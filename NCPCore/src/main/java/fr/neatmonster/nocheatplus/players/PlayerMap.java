@@ -14,9 +14,9 @@
  */
 package fr.neatmonster.nocheatplus.players;
 
-import java.util.HashMap;
 import java.util.Map;
 import java.util.UUID;
+import java.util.concurrent.ConcurrentHashMap;
 
 import org.bukkit.Bukkit;
 import org.bukkit.entity.Player;
@@ -66,9 +66,9 @@ public final class PlayerMap {
     private final boolean hasGetPlayer_UUID = ReflectionUtil.getMethod(Bukkit.class, "getPlayer", UUID.class) != null;
 
     // TODO: Map types (copy on write, lazy erase, or just keep ordinary maps?)
-    private Map<UUID, PlayerInfo> idInfoMap = new HashMap<UUID, PlayerMap.PlayerInfo>();
-    private Map<String, PlayerInfo> exactNameInfoMap = new HashMap<String, PlayerMap.PlayerInfo>();
-    private Map<String, PlayerInfo> lowerCaseNameInfoMap = new HashMap<String, PlayerMap.PlayerInfo>();
+    private Map<UUID, PlayerInfo> idInfoMap = new ConcurrentHashMap<UUID, PlayerInfo>();
+    private Map<String, PlayerInfo> exactNameInfoMap = new ConcurrentHashMap<String, PlayerMap.PlayerInfo>();
+    private Map<String, PlayerInfo> lowerCaseNameInfoMap = new ConcurrentHashMap<String, PlayerMap.PlayerInfo>();
     // TODO: Consider: Get players by prefix (primary thread only, e.g. for use with commands).
     // TODO: get uuid/name methods?
     // TODO: unlink Player references on remove for better gc?
