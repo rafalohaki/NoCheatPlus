@@ -49,6 +49,13 @@
         </profile>
     </profiles>
 
+    <repositories>
+        <repository>
+            <id>papermc</id>
+            <url>https://repo.papermc.io/repository/maven-public/</url>
+        </repository>
+    </repositories>
+
     <build>
         <pluginManagement>
             <plugins>

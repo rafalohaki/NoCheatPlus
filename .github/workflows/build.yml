@@ -13,9 +13,8 @@ jobs:
         with:
           java-version: '17'
           distribution: 'temurin'
-          cache: maven
       - name: Build NoCheatPlus
-        run: mvn clean package
+        run: mvn clean package -P nonfree_build -P all
       - name: Upload NoCheatPlus
         uses: actions/upload-artifact@v3
         with:
