@@ -144,7 +144,7 @@
     <repositories>
         <repository>
             <id>nms-repo</id>
-            <url>https://repo.codemc.org/repository/nms/</url>
+            <url>https://repo.codemc.io/repository/nms/</url>
         </repository>
     </repositories>
 
