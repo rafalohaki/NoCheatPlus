@@ -13,7 +13,6 @@ folia-supported: true
 
 softdepend:
 - ProtocolLib
-- Carbon
 
 commands:
     nocheatplus:
