@@ -125,12 +125,7 @@ public final class PlayerMap {
             if (info.player != null) {
                 return info.player;
             }
-            if (storePlayerInstances) {
-                info.player = getPlayerBukkit(info);
-                return info.player;
-            } else  {
-                return getPlayerBukkit(info);
-            }
+            return getPlayerBukkit(info);
         } else {
             return getPlayerBukkit(id);
         }
