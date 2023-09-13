@@ -42,8 +42,8 @@ public class MCAccessFactory {
      * @throws RuntimeException if no access can be set.
      */
     public MCAccess getMCAccess(final MCAccessConfig config) {
-        final List<Throwable> throwables = new ArrayList<Throwable>();
-        MCAccess mcAccess = null;
+        final List<Throwable> throwables = new ArrayList<>();
+        MCAccess mcAccess;
         // Try to set up native access.
         
         // CraftBukkit (dedicated).

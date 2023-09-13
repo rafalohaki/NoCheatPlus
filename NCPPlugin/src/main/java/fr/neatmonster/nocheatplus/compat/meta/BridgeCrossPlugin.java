@@ -43,8 +43,7 @@ public class BridgeCrossPlugin implements IBridgeCrossPlugin, IPostRegisterRunna
         try {
             reflectBase = new ReflectBase();
         }
-        catch (NullPointerException e1) {}
-        catch (ReflectFailureException e2) {}
+        catch (NullPointerException | ReflectFailureException ignored) {}
         if (reflectBase != null) {
             this.playerClass = getEntityClass(reflectBase, "Player");
             this.entityClass = getEntityClass(reflectBase, "Entity", "");
@@ -55,7 +54,7 @@ public class BridgeCrossPlugin implements IBridgeCrossPlugin, IPostRegisterRunna
         }
     }
 
-    private Class<?> getEntityClass(ReflectBase reflectBase, String entityName) {
+    private Class<?> getEntityClass(ReflectBase reflectBase, String entityName) { // Dreeam - TODO: idk what's this
         return getEntityClass(reflectBase, entityName, entityName);
     }
 

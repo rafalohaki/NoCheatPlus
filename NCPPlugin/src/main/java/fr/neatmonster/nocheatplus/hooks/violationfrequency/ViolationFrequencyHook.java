@@ -1,5 +1,9 @@
 package fr.neatmonster.nocheatplus.hooks.violationfrequency;
 
+import net.kyori.adventure.text.Component;
+import net.kyori.adventure.text.TextComponent;
+import net.kyori.adventure.text.format.NamedTextColor;
+import net.kyori.adventure.text.serializer.legacy.LegacyComponentSerializer;
 import org.bukkit.ChatColor;
 import org.bukkit.entity.Player;
 
@@ -18,7 +22,7 @@ import fr.neatmonster.nocheatplus.utilities.StringUtil;
 
 /**
  * A simple hook good at preventing false flags on small Vls and help generate larger on checks given out too small vl.
- * 
+ *
  * In default config, it will make NCP won't setback anythings till VL reach to 35,
  * SurvivalFly actions it will look like: vl>35 cancel ....
  * But it can catch if they are using shortfly depend on the flag frequency between moves.
@@ -96,7 +100,7 @@ public class ViolationFrequencyHook implements NCPHook, IFirst {
                     builder.append("(+" + StringUtil.fdec1.format(info.getAddedVl() + config.morevls) + ")");
                     log(builder.toString(), player);
                 }
-                if (info.getTotalVl() + config.morevls <= config.maxtotalvls) return true; else return false;                
+                if (info.getTotalVl() + config.morevls <= config.maxtotalvls) return true; else return false;
             }
             
             if (config.debug) {
@@ -109,15 +113,14 @@ public class ViolationFrequencyHook implements NCPHook, IFirst {
         }
         return false;
     }
-    
+
     private void log(String s, Player p) {
         final LogManager logManager = NCPAPIProvider.getNoCheatPlusAPI().getLogManager();
-        final StringBuilder builder = new StringBuilder(300);
-        builder.append("ViolationFrequency");
-        builder.append(" [" + ChatColor.YELLOW + p.getName());
-        builder.append(ChatColor.WHITE + "] ");
-        builder.append(s);
-        final String message = builder.toString();
-        logManager.info(Streams.NOTIFY_INGAME, message);
+        final TextComponent message = Component.text()
+                .append(Component.text("ViolationFrequency" + " [", NamedTextColor.WHITE))
+                .append(Component.text(p.getName(), NamedTextColor.YELLOW))
+                .append(Component.text("] " + s, NamedTextColor.WHITE))
+                .build();
+        logManager.info(Streams.NOTIFY_INGAME, LegacyComponentSerializer.legacyAmpersand().serialize(message));
     }
 }
