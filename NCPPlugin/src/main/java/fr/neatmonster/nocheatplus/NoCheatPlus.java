@@ -30,6 +30,7 @@ import java.util.Map.Entry;
 import java.util.Random;
 import java.util.Set;
 
+import net.kyori.adventure.text.serializer.plain.PlainTextComponentSerializer;
 import org.bukkit.Bukkit;
 import org.bukkit.ChatColor;
 import org.bukkit.World;
@@ -50,7 +51,6 @@ import org.bukkit.permissions.Permissible;
 import org.bukkit.permissions.Permission;
 import org.bukkit.plugin.PluginDescriptionFile;
 import org.bukkit.plugin.java.JavaPlugin;
-import org.bukkit.scheduler.BukkitScheduler;
 
 import fr.neatmonster.nocheatplus.actions.ActionFactory;
 import fr.neatmonster.nocheatplus.actions.ActionFactoryFactory;
@@ -59,7 +59,6 @@ import fr.neatmonster.nocheatplus.checks.blockinteract.BlockInteractListener;
 import fr.neatmonster.nocheatplus.checks.blockplace.BlockPlaceListener;
 import fr.neatmonster.nocheatplus.checks.chat.ChatConfig;
 import fr.neatmonster.nocheatplus.checks.chat.ChatListener;
-import fr.neatmonster.nocheatplus.checks.combined.CombinedData;
 import fr.neatmonster.nocheatplus.checks.combined.CombinedListener;
 import fr.neatmonster.nocheatplus.checks.fight.FightListener;
 import fr.neatmonster.nocheatplus.checks.inventory.InventoryListener;
@@ -138,7 +137,6 @@ import fr.neatmonster.nocheatplus.utilities.ColorUtil;
 import fr.neatmonster.nocheatplus.utilities.Misc;
 import fr.neatmonster.nocheatplus.utilities.OnDemandTickListener;
 import fr.neatmonster.nocheatplus.utilities.ReflectionUtil;
-import fr.neatmonster.nocheatplus.utilities.StringUtil;
 import fr.neatmonster.nocheatplus.utilities.TickTask;
 import fr.neatmonster.nocheatplus.utilities.entity.PassengerUtil;
 import fr.neatmonster.nocheatplus.utilities.map.BlockCache;
@@ -229,10 +227,10 @@ public class NoCheatPlus extends JavaPlugin implements NoCheatPlusAPI {
     private final List<IDisableListener> disableListeners = new ArrayList<IDisableListener>();
 
     /** All registered components.  */
-    private Set<Object> allComponents = new LinkedHashSet<Object>(50);
+    private Set<Object> allComponents = new LinkedHashSet<>(50);
 
     /** Feature tags by keys, for features that might not be available. */
-    private final LinkedHashMap<String, LinkedHashSet<String>> featureTags = new LinkedHashMap<String, LinkedHashSet<String>>();
+    private final LinkedHashMap<String, LinkedHashSet<String>> featureTags = new LinkedHashMap<>();
 
     /** Hook for logging all violations. */
     private final AllViolationsHook allViolationsHook = new AllViolationsHook();
@@ -313,7 +311,7 @@ public class NoCheatPlus extends JavaPlugin implements NoCheatPlusAPI {
      */
     private boolean checkDenyLoginsNames(String playerName) {
         final long ts = System.currentTimeMillis();
-        final List<String> rem = new LinkedList<String>();
+        final List<String> rem = new LinkedList<>();
         boolean res = false;
         synchronized (denyLoginNames) {
             for (final Entry<String, Long> entry : denyLoginNames.entrySet()) {
@@ -444,7 +442,7 @@ public class NoCheatPlus extends JavaPlugin implements NoCheatPlusAPI {
     @SuppressWarnings("unchecked")
     @Override
     public <T> Collection<ComponentRegistry<T>> getComponentRegistries(final Class<ComponentRegistry<T>> clazz) {
-        final List<ComponentRegistry<T>> result = new LinkedList<ComponentRegistry<T>>();
+        final List<ComponentRegistry<T>> result = new LinkedList<>();
         for (final ComponentRegistry<?> registry : subRegistries) {
             if (clazz.isAssignableFrom(registry.getClass())) {
                 try{
@@ -537,7 +535,7 @@ public class NoCheatPlus extends JavaPlugin implements NoCheatPlusAPI {
         // Add to sub registries.
         for (final ComponentRegistry<?> registry : subRegistries) {
             final Object res = ReflectionUtil.invokeGenericMethodOneArg(registry, "addComponent", obj);
-            if (res != null && (res instanceof Boolean) && ((Boolean) res).booleanValue()) {
+            if (res != null && (res instanceof Boolean) && (Boolean) res) {
                 added = true;
             }
         }
@@ -1125,7 +1123,7 @@ public class NoCheatPlus extends JavaPlugin implements NoCheatPlusAPI {
         // Finished.
         logManager.info(Streams.INIT, "Post-enable finished.");
         // Log version to file (queued).
-        logManager.info(Streams.DEFAULT_FILE, StringUtil.join(VersionCommand.getVersionInfo(), "\n"));
+        logManager.info(Streams.DEFAULT_FILE, PlainTextComponentSerializer.plainText().serialize(VersionCommand.getVersionInfo()));
     }
 
     /**
@@ -1485,7 +1483,7 @@ public class NoCheatPlus extends JavaPlugin implements NoCheatPlusAPI {
 
     @Override
     public Map<String, Set<String>> getAllFeatureTags() {
-        final LinkedHashMap<String, Set<String>> allTags = new LinkedHashMap<String, Set<String>>();
+        final LinkedHashMap<String, Set<String>> allTags = new LinkedHashMap<>();
         for (final Entry<String, LinkedHashSet<String>> entry : this.featureTags.entrySet()) {
             allTags.put(entry.getKey(), Collections.unmodifiableSet(entry.getValue()));
         }

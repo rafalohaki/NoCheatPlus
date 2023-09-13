@@ -14,13 +14,12 @@
  */
 package fr.neatmonster.nocheatplus.command.admin;
 
-import java.util.Collections;
 import java.util.List;
 
+import net.kyori.adventure.text.serializer.plain.PlainTextComponentSerializer;
 import org.bukkit.Bukkit;
 import org.bukkit.command.Command;
 import org.bukkit.command.CommandSender;
-import org.bukkit.ChatColor;
 import org.bukkit.plugin.java.JavaPlugin;
 
 import fr.neatmonster.nocheatplus.NCPAPIProvider;
@@ -33,7 +32,6 @@ import fr.neatmonster.nocheatplus.logging.LogManager;
 import fr.neatmonster.nocheatplus.logging.Streams;
 import fr.neatmonster.nocheatplus.permissions.Permissions;
 import fr.neatmonster.nocheatplus.players.DataManager;
-import fr.neatmonster.nocheatplus.utilities.StringUtil;
 import fr.neatmonster.nocheatplus.worlds.WorldDataManager;
 
 public class ReloadCommand extends BaseCommand {
@@ -86,7 +84,7 @@ public class ReloadCommand extends BaseCommand {
         DataManager.restoreDefaultDebugFlags();
 
         // Tell the registered listeners to adapt to new config, first sort them (!).
-        Collections.sort(notifyReload, Order.cmpSetupOrder);
+        notifyReload.sort(Order.cmpSetupOrder);
         for (final INotifyReload component : notifyReload){
             component.onReload();
         }
@@ -99,7 +97,7 @@ public class ReloadCommand extends BaseCommand {
             sender.sendMessage(TAG + "Configuration reloaded.");
         }
         logManager.info(Streams.INIT, "Configuration reloaded.");
-        logManager.info(Streams.DEFAULT_FILE, StringUtil.join(VersionCommand.getVersionInfo(), "\n")); // Queued (!).
+        logManager.info(Streams.DEFAULT_FILE, PlainTextComponentSerializer.plainText().serialize(VersionCommand.getVersionInfo())); // Queued (!).
     }
 
 }

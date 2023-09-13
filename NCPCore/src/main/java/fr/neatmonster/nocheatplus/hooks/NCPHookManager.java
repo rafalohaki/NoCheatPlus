@@ -36,58 +36,58 @@ import fr.neatmonster.nocheatplus.utilities.CheckTypeUtil;
 
 /**
  * After-check-failure hook manager integrated into NoCheatPlus.
- * 
+ *
  * @author asofold
  */
 public final class NCPHookManager {
 
-    /** Ids given to hooks. */
-    private static int                                 maxHookId     = 0;
+    /**
+     * Ids given to hooks.
+     */
+    private static int maxHookId = 0;
 
-    /** Hook id to hook. */
-    private final static Map<Integer, NCPHook>         allHooks      = new HashMap<Integer, NCPHook>();
+    /**
+     * Hook id to hook.
+     */
+    private final static Map<Integer, NCPHook> allHooks = new HashMap<>();
 
-    /** Mapping the check types to the hooks. */
-    private static final Map<CheckType, List<NCPHook>> hooksByChecks = new HashMap<CheckType, List<NCPHook>>();
+    /**
+     * Mapping the check types to the hooks.
+     */
+    private static final Map<CheckType, List<NCPHook>> hooksByChecks = new HashMap<>();
 
-    private static Comparator<NCPHook> HookComparator = new Comparator<NCPHook>() {
-        @Override
-        public int compare(final NCPHook o1, final NCPHook o2) {
-            final boolean s1 = o1 instanceof IStats;
-            final boolean f1 = o1 instanceof IFirst;
-            final boolean l1 = o1 instanceof ILast;
-            final boolean s2 = o2 instanceof IStats;
-            final boolean f2 = o2 instanceof IFirst;
-            final boolean l2 = o2 instanceof ILast;
-            if      (s1 && !s2) return l1 ? 1 : -1;
-            else if (!s1 && s2) return l2 ? -1 : 1;
-            else if (l2)        return -1;
-            else if (l1)        return 1;
-            else if (f1)        return -1;
-            else if (f2)        return 1;
-            else                return 0;
-        }
+    private static final Comparator<NCPHook> HookComparator = (o1, o2) -> {
+        final boolean s1 = o1 instanceof IStats;
+        final boolean f1 = o1 instanceof IFirst;
+        final boolean l1 = o1 instanceof ILast;
+        final boolean s2 = o2 instanceof IStats;
+        final boolean f2 = o2 instanceof IFirst;
+        final boolean l2 = o2 instanceof ILast;
+        if (s1 && !s2) return l1 ? 1 : -1;
+        else if (!s1 && s2) return l2 ? -1 : 1;
+        else if (l2) return -1;
+        else if (l1) return 1;
+        else if (f1) return -1;
+        else if (f2) return 1;
+        else return 0;
     };
 
-    static{
+    static {
         // Fill the map to be sure that thread safety can be guaranteed.
         for (final CheckType type : CheckType.values()) {
             if (CheckTypeUtil.needsSynchronization(type)) {
-                hooksByChecks.put(type, Collections.synchronizedList(new ArrayList<NCPHook>()));
-            }
-            else {
-                hooksByChecks.put(type, new ArrayList<NCPHook>());
+                hooksByChecks.put(type, Collections.synchronizedList(new ArrayList<>()));
+            } else {
+                hooksByChecks.put(type, new ArrayList<>());
             }
         }
     }
 
     /**
      * Register a hook for a specific check type (all, group, or an individual check).
-     * 
-     * @param checkType
-     *            the check type
-     * @param hook
-     *            the hook
+     *
+     * @param checkType the check type
+     * @param hook      the hook
      * @return an id to identify the hook, will return the existing id if the hook was already present somewhere
      */
     public static Integer addHook(final CheckType checkType, final NCPHook hook) {
@@ -99,17 +99,15 @@ public final class NCPHookManager {
 
     /**
      * Register a hook for several individual checks ids (all, group, or an individual checks).
-     * 
-     * @param checkTypes
-     *            array of check types to register the hook for. If you pass null this hook will be registered for all
-     *            checks
-     * @param hook
-     *            the hook
+     *
+     * @param checkTypes array of check types to register the hook for. If you pass null this hook will be registered for all
+     *                   checks
+     * @param hook       the hook
      * @return the hook id
      */
     public static Integer addHook(CheckType[] checkTypes, final NCPHook hook) {
         if (checkTypes == null) {
-            checkTypes = new CheckType[] {CheckType.ALL};
+            checkTypes = new CheckType[]{CheckType.ALL};
         }
         final Integer hookId = getId(hook);
         for (final CheckType checkType : checkTypes) {
@@ -121,33 +119,28 @@ public final class NCPHookManager {
 
     /**
      * Add to the mapping for given check type, no extra actions or recursion.
-     * 
-     * @param checkType
-     *            the check type
-     * @param hook
-     *            the hook
+     *
+     * @param checkType the check type
+     * @param hook      the hook
      */
     private static void addToMapping(final CheckType checkType, final NCPHook hook) {
         final List<NCPHook> hooks = hooksByChecks.get(checkType);
         if (!hooks.contains(hook)) {
             if (!(hook instanceof ILast) && (hook instanceof IStats || hook instanceof IFirst)) {
                 hooks.add(0, hook);
-            }
-            else {
+            } else {
                 hooks.add(hook);
             }
-            Collections.sort(hooks, HookComparator);
+            hooks.sort(HookComparator);
         }
     }
 
     /**
      * Add hook to the hooksByChecks mappings.<br>
      * Assumes that the hook already has been registered in the allHooks map.
-     * 
-     * @param checkType
-     *            the check type
-     * @param hook
-     *            the hook
+     *
+     * @param checkType the check type
+     * @param hook      the hook
      */
     private static void addToMappings(final CheckType checkType, final NCPHook hook) {
         for (final CheckType refType : CheckTypeUtil.getWithDescendants(checkType)) {
@@ -157,18 +150,14 @@ public final class NCPHookManager {
 
     /**
      * Call the hooks for the specified check type and player.
-     * 
-     * @param checkType
-     *            the check type
-     * @param player
-     *            the player
-     * @param hooks
-     *            the hooks
+     *
+     * @param checkType the check type
+     * @param player    the player
+     * @param hooks     the hooks
      * @return true, if a hook as decided to cancel the VL processing
      */
-    private static final boolean applyHooks(final CheckType checkType, final Player player, final IViolationInfo info, final List<NCPHook> hooks) {
-        for (int i = 0; i < hooks.size(); i++) {
-            final NCPHook hook = hooks.get(i);
+    private static boolean applyHooks(final CheckType checkType, final Player player, final IViolationInfo info, final List<NCPHook> hooks) {
+        for (final NCPHook hook : hooks) {
             try {
                 if (hook.onCheckFailure(checkType, player, info) && !(hook instanceof IStats)) {
                     return true;
@@ -183,35 +172,31 @@ public final class NCPHookManager {
 
     /**
      * Get a collection of all hooks.
-     * 
+     *
      * @return all the hooks
      */
     public static Collection<NCPHook> getAllHooks() {
-        final List<NCPHook> hooks = new LinkedList<NCPHook>();
-        hooks.addAll(allHooks.values());
-        return hooks;
+        return new LinkedList<>(allHooks.values());
     }
 
     /**
      * Get the hook description.
-     * 
-     * @param hook
-     *            the hook
+     *
+     * @param hook the hook
      * @return the hook description
      */
-    private static final String getHookDescription(final NCPHook hook) {
+    public static String getHookDescription(final NCPHook hook) {
         return hook.getHookName() + " [" + hook.getHookVersion() + "]";
     }
 
     /**
      * Get hooks by their hook name.
-     * 
-     * @param hookName
-     *            case sensitive (exact match)
+     *
+     * @param hookName case sensitive (exact match)
      * @return the collection of NCP hooks matching the hook name
      */
     public static Collection<NCPHook> getHooksByName(final String hookName) {
-        final List<NCPHook> hooks = new LinkedList<NCPHook>();
+        final List<NCPHook> hooks = new LinkedList<>();
         for (final Integer refId : allHooks.keySet()) {
             final NCPHook hook = allHooks.get(refId);
             if (hook.getHookName().equals(hookName) && !hooks.contains(hook)) {
@@ -223,9 +208,8 @@ public final class NCPHookManager {
 
     /**
      * For registration purposes only.
-     * 
-     * @param hook
-     *            the hook
+     *
+     * @param hook the hook
      * @return unique id associated with that hook (returns an existing id if hook is already present)
      */
     private static Integer getId(final NCPHook hook) {
@@ -248,7 +232,7 @@ public final class NCPHookManager {
 
     /**
      * Gets the new hook id.
-     * 
+     *
      * @return the new hook id
      */
     private static Integer getNewHookId() {
@@ -258,27 +242,22 @@ public final class NCPHookManager {
 
     /**
      * Log that a hook was added.
-     * 
-     * @param hook
-     *            the hook
+     *
+     * @param hook the hook
      */
-    private static final void logHookAdded(final NCPHook hook) {
+    private static void logHookAdded(final NCPHook hook) {
         NCPAPIProvider.getNoCheatPlusAPI().getLogManager().info(Streams.STATUS, "Added hook: " + getHookDescription(hook) + ".");
     }
 
     /**
      * Log that a hook failed.
-     * 
-     * @param checkType
-     *            the check type
-     * @param player
-     *            the player
-     * @param hook
-     *            the hook
-     * @param throwable
-     *            the throwable
+     *
+     * @param checkType the check type
+     * @param player    the player
+     * @param hook      the hook
+     * @param t the throwable
      */
-    private static final void logHookFailure(final CheckType checkType, final Player player, final NCPHook hook, final Throwable t) {
+    private static void logHookFailure(final CheckType checkType, final Player player, final NCPHook hook, final Throwable t) {
         // TODO: might accumulate failure rate and only log every so and so seconds or disable hook if spamming (leads
         // to NCP spam though)?
         final StringBuilder builder = new StringBuilder(1024);
@@ -299,17 +278,16 @@ public final class NCPHookManager {
 
     /**
      * Log that a hook was removed.
-     * 
-     * @param hook
-     *            the hook
+     *
+     * @param hook the hook
      */
-    private static final void logHookRemoved(final NCPHook hook) {
+    private static void logHookRemoved(final NCPHook hook) {
         NCPAPIProvider.getNoCheatPlusAPI().getLogManager().info(Streams.STATUS, "Removed hook: " + getHookDescription(hook) + ".");
     }
 
     /**
      * Removes all the hooks.
-     * 
+     *
      * @return the collection
      */
     public static Collection<NCPHook> removeAllHooks() {
@@ -322,11 +300,9 @@ public final class NCPHookManager {
 
     /**
      * Remove from internal mappings, both allHooks and hooksByChecks.
-     * 
-     * @param hook
-     *            the hook
-     * @param hookId
-     *            the hook id
+     *
+     * @param hook   the hook
+     * @param hookId the hook id
      */
     private static void removeFromMappings(final NCPHook hook, final Integer hookId) {
         allHooks.remove(hookId);
@@ -337,9 +313,8 @@ public final class NCPHookManager {
 
     /**
      * Remove a hook by its hook id (returned on adding hooks).
-     * 
-     * @param hookId
-     *            if present, null otherwise
+     *
+     * @param hookId if present, null otherwise
      * @return the NCP hook
      */
     public static NCPHook removeHook(final Integer hookId) {
@@ -354,9 +329,8 @@ public final class NCPHookManager {
 
     /**
      * Remove a hook.
-     * 
-     * @param hook
-     *            the hook
+     *
+     * @param hook the hook
      * @return hook id if present, null otherwise
      */
     public static Integer removeHook(final NCPHook hook) {
@@ -376,13 +350,12 @@ public final class NCPHookManager {
 
     /**
      * Remove a collection of hooks.
-     * 
-     * @param hooks
-     *            the hooks
+     *
+     * @param hooks the hooks
      * @return a set of the removed hooks ids, same order as the given collection (hooks).
      */
     public static Set<Integer> removeHooks(final Collection<NCPHook> hooks) {
-        final Set<Integer> ids = new LinkedHashSet<Integer>();
+        final Set<Integer> ids = new LinkedHashSet<>();
         for (final NCPHook hook : hooks) {
             final Integer id = removeHook(hook);
             if (id != null) {
@@ -394,9 +367,8 @@ public final class NCPHookManager {
 
     /**
      * Remove hooks by their name (case sensitive, exact match).
-     * 
-     * @param hookName
-     *            the hook name
+     *
+     * @param hookName the hook name
      * @return the collection of NCP hooks removed
      */
     public static Collection<NCPHook> removeHooks(final String hookName) {
@@ -410,14 +382,12 @@ public final class NCPHookManager {
 
     /**
      * This is called by checks when players fail them.
-     * 
-     * @param checkType
-     *            the check type
-     * @param player
-     *            the player that fails the check
+     *
+     * @param type the check type
+     * @param player    the player that fails the check
      * @return if we should cancel the VL processing
      */
-    public static final boolean shouldCancelVLProcessing(final ViolationData violationData) {
+    public static boolean shouldCancelVLProcessing(final ViolationData violationData) {
         // Checks for hooks registered for this event, parent groups or ALL will be inserted into the list.
         // Return true as soon as one hook returns true. Test hooks, if present.
         final CheckType type = violationData.check.getType();
@@ -427,11 +397,10 @@ public final class NCPHookManager {
                 synchronized (hooksCheck) {
                     return applyHooks(type, violationData.player, violationData, hooksCheck);
                 }
-            }
-            else{
+            } else {
                 return applyHooks(type, violationData.player, violationData, hooksCheck);
             }
-        }   
+        }
         return false;
     }
 }

@@ -76,7 +76,7 @@ public abstract class Check implements IDebugPlayer {
 
     // TODO: Do these get cleaned up ?
     /** The execution histories of each check. */
-    protected static Map<String, ExecutionHistory> histories = new HashMap<String, ExecutionHistory>();
+    protected static Map<String, ExecutionHistory> histories = new HashMap<>();
 
     /**
      * Gets the player's history.
@@ -190,7 +190,7 @@ public abstract class Check implements IDebugPlayer {
      * Full activation check (configuration, exemption, permission).
      * 
      * @param player
-     * @param data
+     * @param pData
      * @param worldData
      * @return
      */
@@ -203,7 +203,7 @@ public abstract class Check implements IDebugPlayer {
      * Full activation check (configuration, exemption, permission).
      * 
      * @param player
-     * @param data
+     * @param pData
      * @return
      */
     public boolean isEnabled(final Player player, final IPlayerData pData) {
