@@ -22,10 +22,10 @@ package fr.neatmonster.nocheatplus.components.location;
  */
 public interface IGetPosition {
 
-    public double getX();
+    double getX();
 
-    public double getY();
+    double getY();
 
-    public double getZ();
+    double getZ();
 
 }

@@ -88,7 +88,7 @@ public class VehicleChecks extends CheckListener {
 
     private final IWorldDataManager worldDataManager = NCPAPIProvider.getNoCheatPlusAPI().getWorldDataManager();
 
-    private final Set<EntityType> normalVehicles = new HashSet<EntityType>();
+    private final Set<EntityType> normalVehicles = new HashSet<>();
 
     /** Temporary use, reset world to null afterwards, avoid nesting. */
     private final Location useLoc = new Location(null, 0, 0, 0);
@@ -391,7 +391,6 @@ public class VehicleChecks extends CheckListener {
         // Determine best locations to use.
         // (Currently always use firstPastMove and vehicleLocation.)
         final Location useFrom = LocUtil.set(useLoc, world, firstPastMove.toIsValid ? firstPastMove.to : firstPastMove.from);
-        final Location useTo = vehicleLocation;
         // Initialize moveInfo.
         if (vehicleType == EntityType.PIG) {
             // TODO: Special cases by config rather.
@@ -399,7 +398,7 @@ public class VehicleChecks extends CheckListener {
             moveInfo.setExtendFullWidth(0.52);
         }
         // TODO: Test yOnGround at 0.13 instead of xz-margin
-        moveInfo.set(vehicle, useFrom, useTo, 
+        moveInfo.set(vehicle, useFrom, vehicleLocation,
                 vehicleType == EntityType.PIG ? Math.max(0.13, cc.yOnGround) : cc.yOnGround); // TODO: Extra config.
         moveInfo.setExtendFullWidth(0.0);
         // TODO: Check consistency for given/set and log debug/warnings if necessary (to = vehicleLocation? from = firstPastMove).
@@ -424,7 +423,7 @@ public class VehicleChecks extends CheckListener {
         //    return; 
         //}
         // Ensure chunks are loaded.
-        MovingUtil.ensureChunksLoaded(player, useFrom, useTo, firstPastMove, 
+        MovingUtil.ensureChunksLoaded(player, useFrom, vehicleLocation, firstPastMove,
                 "vehicle move", cc, pData);
         // Initialize currentMove.
         final VehicleMoveData thisMove = data.vehicleMoves.getCurrentMove();
@@ -780,7 +779,7 @@ public class VehicleChecks extends CheckListener {
 
     private void debugNestedVehicleEnter(Player player) {
         debug(player, "Vehicle enter: Skip on nested vehicles, possibly with multiple players involved, who would do that?");
-        List<String> vehicles = new LinkedList<String>();
+        List<String> vehicles = new LinkedList<>();
         Entity tempVehicle = player.getVehicle();
         while (tempVehicle != null) {
             vehicles.add(tempVehicle.getType().toString());
@@ -945,7 +944,7 @@ public class VehicleChecks extends CheckListener {
         }
 
         if (debug) {
-            debug(player, "Vehicle leave: " + pLoc.toString() + (pLoc.equals(loc) ? "" : " / player at: " + pLoc.toString()));
+            debug(player, "Vehicle leave: " + pLoc.toString() + (pLoc.equals(loc) ? "" : " / player at: " + pLoc));
         }
 
         data.lastVehicleType = vehicle != null ? vehicle.getType() : null;

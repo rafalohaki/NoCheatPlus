@@ -139,7 +139,7 @@ public class LocUtil {
      * @throws NullPointerException
      *             if World is null.
      */
-    public static final Location clone(final Location loc){
+    public static Location clone(final Location loc){
         return new Location(testWorld(loc.getWorld()), loc.getX(), loc.getY(), loc.getZ(), loc.getYaw(), loc.getPitch());
     }
 
@@ -154,7 +154,7 @@ public class LocUtil {
      * @throws NullPointerException
      *             if the resulting world is null.
      */
-    public static final Location clone(final Location loc, final float yaw, final float pitch){
+    public static Location clone(final Location loc, final float yaw, final float pitch){
         return new Location(testWorld(loc.getWorld()), loc.getX(), loc.getY(), loc.getZ(), yaw, pitch);
     }
 
@@ -170,7 +170,7 @@ public class LocUtil {
      * @throws NullPointerException
      *             if the resulting world is null.
      */
-    public static final Location clone(final Location setBack, final Location ref) {
+    public static Location clone(final Location setBack, final Location ref) {
         if (setBack == null){
             return clone(ref);
         }
@@ -187,7 +187,7 @@ public class LocUtil {
      * @param ref
      * @return
      */
-    public static final Location clone(final Location setBack, final RichBoundsLocation ref) {
+    public static Location clone(final Location setBack, final RichBoundsLocation ref) {
         if (setBack == null) {
             return ref.getLocation();
         }
@@ -204,7 +204,7 @@ public class LocUtil {
      * @throws NullPointerException
      *             if loc.getWorld() is null.
      */
-    public static final void set(final Location setBack, final Location loc) {
+    public static void set(final Location setBack, final Location loc) {
         setBack.setWorld(testWorld(loc.getWorld()));
         setBack.setX(loc.getX());
         setBack.setY(loc.getY());
@@ -221,7 +221,7 @@ public class LocUtil {
      * @throws NullPointerException
      *             if loc.getWorld() is null.
      */
-    public static final void set(final Location setBack, final RichBoundsLocation loc) {
+    public static void set(final Location setBack, final RichBoundsLocation loc) {
         setBack.setWorld(testWorld(loc.getWorld()));
         setBack.setX(loc.getX());
         setBack.setY(loc.getY());
@@ -250,7 +250,7 @@ public class LocUtil {
      * @param yaw
      * @return
      */
-    public static final boolean needsYawCorrection2(final float yaw) {
+    public static boolean needsYawCorrection2(final float yaw) {
         return Float.isNaN(yaw) || yaw <= -360f || yaw >= 360f;
     }
 
@@ -260,7 +260,7 @@ public class LocUtil {
      * @param yaw
      * @return
      */
-    public static final boolean needsYawCorrection(final float yaw) {
+    public static boolean needsYawCorrection(final float yaw) {
         return Float.isNaN(yaw) || yaw < 0f || yaw >= 360f;
     }
 
@@ -270,7 +270,7 @@ public class LocUtil {
      * @param pitch
      * @return
      */
-    public static final boolean needsPitchCorrection(final float pitch) {
+    public static boolean needsPitchCorrection(final float pitch) {
         return Float.isNaN(pitch) || pitch < -90f || pitch > 90f;
     }
 
@@ -282,8 +282,8 @@ public class LocUtil {
      * @return true, if is bad coordinate
      */
     public static boolean isBadCoordinate(float ... floats) {
-        for (int i = 0; i < floats.length; i++) {
-            if (Float.isNaN(floats[i]) || Float.isInfinite(floats[i])) {
+        for (float aFloat : floats) {
+            if (Float.isNaN(aFloat) || Float.isInfinite(aFloat)) {
                 return true;
             }
         }
@@ -298,8 +298,7 @@ public class LocUtil {
      * @return true, if is bad coordinate
      */
     public static boolean isBadCoordinate(double ... doubles) {
-        for (int i = 0; i < doubles.length; i++) {
-            final double x = doubles[i];
+        for (final double x : doubles) {
             if (Double.isNaN(x) || Double.isInfinite(x) || Math.abs(x) > 3.2E7D) {
                 return true;
             }
@@ -314,7 +313,7 @@ public class LocUtil {
      * @param pitch
      * @return
      */
-    public static final boolean needsDirectionCorrection(final float yaw, final float pitch) {
+    public static boolean needsDirectionCorrection(final float yaw, final float pitch) {
         return needsYawCorrection(yaw) || needsPitchCorrection(pitch);
     }
 
@@ -325,7 +324,7 @@ public class LocUtil {
      * @param pitch
      * @return
      */
-    public static final boolean needsDirectionCorrection2(final float yaw, final float pitch) {
+    public static boolean needsDirectionCorrection2(final float yaw, final float pitch) {
         return needsYawCorrection2(yaw) || needsPitchCorrection(pitch);
     }
 
@@ -335,7 +334,7 @@ public class LocUtil {
      * @param yaw
      * @return
      */
-    public static final float correctYaw(float yaw) {
+    public static float correctYaw(float yaw) {
         if (Float.isNaN(yaw)) {
             return 0f;
         }
@@ -366,7 +365,7 @@ public class LocUtil {
      * @param yaw
      * @return
      */
-    public static final float correctYaw2(float yaw) {
+    public static float correctYaw2(float yaw) {
         if (Float.isNaN(yaw) || yaw == Float.NEGATIVE_INFINITY || yaw == Float.POSITIVE_INFINITY) {
             return 0f;
         }
@@ -385,7 +384,7 @@ public class LocUtil {
      * @param pitch
      * @return
      */
-    public static final float correctPitch(float pitch) {
+    public static float correctPitch(float pitch) {
         if (Float.isNaN(pitch)) {
             return 0f;
         } else if (pitch < -90f) {
@@ -406,8 +405,7 @@ public class LocUtil {
      * @return
      */
     public static World getFirstWorld(final Location... locs) {
-        for (int i = 0; i < locs.length; i++) {
-            final Location loc = locs[i];
+        for (final Location loc : locs) {
             if (loc != null) {
                 final World world = loc.getWorld();
                 if (world != null) {

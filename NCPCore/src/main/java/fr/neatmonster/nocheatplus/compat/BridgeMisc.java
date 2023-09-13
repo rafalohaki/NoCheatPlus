@@ -42,7 +42,7 @@ public class BridgeMisc {
     private static GameMode getSpectatorGameMode() {
         try {
             return GameMode.SPECTATOR;
-        } catch (Throwable t) {}
+        } catch (Throwable ignored) {}
         return null;
     }
 
@@ -64,15 +64,8 @@ public class BridgeMisc {
         Object source;
         try {
             source = projectile.getClass().getMethod("getShooter").invoke(projectile);
-        } catch (IllegalArgumentException e) {
-            return null;
-        } catch (SecurityException e) {
-            return null;
-        } catch (IllegalAccessException e) {
-            return null;
-        } catch (InvocationTargetException e) {
-            return null;
-        } catch (NoSuchMethodException e) {
+        } catch (IllegalArgumentException | NoSuchMethodException | InvocationTargetException | IllegalAccessException |
+                 SecurityException e) {
             return null;
         }
         if (source instanceof Player) {
@@ -104,9 +97,9 @@ public class BridgeMisc {
     public static Player[] getOnlinePlayers() {
         try {
             Collection<? extends Player> players = Bukkit.getOnlinePlayers();
-            return players.isEmpty() ? new Player[0] : players.toArray(new Player[players.size()]);
+            return players.isEmpty() ? new Player[0] : players.toArray(new Player[0]);
         }
-        catch (NoSuchMethodError e) {}
+        catch (NoSuchMethodError ignored) {}
         if (Bukkit_getOnlinePlayers != null) {
             Object obj = ReflectionUtil.invokeMethodNoArgs(Bukkit_getOnlinePlayers, null);
             if (obj != null && (obj instanceof Player[])) {

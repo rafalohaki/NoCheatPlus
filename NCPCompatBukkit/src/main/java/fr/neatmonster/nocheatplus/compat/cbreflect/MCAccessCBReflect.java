@@ -218,10 +218,7 @@ public class MCAccessCBReflect extends MCAccessBukkit {
                 }
             }
         }
-        catch (ReflectFailureException e) {
-            // Ignore.
-        }
-        catch (NullPointerException ne) {
+        catch (ReflectFailureException | NullPointerException e) {
             // Ignore.
         }
         return AlmostBoolean.MAYBE;

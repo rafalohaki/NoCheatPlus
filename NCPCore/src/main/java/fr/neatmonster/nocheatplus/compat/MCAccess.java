@@ -49,25 +49,25 @@ public interface MCAccess extends IGetBlockCache, IEntityAccessDimensions {
      * 
      * @return
      */
-    public String getMCVersion();
+    String getMCVersion();
 
     /**
      * Server version tag, like CB 2511.
      * @return
      */
-    public String getServerVersionTag();
+    String getServerVersionTag();
 
     /**
      * Get the servers command map.
      * @return May return null if not supported.
      */
-    public CommandMap getCommandMap();
+    CommandMap getCommandMap();
 
     /**
      * Retrieve a new BlockCache instance with access set to null.
      */
     @Override
-    public BlockCache getBlockCache();
+    BlockCache getBlockCache();
 
     /**
      * Get a new BlockCache instance.
@@ -76,27 +76,27 @@ public interface MCAccess extends IGetBlockCache, IEntityAccessDimensions {
      *            May be null to store an instance of BlockCache for future use.
      * @return
      */
-    public BlockCache getBlockCache(World world);
+    BlockCache getBlockCache(World world);
 
     @Override
-    public double  getHeight(Entity entity);
+    double  getHeight(Entity entity);
 
     @Override
-    public double getWidth(Entity entity);
+    double getWidth(Entity entity);
 
     /**
      * NMS Block static.
      * @param id
      * @return MAYBE if undecided, YES or NO if decided.
      */
-    public AlmostBoolean isBlockSolid(Material id);
+    AlmostBoolean isBlockSolid(Material id);
 
     /**
      * NMS Block static..
      * @param id
      * @return MAYBE if undecided, YES or NO if decided.
      */
-    public AlmostBoolean isBlockLiquid(Material id);
+    AlmostBoolean isBlockLiquid(Material id);
 
     /**
      * Does only check y bounds, returns false if dead. This is called by
@@ -106,7 +106,7 @@ public interface MCAccess extends IGetBlockCache, IEntityAccessDimensions {
      * @param player
      * @return MAYBE if undecided, YES or NO if decided.
      */
-    public AlmostBoolean isIllegalBounds(Player player);
+    AlmostBoolean isIllegalBounds(Player player);
 
     /**
      * Potion effect jump amplifier.
@@ -114,28 +114,28 @@ public interface MCAccess extends IGetBlockCache, IEntityAccessDimensions {
      * @param player
      * @return Double.NEGATIVE_INFINITY if not present.
      */
-    public double getJumpAmplifier(Player player);
+    double getJumpAmplifier(Player player);
 
     /**
      * Potion effect speed amplifier.
      * 
      * @return Double.NEGATIVE_INFINITY if not present.
      */
-    public double getFasterMovementAmplifier(Player player);
+    double getFasterMovementAmplifier(Player player);
 
     /**
      * 
      * @param player
      * @return Integer.MAX_VALUE if not available (!).
      */
-    public int getInvulnerableTicks(Player player);
+    int getInvulnerableTicks(Player player);
 
     /**
      * 
      * @param player
      * @param ticks
      */
-    public void setInvulnerableTicks(Player player, int ticks);
+    void setInvulnerableTicks(Player player, int ticks);
 
     /**
      * Deal damage with DamageCause.FALL as cause.
@@ -143,27 +143,27 @@ public interface MCAccess extends IGetBlockCache, IEntityAccessDimensions {
      * @param player
      * @param damage
      */
-    public void dealFallDamage(Player player, double damage);
+    void dealFallDamage(Player player, double damage);
 
     /**
      * If dealFallDamage(Player, double) will fire a damage event.
      * @return
      */
-    public AlmostBoolean dealFallDamageFiresAnEvent();
+    AlmostBoolean dealFallDamageFiresAnEvent();
 
     /**
      * This may well be removed, if possible to check with Bukkit.
      * @param damaged
      * @return
      */
-    public boolean isComplexPart(Entity damaged);
+    boolean isComplexPart(Entity damaged);
 
     /**
      * Tests if player is not set to dead but has no health.
      * @param player
      * @return
      */
-    public boolean shouldBeZombie(Player player);
+    boolean shouldBeZombie(Player player);
 
     /**
      * Ensure the player is really taken out: Set flag + death ticks.
@@ -173,14 +173,14 @@ public interface MCAccess extends IGetBlockCache, IEntityAccessDimensions {
      * @param player
      * @param deathTicks
      */
-    public void setDead(Player player, int deathTicks);
+    void setDead(Player player, int deathTicks);
 
     /**
      * Usually sand and gravel. Not for fastest access.
      * @param type
      * @return
      */
-    public boolean hasGravity(Material type);
+    boolean hasGravity(Material type);
 
     //	/**
     //	 * Correct the direction (yaw + pitch). If this can't be done lightly it should just do nothing. Check pitch and yaw before calling, use auxiliary methods from LocUtil.
@@ -193,5 +193,5 @@ public interface MCAccess extends IGetBlockCache, IEntityAccessDimensions {
      * @param player
      * @return true if can reset and vice versa
      */
-    public boolean resetActiveItem(Player player);
+    boolean resetActiveItem(Player player);
 }

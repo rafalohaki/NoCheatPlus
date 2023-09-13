@@ -35,7 +35,7 @@ public interface IEntityAccessLastPositionAndLook {
      *            This instance gets updated by last coordinates and looking
      *            direction.
      */
-    public void getPositionAndLook(Entity entity, ISetPositionWithLook location);
+    void getPositionAndLook(Entity entity, ISetPositionWithLook location);
 
     /**
      * Set the last position with look of an entity.
@@ -46,6 +46,6 @@ public interface IEntityAccessLastPositionAndLook {
      *            The reference data to set the last position and look of the
      *            entity to.
      */
-    public void setPositionAndLook(Entity entity, IGetPositionWithLook location);
+    void setPositionAndLook(Entity entity, IGetPositionWithLook location);
 
 }

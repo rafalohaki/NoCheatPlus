@@ -122,8 +122,7 @@ public class FileLogger {
                 initLogger(file);
                 logger.log(Level.INFO, "Logger started.");
                 inoperable = false;
-            } catch (SecurityException e) {
-            } catch (IOException e) {
+            } catch (SecurityException | IOException ignored) {
             }
         }
         

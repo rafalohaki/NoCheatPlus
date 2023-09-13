@@ -61,7 +61,7 @@ public class LinkedHashMapCOW<K, V> implements Map<K, V> {
     public LinkedHashMapCOW(int initialCapacity, float loadFactor) {
         this.initialCapacity = initialCapacity;
         this.loadFactor = loadFactor;
-        this.map = new LinkedHashMap<K, V>(initialCapacity, loadFactor, false);
+        this.map = new LinkedHashMap<>(initialCapacity, loadFactor, false);
     }
 
     /**
@@ -78,7 +78,7 @@ public class LinkedHashMapCOW<K, V> implements Map<K, V> {
      * @return
      */
     private LinkedHashMap<K, V> copyMap() {
-        final LinkedHashMap<K, V> newMap = new LinkedHashMap<K, V>(initialCapacity, loadFactor, false);
+        final LinkedHashMap<K, V> newMap = new LinkedHashMap<>(initialCapacity, loadFactor, false);
         newMap.putAll(this.map);
         return newMap;
     }

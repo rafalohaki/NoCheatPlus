@@ -65,7 +65,7 @@ public class MovingConfig extends ACheckConfig {
     public final boolean    ignoreCreative;
     public final boolean    ignoreAllowFlight;
 
-    private final Map<GameMode, ModelFlying> flyingModelGameMode = new HashMap<GameMode, ModelFlying>();
+    private final Map<GameMode, ModelFlying> flyingModelGameMode = new HashMap<>();
     private final ModelFlying flyingModelElytra;
     private final ModelFlying flyingModelLevitation;
     private final ModelFlying flyingModelSlowfalling;
@@ -183,11 +183,11 @@ public class MovingConfig extends ACheckConfig {
     public final boolean scheduleVehicleSetBacks;
     public final boolean schedulevehicleSetPassenger;
 
-    public final Set<EntityType> ignoredVehicles = new HashSet<EntityType>();
+    public final Set<EntityType> ignoredVehicles = new HashSet<>();
 
     public final ActionList vehicleMorePacketsActions;
 
-    public final HashMap<EntityType, Double> vehicleEnvelopeHorizontalSpeedCap = new HashMap<EntityType, Double>();
+    public final HashMap<EntityType, Double> vehicleEnvelopeHorizontalSpeedCap = new HashMap<>();
     public final ActionList vehicleEnvelopeActions;
 
     // Trace
@@ -275,13 +275,13 @@ public class MovingConfig extends ACheckConfig {
         final double sfStepHeight = config.getDouble(ConfPaths.MOVING_SURVIVALFLY_STEPHEIGHT, Double.MAX_VALUE);
         if (sfStepHeight == Double.MAX_VALUE) {
             final String ref;
-            if (Bukkit.getVersion().toLowerCase().indexOf("spigot") != -1) {
+            if (Bukkit.getVersion().toLowerCase().contains("spigot")) {
                 // Assume 1.8 clients being supported.
                 ref = "1.7.10";
             } else {
                 ref = "1.8";
             }
-            this.sfStepHeight = ServerVersion.select(ref, 0.5, 0.6, 0.6, 0.5).doubleValue();
+            this.sfStepHeight = ServerVersion.select(ref, 0.5, 0.6, 0.6, 0.5);
         } else {
             this.sfStepHeight = sfStepHeight;
         }
@@ -373,7 +373,7 @@ public class MovingConfig extends ACheckConfig {
                     ignoredVehicles.add(type);
                 }
             }
-            catch (IllegalArgumentException e) {}
+            catch (IllegalArgumentException ignored) {}
         }
 
 

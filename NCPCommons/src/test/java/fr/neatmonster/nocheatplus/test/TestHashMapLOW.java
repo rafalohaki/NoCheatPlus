@@ -41,8 +41,8 @@ public class TestHashMapLOW {
      */
     @Test
     public void testBase() {
-        HashMap<String, Integer> refMap = new LinkedHashMap<String, Integer>();
-        HashMapLOW<String, Integer> map = new HashMapLOW<String, Integer>(100);
+        HashMap<String, Integer> refMap = new LinkedHashMap<>();
+        HashMapLOW<String, Integer> map = new HashMapLOW<>(100);
 
         testSize(map, refMap);
         fill(map, refMap, 1000, true);
@@ -63,8 +63,8 @@ public class TestHashMapLOW {
      */
     @Test
     public void testRemove() {
-        HashMap<String, Integer> refMap = new LinkedHashMap<String, Integer>();
-        HashMapLOW<String, Integer> map = new HashMapLOW<String, Integer>(100);
+        HashMap<String, Integer> refMap = new LinkedHashMap<>();
+        HashMapLOW<String, Integer> map = new HashMapLOW<>(100);
         fill(map, refMap, 1000, true);
 
         int i = 0;
@@ -81,8 +81,8 @@ public class TestHashMapLOW {
      */
     @Test
     public void testRemoveWithIterator() {
-        HashMap<String, Integer> refMap = new LinkedHashMap<String, Integer>();
-        HashMapLOW<String, Integer> map = new HashMapLOW<String, Integer>(100);
+        HashMap<String, Integer> refMap = new LinkedHashMap<>();
+        HashMapLOW<String, Integer> map = new HashMapLOW<>(100);
         fill(map, refMap, 1000, true);
 
         int i = 0;
@@ -98,8 +98,8 @@ public class TestHashMapLOW {
 
     @Test
     public void testReplaceValues() {
-        HashMap<String, Integer> refMap = new LinkedHashMap<String, Integer>();
-        HashMapLOW<String, Integer> map = new HashMapLOW<String, Integer>(100);
+        HashMap<String, Integer> refMap = new LinkedHashMap<>();
+        HashMapLOW<String, Integer> map = new HashMapLOW<>(100);
         fill(map, refMap, 1000, true);
         for (Entry<String, Integer> entry : refMap.entrySet()) {
             String key = entry.getKey();
@@ -119,8 +119,8 @@ public class TestHashMapLOW {
 
     @Test
     public void testReplaceValuesIterator() {
-        HashMap<String, Integer> refMap = new LinkedHashMap<String, Integer>();
-        HashMapLOW<String, Integer> map = new HashMapLOW<String, Integer>(100);
+        HashMap<String, Integer> refMap = new LinkedHashMap<>();
+        HashMapLOW<String, Integer> map = new HashMapLOW<>(100);
         fill(map, refMap, 1000, true);
         Iterator<Entry<String, Integer>> it = map.iterator();
         while (it.hasNext()) {
@@ -165,7 +165,7 @@ public class TestHashMapLOW {
 
     private void testIterator(HashMapLOW<String, Integer> map) {
         Iterator<Entry<String, Integer>> it = map.iterator();
-        Map<String, Integer> refMap2 = new HashMap<String, Integer>();
+        Map<String, Integer> refMap2 = new HashMap<>();
         int i = 0;
         while (it.hasNext()) {
             i++;
@@ -223,10 +223,10 @@ public class TestHashMapLOW {
         if (map.size() != refMap.size()) {
             fail("Sizes differ: low=" + map.size() + " ref=" + refMap.size());
         }
-        if (map.size() == 0 && !map.isEmpty()) {
+        if (map.isEmpty() && !map.isEmpty()) {
             fail("Expect isEmpty() on size == 0.");
         }
-        if (map.size() > 0 && map.isEmpty()) {
+        if (!map.isEmpty() && map.isEmpty()) {
             fail("Expect !isEmpty() on size > 0");
         }
         if (map.size() < 0) {

@@ -85,7 +85,7 @@ public class NetData extends ACheckData {
      * primary thread. Latest packet is first.
      */
     // TODO: Might extend to synchronize with moving events.
-    private final LinkedList<DataPacketFlying> flyingQueue = new LinkedList<DataPacketFlying>();
+    private final LinkedList<DataPacketFlying> flyingQueue = new LinkedList<>();
     /** Maximum amount of packets to store. */
     private final int flyingQueueMaxSize = 15;
     /**
@@ -159,7 +159,7 @@ public class NetData extends ACheckData {
          * same time ? Packet inversion is acute on 1.11.2 (dig is processed
          * before flying).
          */
-        final DataPacketFlying[] out = flyingQueue.toArray(new DataPacketFlying[flyingQueue.size()]);
+        final DataPacketFlying[] out = flyingQueue.toArray(new DataPacketFlying[0]);
         lock.unlock();
         return out;
     }

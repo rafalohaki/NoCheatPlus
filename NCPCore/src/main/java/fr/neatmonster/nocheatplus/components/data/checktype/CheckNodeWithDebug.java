@@ -57,7 +57,7 @@ public abstract class CheckNodeWithDebug<N extends CheckNodeWithDebug<N>> extend
             return false; // Only allow explicit activation.
         }
 
-    };
+    }
 
     @SuppressWarnings("rawtypes")
     protected static final AccessDebug accessDebug = new AccessDebug();

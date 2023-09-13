@@ -28,6 +28,6 @@ public interface Clock {
      * 
      * @return
      */
-    public long clock();
+    long clock();
     
 }

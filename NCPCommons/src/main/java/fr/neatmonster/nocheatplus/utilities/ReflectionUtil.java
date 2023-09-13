@@ -160,8 +160,7 @@ public class ReflectionUtil {
         }
         else if (methodFound != null && methodFound.getParameterTypes()[0].isAssignableFrom(argClass)){
             try{
-                final Object res = methodFound.invoke(obj, arg);
-                return res;
+                return methodFound.invoke(obj, arg);
             }
             catch (Throwable t){
                 // TODO: Throw something !?
@@ -199,8 +198,7 @@ public class ReflectionUtil {
         // Invoke if found.
         if (methodFound != null){
             try{
-                final Object res = methodFound.invoke(obj);
-                return res;
+                return methodFound.invoke(obj);
             }
             catch (Throwable t){
                 // TODO: Throw something !?
@@ -224,9 +222,7 @@ public class ReflectionUtil {
         try {
             return method.invoke(object);
         }
-        catch (IllegalAccessException e) {}
-        catch (IllegalArgumentException e) {}
-        catch (InvocationTargetException e) {}
+        catch (IllegalAccessException | InvocationTargetException | IllegalArgumentException ignored) {}
         return null;
     }
 
@@ -242,9 +238,7 @@ public class ReflectionUtil {
         try {
             return method.invoke(object, arguments);
         }
-        catch (IllegalAccessException e) {}
-        catch (IllegalArgumentException e) {}
-        catch (InvocationTargetException e) {}
+        catch (IllegalAccessException | InvocationTargetException | IllegalArgumentException ignored) {}
         return null;
     }
 
@@ -264,14 +258,13 @@ public class ReflectionUtil {
                     return methodFound;
                 }
                 final Class<?> returnType = methodFound.getReturnType();
-                for (int i = 0; i < returnTypePreference.length; i++){
-                    if (returnType == returnTypePreference[i]){
+                for (Class<?> aClass : returnTypePreference) {
+                    if (returnType == aClass) {
                         return methodFound;
                     }
                 }
             }
-        } catch (SecurityException e) {
-        } catch (NoSuchMethodException e) {
+        } catch (SecurityException | NoSuchMethodException ignored) {
         }
         return null;
     }
@@ -361,8 +354,7 @@ public class ReflectionUtil {
                 return field;
             }
         }
-        catch (NoSuchFieldException e) {}
-        catch (SecurityException e) {}
+        catch (NoSuchFieldException | SecurityException ignored) {}
         return null;
     }
 
@@ -379,8 +371,7 @@ public class ReflectionUtil {
             field.set(object, value);
             return true;
         }
-        catch (IllegalArgumentException e) {}
-        catch (IllegalAccessException e) {}
+        catch (IllegalArgumentException | IllegalAccessException ignored) {}
         return false;
     }
 
@@ -388,8 +379,7 @@ public class ReflectionUtil {
         try {
             return field.getBoolean(object);
         }
-        catch (IllegalArgumentException e) {}
-        catch (IllegalAccessException e) {}
+        catch (IllegalArgumentException | IllegalAccessException ignored) {}
         return defaultValue;
     }
 
@@ -397,8 +387,7 @@ public class ReflectionUtil {
         try {
             return field.getInt(object);
         }
-        catch (IllegalArgumentException e) {}
-        catch (IllegalAccessException e) {}
+        catch (IllegalArgumentException | IllegalAccessException ignored) {}
         return defaultValue;
     }
 
@@ -406,8 +395,7 @@ public class ReflectionUtil {
         try {
             return field.getFloat(object);
         }
-        catch (IllegalArgumentException e) {}
-        catch (IllegalAccessException e) {}
+        catch (IllegalArgumentException | IllegalAccessException ignored) {}
         return defaultValue;
     }
 
@@ -415,8 +403,7 @@ public class ReflectionUtil {
         try {
             return field.getDouble(object);
         }
-        catch (IllegalArgumentException e) {}
-        catch (IllegalAccessException e) {}
+        catch (IllegalArgumentException | IllegalAccessException ignored) {}
         return defaultValue;
     }
 
@@ -424,8 +411,7 @@ public class ReflectionUtil {
         try {
             return field.get(object);
         }
-        catch (IllegalArgumentException e) {}
-        catch (IllegalAccessException e) {}
+        catch (IllegalArgumentException | IllegalAccessException ignored) {}
         return defaultValue;
     }
 
@@ -441,8 +427,7 @@ public class ReflectionUtil {
         try {
             return clazz.getMethod(methodName, arguments);
         }
-        catch (NoSuchMethodException e) {}
-        catch (SecurityException e) {}
+        catch (NoSuchMethodException | SecurityException ignored) {}
         return null;
     }
 
@@ -476,8 +461,7 @@ public class ReflectionUtil {
         try {
             return clazz.getConstructor(parameterTypes);
         }
-        catch (NoSuchMethodException e) {}
-        catch (SecurityException e) {}
+        catch (NoSuchMethodException | SecurityException ignored) {}
         return null;
     }
 
@@ -491,10 +475,8 @@ public class ReflectionUtil {
     public static Object newInstance(Constructor<?> constructor, Object... arguments) {
         try {
             return constructor.newInstance(arguments);
-        } catch (InstantiationException e) {}
-        catch (IllegalAccessException e) {}
-        catch (IllegalArgumentException e) {}
-        catch (InvocationTargetException e) {}
+        } catch (InstantiationException | InvocationTargetException | IllegalArgumentException |
+                 IllegalAccessException ignored) {}
         return null;
     }
 

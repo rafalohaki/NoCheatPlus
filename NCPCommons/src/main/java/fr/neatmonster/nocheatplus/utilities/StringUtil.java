@@ -56,9 +56,9 @@ public class StringUtil {
      * @return
      */
     public static List<Character> characterList(char...chars) {
-        final List<Character> res = new ArrayList<Character>(chars.length);
-        for (int i = 0; i < chars.length; i++) {
-            res.add(chars[i]);
+        final List<Character> res = new ArrayList<>(chars.length);
+        for (char aChar : chars) {
+            res.add(aChar);
         }
         return res;
     }
@@ -70,7 +70,7 @@ public class StringUtil {
      * @param link
      * @return
      */
-    public static <O extends Object> String join(O[] input, int startIndex, String link) {
+    public static <O> String join(O[] input, int startIndex, String link) {
         return join(Arrays.copyOfRange(input, startIndex, input.length), link);
     }
 
@@ -81,11 +81,11 @@ public class StringUtil {
      * @param link
      * @return
      */
-    public static <O extends Object> String join(O[] input, String link) {
+    public static <O> String join(O[] input, String link) {
         return join(Arrays.asList(input), link);
     }
 
-    public static String join(Iterator<? extends Object> iterator, String link) {
+    public static String join(Iterator<?> iterator, String link) {
         final StringBuilder builder = new StringBuilder(1024);
         boolean first = true;
         while (iterator.hasNext()) {
@@ -106,7 +106,7 @@ public class StringUtil {
      * @param link
      * @return
      */
-    public static String join(final Collection<? extends Object> input, final String link)
+    public static String join(final Collection<?> input, final String link)
     {
         return join(input, link, new StringBuilder(Math.max(300, input.size() * 10))).toString();
     }
@@ -118,8 +118,8 @@ public class StringUtil {
      * @param link
      * @return The given StringBuilder for chaining.
      */
-    public static StringBuilder join(final Collection<? extends Object> input, final String link,
-            final StringBuilder builder)
+    public static StringBuilder join(final Collection<?> input, final String link,
+                                     final StringBuilder builder)
     {
         boolean first = true;
         for (final Object obj : input) {
@@ -163,11 +163,11 @@ public class StringUtil {
      */
     public static List<String> split(String input, Collection<Character> chars){
         // TODO: Construct one regular expression to do the entire job!?
-        List<String> out = new ArrayList<String>();
+        List<String> out = new ArrayList<>();
         out.add(input);
-        List<String> queue = new ArrayList<String>();
+        List<String> queue = new ArrayList<>();
         for (final char c : chars){
-            String hex = Integer.toHexString((int) c);
+            String hex = Integer.toHexString(c);
             switch (hex.length()){
                 case 1:
                     hex = "000" + hex;
@@ -180,9 +180,7 @@ public class StringUtil {
             }
             for (final String s : out){
                 final String[] split = s.split("\\u" + hex);
-                for (final String _s : split){
-                    queue.add(_s);
-                }
+                queue.addAll(Arrays.asList(split));
             }
             List<String> temp = out;
             out = queue;
@@ -200,7 +198,7 @@ public class StringUtil {
      * @return
      */
     public static List<String> getNonEmpty(final List<String> input, boolean trim) {
-        final List<String> output = new ArrayList<String>();
+        final List<String> output = new ArrayList<>();
         for (String x : input) {
             if (trim) {
                 x = x.trim();
@@ -258,9 +256,9 @@ public class StringUtil {
             m = t.length();
         }
 
-        int p[] = new int[n + 1];
-        int d[] = new int[n + 1];
-        int _d[];
+        int[] p = new int[n + 1];
+        int[] d = new int[n + 1];
+        int[] _d;
 
         int i;
         int j;
@@ -296,7 +294,7 @@ public class StringUtil {
      * @param trim If to make the output more compact in case of repetitions.
      * @return
      */
-    public static final String stackTraceToString(final Throwable t, final boolean header, final boolean trim) {
+    public static String stackTraceToString(final Throwable t, final boolean header, final boolean trim) {
         // TODO: Consider to use System.getProperty("line.separator").
         // TODO: Consider to add a trimDepth argument, for repetition of a sequence of elements.
         final StringBuilder b = new StringBuilder(325);
@@ -307,8 +305,7 @@ public class StringUtil {
         final StackTraceElement[] elements = t.getStackTrace();
         StackTraceElement last = null; // Assume this is faster than operating on the strings.
         int repetition = 0;
-        for (int i = 0; i < elements.length; i++) {
-            final StackTraceElement element = elements[i];
+        for (final StackTraceElement element : elements) {
             if (trim) {
                 if (element.equals(last)) {
                     repetition += 1;
@@ -344,7 +341,7 @@ public class StringUtil {
      * @param t
      * @return
      */
-    public static final String throwableToString(final Throwable t) {
+    public static String throwableToString(final Throwable t) {
         return stackTraceToString(t, true, true);
     }
 
@@ -354,7 +351,7 @@ public class StringUtil {
      * @param needles
      * @return
      */
-    public static final int count(final String dartBoard, final char needles) {
+    public static int count(final String dartBoard, final char needles) {
         int n = 0;
         int index = 0;
         while (index != -1) {
@@ -374,7 +371,7 @@ public class StringUtil {
      * @return String with leading whitespace removed. Returns the original
      *         reference, if there is no leading whitespace.
      */
-    public static final String leftTrim(final String input) {
+    public static String leftTrim(final String input) {
         if (input == null) {
             return null;
         }
@@ -413,8 +410,8 @@ public class StringUtil {
     }
 
     public static boolean startsWithAnyOf(final String input, final String... startsWith) {
-        for (int i = 0; i < startsWith.length; i++) {
-            if (input.startsWith(startsWith[i])) {
+        for (String s : startsWith) {
+            if (input.startsWith(s)) {
                 return true;
             }
         }
@@ -422,8 +419,8 @@ public class StringUtil {
     }
 
     public static boolean endsWithAnyOf(final String input, final String... endsWith) {
-        for (int i = 0; i < endsWith.length; i++) {
-            if (input.endsWith(endsWith[i])) {
+        for (String s : endsWith) {
+            if (input.endsWith(s)) {
                 return true;
             }
         }

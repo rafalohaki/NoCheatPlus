@@ -34,7 +34,7 @@ public class BukkitDoor implements BukkitShapeModel {
      * @return The block face of the block the door is standing on, indicating
      *         where the door is.
      */
-    private static final BlockFace getWhereTheDoorIsFace(
+    private static BlockFace getWhereTheDoorIsFace(
             final BlockFace facing, final Hinge hinge,
             final boolean isOpen) {
         // For idiots:

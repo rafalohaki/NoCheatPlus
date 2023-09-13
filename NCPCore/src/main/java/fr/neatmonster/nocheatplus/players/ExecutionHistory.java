@@ -33,7 +33,7 @@ public class ExecutionHistory {
     public static class ExecutionHistoryEntry {
 
         /** The execution times. */
-        private final int executionTimes[];
+        private final int[] executionTimes;
 
         /** The last execution. */
         private long      lastExecution   = 0;
@@ -144,7 +144,7 @@ public class ExecutionHistory {
      * Instantiates a new execution history.
      */
     public ExecutionHistory() {
-        entries = new HashMap<Action<ViolationData, ActionList>, ExecutionHistoryEntry>();
+        entries = new HashMap<>();
     }
 
 	/**

@@ -29,12 +29,12 @@ public interface ComponentRegistry<T>{
      * @param component
 	 * @return If (newly) added. Adding an already present component should do nothing.
      */
-	public boolean addComponent(final T component);
+    boolean addComponent(final T component);
 	
 	/**
 	 * Remove a registered component. <br>
 	 * Does not unregister listeners currently.
 	 * @param component
 	 */
-	public void removeComponent(final T component);
+    void removeComponent(final T component);
 }

@@ -58,7 +58,7 @@ public class CommandUtil {
      * @return
      */
     public static Collection<Command> getCommands() {
-        final Collection<Command> commands = new LinkedHashSet<Command>(500);
+        final Collection<Command> commands = new LinkedHashSet<>(500);
 
         // All (?) commands from the SimpleCommandMap of the server, if available.
         final CommandMap commandMap = getCommandMap();
@@ -125,7 +125,7 @@ public class CommandUtil {
      */
     public static List<String> getCheckTypeTabMatches(final String input) {
         final String ref = input.toUpperCase().replace('-', '_').replace('.', '_');
-        final List<String> res = new ArrayList<String>();
+        final List<String> res = new ArrayList<>();
         for (final CheckType checkType : CheckType.values()) {
             final String name = checkType.name();
             if (name.startsWith(ref)) {
@@ -150,7 +150,7 @@ public class CommandUtil {
 
     public static List<String> getCheckTypeTabMatches2(final String input, final String prefix) {
         final String ref = input.toUpperCase().replace('-', '_').replace('.', '_');
-        final List<String> res = new ArrayList<String>();
+        final List<String> res = new ArrayList<>();
         for (final CheckType checkType : CheckType.values()) {
             final String name = checkType.name();
             if (name.startsWith(ref)) {
@@ -185,7 +185,7 @@ public class CommandUtil {
      * @return Always returns a modifiable list.
      */
     public static List<String> getTabMatches(final String input, final String[][] model) {
-        final List<String> res = new LinkedList<String>();
+        final List<String> res = new LinkedList<>();
         for (final String[] choices : model) {
             for (final String choice : choices) {
                 if (choice.startsWith(input)) {

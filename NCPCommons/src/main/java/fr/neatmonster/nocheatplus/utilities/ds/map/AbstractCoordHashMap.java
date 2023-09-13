@@ -145,7 +145,7 @@ public abstract class AbstractCoordHashMap<V, E extends fr.neatmonster.nocheatpl
         }
         if (bucket == null) {
             // TODO: use array list ?
-            bucket = new LinkedList<E>();
+            bucket = new LinkedList<>();
             entries[slot] = bucket;
         }
         bucket.add(newEntry(x, y, z, value, hash));
@@ -196,7 +196,7 @@ public abstract class AbstractCoordHashMap<V, E extends fr.neatmonster.nocheatpl
                 List<E> newBucket = newEntries[newSlot];
                 if (newBucket == null) {
                     if (used < 0) {
-                        newBucket = new LinkedList<E>();
+                        newBucket = new LinkedList<>();
                     }
                     else{
                         newBucket = entries[used];

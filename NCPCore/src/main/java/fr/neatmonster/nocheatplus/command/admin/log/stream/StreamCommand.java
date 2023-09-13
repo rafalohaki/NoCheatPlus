@@ -101,32 +101,33 @@ public class StreamCommand extends BaseCommand {
             StreamID streamId = man.getStreamID(streamDef);
             if (streamId == null) {
                 String altStreamDef = streamDef.toLowerCase();
-                if (altStreamDef.equals("notify")) {
-                    // Default level should be INFO.
-                    streamId = Streams.NOTIFY_INGAME;
-                }
-                else if (altStreamDef.equals("debug")) {
-                    streamId = Streams.TRACE_FILE;
-                    if (level == null) {
-                        level = Level.FINE;
-                    }
-                }
-                else if (altStreamDef.equals("status")) {
-                    streamId = Streams.STATUS;
-                }
-                else if (altStreamDef.equals("init")) {
-                    streamId = Streams.INIT;
-                }
-                else if (altStreamDef.equals("console")) {
-                    // Prefer the plugin logger.
-                    streamId = Streams.PLUGIN_LOGGER;
-                }
-                else if (altStreamDef.equals("file")) {
-                    streamId = Streams.DEFAULT_FILE;
-                }
-                else {
-                    sender.sendMessage("Bad stream id: " + streamDef);
-                    continue;
+                switch (altStreamDef) {
+                    case "notify":
+                        // Default level should be INFO.
+                        streamId = Streams.NOTIFY_INGAME;
+                        break;
+                    case "debug":
+                        streamId = Streams.TRACE_FILE;
+                        if (level == null) {
+                            level = Level.FINE;
+                        }
+                        break;
+                    case "status":
+                        streamId = Streams.STATUS;
+                        break;
+                    case "init":
+                        streamId = Streams.INIT;
+                        break;
+                    case "console":
+                        // Prefer the plugin logger.
+                        streamId = Streams.PLUGIN_LOGGER;
+                        break;
+                    case "file":
+                        streamId = Streams.DEFAULT_FILE;
+                        break;
+                    default:
+                        sender.sendMessage("Bad stream id: " + streamDef);
+                        continue;
                 }
             }
             // Finally log.

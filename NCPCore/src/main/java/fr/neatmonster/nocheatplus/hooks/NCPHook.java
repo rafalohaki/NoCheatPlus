@@ -34,14 +34,14 @@ public interface NCPHook {
      * 
      * @return the hook name
      */
-    public String getHookName();
+    String getHookName();
 
     /**
      * For logging purposes.
      * 
      * @return the hook version
      */
-    public String getHookVersion();
+    String getHookVersion();
 
     /**
      * This is called on failure of a check.<br>
@@ -57,5 +57,5 @@ public interface NCPHook {
      *            Extended information about the violations.
      * @return if we need to cancel the check failure processing
      */
-    public boolean onCheckFailure(CheckType checkType, Player player, IViolationInfo info);
+    boolean onCheckFailure(CheckType checkType, Player player, IViolationInfo info);
 }

@@ -25,5 +25,5 @@ package fr.neatmonster.nocheatplus.components.registry.feature;
  *
  */
 public interface INotifyReload {
-	public void onReload();
+	void onReload();
 }

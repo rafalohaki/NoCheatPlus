@@ -30,7 +30,7 @@ import java.util.concurrent.locks.ReentrantLock;
 public class QueueRORAWithLock<E> implements IQueueRORA<E> {
 
     private final Lock lock;
-    private LinkedList<E> elements = new LinkedList<E>();
+    private LinkedList<E> elements = new LinkedList<>();
 
     public QueueRORAWithLock() {
         this(new ReentrantLock());
@@ -53,7 +53,7 @@ public class QueueRORAWithLock<E> implements IQueueRORA<E> {
     public List<E> removeAll() {
         lock.lock();
         final List<E> result = elements;
-        elements = new LinkedList<E>();
+        elements = new LinkedList<>();
         lock.unlock();
         return result;
     }

@@ -15,7 +15,6 @@
 package fr.neatmonster.nocheatplus.compat.bukkit;
 
 import java.util.ArrayList;
-import java.util.Arrays;
 import java.util.Collections;
 import java.util.List;
 
@@ -34,7 +33,7 @@ public class EntityAccessVehicleLegacy implements IEntityAccessVehicle {
     private final List<Entity> nullPassenger;
 
     public EntityAccessVehicleLegacy() {
-        List<Entity> lst = new ArrayList<Entity>(1);
+        List<Entity> lst = new ArrayList<>(1);
         lst.add(null);
         nullPassenger = Collections.unmodifiableList(lst);
     }
@@ -43,7 +42,7 @@ public class EntityAccessVehicleLegacy implements IEntityAccessVehicle {
     @Override
     public List<Entity> getEntityPassengers(final Entity entity) {
         final Entity passenger = entity.getPassenger();
-        return passenger == null ? nullPassenger : Arrays.asList(passenger);
+        return passenger == null ? nullPassenger : Collections.singletonList(passenger);
     }
 
     @SuppressWarnings("deprecation")

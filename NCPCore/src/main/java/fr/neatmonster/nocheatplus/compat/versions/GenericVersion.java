@@ -75,10 +75,10 @@ public class GenericVersion {
         }
         int[] newInts = Arrays.copyOf(oldInts, maxDivisions);
         StringBuilder builder = new StringBuilder(version.length());
-        builder.append(Integer.toString(newInts[0]));
+        builder.append(newInts[0]);
         for (int i = 1; i < newInts.length; i++) {
             builder.append(".");
-            builder.append(Integer.toString(newInts[i]));
+            builder.append(newInts[i]);
         }
         return builder.toString();
     }
@@ -137,8 +137,8 @@ public class GenericVersion {
      */
     public static String[] padVersions(String... versions) {
         int maxDivisions = 0;
-        for (int i = 0; i < versions.length; i++) {
-            maxDivisions = Math.max(maxDivisions, getVersionDivisions(versions[i]));
+        for (String version : versions) {
+            maxDivisions = Math.max(maxDivisions, getVersionDivisions(version));
         }
         String[] out = new String[versions.length];
         for (int i = 0; i < versions.length; i++) {
@@ -195,7 +195,7 @@ public class GenericVersion {
             else if (v1Int.length > v2Int.length) {
                 return 1;
             }
-        } catch (NumberFormatException e) {}
+        } catch (NumberFormatException ignored) {}
 
         // Equality was tested above, so it would seem.
         throw new IllegalArgumentException("Bad version input.");

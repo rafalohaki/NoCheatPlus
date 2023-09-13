@@ -98,7 +98,7 @@ public abstract class BKModTree<V, N extends Node<V, N>, L extends LookupEntry<V
 			else{
 				for (final Integer key : children.keySet()){
 					// TODO: Not sure this is faster than the EntrySet in average.
-					if (Math.abs(distance - key.intValue()) <= range) nodes.add(children.get(key));
+					if (Math.abs(distance - key) <= range) nodes.add(children.get(key));
 				}
 			}
 			return nodes;
@@ -127,7 +127,7 @@ public abstract class BKModTree<V, N extends Node<V, N>, L extends LookupEntry<V
 
 		@Override
 		protected Map<Integer, N> newMap() {
-			return new HashMap<Integer, N>(initialCapacity, loadFactor);
+			return new HashMap<>(initialCapacity, loadFactor);
 		}
 	}
 	
@@ -137,8 +137,8 @@ public abstract class BKModTree<V, N extends Node<V, N>, L extends LookupEntry<V
 		}
 	}
 	
-	public static interface NodeFactory<V, N extends Node<V, N>>{
-		public N newNode(V value, N parent);
+	public interface NodeFactory<V, N extends Node<V, N>>{
+		N newNode(V value, N parent);
 	}
 	
 	/**
@@ -170,8 +170,8 @@ public abstract class BKModTree<V, N extends Node<V, N>, L extends LookupEntry<V
 		}
 	}
 	
-	public static interface LookupEntryFactory<V, N extends Node<V, N>, L extends LookupEntry<V, N>>{
-		public L newLookupEntry(Collection<N> nodes, N match, int distance, boolean isNew);
+	public interface LookupEntryFactory<V, N extends Node<V, N>, L extends LookupEntry<V, N>>{
+		L newLookupEntry(Collection<N> nodes, N match, int distance, boolean isNew);
 	}
 
 	protected final NodeFactory<V, N> nodeFactory;
@@ -201,7 +201,7 @@ public abstract class BKModTree<V, N extends Node<V, N>, L extends LookupEntry<V
 	 * @return
 	 */
 	public L lookup(final V value, final int range, final int seekMax, final boolean create){ // TODO: signature.
-		final List<N> inRange = new LinkedList<N>();
+		final List<N> inRange = new LinkedList<>();
 		if (root == null){
 			if (create){
 				root = nodeFactory.newNode(value, null);
@@ -212,7 +212,7 @@ public abstract class BKModTree<V, N extends Node<V, N>, L extends LookupEntry<V
 			}
 		}
 		// TODO: best queue type.
-		final List<N> open = new ArrayList<N>();
+		final List<N> open = new ArrayList<>();
 		open.add(root);
 		N insertion = null;
 		int insertionDist = 0;

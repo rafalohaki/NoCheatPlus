@@ -20,12 +20,10 @@ import java.util.Collection;
 import org.bukkit.Bukkit;
 import org.bukkit.event.Cancellable;
 import org.bukkit.event.Event;
-import org.bukkit.event.EventException;
 import org.bukkit.event.EventHandler;
 import org.bukkit.event.EventPriority;
 import org.bukkit.event.Listener;
 import org.bukkit.event.server.PluginDisableEvent;
-import org.bukkit.plugin.EventExecutor;
 import org.bukkit.plugin.Plugin;
 
 import fr.neatmonster.nocheatplus.components.registry.feature.ComponentWithName;
@@ -95,20 +93,15 @@ public class EventRegistryBukkit extends MultiListenerRegistry<Event, EventPrior
                 if (Cancellable.class.isAssignableFrom(eventClass)) {
                     // TODO: Check if order is right (eventClass extends Cancellable).
                     // TODO: Future java (see above) ?
-                    return new CancellableNodeBukkit<E>(eventClass, basePriority);
+                    return new CancellableNodeBukkit<>(eventClass, basePriority);
                 } else {
-                    return new MiniListenerNode<E, EventPriority>(eventClass, basePriority);
+                    return new MiniListenerNode<>(eventClass, basePriority);
                 }
             }
         };
         // Auto register for plugin disable.
         // TODO: Ensure the ignoreCancelled setting is correct (do listeners really not unregister if the event is cancelled).
-        register(new MiniListener<PluginDisableEvent>() {
-            @Override
-            public void onEvent(PluginDisableEvent event) {
-                unregisterAttached(event.getPlugin());
-            }
-        }, EventPriority.MONITOR, new RegistrationOrder("nocheatplus.system.registry", null, ".*"), true);
+        register((MiniListener<PluginDisableEvent>) event -> unregisterAttached(event.getPlugin()), EventPriority.MONITOR, new RegistrationOrder("nocheatplus.system.registry", null, ".*"), true);
     }
 
     @Override
@@ -116,15 +109,11 @@ public class EventRegistryBukkit extends MultiListenerRegistry<Event, EventPrior
             final MiniListenerNode<E, EventPriority> node, final EventPriority basePriority) {
         Bukkit.getPluginManager().registerEvent(eventClass, 
                 dummyListener,
-                basePriority, new EventExecutor() {
-            @SuppressWarnings("unchecked")
-            @Override
-            public void execute(Listener dummy, Event event) throws EventException {
-                if (eventClass.isAssignableFrom(event.getClass())) {
-                    node.onEvent((E) event);
-                }
-            }
-        }, plugin, false);
+                basePriority, (dummy, event) -> {
+                    if (eventClass.isAssignableFrom(event.getClass())) {
+                        node.onEvent((E) event);
+                    }
+                }, plugin, false);
     }
 
     /**
@@ -222,9 +211,7 @@ public class EventRegistryBukkit extends MultiListenerRegistry<Event, EventPrior
             }
             eh = method.getAnnotation(EventHandler.class);
             eventClass = (Class<E>) method.getParameterTypes()[0];
-        } catch (NoSuchMethodException e) {
-            throw new IllegalArgumentException(e);
-        } catch (SecurityException e) {
+        } catch (NoSuchMethodException | SecurityException e) {
             throw new IllegalArgumentException(e);
         }
         register(eventClass, listener, eh.priority(), null, eh.ignoreCancelled());
@@ -248,9 +235,7 @@ public class EventRegistryBukkit extends MultiListenerRegistry<Event, EventPrior
         try {
             Method method = ReflectionUtil.seekMethodIgnoreArgs(clazz, "onEvent");
             eventClass = (Class<E>) method.getParameterTypes()[0];
-        } catch (NullPointerException e) {
-            throw new IllegalArgumentException(e);
-        } catch (SecurityException e) {
+        } catch (NullPointerException | SecurityException e) {
             throw new IllegalArgumentException(e);
         }
         register(eventClass, listener);
@@ -263,7 +248,7 @@ public class EventRegistryBukkit extends MultiListenerRegistry<Event, EventPrior
         if (defaultOrder == null && listener instanceof ComponentWithName) {
             defaultOrder = new RegistrationOrder(((ComponentWithName) listener).getComponentName());
         }
-        return super.register((Object) listener, EventPriority.NORMAL, defaultOrder, false);
+        return super.register(listener, EventPriority.NORMAL, defaultOrder, false);
     }
 
     @Override

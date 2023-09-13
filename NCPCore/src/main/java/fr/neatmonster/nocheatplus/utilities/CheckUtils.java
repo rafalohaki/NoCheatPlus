@@ -41,13 +41,7 @@ import fr.neatmonster.nocheatplus.players.IPlayerData;
  */
 public class CheckUtils {
 
-    public static final IPrimaryThreadContextTester primaryServerThreadContextTester = new IPrimaryThreadContextTester() {
-
-        @Override
-        public boolean isPrimaryThread() {
-            return Bukkit.isPrimaryThread();
-        }
-    };
+    public static final IPrimaryThreadContextTester primaryServerThreadContextTester = Bukkit::isPrimaryThread;
 
     /**
      * Improper API access: Log once a message with the checkType and the
@@ -105,8 +99,8 @@ public class CheckUtils {
      * @return Return timestamp or Long.MIN_VALUE if not possible or beyond
      *         maxAge.
      */
-    public static final long guessKeepAliveTime(final Player player, 
-            final long now, final long maxAge, final IPlayerData pData){
+    public static long guessKeepAliveTime(final Player player,
+                                          final long now, final long maxAge, final IPlayerData pData){
         final int tick = TickTask.getTick();
         long ref = Long.MIN_VALUE;
         // Estimate last fight action time (important for gode modes).

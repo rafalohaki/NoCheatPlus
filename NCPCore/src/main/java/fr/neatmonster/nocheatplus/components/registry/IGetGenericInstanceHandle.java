@@ -31,6 +31,6 @@ public interface IGetGenericInstanceHandle {
      * @param registeredFor
      * @return
      */
-    public <T> IGenericInstanceHandle<T> getGenericInstanceHandle(Class<T> registeredFor);
+    <T> IGenericInstanceHandle<T> getGenericInstanceHandle(Class<T> registeredFor);
 
 }

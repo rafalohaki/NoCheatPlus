@@ -51,28 +51,28 @@ public class ActionFactory extends AbstractActionFactory<ViolationData, ActionLi
         actionDefinition = actionDefinition.toLowerCase();
 
         if (actionDefinition.equals("cancel")) {
-            return new CancelAction<ViolationData, ActionList>();
+            return new CancelAction<>();
         }
 
         if (actionDefinition.endsWith("%cancel")) {
             try {
-                Double probability = Double.parseDouble(actionDefinition.substring(
+                double probability = Double.parseDouble(actionDefinition.substring(
                         0, actionDefinition.length() - 7));
                 if (!Double.isInfinite(probability) 
                         && !Double.isNaN(probability) 
                         && probability > 0.0) {
                     // TODO: parsing via factory, store implicit penalties there too.
-                    return new PenaltyAction<ViolationData, ActionList>(
+                    return new PenaltyAction<>(
                             "imp_" + actionDefinition, new PenaltyNode(
-                                    CheckUtils.getRandom(), // TODO: store earlier once.
-                                    probability / 100.0, 
-                                    CancelPenalty.CANCEL));
+                            CheckUtils.getRandom(), // TODO: store earlier once.
+                            probability / 100.0,
+                            CancelPenalty.CANCEL));
                 }
             }
             catch (NumberFormatException e) {
             }
             StaticLog.logWarning("Bad probability definition for cancel action: '" + actionDefinition + "', relay to always cancelling.");
-            return new CancelAction<ViolationData, ActionList>();
+            return new CancelAction<>();
         }
 
         if (actionDefinition.startsWith("cmd:")) {

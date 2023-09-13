@@ -32,17 +32,7 @@ public class SimpleCharPrefixTree extends CharPrefixTree<SimpleCharNode, SimpleC
 	}
 	
 	public SimpleCharPrefixTree(){
-		super(new NodeFactory<Character, SimpleCharNode>(){
-			@Override
-			public final SimpleCharNode newNode(final SimpleCharNode parent) {
-				return new SimpleCharNode();
-			}
-		}, new LookupEntryFactory<Character, SimpleCharNode, SimpleCharLookupEntry>() {
-			@Override
-			public final SimpleCharLookupEntry newLookupEntry(final SimpleCharNode node, final SimpleCharNode insertion, final int depth, final boolean hasPrefix) {
-				return new SimpleCharLookupEntry(node, insertion, depth, hasPrefix);
-			}
-		});
+		super(parent -> new SimpleCharNode(), SimpleCharLookupEntry::new);
 	}
 
 }

@@ -24,7 +24,7 @@ public interface ISetMargins {
      * @param height
      * @param xzMargin
      */
-    public void setMargins(final double height, final double xzMargin);
+    void setMargins(final double height, final double xzMargin);
 
     /**
      * Allow cutting off the margins opposite to a checking direction. Call
@@ -35,6 +35,6 @@ public interface ISetMargins {
      *            direction are cut off. This is meant for setups like with
      *            moving out of blocks.
      */
-    public void setCutOppositeDirectionMargin(boolean cutOppositeDirectionMargin);
+    void setCutOppositeDirectionMargin(boolean cutOppositeDirectionMargin);
 
 }

@@ -35,10 +35,10 @@ public class BridgeMaterial {
     // TODO: Should be non static, ideally.
 
     /** Legacy Material by lower case name without preceding 'legacy_' part. */
-    private static final Map<String, Material> legacy = new HashMap<String, Material>();
+    private static final Map<String, Material> legacy = new HashMap<>();
 
     /** Actual lower case name to Material map for all existing materials. */
-    private static final Map<String, Material> all = new HashMap<String, Material>();
+    private static final Map<String, Material> all = new HashMap<>();
 
     static {
         for (Material mat : Material.values()) {
@@ -134,7 +134,7 @@ public class BridgeMaterial {
     }
 
     public static Set<Material> getAll(String... names) {
-        final LinkedHashSet<Material> res = new LinkedHashSet<Material>();
+        final LinkedHashSet<Material> res = new LinkedHashSet<>();
         for (final String name : names) {
             final Material mat = get(name);
             if (mat != null) {
@@ -145,7 +145,7 @@ public class BridgeMaterial {
     }
 
     public static Set<Material> getAllBlocks(String... names) {
-        final LinkedHashSet<Material> res = new LinkedHashSet<Material>();
+        final LinkedHashSet<Material> res = new LinkedHashSet<>();
         for (final String name : names) {
             final Material mat = get(name);
             if (mat != null && mat.isBlock()) {
@@ -338,7 +338,7 @@ public class BridgeMaterial {
                     continue;
                 }
                 final Material value = entry.getValue();
-                if (isBlock == AlmostBoolean.MAYBE || !(isBlock.decide() ^ value.isBlock())) {
+                if (isBlock == AlmostBoolean.MAYBE || isBlock.decide() == value.isBlock()) {
                     res.add(value);
                 }
             }
@@ -354,7 +354,7 @@ public class BridgeMaterial {
      */
     public static Set<Material> getBySuffix(final String suffix, 
             final AlmostBoolean isBlock, final String... excludePrefixes) {
-        final Set<Material> res = new LinkedHashSet<Material>();
+        final Set<Material> res = new LinkedHashSet<>();
         final SimpleCharPrefixTree prefixTree = new SimpleCharPrefixTree();
         prefixTree.feedAll(Arrays.asList(excludePrefixes), false, true);
         getBySuffix(suffix.toLowerCase(), isBlock, prefixTree, res);
@@ -372,7 +372,7 @@ public class BridgeMaterial {
      */
     public static Set<Material> getBySuffix(final Collection<String> suffices, 
             final AlmostBoolean isBlock, final String... excludePrefixes) {
-        final Set<Material> res = new LinkedHashSet<Material>();
+        final Set<Material> res = new LinkedHashSet<>();
         final SimpleCharPrefixTree prefixTree = new SimpleCharPrefixTree();
         prefixTree.feedAll(Arrays.asList(excludePrefixes), false, true);
         for (final String suffix : suffices) {
@@ -382,12 +382,12 @@ public class BridgeMaterial {
     }
 
     public static Set<Material> getByPrefix(final String prefix, final AlmostBoolean isBlock) {
-        final Set<Material> res = new LinkedHashSet<Material>();
+        final Set<Material> res = new LinkedHashSet<>();
         for (final Entry<String, Material> entry : all.entrySet()) {
             final String key = entry.getKey();
             if (key.startsWith(prefix)) {
                 final Material value = entry.getValue();
-                if (isBlock == AlmostBoolean.MAYBE || !(isBlock.decide() ^ value.isBlock())) {
+                if (isBlock == AlmostBoolean.MAYBE || isBlock.decide() == value.isBlock()) {
                     res.add(value);
                 }
             }
@@ -409,8 +409,8 @@ public class BridgeMaterial {
     public static Set<Material> getByPrefixAndSuffix(final Collection<String> prefixes,
             final Collection<String> suffices, final AlmostBoolean isBlock,
             final String... excludeContains) {
-        final Set<Material> res = new LinkedHashSet<Material>();
-        final List<String> useExcludeContains = new LinkedList<String>();
+        final Set<Material> res = new LinkedHashSet<>();
+        final List<String> useExcludeContains = new LinkedList<>();
         for (final String exclude : excludeContains) {
             useExcludeContains.add(exclude.toLowerCase());
         }
@@ -432,7 +432,7 @@ public class BridgeMaterial {
             if ((prefixTree == null || prefixTree.hasPrefix(key)) 
                     && suffixTree.hasPrefix(StringUtil.reverse(key))) {
                 final Material value = entry.getValue();
-                if (isBlock == AlmostBoolean.MAYBE || !(isBlockDecided ^ value.isBlock())) {
+                if (isBlock == AlmostBoolean.MAYBE || isBlockDecided == value.isBlock()) {
                     boolean match = true;
                     for (final String exclude : useExcludeContains) {
                         if (key.contains(exclude)) {

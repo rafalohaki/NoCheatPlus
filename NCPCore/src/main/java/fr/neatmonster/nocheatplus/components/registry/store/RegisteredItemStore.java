@@ -96,7 +96,7 @@ public class RegisteredItemStore {
         protected RegistrationOrder fetchRegistrationOrder(ItemNode<T> item) {
             return item.getRegistrationOrder();
         }
-    };
+    }
 
     static final class ItemList <T> {
 
@@ -112,9 +112,9 @@ public class RegisteredItemStore {
          */
 
         /** I bit heavy on the tip of the blade, java. */
-        private final SortItemNode<T> typedSort = new SortItemNode<T>();
+        private final SortItemNode<T> typedSort = new SortItemNode<>();
         /** Internal bookkeeping: all item nodes in order of registration. */
-        private final List<ItemNode<T>> itemNodes = new LinkedList<ItemNode<T>>();
+        private final List<ItemNode<T>> itemNodes = new LinkedList<>();
         /** All elements of itemNodes in sorted order, or null - lazy init, keep consistent. */
         private ItemNode<T>[] sortedItemNodes = null;
         /** All elements of itemNodes in sorted order, or null - lazy init, keep consistent. */
@@ -150,7 +150,7 @@ public class RegisteredItemStore {
         }
 
         List<T> getSortedItemsCopyList() {
-            final LinkedList<T> out = new LinkedList<T>();
+            final LinkedList<T> out = new LinkedList<>();
             Collections.addAll(out, sortedItems);
             return out;
         }
@@ -162,7 +162,7 @@ public class RegisteredItemStore {
          * @param internalCount
          */
         void register(final RegistrationOrder order, final T item, final int internalCount) {
-            itemNodes.add(new ItemNode<T>(order, item, internalCount));
+            itemNodes.add(new ItemNode<>(order, item, internalCount));
             invalidateSorted();
         }
 
@@ -210,12 +210,12 @@ public class RegisteredItemStore {
     // TODO: Thread safety on fetch / version with (abstract class with abstract methods to access store.)?
 
     /** Registered items in self-sorting ItemListS by class. */
-    private final Map<Class<?>, ItemList<?>> itemListMap = new HashMap<Class<?>, ItemList<?>>();
+    private final Map<Class<?>, ItemList<?>> itemListMap = new HashMap<>();
     /**
      * Efficiently keep track of already registered items (registration of the
      * same instance for multiple types is possible).
      */
-    private final Map<Object, Set<Class<?>>> items = new HashMap<Object, Set<Class<?>>>();
+    private final Map<Object, Set<Class<?>>> items = new HashMap<>();
 
     private int internalCount = 0; // TODO: Might support a counter object, passed from extern.
 
@@ -303,12 +303,12 @@ public class RegisteredItemStore {
         @SuppressWarnings("unchecked")
         ItemList<T> itemList = (ItemList<T>) itemListMap.get(type);
         if (itemList == null) {
-            itemList = new ItemList<T>();
+            itemList = new ItemList<>();
             itemListMap.put(type, itemList);
         }
         itemList.register(order, item, ++internalCount);
         if (registeredFor == null) {
-            registeredFor = new HashSet<Class<?>>();
+            registeredFor = new HashSet<>();
             items.put(item, registeredFor);
         }
         registeredFor.add(type);
@@ -502,7 +502,7 @@ public class RegisteredItemStore {
      * @return
      */
     public List<Object> getAllRegisteredItems() {
-        return new ArrayList<Object>(items.keySet());
+        return new ArrayList<>(items.keySet());
     }
 
     /**
@@ -528,7 +528,7 @@ public class RegisteredItemStore {
     @SuppressWarnings("unchecked")
     public <T> List<T> getSortedItemsCopyList(Class<T> type) {
         final ItemList<T> itemList = (ItemList<T>) itemListMap.get(type);
-        return itemList == null ? new LinkedList<T>() : itemList.getSortedItemsCopyList();
+        return itemList == null ? new LinkedList<>() : itemList.getSortedItemsCopyList();
     }
 
     /**

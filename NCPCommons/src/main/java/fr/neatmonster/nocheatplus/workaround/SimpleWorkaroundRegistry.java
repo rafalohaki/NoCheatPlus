@@ -37,25 +37,25 @@ import fr.neatmonster.nocheatplus.utilities.ds.count.acceptdeny.ICounterWithPare
 public class SimpleWorkaroundRegistry implements IWorkaroundRegistry {
 
     /** Global counter by id. */
-    private final Map<String, IAcceptDenyCounter> counters = new HashMap<String, IAcceptDenyCounter>();
+    private final Map<String, IAcceptDenyCounter> counters = new HashMap<>();
 
     /** Workaround blue print by id. */
-    private final Map<String, IWorkaround> bluePrints = new HashMap<String, IWorkaround>();
+    private final Map<String, IWorkaround> bluePrints = new HashMap<>();
 
     /** Map group id to array of workaround ids. */
-    private final Map<String, String[]> groups = new HashMap<String, String[]>();
+    private final Map<String, String[]> groups = new HashMap<>();
 
     /** Map WorkaroundSet id to the contained blueprint ids. */
-    private final Map<String, String[]> workaroundSets = new HashMap<String, String[]>();
+    private final Map<String, String[]> workaroundSets = new HashMap<>();
 
     /** Map WorkaroundSet id to the contained group ids. Might not contain entries for all ids. */
-    private final Map<String, String[]> workaroundSetGroups = new HashMap<String, String[]>();
+    private final Map<String, String[]> workaroundSetGroups = new HashMap<>();
 
     @Override
     public void setWorkaroundBluePrint(final IWorkaround... bluePrints) {
         // TODO: Might consistency check, plus policy for overriding (ignore all if present).
-        for (int i = 0; i < bluePrints.length; i++) {
-            final IWorkaround bluePrintCopy = bluePrints[i].getNewInstance();
+        for (IWorkaround bluePrint : bluePrints) {
+            final IWorkaround bluePrintCopy = bluePrint.getNewInstance();
             this.bluePrints.put(bluePrintCopy.getId(), bluePrintCopy);
             // Set a parent counter, if not already set. 
             final IAcceptDenyCounter allTimeCounter = bluePrintCopy.getAllTimeCounter();
@@ -75,7 +75,7 @@ public class SimpleWorkaroundRegistry implements IWorkaroundRegistry {
                 throw new IllegalArgumentException("No blueprint for id '" + id + "' in group '" + groupId + "'.");
             }
         }
-        groups.put(groupId, workaroundIds.toArray(new String[workaroundIds.size()]));
+        groups.put(groupId, workaroundIds.toArray(new String[0]));
     }
 
     @Override
@@ -108,7 +108,7 @@ public class SimpleWorkaroundRegistry implements IWorkaroundRegistry {
 
     @Override
     public void setWorkaroundSetByIds(final String workaroundSetId, final Collection<String> bluePrintIds, final String... groupIds) {
-        final List<IWorkaround> bluePrints = new ArrayList<IWorkaround>(bluePrintIds.size());
+        final List<IWorkaround> bluePrints = new ArrayList<>(bluePrintIds.size());
         for (final String id : bluePrintIds) {
             final IWorkaround bluePrint = this.bluePrints.get(id);
             if (bluePrint == null) {
@@ -135,9 +135,8 @@ public class SimpleWorkaroundRegistry implements IWorkaroundRegistry {
             groups = null;
         }
         else {
-            groups = new HashMap<String, String[]>();
-            for (int i = 0; i < groupIds.length; i++) {
-                final String groupId = groupIds[i];
+            groups = new HashMap<>();
+            for (final String groupId : groupIds) {
                 groups.put(groupId, this.groups.get(groupId));
             }
         }
@@ -197,7 +196,7 @@ public class SimpleWorkaroundRegistry implements IWorkaroundRegistry {
 
     @Override
     public Set<String> getCheckedIdSet(Collection<? extends IWorkaround> workarounds) {
-        final Set<String> ids = new LinkedHashSet<String>();
+        final Set<String> ids = new LinkedHashSet<>();
         for (final IWorkaround workaround : workarounds) {
             final IWorkaround bluePrint = this.bluePrints.get(workaround.getId());
             if (bluePrint == null) {

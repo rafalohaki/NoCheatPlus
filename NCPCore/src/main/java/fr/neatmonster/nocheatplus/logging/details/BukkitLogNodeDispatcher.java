@@ -28,15 +28,10 @@ public class BukkitLogNodeDispatcher extends AbstractLogNodeDispatcher { // TODO
     /**
      * Permanent TickListener for logging [TODO: on-demand scheduling, but thread-safe. With extra lock.]
      */
-    private final TickListener taskPrimary = new TickListener() {
-
-        @Override
-        public void onTick(final int tick, final long timeLast) {
-            if (runLogsPrimary()) {
-                // TODO: Here or within runLogsPrimary, handle rescheduling.
-            }
+    private final TickListener taskPrimary = (tick, timeLast) -> {
+        if (runLogsPrimary()) {
+            // TODO: Here or within runLogsPrimary, handle rescheduling.
         }
-
     };
 
     /**

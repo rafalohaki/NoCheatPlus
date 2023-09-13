@@ -50,7 +50,6 @@ import fr.neatmonster.nocheatplus.players.IPlayerData;
 import fr.neatmonster.nocheatplus.utilities.StringUtil;
 import fr.neatmonster.nocheatplus.utilities.location.PlayerLocation;
 import fr.neatmonster.nocheatplus.utilities.location.TrigUtil;
-import fr.neatmonster.nocheatplus.utilities.map.BlockProperties;
 import fr.neatmonster.nocheatplus.utilities.map.BlockFlags;
 
 
@@ -60,9 +59,9 @@ import fr.neatmonster.nocheatplus.utilities.map.BlockFlags;
  */
 public class CreativeFly extends Check {
 
-    private final List<String> tags = new LinkedList<String>();
+    private final List<String> tags = new LinkedList<>();
     private final BlockChangeTracker blockChangeTracker;
-    private IGenericInstanceHandle<IAttributeAccess> attributeAccess = NCPAPIProvider.getNoCheatPlusAPI().getGenericInstanceHandle(IAttributeAccess.class);
+    private final IGenericInstanceHandle<IAttributeAccess> attributeAccess = NCPAPIProvider.getNoCheatPlusAPI().getGenericInstanceHandle(IAttributeAccess.class);
 
 
    /**
@@ -278,7 +277,7 @@ public class CreativeFly extends Check {
                 vd.setParameter(ParameterName.LOCATION_TO, String.format(Locale.US, "%.2f, %.2f, %.2f", to.getX(), to.getY(), to.getZ()));
                 vd.setParameter(ParameterName.DISTANCE, String.format(Locale.US, "%.2f", TrigUtil.distance(from,  to)));
                 if (model != null) {
-                    vd.setParameter(ParameterName.MODEL, model.getId().toString());
+                    vd.setParameter(ParameterName.MODEL, model.getId());
                 }
                 if (!tags.isEmpty()) {
                     vd.setParameter(ParameterName.TAGS, StringUtil.join(tags, "+"));
@@ -1098,7 +1097,7 @@ public class CreativeFly extends Check {
             if (model.getScaleLevitationEffect()) {
                 final double amount = lastMove.hAllowedDistance > 0.0 ? lastMove.hAllowedDistance : lastMove.hDistance;
                 if (thisMove.touchedGround) data.addHorizontalVelocity(new AccountEntry(amount, 2, MovingData.getHorVelValCount(amount)));
-                if (debug) debug(player, lastMove.modelFlying.getId().toString() + " -> potion.levitation: add velocity");
+                if (debug) debug(player, lastMove.modelFlying.getId() + " -> potion.levitation: add velocity");
                 return;
             }
 
@@ -1135,7 +1134,7 @@ public class CreativeFly extends Check {
         // Quick change between models, reset friction, invalid
         if (secondPastMove.modelFlying != null && lastMove.modelFlying != null
             && secondPastMove.modelFlying == model && model != lastMove.modelFlying) {
-            if (debug) debug(player, "Invalidate this move on too fast model switch: " + (secondPastMove.modelFlying.getId().toString() + " -> " + lastMove.modelFlying.getId().toString() + " -> " + model.getId().toString()));
+            if (debug) debug(player, "Invalidate this move on too fast model switch: " + (secondPastMove.modelFlying.getId() + " -> " + lastMove.modelFlying.getId() + " -> " + model.getId()));
             thisMove.invalidate();
         }
     }

@@ -35,7 +35,7 @@ import fr.neatmonster.nocheatplus.utilities.CheckTypeUtil;
  */
 public abstract class CheckTypeTree<N extends CheckTypeTreeNode<N>> {
 
-    public static interface CheckTypeTreeNodeFactory<N extends CheckTypeTreeNode<N>> {
+    public interface CheckTypeTreeNodeFactory<N extends CheckTypeTreeNode<N>> {
         N newNode(CheckType checkType, N parent);
     }
 
@@ -57,7 +57,7 @@ public abstract class CheckTypeTree<N extends CheckTypeTreeNode<N>> {
             this.checkType = checkType;
             this.parent = parent;
             final Set<CheckType> childrenTypes = CheckTypeUtil.getDirectChildren(checkType);
-            final List<N> children = new ArrayList<N>(childrenTypes.size());
+            final List<N> children = new ArrayList<>(childrenTypes.size());
             for (CheckType childType : childrenTypes) {
                 children.add(factory.newNode(childType, (N) this));
             }
@@ -82,7 +82,7 @@ public abstract class CheckTypeTree<N extends CheckTypeTreeNode<N>> {
         }
     }
 
-    public static interface Visitor<N extends CheckTypeTreeNode<N>> {
+    public interface Visitor<N extends CheckTypeTreeNode<N>> {
         /*
          * TODO: Not so sure this really is far reaching, due to performance
          * questions: With concurrent access, a stored instance doesn't do, so
@@ -97,12 +97,12 @@ public abstract class CheckTypeTree<N extends CheckTypeTreeNode<N>> {
          * @param node
          * @return Return true in order to continue visiting further nodes, false to abort.
          */
-        public boolean visit(N node);
+        boolean visit(N node);
     }
 
     private final N rootNode;
 
-    private final Map<CheckType, N> nodeMap = new LinkedHashMap<CheckType, N>();
+    private final Map<CheckType, N> nodeMap = new LinkedHashMap<>();
 
     public CheckTypeTree() {
         // Protective glasses on..
@@ -111,11 +111,11 @@ public abstract class CheckTypeTree<N extends CheckTypeTreeNode<N>> {
             public N newNode(CheckType checkType, N parent) {
                 return CheckTypeTree.this.newNode(checkType, parent, this);
             }
-        };
+        }
         // Create explosion.
         rootNode = newNode(CheckType.ALL, null, new DefaultFactory());
         // Create mapping for explosion.
-        final List<N> allNodes = new LinkedList<N>();
+        final List<N> allNodes = new LinkedList<>();
         collectNodes(rootNode, allNodes);
         for (final N node : allNodes) {
             nodeMap.put(node.getCheckType(), node);

@@ -32,6 +32,6 @@ package fr.neatmonster.nocheatplus.components.registry.order;
  */
 public interface IGetRegistrationOrder {
 
-    public RegistrationOrder getRegistrationOrder();
+    RegistrationOrder getRegistrationOrder();
 
 }

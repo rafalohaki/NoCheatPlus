@@ -29,7 +29,7 @@ public class TestBlockFlags {
     @Test
     public void testIfFlagsAreUnique() {
         final Collection<String> flags = BlockFlags.getAllFlagNames();
-        final Set<Long> occupied = new HashSet<Long>();
+        final Set<Long> occupied = new HashSet<>();
         for (final String name : flags) {
             final long flag = BlockFlags.parseFlag(name);
             if (flag == 0L) {

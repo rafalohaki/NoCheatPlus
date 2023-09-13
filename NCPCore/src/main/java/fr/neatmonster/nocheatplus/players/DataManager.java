@@ -270,15 +270,15 @@ public class DataManager {
         try {
             return getPlayerData(player);
         } 
-        catch (UnsupportedOperationException e) {}
+        catch (UnsupportedOperationException ignored) {}
         try {
             return getPlayerData(player.getUniqueId());
         } 
-        catch (UnsupportedOperationException e) {}
+        catch (UnsupportedOperationException ignored) {}
         try {
             return getPlayerData(player.getName());
         } 
-        catch (UnsupportedOperationException e) {}
+        catch (UnsupportedOperationException ignored) {}
         // Failure.
         return null;
     }

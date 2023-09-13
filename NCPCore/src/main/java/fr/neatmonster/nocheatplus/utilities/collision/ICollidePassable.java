@@ -31,8 +31,8 @@ import fr.neatmonster.nocheatplus.utilities.map.BlockCache;
 public interface ICollidePassable extends ICollideBlocks, ISetMargins {
     // TODO: Add a super interface (+ asbtract impl.) for BlockCache based stuff including BlockChangeTracker.
 
-    public void setBlockCache(BlockCache blockCache);
-    public BlockCache getBlockCache();
+    void setBlockCache(BlockCache blockCache);
+    BlockCache getBlockCache();
 
     /**
      * Allows testing for past states. Should be reset in cleanup. Will do
@@ -47,8 +47,8 @@ public interface ICollidePassable extends ICollideBlocks, ISetMargins {
      * @param worldId
      *            the UUID of the world this takes place in.
      */
-    public void setBlockChangeTracker(BlockChangeTracker blockChangeTracker, 
-            BlockChangeReference blockChangeReference, int tick, UUID worldId);
+    void setBlockChangeTracker(BlockChangeTracker blockChangeTracker,
+                               BlockChangeReference blockChangeReference, int tick, UUID worldId);
 
     /**
      * Set the axis checking order, length must be 3, use Axis.NONE for
@@ -58,7 +58,7 @@ public interface ICollidePassable extends ICollideBlocks, ISetMargins {
      * @throws UnsupportedOperationException
      *             If setting the order of axes is not supported.
      */
-    public void setAxisOrder(List<Axis> axisOrder);
+    void setAxisOrder(List<Axis> axisOrder);
 
     /**
      * Convenience: Call set and setBlockCache with the data from the
@@ -68,7 +68,7 @@ public interface ICollidePassable extends ICollideBlocks, ISetMargins {
      * @param from
      * @param to
      */
-    public void set(final PlayerLocation from, final PlayerLocation to);
+    void set(final PlayerLocation from, final PlayerLocation to);
 
     /**
      * Indicate if extra workarounds may be necessary, such as running y-axis
@@ -79,13 +79,13 @@ public interface ICollidePassable extends ICollideBlocks, ISetMargins {
      *         checking. Typically should return true with ray-tracing and false
      *         with axis-tracing.
      */
-    public boolean mightNeedSplitAxisHandling();
+    boolean mightNeedSplitAxisHandling();
 
     /**
      * Remove reference to objects passed from outside (BlockCache,
      * BlockChangeTracker and similar, but not calling their cleanup methods).
      * Should not reset previously set collision information.
      */
-    public void cleanup();
+    void cleanup();
 
 }

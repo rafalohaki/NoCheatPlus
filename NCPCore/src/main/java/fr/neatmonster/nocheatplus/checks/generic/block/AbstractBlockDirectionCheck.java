@@ -15,7 +15,6 @@
 package fr.neatmonster.nocheatplus.checks.generic.block;
 
 import java.util.ArrayList;
-import java.util.Arrays;
 import java.util.List;
 
 import org.bukkit.Location;
@@ -36,7 +35,6 @@ import fr.neatmonster.nocheatplus.players.IPlayerData;
 import fr.neatmonster.nocheatplus.utilities.collision.CollideRayVsAABB;
 import fr.neatmonster.nocheatplus.utilities.collision.ICollideRayVsAABB;
 import fr.neatmonster.nocheatplus.utilities.location.LocUtil;
-import fr.neatmonster.nocheatplus.utilities.map.BlockProperties;
 import fr.neatmonster.nocheatplus.utilities.map.BlockFlags;
 
 /**
@@ -259,7 +257,7 @@ public abstract class AbstractBlockDirectionCheck<D extends ICheckData, C extend
      * @return List of block faces are allowed to touch 
      */
     private static List<BlockFace> getInteractableFaces(final int xdiff, final int zdiff, final int ydiff, final boolean fullBounds) {
-        final List<BlockFace> faces = new ArrayList<BlockFace>(6);
+        final List<BlockFace> faces = new ArrayList<>(6);
         // Allow on sides if isn't interact with full_bounds block 
         if (!fullBounds) {
 

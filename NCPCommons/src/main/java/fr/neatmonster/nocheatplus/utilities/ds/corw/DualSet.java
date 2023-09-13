@@ -37,7 +37,7 @@ public class DualSet<T> extends DualCollection<T, Set<T>>{
 
     @Override
     protected Set<T> newCollection() {
-        return new LinkedHashSet<T>();
+        return new LinkedHashSet<>();
     }
 
 }

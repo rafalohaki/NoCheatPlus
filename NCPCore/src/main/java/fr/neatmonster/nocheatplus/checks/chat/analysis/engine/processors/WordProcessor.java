@@ -23,23 +23,23 @@ public interface WordProcessor{
 	 * For debugging purposes.
 	 * @return
 	 */
-	public String getProcessorName(); 
+    String getProcessorName();
 	
 	/**
 	 * Configured weight.
 	 * @return
 	 */
-	public float getWeight();
+    float getWeight();
 	
 	/**
 	 * 
 	 * @param message
 	 * @return A number ranging from 0 to 1. 0 means no matching, 1 means high repetition score.
 	 */
-	public float process(MessageLetterCount message);
+    float process(MessageLetterCount message);
 	
 	/**
 	 * Clear all held data.
 	 */
-	public void clear();
+    void clear();
 }

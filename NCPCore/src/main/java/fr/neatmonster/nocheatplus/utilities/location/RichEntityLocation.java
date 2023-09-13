@@ -231,11 +231,8 @@ public class RichEntityLocation extends RichBoundsLocation {
             }
             // Finally check possible jump height.
             // TODO: This too is inaccurate.
-            if (isOnGround(jumpHeigth)) {
-                // Here ladders are ok.
-                return true;
-            }
-            return false;
+            // Here ladders are ok.
+            return isOnGround(jumpHeigth);
         }
         return true;
     }
@@ -450,24 +447,6 @@ public class RichEntityLocation extends RichBoundsLocation {
     public void cleanup() {
         super.cleanup();
         entity = null;
-    }
-
-    /* (non-Javadoc)
-     * @see fr.neatmonster.nocheatplus.utilities.RichBoundsLocation#toString()
-     */
-    @Override
-    public String toString() {
-        final StringBuilder builder = new StringBuilder(128);
-        builder.append("RichEntityLocation(");
-        builder.append(world == null ? "null" : world.getName());
-        builder.append('/');
-        builder.append(Double.toString(x));
-        builder.append(", ");
-        builder.append(Double.toString(y));
-        builder.append(", ");
-        builder.append(Double.toString(z));
-        builder.append(')');
-        return builder.toString();
     }
 
 }

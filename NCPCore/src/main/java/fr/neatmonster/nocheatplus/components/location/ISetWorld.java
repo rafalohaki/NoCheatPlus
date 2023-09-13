@@ -21,6 +21,6 @@ package fr.neatmonster.nocheatplus.components.location;
  */
 public interface ISetWorld {
 
-    public void setWorldName(String worldName);
+    void setWorldName(String worldName);
 
 }

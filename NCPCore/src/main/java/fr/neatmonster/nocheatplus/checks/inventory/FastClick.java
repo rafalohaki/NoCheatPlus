@@ -30,7 +30,6 @@ import fr.neatmonster.nocheatplus.checks.ViolationData;
 import fr.neatmonster.nocheatplus.checks.combined.Improbable;
 import fr.neatmonster.nocheatplus.permissions.Permissions;
 import fr.neatmonster.nocheatplus.players.IPlayerData;
-import fr.neatmonster.nocheatplus.utilities.InventoryUtil;
 import fr.neatmonster.nocheatplus.utilities.TickTask;
 import fr.neatmonster.nocheatplus.utilities.StringUtil;
 import fr.neatmonster.nocheatplus.utilities.InventoryUtil;
@@ -42,7 +41,7 @@ import fr.neatmonster.nocheatplus.utilities.InventoryUtil;
 public class FastClick extends Check {
 
 
-    final List<String> tags = new ArrayList<String>();
+    final List<String> tags = new ArrayList<>();
 
 
     /**
@@ -111,7 +110,7 @@ public class FastClick extends Check {
         float shortTerm = data.fastClickFreq.bucketScore(0);
         if (shortTerm > cc.fastClickShortTermLimit) {
             // Check for lag.
-            shortTerm /= (float) TickTask.getLag(data.fastClickFreq.bucketDuration(), true);
+            shortTerm /= TickTask.getLag(data.fastClickFreq.bucketDuration(), true);
         }
         shortTerm -= cc.fastClickShortTermLimit;
         
@@ -119,7 +118,7 @@ public class FastClick extends Check {
         float normal = data.fastClickFreq.score(1f);
         if (normal > cc.fastClickNormalLimit) {
             // Check for lag.
-            normal /= (float) TickTask.getLag(data.fastClickFreq.bucketDuration() * data.fastClickFreq.numberOfBuckets(), true);
+            normal /= TickTask.getLag(data.fastClickFreq.bucketDuration() * data.fastClickFreq.numberOfBuckets(), true);
         }
         normal -= cc.fastClickNormalLimit;
         

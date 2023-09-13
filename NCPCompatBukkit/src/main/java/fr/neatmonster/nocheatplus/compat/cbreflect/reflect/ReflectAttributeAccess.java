@@ -120,11 +120,11 @@ public class ReflectAttributeAccess implements IAttributeAccess {
     }
 
     // TODO: Register each and every one of these as generic instances and fetch from there.
-    private ReflectBase reflectBase;
-    private ReflectGenericAttributes reflectGenericAttributes;
-    private ReflectAttributeInstance reflectAttributeInstance;
-    private ReflectAttributeModifier reflectAttributeModifier;
-    private ReflectPlayer reflectPlayer;
+    private final ReflectBase reflectBase;
+    private final ReflectGenericAttributes reflectGenericAttributes;
+    private final ReflectAttributeInstance reflectAttributeInstance;
+    private final ReflectAttributeModifier reflectAttributeModifier;
+    private final ReflectPlayer reflectPlayer;
 
     public ReflectAttributeAccess() {
         try {
@@ -133,7 +133,7 @@ public class ReflectAttributeAccess implements IAttributeAccess {
             try {
                 reflectAxisAlignedBB = new ReflectAxisAlignedBB(reflectBase);
             }
-            catch (NullPointerException e) {}
+            catch (NullPointerException ignored) {}
             reflectGenericAttributes = new ReflectGenericAttributes(this.reflectBase);
             reflectAttributeInstance = new ReflectAttributeInstance(this.reflectBase);
             reflectAttributeModifier = new ReflectAttributeModifier(this.reflectBase);
@@ -174,7 +174,7 @@ public class ReflectAttributeAccess implements IAttributeAccess {
      */
     private double getSpeedAttributeMultiplier(Player player, boolean removeSprint) {
         Object attributeInstance = getMovementSpeedAttributeInstance(player);
-        double val = ((Double) ReflectionUtil.invokeMethodNoArgs(this.reflectAttributeInstance.nmsGetValue, attributeInstance)).doubleValue() / ((Double) ReflectionUtil.invokeMethodNoArgs(this.reflectAttributeInstance.nmsGetBaseValue, attributeInstance)).doubleValue();
+        double val = (Double) ReflectionUtil.invokeMethodNoArgs(this.reflectAttributeInstance.nmsGetValue, attributeInstance) / (Double) ReflectionUtil.invokeMethodNoArgs(this.reflectAttributeInstance.nmsGetBaseValue, attributeInstance);
         if (!removeSprint) {
             return val;
         }
@@ -204,8 +204,7 @@ public class ReflectAttributeAccess implements IAttributeAccess {
     }
 
     private Object getHandle(Player player) {
-        Object handle = ReflectionUtil.invokeMethodNoArgs(this.reflectPlayer.obcGetHandle, player);
-        return handle;
+        return ReflectionUtil.invokeMethodNoArgs(this.reflectPlayer.obcGetHandle, player);
     }
 
 }

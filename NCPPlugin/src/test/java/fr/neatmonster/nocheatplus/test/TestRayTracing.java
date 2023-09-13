@@ -92,11 +92,11 @@ public class TestRayTracing {
     public static RayTracing checkConsistency(final double[] coords) {
         RayTracing rt = new RayTracing(coords[0], coords[1], coords[2], coords[3], coords[4], coords[5]) {
 
-            protected int lbx, lby, lbz;
+            private int lbx, lby, lbz;
 
-            protected double ldt = 0;
+            private double ldt = 0;
 
-            protected double lox, loy, loz;
+            private double lox, loy, loz;
 
             /* (non-Javadoc)
              * @see fr.neatmonster.nocheatplus.utilities.RayTracing#set(double, double, double, double, double, double)

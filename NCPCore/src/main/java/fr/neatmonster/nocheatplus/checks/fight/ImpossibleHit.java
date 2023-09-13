@@ -26,7 +26,6 @@ import fr.neatmonster.nocheatplus.checks.moving.MovingData;
 import fr.neatmonster.nocheatplus.checks.blockinteract.BlockInteractData;
 import fr.neatmonster.nocheatplus.checks.ViolationData;
 import fr.neatmonster.nocheatplus.players.IPlayerData;
-import fr.neatmonster.nocheatplus.utilities.TickTask;
 import fr.neatmonster.nocheatplus.utilities.StringUtil;
 import fr.neatmonster.nocheatplus.utilities.InventoryUtil;
 
@@ -60,7 +59,7 @@ public class ImpossibleHit extends Check {
         boolean cancel = false;
         boolean violation = false;
         final long currentEventTime = System.currentTimeMillis();
-        List<String> tags = new LinkedList<String>();
+        List<String> tags = new LinkedList<>();
         final MovingData mData = pData.getGenericInstance(MovingData.class);
         final BlockInteractData biData = pData.getGenericInstance(BlockInteractData.class);
         

@@ -85,7 +85,7 @@ public class TestWorldDataManager {
 
         WorldDataManager worldMan = getWorldDataManager();
 
-        Map<String, ConfigFile> rawWorldConfigs = new LinkedHashMap<String, ConfigFile>();
+        Map<String, ConfigFile> rawWorldConfigs = new LinkedHashMap<>();
 
         // (Implicitly create configurations via set).
         // Default.
@@ -204,7 +204,7 @@ public class TestWorldDataManager {
         ///////////////////
 
         worldMan = getWorldDataManager();
-        rawWorldConfigs = new LinkedHashMap<String, ConfigFile>();
+        rawWorldConfigs = new LinkedHashMap<>();
         set(rawWorldConfigs, null, "dummy", "dummy");
         worldMan.applyConfiguration(rawWorldConfigs);
 

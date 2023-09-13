@@ -24,6 +24,6 @@ import org.bukkit.World;
  */
 public interface IGetBukkitLocation extends IGetLocationWithLook {
 
-    public World getWorld();
+    World getWorld();
 
 }

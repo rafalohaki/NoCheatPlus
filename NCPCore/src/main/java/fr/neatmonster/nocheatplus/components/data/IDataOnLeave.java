@@ -37,6 +37,6 @@ public interface IDataOnLeave {
      * @return Return true to remove the data instance from the cache in
      *         question, false otherwise.
      */
-    public boolean dataOnLeave(Player player, IPlayerData pData);
+    boolean dataOnLeave(Player player, IPlayerData pData);
 
 }

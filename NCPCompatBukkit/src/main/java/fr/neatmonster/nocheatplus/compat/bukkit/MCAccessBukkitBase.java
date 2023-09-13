@@ -39,7 +39,6 @@ import fr.neatmonster.nocheatplus.utilities.ReflectionUtil;
 import fr.neatmonster.nocheatplus.utilities.map.BlockCache;
 import fr.neatmonster.nocheatplus.utilities.map.BlockFlags;
 import fr.neatmonster.nocheatplus.utilities.map.BlockProperties;
-import fr.neatmonster.nocheatplus.utilities.map.BlockFlags;
 import fr.neatmonster.nocheatplus.utilities.map.MaterialUtil;
 
 public class MCAccessBukkitBase implements MCAccess {
@@ -50,7 +49,7 @@ public class MCAccessBukkitBase implements MCAccess {
     /**
      * Fill in already initialized blocks, to return false for guessItchyBlock.
      */
-    protected final Set<Material> processedBlocks = new LinkedHashSet<Material>();
+    protected final Set<Material> processedBlocks = new LinkedHashSet<>();
 
     /**
      * Constructor to let it fail.
@@ -170,7 +169,7 @@ public class MCAccessBukkitBase implements MCAccess {
         }
     }
 
-    private final double legacyGetWidth(final Entity entity) {
+    private double legacyGetWidth(final Entity entity) {
         // TODO: Make readable from file for defaults + register individual getters where appropriate.
         // TODO: For height too. [Automatize most by spawning + checking?]
         // Values taken from 1.7.10.
@@ -267,7 +266,7 @@ public class MCAccessBukkitBase implements MCAccess {
                 default:
                     break;
             }
-        } catch (Throwable t) {}
+        } catch (Throwable ignored) {}
         // Default entity width.
         return 0.6f;
     }

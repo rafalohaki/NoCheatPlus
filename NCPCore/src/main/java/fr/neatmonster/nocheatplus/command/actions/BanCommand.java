@@ -80,7 +80,7 @@ public class BanCommand extends BaseCommand {
         if (player == null && !IdUtil.isValidMinecraftUserName(name)) {
             UUID id = IdUtil.UUIDFromStringSafe(name);
             if (id != null) {
-                StaticLog.logWarning("Banning by UUID might not work (" + id.toString()+"), relay to the vanilla command.");
+                StaticLog.logWarning("Banning by UUID might not work (" + id +"), relay to the vanilla command.");
             } else {
                 StaticLog.logWarning("Might not be a valid user name: " + name);
             }

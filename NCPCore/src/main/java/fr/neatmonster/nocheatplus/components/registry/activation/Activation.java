@@ -46,7 +46,7 @@ public class Activation implements IDescriptiveActivation {
      *            Lower case expected.
      * @return null on failures.
      */
-    private static final String rightSideDelimiters(final String version) {
+    private static String rightSideDelimiters(final String version) {
         String pV = GenericVersion.parseVersionDelimiters(version, "", "-snapshot");
         if (pV == null) {
             pV = GenericVersion.parseVersionDelimiters(version, "", "-b");
@@ -88,7 +88,7 @@ public class Activation implements IDescriptiveActivation {
         return pV;
     }
 
-    private final List<IActivation> conditions = new LinkedList<IActivation>();
+    private final List<IActivation> conditions = new LinkedList<>();
     private boolean conditionsAND = true;
 
     private String neutralDescription = null;
@@ -153,12 +153,7 @@ public class Activation implements IDescriptiveActivation {
      * @return This Activation instance.
      */
     public Activation pluginExist(final String pluginName) {
-        conditions.add(new IActivation() {
-            @Override
-            public boolean isAvailable() {
-                return Bukkit.getServer().getPluginManager().getPlugin(pluginName) != null;
-            }
-        });
+        conditions.add(() -> Bukkit.getServer().getPluginManager().getPlugin(pluginName) != null);
         return this;
     }
 
@@ -169,12 +164,7 @@ public class Activation implements IDescriptiveActivation {
      * @return This Activation instance.
      */
     public Activation pluginEnabled(final String pluginName) {
-        conditions.add(new IActivation() {
-            @Override
-            public boolean isAvailable() {
-                return Bukkit.getServer().getPluginManager().isPluginEnabled(pluginName);
-            }
-        });
+        conditions.add(() -> Bukkit.getServer().getPluginManager().isPluginEnabled(pluginName));
         return this;
     }
 
@@ -190,17 +180,14 @@ public class Activation implements IDescriptiveActivation {
      * @return This Activation instance.
      */
     public Activation pluginVersionGT(final String pluginName, final String version, final boolean allowEQ) {
-        conditions.add(new IActivation() {
-            @Override
-            public boolean isAvailable() {
-                String pluginVersion = guessUsablePluginVersion(pluginName);
-                if (pluginVersion == null) {
-                    return false;
-                }
-                else {
-                    int cmp = GenericVersion.compareVersions(pluginVersion, version);
-                    return cmp == 1 || allowEQ && cmp == 0;
-                }
+        conditions.add(() -> {
+            String pluginVersion = guessUsablePluginVersion(pluginName);
+            if (pluginVersion == null) {
+                return false;
+            }
+            else {
+                int cmp = GenericVersion.compareVersions(pluginVersion, version);
+                return cmp == 1 || allowEQ && cmp == 0;
             }
         });
         return this;
@@ -218,17 +205,14 @@ public class Activation implements IDescriptiveActivation {
      * @return This Activation instance.
      */
     public Activation pluginVersionLT(final String pluginName, final String version, final boolean allowEQ) {
-        conditions.add(new IActivation() {
-            @Override
-            public boolean isAvailable() {
-                String pluginVersion = guessUsablePluginVersion(pluginName);
-                if (pluginVersion == null) {
-                    return false;
-                }
-                else {
-                    int cmp = GenericVersion.compareVersions(pluginVersion, version);
-                    return cmp == -1 || allowEQ && cmp == 0;
-                }
+        conditions.add(() -> {
+            String pluginVersion = guessUsablePluginVersion(pluginName);
+            if (pluginVersion == null) {
+                return false;
+            }
+            else {
+                int cmp = GenericVersion.compareVersions(pluginVersion, version);
+                return cmp == -1 || allowEQ && cmp == 0;
             }
         });
         return this;
@@ -245,16 +229,13 @@ public class Activation implements IDescriptiveActivation {
      * @return This Activation instance.
      */
     public Activation pluginVersionEQ(final String pluginName, final String version) {
-        conditions.add(new IActivation() {
-            @Override
-            public boolean isAvailable() {
-                String pluginVersion = guessUsablePluginVersion(pluginName);
-                if (pluginVersion == null) {
-                    return false;
-                }
-                else {
-                    return GenericVersion.compareVersions(pluginVersion, version) == 0;
-                }
+        conditions.add(() -> {
+            String pluginVersion = guessUsablePluginVersion(pluginName);
+            if (pluginVersion == null) {
+                return false;
+            }
+            else {
+                return GenericVersion.compareVersions(pluginVersion, version) == 0;
             }
         });
         return this;
@@ -278,17 +259,14 @@ public class Activation implements IDescriptiveActivation {
     public Activation pluginVersionBetween(final String pluginName, 
             final String versionLow, final boolean allowEQlow,
             final String versionHigh, final boolean allowEQhigh) {
-        conditions.add(new IActivation() {
-            @Override
-            public boolean isAvailable() {
-                String pluginVersion = guessUsablePluginVersion(pluginName);
-                if (pluginVersion == null) {
-                    return false;
-                }
-                else {
-                    return GenericVersion.isVersionBetween(pluginVersion, 
-                            versionLow, allowEQlow, versionHigh, allowEQhigh);
-                }
+        conditions.add(() -> {
+            String pluginVersion = guessUsablePluginVersion(pluginName);
+            if (pluginVersion == null) {
+                return false;
+            }
+            else {
+                return GenericVersion.isVersionBetween(pluginVersion,
+                        versionLow, allowEQlow, versionHigh, allowEQhigh);
             }
         });
         return this;
@@ -303,12 +281,9 @@ public class Activation implements IDescriptiveActivation {
      * @return
      */
     public Activation minecraftVersionGT(final String version, final boolean allowEQ) {
-        conditions.add(new IActivation() {
-            @Override
-            public boolean isAvailable() {
-                int cmp = ServerVersion.compareMinecraftVersion(version);
-                return cmp == 1 || allowEQ && cmp == 0;
-            }
+        conditions.add(() -> {
+            int cmp = ServerVersion.compareMinecraftVersion(version);
+            return cmp == 1 || allowEQ && cmp == 0;
         });
         return this;
     }
@@ -322,12 +297,9 @@ public class Activation implements IDescriptiveActivation {
      * @return
      */
     public Activation minecraftVersionLT(final String version, final boolean allowEQ) {
-        conditions.add(new IActivation() {
-            @Override
-            public boolean isAvailable() {
-                int cmp = ServerVersion.compareMinecraftVersion(version);
-                return cmp == -1 || allowEQ && cmp == 0;
-            }
+        conditions.add(() -> {
+            int cmp = ServerVersion.compareMinecraftVersion(version);
+            return cmp == -1 || allowEQ && cmp == 0;
         });
         return this;
     }
@@ -339,12 +311,7 @@ public class Activation implements IDescriptiveActivation {
      * @return
      */
     public Activation minecraftVersionEQ(final String version) {
-        conditions.add(new IActivation() {
-            @Override
-            public boolean isAvailable() {
-                return ServerVersion.compareMinecraftVersion(version) == 0;
-            }
-        });
+        conditions.add(() -> ServerVersion.compareMinecraftVersion(version) == 0);
         return this;
     }
 
@@ -366,13 +333,8 @@ public class Activation implements IDescriptiveActivation {
     public Activation minecraftVersionBetween(
             final String versionLow, final boolean allowEQlow,
             final String versionHigh, final boolean allowEQhigh) {
-        conditions.add(new IActivation() {
-            @Override
-            public boolean isAvailable() {
-                return ServerVersion.isMinecraftVersionBetween(
-                        versionLow, allowEQlow, versionHigh, allowEQhigh);
-            }
-        });
+        conditions.add(() -> ServerVersion.isMinecraftVersionBetween(
+                versionLow, allowEQlow, versionHigh, allowEQhigh));
         return this;
     }
 
@@ -384,12 +346,7 @@ public class Activation implements IDescriptiveActivation {
      * @return
      */
     public Activation serverVersionContains(final String content) {
-        conditions.add(new IActivation() {
-            @Override
-            public boolean isAvailable() {
-                return Bukkit.getServer().getVersion().contains(content);
-            }
-        });
+        conditions.add(() -> Bukkit.getServer().getVersion().contains(content));
         return this;
     }
 
@@ -401,12 +358,7 @@ public class Activation implements IDescriptiveActivation {
      * @return
      */
     public Activation serverVersionContainsIgnoreCase(final String content) {
-        conditions.add(new IActivation() {
-            @Override
-            public boolean isAvailable() {
-                return Bukkit.getServer().getVersion().toLowerCase().contains(content.toLowerCase());
-            }
-        });
+        conditions.add(() -> Bukkit.getServer().getVersion().toLowerCase().contains(content.toLowerCase()));
         return this;
     }
 
@@ -417,12 +369,7 @@ public class Activation implements IDescriptiveActivation {
      * @return This Activation instance.
      */
     public Activation classExist(final String className) {
-        conditions.add(new IActivation() {
-            @Override
-            public boolean isAvailable() {
-                return ReflectionUtil.getClass(className) != null;
-            }
-        });
+        conditions.add(() -> ReflectionUtil.getClass(className) != null);
         return this;
     }
 
@@ -433,12 +380,7 @@ public class Activation implements IDescriptiveActivation {
      * @return This Activation instance.
      */
     public Activation classNotExist(final String className) {
-        conditions.add(new IActivation() {
-            @Override
-            public boolean isAvailable() {
-                return ReflectionUtil.getClass(className) == null;
-            }
-        });
+        conditions.add(() -> ReflectionUtil.getClass(className) == null);
         return this;
     }
 
@@ -473,22 +415,12 @@ public class Activation implements IDescriptiveActivation {
     }
 
     public Activation unitTest() {
-        conditions.add(new IActivation() {
-            @Override
-            public boolean isAvailable() {
-                return checkUnitTest();
-            }
-        });
+        conditions.add(this::checkUnitTest);
         return this;
     }
 
     public Activation notUnitTest() {
-        conditions.add(new IActivation() {
-            @Override
-            public boolean isAvailable() {
-                return !checkUnitTest();
-            }
-        });
+        conditions.add(() -> !checkUnitTest());
         return this;
     }
 

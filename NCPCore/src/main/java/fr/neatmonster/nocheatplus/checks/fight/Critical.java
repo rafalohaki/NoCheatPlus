@@ -67,11 +67,11 @@ public class Critical extends Check {
 
         boolean cancel = false;
         boolean violation = false;
-        final List<String> tags = new ArrayList<String>();
+        final List<String> tags = new ArrayList<>();
         final MovingData mData = pData.getGenericInstance(MovingData.class);
         final MovingConfig mCC = pData.getGenericInstance(MovingConfig.class);
         final PlayerMoveData thisMove = mData.playerMoves.getCurrentMove();
-        final double mcFallDistance = (double) player.getFallDistance();
+        final double mcFallDistance = player.getFallDistance();
         final double ncpFallDistance = mData.noFallFallDistance;
         final double realisticFallDistance = MovingUtil.getRealisticFallDistance(player, thisMove.from.getY(), thisMove.to.getY(), mData, pData);
 

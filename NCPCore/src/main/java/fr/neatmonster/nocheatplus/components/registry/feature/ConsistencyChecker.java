@@ -26,7 +26,7 @@ public interface ConsistencyChecker {
 	 * Perform consistency checking. Depending on configuration this should clean up inconsistent states and/or log problems.
 	 * @param onlinePlayers Players as returned by Server.getOnlinePlayers, at the point of time before checking.
 	 */
-	public void checkConsistency(Player[] onlinePlayers);
+    void checkConsistency(Player[] onlinePlayers);
 	
 	// TODO: Might add method to check consistency for single players (on join, on certain check failures).
 }

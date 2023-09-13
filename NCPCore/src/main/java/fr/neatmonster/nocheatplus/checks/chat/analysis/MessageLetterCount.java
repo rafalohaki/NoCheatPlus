@@ -55,7 +55,7 @@ public class MessageLetterCount {
 		
 		fullCount = new WordLetterCount(message);
 		// (Do not store 60 times "a".)
-		final Map<String, WordLetterCount> done = new HashMap<String, WordLetterCount>(words.length);
+		final Map<String, WordLetterCount> done = new HashMap<>(words.length);
 		for (int i = 0; i < parts.length; i++){
 			final String word = parts[i];
 			if (done.containsKey(word)){

@@ -31,7 +31,7 @@ import fr.neatmonster.nocheatplus.compat.AlmostBoolean;
  */
 public class TeleportQueue {
 
-    public static enum AckResolution {
+    public enum AckResolution {
         /** Waiting for ACK. */
         WAITING,
         /** Packet is ACK. */
@@ -57,12 +57,12 @@ public class TeleportQueue {
     private final Lock lock = new ReentrantLock();
 
     /** Validated outgoing teleport locations, expected to be confirmed by the client. */
-    private final LinkedList<CountableLocation> expectIncoming = new LinkedList<CountableLocation>();
+    private final LinkedList<CountableLocation> expectIncoming = new LinkedList<>();
     /** Location from a Bukkit event, which we expect an outgoing teleport for. */
     private DataLocation expectOutgoing = null;
 
-    private long maxAge = 4000; // TODO: configurable
-    private int maxQueueSize = 60; // TODO: configurable
+    private final long maxAge = 4000; // TODO: configurable
+    private final int maxQueueSize = 60; // TODO: configurable
 
     /**
      * Queried from the primary thread (read only), reset with outgoing
@@ -70,7 +70,7 @@ public class TeleportQueue {
      */
     private CountableLocation lastAck = null;
 
-    private AckReference lastAckReference = new AckReference();
+    private final AckReference lastAckReference = new AckReference();
 
     /**
      * Maximum age in milliseconds, older entries expire.
@@ -211,9 +211,7 @@ public class TeleportQueue {
             return AlmostBoolean.YES;
         }
         AlmostBoolean ackState = AlmostBoolean.NO;
-        final Iterator<CountableLocation> it = expectIncoming.iterator();
-        while (it.hasNext()) {
-            final CountableLocation ref = it.next();
+        for (CountableLocation ref : expectIncoming) {
             // No expiration checks here.
             if (ref.teleportId == teleportId) {
                 // Match an outdated id.

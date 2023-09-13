@@ -95,11 +95,11 @@ public class NoSlow extends BaseAdapter {
 
     private static int timeBetweenRL = 70;
     private static PacketType[] initPacketTypes() {
-        final List<PacketType> types = new LinkedList<PacketType>(Arrays.asList(
+        final List<PacketType> types = new LinkedList<>(Arrays.asList(
                 PacketType.Play.Client.BLOCK_DIG,
                 PacketType.Play.Client.BLOCK_PLACE
-                ));
-        return types.toArray(new PacketType[types.size()]);
+        ));
+        return types.toArray(new PacketType[0]);
     }
 
     public NoSlow(Plugin plugin) {
@@ -254,7 +254,7 @@ public class NoSlow extends BaseAdapter {
         }
         final IPlayerData pData = DataManager.getPlayerDataSafe(p);
         if (pData == null) {
-            StaticLog.logWarning("Failed to fetch player data with " + event.getPacketType() + " for: " + p.toString());
+            StaticLog.logWarning("Failed to fetch player data with " + event.getPacketType() + " for: " + p);
             return;
         }
         final MovingData data = pData.getGenericInstance(MovingData.class);

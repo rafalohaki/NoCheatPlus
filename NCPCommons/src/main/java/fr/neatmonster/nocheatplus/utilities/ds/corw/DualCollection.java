@@ -175,10 +175,9 @@ public abstract class DualCollection<T, C extends Collection<T>> {
             return false;
         }
         else {
-            ;
             lock.lock();
             // (Could be set to null within the primary thread.)
-            final boolean res = asynchronousCollection == null ? false : asynchronousCollection.contains(element);
+            final boolean res = asynchronousCollection != null && asynchronousCollection.contains(element);
             lock.unlock();
             return res;
         }
@@ -324,7 +323,7 @@ public abstract class DualCollection<T, C extends Collection<T>> {
      * @return
      */
     public boolean containsPrimaryThread(final T element) {
-        return primaryThreadCollection == null ? false : primaryThreadCollection.contains(element);
+        return primaryThreadCollection != null && primaryThreadCollection.contains(element);
     }
 
     /**

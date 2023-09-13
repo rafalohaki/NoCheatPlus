@@ -17,15 +17,10 @@ package fr.neatmonster.nocheatplus.compat;
 import org.bukkit.Material;
 import org.bukkit.entity.LivingEntity;
 import org.bukkit.entity.Player;
-import org.bukkit.event.player.PlayerInteractEntityEvent;
-import org.bukkit.event.player.PlayerInteractEvent;
 import org.bukkit.inventory.ItemStack;
 import org.bukkit.inventory.PlayerInventory;
-import org.bukkit.potion.PotionEffectType;
 
-import fr.neatmonster.nocheatplus.utilities.PotionUtil;
 import fr.neatmonster.nocheatplus.utilities.ReflectionUtil;
-import fr.neatmonster.nocheatplus.utilities.InventoryUtil;
 
 
 public class Bridge1_17 {
@@ -55,8 +50,7 @@ public class Bridge1_17 {
         }
         final PlayerInventory inv = player.getInventory();
         final ItemStack[] contents = inv.getArmorContents();
-        for (int i = 0; i < contents.length; i++){
-            final ItemStack armor = contents[i];
+        for (final ItemStack armor : contents) {
             if (armor != null && armor.getType().toString().startsWith("LEATHER")) {
                 return true;
             }

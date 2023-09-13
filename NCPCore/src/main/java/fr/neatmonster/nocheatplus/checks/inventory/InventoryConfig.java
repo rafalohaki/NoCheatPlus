@@ -43,13 +43,13 @@ public class InventoryConfig extends ACheckConfig {
     public final float		fastClickShortTermLimit;
     public final float		fastClickNormalLimit;
     public final int        chestOpenLimit;
-    public final Set<String> inventoryExemptions = new HashSet<String>();
+    public final Set<String> inventoryExemptions = new HashSet<>();
     public final float      fastClickImprobableWeight;
     public final ActionList fastClickActions;
 
     public final long		fastConsumeDuration;
     public final boolean    fastConsumeWhitelist;
-    public final Set<Material> fastConsumeItems = new HashSet<Material>();
+    public final Set<Material> fastConsumeItems = new HashSet<>();
     public final ActionList fastConsumeActions;
 
     public final int        gutenbergPageLimit;

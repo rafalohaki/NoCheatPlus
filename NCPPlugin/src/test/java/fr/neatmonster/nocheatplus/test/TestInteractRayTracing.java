@@ -25,8 +25,10 @@ import fr.neatmonster.nocheatplus.utilities.map.FakeBlockCache;
 
 public class TestInteractRayTracing {
 
-    public final class CenteredInteractRayTracing extends InteractRayTracing {
-        private int centerX, centerY, centerZ;
+    public static final class CenteredInteractRayTracing extends InteractRayTracing {
+        private final int centerX;
+        private final int centerY;
+        private final int centerZ;
         public CenteredInteractRayTracing(boolean strict, int centerX, int centerY, int centerZ) {
             super(strict);
             this.centerX = centerX;

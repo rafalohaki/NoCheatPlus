@@ -23,18 +23,15 @@ import java.util.Set;
 import java.util.UUID;
 import java.util.concurrent.ConcurrentHashMap;
 
-import org.bukkit.ChatColor;
 import org.bukkit.GameMode;
 import org.bukkit.Location;
 import org.bukkit.Material;
 import org.bukkit.entity.Entity;
 import org.bukkit.entity.EntityType;
 import org.bukkit.entity.Player;
-import org.bukkit.entity.Projectile;
 import org.bukkit.event.EventHandler;
 import org.bukkit.event.EventPriority;
 import org.bukkit.event.Listener;
-import org.bukkit.event.entity.EntityDamageByEntityEvent;
 import org.bukkit.event.entity.EntityDamageEvent;
 import org.bukkit.event.entity.EntityDamageEvent.DamageCause;
 import org.bukkit.event.entity.EntityToggleGlideEvent;
@@ -105,7 +102,6 @@ import fr.neatmonster.nocheatplus.components.data.IData;
 import fr.neatmonster.nocheatplus.components.location.SimplePositionWithLook;
 import fr.neatmonster.nocheatplus.components.modifier.IAttributeAccess;
 import fr.neatmonster.nocheatplus.components.registry.event.IGenericInstanceHandle;
-import fr.neatmonster.nocheatplus.components.registry.factory.IFactoryOne;
 import fr.neatmonster.nocheatplus.components.registry.feature.IHaveCheckType;
 import fr.neatmonster.nocheatplus.components.registry.feature.INeedConfig;
 import fr.neatmonster.nocheatplus.components.registry.feature.IRemoveData;
@@ -116,10 +112,8 @@ import fr.neatmonster.nocheatplus.config.ConfigManager;
 import fr.neatmonster.nocheatplus.logging.StaticLog;
 import fr.neatmonster.nocheatplus.logging.Streams;
 import fr.neatmonster.nocheatplus.logging.debug.DebugUtil;
-import fr.neatmonster.nocheatplus.permissions.Permissions;
 import fr.neatmonster.nocheatplus.players.DataManager;
 import fr.neatmonster.nocheatplus.players.IPlayerData;
-import fr.neatmonster.nocheatplus.players.PlayerFactoryArgument;
 import fr.neatmonster.nocheatplus.stats.Counters;
 import fr.neatmonster.nocheatplus.utilities.CheckUtils;
 import fr.neatmonster.nocheatplus.utilities.PotionUtil;
@@ -133,7 +127,6 @@ import fr.neatmonster.nocheatplus.utilities.map.BlockProperties;
 import fr.neatmonster.nocheatplus.utilities.map.BlockFlags;
 import fr.neatmonster.nocheatplus.utilities.map.MapUtil;
 import fr.neatmonster.nocheatplus.utilities.map.MaterialUtil;
-import fr.neatmonster.nocheatplus.worlds.WorldFactoryArgument;
 
 /**
  * Central location to listen to events that are relevant for the moving checks.
@@ -161,7 +154,7 @@ public class MovingListener extends CheckListener implements TickListener, IRemo
     private final Passable passable = addCheck(new Passable());
     
     /** Store events by player name, in order to invalidate moving processing on higher priority level in case of teleports. */
-    private final Map<String, PlayerMoveEvent> processingEvents = new HashMap<String, PlayerMoveEvent>();
+    private final Map<String, PlayerMoveEvent> processingEvents = new HashMap<>();
 
     /** Player names to check hover for, case insensitive. */
     private final Set<String> hoverTicks = ConcurrentHashMap.newKeySet(30); // TODO: Rename
@@ -185,7 +178,7 @@ public class MovingListener extends CheckListener implements TickListener, IRemo
     /** Auxiliary functionality. */
     private final AuxMoving aux = NCPAPIProvider.getNoCheatPlusAPI().getGenericInstance(AuxMoving.class);
 
-    private IGenericInstanceHandle<IAttributeAccess> attributeAccess = NCPAPIProvider.getNoCheatPlusAPI().getGenericInstanceHandle(IAttributeAccess.class);
+    private final IGenericInstanceHandle<IAttributeAccess> attributeAccess = NCPAPIProvider.getNoCheatPlusAPI().getGenericInstanceHandle(IAttributeAccess.class);
 
     private final BlockChangeTracker blockChangeTracker;
 
@@ -219,25 +212,13 @@ public class MovingListener extends CheckListener implements TickListener, IRemo
         api.register(api.newRegistrationContext()
                 // MovingConfig
                 .registerConfigWorld(MovingConfig.class)
-                .factory(new IFactoryOne<WorldFactoryArgument, MovingConfig>() {
-                    @Override
-                    public MovingConfig getNewInstance(
-                            final WorldFactoryArgument arg) {
-                        return new MovingConfig(arg.worldData);
-                    }
-                })
+                .factory(arg -> new MovingConfig(arg.worldData))
                 .registerConfigTypesPlayer(CheckType.MOVING, true)
                 .context() //
                 // MovingData
                 .registerDataPlayer(MovingData.class)
-                .factory(new IFactoryOne<PlayerFactoryArgument, MovingData>() {
-                    @Override
-                    public MovingData getNewInstance(
-                            final PlayerFactoryArgument arg) {
-                        return new MovingData(arg.worldData.getGenericInstance(
-                                MovingConfig.class), arg.playerData);
-                    }
-                })
+                .factory(arg -> new MovingData(arg.worldData.getGenericInstance(
+                        MovingConfig.class), arg.playerData))
                 .addToGroups(CheckType.MOVING, false, IData.class, ICheckData.class)
                 .removeSubCheckData(CheckType.MOVING, true)
                 .context() //
@@ -1915,8 +1896,8 @@ public class MovingListener extends CheckListener implements TickListener, IRemo
     }
 
 
-    private final void undoCancelledSetBack(final Player player, final PlayerTeleportEvent event,
-                                            final MovingData data, final IPlayerData pData) {
+    private void undoCancelledSetBack(final Player player, final PlayerTeleportEvent event,
+                                      final MovingData data, final IPlayerData pData) {
 
         // Prevent cheaters getting rid of flying data (morepackets, other).
         // TODO: even more strict enforcing ?
@@ -2190,7 +2171,7 @@ public class MovingListener extends CheckListener implements TickListener, IRemo
                         builder.append((String) obj);
                     }
                     else {
-                        builder.append(obj.toString());
+                        builder.append(obj);
                     }
                 }
             }
@@ -2369,7 +2350,7 @@ public class MovingListener extends CheckListener implements TickListener, IRemo
     }
 
 
-    private final boolean noFallVL(final Player player, final String tag, final MovingData data, final MovingConfig cc) {
+    private boolean noFallVL(final Player player, final String tag, final MovingData data, final MovingConfig cc) {
 
         data.noFallVL += 1.0;
         final ViolationData vd = new ViolationData(noFall, player, data.noFallVL, 1.0, cc.noFallActions);
@@ -2671,7 +2652,7 @@ public class MovingListener extends CheckListener implements TickListener, IRemo
      */
     private void checkOnTickHover() {
 
-        final List<String> rem = new ArrayList<String>(hoverTicks.size()); // Pessimistic.
+        final List<String> rem = new ArrayList<>(hoverTicks.size()); // Pessimistic.
         final PlayerMoveInfo info = aux.usePlayerMoveInfo();
         for (final String playerName : hoverTicks) {
             // TODO: put players into the set (+- one tick would not matter ?)
@@ -2714,7 +2695,7 @@ public class MovingListener extends CheckListener implements TickListener, IRemo
                 rem.add(playerName);
             }
         }
-        hoverTicks.removeAll(rem);
+        rem.forEach(hoverTicks::remove);
         aux.returnPlayerMoveInfo(info);
     }
 
@@ -2726,7 +2707,7 @@ public class MovingListener extends CheckListener implements TickListener, IRemo
      */
     private void checkOnTickPlayersEnforce() {
 
-        final List<String> rem = new ArrayList<String>(playersEnforce.size()); // Pessimistic.
+        final List<String> rem = new ArrayList<>(playersEnforce.size()); // Pessimistic.
         for (final String playerName : playersEnforce) {
             final Player player = DataManager.getPlayerExact(playerName);
             if (player == null || !player.isOnline()) {
@@ -2744,7 +2725,7 @@ public class MovingListener extends CheckListener implements TickListener, IRemo
                 player.teleport(newTo, BridgeMisc.TELEPORT_CAUSE_CORRECTION_OF_POSITION);
             }
         }
-        if (!rem.isEmpty()) playersEnforce.removeAll(rem);
+        if (!rem.isEmpty()) rem.forEach(playersEnforce::remove);
     }
 
 
@@ -2883,7 +2864,7 @@ public class MovingListener extends CheckListener implements TickListener, IRemo
             try{
                 // TODO: Check backwards compatibility (1.4.2). Remove try-catch
                 builder.append("\n(walkspeed=" + player.getWalkSpeed() + " flyspeed=" + player.getFlySpeed() + ")");
-            } catch (Throwable t) {}
+            } catch (Throwable ignored) {}
             if (player.isSprinting()) {
                 builder.append("(sprinting)");
             }

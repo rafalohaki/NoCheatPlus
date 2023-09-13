@@ -37,6 +37,6 @@ public interface ICanHandleTimeRunningBackwards {
     /**
      * Adjust to system time having run backwards (just "a second ago").
      */
-    public void handleTimeRanBackwards();
+    void handleTimeRanBackwards();
 
 }

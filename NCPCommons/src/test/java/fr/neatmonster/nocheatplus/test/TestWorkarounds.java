@@ -160,7 +160,7 @@ public class TestWorkarounds {
         // Register workarounds.
         List<WorkaroundCounter> wg1 = getWorkaroundCounters("w.man", 15);
         List<WorkaroundCountDown> wg2 = getWorkaroundcountDowns("w.man", 15);
-        List<IWorkaround> wgAll = new ArrayList<IWorkaround>(30);
+        List<IWorkaround> wgAll = new ArrayList<>(30);
         wgAll.addAll(wg1);
         wgAll.addAll(wg2);
         try {
@@ -171,9 +171,9 @@ public class TestWorkarounds {
             // Success.
         }
         reg.setWorkaroundBluePrint(wgAll.toArray(new IWorkaround[2 * 15]));
-        List<String> ids1 = new ArrayList<String>(reg.getCheckedIdSet(wg1));
-        List<String> ids2 = new ArrayList<String>(reg.getCheckedIdSet(wg2));
-        List<String> idsAll = new ArrayList<String>(reg.getCheckedIdSet(wgAll));
+        List<String> ids1 = new ArrayList<>(reg.getCheckedIdSet(wg1));
+        List<String> ids2 = new ArrayList<>(reg.getCheckedIdSet(wg2));
+        List<String> idsAll = new ArrayList<>(reg.getCheckedIdSet(wgAll));
         // Register groups.
         reg.setGroup("group.mix", Arrays.asList(ids1.get(0), ids2.get(0)));
         reg.setGroup("group.wc", ids1);
@@ -234,7 +234,7 @@ public class TestWorkarounds {
      * @return
      */
     public static List<WorkaroundCounter> getWorkaroundCounters(String name, int repeatCount) {
-        final List<WorkaroundCounter> workarounds = new ArrayList<WorkaroundCounter>();
+        final List<WorkaroundCounter> workarounds = new ArrayList<>();
         for (int i = 0; i < repeatCount; i++) {
             workarounds.add(new WorkaroundCounter(name + ".WorkaroundCounter." + i));
         }
@@ -251,7 +251,7 @@ public class TestWorkarounds {
      * @return
      */
     public static List<WorkaroundCountDown> getWorkaroundcountDowns(String name, int repeatCount) {
-        final List<WorkaroundCountDown> workarounds = new ArrayList<WorkaroundCountDown>();
+        final List<WorkaroundCountDown> workarounds = new ArrayList<>();
         for (int i = 0; i < repeatCount; i++) {
             workarounds.add(new WorkaroundCountDown(name + ".WorkaroundCountDown." + i, i + 1));
         }

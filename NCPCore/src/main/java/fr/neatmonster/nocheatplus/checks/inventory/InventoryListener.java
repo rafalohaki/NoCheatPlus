@@ -23,7 +23,6 @@ import org.bukkit.entity.Entity;
 import org.bukkit.entity.HumanEntity;
 import org.bukkit.entity.Item;
 import org.bukkit.entity.LivingEntity;
-import org.bukkit.entity.Entity;
 import org.bukkit.entity.Player;
 import org.bukkit.event.EventHandler;
 import org.bukkit.event.EventPriority;
@@ -37,7 +36,6 @@ import org.bukkit.event.inventory.InventoryCloseEvent;
 import org.bukkit.event.inventory.InventoryEvent;
 import org.bukkit.event.inventory.InventoryOpenEvent;
 import org.bukkit.event.inventory.InventoryType;
-import org.bukkit.event.inventory.InventoryType.SlotType;
 import org.bukkit.event.player.PlayerBedEnterEvent;
 import org.bukkit.event.player.PlayerChangedWorldEvent;
 import org.bukkit.event.player.PlayerDropItemEvent;
@@ -67,17 +65,14 @@ import fr.neatmonster.nocheatplus.components.data.ICheckData;
 import fr.neatmonster.nocheatplus.components.data.IData;
 import fr.neatmonster.nocheatplus.components.entity.IEntityAccessVehicle;
 import fr.neatmonster.nocheatplus.components.registry.event.IGenericInstanceHandle;
-import fr.neatmonster.nocheatplus.components.registry.factory.IFactoryOne;
 import fr.neatmonster.nocheatplus.components.registry.feature.JoinLeaveListener;
 import fr.neatmonster.nocheatplus.players.DataManager;
 import fr.neatmonster.nocheatplus.players.IPlayerData;
-import fr.neatmonster.nocheatplus.players.PlayerFactoryArgument;
 import fr.neatmonster.nocheatplus.stats.Counters;
 import fr.neatmonster.nocheatplus.utilities.InventoryUtil;
 import fr.neatmonster.nocheatplus.utilities.ReflectionUtil;
 import fr.neatmonster.nocheatplus.utilities.map.BlockProperties;
 import fr.neatmonster.nocheatplus.utilities.map.MaterialUtil;
-import fr.neatmonster.nocheatplus.worlds.WorldFactoryArgument;
 
 /**
  * Central location to listen to events that are relevant for the inventory checks.
@@ -129,24 +124,12 @@ public class InventoryListener  extends CheckListener implements JoinLeaveListen
         api.register(api.newRegistrationContext()
                 // InventoryConfig
                 .registerConfigWorld(InventoryConfig.class)
-                .factory(new IFactoryOne<WorldFactoryArgument, InventoryConfig>() {
-                    @Override
-                    public InventoryConfig getNewInstance(
-                            WorldFactoryArgument arg) {
-                        return new InventoryConfig(arg.worldData);
-                    }
-                })
+                .factory(arg -> new InventoryConfig(arg.worldData))
                 .registerConfigTypesPlayer()
                 .context() //
                 // InventoryData
                 .registerDataPlayer(InventoryData.class)
-                .factory(new IFactoryOne<PlayerFactoryArgument, InventoryData>() {
-                    @Override
-                    public InventoryData getNewInstance(
-                            PlayerFactoryArgument arg) {
-                        return new InventoryData();
-                    }
-                })
+                .factory(arg -> new InventoryData())
                 .addToGroups(CheckType.INVENTORY, true, IData.class, ICheckData.class)
                 .context() //
                 );
@@ -271,14 +254,14 @@ public class InventoryListener  extends CheckListener implements JoinLeaveListen
                 counters.addPrimaryThread(idIllegalItem, 1);
             }
         }
-        catch (final ArrayIndexOutOfBoundsException e) {} // Hotfix (CB)
+        catch (final ArrayIndexOutOfBoundsException ignored) {} // Hotfix (CB)
         try {
             if (!cancel && Items.checkIllegalEnchantments(player, cursor, pData)) {
                 cancel = true;
                 counters.addPrimaryThread(idIllegalItem, 1);
             }
         }
-        catch (final ArrayIndexOutOfBoundsException e) {} // Hotfix (CB)
+        catch (final ArrayIndexOutOfBoundsException ignored) {} // Hotfix (CB)
 
         // Fast inventory manipulation check.
         if (fastClick.isEnabled(player, pData)) {

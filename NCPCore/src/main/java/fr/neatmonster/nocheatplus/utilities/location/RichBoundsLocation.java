@@ -155,7 +155,7 @@ public class RichBoundsLocation implements IGetBukkitLocation, IGetBlockPosition
     // "Heavy" object members that need to be set to null on cleanup. //
 
     /** Block property access. */
-    BlockCache blockCache = null;
+    BlockCache blockCache;
 
     /** Bukkit world. */
     World world = null;
@@ -641,7 +641,7 @@ public class RichBoundsLocation implements IGetBukkitLocation, IGetBlockPosition
      */
     public boolean isAboveStairs() {
         if (aboveStairs == null) {
-            if (blockFlags != null && (blockFlags.longValue() & BlockFlags.F_STAIRS) == 0) {
+            if (blockFlags != null && (blockFlags & BlockFlags.F_STAIRS) == 0) {
                 aboveStairs = false;
                 return false;
             }
@@ -657,7 +657,7 @@ public class RichBoundsLocation implements IGetBukkitLocation, IGetBlockPosition
      */
     public boolean isInLava() {
         if (inLava == null) {
-            if (blockFlags != null && (blockFlags.longValue() & BlockFlags.F_LAVA) == 0 ) {
+            if (blockFlags != null && (blockFlags & BlockFlags.F_LAVA) == 0 ) {
                 inLava = false;
                 return false;
             }
@@ -673,7 +673,7 @@ public class RichBoundsLocation implements IGetBukkitLocation, IGetBlockPosition
      */
     public boolean isInWater() {
         if (inWater == null) {
-            if (!isInWaterLogged() && blockFlags != null && (blockFlags.longValue() & BlockFlags.F_WATER) == 0 ) {
+            if (!isInWaterLogged() && blockFlags != null && (blockFlags & BlockFlags.F_WATER) == 0 ) {
                 inWater = false;
                 return false;
             }
@@ -702,7 +702,7 @@ public class RichBoundsLocation implements IGetBukkitLocation, IGetBlockPosition
      */
     public boolean isInLiquid() {
         // TODO: optimize (check liquid first and only if liquid check further)
-        if (!isInWaterLogged() && blockFlags != null && (blockFlags.longValue() & BlockFlags.F_LIQUID) == 0) return false;
+        if (!isInWaterLogged() && blockFlags != null && (blockFlags & BlockFlags.F_LIQUID) == 0) return false;
         // TODO: This should check for F_LIQUID too, Use a method that returns all found flags (!).
         return isInWater() || isInLava();
     }
@@ -795,7 +795,7 @@ public class RichBoundsLocation implements IGetBukkitLocation, IGetBlockPosition
      * @return If so.
      */
     public boolean isAboveLadder() {
-        if (blockFlags != null && (blockFlags.longValue() & BlockFlags.F_CLIMBABLE) == 0) return false;
+        if (blockFlags != null && (blockFlags & BlockFlags.F_CLIMBABLE) == 0) return false;
         // TODO: bounding box ?
         return (BlockFlags.getBlockFlags(getTypeIdBelow()) & BlockFlags.F_CLIMBABLE) != 0;
     }
@@ -861,8 +861,8 @@ public class RichBoundsLocation implements IGetBukkitLocation, IGetBlockPosition
         if (onIce == null) {
             // TODO: Use a box here too ?
             // TODO: check if player is really sneaking (refactor from survivalfly to static access in Combined ?)!
-            if (blockFlags != null && (blockFlags.longValue() & BlockFlags.F_ICE) == 0) {
-                onIce = isOnIceLegacy() ? true : false;
+            if (blockFlags != null && (blockFlags & BlockFlags.F_ICE) == 0) {
+                onIce = isOnIceLegacy();
             } 
             else {
                 // MC applies ice properties only with at least half the box on the block
@@ -896,7 +896,7 @@ public class RichBoundsLocation implements IGetBukkitLocation, IGetBlockPosition
      */
     public boolean isOnBlueIce() {
         if (onBlueIce == null) {
-            if (blockFlags != null && (blockFlags.longValue() & BlockFlags.F_BLUE_ICE) == 0) {
+            if (blockFlags != null && (blockFlags & BlockFlags.F_BLUE_ICE) == 0) {
                 onBlueIce = false;
             } 
             else {
@@ -916,7 +916,7 @@ public class RichBoundsLocation implements IGetBukkitLocation, IGetBlockPosition
      */
     public boolean isOnSoulSand() {
         if (onSoulSand == null) {
-            if (blockFlags != null && (blockFlags.longValue() & BlockFlags.F_SOULSAND) == 0) {
+            if (blockFlags != null && (blockFlags & BlockFlags.F_SOULSAND) == 0) {
                 onSoulSand = false;
             } 
             else {
@@ -935,7 +935,7 @@ public class RichBoundsLocation implements IGetBukkitLocation, IGetBlockPosition
      */
     public boolean isOnSlimeBlock() {
         if (onSlimeBlock == null) {
-            if (blockFlags != null && (blockFlags.longValue() & BlockFlags.F_SLIME) == 0) {
+            if (blockFlags != null && (blockFlags & BlockFlags.F_SLIME) == 0) {
                 onSlimeBlock = false;
             } 
             else { 
@@ -958,7 +958,7 @@ public class RichBoundsLocation implements IGetBukkitLocation, IGetBlockPosition
             if (isOnSlimeBlock()) {
                 onBouncyBlock = true;
             }
-            else if (blockFlags != null && (blockFlags.longValue() & BlockFlags.F_BED) != 0) {
+            else if (blockFlags != null && (blockFlags & BlockFlags.F_BED) != 0) {
                 onBouncyBlock = isOnGround() && BlockProperties.collides(blockCache, minX, minY - yOnGround, minZ, maxX, minY, maxZ, BlockFlags.F_BED); 
             }
             else onBouncyBlock = false;
@@ -973,7 +973,7 @@ public class RichBoundsLocation implements IGetBukkitLocation, IGetBlockPosition
      */
     public boolean isOnHoneyBlock() {
         if (onHoneyBlock == null) {
-            if (blockFlags != null && (blockFlags.longValue() & BlockFlags.F_STICKY) == 0) {
+            if (blockFlags != null && (blockFlags & BlockFlags.F_STICKY) == 0) {
                 onHoneyBlock = false;
             } 
             else {
@@ -991,7 +991,7 @@ public class RichBoundsLocation implements IGetBukkitLocation, IGetBlockPosition
      */
     public boolean isInBubbleStream() {
         if (inBubblestream == null) {
-            if (blockFlags != null && (blockFlags.longValue() & BlockFlags.F_BUBBLECOLUMN) == 0) {
+            if (blockFlags != null && (blockFlags & BlockFlags.F_BUBBLECOLUMN) == 0) {
                 inBubblestream = false;
             } 
             else {
@@ -1041,7 +1041,7 @@ public class RichBoundsLocation implements IGetBukkitLocation, IGetBlockPosition
         }
         else {
             // Shortcut check (currently needed for being stuck + sf).
-            if (blockFlags == null || (blockFlags.longValue() & BlockFlags.F_GROUND) != 0) {
+            if (blockFlags == null || (blockFlags & BlockFlags.F_GROUND) != 0) {
                 // TODO: Consider dropping this shortcut.
                 final int bY = Location.locToBlock(y - yOnGround);
                 final IBlockCacheNode useNode = bY == blockY ? getOrCreateBlockCacheNode() : (bY == blockY -1 ? getOrCreateBlockCacheNodeBelow() : blockCache.getOrCreateBlockCacheNode(blockX,  bY, blockZ, false));
@@ -1449,9 +1449,9 @@ public class RichBoundsLocation implements IGetBukkitLocation, IGetBlockPosition
                     final BlockChangeEntry entry = blockChangeTracker.getBlockChangeEntryMatchFlags(ref, tick, worldId, x, y, z, direction, matchFlags);
                     if (entry != null && (minEntry == null || entry.id < minEntry.id)) {
                         // Check vs. coverDistance, exclude cases where the piston can't push that far.
-                        if (coverDistance > 0.0 
-                            && coversDistance(x + blockFace.getModX(), y + blockFace.getModY(), z + blockFace.getModZ(), 
-                                              direction, coverDistance)) {
+                        if (direction != null && coverDistance > 0.0
+                                && coversDistance(x + blockFace.getModX(), y + blockFace.getModY(), z + blockFace.getModZ(),
+                                direction, coverDistance)) {
                             minEntry = entry;
                         }
                     }
@@ -1523,19 +1523,19 @@ public class RichBoundsLocation implements IGetBukkitLocation, IGetBlockPosition
     private boolean coversDistance(final int x, final int y, final int z, final Direction direction, final double coverDistance) {
         switch (direction) {
             case Y_POS: {
-                return y + 1.0 - Math.max(minY, (double) y) >= coverDistance;
+                return y + 1.0 - Math.max(minY, y) >= coverDistance;
             }
             case Y_NEG: {
                 return Math.min(maxY, (double) y + 1) - y >= coverDistance;
             }
             case X_POS: {
-                return x + 1.0 - Math.max(minX, (double) x) >= coverDistance;
+                return x + 1.0 - Math.max(minX, x) >= coverDistance;
             }
             case X_NEG: {
                 return Math.min(maxX, (double) x + 1) - x >= coverDistance;
             }
             case Z_POS: {
-                return z + 1.0 - Math.max(minZ, (double) z) >= coverDistance;
+                return z + 1.0 - Math.max(minZ, z) >= coverDistance;
             }
             case Z_NEG: {
                 return Math.min(maxZ, (double) z + 1) - z >= coverDistance;
@@ -1674,23 +1674,5 @@ public class RichBoundsLocation implements IGetBukkitLocation, IGetBlockPosition
     @Override    
     public int hashCode() {
         return LocUtil.hashCode(this);
-    }
-
-    /* (non-Javadoc)
-     * @see java.lang.Object#toString()
-     */
-    @Override
-    public String toString() {
-        final StringBuilder builder = new StringBuilder(128);
-        builder.append("RichBoundsLocation(");
-        builder.append(world == null ? "null" : world.getName());
-        builder.append('/');
-        builder.append(Double.toString(x));
-        builder.append(", ");
-        builder.append(Double.toString(y));
-        builder.append(", ");
-        builder.append(Double.toString(z));
-        builder.append(')');
-        return builder.toString();
     }
 }

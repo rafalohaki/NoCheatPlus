@@ -45,7 +45,7 @@ public class InventoryUtil {
      */
     public static List<Material> collectItemsBySuffix(String suffix) {
         suffix = suffix.toLowerCase();
-        final List<Material> res = new LinkedList<Material>();
+        final List<Material> res = new LinkedList<>();
         for (final Material mat : Material.values()) {
             if (!mat.isBlock() && mat.name().toLowerCase().endsWith(suffix)) {
                 res.add(mat);
@@ -61,7 +61,7 @@ public class InventoryUtil {
      */
     public static List<Material> collectItemsByPrefix(String prefix) {
         prefix = prefix.toLowerCase();
-        final List<Material> res = new LinkedList<Material>();
+        final List<Material> res = new LinkedList<>();
         for (final Material mat : Material.values()) {
             if (!mat.isBlock() && mat.name().toLowerCase().startsWith(prefix)) {
                 res.add(mat);
@@ -80,9 +80,9 @@ public class InventoryUtil {
     public static int getFreeSlots(final Inventory inventory) {
         final ItemStack[] contents = inventory.getContents();
         int count = 0;
-        for (int i = 0; i < contents.length; i++) {
-            if (BlockProperties.isAir(contents[i])) {
-                count ++;
+        for (ItemStack content : contents) {
+            if (BlockProperties.isAir(content)) {
+                count++;
             }
         }
         return count;
@@ -105,13 +105,11 @@ public class InventoryUtil {
         final int durability = reference.getDurability();
         final ItemStack[] contents = inventory.getContents();
         int count = 0;
-        for (int i = 0; i < contents.length; i++) {
-            final ItemStack stack = contents[i];
+        for (final ItemStack stack : contents) {
             if (stack == null) {
                 continue;
-            }
-            else if (stack.getType() == mat && stack.getDurability() == durability) {
-                count ++;
+            } else if (stack.getType() == mat && stack.getDurability() == durability) {
+                count++;
             }
         }
         return count;
@@ -259,7 +257,7 @@ public class InventoryUtil {
      * @return true, if is consumable
      */
     public static boolean isConsumable(final ItemStack stack) {
-        return stack == null ? false : isConsumable(stack.getType());
+        return stack != null && isConsumable(stack.getType());
     }
 
     /**

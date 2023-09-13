@@ -77,12 +77,12 @@ public class BlockInteractData extends ACheckData {
      * (rather complete for block-interact checks, to skip subsequent
      * block-break/place checks).
      */
-    private final Set<CheckType> passedChecks = new HashSet<CheckType>();
+    private final Set<CheckType> passedChecks = new HashSet<>();
     /**
      * Checks that have been run and consume this event, i.e. can't be run again
      * (not complete, may contain checks from other check groups).
      */
-    private final Set<CheckType> consumedChecks = new HashSet<CheckType>();
+    private final Set<CheckType> consumedChecks = new HashSet<>();
 
     /**
      * Set last interacted block (coordinates, type, tick). Also resets the

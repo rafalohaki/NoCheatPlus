@@ -25,7 +25,6 @@ import java.util.Set;
 import java.util.UUID;
 import java.util.concurrent.locks.ReentrantLock;
 
-import org.bukkit.Bukkit;
 import org.bukkit.entity.Player;
 import org.bukkit.plugin.Plugin;
 
@@ -71,7 +70,7 @@ public class TickTask implements Runnable {
     public static final int lagMaxTicks = 80;
 
     /** Improbable entries to update. */
-    private static Map<UUID, ImprobableUpdateEntry> improbableUpdates = new LinkedHashMap<UUID, TickTask.ImprobableUpdateEntry>(50);
+    private static Map<UUID, ImprobableUpdateEntry> improbableUpdates = new LinkedHashMap<>(50);
 
     /** The Constant improbableLock. */
     private static final ReentrantLock improbableLock = new ReentrantLock();
@@ -79,10 +78,10 @@ public class TickTask implements Runnable {
     /** Lock for delayedActions. */
     private static final Object actionLock = new Object(); // TODO: Use a ReentrantLock?
     /** Actions to execute. */
-    private static List<ViolationData> delayedActions = new LinkedList<ViolationData>();
+    private static List<ViolationData> delayedActions = new LinkedList<>();
 
     /** Tick listeners to call every tick. */
-    private static final Set<TickListener> tickListeners = new LinkedHashSet<TickListener>();
+    private static final Set<TickListener> tickListeners = new LinkedHashSet<>();
 
     /** Last n tick durations, measured from run to run.*/
     private static final long[] tickDurations = new long[lagMaxTicks];
@@ -94,10 +93,10 @@ public class TickTask implements Runnable {
     private static final long lagMaxCoveredMs = 50L * (1L + lagMaxTicks * (1L + lagMaxTicks));
 
     /** Lag spike durations (min) to keep track of. */
-    private static long[] spikeDurations = new long[]{150, 450, 1000, 5000};
+    private static final long[] spikeDurations = new long[]{150, 450, 1000, 5000};
 
     /** Lag spikes > 150 ms counting (3 x 20 minutes). For lag spike length see spikeDurations. */
-    private static ActionFrequency[] spikes = new ActionFrequency[spikeDurations.length];
+    private static final ActionFrequency[] spikes = new ActionFrequency[spikeDurations.length];
 
     /** Task id of the running TickTask. */
     protected static Object taskId = -1;
@@ -132,7 +131,7 @@ public class TickTask implements Runnable {
                 return;
             }
             copyActions = delayedActions;
-            delayedActions = new LinkedList<ViolationData>();
+            delayedActions = new LinkedList<>();
         }
         for (final ViolationData vd : copyActions) {
             vd.executeActions();
@@ -151,7 +150,7 @@ public class TickTask implements Runnable {
             return;
         } else {
             updateMap = improbableUpdates;
-            improbableUpdates = new LinkedHashMap<UUID, ImprobableUpdateEntry>(50);
+            improbableUpdates = new LinkedHashMap<>(50);
             improbableLock.unlock();
             for (final Entry<UUID, ImprobableUpdateEntry> entry : updateMap.entrySet()) {
                 final Player player = DataManager.getPlayer(entry.getKey());
@@ -290,7 +289,7 @@ public class TickTask implements Runnable {
      * NOTE: Can be called from other threads.
      * @return The current tick count.
      */
-    public static final int getTick() {
+    public static int getTick() {
         return tick;
     }
 
@@ -299,7 +298,7 @@ public class TickTask implements Runnable {
      *
      * @return the time start
      */
-    public static final long getTimeStart() {
+    public static long getTimeStart() {
         return timeStart;
     }
 
@@ -308,7 +307,7 @@ public class TickTask implements Runnable {
      *
      * @return the time last
      */
-    public static final long getTimeLast() {
+    public static long getTimeLast() {
         return timeLast;
     }
 
@@ -318,7 +317,7 @@ public class TickTask implements Runnable {
      * @param ms Past milliseconds to cover. A longer period of time may be used, up to two times if ms > lagMaxTicks * 50.
      * @return Lag factor (1.0 = 20 tps, 2.0 = 10 tps), excluding the current tick.
      */
-    public static final float getLag(final long ms) {
+    public static float getLag(final long ms) {
         return getLag(ms, false);
     }
 
@@ -329,7 +328,7 @@ public class TickTask implements Runnable {
      * @param exact If to include the currently running tick, if possible. Should only be set to true, if called from the main thread (or while the main thread is blocked).
      * @return Lag factor (1.0 = 20 tps, 2.0 = 10 tps).
      */
-    public static final float getLag(final long ms, final boolean exact) {
+    public static float getLag(final long ms, final boolean exact) {
         if (ms < 0) {
             // Account for freezing (i.e. check timeLast, might be an extra method)!
             return getLag(0, exact);
@@ -378,7 +377,7 @@ public class TickTask implements Runnable {
      * @return the moderate lag spikes
      * @deprecated What is moderate :) ?
      */
-    public static final int getModerateLagSpikes() {
+    public static int getModerateLagSpikes() {
         spikes[0].update(System.currentTimeMillis());
         return (int) spikes[0].score(1f);
     }
@@ -390,7 +389,7 @@ public class TickTask implements Runnable {
      * @return the heavy lag spikes
      * @deprecated What is heavy :) ?
      */
-    public static final int getHeavyLagSpikes() {
+    public static int getHeavyLagSpikes() {
         spikes[1].update(System.currentTimeMillis());
         return (int) spikes[1].score(1f);
     }
@@ -402,7 +401,7 @@ public class TickTask implements Runnable {
      *
      * @return the number of lag spikes
      */
-    public static final int getNumberOfLagSpikes() {
+    public static int getNumberOfLagSpikes() {
         spikes[0].update(System.currentTimeMillis());
         return (int) spikes[0].score(1f);
     }
@@ -412,7 +411,7 @@ public class TickTask implements Runnable {
      *
      * @return the lag spike durations
      */
-    public static final long[] getLagSpikeDurations() {
+    public static long[] getLagSpikeDurations() {
         return Arrays.copyOf(spikeDurations, spikeDurations.length);
     }
 
@@ -423,7 +422,7 @@ public class TickTask implements Runnable {
      *
      * @return the lag spikes
      */
-    public static final int[] getLagSpikes() {
+    public static int[] getLagSpikes() {
         final int[] out = new int[spikeDurations.length];
         final long now = System.currentTimeMillis();
         for (int i = 0; i < spikeDurations.length; i++) {
@@ -532,14 +531,12 @@ public class TickTask implements Runnable {
                 // Future purpose.
                 return;
             }
-            copyListeners = tickListeners.toArray(new TickListener[tickListeners.size()]);
-        } 
-        for (int i = 0; i < copyListeners.length; i++) {
-            final TickListener listener = copyListeners[i];
-            try{
+            copyListeners = tickListeners.toArray(new TickListener[0]);
+        }
+        for (final TickListener listener : copyListeners) {
+            try {
                 listener.onTick(tick, timeLast);
-            }
-            catch(Throwable t) {
+            } catch (Throwable t) {
                 StaticLog.logSevere("(TickTask) TickListener generated an exception:");
                 StaticLog.logSevere(t);
             }

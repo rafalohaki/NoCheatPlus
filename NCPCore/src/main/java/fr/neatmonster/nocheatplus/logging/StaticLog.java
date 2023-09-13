@@ -40,7 +40,7 @@ public class StaticLog {
 
     /** The Constant logOnce. */
     // TODO: Quick and dirty - should probably use an access ordered LinkedHashSet, to expire the eldest half :p.
-    private static final Set<Integer> logOnce = Collections.synchronizedSet(new HashSet<Integer>());
+    private static final Set<Integer> logOnce = Collections.synchronizedSet(new HashSet<>());
 
 
     /**

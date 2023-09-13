@@ -50,8 +50,9 @@ public class RegisterConfigWorld<T extends IConfig> extends RegisterInstanceWorl
         return this;
     }
 
+    @SafeVarargs
     @Override
-    public RegisterConfigWorld<T> addToGroups(
+    public final RegisterConfigWorld<T> addToGroups(
             final CheckType checkType, final boolean withDescendantCheckTypes,
             final Class<? super T>... groupTypes) {
         super.addToGroups(checkType, withDescendantCheckTypes, groupTypes);

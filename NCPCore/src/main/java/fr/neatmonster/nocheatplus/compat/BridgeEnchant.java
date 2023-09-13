@@ -24,7 +24,7 @@ import fr.neatmonster.nocheatplus.utilities.map.BlockProperties;
 public final class BridgeEnchant {
 
     @SuppressWarnings("deprecation")
-    private static final Enchantment parseEnchantment(final String name) {
+    private static Enchantment parseEnchantment(final String name) {
         try {
             return Enchantment.getByName(name);
         } catch (Exception e) {
@@ -59,8 +59,7 @@ public final class BridgeEnchant {
         int level = 0;
         // Find the maximum level for the given enchantment.
         final ItemStack[] armor = player.getInventory().getArmorContents();
-        for (int i = 0; i < armor.length; i++) {
-            final ItemStack item = armor[i];
+        for (final ItemStack item : armor) {
             if (!BlockProperties.isAir(item)) {
                 level = Math.max(item.getEnchantmentLevel(enchantment), level);
             }
@@ -162,9 +161,8 @@ public final class BridgeEnchant {
         }
         final PlayerInventory inv = player.getInventory();
         final ItemStack[] contents = inv.getArmorContents();
-        for (int i = 0; i < contents.length; i++){
-            final ItemStack stack = contents[i];
-            if (stack != null && stack.getEnchantmentLevel(enchantment) > 0){
+        for (final ItemStack stack : contents) {
+            if (stack != null && stack.getEnchantmentLevel(enchantment) > 0) {
                 return true;
             }
         }

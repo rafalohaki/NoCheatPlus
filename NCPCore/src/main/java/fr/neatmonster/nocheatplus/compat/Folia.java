@@ -67,7 +67,7 @@ public class Folia {
             // Second attempt, should be happened during onDisable calling from BukkitLogNodeDispatcher
             Thread thread = Executors.defaultThreadFactory().newThread(() -> run.accept(null));
             if (thread == null) return null;
-            thread.run();
+            thread.start();
             return thread;
         //}
     }
@@ -94,8 +94,7 @@ public class Folia {
             Method executeMethod = schedulerClass.getMethod("runAtFixedRate", Plugin.class, Consumer.class, long.class, long.class);
 
             //ReflectionUtil.invokeMethod(executeMethod, syncScheduler, plugin, run, delay, period);
-            Object taskInfo = executeMethod.invoke(syncScheduler, plugin, run, delay, period);
-            return taskInfo;
+            return executeMethod.invoke(syncScheduler, plugin, run, delay, period);
         } catch (Exception e) {
             e.printStackTrace();
         }
@@ -119,8 +118,7 @@ public class Folia {
             Class<?> schedulerClass = syncScheduler.getClass();
             Method executeMethod = schedulerClass.getMethod("run", Plugin.class, Consumer.class);
 
-            Object taskInfo = executeMethod.invoke(syncScheduler, plugin, run);
-            return taskInfo;
+            return executeMethod.invoke(syncScheduler, plugin, run);
         } catch (Exception e) {
             e.printStackTrace();
         }
@@ -145,8 +143,7 @@ public class Folia {
             Class<?> schedulerClass = syncScheduler.getClass();
             Method executeMethod = schedulerClass.getMethod("runDelayed", Plugin.class, Consumer.class, long.class);
 
-            Object taskInfo = executeMethod.invoke(syncScheduler, plugin, run, delay);
-            return taskInfo;
+            return executeMethod.invoke(syncScheduler, plugin, run, delay);
         } catch (Exception e) {
             e.printStackTrace();
         }
@@ -185,8 +182,7 @@ public class Folia {
             Class<?> schedulerClass = syncEntityScheduler.getClass();
             Method executeMethod = schedulerClass.getMethod("runDelayed", Plugin.class, Consumer.class, Runnable.class, long.class);
 
-            Object taskInfo = executeMethod.invoke(syncEntityScheduler, plugin, run, retired, delay);
-            return taskInfo;
+            return executeMethod.invoke(syncEntityScheduler, plugin, run, retired, delay);
         } catch (Exception e) {
             e.printStackTrace();
         }

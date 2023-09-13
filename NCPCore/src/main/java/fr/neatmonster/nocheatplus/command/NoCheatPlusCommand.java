@@ -87,7 +87,7 @@ public class NoCheatPlusCommand extends BaseCommand {
         }
     }
 
-    private Set<String> rootLabels = new LinkedHashSet<String>();
+    private final Set<String> rootLabels = new LinkedHashSet<>();
 
     /**
      * Instantiates a new command handler.
@@ -134,7 +134,7 @@ public class NoCheatPlusCommand extends BaseCommand {
      * @return
      */
     public Collection<RegisteredPermission> getAllSubCommandPermissions(){
-        final Set<RegisteredPermission> set = new LinkedHashSet<RegisteredPermission>(rootLabels.size());
+        final Set<RegisteredPermission> set = new LinkedHashSet<>(rootLabels.size());
         for (final String label : rootLabels){
             set.add(subCommands.get(label).permission);
         }

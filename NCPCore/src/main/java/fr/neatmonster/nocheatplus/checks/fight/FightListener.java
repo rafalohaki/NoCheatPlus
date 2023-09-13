@@ -20,7 +20,6 @@ import org.bukkit.Location;
 import org.bukkit.enchantments.Enchantment;
 import org.bukkit.entity.Entity;
 import org.bukkit.entity.Player;
-import org.bukkit.entity.HumanEntity;
 import org.bukkit.entity.TNTPrimed;
 import org.bukkit.event.EventHandler;
 import org.bukkit.event.EventPriority;
@@ -52,8 +51,6 @@ import fr.neatmonster.nocheatplus.checks.moving.player.UnusedVelocity;
 import fr.neatmonster.nocheatplus.checks.moving.util.AuxMoving;
 import fr.neatmonster.nocheatplus.checks.moving.util.MovingUtil;
 import fr.neatmonster.nocheatplus.checks.moving.velocity.VelocityFlags;
-import fr.neatmonster.nocheatplus.checks.net.NetConfig;
-import fr.neatmonster.nocheatplus.checks.net.NetData;
 import fr.neatmonster.nocheatplus.compat.Bridge1_9;
 import fr.neatmonster.nocheatplus.compat.BridgeEnchant;
 import fr.neatmonster.nocheatplus.compat.BridgeHealth;
@@ -62,21 +59,18 @@ import fr.neatmonster.nocheatplus.components.NoCheatPlusAPI;
 import fr.neatmonster.nocheatplus.components.data.ICheckData;
 import fr.neatmonster.nocheatplus.components.data.IData;
 import fr.neatmonster.nocheatplus.components.registry.event.IGenericInstanceHandle;
-import fr.neatmonster.nocheatplus.components.registry.factory.IFactoryOne;
 import fr.neatmonster.nocheatplus.components.registry.feature.JoinLeaveListener;
 import fr.neatmonster.nocheatplus.penalties.DefaultPenaltyList;
 import fr.neatmonster.nocheatplus.penalties.IPenaltyList;
 import fr.neatmonster.nocheatplus.permissions.Permissions;
 import fr.neatmonster.nocheatplus.players.DataManager;
 import fr.neatmonster.nocheatplus.players.IPlayerData;
-import fr.neatmonster.nocheatplus.players.PlayerFactoryArgument;
 import fr.neatmonster.nocheatplus.stats.Counters;
 import fr.neatmonster.nocheatplus.utilities.TickTask;
 import fr.neatmonster.nocheatplus.utilities.build.BuildParameters;
 import fr.neatmonster.nocheatplus.utilities.location.LocUtil;
 import fr.neatmonster.nocheatplus.utilities.location.TrigUtil;
 import fr.neatmonster.nocheatplus.utilities.map.BlockProperties;
-import fr.neatmonster.nocheatplus.worlds.WorldFactoryArgument;
 
 /**
  * Central location to listen to events that are relevant for the fight checks.<br>
@@ -141,22 +135,12 @@ public class FightListener extends CheckListener implements JoinLeaveListener{
         api.register(api.newRegistrationContext()
                 // FightConfig
                 .registerConfigWorld(FightConfig.class)
-                .factory(new IFactoryOne<WorldFactoryArgument, FightConfig>() {
-                    @Override
-                    public FightConfig getNewInstance(WorldFactoryArgument arg) {
-                        return new FightConfig(arg.worldData);
-                    }
-                })
+                .factory(arg -> new FightConfig(arg.worldData))
                 .registerConfigTypesPlayer()
                 .context() //
                 // FightData
                 .registerDataPlayer(FightData.class)
-                .factory(new IFactoryOne<PlayerFactoryArgument, FightData>() {
-                    @Override
-                    public FightData getNewInstance(PlayerFactoryArgument arg) {
-                        return new FightData(arg.playerData.getGenericInstance(FightConfig.class));
-                    }
-                })
+                .factory(arg -> new FightData(arg.playerData.getGenericInstance(FightConfig.class)))
                 .addToGroups(CheckType.FIGHT, false, IData.class, ICheckData.class)
                 .removeSubCheckData(CheckType.FIGHT, true)
                 .context() //
@@ -790,7 +774,7 @@ public class FightListener extends CheckListener implements JoinLeaveListener{
         // TODO: Get the RELEVANT item (...).
         final ItemStack stack = Bridge1_9.getItemInMainHand(player);
         if (!BlockProperties.isAir(stack)) {
-            level = (double) stack.getEnchantmentLevel(Enchantment.KNOCKBACK);
+            level = stack.getEnchantmentLevel(Enchantment.KNOCKBACK);
         }
         if (player.isSprinting()) {
             // TODO: Lost sprint?

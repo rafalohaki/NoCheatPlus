@@ -120,7 +120,7 @@ public abstract class RayTracing implements ICollideBlocks {
      * @param isEndBlock If the end block coordinate is reached for this axis.
      * @return
      */
-    private static final double tDiff(final double dTotal, final double offset, final boolean isEndBlock) {
+    private static double tDiff(final double dTotal, final double offset, final boolean isEndBlock) {
         // TODO: endBlock check only for == not </> ?
         if (dTotal > 0.0) {
             if (offset >= 1.0) {
@@ -333,9 +333,7 @@ public abstract class RayTracing implements ICollideBlocks {
 
         // Handle double-transitions.
         if (transitions == 3) {
-            if (!handleSecondaryDoubleTransitions(transitions, transX, transY, transZ, tMin)) {
-                return false; 
-            }
+            return handleSecondaryDoubleTransitions(transitions, transX, transY, transZ, tMin);
         }
 
         // All passed.
@@ -362,11 +360,8 @@ public abstract class RayTracing implements ICollideBlocks {
             return false;
         }
         // Y and Z.
-        if (!step(blockX, blockY + (dY > 0 ? 1 : -1), blockZ + (dZ > 0 ? 1 : -1), oX, dY > 0 ? 0.0 : 1.0, dZ > 0 ? 0.0 : 1.0, 0.0, false)) {
-            return false;
-        }
+        return step(blockX, blockY + (dY > 0 ? 1 : -1), blockZ + (dZ > 0 ? 1 : -1), oX, dY > 0 ? 0.0 : 1.0, dZ > 0 ? 0.0 : 1.0, 0.0, false);
         // All passed.
-        return true;
     }
 
     @Override

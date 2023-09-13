@@ -15,7 +15,6 @@
 package fr.neatmonster.nocheatplus.config;
 
 import java.io.File;
-import java.io.FileNotFoundException;
 import java.io.IOException;
 import java.lang.annotation.Annotation;
 import java.lang.reflect.Field;
@@ -115,7 +114,7 @@ public class PathUtils {
          */
         public ManyMoved(String sectionPrefix, Collection<String> subKeys, String oldSuffix, String newSuffix, boolean configurationSection) {
             this.sectionPrefix = sectionPrefix;
-            this.subKeys = new LinkedHashSet<String>(subKeys);
+            this.subKeys = new LinkedHashSet<>(subKeys);
             this.oldSuffix = oldSuffix;
             this.newSuffix = newSuffix;
             this.configurationSection = configurationSection;
@@ -127,7 +126,7 @@ public class PathUtils {
          * @return A new collection.
          */
         public Collection<WrapMoved> getWrapMoved() {
-            final List<WrapMoved> entries = new LinkedList<WrapMoved>();
+            final List<WrapMoved> entries = new LinkedList<>();
             for (final String key : subKeys) {
                 final String prefix = sectionPrefix + key + ".";
                 entries.add(new WrapMoved(prefix + oldSuffix, prefix + newSuffix, configurationSection));
@@ -137,15 +136,15 @@ public class PathUtils {
     }
 
     // Deprecated paths.
-    private static final Set<String> deprecatedFields = new LinkedHashSet<String>();
+    private static final Set<String> deprecatedFields = new LinkedHashSet<>();
     private static final SimpleCharPrefixTree deprecatedPrefixes = new SimpleCharPrefixTree();
 
     // Paths only for the global config.
-    private static final Set<String> globalOnlyFields = new HashSet<String>();
+    private static final Set<String> globalOnlyFields = new HashSet<>();
     private static final SimpleCharPrefixTree globalOnlyPrefixes = new SimpleCharPrefixTree();
 
     // Paths moved to other paths.
-    private static final Map<String, WrapMoved> movedPaths = new LinkedHashMap<String, WrapMoved>();
+    private static final Map<String, WrapMoved> movedPaths = new LinkedHashMap<>();
 
     static{
         initPaths();
@@ -201,8 +200,7 @@ public class PathUtils {
             if (path != null) {
                 pathPrefixes.feed(path);
             }
-        } catch (IllegalArgumentException e) {
-        } catch (IllegalAccessException e) {
+        } catch (IllegalArgumentException | IllegalAccessException ignored) {
         }
     }
 
@@ -210,8 +208,7 @@ public class PathUtils {
         try {
             final String path = field.get(null).toString();
             movedPaths.put(path, new WrapMoved(path, rel));
-        } catch (IllegalArgumentException e) {
-        } catch (IllegalAccessException e) {
+        } catch (IllegalArgumentException | IllegalAccessException ignored) {
         }
     }
 
@@ -254,9 +251,7 @@ public class PathUtils {
                     StaticLog.logSevere(t);
                 }
             }
-        } catch (FileNotFoundException e) {
-        } catch (IOException e) {
-        } catch (InvalidConfigurationException e) {
+        } catch (InvalidConfigurationException | IOException ignored) {
         }
     }
 
@@ -270,8 +265,8 @@ public class PathUtils {
      *         could be used (paths still might have been added).
      */
     public static ConfigFile processPaths(ConfigFile config, final String configName, final boolean isWorldConfig) {
-        final Set<String> removePaths = new LinkedHashSet<String>();
-        final Map<String, Object> addPaths = new LinkedHashMap<String, Object>();
+        final Set<String> removePaths = new LinkedHashSet<>();
+        final Map<String, Object> addPaths = new LinkedHashMap<>();
         if (isWorldConfig) {
             // TODO: might remove these [though some global only paths might actually work].
             processGlobalOnlyPaths(config, configName, null);

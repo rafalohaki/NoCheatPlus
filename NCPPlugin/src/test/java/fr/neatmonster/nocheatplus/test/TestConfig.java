@@ -22,7 +22,6 @@ import org.junit.Test;
 import fr.neatmonster.nocheatplus.compat.BridgeMaterial;
 import fr.neatmonster.nocheatplus.config.ConfPaths;
 import fr.neatmonster.nocheatplus.config.ConfigFile;
-import fr.neatmonster.nocheatplus.config.DefaultConfig;
 import fr.neatmonster.nocheatplus.config.PathUtils;
 import fr.neatmonster.nocheatplus.config.RawConfigFile;
 import fr.neatmonster.nocheatplus.logging.StaticLog;
@@ -36,7 +35,6 @@ public class TestConfig {
         }
     }
 
-    @SuppressWarnings("deprecation")
     @Test
     public void testReadMaterial() {
         // Some really needed parts first.
@@ -76,7 +74,7 @@ public class TestConfig {
             fail("Expect path be removed: " + ConfPaths.LOGGING_FILE);
         }
         Boolean val = config.getBoolean(ConfPaths.LOGGING_BACKEND_FILE_ACTIVE, true);
-        if (val == null || val.booleanValue()) {
+        if (val == null || val) {
             fail("Expect new path to be set to false: " + ConfPaths.LOGGING_BACKEND_FILE_ACTIVE);
         }
     }

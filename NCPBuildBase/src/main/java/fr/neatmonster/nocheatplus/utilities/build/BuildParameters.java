@@ -24,7 +24,7 @@ import java.util.Map;
  */
 public class BuildParameters {
 
-    private static final Map<String, String> fileContents = new HashMap<String, String>();
+    private static final Map<String, String> fileContents = new HashMap<>();
 
     static{
         // Fetch file content from resources.

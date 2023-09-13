@@ -17,7 +17,6 @@ package fr.neatmonster.nocheatplus.utilities;
 import java.util.Collections;
 import java.util.HashMap;
 import java.util.HashSet;
-import java.util.Iterator;
 import java.util.LinkedHashSet;
 import java.util.Map;
 import java.util.Set;
@@ -27,22 +26,22 @@ import fr.neatmonster.nocheatplus.checks.CheckType;
 public class CheckTypeUtil {
 
     /** All descendants recursively. */
-    private static final Map<CheckType, Set<CheckType>> descendantsMap = new HashMap<CheckType, Set<CheckType>>();
+    private static final Map<CheckType, Set<CheckType>> descendantsMap = new HashMap<>();
     /** Direct children only. */
-    private static final Map<CheckType, Set<CheckType>> directChildrenMap = new HashMap<CheckType, Set<CheckType>>();
+    private static final Map<CheckType, Set<CheckType>> directChildrenMap = new HashMap<>();
     /** Checks/groups that might be run off the primary thread. */
-    private static final Set<CheckType> needSync = new HashSet<CheckType>();
+    private static final Set<CheckType> needSync = new HashSet<>();
     /** Check including all descendants recursively, for convenient iteration. */
-    private static final Map<CheckType, Set<CheckType>> withDescendantsMap = new HashMap<CheckType, Set<CheckType>>();
+    private static final Map<CheckType, Set<CheckType>> withDescendantsMap = new HashMap<>();
 
     static {
         // Parent/children relations.
 
         // Recursive first.
         // TODO: Really recursive (...). So create direct children first, then others from those.
-        final Map<CheckType, Set<CheckType>> map = new HashMap<CheckType, Set<CheckType>>();
+        final Map<CheckType, Set<CheckType>> map = new HashMap<>();
         for (final CheckType type : CheckType.values()) {
-            map.put(type, new LinkedHashSet<CheckType>());
+            map.put(type, new LinkedHashSet<>());
         }
         for (final CheckType type : CheckType.values()) {
             if (type != CheckType.ALL) {
@@ -57,7 +56,7 @@ public class CheckTypeUtil {
         for (final CheckType parent : map.keySet()) {
             final Set<CheckType> set = map.get(parent);
             descendantsMap.put(parent, Collections.unmodifiableSet(set));
-            final Set<CheckType> wpSet = new LinkedHashSet<CheckType>(set);
+            final Set<CheckType> wpSet = new LinkedHashSet<>(set);
             wpSet.add(parent);
             withDescendantsMap.put(parent,
                     Collections.unmodifiableSet(wpSet));
@@ -65,13 +64,8 @@ public class CheckTypeUtil {
 
         // Direct children only.
         for (final CheckType parent : map.keySet()) {
-            final Set<CheckType> set = new LinkedHashSet<CheckType>(map.get(parent));
-            final Iterator<CheckType> it = set.iterator();
-            while (it.hasNext()) {
-                if (it.next().getParent() != parent) {
-                    it.remove();
-                }
-            }
+            final Set<CheckType> set = new LinkedHashSet<>(map.get(parent));
+            set.removeIf(checkType -> checkType.getParent() != parent);
             directChildrenMap.put(parent, Collections.unmodifiableSet(set));
         }
 
@@ -90,7 +84,7 @@ public class CheckTypeUtil {
      *            the check type
      * @return the descendants
      */
-    public static final Set<CheckType> getDescendants(
+    public static Set<CheckType> getDescendants(
             final CheckType type) {
         return descendantsMap.get(type);
     }
@@ -103,7 +97,7 @@ public class CheckTypeUtil {
      *            the check type
      * @return the children
      */
-    public static final Set<CheckType> getDirectChildren(
+    public static Set<CheckType> getDirectChildren(
             final CheckType type) {
         return directChildrenMap.get(type);
     }
@@ -116,7 +110,7 @@ public class CheckTypeUtil {
      *            the check type
      * @return the given check type with descendants
      */
-    public static final Set<CheckType> getWithDescendants(
+    public static Set<CheckType> getWithDescendants(
             final CheckType type) {
         return withDescendantsMap.get(type);
     }
@@ -131,8 +125,8 @@ public class CheckTypeUtil {
      *            the supposed child
      * @return true, if is parent
      */
-    public static final boolean isAncestor(final CheckType supposedAncestor,
-            final CheckType supposedDescendant) {
+    public static boolean isAncestor(final CheckType supposedAncestor,
+                                     final CheckType supposedDescendant) {
         // TODO: Perhaps rename to isAncestor !?
         if (supposedAncestor == supposedDescendant) {
             return false;
@@ -159,7 +153,7 @@ public class CheckTypeUtil {
      *            the check type
      * @return true, if successful
      */
-    public static final boolean needsSynchronization(final CheckType type) {
+    public static boolean needsSynchronization(final CheckType type) {
         return needSync.contains(type);
     }
 

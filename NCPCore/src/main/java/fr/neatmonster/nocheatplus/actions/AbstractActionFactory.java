@@ -30,7 +30,7 @@ import fr.neatmonster.nocheatplus.permissions.RegisteredPermission;
 public abstract class AbstractActionFactory <D extends ActionData, L extends AbstractActionList<D, L>>{
 
     // TODO: static ?
-    protected static final Map<String, Object> lib = new HashMap<String, Object>();
+    protected static final Map<String, Object> lib = new HashMap<>();
     protected final ActionListFactory<D, L> listFactory;
 
     /**
@@ -72,13 +72,13 @@ public abstract class AbstractActionFactory <D extends ActionData, L extends Abs
         for (String s : definition.split("vl>")) {
             s = s.trim();
 
-            if (s.length() == 0) {
+            if (s.isEmpty()) {
                 first = false;
                 continue;
             }
 
             try {
-                Integer vl;
+                int vl;
                 String def;
                 if (first) {
                     first = false;
@@ -107,20 +107,20 @@ public abstract class AbstractActionFactory <D extends ActionData, L extends Abs
      */
     @SuppressWarnings("unchecked")
     public Action<D, L>[] createActions(final String... definitions) {
-        final List<Action<D, L>> actions = new ArrayList<Action<D, L>>();
+        final List<Action<D, L>> actions = new ArrayList<>();
 
         for (final String def : definitions) {
-            if (def.length() == 0)
+            if (def.isEmpty())
                 continue;
             try {
                 actions.add(createAction(def));
             } catch (final IllegalArgumentException e) {
                 StaticLog.logWarning("Failed to create action: " + e.getMessage());
-                actions.add(new DummyAction<D, L>(def));
+                actions.add(new DummyAction<>(def));
             }
         }
 
-        return (Action<D, L>[]) actions.toArray(new Action<?, ?>[actions.size()]);
+        return (Action<D, L>[]) actions.toArray(new Action<?, ?>[0]);
     }
 
     /**
@@ -165,7 +165,7 @@ public abstract class AbstractActionFactory <D extends ActionData, L extends Abs
                 repeat = 0;
             }
 
-        return replaceColor ? new CommandActionWithColor<PH, LPH>(name, delay, repeat, command.toString()) 
-                : new CommandAction<PH, LPH>(name, delay, repeat, command.toString());
+        return replaceColor ? new CommandActionWithColor<>(name, delay, repeat, command.toString())
+                : new CommandAction<>(name, delay, repeat, command.toString());
     }
 }

@@ -21,7 +21,7 @@ public class DataPacketFlying extends DataLocation {
      * @author asofold
      *
      */
-    public static enum PACKET_CONTENT {
+    public enum PACKET_CONTENT {
         /** Neither position nor look, only ground. */
         GROUND_ONLY,
         /** Position and ground. */
@@ -29,7 +29,7 @@ public class DataPacketFlying extends DataLocation {
         /** Look and ground. */
         LOOK,
         /** Position, look and ground. */
-        POS_LOOK;
+        POS_LOOK
     }
 
     // TODO: Use MAX_VALUE for not set doubles/floats?

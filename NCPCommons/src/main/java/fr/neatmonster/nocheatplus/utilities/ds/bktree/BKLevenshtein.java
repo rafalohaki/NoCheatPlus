@@ -111,9 +111,9 @@ public class BKLevenshtein<N extends LevenNode<N>, L extends LookupEntry<char[],
 			m = t.length;
 		}
 
-		int p[] = new int[n + 1];
-		int d[] = new int[n + 1];
-		int _d[];
+		int[] p = new int[n + 1];
+		int[] d = new int[n + 1];
+		int[] _d;
 
 		int i;
 		int j;

@@ -18,7 +18,6 @@ import java.util.Arrays;
 import java.util.Collection;
 import java.util.Iterator;
 import java.util.LinkedHashMap;
-import java.util.LinkedHashSet;
 import java.util.LinkedList;
 import java.util.List;
 import java.util.Map;
@@ -65,7 +64,7 @@ import fr.neatmonster.nocheatplus.utilities.map.MapUtil;
  */
 public class BlockChangeTracker {
 
-    public static enum Direction {
+    public enum Direction {
         NONE(BlockFace.SELF),
         X_POS(MapUtil.matchBlockFace(1, 0, 0)),
         X_NEG(MapUtil.matchBlockFace(-1, 0, 0)),
@@ -101,7 +100,7 @@ public class BlockChangeTracker {
 
         public final BlockFace blockFace;
 
-        private Direction(BlockFace blockFace) {
+        Direction(BlockFace blockFace) {
             this.blockFace = blockFace;
         }
 
@@ -134,9 +133,9 @@ public class BlockChangeTracker {
          * Count active block change entries per chunk (chunk size and access
          * are handled elsewhere, except for clear).
          */
-        public final CoordMap<ActivityNode> activityMap = new CoordHashMap<ActivityNode>();
+        public final CoordMap<ActivityNode> activityMap = new CoordHashMap<>();
         /** Directly map to individual blocks. */
-        public final LinkedCoordHashMap<LinkedList<BlockChangeEntry>> blocks = new LinkedCoordHashMap<LinkedList<BlockChangeEntry>>();
+        public final LinkedCoordHashMap<LinkedList<BlockChangeEntry>> blocks = new LinkedCoordHashMap<>();
         /** Tick of last change. */
         public int lastChangeTick = 0;
 
@@ -297,13 +296,13 @@ public class BlockChangeTracker {
     /** Size at which entries get skipped, per world node. */
     private int worldNodeSkipSize = 500;
 
-    private int activityResolution = 32; // TODO: getter/setter/config.
+    private final int activityResolution = 32; // TODO: getter/setter/config.
 
     /**
      * Store the WorldNode instances by UUID, containing the block change
      * entries (and filters). Latest entries must be sorted to the end.
      */
-    private final Map<UUID, WorldNode> worldMap = new LinkedHashMap<UUID, BlockChangeTracker.WorldNode>();
+    private final Map<UUID, WorldNode> worldMap = new LinkedHashMap<>();
 
     /** Use to avoid duplicate entries with pistons. Always empty after processing. */
     private final Set<Block> processBlocks = ConcurrentHashMap.newKeySet(30);
@@ -622,7 +621,7 @@ public class BlockChangeTracker {
             // TODO: Other redundancy checks / simplifications for often changing states?
         }
         if (entries == null) {
-            entries = new LinkedList<BlockChangeTracker.BlockChangeEntry>();
+            entries = new LinkedList<>();
             worldNode.blocks.put(x, y, z, entries, MoveOrder.END); // Add to end.
         }
         entries.add(new BlockChangeEntry(changeId, tick, x, y, z, direction, previousState)); // Add to end.

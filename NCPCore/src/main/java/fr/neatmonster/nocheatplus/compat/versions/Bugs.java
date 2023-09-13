@@ -42,7 +42,7 @@ public class Bugs {
         else if (GenericVersion.compareVersions(mcVersion, "1.8") >= 0) {
             // Assume Spigot + fixed.
             enforceLocation = false;
-        } else if (serverVersion.indexOf("spigot") >= 0 && GenericVersion.compareVersions(mcVersion, "1.7.5") >= 0) {
+        } else if (serverVersion.contains("spigot") && GenericVersion.compareVersions(mcVersion, "1.7.5") >= 0) {
             // Fixed in Spigot just before 1.7.5.
             enforceLocation = false;
         } else if (serverVersion.indexOf("craftbukkit") != 0){

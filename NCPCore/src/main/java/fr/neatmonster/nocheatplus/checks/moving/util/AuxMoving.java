@@ -44,13 +44,13 @@ public class AuxMoving implements IRegisterAsGenericInstance {
      * Unused instances.<br>
      * Might be better due to cascading events in case of actions or plugins doing strange things.
      */
-    private final List<PlayerMoveInfo> parkedPlayerMoveInfo = new ArrayList<PlayerMoveInfo>(10);
+    private final List<PlayerMoveInfo> parkedPlayerMoveInfo = new ArrayList<>(10);
 
     /**
      * Unused instances.<br>
      * Might be better due to cascading events in case of actions or plugins doing strange things.
      */
-    private final List<VehicleMoveInfo> parkedVehicleMoveInfo = new ArrayList<VehicleMoveInfo>(10);
+    private final List<VehicleMoveInfo> parkedVehicleMoveInfo = new ArrayList<>(10);
 
     private final IGenericInstanceHandle<MCAccess> mcAccess = NCPAPIProvider.getNoCheatPlusAPI().getGenericInstanceHandle(MCAccess.class);
 

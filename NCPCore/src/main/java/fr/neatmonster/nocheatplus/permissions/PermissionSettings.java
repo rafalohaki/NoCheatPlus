@@ -99,7 +99,7 @@ public class PermissionSettings {
         }
         @Override
         public boolean matches(String permissionName) {
-            return permissionName.indexOf(contains) >= 0;
+            return permissionName.contains(contains);
         }
     }
     public static class RegexRule extends PermissionRule {
@@ -182,8 +182,8 @@ public class PermissionSettings {
         catch (Exception e) {
             throw new RuntimeException("Bad default policy definition.", e);
         }
-        final Map<String, PermissionPolicy> explicitPolicy = new LinkedHashMap<String, PermissionPolicy>();
-        final List<PermissionRule> implicitRules = new LinkedList<PermissionSettings.PermissionRule>();
+        final Map<String, PermissionPolicy> explicitPolicy = new LinkedHashMap<>();
+        final List<PermissionRule> implicitRules = new LinkedList<>();
 
         // TODO: Change to List ! +- separators.
         final List<String> defs = config.getStringList(pathRules);
@@ -238,9 +238,9 @@ public class PermissionSettings {
         }
         // (Null entries within explicit/implicit yield the default policy for now.)
         this.explicitPolicy = (explicitPolicy == null || explicitPolicy.isEmpty()) ? null 
-                : new HashMap<String, PermissionPolicy>(explicitPolicy);
+                : new HashMap<>(explicitPolicy);
         this.implicitRules = (implicitRules == null || implicitRules.isEmpty()) ? null 
-                : implicitRules.toArray(new PermissionRule[implicitRules.size()]);
+                : implicitRules.toArray(new PermissionRule[0]);
         this.defaultPolicy = defaultPolicy;
     }
 
@@ -254,9 +254,9 @@ public class PermissionSettings {
         if (ref == null) {
             // Implicit second.
             if (implicitRules != null) {
-                for (int i = 0; i < implicitRules.length; i++) {
-                    if (implicitRules[i].matches(permissionName)) {
-                        ref =implicitRules[i].getPermissionPolicy();
+                for (PermissionRule implicitRule : implicitRules) {
+                    if (implicitRule.matches(permissionName)) {
+                        ref = implicitRule.getPermissionPolicy();
                     }
                 }
             }

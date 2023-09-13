@@ -14,7 +14,7 @@
  */
 package fr.neatmonster.nocheatplus.checks.net.protocollib;
 
-import java.util.Arrays;
+import java.util.Collections;
 import java.util.LinkedList;
 import java.util.List;
 
@@ -34,11 +34,11 @@ import fr.neatmonster.nocheatplus.players.IPlayerData;
 
 public class Fight extends BaseAdapter{
     private static PacketType[] initPacketTypes() {
-        final List<PacketType> types = new LinkedList<PacketType>(Arrays.asList(
+        final List<PacketType> types = new LinkedList<>(Collections.singletonList(
                 //PacketType.Play.Client.ARM_ANIMATION,
                 PacketType.Play.Server.EXPLOSION
         ));
-        return types.toArray(new PacketType[types.size()]);
+        return types.toArray(new PacketType[0]);
     }
 
     public Fight(Plugin plugin) {

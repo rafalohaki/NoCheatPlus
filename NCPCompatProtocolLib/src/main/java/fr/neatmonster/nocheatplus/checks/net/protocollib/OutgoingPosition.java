@@ -46,17 +46,16 @@ public class OutgoingPosition extends BaseAdapter {
 
     public OutgoingPosition(Plugin plugin) {
         // PacketPlayInFlying[3, legacy: 10]
-        super(plugin, ListenerPriority.HIGHEST, new PacketType[] {
-                PacketType.Play.Server.POSITION
+        super(plugin, ListenerPriority.HIGHEST, PacketType.Play.Server.POSITION
                 // TODO: POSITION_LOOK ??
-        });
+        );
     }
 
     @Override
     public void onPacketSending(PacketEvent event) {
         try {
             if (event.isPlayerTemporary()) return;
-        } catch(NoSuchMethodError e) {}
+        } catch(NoSuchMethodError ignored) {}
     	if (event.isCancelled()) {
             return;
         }
@@ -68,7 +67,7 @@ public class OutgoingPosition extends BaseAdapter {
         }
         final IPlayerData pData = DataManager.getPlayerDataSafe(player);
         if (pData == null) {
-            StaticLog.logWarning("Failed to fetch player data with " + event.getPacketType() + " for: " + player.toString());
+            StaticLog.logWarning("Failed to fetch player data with " + event.getPacketType() + " for: " + player);
             return;
         }
         // TODO: In future multiple checks might use this (!)

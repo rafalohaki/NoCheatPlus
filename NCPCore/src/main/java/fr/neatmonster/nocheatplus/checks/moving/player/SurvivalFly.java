@@ -24,8 +24,6 @@ import org.bukkit.Material;
 import org.bukkit.entity.Player;
 import org.bukkit.inventory.ItemStack;
 import org.bukkit.potion.PotionEffectType;
-import org.bukkit.World;
-import org.bukkit.block.Block;
 
 import fr.neatmonster.nocheatplus.NCPAPIProvider;
 import fr.neatmonster.nocheatplus.actions.ParameterName;
@@ -44,8 +42,6 @@ import fr.neatmonster.nocheatplus.checks.moving.model.LiftOffEnvelope;
 import fr.neatmonster.nocheatplus.checks.moving.model.PlayerMoveData;
 import fr.neatmonster.nocheatplus.checks.moving.util.AuxMoving;
 import fr.neatmonster.nocheatplus.checks.moving.util.MovingUtil;
-import fr.neatmonster.nocheatplus.checks.moving.velocity.VelocityFlags;
-import fr.neatmonster.nocheatplus.checks.moving.velocity.SimpleEntry;
 import fr.neatmonster.nocheatplus.checks.workaround.WRPT;
 import fr.neatmonster.nocheatplus.compat.Bridge1_17;
 import fr.neatmonster.nocheatplus.compat.Bridge1_13;
@@ -61,7 +57,6 @@ import fr.neatmonster.nocheatplus.logging.Streams;
 import fr.neatmonster.nocheatplus.permissions.Permissions;
 import fr.neatmonster.nocheatplus.players.IPlayerData;
 import fr.neatmonster.nocheatplus.utilities.CheckUtils;
-import fr.neatmonster.nocheatplus.utilities.PotionUtil;
 import fr.neatmonster.nocheatplus.utilities.StringUtil;
 import fr.neatmonster.nocheatplus.utilities.ds.count.ActionAccumulator;
 import fr.neatmonster.nocheatplus.utilities.collision.CollisionUtil;
@@ -85,15 +80,15 @@ public class SurvivalFly extends Check {
     private boolean bufferUse;
     // TODO: Friction by block to walk on (horizontal only, possibly to be in BlockProperties rather).
     /** To join some tags with moving check violations. */
-    private final ArrayList<String> tags = new ArrayList<String>(15);
-    private final ArrayList<String> justUsedWorkarounds = new ArrayList<String>();
-    private final Set<String> reallySneaking = new HashSet<String>(30);
+    private final ArrayList<String> tags = new ArrayList<>(15);
+    private final ArrayList<String> justUsedWorkarounds = new ArrayList<>();
+    private final Set<String> reallySneaking = new HashSet<>(30);
     /** For temporary use: LocUtil.clone before passing deeply, call setWorld(null) after use. */
     private final Location useLoc = new Location(null, 0, 0, 0);
     private final BlockChangeTracker blockChangeTracker;
     // TODO: handle
     private final AuxMoving aux = NCPAPIProvider.getNoCheatPlusAPI().getGenericInstance(AuxMoving.class);
-    private IGenericInstanceHandle<IAttributeAccess> attributeAccess = NCPAPIProvider.getNoCheatPlusAPI().getGenericInstanceHandle(IAttributeAccess.class);
+    private final IGenericInstanceHandle<IAttributeAccess> attributeAccess = NCPAPIProvider.getNoCheatPlusAPI().getGenericInstanceHandle(IAttributeAccess.class);
     //private final Plugin plugin = Bukkit.getPluginManager().getPlugin("NoCheatPlus");
 
     /**
@@ -1005,8 +1000,7 @@ public class SurvivalFly extends Check {
                         }
                     }
                     tags.add("blkmv_y_pos");
-                    final double maxDistYPos = yDistance; //1.0 - (from.getY() - from.getBlockY()); // TODO: Margin ?
-                    return new double[]{maxDistYPos, 0.0};
+                    return new double[]{yDistance, 0.0};
                 }
             }
             // (No else.)
@@ -1032,8 +1026,7 @@ public class SurvivalFly extends Check {
         else if (yDistance < 0.0 && yDistance >= -1.0) {
             if (from.matchBlockChange(blockChangeTracker, data.blockChangeRef, Direction.Y_NEG, -yDistance)) {
                 tags.add("blkmv_y_neg");
-                final double maxDistYNeg = yDistance; // from.getY() - from.getBlockY(); // TODO: Margin ?
-                return new double[]{maxDistYNeg, 0.0};
+                return new double[]{yDistance, 0.0};
             }
         }
         // Nothing found.
@@ -1889,9 +1882,9 @@ public class SurvivalFly extends Check {
      * @param tag Tag to be added in case of a violation of this sub-check.
      * @return A violation value > 0.001, to be interpreted like a moving violation.
      */
-    private static final double verticalAccounting(final double yDistance, 
-                                                   final ActionAccumulator acc, final ArrayList<String> tags, 
-                                                   final String tag) {
+    private static double verticalAccounting(final double yDistance,
+                                             final ActionAccumulator acc, final ArrayList<String> tags,
+                                             final String tag) {
 
         final int count0 = acc.bucketCount(0);
         if (count0 > 0) {
@@ -2604,7 +2597,7 @@ public class SurvivalFly extends Check {
             }
         }
         if (cc.survivalFlyAccountingH && data.hDistAcc.count() > 0) {
-            builder.append("\n hAcc: " + StringUtil.fdec3.format(data.hDistAcc.score() / data.hDistAcc.count()) + "(" + (int) data.hDistAcc.count() + ")");
+            builder.append("\n hAcc: " + StringUtil.fdec3.format(data.hDistAcc.score() / data.hDistAcc.count()) + "(" + data.hDistAcc.count() + ")");
         }
         if (player.isSleeping()) {
             tags.add("sleeping");

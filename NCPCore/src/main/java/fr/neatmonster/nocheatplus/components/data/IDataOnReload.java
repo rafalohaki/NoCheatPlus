@@ -33,6 +33,6 @@ public interface IDataOnReload {
      * @return Return true to remove the data instance from the cache in
      *         question, false otherwise.
      */
-    public boolean dataOnReload(IGetGenericInstance dataAccess);
+    boolean dataOnReload(IGetGenericInstance dataAccess);
 
 }

@@ -47,10 +47,10 @@ public class RegistrationOrder {
     @Retention(RetentionPolicy.RUNTIME)
     public @interface RegisterWithOrder {
         /** Crude workaround for an Integer that may be null. */
-        public String basePriority() default "";
-        public String tag() default "";
-        public String beforeTag() default "";
-        public String afterTag() default "";
+        String basePriority() default "";
+        String tag() default "";
+        String beforeTag() default "";
+        String afterTag() default "";
     }
 
     /**
@@ -64,10 +64,10 @@ public class RegistrationOrder {
     @Retention(RetentionPolicy.RUNTIME)
     public @interface RegisterEventsWithOrder {
         /** Crude workaround for an Integer that may be null. */
-        public String basePriority() default "";
-        public String tag() default "";
-        public String beforeTag() default "";
-        public String afterTag() default "";
+        String basePriority() default "";
+        String tag() default "";
+        String beforeTag() default "";
+        String afterTag() default "";
     }
 
     /**
@@ -80,28 +80,25 @@ public class RegistrationOrder {
     @Retention(RetentionPolicy.RUNTIME)
     public @interface RegisterMethodWithOrder {
         /** Crude workaround for an Integer that may be null. */
-        public String basePriority() default "";
-        public String tag() default "";
-        public String beforeTag() default "";
-        public String afterTag() default "";
+        String basePriority() default "";
+        String tag() default "";
+        String beforeTag() default "";
+        String afterTag() default "";
     }
 
     /**
      * Compare on base of basePriority. Entries with null priority are sorted to
      * the front.
      */
-    public static Comparator<RegistrationOrder> cmpBasePriority = new Comparator<RegistrationOrder>() {
-        @Override
-        public int compare(final RegistrationOrder o1, final RegistrationOrder o2) {
-            final Integer p1 = o1.getBasePriority();
-            final Integer p2 = o2.getBasePriority();
-            if (p1 == null) {
-                return p2 == null ? 0 : -1; // o1 to front.
-            } else if (p2 == null) {
-                return 1; // o2 to front.
-            } else {
-                return p1.compareTo(p2);
-            }
+    public static Comparator<RegistrationOrder> cmpBasePriority = (o1, o2) -> {
+        final Integer p1 = o1.getBasePriority();
+        final Integer p2 = o2.getBasePriority();
+        if (p1 == null) {
+            return p2 == null ? 0 : -1; // o1 to front.
+        } else if (p2 == null) {
+            return 1; // o2 to front.
+        } else {
+            return p1.compareTo(p2);
         }
     };
 
@@ -131,13 +128,8 @@ public class RegistrationOrder {
         // TODO: Signature with passing IFetchRegistrationOrder<F> to the sorting?
         // TODO: Back to generic static methods?
 
-        private final Comparator<F> cmp = new Comparator<F>() {
-            @Override
-            public int compare(final F o1, final F o2) {
-                return RegistrationOrder.cmpBasePriority.compare(
-                        fetchRegistrationOrder(o1), fetchRegistrationOrder(o2));
-            }
-        };
+        private final Comparator<F> cmp = (o1, o2) -> RegistrationOrder.cmpBasePriority.compare(
+                fetchRegistrationOrder(o1), fetchRegistrationOrder(o2));
 
         protected abstract RegistrationOrder fetchRegistrationOrder(F item);
 
@@ -156,7 +148,7 @@ public class RegistrationOrder {
          */
         public LinkedList<F> getSortedLinkedList(final Collection<F> input) {
             final F[] arr = getSortedArray(input);
-            final LinkedList<F> out = new LinkedList<F>();
+            final LinkedList<F> out = new LinkedList<>();
             Collections.addAll(out, arr);
             return out;
         }
@@ -189,9 +181,9 @@ public class RegistrationOrder {
                 return output;
             }
             // Sort into rough groups.
-            final LinkedList<F> belowZeroPriority = new LinkedList<F>();
-            final LinkedList<F> zeroPriority = new LinkedList<F>();
-            final LinkedList<F> aboveZeroPriority = new LinkedList<F>();
+            final LinkedList<F> belowZeroPriority = new LinkedList<>();
+            final LinkedList<F> zeroPriority = new LinkedList<>();
+            final LinkedList<F> aboveZeroPriority = new LinkedList<>();
             int insertionIndex = output.length - 1; // Where to start sorting in elements to output.
             for (final F item : input) {
                 final RegistrationOrder order = fetchRegistrationOrder(item);
@@ -259,7 +251,7 @@ public class RegistrationOrder {
          * @param output
          */
         private void addSortedSubList(final List<F> subList, final F[] output, int insertionIndex) {
-            Collections.sort(subList, cmp);
+            subList.sort(cmp);
             Collections.reverse(subList);
             for (final F item : subList) {
                 sortInFromStart(item, output, insertionIndex);

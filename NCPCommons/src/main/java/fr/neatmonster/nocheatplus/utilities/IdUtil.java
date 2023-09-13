@@ -50,7 +50,7 @@ public class IdUtil {
 		try {
 			return UUIDFromString(input);
 		}
-		catch (IllegalArgumentException e1) {}
+		catch (IllegalArgumentException ignored) {}
 		return null;
 	}
 	

@@ -20,14 +20,13 @@ import org.bukkit.command.Command;
 import org.bukkit.command.CommandSender;
 import org.bukkit.entity.Player;
 
-import fr.neatmonster.nocheatplus.command.BaseCommand;
 import fr.neatmonster.nocheatplus.command.AbstractCommand;
 import fr.neatmonster.nocheatplus.command.testing.stopwatch.StopWatch;
 import fr.neatmonster.nocheatplus.command.testing.stopwatch.StopWatchRegistry;
 
 public class DistanceCommand  extends AbstractCommand<StopWatchRegistry> {
 
-    public static final String TAG = ChatColor.GRAY +""+ ChatColor.BOLD + "[" + ChatColor.RED + "NC+" + ChatColor.GRAY +""+ ChatColor.BOLD + "] " + ChatColor.GRAY;
+    public static final String TAG = ChatColor.GRAY +""+ ChatColor.BOLD + "[" + ChatColor.RED + "NC+" + ChatColor.GRAY + ChatColor.BOLD + "] " + ChatColor.GRAY;
 
     public DistanceCommand(StopWatchRegistry access) {
         super(access, "distance", null);
@@ -42,14 +41,14 @@ public class DistanceCommand  extends AbstractCommand<StopWatchRegistry> {
         }
         try {
             distance = Double.parseDouble(args[2]);
-        } catch (NumberFormatException e) {}
-        if (distance == null || distance.isNaN() || distance.isInfinite() || distance.doubleValue() < 0.0) {
-            sender.sendMessage(TAG + "Bad distance: " + ChatColor.RED +""+ args[2] + ChatColor.GRAY);
+        } catch (NumberFormatException ignored) {}
+        if (distance == null || distance.isNaN() || distance.isInfinite() || distance < 0.0) {
+            sender.sendMessage(TAG + "Bad distance: " + ChatColor.RED + args[2] + ChatColor.GRAY);
             return true;
         }
-        StopWatch clock = new DistanceStopWatch((Player) sender, distance.doubleValue());
+        StopWatch clock = new DistanceStopWatch((Player) sender, distance);
         access.setClock((Player) sender, clock);
-        sender.sendMessage(TAG + "New stopwatch started: " + ChatColor.GREEN +""+ clock.getClockDetails() + ChatColor.GRAY + ".");
+        sender.sendMessage(TAG + "New stopwatch started: " + ChatColor.GREEN + clock.getClockDetails() + ChatColor.GRAY + ".");
         return true;
     }
 

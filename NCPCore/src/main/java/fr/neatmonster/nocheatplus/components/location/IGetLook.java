@@ -27,13 +27,13 @@ public interface IGetLook {
      * 
      * @return
      */
-    public float getPitch();
+    float getPitch();
 
     /**
      * Angle on xz-plane for the looking direction in grad.
      * 
      * @return
      */
-    public float getYaw();
+    float getYaw();
 
 }

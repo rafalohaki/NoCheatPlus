@@ -49,14 +49,14 @@ public class LagCommand extends BaseCommand {
         // Lag spikes.
         long[] spikeDurations = TickTask.getLagSpikeDurations();
         int[] spikes = TickTask.getLagSpikes();
-        builder.append(cR +""+ bO + "»Lag Spikes«\n");  
+        builder.append(cR + bO + "»Lag Spikes«\n");
 
         if (spikes[0] == 0){
-            builder.append("No lag spike(s) greater than "+ cGO +""+ spikeDurations[0] + cG +" ms within the last 40 to 60 minutes.");
+            builder.append("No lag spike(s) greater than "+ cGO + spikeDurations[0] + cG +" ms within the last 40 to 60 minutes.");
         }
         else if (spikes[0] > 0){
 
-            builder.append(cG + "Total spikes: " + cGO +""+ spikes[0] + cG + "\nThere have been some spikes greater than " + cGO +""+ spikeDurations[0] + cG + " ms within the last 40 to 60 minutes.");
+            builder.append(cG + "Total spikes: " + cGO + spikes[0] + cG + "\nThere have been some spikes greater than " + cGO + spikeDurations[0] + cG + " ms within the last 40 to 60 minutes.");
             builder.append("\n" + "Result(s):");
 
             for (int i = 0; i < spikeDurations.length; i++){
@@ -68,10 +68,10 @@ public class LagCommand extends BaseCommand {
                     continue; // Could be break.
                 }
                 else if (i < spikeDurations.length - 1){
-                    builder.append(cG + "\n• " + cGO +""+ (spikes[i] - spikes[i + 1]) + cG + "spike(s) x " + cGO +""+ cGO +""+ spikeDurations[i] + cG + "ms -> " + cGO +""+ spikeDurations[i + 1] + cG + ". ");
+                    builder.append(cG + "\n• " + cGO + (spikes[i] - spikes[i + 1]) + cG + "spike(s) x " + cGO + cGO + spikeDurations[i] + cG + "ms -> " + cGO + spikeDurations[i + 1] + cG + ". ");
                 }
                 else{
-                    builder.append(cG + "\n• " + cGO +""+ spikes[i] + cG + "spike(s) x " + cGO +""+ cGO +""+ spikeDurations[i] +"ms"+ cG + ".");
+                    builder.append(cG + "\n• " + cGO + spikes[i] + cG + "spike(s) x " + cGO + cGO + spikeDurations[i] +"ms"+ cG + ".");
                 }
             }
         }
@@ -80,11 +80,11 @@ public class LagCommand extends BaseCommand {
         long max = 50L * (1L + TickTask.lagMaxTicks) * TickTask.lagMaxTicks;
         long medium = 50L * TickTask.lagMaxTicks;
         long second = 1200L;
-        builder.append(cR +""+ bO + "»TPS Lag«" + cG + "\n[Perc.][time tracked], 0% = 20 TPS");
+        builder.append(cR + bO + "»TPS Lag«" + cG + "\n[Perc.][time tracked], 0% = 20 TPS");
         for (long ms : new long[]{second, medium, max}){
             double lag = TickTask.getLag(ms, true);
             int p = Math.max(0, (int) ((lag - 1.0) * 100.0));
-            builder.append(cG + "\n• " + cG + "" + cGO + p + cG + "% tps lag in the last " + cGO +""+ StringUtil.fdec1.format((double) ms / 1200.0) + cG + " second(s). " );
+            builder.append(cG + "\n• " + cG + cGO + p + cG + "% tps lag in the last " + cGO + StringUtil.fdec1.format((double) ms / 1200.0) + cG + " second(s). " );
         }
         // Send message.
         sender.sendMessage(builder.toString());

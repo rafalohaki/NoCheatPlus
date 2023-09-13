@@ -59,11 +59,7 @@ public class ReflectIBlockData {
     public Object nms_getMaterial(final Object iBlockData) {
         try {
             return nmsGetMaterial.invoke(iBlockData);
-        } catch (IllegalAccessException e) {
-            throw new ReflectFailureException();
-        } catch (IllegalArgumentException e) {
-            throw new ReflectFailureException();
-        } catch (InvocationTargetException e) {
+        } catch (IllegalAccessException | InvocationTargetException | IllegalArgumentException e) {
             throw new ReflectFailureException();
         }
     }

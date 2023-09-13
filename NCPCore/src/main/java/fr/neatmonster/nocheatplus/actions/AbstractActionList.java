@@ -27,14 +27,14 @@ import fr.neatmonster.nocheatplus.permissions.RegisteredPermission;
 public abstract class AbstractActionList<D extends ActionData,  L extends AbstractActionList<D, L>>{
 
 
-    public static interface ActionListFactory<D extends ActionData,  L extends AbstractActionList<D, L>>{
+    public interface ActionListFactory<D extends ActionData,  L extends AbstractActionList<D, L>>{
         /**
          * 
          * @param permissionSilent
          *            The permission to bypass log actions.
          * @return
          */
-        public L getNewActionList(RegisteredPermission permissionSilent);
+        L getNewActionList(RegisteredPermission permissionSilent);
     }
 
     /** Something to return if nothing is set. */
@@ -44,10 +44,10 @@ public abstract class AbstractActionList<D extends ActionData,  L extends Abstra
     public final RegisteredPermission                  permissionSilent;
 
     /** The actions of this AbstractActionList, "bundled" by threshold (violation level). */
-    private final Map<Integer, Action<D, L>[]> actions    = new HashMap<Integer, Action<D, L>[]>();
+    private final Map<Integer, Action<D, L>[]> actions    = new HashMap<>();
 
     /** The thresholds of this list. **/
-    protected final List<Integer>          thresholds = new ArrayList<Integer>();
+    protected final List<Integer>          thresholds = new ArrayList<>();
 
     protected final ActionListFactory<D, L> listFactory;
 
@@ -145,7 +145,7 @@ public abstract class AbstractActionList<D extends ActionData,  L extends Abstra
         if (actions == null || actions.length == 0) {
             return null;
         }
-        final ArrayList<Action<D, L>> optimized = new ArrayList<Action<D, L>>();
+        final ArrayList<Action<D, L>> optimized = new ArrayList<>();
         for (final Action<D, L> action : actions){
             final Action<D, L> optAction = action.getOptimizedCopy(config, threshold);
             if (optAction != null) {

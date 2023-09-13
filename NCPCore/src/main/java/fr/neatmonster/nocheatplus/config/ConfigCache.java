@@ -38,9 +38,9 @@ public abstract class ConfigCache <K, C> {
         this.cow = cow;
         // Linked or not linked ?
         if (cow) {
-            configs = new LinkedHashMapCOW<K, C>(initialCapacity);
+            configs = new LinkedHashMapCOW<>(initialCapacity);
         } else {
-            configs = new HashMap<K, C>(initialCapacity);
+            configs = new HashMap<>(initialCapacity);
         }
     }
 

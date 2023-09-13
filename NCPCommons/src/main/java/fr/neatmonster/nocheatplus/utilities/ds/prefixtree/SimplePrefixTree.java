@@ -35,19 +35,7 @@ public class SimplePrefixTree<K> extends PrefixTree<K, SimpleNode<K>, SimpleLook
 	}
 	
 	public SimplePrefixTree() {
-		super(new NodeFactory<K, SimpleNode<K>>(){
-			@Override
-			public final SimpleNode<K> newNode(final SimpleNode<K> parent) {
-				return new SimpleNode<K>();
-			}
-		}, new LookupEntryFactory<K, SimpleNode<K>, SimpleLookupEntry<K>>(){
-			@Override
-			public SimpleLookupEntry<K> newLookupEntry(
-					SimpleNode<K> node, SimpleNode<K> insertion,
-					int depth, boolean hasPrefix) {
-				return new SimpleLookupEntry<K>(node, insertion, depth, hasPrefix);
-			}
-		});
+		super(parent -> new SimpleNode<>(), SimpleLookupEntry::new);
 		
 	}	
 }

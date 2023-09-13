@@ -52,7 +52,6 @@ import fr.neatmonster.nocheatplus.compat.versions.ServerVersion;
 import fr.neatmonster.nocheatplus.players.IPlayerData;
 import fr.neatmonster.nocheatplus.utilities.ReflectionUtil;
 import fr.neatmonster.nocheatplus.utilities.location.PlayerLocation;
-import fr.neatmonster.nocheatplus.utilities.map.BlockProperties;
 import fr.neatmonster.nocheatplus.utilities.map.BlockFlags;
 import fr.neatmonster.nocheatplus.utilities.map.MaterialUtil;
 
@@ -92,7 +91,7 @@ public class NoFall extends Check {
      * @param fallDistance
      * @return
      */
-    public static final double getDamage(final float fallDistance) {
+    public static double getDamage(final float fallDistance) {
         return fallDistance - Magic.FALL_DAMAGE_DIST;
     }
 
@@ -307,8 +306,7 @@ public class NoFall extends Check {
             // TODO: In case of velocity... skip too / calculate max exempt height?
             final double correction = data.noFallMaxY - previousSetBackY;
             if (correction > 0.0) {
-                final float effectiveDistance = (float) Math.max(0.0, yDistance - correction);
-                return effectiveDistance;
+                return (float) Math.max(0.0, yDistance - correction);
             }
         }
         return yDistance;

@@ -25,7 +25,7 @@ import fr.neatmonster.nocheatplus.command.testing.stopwatch.StopWatchRegistry;
 
 public class ReturnCommand extends AbstractCommand<StopWatchRegistry> {
 
-    public static final String TAG = ChatColor.GRAY +""+ ChatColor.BOLD + "[" + ChatColor.RED + "NC+" + ChatColor.GRAY +""+ ChatColor.BOLD + "] " + ChatColor.GRAY;
+    public static final String TAG = ChatColor.GRAY +""+ ChatColor.BOLD + "[" + ChatColor.RED + "NC+" + ChatColor.GRAY + ChatColor.BOLD + "] " + ChatColor.GRAY;
 
 
     public ReturnCommand(StopWatchRegistry access) {
@@ -41,14 +41,14 @@ public class ReturnCommand extends AbstractCommand<StopWatchRegistry> {
         }
         try {
             distance = Double.parseDouble(args[2]);
-        } catch (NumberFormatException e) {}
-        if (distance == null || distance.isNaN() || distance.isInfinite() || distance.doubleValue() < 0.0) {
-            sender.sendMessage(TAG + "Bad distance: " + ChatColor.RED +""+ args[2] + ChatColor.GRAY + ".");
+        } catch (NumberFormatException ignored) {}
+        if (distance == null || distance.isNaN() || distance.isInfinite() || distance < 0.0) {
+            sender.sendMessage(TAG + "Bad distance: " + ChatColor.RED + args[2] + ChatColor.GRAY + ".");
             return true;
         }
-        StopWatch clock = new ReturnStopWatch((Player) sender, distance.doubleValue());
+        StopWatch clock = new ReturnStopWatch((Player) sender, distance);
         access.setClock((Player) sender, clock);
-        sender.sendMessage(TAG + "New stopwatch started " + ChatColor.GREEN +""+ clock.getClockDetails() + ChatColor.GRAY + ".");
+        sender.sendMessage(TAG + "New stopwatch started " + ChatColor.GREEN + clock.getClockDetails() + ChatColor.GRAY + ".");
         return true;
     }
 

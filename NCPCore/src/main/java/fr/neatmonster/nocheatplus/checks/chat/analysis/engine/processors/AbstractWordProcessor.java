@@ -28,8 +28,8 @@ public abstract class AbstractWordProcessor implements WordProcessor{
 	 * @param map
 	 * @param number Number of entries to remove.
 	 */
-	public static final <K> void releaseMap(final Map<K, ?> map, int number){
-		final List<K> rem = new LinkedList<K>();
+	public static <K> void releaseMap(final Map<K, ?> map, int number){
+		final List<K> rem = new LinkedList<>();
 		int i = 0;
 		for (final K key : map.keySet()){
 			rem.add(key);

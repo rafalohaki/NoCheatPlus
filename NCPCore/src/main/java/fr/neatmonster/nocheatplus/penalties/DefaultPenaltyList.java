@@ -14,12 +14,10 @@
  */
 package fr.neatmonster.nocheatplus.penalties;
 
-import java.util.Iterator;
 import java.util.LinkedHashMap;
 import java.util.LinkedList;
 import java.util.List;
 import java.util.Map;
-import java.util.Map.Entry;
 
 public class DefaultPenaltyList implements IPenaltyList {
 
@@ -31,7 +29,7 @@ public class DefaultPenaltyList implements IPenaltyList {
      * @param <RI>
      */
     private static class GenericNode<RI> {
-        private final List<IPenalty<RI>> penalties = new LinkedList<IPenalty<RI>>();
+        private final List<IPenalty<RI>> penalties = new LinkedList<>();
 
         /**
          * 
@@ -41,18 +39,13 @@ public class DefaultPenaltyList implements IPenaltyList {
          * @return True if the list has been emptied, false otherwise.
          */
         private boolean apply(final RI input, final boolean removeAppliedPenalties) {
-            final Iterator<IPenalty<RI>> it = penalties.iterator();
-            while (it.hasNext()) {
-                if (it.next().apply(input) && removeAppliedPenalties) {
-                    it.remove();
-                }
-            }
+            penalties.removeIf(riiPenalty -> riiPenalty.apply(input) && removeAppliedPenalties);
             return penalties.isEmpty();
         }
     }
 
     private boolean willCancel = false;
-    private final Map<Class<?>, GenericNode<?>> penaltyMap = new LinkedHashMap<Class<?>, GenericNode<?>>();
+    private final Map<Class<?>, GenericNode<?>> penaltyMap = new LinkedHashMap<>();
 
     @Override
     public <RI> void addPenalty(final Class<RI> registeredInput, 
@@ -64,7 +57,7 @@ public class DefaultPenaltyList implements IPenaltyList {
             @SuppressWarnings("unchecked")
             GenericNode<RI> node = (GenericNode<RI>) penaltyMap.get(registeredInput);
             if (node == null) {
-                node = new GenericNode<RI>();
+                node = new GenericNode<>();
                 penaltyMap.put(registeredInput, node);
             }
             node.penalties.add(penalty);
@@ -88,15 +81,9 @@ public class DefaultPenaltyList implements IPenaltyList {
     public <I> void applyAllApplicablePenalties(final I input, 
             final boolean removeAppliedPenalties) {
         final Class<?> inputClass = input.getClass();
-        final Iterator<Entry<Class<?>, GenericNode<?>>> it = penaltyMap.entrySet().iterator();
-        while (it.hasNext()) {
-            final Entry<Class<?>, GenericNode<?>> entry = it.next();
-            if (entry.getKey().isAssignableFrom(inputClass) && 
-                    ((GenericNode<? super I>) entry.getValue()).apply(input, removeAppliedPenalties)
-                    && removeAppliedPenalties) {
-                it.remove();
-            }
-        }
+        penaltyMap.entrySet().removeIf(entry -> entry.getKey().isAssignableFrom(inputClass) &&
+                ((GenericNode<? super I>) entry.getValue()).apply(input, removeAppliedPenalties)
+                && removeAppliedPenalties);
     }
 
 

@@ -15,7 +15,6 @@
 package fr.neatmonster.nocheatplus;
 
 import java.util.ArrayList;
-import java.util.Arrays;
 import java.util.Collection;
 import java.util.Collections;
 import java.util.HashMap;
@@ -121,7 +120,6 @@ import fr.neatmonster.nocheatplus.logging.LogManager;
 import fr.neatmonster.nocheatplus.logging.StaticLog;
 import fr.neatmonster.nocheatplus.logging.StreamID;
 import fr.neatmonster.nocheatplus.logging.Streams;
-import fr.neatmonster.nocheatplus.logging.details.IGetStreamId;
 import fr.neatmonster.nocheatplus.permissions.PermissionRegistry;
 import fr.neatmonster.nocheatplus.permissions.PermissionUtil;
 import fr.neatmonster.nocheatplus.permissions.PermissionUtil.CommandProtectionEntry;
@@ -913,13 +911,13 @@ public class NoCheatPlus extends JavaPlugin implements NoCheatPlusAPI {
         // Re-check basic setup (if onLoad gets skipped by some custom thing).
         setupBasics();
         if (Bugs.shouldEnforceLocation()) {
-            addFeatureTags("defaults", Arrays.asList("enforceLocation"));
+            addFeatureTags("defaults", Collections.singletonList("enforceLocation"));
         }
         if (Bugs.shouldPvpKnockBackVelocity()) {
-            addFeatureTags("defaults", Arrays.asList("pvpKnockBackVelocity"));
+            addFeatureTags("defaults", Collections.singletonList("pvpKnockBackVelocity"));
         }
         if (pDataMan.storesPlayerInstances()) {
-            addFeatureTags("defaults", Arrays.asList("storePlayers"));
+            addFeatureTags("defaults", Collections.singletonList("storePlayers"));
         }
 
         // Start logger task(s).
@@ -1470,7 +1468,7 @@ public class NoCheatPlus extends JavaPlugin implements NoCheatPlusAPI {
     @Override
     public boolean hasFeatureTag(final String key, final String feature) {
         final Collection<String>  features = this.featureTags.get(key);
-        return features == null ? false : features.contains(feature);
+        return features != null && features.contains(feature);
     }
 
     @Override

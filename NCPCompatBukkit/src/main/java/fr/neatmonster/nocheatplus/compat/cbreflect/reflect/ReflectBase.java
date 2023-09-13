@@ -33,7 +33,7 @@ public class ReflectBase {
         // obc
         Class<?> clazz = server.getClass();
         String name = clazz.getPackage().getName();
-        if (name.equals("org.bukkit.craftbukkit") || name.indexOf("org.") == 0 && name.indexOf(".bukkit.") != -1 && name.indexOf(".craftbukkit.") != -1) {
+        if (name.equals("org.bukkit.craftbukkit") || name.indexOf("org.") == 0 && name.contains(".bukkit.") && name.contains(".craftbukkit.")) {
             obcPackageName = name;
         } else {
             obcPackageName = null;
@@ -41,7 +41,7 @@ public class ReflectBase {
         // nms
         clazz = ServerVersion.getNMSMinecraftServer().getClass();
         name = clazz.getPackage().getName();
-        if (name.equals("net.minecraft.server") || name.indexOf("net.") == 0 && name.indexOf(".minecraft.") != -1 && name.indexOf(".server.") != -1) {
+        if (name.equals("net.minecraft.server") || name.indexOf("net.") == 0 && name.contains(".minecraft.") && name.contains(".server.")) {
             nmsPackageName = name.contains("v1_") ? name : "net.minecraft.world.entity";
         } else {
             nmsPackageName = null;

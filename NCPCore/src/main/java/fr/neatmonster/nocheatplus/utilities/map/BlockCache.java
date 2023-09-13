@@ -37,11 +37,11 @@ public abstract class BlockCache {
      * @author asofold
      *
      */
-    public static interface IBlockCacheNode {
+    public interface IBlockCacheNode {
 
-        public boolean isDataFetched();
+        boolean isDataFetched();
 
-        public boolean isBoundsFetched();
+        boolean isBoundsFetched();
 
         /**
          * Test for (useful) bounds being there, i.e. fetched and bounds being
@@ -51,25 +51,25 @@ public abstract class BlockCache {
          *         bounds have been fetched and are null. MAYBE, if bounds have
          *         not been fetched.
          */
-        public AlmostBoolean hasNonNullBounds();
+        AlmostBoolean hasNonNullBounds();
 
         /**
          * Always set.
          * @return
          */
-        public Material getType();
+        Material getType();
 
         /**
          * Ensure to test with isDataSet().
          * @return
          */
-        public int getData();
+        int getData();
 
         /**
          * Ensure to test with isBoundsSet().
          * @return
          */
-        public double[] getBounds();
+        double[] getBounds();
 
         /**
          * Convenience method to return either the set data, or return data
@@ -83,7 +83,7 @@ public abstract class BlockCache {
          * @param z
          * @return
          */
-        public int getData(BlockCache blockCache, int x, int y, int z);
+        int getData(BlockCache blockCache, int x, int y, int z);
 
         /**
          * Convenience method to return either the set bounds, or return bounds
@@ -97,7 +97,7 @@ public abstract class BlockCache {
          * @param z
          * @return
          */
-        public double[] getBounds(BlockCache blockCache, int x, int y, int z);
+        double[] getBounds(BlockCache blockCache, int x, int y, int z);
 
 
     }
@@ -109,7 +109,7 @@ public abstract class BlockCache {
         private static final short FETCHED_BOUNDS = 0x04;
 
         private short fetched;
-        private Material id;
+        private final Material id;
         private int data = 0;
         private double[] bounds = null;
 
@@ -191,7 +191,7 @@ public abstract class BlockCache {
     // Instance
 
     /** Nodes for cached block properties. */
-    private final CoordMap<BlockCacheNode> nodeMap = new CoordHashMap<BlockCacheNode>(23);
+    private final CoordMap<BlockCacheNode> nodeMap = new CoordHashMap<>(23);
 
     /** The max block y. */
     protected int maxBlockY =  255;

@@ -16,6 +16,7 @@ package fr.neatmonster.nocheatplus.test;
 
 import static org.junit.Assert.fail;
 
+import java.util.Collections;
 import java.util.LinkedList;
 import java.util.List;
 
@@ -27,16 +28,14 @@ import fr.neatmonster.nocheatplus.utilities.ColorUtil;
 public class TestColorUtil {
 	@Test
 	public void testRemoveColor(){
-		List<String[]> items = new LinkedList<String[]>();
-		for (String[] item : new String[][]{
-				{"", ""},
-				{" ", " "},
-				{"&", "&"},
-				{"&&", "&&"},
-				{"o3rg7cbo'!§)=?%V823rg7c", "o3rg7cbo'!§)=?%V823rg7c"},
-		}){
-			items.add(item);
-		}
+		List<String[]> items = new LinkedList<>();
+        Collections.addAll(items, new String[][]{
+                {"", ""},
+                {" ", " "},
+                {"&", "&"},
+                {"&&", "&&"},
+                {"o3rg7cbo'!§)=?%V823rg7c", "o3rg7cbo'!§)=?%V823rg7c"},
+        });
 		String[][] generic = new String[][]{
 				{"&/&/&/", ""},
 				{"&/&/", ""},

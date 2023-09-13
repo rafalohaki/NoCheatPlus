@@ -21,5 +21,5 @@ package fr.neatmonster.nocheatplus.event.mini;
  * @param <E>
  */
 public interface MiniListener<E> {
-    public void onEvent(E event);
+    void onEvent(E event);
 }

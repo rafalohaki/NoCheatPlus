@@ -29,7 +29,7 @@ import fr.neatmonster.nocheatplus.utilities.ds.count.ActionFrequency;
 public class Logins extends Check implements IRemoveData{
     
     /** Per world count (if set in the config, only "" is used). */
-    private final Map<String, ActionFrequency> counts = new HashMap<String, ActionFrequency>();
+    private final Map<String, ActionFrequency> counts = new HashMap<>();
 
 	public Logins() {
 		super(CheckType.CHAT_LOGINS);

@@ -63,8 +63,8 @@ import fr.neatmonster.nocheatplus.utilities.ReflectionUtil;
  */
 public abstract class MiniListenerRegistry<EB, P> {
 
-    public static interface NodeFactory<EB, P> {
-        public <E extends EB> MiniListenerNode<E, P> newNode(Class<E> eventClass, P basePriority);
+    public interface NodeFactory<EB, P> {
+        <E extends EB> MiniListenerNode<E, P> newNode(Class<E> eventClass, P basePriority);
     }
 
     ///////////////
@@ -74,24 +74,19 @@ public abstract class MiniListenerRegistry<EB, P> {
     /**
      * Override for efficient stuff.
      */
-    protected NodeFactory<EB, P> nodeFactory = new NodeFactory<EB, P>() {
-        @Override
-        public <E extends EB> MiniListenerNode<E, P> newNode(Class<E> eventClass, P basePriority) {
-            return new MiniListenerNode<E, P>(eventClass, basePriority);
-        }
-    };
+    protected NodeFactory<EB, P> nodeFactory = MiniListenerNode::new;
 
     /**
      * Map event class -> base priority -> node. Note that this does no merging
      * based on super-classes like the Bukkit implementation of the Listener
      * registry would do.
      */
-    protected final Map<Class<? extends EB>, Map<P, MiniListenerNode<? extends EB, P>>> classMap = new HashMap<Class<? extends EB>, Map<P, MiniListenerNode<? extends EB, P>>>();
+    protected final Map<Class<? extends EB>, Map<P, MiniListenerNode<? extends EB, P>>> classMap = new HashMap<>();
 
     /**
      * Store attached MiniListener instances by anchor objects.
      */
-    protected final Map<Object, Set<MiniListener<? extends EB>>> attachments = new HashMap<Object, Set<MiniListener<? extends EB>>>();
+    protected final Map<Object, Set<MiniListener<? extends EB>>> attachments = new HashMap<>();
 
     public void attach(MiniListener<? extends EB>[] listeners, Object anchor) {
         attach(Arrays.asList(listeners), anchor);
@@ -119,11 +114,7 @@ public abstract class MiniListenerRegistry<EB, P> {
         } else if (anchor.equals(listener)) {
             throw new IllegalArgumentException("Must not be equal: listener and anchor");
         }
-        Set<MiniListener<? extends EB>> attached = attachments.get(anchor);
-        if (attached == null) {
-            attached = new HashSet<MiniListener<? extends EB>>();
-            attachments.put(anchor, attached);
-        }
+        Set<MiniListener<? extends EB>> attached = attachments.computeIfAbsent(anchor, k -> new HashSet<>());
         attached.add(listener);
     }
 
@@ -148,11 +139,7 @@ public abstract class MiniListenerRegistry<EB, P> {
         if (attached == null) {
             // TODO: throw something or return value or ignore?
         } else {
-            Set<MiniListener<? extends EB>> attached2 = attachments.get(otherAnchor);
-            if (attached2 == null) {
-                attached2 = new HashSet<MiniListener<? extends EB>>();
-                attachments.put(otherAnchor, attached2);
-            }
+            Set<MiniListener<? extends EB>> attached2 = attachments.computeIfAbsent(otherAnchor, k -> new HashSet<>());
             attached2.addAll(attached);
         }
     }
@@ -166,7 +153,7 @@ public abstract class MiniListenerRegistry<EB, P> {
         // TODO: Consider more signatures for Collection + Array.
         Set<MiniListener<? extends EB>> attached = attachments.get(anchor);
         if (attached != null) {
-            for (MiniListener<? extends EB> listener : new ArrayList<MiniListener<? extends EB>>(attached)) {
+            for (MiniListener<? extends EB> listener : new ArrayList<>(attached)) {
                 unregister(listener);
             }
         }
@@ -276,11 +263,7 @@ public abstract class MiniListenerRegistry<EB, P> {
 
         // TODO: Accept RegisterEventsWithOrder (and RegisterWithOrder) with listener.
         // TODO: Accept IRegisterWithOrder with listener.
-        Map<P, MiniListenerNode<? extends EB, P>> prioMap = classMap.get(eventClass);
-        if (prioMap == null) {
-            prioMap = new HashMap<P, MiniListenerNode<? extends EB, P>>();
-            classMap.put(eventClass, prioMap);
-        }
+        Map<P, MiniListenerNode<? extends EB, P>> prioMap = classMap.computeIfAbsent(eventClass, k -> new HashMap<>());
         // TODO: Concept for when to cast.
         @SuppressWarnings("unchecked")
         MiniListenerNode<E, P> node = (MiniListenerNode<E, P>) prioMap.get(basePriority);

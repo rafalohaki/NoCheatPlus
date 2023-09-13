@@ -63,9 +63,9 @@ public abstract class DigestedWords extends AbstractWordProcessor{
 	protected int minWordSize = 0;
 	protected int maxWordSize = 0;
 	
-	protected final List<Character> letters = new ArrayList<Character>(10);
-	protected final List<Character> digits = new ArrayList<Character>(10);
-	protected final List<Character> other = new ArrayList<Character>(10);
+	protected final List<Character> letters = new ArrayList<>(10);
+	protected final List<Character> digits = new ArrayList<>(10);
+	protected final List<Character> other = new ArrayList<>(10);
 	
 	/**
 	 * Constructor for a given settings instance.
@@ -103,7 +103,7 @@ public abstract class DigestedWords extends AbstractWordProcessor{
 		if (compress) chars = word.counts.keySet();
 		else{
 			// Add all.
-			chars = new ArrayList<Character>(word.word.length());
+			chars = new ArrayList<>(word.word.length());
 			for (int i = 0; i < word.word.length(); i++){
 				char c = word.word.charAt(i);
 				if (Character.isUpperCase(c)) c = Character.toLowerCase(c);
@@ -142,7 +142,7 @@ public abstract class DigestedWords extends AbstractWordProcessor{
 		super.clear(); // Just for completeness.
 	}
 	
-	public static final char[] toArray(final Collection<Character> chars){
+	public static char[] toArray(final Collection<Character> chars){
 		final char[] a = new char[chars.size()];
 		int i = 0;
 		for (final Character c : chars){

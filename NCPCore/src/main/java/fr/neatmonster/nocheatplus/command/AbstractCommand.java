@@ -39,10 +39,10 @@ import fr.neatmonster.nocheatplus.permissions.RegisteredPermission;
  *
  */
 public abstract class AbstractCommand<A> implements TabExecutor{
-    public static final String TAG = ChatColor.GRAY +""+ ChatColor.BOLD + "[" + ChatColor.RED + "NC+" + ChatColor.GRAY +""+ ChatColor.BOLD + "] " + ChatColor.GRAY;
+    public static final String TAG = ChatColor.GRAY +""+ ChatColor.BOLD + "[" + ChatColor.RED + "NC+" + ChatColor.GRAY + ChatColor.BOLD + "] " + ChatColor.GRAY;
     public static final String CTAG = "[NoCheatPlus] ";
 
-    public static final List<String> noTabChoices = Collections.unmodifiableList(new LinkedList<String>());
+    public static final List<String> noTabChoices = Collections.unmodifiableList(new LinkedList<>());
 
     /**
      * Convenience method: join with a space in between.
@@ -107,7 +107,7 @@ public abstract class AbstractCommand<A> implements TabExecutor{
     /** Permission necessary to use this command. May be null. */
     public final RegisteredPermission permission;
     /** Sub commands for delegation. */
-    protected final Map<String, AbstractCommand<?>> subCommands = new LinkedHashMap<String, AbstractCommand<?>>();
+    protected final Map<String, AbstractCommand<?>> subCommands = new LinkedHashMap<>();
     /** The index in args to check for sub-commands. -1 stands for default, either parent + 1 or 0 */
     protected int subCommandIndex = -1;
     /** Aliases for the command label. */
@@ -159,7 +159,7 @@ public abstract class AbstractCommand<A> implements TabExecutor{
     @Override
     public List<String> onTabComplete(CommandSender sender, Command command, String alias, String[] args)
     {
-        final Set<String> choices = new LinkedHashSet<String>(subCommands.size());
+        final Set<String> choices = new LinkedHashSet<>(subCommands.size());
         int len = args.length;
         // Attempt to delegate.
         int subCommandIndex = Math.max(0, this.subCommandIndex);
@@ -181,7 +181,7 @@ public abstract class AbstractCommand<A> implements TabExecutor{
         }
         // No tab completion by default.
         if (choices.isEmpty()) return noTabChoices;
-        else return new LinkedList<String>(choices);
+        else return new LinkedList<>(choices);
     }
 
     @Override
@@ -216,7 +216,7 @@ public abstract class AbstractCommand<A> implements TabExecutor{
      * @param sender
      * @return
      */
-    public boolean testPermission(CommandSender sender, Command command, String alias, String args[]){
+    public boolean testPermission(CommandSender sender, Command command, String alias, String[] args){
         // TODO: Relay to PlayerData or not (...).
         return permission == null || sender.hasPermission(permission.getBukkitPermission());
     }

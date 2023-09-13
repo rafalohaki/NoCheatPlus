@@ -28,6 +28,6 @@ public interface IDisableListener {
      * cleanup, there may be extra registry cleanup stages for data sources and
      * checks later on.
      */
-    public void onDisable();
+    void onDisable();
 
 }

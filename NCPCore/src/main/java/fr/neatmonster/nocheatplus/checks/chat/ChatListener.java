@@ -37,7 +37,6 @@ import fr.neatmonster.nocheatplus.compat.BridgeMisc;
 import fr.neatmonster.nocheatplus.components.NoCheatPlusAPI;
 import fr.neatmonster.nocheatplus.components.data.ICheckData;
 import fr.neatmonster.nocheatplus.components.data.IData;
-import fr.neatmonster.nocheatplus.components.registry.factory.IFactoryOne;
 import fr.neatmonster.nocheatplus.components.registry.feature.INotifyReload;
 import fr.neatmonster.nocheatplus.components.registry.feature.JoinLeaveListener;
 import fr.neatmonster.nocheatplus.config.ConfPaths;
@@ -46,10 +45,8 @@ import fr.neatmonster.nocheatplus.config.ConfigManager;
 import fr.neatmonster.nocheatplus.logging.Streams;
 import fr.neatmonster.nocheatplus.players.DataManager;
 import fr.neatmonster.nocheatplus.players.IPlayerData;
-import fr.neatmonster.nocheatplus.players.PlayerFactoryArgument;
 import fr.neatmonster.nocheatplus.utilities.StringUtil;
 import fr.neatmonster.nocheatplus.utilities.ds.prefixtree.SimpleCharPrefixTree;
-import fr.neatmonster.nocheatplus.worlds.WorldFactoryArgument;
 
 /**
  * Central location to listen to events that are relevant for the chat checks.
@@ -98,21 +95,11 @@ public class ChatListener extends CheckListener implements INotifyReload, JoinLe
         final NoCheatPlusAPI api = NCPAPIProvider.getNoCheatPlusAPI();
         api.register(api.newRegistrationContext()
                 .registerConfigWorld(ChatConfig.class)
-                .factory(new IFactoryOne<WorldFactoryArgument, ChatConfig>() {
-                    @Override
-                    public ChatConfig getNewInstance(WorldFactoryArgument arg) {
-                        return new ChatConfig(arg.worldData);
-                    }
-                })
+                .factory(arg -> new ChatConfig(arg.worldData))
                 .registerConfigTypesPlayer()
                 .context() //
                 .registerDataPlayer(ChatData.class)
-                .factory(new IFactoryOne<PlayerFactoryArgument, ChatData>() {
-                    @Override
-                    public ChatData getNewInstance(PlayerFactoryArgument arg) {
-                        return new ChatData();
-                    }
-                })
+                .factory(arg -> new ChatData())
                 .addToGroups(CheckType.CHAT, true, IData.class, ICheckData.class)
                 .context() //
                 );
@@ -174,13 +161,13 @@ public class ChatListener extends CheckListener implements INotifyReload, JoinLe
         final String alias = split[0].substring(1);
         final Command command = CommandUtil.getCommand(alias);
 
-        final List<String> messageVars = new ArrayList<String>(); // Could as well use an array and allow null on input of SimpleCharPrefixTree.
+        final List<String> messageVars = new ArrayList<>(); // Could as well use an array and allow null on input of SimpleCharPrefixTree.
         messageVars.add(lcMessage);
         String checkMessage = message; // Message to run chat checks on.
         if (command != null) {
             messageVars.add("/" + command.getLabel().toLowerCase() + (split.length > 1 ? (" " + split[1]) : ""));
         }
-        if (alias.indexOf(":") != -1) {
+        if (alias.contains(":")) {
             final int index = message.indexOf(":") + 1;
             if (index < message.length()) {
                 checkMessage = message.substring(index);

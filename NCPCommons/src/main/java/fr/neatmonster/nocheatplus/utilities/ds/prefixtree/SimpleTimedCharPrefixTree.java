@@ -28,23 +28,14 @@ public class SimpleTimedCharPrefixTree extends TimedCharPrefixTree<SimpleTimedCh
 	
 	public SimpleTimedCharPrefixTree(final boolean access){
 		super(
-			new NodeFactory<Character, SimpleTimedCharNode>(){
-				@Override
-				public final SimpleTimedCharNode newNode(final SimpleTimedCharNode parent) {
-					final long ts;
-					if (parent == null) ts = System.currentTimeMillis();
-					else ts = parent.ts;
-					return new SimpleTimedCharNode(ts);
-				}
-				}
-				,
-				 new LookupEntryFactory<Character, SimpleTimedCharNode, SimpleTimedCharLookupEntry>() {
-					@Override
-					public final SimpleTimedCharLookupEntry newLookupEntry(final SimpleTimedCharNode node,
-							final SimpleTimedCharNode insertion, final int depth, final boolean hasPrefix) {
-						return new SimpleTimedCharLookupEntry(node, insertion, depth, hasPrefix);
-					}
-				}, 
+                parent -> {
+                    final long ts;
+                    if (parent == null) ts = System.currentTimeMillis();
+                    else ts = parent.ts;
+                    return new SimpleTimedCharNode(ts);
+                }
+                ,
+                SimpleTimedCharLookupEntry::new,
 				access);
 	}
 

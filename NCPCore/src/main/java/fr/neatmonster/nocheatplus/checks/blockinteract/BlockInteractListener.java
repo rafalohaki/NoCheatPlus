@@ -41,17 +41,14 @@ import fr.neatmonster.nocheatplus.compat.BridgeMisc;
 import fr.neatmonster.nocheatplus.components.NoCheatPlusAPI;
 import fr.neatmonster.nocheatplus.components.data.ICheckData;
 import fr.neatmonster.nocheatplus.components.data.IData;
-import fr.neatmonster.nocheatplus.components.registry.factory.IFactoryOne;
 import fr.neatmonster.nocheatplus.players.DataManager;
 import fr.neatmonster.nocheatplus.players.IPlayerData;
-import fr.neatmonster.nocheatplus.players.PlayerFactoryArgument;
 import fr.neatmonster.nocheatplus.stats.Counters;
 import fr.neatmonster.nocheatplus.utilities.CheckUtils;
 import fr.neatmonster.nocheatplus.utilities.InventoryUtil;
 import fr.neatmonster.nocheatplus.utilities.TickTask;
 import fr.neatmonster.nocheatplus.utilities.location.LocUtil;
 import fr.neatmonster.nocheatplus.utilities.map.BlockProperties;
-import fr.neatmonster.nocheatplus.worlds.WorldFactoryArgument;
 
 /**
  * Central location to listen to events that are relevant for the block interact checks.
@@ -113,23 +110,12 @@ public class BlockInteractListener extends CheckListener {
         api.register(api.newRegistrationContext() //
                 // BlockInteractConfig
                 .registerConfigWorld(BlockInteractConfig.class)
-                .factory(new IFactoryOne<WorldFactoryArgument, BlockInteractConfig>() {
-                    @Override
-                    public BlockInteractConfig getNewInstance(WorldFactoryArgument arg) {
-                        return new BlockInteractConfig(arg.worldData);
-                    }
-                })
+                .factory(arg -> new BlockInteractConfig(arg.worldData))
                 .registerConfigTypesPlayer(CheckType.BLOCKINTERACT, true)
                 .context() //
                 // BlockinteractData
                 .registerDataPlayer(BlockInteractData.class)
-                .factory(new IFactoryOne<PlayerFactoryArgument, BlockInteractData>() {
-                    @Override
-                    public BlockInteractData getNewInstance(
-                            PlayerFactoryArgument arg) {
-                        return new BlockInteractData();
-                    }
-                })
+                .factory(arg -> new BlockInteractData())
                 .addToGroups(CheckType.BLOCKINTERACT, true, IData.class, ICheckData.class)
                 .context() //
                 );
@@ -281,7 +267,7 @@ public class BlockInteractListener extends CheckListener {
             if (flyingHandle.isFlyingQueueFetched()) {
                 // TODO: Update flying queue removing failed entries? At least store index for subsequent checks.
                 final int flyingIndex = flyingHandle.getFirstIndexWithContentIfFetched();
-                final Integer cId;
+                final int cId;
                 if (flyingIndex == 0) {
                     cId = idInteractLookFlyingFirst;
                 }

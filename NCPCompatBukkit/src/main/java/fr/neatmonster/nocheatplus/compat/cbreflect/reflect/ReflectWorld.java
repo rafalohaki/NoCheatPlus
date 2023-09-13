@@ -43,7 +43,7 @@ public class ReflectWorld {
             reflectIBlockData = new ReflectIBlockData(base, reflectMaterial);
             nmsClass = Class.forName(base.nmsPackageName + ".World");
         }
-        catch (Throwable t) {};
+        catch (Throwable ignored) {}
         this.nmsClass = nmsClass;
         if (reflectIBlockData == null || nmsClass == null) {
             nmsGetType = null;
@@ -72,11 +72,7 @@ public class ReflectWorld {
         }
         try {
             return nmsGetType.invoke(nmsWorld, blockPosition);
-        } catch (IllegalAccessException e) {
-            throw new ReflectFailureException();
-        } catch (IllegalArgumentException e) {
-            throw new ReflectFailureException();
-        } catch (InvocationTargetException e) {
+        } catch (IllegalAccessException | InvocationTargetException | IllegalArgumentException e) {
             throw new ReflectFailureException();
         }
     }

@@ -30,6 +30,6 @@ public interface IPrimaryThreadContextTester {
      * 
      * @return
      */
-    public boolean isPrimaryThread();
+    boolean isPrimaryThread();
 
 }

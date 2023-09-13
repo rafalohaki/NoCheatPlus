@@ -43,8 +43,8 @@ public class Improbable extends Check implements IDisableListener{
      * @param now
      * @return
      */
-    public static final boolean check(final Player player, final float weight, final long now, 
-            final String tags, final IPlayerData pData){
+    public static boolean check(final Player player, final float weight, final long now,
+                                final String tags, final IPlayerData pData){
         return instance.checkImprobable(player, weight, now, tags, pData);
     }
 
@@ -55,8 +55,8 @@ public class Improbable extends Check implements IDisableListener{
      * @param now
      * @param pData
      */
-    public static final void feed(final Player player, final float weight, final long now,
-            final IPlayerData pData){
+    public static void feed(final Player player, final float weight, final long now,
+                            final IPlayerData pData){
         pData.getGenericInstance(CombinedData.class).improbableCount.add(now, weight);
     }
 

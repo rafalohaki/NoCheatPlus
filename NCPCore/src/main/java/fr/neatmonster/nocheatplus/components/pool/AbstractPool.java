@@ -28,7 +28,7 @@ public abstract class AbstractPool <O> implements GenericPool <O> {
      */
     protected AbstractPool(int maxPoolSize) {
         this.maxPoolSize = maxPoolSize;
-        pool = new ArrayList<O>(Math.max(10, maxPoolSize));
+        pool = new ArrayList<>(Math.max(10, maxPoolSize));
     }
 
     @Override

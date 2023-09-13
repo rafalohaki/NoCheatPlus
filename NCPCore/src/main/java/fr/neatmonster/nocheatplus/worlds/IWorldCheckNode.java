@@ -30,12 +30,12 @@ public interface IWorldCheckNode extends IConfigCheckNode {
      * 
      * @return
      */
-    public OverrideType getOverrideTypeDebug();
+    OverrideType getOverrideTypeDebug();
 
     /**
      * Server side lag detection - migth also do different things - subject to
      * rename / change.
      */
-    public boolean shouldAdjustToLag();
+    boolean shouldAdjustToLag();
 
 }

@@ -51,7 +51,7 @@ public class RawConfigFile  extends YamlConfiguration {
             // TODO: Custom lookup (both vanilla and Bukkit/Spigot).
             return Material.matchMaterial(prepareMatchMaterial(content));
         }
-        catch (Exception e) {}
+        catch (Exception ignored) {}
         return null;
     }
 
@@ -60,7 +60,7 @@ public class RawConfigFile  extends YamlConfiguration {
     ////////////////
 
     /** Meta data: The build number of the last significant change of a value. */
-    protected final Map<String, Integer> lastChangedBuildNumbers = new HashMap<String, Integer>();
+    protected final Map<String, Integer> lastChangedBuildNumbers = new HashMap<>();
 
     /**
      * Set a value depending on the detected Minecraft version.
@@ -181,9 +181,7 @@ public class RawConfigFile  extends YamlConfiguration {
     public void readStringlFromList(final String path, final Collection<String> target) {
         final List<String> content = getStringList(path);
         if (content == null || content.isEmpty()) return;
-        for (final String entry : content){
-                target.add(entry);
-        }
+        target.addAll(content);
     }
 
     /**
@@ -231,7 +229,7 @@ public class RawConfigFile  extends YamlConfiguration {
                 try {
                     type = EntityType.valueOf(ucKey);
                 }
-                catch (IllegalArgumentException e) {}
+                catch (IllegalArgumentException ignored) {}
                 if (type == null) {
                     // TODO: Log once per file only (needs new framework)?
                     NCPAPIProvider.getNoCheatPlusAPI().getLogManager().warning(Streams.STATUS, "Bad entity type at '" + path + "': " + key);
@@ -256,7 +254,7 @@ public class RawConfigFile  extends YamlConfiguration {
             op.setAccessible(true);
             final DumperOptions options = (DumperOptions) op.get(this);
             options.setWidth(200);
-        } catch (final Exception e) {}
+        } catch (final Exception ignored) {}
 
         return super.saveToString();
     }
@@ -315,7 +313,7 @@ public class RawConfigFile  extends YamlConfiguration {
         int max = 0;
         for (Integer v : lastChangedBuildNumbers.values()) {
             if (v != null) {
-                max = Math.max(max, v.intValue());
+                max = Math.max(max, v);
             }
         }
         return max;

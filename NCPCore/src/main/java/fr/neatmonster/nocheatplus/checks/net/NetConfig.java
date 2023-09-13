@@ -35,7 +35,7 @@ import fr.neatmonster.nocheatplus.worlds.IWorldData;
  */
 public class NetConfig extends ACheckConfig {
 
-    private static RegisteredPermission[] preferKeepUpdatedPermissions = new RegisteredPermission[] {
+    private static final RegisteredPermission[] preferKeepUpdatedPermissions = new RegisteredPermission[] {
             Permissions.NET_ATTACKFREQUENCY,
             Permissions.NET_FLYINGFREQUENCY, 
             Permissions.NET_KEEPALIVEFREQUENCY,

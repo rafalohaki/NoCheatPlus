@@ -25,7 +25,7 @@ import fr.neatmonster.nocheatplus.command.testing.stopwatch.StopWatchRegistry;
 
 public class StopCommand extends AbstractCommand<StopWatchRegistry>{
 
-    public static final String TAG = ChatColor.GRAY +""+ ChatColor.BOLD + "[" + ChatColor.RED + "NC+" + ChatColor.GRAY +""+ ChatColor.BOLD + "] " + ChatColor.GRAY;
+    public static final String TAG = ChatColor.GRAY +""+ ChatColor.BOLD + "[" + ChatColor.RED + "NC+" + ChatColor.GRAY + ChatColor.BOLD + "] " + ChatColor.GRAY;
 
     public StopCommand(StopWatchRegistry registry) {
         super(registry, "stop", null);

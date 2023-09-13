@@ -170,7 +170,7 @@ public class BlockChangeListener implements Listener {
 
     @SuppressWarnings("deprecation")
     private Map<Material, ToolType> init() {
-        Map<Material, ToolType> blocks = new HashMap<Material, ToolType>();
+        Map<Material, ToolType> blocks = new HashMap<>();
         blocks.put(BridgeMaterial.GRASS_BLOCK, ToolType.HOE);
         blocks.put(Material.DIRT, ToolType.HOE);
         if (is1_13) {
@@ -260,7 +260,7 @@ public class BlockChangeListener implements Listener {
                 final Block retBlock = retLoc.getBlock();
                 final long flags = BlockFlags.getBlockFlags(retBlock.getType());
                 if ((flags & F_MOVABLE_IGNORE) == 0L && (flags & F_MOVABLE) != 0L) {
-                    blocks = new ArrayList<Block>(1);
+                    blocks = new ArrayList<>(1);
                     blocks.add(retBlock);
                 }
                 else {

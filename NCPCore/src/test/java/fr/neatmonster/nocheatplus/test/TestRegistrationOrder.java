@@ -35,9 +35,9 @@ import fr.neatmonster.nocheatplus.utilities.build.BuildParameters;
 
 public class TestRegistrationOrder {
 
-    public static interface IAccessSort<F> {
-        public LinkedList<F> getSortedLinkedList(Collection<F> items);
-        public RegistrationOrder getRegistrationOrder(F item);
+    public interface IAccessSort<F> {
+        LinkedList<F> getSortedLinkedList(Collection<F> items);
+        RegistrationOrder getRegistrationOrder(F item);
     }
 
     public static final IAccessSort<RegistrationOrder> accessRegistrationOrder = new IAccessSort<RegistrationOrder>() {
@@ -64,7 +64,7 @@ public class TestRegistrationOrder {
 
     public static final IAccessSort<IGetRegistrationOrder> accessIGetRegistrationOrder = new AccessIGetRegistrationOrder();
 
-    private static String[] tags = new String[]{null, "foo", "bar", "low", "high", "ledge", "bravo", "bravissimo"};
+    private static final String[] tags = new String[]{null, "foo", "bar", "low", "high", "ledge", "bravo", "bravissimo"};
 
 
 
@@ -75,7 +75,7 @@ public class TestRegistrationOrder {
 
         int repeatShuffle = 15;
         int rand1samples = BuildParameters.testLevel > 0 ? 500 : 50;
-        final List<List<RegistrationOrder>> samples = new ArrayList<List<RegistrationOrder>>();
+        final List<List<RegistrationOrder>> samples = new ArrayList<>();
         // TODO: Hand crafted, random, part-random (defined tags, random order).
         for (int i = 0; i < rand1samples; i++) {
             samples.add(getSample(5, 12)); // Random-ish tests to have something in place.
@@ -83,15 +83,9 @@ public class TestRegistrationOrder {
 
         // Iterate ...
         for (List<RegistrationOrder> sample : samples) {
-            List<IGetRegistrationOrder> sample2 = new ArrayList<IGetRegistrationOrder>();
+            List<IGetRegistrationOrder> sample2 = new ArrayList<>();
             for (final RegistrationOrder order : sample) {
-                sample2.add(new IGetRegistrationOrder() {
-                    @Override
-                    public RegistrationOrder getRegistrationOrder() {
-                        return order;
-                    }
-
-                });
+                sample2.add(() -> order);
             }
 
             // Test sorting each.
@@ -115,7 +109,7 @@ public class TestRegistrationOrder {
     private <F> void testSorting(List<F> items, IAccessSort<F> fetcher, int repeatShuffle) {
         // (1) Sorting can't be stable / result in the same in general.
         List<F> originalItems = items;
-        items = new ArrayList<F>(items);
+        items = new ArrayList<>(items);
         LinkedList<F> sorted;
         for (int i = 0; i < 1 + repeatShuffle; i++) {
             sorted = fetcher.getSortedLinkedList(items);
@@ -203,7 +197,7 @@ public class TestRegistrationOrder {
     }
 
     private <F> void testIfContained(List<F> originalItems, List<F> items) {
-        if (!new HashSet<F>(items).containsAll(originalItems)) {
+        if (!new HashSet<>(items).containsAll(originalItems)) {
             fail("Sorted list does not contain all original items.");
         }
     }
@@ -220,8 +214,8 @@ public class TestRegistrationOrder {
             List<F2> items2, IAccessSort<F2> fetcher2, 
             int repeatShuffle) {
         // Test if sorting remains the same: original, and n times shuffled - input + reversed.
-        items1 = new ArrayList<F1>(items1);
-        items2 = new ArrayList<F2>(items2);
+        items1 = new ArrayList<>(items1);
+        items2 = new ArrayList<>(items2);
         List<F1> sorted1;
         List<F2> sorted2;
         for (int i = 0; i < repeatShuffle + 1; i++) {
@@ -250,13 +244,13 @@ public class TestRegistrationOrder {
      * @return
      */
     private List<RegistrationOrder> getSample(int priorities, int itemsPerLevel) {
-        ArrayList<RegistrationOrder> out = new ArrayList<RegistrationOrder>();
+        ArrayList<RegistrationOrder> out = new ArrayList<>();
         int[] prioArr;
         if (priorities <= 0) {
             prioArr = new int[0];
         }
         else {
-            Set<Integer> prios = new LinkedHashSet<Integer>();
+            Set<Integer> prios = new LinkedHashSet<>();
             if (random.nextBoolean()) {
                 prios.add(0);
             }
@@ -270,9 +264,9 @@ public class TestRegistrationOrder {
                 index ++;
             }
         }
-        for (int i = 0; i < prioArr.length; i++) {
+        for (int j : prioArr) {
             for (int x = 0; x < itemsPerLevel; x++) {
-                out.add(getRegistrationOrder(prioArr[i]));
+                out.add(getRegistrationOrder(j));
             }
         }
         for (int i = 0; i < itemsPerLevel; i++) {
@@ -300,7 +294,7 @@ public class TestRegistrationOrder {
      * @param combinations
      */
     private String getTagRegex(int combinations) {
-        Set<String> indices = new HashSet<String>();
+        Set<String> indices = new HashSet<>();
         while (indices.size() < combinations) {
             indices.add(tags[1 + random.nextInt(tags.length - 1)]); // Avoid null here.
         }
@@ -326,10 +320,10 @@ public class TestRegistrationOrder {
      *            int[N][2], containing valid indices for items.
      */
     private <F> void shuffle(List<F> items, int[][] swap) {
-        for (int x = 0; x < swap.length; x++) {
-            F temp1 = items.get(swap[x][1]);
-            items.set(swap[x][1], items.get(swap[x][0]));
-            items.set(swap[x][0], temp1);
+        for (int[] ints : swap) {
+            F temp1 = items.get(ints[1]);
+            items.set(ints[1], items.get(ints[0]));
+            items.set(ints[0], temp1);
         }
     }
 
@@ -344,10 +338,10 @@ public class TestRegistrationOrder {
 
     private <F> void shuffle(List<F> items, int n) {
         int[][] swap = getSwapIndices(items.size(), n);
-        for (int x = 0; x < swap.length; x++) {
-            F temp1 = items.get(swap[x][1]);
-            items.set(swap[x][1], items.get(swap[x][0]));
-            items.set(swap[x][0], temp1);
+        for (int[] ints : swap) {
+            F temp1 = items.get(ints[1]);
+            items.set(ints[1], items.get(ints[0]));
+            items.set(ints[0], temp1);
         }
     }
 

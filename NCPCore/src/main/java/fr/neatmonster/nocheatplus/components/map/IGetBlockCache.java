@@ -31,6 +31,6 @@ public interface IGetBlockCache {
      * 
      * @return
      */
-    public BlockCache getBlockCache();
+    BlockCache getBlockCache();
 
 }

@@ -61,7 +61,7 @@ public class TestLocationTrace {
     }
 
     // TODO: Test pool as well.
-    private TraceEntryPool pool = new TraceEntryPool(1000);
+    private final TraceEntryPool pool = new TraceEntryPool(1000);
 
     @Test
     public void testSize() {
@@ -71,7 +71,7 @@ public class TestLocationTrace {
         if (!trace.isEmpty()) {
             fail("Trace must be empty on start.");
         }
-        if (trace.size() != 0) {
+        if (!trace.isEmpty()) {
             fail("Size must be 0 at start.");
         }
         // Adding up to size elements.
@@ -110,19 +110,19 @@ public class TestLocationTrace {
         try {
             trace.oldestIterator();
             fail("Expect an exception on trying to get an empty iterator (oldest).");
-        } catch (IllegalArgumentException ex) {
+        } catch (IllegalArgumentException ignored) {
 
         }
         try {
             trace.latestIterator();
             fail("Expect an exception on trying to get an empty iterator (latest).");
-        } catch (IllegalArgumentException ex) {
+        } catch (IllegalArgumentException ignored) {
 
         }
         try {
             trace.maxAgeIterator(0);
             fail("Expect an exception on trying to get an empty iterator (maxAge).");
-        } catch (IllegalArgumentException ex) {
+        } catch (IllegalArgumentException ignored) {
 
         }
     }

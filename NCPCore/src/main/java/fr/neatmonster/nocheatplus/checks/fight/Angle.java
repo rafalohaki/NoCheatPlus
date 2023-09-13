@@ -29,7 +29,6 @@ import fr.neatmonster.nocheatplus.checks.CheckType;
 import fr.neatmonster.nocheatplus.checks.ViolationData;
 import fr.neatmonster.nocheatplus.permissions.Permissions;
 import fr.neatmonster.nocheatplus.players.IPlayerData;
-import fr.neatmonster.nocheatplus.players.PlayerData;
 import fr.neatmonster.nocheatplus.utilities.StringUtil;
 import fr.neatmonster.nocheatplus.utilities.TickTask;
 import fr.neatmonster.nocheatplus.utilities.location.TrigUtil;
@@ -43,7 +42,7 @@ import org.bukkit.ChatColor;
 public class Angle extends Check {
   
 
-  private final List<String> tags = new LinkedList<String>();
+  private final List<String> tags = new LinkedList<>();
 
 
     public static class AttackLocation {
@@ -150,7 +149,7 @@ public class Angle extends Check {
             return false;
         }
 
-        final double n = (double) (data.angleHits.size() - 1);
+        final double n = data.angleHits.size() - 1;
 
         // Let's calculate the average move.
         final double averageMove = deltaMove / n;

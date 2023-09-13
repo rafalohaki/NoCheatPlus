@@ -73,11 +73,11 @@ public class MiniListenerNode<E, P> {
         protected RegistrationOrder fetchRegistrationOrder(ListenerEntry<E> item) {
             return item.getRegistrationOrder();
         }
-    };
+    }
 
-    protected final SortListenerEntry<E> typedSort = new SortListenerEntry<E>();
+    protected final SortListenerEntry<E> typedSort = new SortListenerEntry<>();
 
-    protected final List<ListenerEntry<E>> registeredListeners = new ArrayList<ListenerEntry<E>>();
+    protected final List<ListenerEntry<E>> registeredListeners = new ArrayList<>();
 
     @SuppressWarnings("unchecked")
     protected ListenerEntry<E>[] sortedListeners = new ListenerEntry[0];
@@ -118,7 +118,7 @@ public class MiniListenerNode<E, P> {
     }
 
     public void addMiniListener(MiniListener<E> listener, boolean ignoreCancelled, RegistrationOrder order) {
-        registeredListeners.add(new ListenerEntry<E>(listener, ignoreCancelled, order));
+        registeredListeners.add(new ListenerEntry<>(listener, ignoreCancelled, order));
         generateSortedListeners();
     }
 
@@ -180,7 +180,7 @@ public class MiniListenerNode<E, P> {
         }
         builder.append("\n exception:\n");
         builder.append(StringUtil.throwableToString(t));
-        final Set<Throwable> done = new HashSet<Throwable>();
+        final Set<Throwable> done = new HashSet<>();
         done.add(t);
         Throwable cause = t.getCause();
         while (cause != null && !done.contains(cause)) {

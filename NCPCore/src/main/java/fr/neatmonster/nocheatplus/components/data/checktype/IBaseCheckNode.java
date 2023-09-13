@@ -26,6 +26,6 @@ public interface IBaseCheckNode {
      * 
      * @return
      */
-    public boolean isDebugActive();
+    boolean isDebugActive();
 
 }

@@ -25,7 +25,7 @@ import java.util.logging.Level;
  */
 public class DefaultContentStream<C> implements ContentStream<C> {
     
-    private ArrayList<LogNode<C>> nodes = new ArrayList<LogNode<C>>();
+    private ArrayList<LogNode<C>> nodes = new ArrayList<>();
     
     private final LogNodeDispatcher dispatcher;
     
@@ -36,8 +36,8 @@ public class DefaultContentStream<C> implements ContentStream<C> {
     @Override
     public void log(final Level level, final C content) {
         final ArrayList<LogNode<C>> nodes = this.nodes;
-        for (int i = 0; i < nodes.size(); i++) {
-            dispatcher.dispatch(nodes.get(i), level, content);
+        for (LogNode<C> node : nodes) {
+            dispatcher.dispatch(node, level, content);
         }
     }
 
@@ -49,7 +49,7 @@ public class DefaultContentStream<C> implements ContentStream<C> {
                 // TODO: Consider throwing something.
                 return;
             }
-            ArrayList<LogNode<C>> nodes = new ArrayList<LogNode<C>>(this.nodes);
+            ArrayList<LogNode<C>> nodes = new ArrayList<>(this.nodes);
             nodes.add(node);
             this.nodes = nodes;
         }

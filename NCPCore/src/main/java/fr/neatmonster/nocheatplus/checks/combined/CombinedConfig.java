@@ -46,8 +46,8 @@ public class CombinedConfig extends ACheckConfig {
     // Invulnerable management.
     public final boolean                    invulnerableCheck;
     public final int                        invulnerableInitialTicksJoin;
-    public final Set<DamageCause>           invulnerableIgnore = new HashSet<DamageCause>();
-    public final Map<DamageCause, Integer>  invulnerableModifiers = new HashMap<DamageCause, Integer>();
+    public final Set<DamageCause>           invulnerableIgnore = new HashSet<>();
+    public final Map<DamageCause, Integer>  invulnerableModifiers = new HashMap<>();
     public final int                        invulnerableModifierDefault;
     public final boolean                    invulnerableTriggerAlways;
     public final boolean                    invulnerableTriggerFallDistance;
@@ -87,7 +87,7 @@ public class CombinedConfig extends ACheckConfig {
             }
         }
         // Read modifiers for causes.
-        Integer defaultMod = 0;
+        int defaultMod = 0;
         final ConfigurationSection sec = config.getConfigurationSection(ConfPaths.COMBINED_INVULNERABLE_MODIFIERS);
         for (final String input : sec.getKeys(false)){
             final int modifier = sec.getInt(input, 0);

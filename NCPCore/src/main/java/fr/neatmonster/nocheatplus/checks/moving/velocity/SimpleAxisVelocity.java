@@ -41,7 +41,7 @@ public class SimpleAxisVelocity {
     /** Size of queued for which to force cleanup on add. */
     private static final double thresholdCleanup = 20;
 
-    private final LinkedList<SimpleEntry> queued = new LinkedList<SimpleEntry>();
+    private final LinkedList<SimpleEntry> queued = new LinkedList<>();
 
     /** Activation flag for tracking unused velocity. */
     private boolean unusedActive = true;
@@ -50,7 +50,7 @@ public class SimpleAxisVelocity {
      * positive and negative).
      */
     // TODO: Ignoring 0-dist velocity allows 'moving on', though.
-    private double unusedSensitivity = 0.1;
+    private final double unusedSensitivity = 0.1;
     // TODO: Visibility of trackers, concept, etc.
     public final UnusedTracker unusedTrackerPos = new UnusedTracker();
     // TODO: Might do without tracking negative velocity.
@@ -134,7 +134,7 @@ public class SimpleAxisVelocity {
         return entry;
     }
 
-    private final boolean allowsSplit(final SimpleEntry entry, final double amount) {
+    private boolean allowsSplit(final SimpleEntry entry, final double amount) {
         if ((entry.flags & FILTER_SPLIT) == 0L) {
             return false;
         }
@@ -154,10 +154,8 @@ public class SimpleAxisVelocity {
      */
     public SimpleEntry peek(final double amount, final int minActCount, final int maxActCount, 
             final double tolerance) {
-        final Iterator<SimpleEntry> it = queued.iterator();
-        while (it.hasNext()) {
-            final SimpleEntry entry = it.next();
-            if (entry.actCount >= minActCount && entry.actCount <= maxActCount 
+        for (SimpleEntry entry : queued) {
+            if (entry.actCount >= minActCount && entry.actCount <= maxActCount
                     && matchesEntry(entry, amount, tolerance)) {
                 return entry;
             }

@@ -28,8 +28,8 @@ public class VanillaBlocksFactory {
 
     public Collection<String> setupVanillaBlocks(final WorldConfigProvider<?> worldConfigProvider) {
         // Vanilla blocks (abort with first failure, low to high MC version).
-        final List<BlockPropertiesSetup> setups = new LinkedList<BlockPropertiesSetup>();
-        final List<String> success = new LinkedList<String>();
+        final List<BlockPropertiesSetup> setups = new LinkedList<>();
+        final List<String> success = new LinkedList<>();
         try{
             setups.add(new BlocksMC1_5());
             setups.add(new BlocksMC1_6_1());
@@ -47,7 +47,7 @@ public class VanillaBlocksFactory {
             setups.add(new BlocksMC1_19());
             setups.add(new BlocksMC1_20());
         }
-        catch(Throwable t){}
+        catch(Throwable ignored){}
         for (final BlockPropertiesSetup setup : setups){
             try{
                 // Assume the blocks setup to message success.

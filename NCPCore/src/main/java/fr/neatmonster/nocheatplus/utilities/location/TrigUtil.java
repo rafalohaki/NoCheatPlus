@@ -52,7 +52,7 @@ public class TrigUtil {
      *            the location2
      * @return The distance between the locations.
      */
-    public static final double distance(final Location location1, final Location location2)
+    public static double distance(final Location location1, final Location location2)
     {
         return distance(location1.getX(), location1.getY(), location1.getZ(), location2.getX(), location2.getY(), location2.getZ());
     }
@@ -66,7 +66,7 @@ public class TrigUtil {
      *            the location2
      * @return The distance between the locations.
      */
-    public static final double distance(final IGetPosition location1, final Location location2)
+    public static double distance(final IGetPosition location1, final Location location2)
     {
         return distance(location1.getX(), location1.getY(), location1.getZ(), location2.getX(), location2.getY(), location2.getZ());
     }
@@ -80,7 +80,7 @@ public class TrigUtil {
      *            the location2
      * @return The distance between the locations.
      */
-    public static final double distance(final IGetPosition location1, final IGetPosition location2)
+    public static double distance(final IGetPosition location1, final IGetPosition location2)
     {
         return distance(location1.getX(), location1.getY(), location1.getZ(), location2.getX(), location2.getY(), location2.getZ());
     }
@@ -94,7 +94,7 @@ public class TrigUtil {
      *            the block
      * @return the double
      */
-    public static final double distance(final Location location, final Block block)
+    public static double distance(final Location location, final Block block)
     {
         return distance(location.getX(), location.getY(), location.getZ(), 0.5 + block.getX(), 0.5 + block.getY(), 0.5 + block.getZ());
     }
@@ -116,7 +116,7 @@ public class TrigUtil {
      *            the z2
      * @return the double
      */
-    public static final double distance(final double x1, final double y1, final double z1, final double x2, final double y2, final double z2) {
+    public static double distance(final double x1, final double y1, final double z1, final double x2, final double y2, final double z2) {
         final double dx = Math.abs(x1 - x2);
         final double dy = Math.abs(y1 - y2);
         final double dz = Math.abs(z1 - z2);
@@ -132,7 +132,7 @@ public class TrigUtil {
      *            the location2
      * @return the double
      */
-    public static final double distanceSquared(final Location location1, final Location location2)
+    public static double distanceSquared(final Location location1, final Location location2)
     {
         return distanceSquared(location1.getX(), location1.getY(), location1.getZ(), location2.getX(), location2.getY(), location2.getZ());
     }
@@ -146,7 +146,7 @@ public class TrigUtil {
      *            the location2
      * @return the double
      */
-    public static final double distanceSquared(final IGetPosition location1, final IGetPosition location2)
+    public static double distanceSquared(final IGetPosition location1, final IGetPosition location2)
     {
         return distanceSquared(location1.getX(), location1.getY(), location1.getZ(), location2.getX(), location2.getY(), location2.getZ());
     }
@@ -162,7 +162,7 @@ public class TrigUtil {
      *            the z
      * @return the double
      */
-    public static final double distanceSquared(final IGetPosition location, final double x, final double z)
+    public static double distanceSquared(final IGetPosition location, final double x, final double z)
     {
         return distanceSquared(location.getX(), location.getZ(), x, z);
     }
@@ -176,7 +176,7 @@ public class TrigUtil {
      *            the location2
      * @return the double
      */
-    public static final double distanceSquared(final IGetPosition location1, final Location location2)
+    public static double distanceSquared(final IGetPosition location1, final Location location2)
     {
         return distanceSquared(location1.getX(), location1.getY(), location1.getZ(), location2.getX(), location2.getY(), location2.getZ());
     }
@@ -198,7 +198,7 @@ public class TrigUtil {
      *            the z2
      * @return the double
      */
-    public static final double distanceSquared(final double x1, final double y1, final double z1, final double x2, final double y2, final double z2) {
+    public static double distanceSquared(final double x1, final double y1, final double z1, final double x2, final double y2, final double z2) {
         final double dx = Math.abs(x1 - x2);
         final double dy = Math.abs(y1 - y2);
         final double dz = Math.abs(z1 - z2);
@@ -218,7 +218,7 @@ public class TrigUtil {
      *            the z2
      * @return the double
      */
-    public static final double distanceSquared(final double x1, final double z1, final double x2, final double z2) {
+    public static double distanceSquared(final double x1, final double z1, final double x2, final double z2) {
         final double dx = Math.abs(x1 - x2);
         final double dz = Math.abs(z1 - z2);
         return dx * dx + dz * dz;
@@ -233,7 +233,7 @@ public class TrigUtil {
      *            the location2
      * @return the double
      */
-    public static final double xzDistance(final Location location1, final Location location2)
+    public static double xzDistance(final Location location1, final Location location2)
     {
         return distance(location1.getX(), location1.getZ(), location2.getX(), location2.getZ());
     }
@@ -247,7 +247,7 @@ public class TrigUtil {
      *            the location2
      * @return the double
      */
-    public static final double xzDistance(final IGetPosition location1, final IGetPosition location2)
+    public static double xzDistance(final IGetPosition location1, final IGetPosition location2)
     {
         return distance(location1.getX(), location1.getZ(), location2.getX(), location2.getZ());
     }
@@ -261,7 +261,7 @@ public class TrigUtil {
      *            the location2
      * @return the double
      */
-    public static final double xzDistance(final Location location1, final IGetPosition location2)
+    public static double xzDistance(final Location location1, final IGetPosition location2)
     {
         return distance(location1.getX(), location1.getZ(), location2.getX(), location2.getZ());
     }
@@ -279,7 +279,7 @@ public class TrigUtil {
      *            the z2
      * @return the double
      */
-    public static final double distance(final double x1, final double z1, final double x2, final double z2) {
+    public static double distance(final double x1, final double z1, final double x2, final double z2) {
         final double dx = Math.abs(x1 - x2);
         final double dz = Math.abs(z1 - z2);
         return Math.sqrt(dx * dx + dz * dz);
@@ -338,7 +338,7 @@ public class TrigUtil {
      *            the z
      * @return the double
      */
-    public static final double angle(final double x, final double z){
+    public static double angle(final double x, final double z){
         final double a;
         if (x > 0.0) {
             a = Math.atan(z / x);
@@ -374,7 +374,7 @@ public class TrigUtil {
      *            Second vector
      * @return Angle (radians).
      */
-    public static final double angle(Vector a, Vector b) {
+    public static double angle(Vector a, Vector b) {
         final double theta = Math.min(1, Math.max(a.dot(b) / (a.length() * b.length()), -1));
         return Math.acos(theta);
     }
@@ -389,7 +389,7 @@ public class TrigUtil {
      *            the a2
      * @return Difference of angle from -pi to pi
      */
-    public static final double angleDiff(final double a1, final double a2){
+    public static double angleDiff(final double a1, final double a2){
         if (Double.isNaN(a1) || Double.isNaN(a2)) {
             return Double.NaN;
         }
@@ -417,7 +417,7 @@ public class TrigUtil {
      * @return Angle difference to get from fromYaw to toYaw. Result is in
      *         [-180, 180].
      */
-    public static final float yawDiff(float fromYaw, float toYaw){
+    public static float yawDiff(float fromYaw, float toYaw){
         if (fromYaw <= -360f) {
             fromYaw = -((-fromYaw) % 360f);
         }

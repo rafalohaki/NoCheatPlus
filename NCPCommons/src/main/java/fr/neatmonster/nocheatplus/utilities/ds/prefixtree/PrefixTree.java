@@ -59,7 +59,7 @@ public class PrefixTree<K, N extends Node<K, N>, L extends LookupEntry<K, N>>{
 		 * @return The resulting child for the key.
 		 */
 		public N putChild(final K key, final N child){
-			if (children == null) children = new HashMap<K, N>(minCap);
+			if (children == null) children = new HashMap<>(minCap);
 			children.put(key, child);
 			return child;
 		}
@@ -74,13 +74,13 @@ public class PrefixTree<K, N extends Node<K, N>, L extends LookupEntry<K, N>>{
 	public static class SimpleNode<K> extends Node<K, SimpleNode<K>>{
 	}
 	
-	public static interface NodeFactory<K, N extends Node<K, N>>{
+	public interface NodeFactory<K, N extends Node<K, N>>{
 		/**
 		 * 
 		 * @param parent Can be null (root).
 		 * @return
 		 */
-		public N newNode(N parent);
+        N newNode(N parent);
 	}
 	
 	public static class LookupEntry<K, N extends Node<K, N>>{
@@ -101,8 +101,8 @@ public class PrefixTree<K, N extends Node<K, N>, L extends LookupEntry<K, N>>{
 		}
 	}
 	
-	public static interface LookupEntryFactory<K, N extends Node<K, N>, L extends LookupEntry<K, N>>{
-		public L newLookupEntry(N node , N insertion, int depth, boolean hasPrefix); 
+	public interface LookupEntryFactory<K, N extends Node<K, N>, L extends LookupEntry<K, N>>{
+		L newLookupEntry(N node, N insertion, int depth, boolean hasPrefix);
 	}
 	
 	protected final NodeFactory<K, N> nodeFactory;
@@ -289,16 +289,6 @@ public class PrefixTree<K, N extends Node<K, N>, L extends LookupEntry<K, N>>{
 	 * @return
 	 */
 	public static <K> PrefixTree<K, SimpleNode<K>, LookupEntry<K, SimpleNode<K>>> newPrefixTree(){
-		return new PrefixTree<K, SimpleNode<K>, LookupEntry<K, SimpleNode<K>>>(new NodeFactory<K, SimpleNode<K>>(){
-			@Override
-			public final SimpleNode<K> newNode(final SimpleNode<K> parent) {
-				return new SimpleNode<K>();
-			}
-		}, new LookupEntryFactory<K, SimpleNode<K>, LookupEntry<K,SimpleNode<K>>>() {
-			@Override
-			public final LookupEntry<K, SimpleNode<K>> newLookupEntry(final SimpleNode<K> node, final SimpleNode<K> insertion, final int depth, final boolean hasPrefix) {
-				return new LookupEntry<K, SimpleNode<K>>(node, insertion, depth, hasPrefix);
-			}
-		});
+		return new PrefixTree<K, SimpleNode<K>, LookupEntry<K, SimpleNode<K>>>(parent -> new SimpleNode<K>(), LookupEntry::new);
 	}
 }

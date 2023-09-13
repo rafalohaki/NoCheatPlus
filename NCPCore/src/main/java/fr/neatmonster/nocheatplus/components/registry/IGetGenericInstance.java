@@ -28,6 +28,6 @@ public interface IGetGenericInstance {
      * @param registeredFor
      * @return The instance, or null, if none is registered.
      */
-    public <T> T getGenericInstance(Class<T> registeredFor);
+    <T> T getGenericInstance(Class<T> registeredFor);
 
 }

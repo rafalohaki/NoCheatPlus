@@ -14,8 +14,8 @@
  */
 package fr.neatmonster.nocheatplus.config;
 
-import java.util.ArrayList;
 import java.util.Arrays;
+import java.util.Collections;
 import java.util.LinkedList;
 
 import org.bukkit.Material;
@@ -308,7 +308,7 @@ public class DefaultConfig extends ConfigFile {
         set(ConfPaths.COMBINED_INVULNERABLE_TRIGGERS_ALWAYS, false, 785);
         set(ConfPaths.COMBINED_INVULNERABLE_TRIGGERS_FALLDISTANCE, true, 785);
         set(ConfPaths.COMBINED_INVULNERABLE_INITIALTICKS_JOIN, -1, 785);
-        set(ConfPaths.COMBINED_INVULNERABLE_IGNORE, Arrays.asList("FALL"), 785);
+        set(ConfPaths.COMBINED_INVULNERABLE_IGNORE, Collections.singletonList("FALL"), 785);
         set(ConfPaths.COMBINED_INVULNERABLE_MODIFIERS + ".all", 0, 785);
         // Munchhausen
         set(ConfPaths.COMBINED_MUNCHHAUSEN_CHECK, "default", 785);
@@ -395,7 +395,7 @@ public class DefaultConfig extends ConfigFile {
         set(ConfPaths.INVENTORY_ACTIVE, "default", 1144);
         // FastClick
         set(ConfPaths.INVENTORY_FASTCLICK_CHECK, "default", 785);
-        set(ConfPaths.INVENTORY_FASTCLICK_EXCLUDE, Arrays.asList("Inventory Name Here"), 1154);
+        set(ConfPaths.INVENTORY_FASTCLICK_EXCLUDE, Collections.singletonList("Inventory Name Here"), 1154);
         set(ConfPaths.INVENTORY_FASTCLICK_SPARECREATIVE, true, 785);
         set(ConfPaths.INVENTORY_FASTCLICK_TWEAKS1_5, true, 785);
         set(ConfPaths.INVENTORY_FASTCLICK_LIMIT_SHORTTERM, 4, 785);
@@ -743,11 +743,11 @@ public class DefaultConfig extends ConfigFile {
 
         // Compatibility settings.
         set(ConfPaths.COMPATIBILITY_EXEMPTIONS_WILDCARD_DEFAULT_METADATA_ACTIVE, true, 785);
-        set(ConfPaths.COMPATIBILITY_EXEMPTIONS_WILDCARD_DEFAULT_METADATA_KEYS, Arrays.asList("nocheat.exempt"), 785);
+        set(ConfPaths.COMPATIBILITY_EXEMPTIONS_WILDCARD_DEFAULT_METADATA_KEYS, Collections.singletonList("nocheat.exempt"), 785);
         set(ConfPaths.COMPATIBILITY_EXEMPTIONS_WILDCARD_NPC_ACTIVE, true, 785);
         set(ConfPaths.COMPATIBILITY_EXEMPTIONS_WILDCARD_NPC_BUKKITINTERFACE, true, 785);
         set(ConfPaths.COMPATIBILITY_EXEMPTIONS_WILDCARD_NPC_METADATA_ACTIVE, true, 785);
-        set(ConfPaths.COMPATIBILITY_EXEMPTIONS_WILDCARD_NPC_METADATA_KEYS, Arrays.asList("NPC"), 785);
+        set(ConfPaths.COMPATIBILITY_EXEMPTIONS_WILDCARD_NPC_METADATA_KEYS, Collections.singletonList("NPC"), 785);
         set(ConfPaths.COMPATIBILITY_EXEMPTIONS_REMOVE_JOIN, true, 785);
         set(ConfPaths.COMPATIBILITY_EXEMPTIONS_REMOVE_LEAVE, true, 785);
         set(ConfPaths.COMPATIBILITY_SERVER_CBDEDICATED_ENABLE, true, 785);
@@ -756,10 +756,10 @@ public class DefaultConfig extends ConfigFile {
         set(ConfPaths.COMPATIBILITY_BLOCKS + ConfPaths.SUB_ALLOWINSTANTBREAK, new LinkedList<String>(), 785);
         set(ConfPaths.COMPATIBILITY_BLOCKS + ConfPaths.SUB_OVERRIDEFLAGS + "." + Material.SNOW.name().toLowerCase(), "default", 785);
         // Make blocks ign_passable+ground_height.
-        for (final String name : Arrays.asList(
+        for (final String name : Collections.singletonList(
                 // TODO: 
                 "moving_piston"
-                )) {
+        )) {
             set(ConfPaths.COMPATIBILITY_BLOCKS + ConfPaths.SUB_OVERRIDEFLAGS + "." + name, "default+ign_passable+ground_height", 785);
         }
         set(ConfPaths.COMPATIBILITY_BLOCKS + ConfPaths.SUB_BLOCKCACHE_WORLD_MINY, ServerVersion.compareMinecraftVersion("1.18") >= 0 ? -64 : 0,  1154);

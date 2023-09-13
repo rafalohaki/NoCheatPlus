@@ -127,8 +127,7 @@ public class ViolationData implements IViolationInfo, ActionData {
         this.penaltyList = penaltyList == null ? new DefaultPenaltyList() : penaltyList;
         boolean needsParameters = false;
 
-        for (int i = 0; i < applicableActions.length; i++) {
-            final Action<ViolationData, ActionList> action = applicableActions[i];
+        for (final Action<ViolationData, ActionList> action : applicableActions) {
             if (!needsParameters && action.needsParameters()) {
                 needsParameters = true;
             }
@@ -283,7 +282,7 @@ public class ViolationData implements IViolationInfo, ActionData {
             case UUID:
                 return player.getUniqueId().toString();
             case VIOLATIONS:
-                return String.valueOf((long) Math.round(vL));
+                return String.valueOf(Math.round(vL));
             case WORLD: {
                 String world = getParameterValue(ParameterName.WORLD);
                 return world == null ? player.getWorld().getName() : world;
@@ -300,7 +299,7 @@ public class ViolationData implements IViolationInfo, ActionData {
     @Override
     public void setParameter(final ParameterName parameterName, final String value) {
         if (parameters == null) {
-            parameters = new HashMap<ParameterName, String>();
+            parameters = new HashMap<>();
         }
         parameters.put(parameterName, value);
     }

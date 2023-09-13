@@ -14,7 +14,6 @@
  */
 package fr.neatmonster.nocheatplus.components.registry.factory;
 
-import java.util.Arrays;
 import java.util.Collection;
 import java.util.Collections;
 import java.util.LinkedHashSet;
@@ -44,9 +43,9 @@ public class RichFactoryRegistry<A> extends RichTypeSetRegistry implements IRich
 
     public static class CheckRemovalSpec {
 
-        public final Collection<Class<?>> completeRemoval = new LinkedHashSet<Class<?>>();
-        public final Collection<Class<? extends IDataOnRemoveSubCheckData>> subCheckRemoval = new LinkedHashSet<Class<? extends IDataOnRemoveSubCheckData>>();
-        public final Collection<CheckType> checkTypes;;
+        public final Collection<Class<?>> completeRemoval = new LinkedHashSet<>();
+        public final Collection<Class<? extends IDataOnRemoveSubCheckData>> subCheckRemoval = new LinkedHashSet<>();
+        public final Collection<CheckType> checkTypes;
 
         public CheckRemovalSpec(final CheckType checkType, 
                 final boolean withDescendantCheckTypes, 
@@ -54,31 +53,23 @@ public class RichFactoryRegistry<A> extends RichTypeSetRegistry implements IRich
                 ) {
             this(withDescendantCheckTypes 
                     ? CheckTypeUtil.getWithDescendants(checkType)
-                            : Arrays.asList(checkType), factoryRegistry);
+                            : Collections.singletonList(checkType), factoryRegistry);
         }
 
         public CheckRemovalSpec(final Collection<CheckType> checkTypes, 
                 final IRichFactoryRegistry<?> factoryRegistry) {
             this.checkTypes = checkTypes;
             for (final CheckType refType : checkTypes) {
-                for (final Class<? extends IData> type : factoryRegistry.getGroupedTypes(
-                        IData.class, refType)) {
-                    completeRemoval.add(type);
-                }
-                for (final Class<? extends IDataOnRemoveSubCheckData> type : factoryRegistry.getGroupedTypes(
-                        IDataOnRemoveSubCheckData.class, refType)) {
-                    subCheckRemoval.add(type);
-                }
+                completeRemoval.addAll(factoryRegistry.getGroupedTypes(
+                        IData.class, refType));
+                subCheckRemoval.addAll(factoryRegistry.getGroupedTypes(
+                        IDataOnRemoveSubCheckData.class, refType));
             }
             if (checkTypes.contains(CheckType.ALL)) {
-                for (final Class<? extends IData> type : factoryRegistry.getGroupedTypes(
-                        IData.class)) {
-                    completeRemoval.add(type);
-                }
-                for (final Class<? extends IDataOnRemoveSubCheckData> type : factoryRegistry.getGroupedTypes(
-                        IDataOnRemoveSubCheckData.class)) {
-                    subCheckRemoval.add(type);
-                }
+                completeRemoval.addAll(factoryRegistry.getGroupedTypes(
+                        IData.class));
+                subCheckRemoval.addAll(factoryRegistry.getGroupedTypes(
+                        IDataOnRemoveSubCheckData.class));
             }
         }
     }
@@ -92,7 +83,7 @@ public class RichFactoryRegistry<A> extends RichTypeSetRegistry implements IRich
     public RichFactoryRegistry(final Lock lock) {
         super(lock);
         this.lock = lock;
-        factoryRegistry = new FactoryOneRegistry<A>(
+        factoryRegistry = new FactoryOneRegistry<>(
                 lock, CheckUtils.primaryServerThreadContextTester);
     }
 
@@ -119,7 +110,7 @@ public class RichFactoryRegistry<A> extends RichTypeSetRegistry implements IRich
     public <G> void createAutoGroup(final Class<G> groupType) {
         lock.lock();
         createGroup(groupType);
-        final Set<Class<?>> autoGroups = new LinkedHashSet<Class<?>>(this.autoGroups);
+        final Set<Class<?>> autoGroups = new LinkedHashSet<>(this.autoGroups);
         autoGroups.add(groupType);
         this.autoGroups = autoGroups;
         lock.unlock();

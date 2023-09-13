@@ -80,29 +80,27 @@ public class GenericLogAction extends ActionWithParameters<ViolationData, Action
     public GenericLogAction(final String name, final int delay, final int repeat, final String message, 
             final boolean checkActive, final GenericLogActionConfig... configs) {
         super(name, delay, repeat, message);
-        final List<GenericLogActionConfig> temp = new ArrayList<GenericLogAction.GenericLogActionConfig>(
+        final List<GenericLogActionConfig> temp = new ArrayList<>(
                 configs.length);
         boolean replaceColor = false;
         boolean stripColor = false;
         boolean checkActiveUseful = false;
-        for (int i = 0; i < configs.length; i++) {
-            GenericLogActionConfig config = configs[i];
+        for (GenericLogActionConfig config : configs) {
             if (config == null) {
                 continue;
             }
             temp.add(config);
             if (config.chatColor) {
                 replaceColor = true;
-            }
-            else {
+            } else {
                 stripColor = true;
             }
             if (config.configPathActive != null) {
                 checkActiveUseful = true;
             }
         }
-        this.configs = temp.toArray(new GenericLogActionConfig[temp.size()]);
-        this.checkActive = checkActive ? checkActiveUseful : false;
+        this.configs = temp.toArray(new GenericLogActionConfig[0]);
+        this.checkActive = checkActive && checkActiveUseful;
         this.replaceColor = replaceColor;
         this.stripColor = stripColor;
     }
@@ -113,11 +111,10 @@ public class GenericLogAction extends ActionWithParameters<ViolationData, Action
         if (!config.getBoolean(ConfPaths.LOGGING_ACTIVE) || configs.length == 0) {
             return null;
         }
-        final List<GenericLogActionConfig> temp = new ArrayList<GenericLogAction.GenericLogActionConfig>(
+        final List<GenericLogActionConfig> temp = new ArrayList<>(
                 configs.length);
-        for (int i = 0; i < configs.length; i ++) {
-            final GenericLogActionConfig logConfig = configs[i];
-            if (checkActive && logConfig.configPathActive != null 
+        for (final GenericLogActionConfig logConfig : configs) {
+            if (checkActive && logConfig.configPathActive != null
                     && !config.getBoolean(logConfig.configPathActive)) {
                 continue;
             }
@@ -126,7 +123,7 @@ public class GenericLogAction extends ActionWithParameters<ViolationData, Action
         if (temp.isEmpty()) {
             return null;
         }
-        final GenericLogActionConfig[] logConfigs = temp.toArray(new GenericLogActionConfig[temp.size()]);
+        final GenericLogActionConfig[] logConfigs = temp.toArray(new GenericLogActionConfig[0]);
         return new GenericLogAction(name, delay, repeat, message, false, logConfigs);
     }
 
@@ -144,8 +141,7 @@ public class GenericLogAction extends ActionWithParameters<ViolationData, Action
         final String messageNoColor = stripColor ? ColorUtil.removeColors(message) : null;
         final String messageWithColor = replaceColor ? ColorUtil.replaceColors(message) : null;
         final ConfigFile configFile = checkActive ? ConfigManager.getConfigFile() : null;
-        for (int i = 0; i < configs.length; i ++) {
-            final GenericLogActionConfig config = configs[i];
+        for (final GenericLogActionConfig config : configs) {
             if (checkActive && config.configPathActive != null && !configFile.getBoolean(config.configPathActive)) {
                 continue;
             }
@@ -162,8 +158,8 @@ public class GenericLogAction extends ActionWithParameters<ViolationData, Action
     public String toString() {
         final StringBuilder builder = new StringBuilder(32 + 2 * configs.length);
         builder.append("log:" + name + ":" + delay + ":" + repeat + ":");
-        for (int i = 0; i < configs.length; i ++) {
-            builder.append(configs[i].actionConfigSuffix);
+        for (GenericLogActionConfig config : configs) {
+            builder.append(config.actionConfigSuffix);
         }
         return builder.toString();
     }
@@ -184,8 +180,8 @@ public class GenericLogAction extends ActionWithParameters<ViolationData, Action
      *         well.
      */
     public boolean logsToStream(final StreamID streamID) {
-        for (int i = 0; i < configs.length; i++) {
-            if (streamID == configs[i].streamID) {
+        for (GenericLogActionConfig config : configs) {
+            if (streamID == config.streamID) {
                 return true;
             }
         }

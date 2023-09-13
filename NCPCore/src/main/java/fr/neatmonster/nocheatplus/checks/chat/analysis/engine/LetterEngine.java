@@ -49,7 +49,7 @@ import fr.neatmonster.nocheatplus.logging.StaticLog;
 public class LetterEngine implements IRemoveData, IHaveCheckType, ConsistencyChecker{
 
     /** Global processors */
-    protected final List<WordProcessor> processors = new ArrayList<WordProcessor>();
+    protected final List<WordProcessor> processors = new ArrayList<>();
 
     /**
      * Mapping players to data.
@@ -83,7 +83,7 @@ public class LetterEngine implements IRemoveData, IHaveCheckType, ConsistencyChe
 
     public Map<String, Float> process(final MessageLetterCount letterCount, final String playerName, final ChatConfig cc, final ChatData data){
 
-        final Map<String, Float> result = new HashMap<String, Float>();
+        final Map<String, Float> result = new HashMap<>();
 
         // Global processors.
         if (cc.textGlobalCheck){

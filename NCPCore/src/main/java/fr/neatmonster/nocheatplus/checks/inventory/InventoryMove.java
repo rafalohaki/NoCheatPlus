@@ -21,25 +21,18 @@ import org.bukkit.GameMode;
 import org.bukkit.event.inventory.InventoryType;
 import org.bukkit.event.inventory.InventoryType.SlotType;
 import org.bukkit.entity.Player;
-import org.bukkit.Material;
-import org.bukkit.Location;
-import org.bukkit.block.Block;
 
-import fr.neatmonster.nocheatplus.NCPAPIProvider;
 import fr.neatmonster.nocheatplus.actions.ParameterName;
 import fr.neatmonster.nocheatplus.checks.Check;
 import fr.neatmonster.nocheatplus.checks.CheckType;
 import fr.neatmonster.nocheatplus.checks.ViolationData;
 import fr.neatmonster.nocheatplus.checks.combined.Improbable;
 import fr.neatmonster.nocheatplus.checks.moving.model.PlayerMoveData;
-import fr.neatmonster.nocheatplus.checks.moving.model.PlayerMoveInfo;
-import fr.neatmonster.nocheatplus.checks.moving.magic.Magic;
 import fr.neatmonster.nocheatplus.checks.moving.MovingData;
 import fr.neatmonster.nocheatplus.utilities.StringUtil;
 import fr.neatmonster.nocheatplus.utilities.collision.CollisionUtil;
 import fr.neatmonster.nocheatplus.compat.Bridge1_13;
 import fr.neatmonster.nocheatplus.compat.Bridge1_9;
-import fr.neatmonster.nocheatplus.compat.BridgeEnchant;
 import fr.neatmonster.nocheatplus.players.IPlayerData;
 import fr.neatmonster.nocheatplus.utilities.InventoryUtil;
 import fr.neatmonster.nocheatplus.compat.versions.ServerVersion;
@@ -75,7 +68,7 @@ public class InventoryMove extends Check {
         
         boolean cancel = false;
         boolean violation = false;
-        List<String> tags = new LinkedList<String>();
+        List<String> tags = new LinkedList<>();
         // NOTES: 1) NoCheatPlus provides a base speed at which players can move without taking into account any mechanic:
         //        the idea is that if the base speed does not equal to the finally allowed speed then the player is being moved by friction or other means.
         //        2) Important: MC allows players to swim (and keep the status) when on ground, but this is not *consistently* reflected back to the server 

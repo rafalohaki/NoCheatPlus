@@ -86,8 +86,8 @@ public class MovingUtil {
      * @param cc
      * @return
      */
-    public static final boolean shouldCheckSurvivalFly(final Player player, final PlayerLocation fromLocation, final PlayerLocation toLocation, 
-                                                       final MovingData data, final MovingConfig cc, final IPlayerData pData) {
+    public static boolean shouldCheckSurvivalFly(final Player player, final PlayerLocation fromLocation, final PlayerLocation toLocation,
+                                                 final MovingData data, final MovingConfig cc, final IPlayerData pData) {
 
         final GameMode gameMode = player.getGameMode();
         final double yDistance = data.playerMoves.getCurrentMove().yDistance;
@@ -373,8 +373,7 @@ public class MovingUtil {
         final Chunk toChunk = loc.getChunk();
         final Entity[] entities = toChunk.getEntities();
         MovingData untrackedData = null;
-        for (int i = 0; i < entities.length; i++) {
-            final Entity entity = entities[i];
+        for (final Entity entity : entities) {
             if (entity.getType() != EntityType.PLAYER) {
                 continue;
             }
@@ -390,12 +389,10 @@ public class MovingUtil {
                     // Data might have been removed.
                     // TODO: Consider counting as tracked?
                     continue;
-                }
-                else if (TrigUtil.isSamePos(refLoc, otherLastMove.to.getX(), otherLastMove.to.getY(), otherLastMove.to.getZ())) {
+                } else if (TrigUtil.isSamePos(refLoc, otherLastMove.to.getX(), otherLastMove.to.getY(), otherLastMove.to.getZ())) {
                     // Tracked.
                     return null;
-                }
-                else {
+                } else {
                     // Untracked location.
                     // TODO: Discard locations in the same block, if passable.
                     // TODO: Sanity check distance?
@@ -795,7 +792,7 @@ public class MovingUtil {
      * @param from
      * @return {rough position of ground or -1.0 if none, maximum error}
      */
-    private static final double[] scanForGroundOrResetCond(final Player player, final PlayerLocation from) {
+    private static double[] scanForGroundOrResetCond(final Player player, final PlayerLocation from) {
         // Re-check for ground - who knows where this will get called from.
         if (from.isOnGroundOrResetCond()) {
             // TODO: + inside blocks?

@@ -22,7 +22,7 @@ public interface ShapeModel<W> {
     // TODO: Best route passable workaround through here too (base on a flag), + getGroundMinHeight?.
 
     // TODO: Refine +- might have BukkitBlockCacheNode etc.
-    public double[] getShape(BlockCache blockCache, W world, int x, int y, int z);
+    double[] getShape(BlockCache blockCache, W world, int x, int y, int z);
 
     /**
      * Allow faking data.
@@ -31,6 +31,6 @@ public interface ShapeModel<W> {
      *         Bukkit method is used (as long as possible). 0 may be returned
      *         for performance.
      */
-    public int getFakeData(BlockCache blockCache, W world, int x, int y, int z);
+    int getFakeData(BlockCache blockCache, W world, int x, int y, int z);
 
 }

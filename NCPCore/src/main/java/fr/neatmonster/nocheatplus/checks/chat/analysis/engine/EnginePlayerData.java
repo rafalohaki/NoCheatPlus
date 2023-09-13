@@ -31,7 +31,7 @@ import fr.neatmonster.nocheatplus.components.data.IData;
  */
 public class EnginePlayerData implements IData{
 	
-	public final List<WordProcessor> processors = new ArrayList<WordProcessor>(5);
+	public final List<WordProcessor> processors = new ArrayList<>(5);
 
 	public EnginePlayerData(ChatConfig cc) {
 		EnginePlayerConfig config = cc.textEnginePlayerConfig;

@@ -36,7 +36,7 @@ public class InstanceMapLOW {
     private final HashMapLOW<Class<?>, Object> map;
 
     public InstanceMapLOW(final Lock lock, int initialSize) {
-        map = new HashMapLOW<Class<?>, Object>(lock, 12);
+        map = new HashMapLOW<>(lock, 12);
     }
 
     @SuppressWarnings("unchecked")

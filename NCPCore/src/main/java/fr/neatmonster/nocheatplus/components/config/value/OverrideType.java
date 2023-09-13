@@ -42,9 +42,9 @@ public enum OverrideType {
     PERMANENT(100)
     ;
 
-    private int priority;
+    private final int priority;
 
-    private OverrideType(int priority) {
+    OverrideType(int priority) {
         this.priority = priority;
     }
 

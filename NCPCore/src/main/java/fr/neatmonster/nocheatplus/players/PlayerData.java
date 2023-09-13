@@ -100,7 +100,7 @@ public class PlayerData implements IPlayerData {
     // TODO: IPlayerData for the more official API.
 
     /** Monitor player task load across all players (nanoseconds per server tick). */
-    private static ActionFrequency taskLoad = new ActionFrequency(6, 7);
+    private static final ActionFrequency taskLoad = new ActionFrequency(6, 7);
     private static final int ticksMonitored = taskLoad.numberOfBuckets() * (int) taskLoad.bucketDuration();
     private static final long msMonitored = ticksMonitored * 50;
     /**
@@ -110,7 +110,7 @@ public class PlayerData implements IPlayerData {
      * because we'll be adding up zeros most of the time here. Perhaps just
      * relaying to TickTask.getLag is enough.
      */
-    private static float heavyLoad = 500000f / (float) ticksMonitored;
+    private static final float heavyLoad = 500000f / (float) ticksMonitored;
 
     // Default tags.
     // TODO: Move elsewhere (API?)
@@ -165,7 +165,7 @@ public class PlayerData implements IPlayerData {
     private final PermissionRegistry permissionRegistry;
 
     /** Permission cache. */
-    private final HashMapLOW<Integer, PermissionNode> permissions = new HashMapLOW<Integer, PermissionNode>(lock, 35);
+    private final HashMapLOW<Integer, PermissionNode> permissions = new HashMapLOW<>(lock, 35);
     // TODO: a per entry typed variant (key - value relation)?
     private final InstanceMapLOW dataCache = new InstanceMapLOW(lock, 24);
 
@@ -178,9 +178,9 @@ public class PlayerData implements IPlayerData {
 
     private boolean frequentPlayerTaskShouldBeScheduled = false;
     /** Actually queried ones. */
-    private final DualSet<RegisteredPermission> updatePermissions = new DualSet<RegisteredPermission>(lock);
+    private final DualSet<RegisteredPermission> updatePermissions = new DualSet<>(lock);
     /** Possibly needed in future. */
-    private final DualSet<RegisteredPermission> updatePermissionsLazy = new DualSet<RegisteredPermission>(lock);
+    private final DualSet<RegisteredPermission> updatePermissionsLazy = new DualSet<>(lock);
 
     /** TODO: Soon to add minimized offline data, so these kind of things don't impact as much. */
     private final PlayerCheckTypeTree checkTypeTree = new PlayerCheckTypeTree(lock);
@@ -799,7 +799,7 @@ public class PlayerData implements IPlayerData {
      */
     public void addTag(final String tag) {
         if (tags == null) {
-            tags = new HashSet<String>();
+            tags = new HashSet<>();
         }
         tags.add(tag);
     }
@@ -922,7 +922,7 @@ public class PlayerData implements IPlayerData {
     @Override
     public <T> T getGenericInstance(final Class<T> registeredFor) {
         // 1. Check for cache (local).
-        final Object res = dataCache.get(registeredFor);
+        final T res = dataCache.get(registeredFor);
         if (res == null) {
             /*
              * TODO: Consider storing null and check containsKey(registeredFor)
@@ -932,7 +932,7 @@ public class PlayerData implements IPlayerData {
             return cacheMissGenericInstance(registeredFor);
         }
         else {
-            return (T) res;
+            return res;
         }
     }
 
@@ -950,7 +950,7 @@ public class PlayerData implements IPlayerData {
     }
 
     private <T> T putDataCache(final Class<T> registeredFor, final T instance) {
-        final T previousInstance = (T) dataCache.putIfAbsent(registeredFor, instance); // Under lock.
+        final T previousInstance = dataCache.putIfAbsent(registeredFor, instance); // Under lock.
         return previousInstance == null ? instance : previousInstance;
     }
 
@@ -975,9 +975,9 @@ public class PlayerData implements IPlayerData {
             final Collection<Class<? extends IDataOnRemoveSubCheckData>> types,
             final Collection<CheckType> checkTypes
             ) {
-        final Collection<Class<?>> removeTypes = new LinkedList<Class<?>>();
+        final Collection<Class<?>> removeTypes = new LinkedList<>();
         for (final Class<? extends IDataOnRemoveSubCheckData> type : types) {
-            final IDataOnRemoveSubCheckData impl = (IDataOnRemoveSubCheckData) dataCache.get(type);
+            final IDataOnRemoveSubCheckData impl = dataCache.get(type);
             if (impl != null) {
                 if (impl.dataOnRemoveSubCheckData(checkTypes)) {
                     removeTypes.add(type);
@@ -994,9 +994,8 @@ public class PlayerData implements IPlayerData {
      * @param changedPermissions 
      */
     public void adjustSettings(final Set<RegisteredPermission> changedPermissions) {
-        final Iterator<RegisteredPermission> it = changedPermissions.iterator();
-        while (it.hasNext()) {
-            final PermissionNode node = permissions.get(it.next().getId());
+        for (RegisteredPermission changedPermission : changedPermissions) {
+            final PermissionNode node = permissions.get(changedPermission.getId());
             if (node != null) {
                 node.invalidate();
             }

@@ -28,7 +28,7 @@ public interface IPenalty<RI> {
      * 
      * @return
      */
-    public Class<RI> getRegisteredInput();
+    Class<RI> getRegisteredInput();
 
     /**
      * Internal convenience method to get around some of generics.
@@ -38,7 +38,7 @@ public interface IPenalty<RI> {
      * 
      * @param penaltyList
      */
-    public void addToPenaltyList(IPenaltyList penaltyList);
+    void addToPenaltyList(IPenaltyList penaltyList);
 
     /**
      * Apply the penalty using an appropriate input.
@@ -48,6 +48,6 @@ public interface IPenalty<RI> {
      *         double processing in case of the penalty applying for multiple
      *         (specific) types. Return false, to keep it in a list.
      */
-    public boolean apply(RI input);
+    boolean apply(RI input);
 
 }

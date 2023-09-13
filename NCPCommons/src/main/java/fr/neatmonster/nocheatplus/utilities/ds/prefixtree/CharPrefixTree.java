@@ -45,10 +45,10 @@ public class CharPrefixTree<N extends CharNode<N>, L extends CharLookupEntry<N>>
      * @param chars
      * @return
      */
-    public static final List<Character> toCharacterList(final char[] chars){
-        final List<Character> characters = new ArrayList<Character>(chars.length);
-        for (int i = 0; i < chars.length; i++){
-            characters.add(chars[i]);
+    public static List<Character> toCharacterList(final char[] chars){
+        final List<Character> characters = new ArrayList<>(chars.length);
+        for (char aChar : chars) {
+            characters.add(aChar);
         }
         return characters;
     }
@@ -148,8 +148,8 @@ public class CharPrefixTree<N extends CharNode<N>, L extends CharLookupEntry<N>>
      *         inputs, false otherwise.
      */
     public boolean hasAnyPrefixWords(final String... inputs){
-        for (int i = 0; i < inputs.length; i++){
-            if (hasPrefixWords(inputs[i])){
+        for (String input : inputs) {
+            if (hasPrefixWords(input)) {
                 return true;
             }
         }
@@ -211,16 +211,6 @@ public class CharPrefixTree<N extends CharNode<N>, L extends CharLookupEntry<N>>
      * @return
      */
     public static CharPrefixTree<SimpleCharNode, CharLookupEntry<SimpleCharNode>> newCharPrefixTree(){
-        return new CharPrefixTree<SimpleCharNode, CharLookupEntry<SimpleCharNode>>(new NodeFactory<Character, SimpleCharNode>(){
-            @Override
-            public final SimpleCharNode newNode(final SimpleCharNode parent) {
-                return new SimpleCharNode();
-            }
-        }, new LookupEntryFactory<Character, SimpleCharNode, CharLookupEntry<SimpleCharNode>>() {
-            @Override
-            public final CharLookupEntry<SimpleCharNode> newLookupEntry(final SimpleCharNode node, final SimpleCharNode insertion, final int depth, final boolean hasPrefix) {
-                return new CharLookupEntry<SimpleCharNode>(node, insertion, depth, hasPrefix);
-            }
-        });
+        return new CharPrefixTree<SimpleCharNode, CharLookupEntry<SimpleCharNode>>(parent -> new SimpleCharNode(), CharLookupEntry::new);
     }
 }

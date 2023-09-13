@@ -19,7 +19,6 @@ import java.lang.reflect.Field;
 import java.lang.reflect.Method;
 import java.util.ArrayList;
 import java.util.Arrays;
-import java.util.Collections;
 import java.util.Comparator;
 import java.util.List;
 
@@ -43,7 +42,7 @@ import fr.neatmonster.nocheatplus.utilities.StringUtil;
 public class ReflectBlockSix implements IReflectBlock {
 
     /** Obfuscated nms names, allowing to find the order in the source code under certain circumstances. */
-    private static final List<String> possibleNames = new ArrayList<String>();
+    private static final List<String> possibleNames = new ArrayList<>();
 
     static {
         // These might suffice for a while.
@@ -141,7 +140,7 @@ public class ReflectBlockSix implements IReflectBlock {
 
     private String[] guessBoundsMethodNames(Class<?> clazz) {
         // Filter accepted method names.
-        List<String> names = new ArrayList<String>();
+        List<String> names = new ArrayList<>();
         for (Method method : clazz.getMethods()) {
             if (method.getReturnType() == double.class && method.getParameterTypes().length == 0 && possibleNames.contains(method.getName())) {
                 names.add(method.getName());
@@ -151,12 +150,7 @@ public class ReflectBlockSix implements IReflectBlock {
             return null;
         }
         // Sort in the expected order.
-        Collections.sort(names, new Comparator<String>() {
-            @Override
-            public int compare(String o1, String o2) {
-                return Integer.compare(possibleNames.indexOf(o1), possibleNames.indexOf(o2));
-            }
-        });
+        names.sort(Comparator.comparingInt(possibleNames::indexOf));
         // Test for a sequence of exactly 6 consecutive entries.
         int startIndex = 0;
         if (names.size() > 6) {

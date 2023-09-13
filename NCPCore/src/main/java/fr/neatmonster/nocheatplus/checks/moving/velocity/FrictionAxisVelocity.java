@@ -32,8 +32,8 @@ public class FrictionAxisVelocity {
 
     private static final double defaultFrictionFactor = 0.93;
 
-    private final List<AccountEntry> queued = new LinkedList<AccountEntry>();
-    private final List<AccountEntry> active = new LinkedList<AccountEntry>();
+    private final List<AccountEntry> queued = new LinkedList<>();
+    private final List<AccountEntry> active = new LinkedList<>();
 
     public void add(AccountEntry vel) {
         // TODO: Merging behavior?
@@ -85,9 +85,8 @@ public class FrictionAxisVelocity {
             // (Altered entries should be kept, since they get used right away.)
         }
         // Decrease counts for queued.
-        final Iterator<AccountEntry> it = queued.iterator();
-        while (it.hasNext()) {
-            it.next().actCount --;
+        for (AccountEntry accountEntry : queued) {
+            accountEntry.actCount--;
         }
     }
 

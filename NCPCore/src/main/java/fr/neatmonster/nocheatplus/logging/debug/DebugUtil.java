@@ -173,7 +173,7 @@ public class DebugUtil {
             builder.append(", ");
             builder.append(bounds[5]);
             if (bounds.length > 6 && bounds.length % 6 == 0) {
-                for (int i = 2; i <= (int)bounds.length / 6; i++) {
+                for (int i = 2; i <= bounds.length / 6; i++) {
                     builder.append(", ");
                     builder.append(bounds[i*6-6]);
                     builder.append(", ");

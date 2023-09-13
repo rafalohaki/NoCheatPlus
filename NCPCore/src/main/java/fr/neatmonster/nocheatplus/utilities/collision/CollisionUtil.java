@@ -304,8 +304,7 @@ public class CollisionUtil {
      * @return true, if successful
      */
     public static boolean intersectsBlock(final double min, final double max, final int block) {
-        final double db = (double) block;
-        return db + 1.0 > min && db < max;
+        return (double) block + 1.0 > min && (double) block < max;
     }
 
     /**

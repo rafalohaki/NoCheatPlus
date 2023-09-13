@@ -40,7 +40,7 @@ public interface IPlayerData extends IData, IBaseDataAccess, IGetGenericInstance
      * 
      * @return
      */
-    public String getPlayerName();
+    String getPlayerName();
 
     /**
      * Get the player name in lower case, as had been passed at the time of
@@ -48,21 +48,21 @@ public interface IPlayerData extends IData, IBaseDataAccess, IGetGenericInstance
      * 
      * @return
      */
-    public String getPlayerNameLowerCase();
+    String getPlayerNameLowerCase();
 
     /**
      * Get the unique id for the player.
      * 
      * @return
      */
-    public UUID getPlayerId();
+    UUID getPlayerId();
 
     /**
      * Get the System.currentTimeMillis() value from player join handling.
      * 
      * @return
      */
-    public long getLastJoinTime();
+    long getLastJoinTime();
 
     /**
      * Permission check (thread-safe, results and impact of asynchronous queries depends on
@@ -74,13 +74,13 @@ public interface IPlayerData extends IData, IBaseDataAccess, IGetGenericInstance
      *            and/or has already been fetched).
      * @return
      */
-    public boolean hasPermission(final RegisteredPermission registeredPermission, final Player player);
+    boolean hasPermission(final RegisteredPermission registeredPermission, final Player player);
 
     /**
      * Request a permission cache update.
      * @param registeredPermission
      */
-    public void requestPermissionUpdate(final RegisteredPermission registeredPermission);
+    void requestPermissionUpdate(final RegisteredPermission registeredPermission);
 
     /**
      * Low priority permission update for check type specific permissions.
@@ -88,7 +88,7 @@ public interface IPlayerData extends IData, IBaseDataAccess, IGetGenericInstance
      * @param registeredPermissions
      *            May be null.
      */
-    public void requestLazyPermissionUpdate(final RegisteredPermission... registeredPermissions);
+    void requestLazyPermissionUpdate(final RegisteredPermission... registeredPermissions);
 
     /**
      * Mimic legacy behavior (non-nested) - exempt including descendants
@@ -97,7 +97,7 @@ public interface IPlayerData extends IData, IBaseDataAccess, IGetGenericInstance
      * 
      * @param checkType
      */
-    public void exempt(final CheckType checkType);
+    void exempt(final CheckType checkType);
 
     /**
      * Mimic legacy behavior (non-nested) - unexempt including descendants
@@ -110,7 +110,7 @@ public interface IPlayerData extends IData, IBaseDataAccess, IGetGenericInstance
      * 
      * @param checkType
      */
-    public void unexempt(final CheckType checkType);
+    void unexempt(final CheckType checkType);
 
     /**
      * Exempt with reference to the given context with descendants recursively.
@@ -125,7 +125,7 @@ public interface IPlayerData extends IData, IBaseDataAccess, IGetGenericInstance
      * @param checkType
      * @param context
      */
-    public void exempt(final CheckType checkType, final ExemptionContext context);
+    void exempt(final CheckType checkType, final ExemptionContext context);
 
     /**
      * Unexempt once, including descendants recursively. <br>
@@ -143,7 +143,7 @@ public interface IPlayerData extends IData, IBaseDataAccess, IGetGenericInstance
      * @param checkType
      * @param context
      */
-    public void unexempt(final CheckType checkType, final ExemptionContext context);
+    void unexempt(final CheckType checkType, final ExemptionContext context);
 
     /**
      * Remove all (potentially nested) entries context for the given checkType
@@ -156,7 +156,7 @@ public interface IPlayerData extends IData, IBaseDataAccess, IGetGenericInstance
      * @param checkType
      * @param context
      */
-    public void unexemptAll(final CheckType checkType, final ExemptionContext context);
+    void unexemptAll(final CheckType checkType, final ExemptionContext context);
 
     /**
      * Test for exemption.
@@ -166,14 +166,14 @@ public interface IPlayerData extends IData, IBaseDataAccess, IGetGenericInstance
      * @param checkType
      * @return
      */
-    public boolean isExempted(final CheckType checkType);
+    boolean isExempted(final CheckType checkType);
 
     /**
      * Clear all exemptions, for all thread contexts.
      * <hr>
      * Call from the primary thread only.
      */
-    public void clearAllExemptions();
+    void clearAllExemptions();
 
     /**
      * Clear all exemptions for the given checkType and descendants recursively,
@@ -183,14 +183,14 @@ public interface IPlayerData extends IData, IBaseDataAccess, IGetGenericInstance
      * 
      * @param checkType
      */
-    public void clearAllExemptions(final CheckType checkType);
+    void clearAllExemptions(final CheckType checkType);
 
     /**
      * Will get set on player join and world change. Currently NOT on login.
      * 
      * @return
      */
-    public WorldIdentifier getCurrentWorldIdentifier();
+    WorldIdentifier getCurrentWorldIdentifier();
 
     /**
      * Get the currently stored IWorldData instance.
@@ -199,7 +199,7 @@ public interface IPlayerData extends IData, IBaseDataAccess, IGetGenericInstance
      *         data in that case, use instead:
      *         {@link #getCurrentWorldDataSafe()}
      */
-    public IWorldData getCurrentWorldData();
+    IWorldData getCurrentWorldData();
 
     /**
      * Convenience method: Return the default world data, if currentWorldData is
@@ -207,7 +207,7 @@ public interface IPlayerData extends IData, IBaseDataAccess, IGetGenericInstance
      * 
      * @return
      */
-    public IWorldData getCurrentWorldDataSafe();
+    IWorldData getCurrentWorldDataSafe();
 
     /**
      * Full activation check (configuration, exemption, permission).
@@ -216,7 +216,7 @@ public interface IPlayerData extends IData, IBaseDataAccess, IGetGenericInstance
      * @param player
      * @return
      */
-    public boolean isCheckActive(final CheckType checkType, final Player player);
+    boolean isCheckActive(final CheckType checkType, final Player player);
 
     /**
      * Full activation check (configuration, exemption, permission).
@@ -226,8 +226,8 @@ public interface IPlayerData extends IData, IBaseDataAccess, IGetGenericInstance
      * @param worldData
      * @return
      */
-    public boolean isCheckActive(final CheckType checkType, final Player player,
-            final IWorldData worldData);
+    boolean isCheckActive(final CheckType checkType, final Player player,
+                          final IWorldData worldData);
 
     /**
      * Bypass check including exemption and permission.
@@ -236,19 +236,19 @@ public interface IPlayerData extends IData, IBaseDataAccess, IGetGenericInstance
      * @param player
      * @return
      */
-    public boolean hasBypass(final CheckType checkType, final Player player);
+    boolean hasBypass(final CheckType checkType, final Player player);
 
     /**
      * Reset to the current world data (or the default one).
      */
-    public void resetDebug();
+    void resetDebug();
 
     /**
      * Reset to the current world data (or the default one).
      * 
      * @param checkType
      */
-    public void resetDebug(final CheckType checkType);
+    void resetDebug(final CheckType checkType);
 
     /**
      * Override debug flags.
@@ -258,11 +258,11 @@ public interface IPlayerData extends IData, IBaseDataAccess, IGetGenericInstance
      * @param overrideType
      * @param overrideChildren
      */
-    public void overrideDebug(final CheckType checkType, final AlmostBoolean active, 
-            final OverrideType overrideType, final boolean overrideChildren);
+    void overrideDebug(final CheckType checkType, final AlmostBoolean active,
+                       final OverrideType overrideType, final boolean overrideChildren);
 
     @Override
-    public <T> T getGenericInstance(Class<T> registeredFor);
+    <T> T getGenericInstance(Class<T> registeredFor);
 
     /**
      * Remove data from the cache (not from underlying factories, nor from per
@@ -270,7 +270,7 @@ public interface IPlayerData extends IData, IBaseDataAccess, IGetGenericInstance
      * 
      * @param registeredFor
      */
-    public <T> void removeGenericInstance(Class<T> registeredFor);
+    <T> void removeGenericInstance(Class<T> registeredFor);
 
     /**
      * Remove all generic instances from cache, which are contained in the given
@@ -278,14 +278,14 @@ public interface IPlayerData extends IData, IBaseDataAccess, IGetGenericInstance
      * 
      * @param types
      */
-    public void removeAllGenericInstances(Collection<Class<?>> types);
+    void removeAllGenericInstances(Collection<Class<?>> types);
 
     /**
      * Call dataOnRemoveSubCheckData(...).
      * 
      * @param subCheckRemoval
      */
-    public void removeSubCheckData(
+    void removeSubCheckData(
             Collection<Class<? extends IDataOnRemoveSubCheckData>> subCheckRemoval,
             Collection<CheckType> checkTypes);
 
@@ -295,7 +295,7 @@ public interface IPlayerData extends IData, IBaseDataAccess, IGetGenericInstance
      * 
      * @return
      */
-    public boolean getNotifyOff();
+    boolean getNotifyOff();
 
     /**
      * Allow or turn off notifications. A player must have the admin.notify
@@ -304,32 +304,32 @@ public interface IPlayerData extends IData, IBaseDataAccess, IGetGenericInstance
      * @param notifyOff
      *            set to true to turn off notifications.
      */
-    public void setNotifyOff(final boolean notifyOff);
+    void setNotifyOff(final boolean notifyOff);
     
     /**
      * Check if player join via geysermc
      * 
      * @return
      */
-    public boolean isBedrockPlayer();
+    boolean isBedrockPlayer();
 
     /**
      * Set the state player connect through geysermc
      * 
      * @param bedrockPlayer
      */
-    public void setBedrockPlayer(final boolean bedrockPlayer);
+    void setBedrockPlayer(final boolean bedrockPlayer);
 
     /**
      * Let the inventory be updated (run in TickTask).
      */
-    public void requestUpdateInventory();
+    void requestUpdateInventory();
 
     /**
      * Let the player be set back to the location stored in moving data (run in
      * TickTask). Only applies if it's set there.
      */
-    public void requestPlayerSetBack();
+    void requestPlayerSetBack();
 
     /**
      * Test if it's set to process a player set back on tick. This does not
@@ -337,7 +337,7 @@ public interface IPlayerData extends IData, IBaseDataAccess, IGetGenericInstance
      * 
      * @return
      */
-    public boolean isPlayerSetBackScheduled();
+    boolean isPlayerSetBackScheduled();
 
     /**
      * Get the client's version protocol ID through ViaVersion or ProtocolSupport. <br>
@@ -346,7 +346,7 @@ public interface IPlayerData extends IData, IBaseDataAccess, IGetGenericInstance
      * 
      * @return -1, if it cannot be determined.
      */
-    public int getClientVersionID();
+    int getClientVersionID();
 
     /**
      * Get the client's version protocol through ViaVersion or ProtocolSupport. <br>
@@ -355,7 +355,7 @@ public interface IPlayerData extends IData, IBaseDataAccess, IGetGenericInstance
      * 
      * @return ClientVersion.UNKNOWN, if it cannot be determined.
      */
-    public ClientVersion getClientVersion();
+    ClientVersion getClientVersion();
 
     /**
      * Set the client's version protocol ID as given by ProtocolSupport or ViaVersion.
@@ -363,5 +363,5 @@ public interface IPlayerData extends IData, IBaseDataAccess, IGetGenericInstance
      * 
      * @param ID
      */
-    public void setClientVersionID(final int ID);
+    void setClientVersionID(final int ID);
 }

@@ -26,6 +26,6 @@ public interface IResettableCounter {
      * Reset all contained counters. Not propagated to parent.
      * 
      */
-    public void resetCounter();
+    void resetCounter();
 
 }

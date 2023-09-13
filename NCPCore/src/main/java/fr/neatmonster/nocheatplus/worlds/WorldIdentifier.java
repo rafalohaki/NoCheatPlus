@@ -46,7 +46,7 @@ public class WorldIdentifier {
             return lowerCaseName.equalsIgnoreCase((String) obj);
         }
         else if (obj instanceof UUID) {
-            return id.equals((UUID) obj);
+            return id.equals(obj);
         }
         else {
             return false;

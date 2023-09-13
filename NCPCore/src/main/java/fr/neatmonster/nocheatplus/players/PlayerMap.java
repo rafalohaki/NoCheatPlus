@@ -66,9 +66,9 @@ public final class PlayerMap {
     private final boolean hasGetPlayer_UUID = ReflectionUtil.getMethod(Bukkit.class, "getPlayer", UUID.class) != null;
 
     // TODO: Map types (copy on write, lazy erase, or just keep ordinary maps?)
-    private Map<UUID, PlayerInfo> idInfoMap = new ConcurrentHashMap<UUID, PlayerInfo>();
-    private Map<String, PlayerInfo> exactNameInfoMap = new ConcurrentHashMap<String, PlayerMap.PlayerInfo>();
-    private Map<String, PlayerInfo> lowerCaseNameInfoMap = new ConcurrentHashMap<String, PlayerMap.PlayerInfo>();
+    private final Map<UUID, PlayerInfo> idInfoMap = new ConcurrentHashMap<>();
+    private final Map<String, PlayerInfo> exactNameInfoMap = new ConcurrentHashMap<>();
+    private final Map<String, PlayerInfo> lowerCaseNameInfoMap = new ConcurrentHashMap<>();
     // TODO: Consider: Get players by prefix (primary thread only, e.g. for use with commands).
     // TODO: get uuid/name methods?
     // TODO: unlink Player references on remove for better gc?
@@ -131,7 +131,6 @@ public final class PlayerMap {
         }
     }
 
-    @SuppressWarnings("deprecation")
     public Player getPlayerExact(final String exactName) {
         final PlayerInfo info = exactNameInfoMap.get(exactName);
         if (info != null) {
@@ -153,7 +152,6 @@ public final class PlayerMap {
         return getPlayerLowerCase(probableName.toLowerCase());
     }
 
-    @SuppressWarnings("deprecation")
     public Player getPlayerLowerCase(final String lowerCaseName) {
         final PlayerInfo info = lowerCaseNameInfoMap.get(lowerCaseName);
         if (info != null) {
@@ -254,7 +252,6 @@ public final class PlayerMap {
         return null;
     }
 
-    @SuppressWarnings("deprecation")
     private Player getPlayerBukkit(final PlayerInfo info) {
         if (hasGetPlayer_UUID) {
             return Bukkit.getPlayer(info.id);

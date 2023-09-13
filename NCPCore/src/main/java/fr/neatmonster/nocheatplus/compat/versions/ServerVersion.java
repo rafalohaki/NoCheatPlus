@@ -72,8 +72,7 @@ public class ServerVersion {
     public static Object getNMSMinecraftServer() {
         final Server server = Bukkit.getServer();
         try {
-            final Object obj = ReflectionUtil.invokeMethodNoArgs(server, "getServer");
-            return obj;
+            return ReflectionUtil.invokeMethodNoArgs(server, "getServer");
         }
         catch (Throwable t) {
             return null;

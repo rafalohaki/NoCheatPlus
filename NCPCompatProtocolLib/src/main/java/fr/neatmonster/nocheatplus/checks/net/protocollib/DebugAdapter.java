@@ -27,10 +27,8 @@ import fr.neatmonster.nocheatplus.players.DataManager;
 public class DebugAdapter extends BaseAdapter {
 
     public DebugAdapter(Plugin plugin) {
-        super(plugin, ListenerPriority.LOW, new PacketType[] {
-                PacketType.Play.Client.BLOCK_PLACE,
-                PacketType.Play.Client.BLOCK_DIG,
-        });
+        super(plugin, ListenerPriority.LOW, PacketType.Play.Client.BLOCK_PLACE,
+                PacketType.Play.Client.BLOCK_DIG);
     }
 
     @Override

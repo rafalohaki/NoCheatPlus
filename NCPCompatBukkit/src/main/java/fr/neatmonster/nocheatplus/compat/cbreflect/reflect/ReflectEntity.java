@@ -65,7 +65,7 @@ public class ReflectEntity extends ReflectGetHandleBase<Entity> {
 
         // damageEntity(...)
         // boolean hurt(net.minecraft.world.damagesource.DamageSource,float) -> a
-        nmsDamageEntityNew = ReflectionUtil.getMethod(nmsClass, "a", new Class<?>[]{damageSource.nmsClass, float.class});
+        nmsDamageEntityNew = ReflectionUtil.getMethod(nmsClass, "a", damageSource.nmsClass, float.class);
         nmsDamageEntity = nmsDamageEntityNew != null ? nmsDamageEntityNew : 
                           ReflectionUtil.getMethod(nmsClass, "damageEntity", 
                           new Class<?>[]{damageSource.nmsClass, float.class}, new Class<?>[]{damageSource.nmsClass, int.class});

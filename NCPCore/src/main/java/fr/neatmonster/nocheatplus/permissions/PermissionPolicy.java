@@ -29,7 +29,7 @@ public class PermissionPolicy {
      * @author asofold
      *
      */
-    public static enum FetchingPolicy {
+    public enum FetchingPolicy {
         /** Have this permission by default. */
         TRUE,
         /** Not have this permission by default. */
@@ -39,7 +39,7 @@ public class PermissionPolicy {
         /** Check once per interval. */
         INTERVAL,
         /** Always check this permission. */
-        ALWAYS;
+        ALWAYS
     }
 
     /** Invalidate with changing to another world. */

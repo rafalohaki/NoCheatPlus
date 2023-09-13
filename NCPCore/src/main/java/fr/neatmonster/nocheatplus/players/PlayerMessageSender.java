@@ -28,7 +28,7 @@ import fr.neatmonster.nocheatplus.utilities.OnDemandTickListener;
  */
 public class PlayerMessageSender extends OnDemandTickListener {
 
-    private final class MessageEntry{
+    private static final class MessageEntry{
         public final String playerName;
         public final String message;
         public MessageEntry(final String playerName, final String message){
@@ -38,7 +38,7 @@ public class PlayerMessageSender extends OnDemandTickListener {
     }
 
     /** Queued entries, also used as lock. */
-    private List<MessageEntry> messageEntries = new LinkedList<MessageEntry>();
+    private List<MessageEntry> messageEntries = new LinkedList<>();
 
     @Override
     public boolean delegateTick(int tick, long timeLast) {
@@ -52,7 +52,7 @@ public class PlayerMessageSender extends OnDemandTickListener {
                 return true;
             }
             entries = messageEntries;
-            messageEntries = new LinkedList<PlayerMessageSender.MessageEntry>();
+            messageEntries = new LinkedList<>();
         }
         // Do messaging.
         for (final MessageEntry entry : entries){

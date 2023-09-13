@@ -23,6 +23,6 @@ package fr.neatmonster.nocheatplus.components.registry.event;
  */
 public interface IUnregisterGenericInstanceRegistryListener {
 
-    public <T> void unregisterGenericInstanceRegistryListener(Class<T> registeredFor, IGenericInstanceRegistryListener<T> listener);
+    <T> void unregisterGenericInstanceRegistryListener(Class<T> registeredFor, IGenericInstanceRegistryListener<T> listener);
 
 }

@@ -28,6 +28,6 @@ public interface IHandle<T> {
      * 
      * @return
      */
-    public T getHandle();
+    T getHandle();
 
 }

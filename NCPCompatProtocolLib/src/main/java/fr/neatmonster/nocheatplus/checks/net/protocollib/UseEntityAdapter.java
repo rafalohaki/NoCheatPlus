@@ -15,8 +15,8 @@
 package fr.neatmonster.nocheatplus.checks.net.protocollib;
 
 import java.lang.reflect.Method;
-import java.util.Arrays;
 
+import java.util.Collections;
 import org.bukkit.entity.Player;
 import org.bukkit.plugin.Plugin;
 
@@ -104,7 +104,7 @@ public class UseEntityAdapter extends BaseAdapter {
         if (NCPAPIProvider.getNoCheatPlusAPI().getWorldDataManager().isActiveAnywhere(
                 CheckType.NET_ATTACKFREQUENCY)) {
             NCPAPIProvider.getNoCheatPlusAPI().addFeatureTags(
-                    "checks", Arrays.asList(AttackFrequency.class.getSimpleName()));
+                    "checks", Collections.singletonList(AttackFrequency.class.getSimpleName()));
         }
         attackFrequency = new AttackFrequency();
         NCPAPIProvider.getNoCheatPlusAPI().addComponent(attackFrequency);
@@ -116,7 +116,7 @@ public class UseEntityAdapter extends BaseAdapter {
             try {
                 return new LegacyReflectionSet(versionDetail);
             }
-            catch (RuntimeException e) {} // +-
+            catch (RuntimeException ignored) {} // +-
         }
         return null;
     }
@@ -125,7 +125,7 @@ public class UseEntityAdapter extends BaseAdapter {
     public void onPacketReceiving(final PacketEvent event) {
         try {
             if (event.isPlayerTemporary()) return;
-        } catch(NoSuchMethodError e) {}
+        } catch(NoSuchMethodError ignored) {}
         final long time = System.currentTimeMillis();
         final Player player = event.getPlayer();
         if (player == null) {

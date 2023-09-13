@@ -29,5 +29,5 @@ public interface BlockPropertiesSetup {
      * Additional initialization.
      * @param worldConfigProvider Configuration provider if needed.
      */
-    public void setupBlockProperties(WorldConfigProvider<?> worldConfigProvider);
+    void setupBlockProperties(WorldConfigProvider<?> worldConfigProvider);
 }

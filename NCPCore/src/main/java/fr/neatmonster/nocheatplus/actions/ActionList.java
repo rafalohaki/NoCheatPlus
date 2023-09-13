@@ -26,14 +26,7 @@ import fr.neatmonster.nocheatplus.permissions.RegisteredPermission;
  */
 public class ActionList extends AbstractActionList<ViolationData, ActionList>{
 
-    public static final ActionListFactory<ViolationData, ActionList> listFactory = new ActionListFactory<ViolationData, ActionList>() {
-
-        @Override
-        public ActionList getNewActionList(RegisteredPermission permissionSilent) {
-            return new ActionList(permissionSilent);
-        }
-
-    }; 
+    public static final ActionListFactory<ViolationData, ActionList> listFactory = ActionList::new;
 
     /**
      * 

@@ -52,8 +52,8 @@ public interface ICollideRayVsAABB extends IGetPosition {
      * @param dirZ
      * @return The same instance for chaining.
      */
-    public ICollideRayVsAABB setRay(double startX, double startY, double startZ,
-            double dirX, double dirY, double dirZ);
+    ICollideRayVsAABB setRay(double startX, double startY, double startZ,
+                             double dirX, double dirY, double dirZ);
 
     /**
      * Set the properties of the AABB, using foot-center positions and margins.
@@ -71,8 +71,8 @@ public interface ICollideRayVsAABB extends IGetPosition {
      *            Margin from targetY to the top of the box.
      * @return The same instance for chaining.
      */
-    public ICollideRayVsAABB setAABB(double targetX, double targetY, double targetZ,
-            double boxMarginHorizontal, double boxMarginVertical);
+    ICollideRayVsAABB setAABB(double targetX, double targetY, double targetZ,
+                              double boxMarginHorizontal, double boxMarginVertical);
 
     /**
      * Set the properties of the AABB, using a given boxIGetBox3D instance.
@@ -81,7 +81,7 @@ public interface ICollideRayVsAABB extends IGetPosition {
      *            The 3D bounding box to set.
      * @return The same instance for chaining.
      */
-    public ICollideRayVsAABB setAABB(IGetBox3D box);
+    ICollideRayVsAABB setAABB(IGetBox3D box);
 
     /**
      * Set the properties of the AABB, using block coordinates and a margin.
@@ -97,7 +97,7 @@ public interface ICollideRayVsAABB extends IGetPosition {
      *            A margin to apply towards all directions.
      * @return The same instance for chaining.
      */
-    public ICollideRayVsAABB setAABB(int targetX, int targetY, int targetZ, double margin);
+    ICollideRayVsAABB setAABB(int targetX, int targetY, int targetZ, double margin);
 
     /**
      * Set the properties of the AABB directly. This can be called independently
@@ -112,8 +112,9 @@ public interface ICollideRayVsAABB extends IGetPosition {
      * @param maxZ
      * @return The same instance for chaining.
      */
-    public ICollideRayVsAABB setAABB(double minX, double minY, double minZ, 
-            double maxX, double maxY, double maxZ);
+    @SuppressWarnings("JavadocDeclaration")
+    ICollideRayVsAABB setAABB(double minX, double minY, double minZ,
+                              double maxX, double maxY, double maxZ);
 
     /**
      * Set if the nearest point is to be estimated instead, in case the ray does
@@ -125,7 +126,7 @@ public interface ICollideRayVsAABB extends IGetPosition {
      *            allow some imprecision, as well as starting from 0 always).
      * @return The same instance for chaining.
      */
-    public ICollideRayVsAABB setFindNearestPointIfNotCollide(boolean findNearestPointIfNotCollide);
+    ICollideRayVsAABB setFindNearestPointIfNotCollide(boolean findNearestPointIfNotCollide);
 
     /**
      * Test if the nearest point is to be estimated instead, in case the ray
@@ -133,7 +134,7 @@ public interface ICollideRayVsAABB extends IGetPosition {
      * 
      * @return
      */
-    public boolean getFindNearestPointIfNotCollide();
+    boolean getFindNearestPointIfNotCollide();
 
     /**
      * Run the actual checking once. This can be run multiple times with varying
@@ -141,14 +142,14 @@ public interface ICollideRayVsAABB extends IGetPosition {
      * 
      * @return The same instance for chaining.
      */
-    public ICollideRayVsAABB loop();
+    ICollideRayVsAABB loop();
 
     /**
      * Just fetch the result after calling loop.
      * 
      * @return If the ray collides the AABB
      */
-    public boolean collides();
+    boolean collides();
 
     /**
      * Get some kind of squared distance from the nearest point towards the
@@ -156,7 +157,7 @@ public interface ICollideRayVsAABB extends IGetPosition {
      * 
      * @return 0.0 if colliding.
      */
-    public double getClosestDistanceSquared();
+    double getClosestDistanceSquared();
 
     /**
      * Earliest time of collision if collides() returns true, or of the nearest
@@ -165,6 +166,6 @@ public interface ICollideRayVsAABB extends IGetPosition {
      * @return Time in multiples of the initial direction vector. In case it's
      *         not possible at all, 0.0 might be returned.
      */
-    public double getTime();
+    double getTime();
 
 }

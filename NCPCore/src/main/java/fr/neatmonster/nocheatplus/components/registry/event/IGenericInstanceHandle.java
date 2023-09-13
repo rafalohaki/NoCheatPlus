@@ -36,7 +36,7 @@ public interface IGenericInstanceHandle<T> extends IHandle<T> {
      * @throws RuntimeException,
      *             if disableHandle has been called.
      */
-    public T getHandle();
+    T getHandle();
 
     /**
      * Unlink from the registry. Subsequent calls to getHandle will yield a
@@ -48,6 +48,6 @@ public interface IGenericInstanceHandle<T> extends IHandle<T> {
      * time such happens. Often changing registration is not a typical use-case.
      * This can not be undone.
      */
-    public void disableHandle();
+    void disableHandle();
 
 }

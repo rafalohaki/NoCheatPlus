@@ -17,14 +17,12 @@ package fr.neatmonster.nocheatplus.command.admin.top;
 import java.text.DecimalFormat;
 import java.util.Arrays;
 import java.util.Collection;
-import java.util.Collections;
 import java.util.Comparator;
 import java.util.Iterator;
 import java.util.LinkedHashSet;
 import java.util.List;
 import java.util.Set;
 
-import org.bukkit.Bukkit;
 import org.bukkit.ChatColor;
 import org.bukkit.command.Command;
 import org.bukkit.command.CommandSender;
@@ -61,7 +59,7 @@ public class TopCommand extends BaseCommand{
         private final int n;
         private final Plugin plugin;
         public PrimaryThreadWorker(CommandSender sender, Collection<CheckType> checkTypes, Comparator<VLView> comparator, int n, Plugin plugin) {
-            this.checkTypes = new LinkedHashSet<CheckType>(checkTypes);
+            this.checkTypes = new LinkedHashSet<>(checkTypes);
             this.sender = sender;
             this.comparator = comparator;
             this.n = n;
@@ -128,10 +126,10 @@ public class TopCommand extends BaseCommand{
             }
             
             // Sort
-            Collections.sort(views, comparator);
+            views.sort(comparator);
             // Display.
             final StringBuilder builder = new StringBuilder(100 + 32 * views.size());
-            builder.append((sender instanceof Player ? TAG : CTAG) + "Top results for check: " + c3 + bo +""+ it + checkType.toString().toLowerCase());
+            builder.append((sender instanceof Player ? TAG : CTAG) + "Top results for check: " + c3 + bo + it + checkType.toString().toLowerCase());
             int done = 0;
 
             for (final VLView view : views) {
@@ -166,7 +164,6 @@ public class TopCommand extends BaseCommand{
         this.usage = TAG + "Optional: Specify number of entries to show (once).\nObligatory: Specify check types (multiple possible).\nOptional: Specify what to sort by (multiple possible: -sumvl, -avgvl, -maxvl, -nvl, -name, -time).\nThis is a heavy operation, use with care."; // -check
     }
 
-    @SuppressWarnings("unchecked")
     @Override
     public boolean onCommand(CommandSender sender, Command command, String alias, String[] args) {
         if (args.length < 2) {
@@ -178,7 +175,7 @@ public class TopCommand extends BaseCommand{
         try {
             n = Integer.parseInt(args[1].trim());
             startIndex = 2;
-        } catch (NumberFormatException e) {}
+        } catch (NumberFormatException ignored) {}
         if (n <= 0) {
             sender.sendMessage((sender instanceof Player ? TAG : CTAG) + "Setting number of entries to 10");
             n = 1;
@@ -190,12 +187,12 @@ public class TopCommand extends BaseCommand{
             n = 10000;
         }
         
-        Set<CheckType> checkTypes = new LinkedHashSet<CheckType>();
+        Set<CheckType> checkTypes = new LinkedHashSet<>();
         for (int i = startIndex; i < args.length; i ++) {
             CheckType type = null;
             try {
                 type = CheckType.valueOf(args[i].trim().toUpperCase().replace('-', '_').replace('.', '_'));
-            } catch (Throwable t) {} // ...
+            } catch (Throwable ignored) {} // ...
             if (type != null) {
                 checkTypes.addAll(CheckTypeUtil.getWithDescendants(type)); // Includes type.
             }
@@ -208,7 +205,7 @@ public class TopCommand extends BaseCommand{
         Comparator<VLView> comparator = VLView.parseMixedComparator(args, startIndex);
         if (comparator == null) {
             // TODO: Default comparator ?
-            comparator = new FCFSComparator<VLView>(Arrays.asList(VLView.CmpnVL, VLView.CmpSumVL), true);
+            comparator = new FCFSComparator<>(Arrays.asList(VLView.CmpnVL, VLView.CmpSumVL), true);
         }
         
         // Run a worker task.

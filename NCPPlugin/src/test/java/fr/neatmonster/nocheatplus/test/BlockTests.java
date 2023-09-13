@@ -54,7 +54,7 @@ public class BlockTests {
 
         @Override
         public Collection<C> getAllConfigs() {
-            final List<C> list = new ArrayList<C>();
+            final List<C> list = new ArrayList<>();
             list.add(config);
             return list;
         }

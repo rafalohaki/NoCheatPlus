@@ -34,14 +34,14 @@ public class FCFSComparator <T> implements Comparator<T> {
     }
     
     public FCFSComparator(Collection<Comparator<T>> comparators, boolean reverse) {
-        this.comparators = new ArrayList<Comparator<T>>(comparators);
+        this.comparators = new ArrayList<>(comparators);
         this.reverse = reverse;
     }
 
     @Override
     public int compare(T o1, T o2) {
-        for (int i = 0; i < comparators.size(); i++) {
-            final int res = comparators.get(i).compare(o1, o2);
+        for (Comparator<T> comparator : comparators) {
+            final int res = comparator.compare(o1, o2);
             if (res != 0) {
                 return reverse ? -res : res;
             }

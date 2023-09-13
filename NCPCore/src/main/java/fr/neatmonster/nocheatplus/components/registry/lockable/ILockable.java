@@ -36,7 +36,7 @@ public interface ILockable {
      * @throws IllegalStateException
      *             If locking is not supported due to custom side conditions.
      */
-    public void lock();
+    void lock();
 
     /**
      * Lock with setting a secret. Restrictions may apply for the nature of the
@@ -51,7 +51,7 @@ public interface ILockable {
      *             If the secret does not fulfill the requirements (includes
      *             null).
      */
-    public void lock(Object secret);
+    void lock(Object secret);
 
     /**
      * Unlock using the given secret. Restrictions may apply for the nature of
@@ -65,14 +65,14 @@ public interface ILockable {
      *             If the secret does not fulfill the requirements (includes
      *             null).
      */
-    public void unlock(Object secret);
+    void unlock(Object secret);
 
     /**
      * Test if is locked.
      * 
      * @return
      */
-    public boolean isLocked();
+    boolean isLocked();
 
     /**
      * Convenience: throw an IllegalStateException, if already locked.
@@ -80,6 +80,6 @@ public interface ILockable {
      * @throws IllegalStateException
      *             If already locked.
      */
-    public void throwIfLocked();
+    void throwIfLocked();
 
 }

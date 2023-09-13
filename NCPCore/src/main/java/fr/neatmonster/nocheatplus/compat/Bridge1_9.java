@@ -171,7 +171,7 @@ public class Bridge1_9 {
     }
 
     public static boolean isGliding(final LivingEntity entity) {
-        return hasIsGliding ? entity.isGliding() : false;
+        return hasIsGliding && entity.isGliding();
     }
 
     /**

@@ -32,6 +32,6 @@ public interface IDebugPlayer {
      *            May be null.
      * @param message
      */
-    public void debug(Player player, String message);
+    void debug(Player player, String message);
 
 }

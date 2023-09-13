@@ -72,7 +72,7 @@ public class FightData extends ACheckData implements IDataOnRemoveSubCheckData, 
     public long damageTakenByEntityTick;
 
     // Data of the angle check.
-    public LinkedList<Angle.AttackLocation> angleHits = new LinkedList<Angle.AttackLocation>();
+    public LinkedList<Angle.AttackLocation> angleHits = new LinkedList<>();
 
     // FastHeal
     public long					   fastHealRefTime = 0;

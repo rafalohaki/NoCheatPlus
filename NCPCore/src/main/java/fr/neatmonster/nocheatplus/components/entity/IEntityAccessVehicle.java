@@ -32,7 +32,7 @@ public interface IEntityAccessVehicle {
      * @param entity
      * @return
      */
-    public List<Entity> getEntityPassengers(Entity entity);
+    List<Entity> getEntityPassengers(Entity entity);
 
     /**
      * Add a new passenger (entity) to the given vehicle.
@@ -41,6 +41,6 @@ public interface IEntityAccessVehicle {
      * @param vehicle
      * @return
      */
-    public boolean addPassenger(Entity entity, Entity vehicle);
+    boolean addPassenger(Entity entity, Entity vehicle);
 
 }

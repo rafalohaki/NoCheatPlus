@@ -22,6 +22,6 @@ package fr.neatmonster.nocheatplus.components.location;
  */
 public interface IGetLocation extends IGetPosition {
 
-    public String getWorldName();
+    String getWorldName();
 
 }

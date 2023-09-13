@@ -190,7 +190,7 @@ public class HashMapLOW <K, V> {
                 }
             }
             // Create a new Entry.
-            final LHMEntry<K, V> newEntry = new LHMEntry<K, V>(hashCode, key, value);
+            final LHMEntry<K, V> newEntry = new LHMEntry<>(hashCode, key, value);
             if (emptyIndex == -1) {
                 // Grow.
                 grow(newEntry);
@@ -267,8 +267,7 @@ public class HashMapLOW <K, V> {
                 return null;
             }
             else {
-                for (int i = 0; i < contents.length; i++) {
-                    final LHMEntry<K, V> entry = contents[i];
+                for (final LHMEntry<K, V> entry : contents) {
                     if (entry != null && entry.equalsKey(hashCode, key)) {
                         return entry.getValue();
                     }
@@ -289,8 +288,7 @@ public class HashMapLOW <K, V> {
                 return false;
             }
             else {
-                for (int i = 0; i < contents.length; i++) {
-                    final LHMEntry<K, V> entry = contents[i];
+                for (final LHMEntry<K, V> entry : contents) {
                     if (entry != null && entry.equalsKey(hashCode, key)) {
                         return true;
                     }
@@ -440,7 +438,7 @@ public class HashMapLOW <K, V> {
     private LHMBucket<K, V>[] buckets;
     private int size = 0;
 
-    private float loadFactor = 0.75f;
+    private final float loadFactor = 0.75f;
 
     // TODO: Configurable: loadFactor
     // TODO: Configurable: initial size and resize multiplier for Buckets.
@@ -485,8 +483,7 @@ public class HashMapLOW <K, V> {
         final LHMBucket<K, V>[] newBuckets = newBuckets(size); // Hold current number of elements.
         final int newLength = newBuckets.length;
         // Entries are reused, but not buckets (buckets would break iteration).
-        for (int index = 0; index < buckets.length; index++) {
-            final LHMBucket<K, V> bucket = buckets[index];
+        for (final LHMBucket<K, V> bucket : buckets) {
             if (bucket != null && bucket.size > 0) {
                 for (int j = 0; j < bucket.contents.length; j++) {
                     final LHMEntry<K, V> entry = bucket.contents[j];
@@ -494,7 +491,7 @@ public class HashMapLOW <K, V> {
                         final int newIndex = getBucketIndex(entry.hashCode, newLength);
                         LHMBucket<K, V> newBucket = newBuckets[newIndex];
                         if (newBucket == null) {
-                            newBucket = new LHMBucket<K, V>();
+                            newBucket = new LHMBucket<>();
                             newBuckets[newIndex] = newBucket;
                         }
                         newBucket.addEntry(entry);
@@ -563,13 +560,13 @@ public class HashMapLOW <K, V> {
      *            overridden.
      * @return
      */
-    private final V put(final K key, final V value, final boolean ifAbsent) {
+    private V put(final K key, final V value, final boolean ifAbsent) {
         final int hashCode = getHashCode(key);
         lock.lock();
         final int index = getBucketIndex(hashCode, buckets.length);
         LHMBucket<K, V> bucket = buckets[index];
         if (bucket == null) {
-            bucket = new LHMBucket<K, V>();
+            bucket = new LHMBucket<>();
             buckets[index] = bucket;
         }
         V oldValue = bucket.put(hashCode, key, value, ifAbsent);
@@ -711,7 +708,7 @@ public class HashMapLOW <K, V> {
      * @return
      */
     public Iterator<Entry<K, V>> iterator() {
-        return size == 0 ? new LHMIterator<K, V>(null, null) : new LHMIterator<K, V>(this, buckets);
+        return size == 0 ? new LHMIterator<>(null, null) : new LHMIterator<>(this, buckets);
     }
 
     /**
@@ -721,7 +718,7 @@ public class HashMapLOW <K, V> {
      * @return
      */
     public Iterable<Entry<K, V>> iterable() {
-        return new LHMIterable<K, V>(iterator());
+        return new LHMIterable<>(iterator());
     }
 
     /**
@@ -731,7 +728,7 @@ public class HashMapLOW <K, V> {
      * @return
      */
     public Collection<K> getKeys() {
-        final Set<K> out = new LinkedHashSet<K>();
+        final Set<K> out = new LinkedHashSet<>();
         final Iterator<Entry<K, V>> it = iterator();
         while (it.hasNext()) {
             out.add(it.next().getKey());

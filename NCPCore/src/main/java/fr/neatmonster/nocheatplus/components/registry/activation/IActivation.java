@@ -26,6 +26,6 @@ public interface IActivation {
      * Test if the feature is available.
      * @return
      */
-    public boolean isAvailable();
+    boolean isAvailable();
 
 }

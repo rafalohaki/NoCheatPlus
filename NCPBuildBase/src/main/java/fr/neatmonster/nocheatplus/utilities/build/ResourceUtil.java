@@ -60,12 +60,12 @@ public class ResourceUtil {
 				if (r != null){
 					try {
 						r.close();
-					} catch (IOException e1) {
+					} catch (IOException ignored) {
 					}
 				}
 				return null;
 			}
-		} catch (MalformedURLException e) {
+		} catch (MalformedURLException ignored) {
 		}
 		return null;
 	}
@@ -105,7 +105,7 @@ public class ResourceUtil {
 		try{
 			return Integer.parseInt(input);
 		}
-		catch (NumberFormatException e) {
+		catch (NumberFormatException ignored) {
 		}
 		return preset;
 	}

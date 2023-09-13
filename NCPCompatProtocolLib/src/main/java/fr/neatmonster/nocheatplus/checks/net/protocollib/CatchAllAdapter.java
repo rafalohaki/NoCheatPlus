@@ -47,7 +47,7 @@ public class CatchAllAdapter extends BaseAdapter {
      */
     private static Iterable<? extends PacketType> getPacketTypes() {
         // TODO: Config ?
-        Set<PacketType> types = new LinkedHashSet<PacketType>();
+        Set<PacketType> types = new LinkedHashSet<>();
         for (PacketType type : PacketType.Play.Client.getInstance().values()) {
             if (type.isSupported()) {
                 types.add(type);
@@ -70,7 +70,7 @@ public class CatchAllAdapter extends BaseAdapter {
     public void onPacketReceiving(PacketEvent event) {
         try {
             if (event.isPlayerTemporary()) return;
-        } catch(NoSuchMethodError e) {}
+        } catch(NoSuchMethodError ignored) {}
         final Player player = event.getPlayer();
         if (player == null) {
             counters.add(ProtocolLibComponent.idNullPlayer, 1);
@@ -79,7 +79,7 @@ public class CatchAllAdapter extends BaseAdapter {
         }
         final IPlayerData pData = DataManager.getPlayerDataSafe(player);
         if (pData == null) {
-            StaticLog.logWarning("Failed to fetch player data with " + event.getPacketType() + " for: " + player.toString());
+            StaticLog.logWarning("Failed to fetch player data with " + event.getPacketType() + " for: " + player);
             return;
         }
         if (packetFrequency.isEnabled(player, pData)) {

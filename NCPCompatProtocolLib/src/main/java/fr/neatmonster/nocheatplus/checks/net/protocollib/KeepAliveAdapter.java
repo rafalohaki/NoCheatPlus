@@ -14,8 +14,7 @@
  */
 package fr.neatmonster.nocheatplus.checks.net.protocollib;
 
-import java.util.Arrays;
-
+import java.util.Collections;
 import org.bukkit.entity.Player;
 import org.bukkit.plugin.Plugin;
 
@@ -50,7 +49,7 @@ public class KeepAliveAdapter extends BaseAdapter {
         if (NCPAPIProvider.getNoCheatPlusAPI().getWorldDataManager().isActiveAnywhere(
                 CheckType.NET_KEEPALIVEFREQUENCY)) {
             NCPAPIProvider.getNoCheatPlusAPI().addFeatureTags(
-                    "checks", Arrays.asList(KeepAliveFrequency.class.getSimpleName()));
+                    "checks", Collections.singletonList(KeepAliveFrequency.class.getSimpleName()));
         }
         NCPAPIProvider.getNoCheatPlusAPI().addComponent(frequencyCheck);
     }
@@ -59,7 +58,7 @@ public class KeepAliveAdapter extends BaseAdapter {
     public void onPacketReceiving(final PacketEvent event) {
         try {
             if (event.isPlayerTemporary()) return;
-        } catch(NoSuchMethodError e) {}
+        } catch(NoSuchMethodError ignored) {}
         final long time = System.currentTimeMillis();
         final Player player = event.getPlayer();
         if (player == null) {

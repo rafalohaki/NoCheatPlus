@@ -18,7 +18,6 @@ import java.util.LinkedList;
 import java.util.List;
 
 import org.bukkit.Material;
-import org.bukkit.entity.Boat;
 import org.bukkit.entity.Entity;
 import org.bukkit.entity.EntityType;
 import org.bukkit.entity.LivingEntity;
@@ -65,7 +64,7 @@ public class VehicleEnvelope extends Check {
      * @author asofold
      *
      */
-    public class CheckDetails {
+    public static class CheckDetails {
 
         public boolean canClimb;
         public boolean canRails;
@@ -95,10 +94,10 @@ public class VehicleEnvelope extends Check {
     }
 
     /** Tags for checks. */
-    private final List<String> tags = new LinkedList<String>();
+    private final List<String> tags = new LinkedList<>();
 
     /** Extra details to log on debug. */
-    private final List<String> debugDetails = new LinkedList<String>();
+    private final List<String> debugDetails = new LinkedList<>();
 
     /** Details for re-use. */
     private final CheckDetails checkDetails = new CheckDetails();
@@ -288,7 +287,7 @@ public class VehicleEnvelope extends Check {
         // Maximum thinkable horizontal speed.
         // TODO: Further distinguish, best set in CheckDetails.
         if (vehicle instanceof LivingEntity) {
-            Double speed = PotionUtil.getPotionEffectAmplifier((LivingEntity)vehicle, PotionEffectType.SPEED);
+            double speed = PotionUtil.getPotionEffectAmplifier((LivingEntity)vehicle, PotionEffectType.SPEED);
             // The most terrible code I ever written due to poor infrastructure. Should be thinking of recode the vehicle check after the hspeed refactor
             if (camel != null && camel.isAssignableFrom(vehicle.getClass())) {
                 final VehicleMoveData firstPastMove = data.vehicleMoves.getFirstPastMove();
@@ -411,7 +410,7 @@ public class VehicleEnvelope extends Check {
         }
 
         if (vehicle instanceof LivingEntity) {
-            Double levitation = Bridge1_9.getLevitationAmplifier((LivingEntity)vehicle);
+            double levitation = Bridge1_9.getLevitationAmplifier((LivingEntity)vehicle);
             if (!Double.isInfinite(levitation)) {
                 checkDetails.maxAscend += 0.046 * (levitation + 1);
                 violation = false;

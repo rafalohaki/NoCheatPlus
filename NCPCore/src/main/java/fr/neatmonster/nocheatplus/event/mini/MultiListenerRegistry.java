@@ -81,13 +81,7 @@ public abstract class MultiListenerRegistry<EB, P> extends MiniListenerRegistry<
             try {
                 method.invoke(listener, event);
             }
-            catch (InvocationTargetException e) {
-                onException(event, e);
-            }
-            catch (IllegalArgumentException e) {
-                onException(event, e);
-            }
-            catch (IllegalAccessException e) {
+            catch (InvocationTargetException | IllegalAccessException | IllegalArgumentException e) {
                 onException(event, e);
             }
         }
@@ -165,7 +159,7 @@ public abstract class MultiListenerRegistry<EB, P> extends MiniListenerRegistry<
     @SuppressWarnings("unchecked")
     protected <E extends EB> MiniListener<E> getMiniListener(final Object listener, 
             final Method method, final RegistrationOrder order, final P basePriority) {
-        return new AutoListener<E>((Class<E>) method.getParameterTypes()[0], 
+        return new AutoListener<>((Class<E>) method.getParameterTypes()[0],
                 listener, method, order, basePriority);
     }
 
@@ -210,7 +204,7 @@ public abstract class MultiListenerRegistry<EB, P> extends MiniListenerRegistry<
      */
     protected Collection<MiniListener<? extends EB>> register(Object listener, 
             P defaultPriority, RegistrationOrder defaultOrder, boolean defaultIgnoreCancelled) {
-        Collection<MiniListener<? extends EB>> listeners = new ArrayList<MiniListener<? extends EB>>();
+        Collection<MiniListener<? extends EB>> listeners = new ArrayList<>();
         Class<?> listenerClass = listener.getClass();
         RegistrationOrder order = null;
         if (listenerClass.isAnnotationPresent(RegisterEventsWithOrder.class)) {

@@ -72,7 +72,7 @@ public class PluginTests {
             for (RegisteredPermission rp : Permissions.getPermissions()) {
                 permissionRegistry.addRegisteredPermission(rp);
             }
-            Map<String, ConfigFile> rawConfigs = new HashMap<String, ConfigFile>();
+            Map<String, ConfigFile> rawConfigs = new HashMap<>();
             rawConfigs.put(null, new DefaultConfig());
             worldDataManager.applyConfiguration((rawConfigs));
         }
@@ -238,13 +238,7 @@ public class PluginTests {
         public ActionFactoryFactory setActionFactoryFactory(
                 ActionFactoryFactory actionFactoryFactory) {
             if (actionFactoryFactory == null) {
-                actionFactoryFactory = new ActionFactoryFactory() {
-                    @Override
-                    public final ActionFactory newActionFactory(
-                            final Map<String, Object> library) {
-                        return new ActionFactory(library);
-                    }
-                };
+                actionFactoryFactory = ActionFactory::new;
             }
             final ActionFactoryFactory previous = registerGenericInstance(
                     ActionFactoryFactory.class, actionFactoryFactory);

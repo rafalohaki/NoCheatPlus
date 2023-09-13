@@ -30,10 +30,10 @@ public interface IRemoveData {
 	 * @param playerName
 	 * @return IData instance if something was changed. Note that this should also return an existing data instance, if it is only partially cleared and not actually removed.
 	 */
-	public IData removeData(String playerName);
+    IData removeData(String playerName);
 	
 	/**
 	 * Remove the data of all players.
 	 */
-	public void removeAllData();
+    void removeAllData();
 }
