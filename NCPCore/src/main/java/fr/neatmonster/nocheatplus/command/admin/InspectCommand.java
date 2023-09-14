@@ -14,6 +14,7 @@
  */
 package fr.neatmonster.nocheatplus.command.admin;
 
+import com.google.common.collect.Lists;
 import com.viaversion.viaversion.api.Via;
 import com.viaversion.viaversion.api.protocol.version.ProtocolVersion;
 import java.text.DecimalFormat;
@@ -202,10 +203,14 @@ public class InspectCommand extends BaseCommand {
      */
     @Override
     public List<String> onTabComplete(CommandSender sender, Command command, String alias, String[] args) {
-        // Complete players.
+        // Complete Players
+        if (args.length == 2) {
+            List<String> players = Lists.newArrayList();
+            for (Player player : Bukkit.getOnlinePlayers()) {
+                players.add(player.getName());
+            }
+            return players;
+        }
         return null;
     }
-
-
-
 }

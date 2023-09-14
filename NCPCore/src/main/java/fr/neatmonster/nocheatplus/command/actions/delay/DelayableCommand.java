@@ -189,5 +189,4 @@ public abstract class DelayableCommand extends BaseCommand {
         // TODO: Add altered signature for alteredArgs ?
         return null;
     }
-
 }
