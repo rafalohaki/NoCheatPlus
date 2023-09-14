@@ -33,7 +33,6 @@ import fr.neatmonster.nocheatplus.NCPAPIProvider;
 import fr.neatmonster.nocheatplus.checks.CheckType;
 import fr.neatmonster.nocheatplus.checks.moving.util.MovingUtil;
 import fr.neatmonster.nocheatplus.compat.AlmostBoolean;
-import fr.neatmonster.nocheatplus.compat.versions.ClientVersion;
 import fr.neatmonster.nocheatplus.components.config.value.OverrideType;
 import fr.neatmonster.nocheatplus.components.data.ICanHandleTimeRunningBackwards;
 import fr.neatmonster.nocheatplus.components.data.IData;
@@ -173,8 +172,6 @@ public class PlayerData implements IPlayerData {
     private boolean bedrockPlayer = false;
     private boolean requestUpdateInventory = false;
     private boolean requestPlayerSetBack = false;
-    private int versionID = -1;
-    private ClientVersion clientVersion = ClientVersion.UNKNOWN;
 
     private boolean frequentPlayerTaskShouldBeScheduled = false;
     /** Actually queried ones. */
@@ -461,8 +458,6 @@ public class PlayerData implements IPlayerData {
         // (Somewhat reversed order of invalidation.)
         invalidateOffline();
         bedrockPlayer = false;
-        versionID = -1;
-        clientVersion = ClientVersion.UNKNOWN;
     }
 
     /**
@@ -881,37 +876,6 @@ public class PlayerData implements IPlayerData {
     public boolean isPlayerSetBackScheduled() {
         return this.requestPlayerSetBack 
                 && (frequentPlayerTaskShouldBeScheduled || isFrequentPlayerTaskScheduled());
-    }
-
-     /**
-     * Get the client's version through ViaVersion or ProtocolSupport. <br>
-     * Requires CompatNoCheatPlus (subject to change)
-     * @return
-     */
-    @Override
-    public int getClientVersionID() {
-        return versionID;
-    }
-
-    /**
-     * Get the client's version through ViaVersion or ProtocolSupport. <br>
-     * Requires CompatNoCheatPlus (subject to change)
-     * @return
-     */
-    @Override
-    public ClientVersion getClientVersion() {
-        return clientVersion;
-    }
-
-    /**
-     * Set the client's version ID as given by ProtocolSupport or ViaVersion
-     * 
-     * @param versionID
-     */
-    @Override
-    public void setClientVersionID(final int versionID) {
-        this.versionID = versionID;
-        this.clientVersion = ClientVersion.getById(versionID);
     }
 
     /**

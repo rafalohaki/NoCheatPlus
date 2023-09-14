@@ -21,7 +21,6 @@ import org.bukkit.entity.Player;
 
 import fr.neatmonster.nocheatplus.checks.CheckType;
 import fr.neatmonster.nocheatplus.compat.AlmostBoolean;
-import fr.neatmonster.nocheatplus.compat.versions.ClientVersion;
 import fr.neatmonster.nocheatplus.components.config.value.OverrideType;
 import fr.neatmonster.nocheatplus.components.data.IData;
 import fr.neatmonster.nocheatplus.components.data.IDataOnRemoveSubCheckData;
@@ -338,30 +337,4 @@ public interface IPlayerData extends IData, IBaseDataAccess, IGetGenericInstance
      * @return
      */
     boolean isPlayerSetBackScheduled();
-
-    /**
-     * Get the client's version protocol ID through ViaVersion or ProtocolSupport. <br>
-     * Requires CompatNoCheatPlus (subject to change)
-     * @see https://wiki.vg/Protocol_version_numbers
-     * 
-     * @return -1, if it cannot be determined.
-     */
-    int getClientVersionID();
-
-    /**
-     * Get the client's version protocol through ViaVersion or ProtocolSupport. <br>
-     * Requires CompatNoCheatPlus (subject to change)
-     * @see https://wiki.vg/Protocol_version_numbers
-     * 
-     * @return ClientVersion.UNKNOWN, if it cannot be determined.
-     */
-    ClientVersion getClientVersion();
-
-    /**
-     * Set the client's version protocol ID as given by ProtocolSupport or ViaVersion.
-     * Currently done externally, through CompatNoCheatPlus (subject to change)
-     * 
-     * @param ID
-     */
-    void setClientVersionID(final int ID);
 }

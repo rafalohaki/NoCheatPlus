@@ -14,10 +14,13 @@
  */
 package fr.neatmonster.nocheatplus.command.admin;
 
+import com.viaversion.viaversion.api.Via;
+import com.viaversion.viaversion.api.protocol.version.ProtocolVersion;
 import java.text.DecimalFormat;
 import java.util.Collection;
 import java.util.List;
 
+import org.bukkit.Bukkit;
 import org.bukkit.ChatColor;
 import org.bukkit.Location;
 import org.bukkit.command.Command;
@@ -95,8 +98,11 @@ public class InspectCommand extends BaseCommand {
         
         builder.append("\n "+ c1 + c2 + "•" + c1 + cI + (pData.isBedrockPlayer() ? " Is a Bedrock player" : " Is a Java player") + c1 + ".");
 
-        builder.append("\n "+ c1 + c2 + "•" + c1 +" Is playing with version " + pData.getClientVersion().getReleaseName() + "(" + pData.getClientVersionID() + ")");
-
+        if (Bukkit.getPluginManager().isPluginEnabled("ViaVersion")) {
+            builder.append("\n " + c1 + c2 + "•" + c1 + " Is playing with version " + ProtocolVersion.getProtocol(Via.getAPI().getPlayerVersion(pData.getPlayerId())));
+        } else {
+            builder.append("\n " + c1 + c2 + "•" + c1 + " Is playing with version " + Bukkit.getMinecraftVersion() + "(" + Bukkit.getUnsafe().getProtocolVersion() + ")");
+        }
         if (player.isOp()){
             builder.append("\n "+ c1 + c2 + "•"  + c1 + cI + " Is OP" + c1 + ".");
         }
