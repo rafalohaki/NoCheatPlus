@@ -9,7 +9,6 @@
         <relativePath>../pom.xml</relativePath>
     </parent>
 
-    <groupId>fr.neatmonster</groupId>
     <artifactId>nocheatplus</artifactId>
     <version>3.17.1-SNAPSHOT</version>
 

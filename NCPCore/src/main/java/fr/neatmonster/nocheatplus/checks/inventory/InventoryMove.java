@@ -124,12 +124,12 @@ public class InventoryMove extends Check {
 
             // Feed Improbable only for actual improbable clicking (Sprinting and clicking is impossible in all cases.)
             // Later, once all known false positives are fixed, we can feed improbable for all cases (InventoryListener)
-            if (cc.invMoveImprobableWeight > 0.0f) {
+            if (InventoryConfig.invMoveImprobableWeight > 0.0f) {
 
                 if (cc.invMoveImprobableFeedOnly) {
-                    Improbable.feed(player, cc.invMoveImprobableWeight, System.currentTimeMillis());
+                    Improbable.feed(player, InventoryConfig.invMoveImprobableWeight, System.currentTimeMillis());
                 } 
-                else if (Improbable.check(player, cc.invMoveImprobableWeight, System.currentTimeMillis(), "inventory.invmove.sprinting", pData)) {
+                else if (Improbable.check(player, InventoryConfig.invMoveImprobableWeight, System.currentTimeMillis(), "inventory.invmove.sprinting", pData)) {
                     cancel = true;
                }
             }

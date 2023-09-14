@@ -86,7 +86,6 @@ public class BlocksMC1_9 implements BlockPropertiesSetup {
         BlockProperties.setSpecialCaseTrapDoorAboveLadder(true);
 
         ConfigFile config = ConfigManager.getConfigFile();
-        if (config.getBoolean(ConfPaths.BLOCKBREAK_DEBUG, config.getBoolean(ConfPaths.CHECKS_DEBUG, false)))
-        StaticLog.logInfo("Added block-info for Minecraft 1.9 blocks.");
+        if (config.getBoolean(ConfPaths.BLOCKBREAK_DEBUG, config.getBoolean(ConfPaths.CHECKS_DEBUG, false))) StaticLog.logInfo("Added block-info for Minecraft 1.9 blocks.");
     }
 }

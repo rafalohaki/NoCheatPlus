@@ -54,9 +54,7 @@ public class PacketFrequency extends Check {
         if (amount > cc.packetFrequencyPacketsPerSecond) {
             amount /= TickTask.getLag(fDur);
             if (amount > cc.packetFrequencyPacketsPerSecond) {
-                if (executeActions(player, amount - cc.packetFrequencyPacketsPerSecond, 1.0, cc.packetFrequencyActions).willCancel()) {
-                    return true;
-                }
+                return executeActions(player, amount - cc.packetFrequencyPacketsPerSecond, 1.0, cc.packetFrequencyActions).willCancel();
             }
         }
         return false; // Cancel state.

@@ -45,7 +45,7 @@ public abstract class RayTracing implements ICollideBlocks {
     protected double t = Double.MIN_VALUE;
 
     /** Tolerance for time, for checking the abort condition: 1.0 - t <= tol . */
-    protected double tol = 0.0;
+    protected final double tol = 0.0;
 
     /** Force calling step at the end position, for the case it is reached with block transitions. */
     protected boolean forceStepEndPos = true;
@@ -59,7 +59,7 @@ public abstract class RayTracing implements ICollideBlocks {
     protected int step = 0;
 
     /** If to call stepSecondary at all (secondary transitions).*/
-    protected boolean secondaryStep = true;
+    protected final boolean secondaryStep = true;
 
     /** Maximum steps that will be done. */
     private int maxSteps = Integer.MAX_VALUE;

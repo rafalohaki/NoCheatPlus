@@ -45,12 +45,6 @@ public class SimpleAxisVelocity {
 
     /** Activation flag for tracking unused velocity. */
     private boolean unusedActive = true;
-    /**
-     * Sensitivity for tracking unused velocity (absolute amount, counts for
-     * positive and negative).
-     */
-    // TODO: Ignoring 0-dist velocity allows 'moving on', though.
-    private final double unusedSensitivity = 0.1;
     // TODO: Visibility of trackers, concept, etc.
     public final UnusedTracker unusedTrackerPos = new UnusedTracker();
     // TODO: Might do without tracking negative velocity.
@@ -240,6 +234,12 @@ public class SimpleAxisVelocity {
      */
     private void addUnused(final SimpleEntry entry) {
         // Global pre-conditions (sensitivity, skip entries that are supposed to be even more fake than default).
+        /**
+         * Sensitivity for tracking unused velocity (absolute amount, counts for
+         * positive and negative).
+         */
+        // TODO: Ignoring 0-dist velocity allows 'moving on', though.
+        double unusedSensitivity = 0.1;
         if (Math.abs(entry.value) < unusedSensitivity || entry.initialActCount < 5) {
             return;
         }

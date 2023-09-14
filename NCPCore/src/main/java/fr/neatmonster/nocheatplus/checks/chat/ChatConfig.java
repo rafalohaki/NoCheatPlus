@@ -172,7 +172,7 @@ public class ChatConfig extends ACheckConfig {
         loginsSeconds = config.getInt(ConfPaths.CHAT_LOGINS_SECONDS);
         loginsLimit = config.getInt(ConfPaths.CHAT_LOGINS_LIMIT);
         loginsKickMessage =  config.getString(ConfPaths.CHAT_LOGINS_KICKMESSAGE);
-        loginsStartupDelay = config.getInt(ConfPaths.CHAT_LOGINS_STARTUPDELAY) * 1000;
+        loginsStartupDelay = config.getInt(ConfPaths.CHAT_LOGINS_STARTUPDELAY) * 1000L;
 
         relogKickMessage = config.getString(ConfPaths.CHAT_RELOG_KICKMESSAGE);
         relogTimeout = config.getLong(ConfPaths.CHAT_RELOG_TIMEOUT);

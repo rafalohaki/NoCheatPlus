@@ -460,11 +460,7 @@ public class PathUtils {
         if (deprecatedPrefixes.hasPrefix(path)) {
             return false;
         }
-        else if (movedPaths.containsKey(path)) {
-            return false;
-        } else {
-            return true;
-        }
+        else return !movedPaths.containsKey(path);
     }
 
 }

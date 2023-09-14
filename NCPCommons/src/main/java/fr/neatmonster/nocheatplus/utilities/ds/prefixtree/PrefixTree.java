@@ -39,7 +39,7 @@ public class PrefixTree<K, N extends Node<K, N>, L extends LookupEntry<K, N>>{
 	 * @param <N>
 	 */
 	public static class Node<K, N extends Node<K,N>>{
-		protected int minCap = 4;
+		protected final int minCap = 4;
 		/** End of a sequence marker (not necessarily a leaf) */
 		public boolean isEnd = false;
 		public Map<K, N> children = null;

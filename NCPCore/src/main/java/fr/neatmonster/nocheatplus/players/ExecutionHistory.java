@@ -202,7 +202,7 @@ public class ExecutionHistory {
         entry.checkCounter(time);
 
         if (entry.getCounter() + 1 > action.delay){
-            if (entry.getLastExecution() <= time - action.repeat) return true;
+            return entry.getLastExecution() <= time - action.repeat;
         }
         return false;
     }

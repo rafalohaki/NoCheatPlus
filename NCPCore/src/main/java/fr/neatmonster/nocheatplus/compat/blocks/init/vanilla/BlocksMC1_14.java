@@ -151,8 +151,7 @@ public class BlocksMC1_14 implements BlockPropertiesSetup{
 
         BlockFlags.addFlags("SWEET_BERRY_BUSH", BlockFlags.F_BERRY_BUSH);
         ConfigFile config = ConfigManager.getConfigFile();
-        if (config.getBoolean(ConfPaths.BLOCKBREAK_DEBUG, config.getBoolean(ConfPaths.CHECKS_DEBUG, false)))
-        StaticLog.logInfo("Added block-info for Minecraft 1.14 blocks.");
+        if (config.getBoolean(ConfPaths.BLOCKBREAK_DEBUG, config.getBoolean(ConfPaths.CHECKS_DEBUG, false))) StaticLog.logInfo("Added block-info for Minecraft 1.14 blocks.");
     }
 
 }

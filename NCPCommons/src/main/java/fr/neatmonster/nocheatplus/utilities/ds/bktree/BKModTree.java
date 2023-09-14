@@ -42,7 +42,7 @@ public abstract class BKModTree<V, N extends Node<V, N>, L extends LookupEntry<V
 	 * @param <N>
 	 */
 	public static abstract class Node<V, N extends Node<V, N>>{
-		public V value;
+		public final V value;
 		
 		public Node(V value){
 			this.value = value;
@@ -65,7 +65,7 @@ public abstract class BKModTree<V, N extends Node<V, N>, L extends LookupEntry<V
 	 */
 	public static abstract class MapNode<V, N extends HashMapNode<V, N>> extends Node<V, N>{
 		protected Map<Integer, N> children = null; // Only created if needed.
-		protected int maxIterate = 12; // Maybe add a setter.
+		protected final int maxIterate = 12; // Maybe add a setter.
 		public MapNode(V value) {
 			super(value);
 		}
@@ -119,8 +119,8 @@ public abstract class BKModTree<V, N extends Node<V, N>, L extends LookupEntry<V
 	 */
 	public static class HashMapNode<V, N extends HashMapNode<V, N>> extends MapNode<V, N>{
 		/** Map Levenshtein distance to next nodes. */
-		protected int initialCapacity = 4;
-		protected float loadFactor = 0.75f;
+		protected final int initialCapacity = 4;
+		protected final float loadFactor = 0.75f;
 		public HashMapNode(V value) {
 			super(value);
 		}
@@ -181,7 +181,7 @@ public abstract class BKModTree<V, N extends Node<V, N>, L extends LookupEntry<V
 	protected N root = null;
 	
 	/** Set to true to have visit called */
-	protected boolean visit = false;
+	protected final boolean visit = false;
 	
 	public BKModTree(NodeFactory<V, N> nodeFactory, LookupEntryFactory<V, N, L> resultFactory){
 		this.nodeFactory = nodeFactory;

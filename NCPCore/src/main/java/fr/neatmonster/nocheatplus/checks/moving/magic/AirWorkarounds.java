@@ -836,10 +836,7 @@ public class AirWorkarounds {
             // Odd decrease after lift-off.
             return true;
         }
-        if (AirWorkarounds.oddFriction(yDistance, yDistDiffEx, lastMove, data, from)) {
-            // Odd behavior with moving up or (slightly) down, accounting for more than one past move.
-            return true;
-        }
-        return false;
+        // Odd behavior with moving up or (slightly) down, accounting for more than one past move.
+        return AirWorkarounds.oddFriction(yDistance, yDistDiffEx, lastMove, data, from);
     }
 }

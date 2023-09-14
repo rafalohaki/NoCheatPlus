@@ -119,24 +119,24 @@ public class ReflectAttributeAccess implements IAttributeAccess {
 
     }
 
-    // TODO: Register each and every one of these as generic instances and fetch from there.
-    private final ReflectBase reflectBase;
     private final ReflectGenericAttributes reflectGenericAttributes;
     private final ReflectAttributeInstance reflectAttributeInstance;
     private final ReflectAttributeModifier reflectAttributeModifier;
     private final ReflectPlayer reflectPlayer;
 
     public ReflectAttributeAccess() {
+        // TODO: Register each and every one of these as generic instances and fetch from there.
+        ReflectBase reflectBase;
         try {
-            this.reflectBase = new ReflectBase();
+            reflectBase = new ReflectBase();
             ReflectAxisAlignedBB reflectAxisAlignedBB = null;
             try {
                 reflectAxisAlignedBB = new ReflectAxisAlignedBB(reflectBase);
             }
             catch (NullPointerException ignored) {}
-            reflectGenericAttributes = new ReflectGenericAttributes(this.reflectBase);
-            reflectAttributeInstance = new ReflectAttributeInstance(this.reflectBase);
-            reflectAttributeModifier = new ReflectAttributeModifier(this.reflectBase);
+            reflectGenericAttributes = new ReflectGenericAttributes(reflectBase);
+            reflectAttributeInstance = new ReflectAttributeInstance(reflectBase);
+            reflectAttributeModifier = new ReflectAttributeModifier(reflectBase);
             reflectPlayer = new ReflectPlayer(reflectBase, reflectAxisAlignedBB, new ReflectDamageSource(reflectBase));
         } catch (ClassNotFoundException ex) {
             throw new RuntimeException("Not available.");

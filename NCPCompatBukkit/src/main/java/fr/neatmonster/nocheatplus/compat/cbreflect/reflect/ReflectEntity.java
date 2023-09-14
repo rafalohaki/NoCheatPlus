@@ -40,8 +40,6 @@ public class ReflectEntity extends ReflectGetHandleBase<Entity> {
 
     public final Method nmsDamageEntity;
 
-    private final Method nmsDamageEntityNew;
-
     @MostlyHarmless()
     public final Method nmsclearActiveItem;
 
@@ -65,7 +63,7 @@ public class ReflectEntity extends ReflectGetHandleBase<Entity> {
 
         // damageEntity(...)
         // boolean hurt(net.minecraft.world.damagesource.DamageSource,float) -> a
-        nmsDamageEntityNew = ReflectionUtil.getMethod(nmsClass, "a", damageSource.nmsClass, float.class);
+        Method nmsDamageEntityNew = ReflectionUtil.getMethod(nmsClass, "a", damageSource.nmsClass, float.class);
         nmsDamageEntity = nmsDamageEntityNew != null ? nmsDamageEntityNew : 
                           ReflectionUtil.getMethod(nmsClass, "damageEntity", 
                           new Class<?>[]{damageSource.nmsClass, float.class}, new Class<?>[]{damageSource.nmsClass, int.class});

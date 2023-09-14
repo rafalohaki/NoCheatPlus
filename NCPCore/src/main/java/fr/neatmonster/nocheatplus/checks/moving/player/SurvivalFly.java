@@ -180,10 +180,7 @@ public class SurvivalFly extends Check {
                 // Invalidate.
                 data.lostSprintCount = 0;
                 tags.add("invalidate_lostsprint");
-                if (now <= data.timeSprinting + cc.sprintingGrace) {
-                    sprinting = true;
-                }
-                else sprinting = false;
+                sprinting = now <= data.timeSprinting + cc.sprintingGrace;
             }
             else {
                 tags.add("lostsprint");

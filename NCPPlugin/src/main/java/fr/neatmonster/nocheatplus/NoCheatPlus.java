@@ -533,7 +533,7 @@ public class NoCheatPlus extends JavaPlugin implements NoCheatPlusAPI {
         // Add to sub registries.
         for (final ComponentRegistry<?> registry : subRegistries) {
             final Object res = ReflectionUtil.invokeGenericMethodOneArg(registry, "addComponent", obj);
-            if (res != null && (res instanceof Boolean) && (Boolean) res) {
+            if ((res instanceof Boolean) && (Boolean) res) {
                 added = true;
             }
         }

@@ -172,13 +172,8 @@ public class GodMode extends Check {
         if (data.godModeAcc > 2){
             // TODO: To match with old checks vls / actions, either change actions or apply a factor.
             data.godModeVL += delta;
-            if (executeActions(player, data.godModeVL, delta, 
-                    pData.getGenericInstance(FightConfig.class).godModeActions).willCancel()){
-                cancel = true;
-            }
-            else {
-                cancel = false;
-            }
+            cancel = executeActions(player, data.godModeVL, delta,
+                    pData.getGenericInstance(FightConfig.class).godModeActions).willCancel();
         }
         else{
             cancel = false;

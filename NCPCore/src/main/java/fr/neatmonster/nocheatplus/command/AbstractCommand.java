@@ -31,6 +31,7 @@ import org.bukkit.command.TabExecutor;
 import org.bukkit.entity.Player;
 
 import fr.neatmonster.nocheatplus.permissions.RegisteredPermission;
+import org.jetbrains.annotations.NotNull;
 
 /**
  * Base command class, featuring some features.<br>
@@ -157,7 +158,7 @@ public abstract class AbstractCommand<A> implements TabExecutor{
     }
 
     @Override
-    public List<String> onTabComplete(CommandSender sender, Command command, String alias, String[] args)
+    public List<String> onTabComplete(@NotNull CommandSender sender, @NotNull Command command, @NotNull String alias, String[] args)
     {
         final Set<String> choices = new LinkedHashSet<>(subCommands.size());
         int len = args.length;
@@ -185,7 +186,7 @@ public abstract class AbstractCommand<A> implements TabExecutor{
     }
 
     @Override
-    public boolean onCommand(CommandSender sender, Command command, String alias, String[] args)
+    public boolean onCommand(@NotNull CommandSender sender, @NotNull Command command, @NotNull String alias, String[] args)
     {
         int len = args.length;
         int subCommandIndex = Math.max(0, this.subCommandIndex);

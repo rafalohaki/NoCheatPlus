@@ -57,8 +57,6 @@ public interface IWorkaroundRegistry {
         private final IStagedWorkaround[] stagedWorkarounds;
 
         // TODO: Consider to make accessible (flexible log/stats command) or remove keeping entire groups.
-        /** Map groupId to workarounds. Set to null, if no groups are present. */
-        private final Map<String, IWorkaround[]> groups;
 
         /** Only the staged workarounds within a group by group id. Set to null, if no groups are present. */
         private final Map<String, IStagedWorkaround[]> stagedGroups;
@@ -89,8 +87,10 @@ public interface IWorkaroundRegistry {
             this.stagedWorkarounds = stagedWorkarounds.toArray(new IStagedWorkaround[0]);
 
             // Prepare fast to reset lists, if groups are given.
+            /** Map groupId to workarounds. Set to null, if no groups are present. */
+            Map<String, IWorkaround[]> groups1;
             if (groups != null) {
-                this.groups = new HashMap<>();
+                groups1 = new HashMap<>();
                 this.stagedGroups = new HashMap<>();
                 for (final Entry<String, String[]> entry : groups.entrySet()) {
                     final String groupId = entry.getKey();
@@ -104,14 +104,14 @@ public interface IWorkaroundRegistry {
                             stagedGroup.add((IStagedWorkaround) workaround);
                         }
                     }
-                    this.groups.put(groupId, group);
+                    groups1.put(groupId, group);
                     if (!stagedGroup.isEmpty()) {
                         this.stagedGroups.put(groupId, stagedGroup.toArray(new IStagedWorkaround[0]));
                     }
                 }
             }
             else {
-                this.groups = null;
+                groups1 = null;
                 this.stagedGroups = null;
             }
         }

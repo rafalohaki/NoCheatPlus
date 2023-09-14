@@ -19,6 +19,7 @@ import java.util.Collections;
 import java.util.LinkedHashMap;
 import java.util.Map;
 import java.util.Set;
+import org.jetbrains.annotations.NotNull;
 
 /**
  * More cows, more fun: Copy on write for a LinkedHashMap (optimized for fast reading from any thread).
@@ -104,7 +105,7 @@ public class LinkedHashMapCOW<K, V> implements Map<K, V> {
      * Unmodifiable version of the EntrySet. Entry.setValue might be possible, but dangerous :p
      */
     @Override
-    public Set<java.util.Map.Entry<K, V>> entrySet() {
+    public @NotNull Set<java.util.Map.Entry<K, V>> entrySet() {
         return Collections.unmodifiableSet(map.entrySet());
     }
 
@@ -123,7 +124,7 @@ public class LinkedHashMapCOW<K, V> implements Map<K, V> {
      * Unmodifiable version of the KeySet.
      */
     @Override
-    public Set<K> keySet() {
+    public @NotNull Set<K> keySet() {
         return Collections.unmodifiableSet(map.keySet());
     }
 
@@ -139,7 +140,7 @@ public class LinkedHashMapCOW<K, V> implements Map<K, V> {
     }
 
     @Override
-    public void putAll(final Map<? extends K, ? extends V> m) {
+    public void putAll(final @NotNull Map<? extends K, ? extends V> m) {
         synchronized (this) {
             final LinkedHashMap<K, V> newMap = copyMap();
             newMap.putAll(m);
@@ -184,7 +185,7 @@ public class LinkedHashMapCOW<K, V> implements Map<K, V> {
      * Unmodifiable version of the values (Collection).
      */
     @Override
-    public Collection<V> values() {
+    public @NotNull Collection<V> values() {
         return Collections.unmodifiableCollection(map.values());
     }
 

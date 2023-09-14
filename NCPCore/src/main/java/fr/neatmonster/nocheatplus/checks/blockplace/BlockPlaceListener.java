@@ -131,7 +131,6 @@ public class BlockPlaceListener extends CheckListener {
     private final boolean hasGetReplacedState = ReflectionUtil.getMethodNoArgs(BlockPlaceEvent.class, "getReplacedState", BlockState.class) != null;
     public final List<BlockFace> faces;
 
-    @SuppressWarnings("unchecked")
     public BlockPlaceListener() {
         super(CheckType.BLOCKPLACE);
         final NoCheatPlusAPI api = NCPAPIProvider.getNoCheatPlusAPI();

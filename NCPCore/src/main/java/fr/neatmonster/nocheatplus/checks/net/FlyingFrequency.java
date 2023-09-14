@@ -50,12 +50,8 @@ public class FlyingFrequency extends Check {
             final NetData data, final NetConfig cc, final IPlayerData pData) {
         data.flyingFrequencyAll.add(time, 1f);
         final float allScore = data.flyingFrequencyAll.score(1f);
-        if (allScore / cc.flyingFrequencySeconds > cc.flyingFrequencyPPS  
-                && executeActions(player, allScore / cc.flyingFrequencySeconds - cc.flyingFrequencyPPS, 1.0 / cc.flyingFrequencySeconds, cc.flyingFrequencyActions).willCancel()) {
-            return true;
-        } else {
-            return false;
-        }
+        return allScore / cc.flyingFrequencySeconds > cc.flyingFrequencyPPS
+                && executeActions(player, allScore / cc.flyingFrequencySeconds - cc.flyingFrequencyPPS, 1.0 / cc.flyingFrequencySeconds, cc.flyingFrequencyActions).willCancel();
     }
 
 }

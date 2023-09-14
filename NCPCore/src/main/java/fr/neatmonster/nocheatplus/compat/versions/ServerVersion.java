@@ -14,6 +14,7 @@
  */
 package fr.neatmonster.nocheatplus.compat.versions;
 
+import java.util.Objects;
 import org.bukkit.Bukkit;
 import org.bukkit.Server;
 
@@ -220,7 +221,7 @@ public class ServerVersion {
      */
     public static <V> V select(final String cmpVersion, final V valueLT, final V valueEQ, final V valueGT, final V valueUnknown) {
         final String mcVersion = ServerVersion.getMinecraftVersion();
-        if (mcVersion == GenericVersion.UNKNOWN_VERSION) {
+        if (Objects.equals(mcVersion, GenericVersion.UNKNOWN_VERSION)) {
             return valueUnknown;
         } else {
             final int cmp = GenericVersion.compareVersions(mcVersion, cmpVersion);

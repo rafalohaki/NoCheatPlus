@@ -50,10 +50,7 @@ public class MoreInventory extends Check{
     	                 final Inventory inv, final boolean PoYdiff) {
         
         // TODO: bring in the moving subcheck in invMove.
-        if (type == InventoryType.CRAFTING 
-            && (player.isSprinting() || PoYdiff || player.isBlocking() || player.isSneaking() || mData.isUsingItem)) {
-            return true;
-        }
-        return false;
+        return type == InventoryType.CRAFTING
+                && (player.isSprinting() || PoYdiff || player.isBlocking() || player.isSneaking() || mData.isUsingItem);
     }
 }

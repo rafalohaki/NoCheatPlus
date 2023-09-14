@@ -41,12 +41,10 @@ public class AttribUtil {
      */
     public static double getMultiplier(final int operator, final double value) {
         // TODO: Might allow 1 too, as it should "work", despite less accurate.
-        switch(operator) {
-            case 2:
-                return 1.0 + value;
-            default:
-                throw new IllegalArgumentException("Unsupported operator: " + operator);
+        if (operator == 2) {
+            return 1.0 + value;
         }
+        throw new IllegalArgumentException("Unsupported operator: " + operator);
     }
 
 }

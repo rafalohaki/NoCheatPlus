@@ -117,7 +117,6 @@ public class InventoryListener  extends CheckListener implements JoinLeaveListen
 
     private final IGenericInstanceHandle<IEntityAccessVehicle> handleVehicles = NCPAPIProvider.getNoCheatPlusAPI().getGenericInstanceHandle(IEntityAccessVehicle.class);
 
-    @SuppressWarnings("unchecked")
     public InventoryListener() {
         super(CheckType.INVENTORY);
         final NoCheatPlusAPI api = NCPAPIProvider.getNoCheatPlusAPI();
@@ -233,7 +232,7 @@ public class InventoryListener  extends CheckListener implements JoinLeaveListen
         if (pData.isDebugActive(checkType)) {
             outputDebugInventoryClick(player, slot, event, inventoryAction);
         }
-        if (slot == InventoryView.OUTSIDE || slot < 0) {
+        if (slot < 0) {
             data.lastClickTime = now;
             // Update this one only if the inventory was closed previously (or was forcibly closed)
             // otherwise keep the first click time
@@ -451,7 +450,7 @@ public class InventoryListener  extends CheckListener implements JoinLeaveListen
      * @param event
      *            the event
      */
-    @EventHandler(ignoreCancelled = false, priority = EventPriority.LOWEST)
+    @EventHandler(priority = EventPriority.LOWEST)
     public final void onPlayerInteract(final PlayerInteractEvent event) {
 
         // Only interested in right-clicks while holding an item.
@@ -508,7 +507,7 @@ public class InventoryListener  extends CheckListener implements JoinLeaveListen
         }
     }
 
-    @EventHandler(ignoreCancelled = false, priority = EventPriority.LOWEST)
+    @EventHandler(priority = EventPriority.LOWEST)
     public final void onPlayerInteractEntity(final PlayerInteractEntityEvent event) {
 
         final Player player = event.getPlayer();
@@ -545,7 +544,7 @@ public class InventoryListener  extends CheckListener implements JoinLeaveListen
      * @param event
      *            the event
      */
-    @EventHandler(ignoreCancelled = false, priority = EventPriority.LOWEST)
+    @EventHandler(priority = EventPriority.LOWEST)
     public final void onPlayerInventoryOpen(final InventoryOpenEvent event) {
 
         // Possibly already prevented by block + entity interaction.

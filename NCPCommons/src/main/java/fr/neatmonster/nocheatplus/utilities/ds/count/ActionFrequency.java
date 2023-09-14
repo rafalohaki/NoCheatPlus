@@ -14,6 +14,8 @@
  */
 package fr.neatmonster.nocheatplus.utilities.ds.count;
 
+import java.util.Arrays;
+
 /**
  * Keep track of frequency of some action, 
  * put weights into buckets, which represent intervals of time. 
@@ -133,9 +135,7 @@ public class ActionFrequency {
      * @param now
      */
     public final void clear(final long now) {
-        for (int i = 0; i < buckets.length; i++) {
-            buckets[i] = 0f;
-        }
+        Arrays.fill(buckets, 0f);
         time = lastUpdate = now;
     }
 

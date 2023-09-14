@@ -697,7 +697,7 @@ public class CreativeFly extends Check {
                 // Handled somewhere else
                 // TODO: More strict vertical check
                 thisMove.yAllowedDistance = allowedElytraYDistance = yDistance;
-                if (Math.round(data.fireworksBoostTickNeedCheck / 4) > data.fireworksBoostDuration
+                if (Math.round((float) data.fireworksBoostTickNeedCheck / 4) > data.fireworksBoostDuration
                     && hDistance < Math.sqrt(x*x + z*z)) {
                     thisMove.hAllowedDistance = Math.sqrt(x*x + z*z);
                     if (debug) debug(player, "Set hAllowedDistance for this firework boost phase (hDist/Allowed): " + thisMove.hDistance + "/" + thisMove.hAllowedDistance);
@@ -1217,7 +1217,7 @@ public class CreativeFly extends Check {
         if (data.fireworksBoostDuration > 0) {
             allowedElytraYDistance = Math.abs(thisMove.yDistance) < 2.0 ?
                     thisMove.yDistance : lastMove.toIsValid ? lastMove.yDistance : 0;
-            if (Math.round(data.fireworksBoostTickNeedCheck / 4) > data.fireworksBoostDuration 
+            if (Math.round((float) data.fireworksBoostTickNeedCheck / 4) > data.fireworksBoostDuration
                 && thisMove.hDistance < Math.sqrt(x*x + z*z)) {
                 return new double[] {Math.sqrt(x*x + z*z), allowedElytraYDistance};
             }

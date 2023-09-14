@@ -76,7 +76,7 @@ public abstract class Check implements IDebugPlayer {
 
     // TODO: Do these get cleaned up ?
     /** The execution histories of each check. */
-    protected static Map<String, ExecutionHistory> histories = new HashMap<>();
+    protected static final Map<String, ExecutionHistory> histories = new HashMap<>();
 
     /**
      * Gets the player's history.

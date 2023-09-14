@@ -136,8 +136,7 @@ public class CharPrefixTree<N extends CharNode<N>, L extends CharLookupEntry<N>>
         final L result = lookup(input, false);
         if (!result.hasPrefix) return false;
         if (input.length() == result.depth) return true;
-        if (Character.isWhitespace(input.charAt(result.depth))) return true;
-        return false;
+        return Character.isWhitespace(input.charAt(result.depth));
     }
 
     /**

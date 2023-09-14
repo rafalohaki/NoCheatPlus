@@ -128,7 +128,6 @@ public class FightListener extends CheckListener implements JoinLeaveListener{
     // Assume it to stay the same all time.
     private final IGenericInstanceHandle<IBridgeCrossPlugin> crossPlugin = NCPAPIProvider.getNoCheatPlusAPI().getGenericInstanceHandle(IBridgeCrossPlugin.class);
 
-    @SuppressWarnings("unchecked")
     public FightListener() {
         super(CheckType.FIGHT);
         final NoCheatPlusAPI api = NCPAPIProvider.getNoCheatPlusAPI();
@@ -718,18 +717,15 @@ public class FightListener extends CheckListener implements JoinLeaveListener{
                 damagedData.lastNoDamageTicks = ndt;
             }
             // Knock-back calculation (1.8: events only fire if they would count by ndt).
-            switch (event.getCause()) {
-                case ENTITY_ATTACK:
-                    if (event instanceof EntityDamageByEntityEvent) {
-                        final Entity entity = ((EntityDamageByEntityEvent) event).getDamager();
-                        if ((entity instanceof Player) && !damagedPlayer.isInsideVehicle() 
-                             && damagedPData.getGenericInstance(FightConfig.class).knockBackVelocityPvP) {
-                            // TODO: Use the velocity event that is sent anyway and replace x/z if 0 (queue max. values).
-                            applyKnockBack((Player) entity, damagedPlayer, damagedData, damagedPData);
-                        }
+            if (event.getCause() == DamageCause.ENTITY_ATTACK) {
+                if (event instanceof EntityDamageByEntityEvent) {
+                    final Entity entity = ((EntityDamageByEntityEvent) event).getDamager();
+                    if ((entity instanceof Player) && !damagedPlayer.isInsideVehicle()
+                            && damagedPData.getGenericInstance(FightConfig.class).knockBackVelocityPvP) {
+                        // TODO: Use the velocity event that is sent anyway and replace x/z if 0 (queue max. values).
+                        applyKnockBack((Player) entity, damagedPlayer, damagedData, damagedPData);
                     }
-                default:
-                    break;
+                }
             }
         }
     }
@@ -912,7 +908,7 @@ public class FightListener extends CheckListener implements JoinLeaveListener{
         data.godModeHealth = Math.max(data.godModeHealth, health);
     }
     
-    @EventHandler(priority = EventPriority.MONITOR, ignoreCancelled = false)
+    @EventHandler(priority = EventPriority.MONITOR)
     public void entityInteract(PlayerInteractEntityEvent e) {
     	Entity entity = e.getRightClicked();
     	final Player player = e.getPlayer();
@@ -930,7 +926,7 @@ public class FightListener extends CheckListener implements JoinLeaveListener{
         data.angleHits.clear();
     }
 
-    @EventHandler(ignoreCancelled = false, priority = EventPriority.MONITOR)
+    @EventHandler(priority = EventPriority.MONITOR)
     public void onItemHeld(final PlayerItemHeldEvent event) {
         
         final Player player = event.getPlayer();

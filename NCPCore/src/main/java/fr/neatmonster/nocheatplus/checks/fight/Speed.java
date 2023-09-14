@@ -94,7 +94,7 @@ public class Speed extends Check {
             // Execute whatever actions are associated with this check and the violation level and find out if we should
             // cancel the event.
             final ViolationData vd = new ViolationData(this, player, data.speedVL, max - cc.speedLimit, cc.speedActions);
-            vd.setParameter(ParameterName.LIMIT, String.valueOf(Math.round(cc.speedLimit)));
+            vd.setParameter(ParameterName.LIMIT, String.valueOf(cc.speedLimit));
             cancel = executeActions(vd).willCancel();
         }
         else data.speedVL *= 0.96;

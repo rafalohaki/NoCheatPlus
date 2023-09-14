@@ -154,11 +154,8 @@ public class ConfigManager {
                 // Quick shallow ugly fix: only save back if loading was successful.
                 try {
                     if (globalConfig.getBoolean(ConfPaths.SAVEBACKCONFIG)){
-                        boolean overrideCreated = false;
-                        if (!globalConfig.contains(ConfPaths.CONFIGVERSION_CREATED)){
-                            // Workaround.
-                            overrideCreated = true;
-                        }
+                        boolean overrideCreated = !globalConfig.contains(ConfPaths.CONFIGVERSION_CREATED);
+                        // Workaround.
                         if (!overrideCreated && globalConfig.getInt(ConfPaths.CONFIGVERSION_CREATED, 0) >= 0
                                 && ConfigManager.isConfigUpToDate(globalConfig, 0) == null) {
                             // Workaround: Update the created build number, to not warn on further changes.
@@ -260,7 +257,7 @@ public class ConfigManager {
     public static String isConfigUpToDate(final ConfigFile globalConfig, final int maxPaths) {
         Object created_o = globalConfig.get(ConfPaths.CONFIGVERSION_CREATED);
         int buildCreated = -1;
-        if (created_o != null && created_o instanceof Integer) {
+        if (created_o instanceof Integer) {
             buildCreated = (Integer) created_o;
         }
         // Silence version checking with a value < 0.

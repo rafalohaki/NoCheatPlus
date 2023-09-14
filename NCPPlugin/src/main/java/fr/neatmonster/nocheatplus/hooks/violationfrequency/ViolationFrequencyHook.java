@@ -99,7 +99,7 @@ public class ViolationFrequencyHook implements NCPHook, IFirst {
                     builder.append("(+" + StringUtil.fdec1.format(info.getAddedVl() + config.morevls) + ")");
                     log(builder.toString(), player);
                 }
-                if (info.getTotalVl() + config.morevls <= config.maxtotalvls) return true; else return false;
+                return info.getTotalVl() + config.morevls <= config.maxtotalvls;
             }
             
             if (config.debug) {

@@ -100,8 +100,6 @@ public abstract class CheckTypeTree<N extends CheckTypeTreeNode<N>> {
         boolean visit(N node);
     }
 
-    private final N rootNode;
-
     private final Map<CheckType, N> nodeMap = new LinkedHashMap<>();
 
     public CheckTypeTree() {
@@ -113,7 +111,7 @@ public abstract class CheckTypeTree<N extends CheckTypeTreeNode<N>> {
             }
         }
         // Create explosion.
-        rootNode = newNode(CheckType.ALL, null, new DefaultFactory());
+        N rootNode = newNode(CheckType.ALL, null, new DefaultFactory());
         // Create mapping for explosion.
         final List<N> allNodes = new LinkedList<>();
         collectNodes(rootNode, allNodes);

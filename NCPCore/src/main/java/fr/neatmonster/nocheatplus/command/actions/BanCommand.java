@@ -34,10 +34,8 @@ import fr.neatmonster.nocheatplus.utilities.IdUtil;
 
 public class BanCommand extends BaseCommand {
 
-    private final JavaPlugin plugin;
     public BanCommand(JavaPlugin plugin) {
         super(plugin, "ban", Permissions.COMMAND_BAN);
-        this.plugin = plugin;
     }
 
     @Override

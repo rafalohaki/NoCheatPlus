@@ -182,10 +182,7 @@ public final class BridgeEnchant {
             return false;
         }
         final ItemStack contents = player.getInventory().getHelmet();
-        if (contents != null && contents.getEnchantmentLevel(enchantment) > 0){
-            return true;
-        }
-        return false;
+        return contents != null && contents.getEnchantmentLevel(enchantment) > 0;
     }
 
     /**
@@ -201,10 +198,7 @@ public final class BridgeEnchant {
             return false;
         }
         final ItemStack contents = player.getInventory().getChestplate();
-        if (contents != null && contents.getEnchantmentLevel(enchantment) > 0){
-            return true;
-        }
-        return false;
+        return contents != null && contents.getEnchantmentLevel(enchantment) > 0;
     }
 
     /**
@@ -220,10 +214,7 @@ public final class BridgeEnchant {
             return false;
         }
         final ItemStack contents = player.getInventory().getLeggings();
-        if (contents != null && contents.getEnchantmentLevel(enchantment) > 0){
-            return true;
-        }
-        return false;
+        return contents != null && contents.getEnchantmentLevel(enchantment) > 0;
     }
 
     /**
@@ -239,10 +230,7 @@ public final class BridgeEnchant {
             return false;
         }
         final ItemStack contents = player.getInventory().getBoots();
-        if (contents != null && contents.getEnchantmentLevel(enchantment) > 0){
-            return true;
-        }
-        return false;
+        return contents != null && contents.getEnchantmentLevel(enchantment) > 0;
     }
 
     public static boolean hasThorns() {

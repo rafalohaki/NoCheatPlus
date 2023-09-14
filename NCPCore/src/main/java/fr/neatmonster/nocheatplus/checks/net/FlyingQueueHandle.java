@@ -69,17 +69,14 @@ public class FlyingQueueHandle implements IHandle<DataPacketFlying[]> {
      *         returned.
      */
     public int getFirstIndexWithContentIfFetched() {
-        if (queue == null) {
-            return -1;
-        }
-        else {
+        if (queue != null) {
             for (int i = 0; i < queue.length; i++) {
                 if (queue[i] != null) {
                     return i;
                 }
             }
-            return -1;
         }
+        return -1;
     }
 
     /**

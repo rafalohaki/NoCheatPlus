@@ -103,7 +103,6 @@ public class BlockInteractListener extends CheckListener {
     private final int idInteractLookFlyingFirst = counters.registerKey("block.interact.look.flying.first");
     private final int idInteractLookFlyingOther = counters.registerKey("block.interact.look.flying.other");
 
-    @SuppressWarnings("unchecked")
     public BlockInteractListener() {
         super(CheckType.BLOCKINTERACT);
         final NoCheatPlusAPI api = NCPAPIProvider.getNoCheatPlusAPI();
@@ -127,7 +126,7 @@ public class BlockInteractListener extends CheckListener {
      * @param event
      *            the event
      */
-    @EventHandler(ignoreCancelled = false, priority = EventPriority.LOWEST)
+    @EventHandler(priority = EventPriority.LOWEST)
     public void onPlayerInteract(final PlayerInteractEvent event) {
         final Player player = event.getPlayer();
         final IPlayerData pData = DataManager.getPlayerData(player);
@@ -334,7 +333,7 @@ public class BlockInteractListener extends CheckListener {
         }
     }
 
-    @EventHandler(ignoreCancelled = false, priority = EventPriority.MONITOR)
+    @EventHandler(priority = EventPriority.MONITOR)
     public void onPlayerInteractMonitor(final PlayerInteractEvent event) {
         // Set event resolution.
         final Player player = event.getPlayer();

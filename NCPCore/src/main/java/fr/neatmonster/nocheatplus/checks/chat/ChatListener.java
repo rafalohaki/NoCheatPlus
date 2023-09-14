@@ -86,7 +86,6 @@ public class ChatListener extends CheckListener implements INotifyReload, JoinLe
     /** Set world to null after use, primary thread only. */
     private final Location useLoc = new Location(null, 0, 0, 0);
 
-    @SuppressWarnings("unchecked")
     public ChatListener() {
         super(CheckType.CHAT);
         ConfigFile config = ConfigManager.getConfigFile();
@@ -117,7 +116,7 @@ public class ChatListener extends CheckListener implements INotifyReload, JoinLe
      * @param event
      *            the event
      */
-    @EventHandler(ignoreCancelled = false, priority = EventPriority.LOWEST)
+    @EventHandler(priority = EventPriority.LOWEST)
     public void onPlayerChat(final AsyncPlayerChatEvent event) {
 
         final Player player = event.getPlayer();

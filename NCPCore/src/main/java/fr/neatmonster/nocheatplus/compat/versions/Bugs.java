@@ -14,6 +14,7 @@
  */
 package fr.neatmonster.nocheatplus.compat.versions;
 
+import java.util.Objects;
 import org.bukkit.Bukkit;
 
 /**
@@ -35,23 +36,19 @@ public class Bugs {
         pvpKnockBackVelocity = ServerVersion.compareMinecraftVersion("1.8") >= 0;
 
         // First move exploit (classic CraftBukkit or Spigot before 1.7.5). 
-        if (mcVersion == GenericVersion.UNKNOWN_VERSION) {
+        if (Objects.equals(mcVersion, GenericVersion.UNKNOWN_VERSION)) {
             // Assume something where it's not an issue.
             enforceLocation = false;
         }
         else if (GenericVersion.compareVersions(mcVersion, "1.8") >= 0) {
             // Assume Spigot + fixed.
             enforceLocation = false;
-        } else if (serverVersion.contains("spigot") && GenericVersion.compareVersions(mcVersion, "1.7.5") >= 0) {
+        } else // Assume classic CraftBukkit (not fixed).
+            // Assume something where it's not an issue.
+            if (serverVersion.contains("spigot") && GenericVersion.compareVersions(mcVersion, "1.7.5") >= 0) {
             // Fixed in Spigot just before 1.7.5.
             enforceLocation = false;
-        } else if (serverVersion.indexOf("craftbukkit") != 0){
-            // Assume classic CraftBukkit (not fixed).
-            enforceLocation = true;
-        } else {
-            // Assume something where it's not an issue.
-            enforceLocation = false;
-        }
+        } else enforceLocation = serverVersion.indexOf("craftbukkit") != 0;
     }
 
     public static boolean shouldEnforceLocation() {

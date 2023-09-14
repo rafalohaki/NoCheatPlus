@@ -169,7 +169,6 @@ public class NetStatic {
         return Math.max(0.0, violation);
     }
 
-    @SuppressWarnings("unchecked")
     public static void registerTypes() {
         final NoCheatPlusAPI api = NCPAPIProvider.getNoCheatPlusAPI();
         api.register(api.newRegistrationContext()

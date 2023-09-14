@@ -54,7 +54,6 @@ public class CombinedListener extends CheckListener {
     private final Counters counters = NCPAPIProvider.getNoCheatPlusAPI().getGenericInstance(Counters.class);
     private final int idFakeInvulnerable = counters.registerKey("fakeinvulnerable");
 
-    @SuppressWarnings("unchecked")
     public CombinedListener(){
         super(CheckType.COMBINED);
         final NoCheatPlusAPI api = NCPAPIProvider.getNoCheatPlusAPI();

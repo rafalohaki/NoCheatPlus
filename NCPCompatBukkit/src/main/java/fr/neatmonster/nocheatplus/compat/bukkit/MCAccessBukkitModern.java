@@ -188,13 +188,12 @@ public class MCAccessBukkitModern extends MCAccessBukkit {
         BlockFlags.setBlockFlags(Material.SKELETON_WALL_SKULL, blockFix);
 
         // Directly keep blocks as is.
-        Collections.addAll(processedBlocks, new Material[]{
-                BridgeMaterial.COBWEB,
+        Collections.addAll(processedBlocks, BridgeMaterial.COBWEB,
                 BridgeMaterial.MOVING_PISTON,
                 Material.SNOW,
                 Material.BEACON,
                 Material.VINE,
-                Material.CHORUS_FLOWER});
+                Material.CHORUS_FLOWER);
 
         processedBlocks.addAll(BridgeMaterial.getAllBlocks(
                 "light", "glow_lichen", "big_dripleaf_stem",

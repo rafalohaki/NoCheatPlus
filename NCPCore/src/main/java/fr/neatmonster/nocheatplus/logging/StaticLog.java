@@ -138,8 +138,8 @@ public class StaticLog {
     public static void logOnce(final StreamID stream, final Level level, 
             final String header, final String longMessage) {
         // TODO: LogOnce should be in static log ?
-        final int ref = header.hashCode() ^ longMessage.hashCode() ^ new Integer(header.length()).hashCode()
-                ^ new Integer(longMessage.length()).hashCode();
+        final int ref = header.hashCode() ^ longMessage.hashCode() ^ Integer.valueOf(header.length()).hashCode()
+                ^ Integer.valueOf(longMessage.length()).hashCode();
         final String extra;
         final boolean details = logOnce.add(ref);
         if (details) {

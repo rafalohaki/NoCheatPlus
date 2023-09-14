@@ -62,7 +62,7 @@ public class CommandUtil {
 
         // All (?) commands from the SimpleCommandMap of the server, if available.
         final CommandMap commandMap = getCommandMap();
-        if (commandMap != null && commandMap instanceof SimpleCommandMap) {
+        if (commandMap instanceof SimpleCommandMap) {
             commands.addAll(((SimpleCommandMap) commandMap).getCommands());
         }
         // TODO: Fall-back for Vanilla / CB commands? [Fall-back should be altering permission defaults, though negating permissions is the right way.]

@@ -79,11 +79,8 @@ public class BlockCacheBukkit extends BlockCache {
                 }
                 final double locY = entity.getLocation(useLoc).getY();
                 useLoc.setWorld(null);
-                if (Math.abs(locY - minY) < 0.7){
-                    // TODO: A "better" estimate is possible, though some more tolerance would be good. 
-                    return true; 
-                }
-                else return false;
+                // TODO: A "better" estimate is possible, though some more tolerance would be good.
+                return Math.abs(locY - minY) < 0.7;
             }		
         }
         catch (Throwable t){

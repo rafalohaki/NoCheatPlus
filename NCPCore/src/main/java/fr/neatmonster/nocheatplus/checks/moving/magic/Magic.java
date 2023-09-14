@@ -399,7 +399,7 @@ public class Magic {
      * @return
      */
     public static boolean touchedBlueIce(final PlayerMoveData thisMove) {
-        return thisMove.from.onBlueIce || thisMove.from.onBlueIce;
+        return thisMove.from.onBlueIce;
     } 
 
     /**

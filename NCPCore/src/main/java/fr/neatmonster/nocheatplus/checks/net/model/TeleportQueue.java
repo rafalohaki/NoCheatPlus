@@ -62,7 +62,6 @@ public class TeleportQueue {
     private DataLocation expectOutgoing = null;
 
     private final long maxAge = 4000; // TODO: configurable
-    private final int maxQueueSize = 60; // TODO: configurable
 
     /**
      * Queried from the primary thread (read only), reset with outgoing
@@ -172,6 +171,8 @@ public class TeleportQueue {
                     res = new CountableLocation(x, y, z, yaw, pitch, 1, time, teleportId);
                     expectIncoming.addLast(res);
                     // Don't exceed maxQueueSize.
+                    // TODO: configurable
+                    int maxQueueSize = 60;
                     if (expectIncoming.size() > maxQueueSize) {
                         expectIncoming.removeFirst();
                     }

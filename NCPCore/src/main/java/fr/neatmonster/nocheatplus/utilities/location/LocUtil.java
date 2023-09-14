@@ -389,11 +389,7 @@ public class LocUtil {
             return 0f;
         } else if (pitch < -90f) {
             return -90f;
-        } else if (pitch > 90f) {
-            return 90f;
-        } else {
-            return pitch;
-        }
+        } else return Math.min(pitch, 90f);
     }
 
     /**

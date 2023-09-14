@@ -23,6 +23,7 @@ import java.util.NoSuchElementException;
 import java.util.Set;
 import java.util.concurrent.locks.Lock;
 import java.util.concurrent.locks.ReentrantLock;
+import org.jetbrains.annotations.NotNull;
 
 /**
  * Lock on write hash map. Less jumpy than cow, bucket oriented addition, bulk
@@ -239,20 +240,17 @@ public class HashMapLOW <K, V> {
          * @return
          */
         V remove(final int hashCode, final K key) {
-            if (size == 0) {
-                return null;
-            }
-            else {
+            if (size != 0) {
                 for (int i = 0; i < contents.length; i++) {
                     final LHMEntry<K, V> entry = contents[i];
                     if (entry != null && entry.equalsKey(hashCode, key)) {
                         contents[i] = null;
-                        size --;
+                        size--;
                         return entry.getValue();
                     }
                 }
-                return null;
             }
+            return null;
         }
 
         /**
@@ -263,17 +261,14 @@ public class HashMapLOW <K, V> {
          */
         V get(final int hashCode, final K key) {
             final LHMEntry<K, V>[] contents = this.contents; // Mind iteration.
-            if (size == 0) {
-                return null;
-            }
-            else {
+            if (size != 0) {
                 for (final LHMEntry<K, V> entry : contents) {
                     if (entry != null && entry.equalsKey(hashCode, key)) {
                         return entry.getValue();
                     }
                 }
-                return null;
             }
+            return null;
         }
 
         /**
@@ -284,17 +279,14 @@ public class HashMapLOW <K, V> {
          */
         boolean containsKey(final int hashCode, final K key) {
             final LHMEntry<K, V>[] contents = this.contents; // Mind iteration.
-            if (size == 0) {
-                return false;
-            }
-            else {
+            if (size != 0) {
                 for (final LHMEntry<K, V> entry : contents) {
                     if (entry != null && entry.equalsKey(hashCode, key)) {
                         return true;
                     }
                 }
-                return false;
             }
+            return false;
         }
 
         /**
@@ -419,7 +411,7 @@ public class HashMapLOW <K, V> {
         }
 
         @Override
-        public Iterator<Entry<K, V>> iterator() {
+        public @NotNull Iterator<Entry<K, V>> iterator() {
             return iterator;
         }
 

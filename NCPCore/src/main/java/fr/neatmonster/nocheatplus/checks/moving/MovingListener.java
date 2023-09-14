@@ -189,7 +189,6 @@ public class MovingListener extends CheckListener implements TickListener, IRemo
 
     private final boolean specialMinecart = ServerVersion.compareMinecraftVersion("1.19.4") >= 0;
 
-    @SuppressWarnings("unchecked")
     public MovingListener() {
         super(CheckType.MOVING);
         // Register vehicleChecks.
@@ -1231,14 +1230,13 @@ public class MovingListener extends CheckListener implements TickListener, IRemo
                 ) {
 
             if (debug) {
-                final StringBuilder builder = new StringBuilder(150);
-                builder.append("Direct block push at (");
-                builder.append("x:" + entryBelowY_POS.x);
-                builder.append(" y:" + entryBelowY_POS.y);
-                builder.append(" z:" + entryBelowY_POS.z);
-                builder.append(" direction:" + entryBelowY_POS.direction.name());
-                builder.append(")");
-                debug(player, builder.toString());
+                String builder = "Direct block push at (" +
+                        "x:" + entryBelowY_POS.x +
+                        " y:" + entryBelowY_POS.y +
+                        " z:" + entryBelowY_POS.z +
+                        " direction:" + entryBelowY_POS.direction.name() +
+                        ")";
+                debug(player, builder);
             }
             /*
              * TODO: One case left still not covered, double ascend motions (0.25, 0.649)
@@ -1356,14 +1354,13 @@ public class MovingListener extends CheckListener implements TickListener, IRemo
             data.blockChangeRef.updateSpan(entry);
 
             if (debug) {
-                final StringBuilder builder = new StringBuilder(150);
-                builder.append("Direct block push at (");
-                builder.append("x:" + entry.x);
-                builder.append(" y:" + entry.y);
-                builder.append(" z:" + entry.z);
-                builder.append(" direction:" + entry.direction.name());
-                builder.append(")");
-                debug(player, builder.toString());
+                String builder = "Direct block push at (" +
+                        "x:" + entry.x +
+                        " y:" + entry.y +
+                        " z:" + entry.z +
+                        " direction:" + entry.direction.name() +
+                        ")";
+                debug(player, builder);
                 debug(player, "checkPastStateHorizontalPush: set velocity: " + 0.6);
             }
             return true;
@@ -1581,7 +1578,7 @@ public class MovingListener extends CheckListener implements TickListener, IRemo
      * Monitor level PlayerMoveEvent. Uses useLoc.
      * @param event
      */
-    @EventHandler(priority=EventPriority.MONITOR, ignoreCancelled = false)
+    @EventHandler(priority=EventPriority.MONITOR)
     public void onPlayerMoveMonitor(final PlayerMoveEvent event) {
 
         // TODO: Use stored move data to verify if from/to have changed (thus a teleport will result, possibly a minor issue due to the teleport).
@@ -1787,7 +1784,7 @@ public class MovingListener extends CheckListener implements TickListener, IRemo
      * 
      * @param event
      */
-    @EventHandler(ignoreCancelled = false, priority = EventPriority.LOWEST)
+    @EventHandler(priority = EventPriority.LOWEST)
     public void onPlayerTeleportLowest(final PlayerTeleportEvent event) {
 
         final Player player = event.getPlayer();
@@ -1872,7 +1869,7 @@ public class MovingListener extends CheckListener implements TickListener, IRemo
      * 
      * @param event
      */
-    @EventHandler(ignoreCancelled = false, priority = EventPriority.HIGHEST)
+    @EventHandler(priority = EventPriority.HIGHEST)
     public void onPlayerTeleport(final PlayerTeleportEvent event) {
         // Only check cancelled events.
         if (event.isCancelled()) checkUndoCancelledSetBack(event);
@@ -1924,7 +1921,7 @@ public class MovingListener extends CheckListener implements TickListener, IRemo
      * 
      * @param event
      */
-    @EventHandler(ignoreCancelled = false, priority = EventPriority.MONITOR)
+    @EventHandler(priority = EventPriority.MONITOR)
     public void onPlayerTeleportMonitor(final PlayerTeleportEvent event) {
 
         // Evaluate result and adjust data.
@@ -2206,7 +2203,7 @@ public class MovingListener extends CheckListener implements TickListener, IRemo
     }
 
 
-    @EventHandler(priority = EventPriority.LOWEST, ignoreCancelled = false)
+    @EventHandler(priority = EventPriority.LOWEST)
     public void onEntityDamage(final EntityDamageEvent event) {
 
         if (event.getCause() != DamageCause.FALL) {
@@ -2603,7 +2600,7 @@ public class MovingListener extends CheckListener implements TickListener, IRemo
     }
 
 
-    @EventHandler(priority = EventPriority.MONITOR, ignoreCancelled = false)
+    @EventHandler(priority = EventPriority.MONITOR)
     public void onPlayerToggleFlight(final PlayerToggleFlightEvent event) {
 
         // (ignoreCancelled = false: we track the bit of vertical extra momentum/thing).

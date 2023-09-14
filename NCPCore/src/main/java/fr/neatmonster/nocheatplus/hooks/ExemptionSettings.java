@@ -73,17 +73,14 @@ public class ExemptionSettings {
         }
 
         public boolean hasAnyMetaDataKey(final Entity entity) {
-            if (metaDataKeys == null) {
-                return false;
-            }
-            else {
+            if (metaDataKeys != null) {
                 for (String metaDataKey : metaDataKeys) {
                     if (entity.hasMetadata(metaDataKey)) {
                         return true;
                     }
                 }
-                return false;
             }
+            return false;
         }
 
     }

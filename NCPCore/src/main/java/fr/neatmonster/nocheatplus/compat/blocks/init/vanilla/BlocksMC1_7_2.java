@@ -48,8 +48,7 @@ public class BlocksMC1_7_2 implements BlockPropertiesSetup{
         BlockInit.setAsIfExists("DOUBLE_PLANT", BridgeMaterial.DANDELION);
 
         ConfigFile config = ConfigManager.getConfigFile();
-        if (config.getBoolean(ConfPaths.BLOCKBREAK_DEBUG, config.getBoolean(ConfPaths.CHECKS_DEBUG, false)))
-        StaticLog.logInfo("Added block-info for Minecraft 1.7.2 blocks.");
+        if (config.getBoolean(ConfPaths.BLOCKBREAK_DEBUG, config.getBoolean(ConfPaths.CHECKS_DEBUG, false))) StaticLog.logInfo("Added block-info for Minecraft 1.7.2 blocks.");
     }
 
 }

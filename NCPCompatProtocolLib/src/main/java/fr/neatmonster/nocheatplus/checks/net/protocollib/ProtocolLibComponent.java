@@ -244,7 +244,7 @@ public class ProtocolLibComponent implements IDisableListener, INotifyReload, Jo
         }
     }
 
-    @EventHandler(priority = EventPriority.MONITOR, ignoreCancelled = false)
+    @EventHandler(priority = EventPriority.MONITOR)
     public void onPlayerRespawn(final PlayerRespawnEvent event) {
         if (!registeredPacketAdapters.isEmpty()) {
             final Player player = event.getPlayer();

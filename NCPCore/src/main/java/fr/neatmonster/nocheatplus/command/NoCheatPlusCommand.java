@@ -55,6 +55,7 @@ import fr.neatmonster.nocheatplus.config.ConfigManager;
 import fr.neatmonster.nocheatplus.permissions.Permissions;
 import fr.neatmonster.nocheatplus.permissions.RegisteredPermission;
 import fr.neatmonster.nocheatplus.utilities.ColorUtil;
+import org.jetbrains.annotations.NotNull;
 
 /**
  * The /nocheatplus or /ncp command handler, delegates to sub commands.
@@ -82,7 +83,7 @@ public class NoCheatPlusCommand extends BaseCommand {
          * @see org.bukkit.event.Event#getHandlers()
          */
         @Override
-        public HandlerList getHandlers() {
+        public @NotNull HandlerList getHandlers() {
             return handlers;
         }
     }

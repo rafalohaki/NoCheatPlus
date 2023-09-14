@@ -143,8 +143,7 @@ public abstract class DelayableCommand extends BaseCommand {
         String[] alteredArgs;
         if (args.length <= delayIndex){
             // No delay found, if demanded return.
-            if (mustHaveDelay) 
-            StaticLog.logInfo("Bad setup. Command usage /ncp delay delay=(ticks) (command to delay).");
+            if (mustHaveDelay) StaticLog.logInfo("Bad setup. Command usage /ncp delay delay=(ticks) (command to delay).");
             alteredArgs = args;
             return true;
         }

@@ -85,7 +85,6 @@ public class BlockBreakListener extends CheckListener {
     /** For temporary use: LocUtil.clone before passing deeply, call setWorld(null) after use. */
     private final Location useLoc = new Location(null, 0, 0, 0);
 
-    @SuppressWarnings("unchecked")
     public BlockBreakListener(){
         super(CheckType.BLOCKBREAK);
         final NoCheatPlusAPI api = NCPAPIProvider.getNoCheatPlusAPI();
@@ -112,7 +111,7 @@ public class BlockBreakListener extends CheckListener {
      * @param event
      *            the event
      */
-    @EventHandler(ignoreCancelled = false, priority = EventPriority.LOWEST)
+    @EventHandler(priority = EventPriority.LOWEST)
     public void onBlockBreak(final BlockBreakEvent event) {
         final long now = System.currentTimeMillis();
         final Player player = event.getPlayer();
@@ -300,7 +299,7 @@ public class BlockBreakListener extends CheckListener {
      *            the event
      */
     @EventHandler(
-            ignoreCancelled = false, priority = EventPriority.LOWEST)
+            priority = EventPriority.LOWEST)
     public void onPlayerInteract(final PlayerInteractEvent event) {
         // debug(player, "Interact("+event.isCancelled()+"): " + event.getClickedBlock());
         // The following is to set the "first damage time" for a block.
@@ -317,7 +316,7 @@ public class BlockBreakListener extends CheckListener {
         checkBlockDamage(event.getPlayer(), event.getClickedBlock(), event);
     }
 
-    @EventHandler(ignoreCancelled = false, priority = EventPriority.LOWEST)
+    @EventHandler(priority = EventPriority.LOWEST)
     public void onBlockDamageLowest(final BlockDamageEvent event) {
         /*
          * TODO: Add a check type BLOCKDAMAGE_CONFIRM (no permission):
@@ -333,7 +332,7 @@ public class BlockBreakListener extends CheckListener {
         }
     }
 
-    @EventHandler(ignoreCancelled = false, priority = EventPriority.MONITOR)
+    @EventHandler(priority = EventPriority.MONITOR)
     public void onBlockDamage(final BlockDamageEvent event) {
 
         if (!DataManager.getPlayerData(event.getPlayer()).isCheckActive(CheckType.BLOCKBREAK, event.getPlayer())) return;
@@ -393,7 +392,7 @@ public class BlockBreakListener extends CheckListener {
         }
     }
 
-    @EventHandler(ignoreCancelled = false, priority = EventPriority.MONITOR)
+    @EventHandler(priority = EventPriority.MONITOR)
     public void onItemHeld(final PlayerItemHeldEvent event) {
 
         if (!DataManager.getPlayerData(event.getPlayer()).isCheckActive(CheckType.BLOCKBREAK, event.getPlayer())) return;

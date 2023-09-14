@@ -605,7 +605,7 @@ public class BlockProperties {
      * @return true, if is chest
      */
     public static boolean isChest(final Material mat) {
-        return mat != null && (mat == Material.CHEST || mat == Material.TRAPPED_CHEST || mat == Material.ENDER_CHEST);
+        return (mat == Material.CHEST || mat == Material.TRAPPED_CHEST || mat == Material.ENDER_CHEST);
     }
 
     /**
@@ -791,7 +791,7 @@ public class BlockProperties {
     protected static final Map<Material, BlockProps> blocks = new HashMap<>();
 
     /** Map for the tool properties. */
-    protected static Map<Material, ToolProps> tools = new LinkedHashMap<>(50, 0.5f);
+    protected static final Map<Material, ToolProps> tools = new LinkedHashMap<>(50, 0.5f);
 
     /** Direct overrides for specific side conditions.*/
     private static final Map<BlockBreakKey, Long> breakingTimeOverrides = new HashMap<>();
@@ -2098,7 +2098,7 @@ public class BlockProperties {
             double damage;
             if (!pureHardness) {
                 // Reverse version to get hardness base on time map
-                float tick = duration / 50;
+                float tick = (float) duration / 50;
                 damage = 1 / tick;
                 hardness = 1 / damage / ((isRightTool || !blockProps.requireCorrectTool ? 30 : 100) / (isValidTool ? getToolMultiplier(blockId, blockProps, toolProps) : 1.0));
             }

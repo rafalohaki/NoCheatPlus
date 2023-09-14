@@ -39,7 +39,7 @@ public class NetData extends ACheckData {
     private final Lock lock = new ReentrantLock();
 
     // AttackFrequency
-    public ActionFrequency attackFrequencySeconds = new ActionFrequency(16, 500);
+    public final ActionFrequency attackFrequencySeconds = new ActionFrequency(16, 500);
 
     // FlyingFrequency
     /** All flying packets, use System.currentTimeMillis() for time. */
@@ -61,7 +61,7 @@ public class NetData extends ACheckData {
      * Last 20 seconds keep alive packets counting. Use lastUpdate() for the
      * time of the last event. System.currentTimeMillis() is used.
      */
-    public ActionFrequency keepAliveFreq = new ActionFrequency(20, 1000);
+    public final ActionFrequency keepAliveFreq = new ActionFrequency(20, 1000);
 	
 	// Wrong Turn
     public double wrongTurnVL = 0;
@@ -86,8 +86,6 @@ public class NetData extends ACheckData {
      */
     // TODO: Might extend to synchronize with moving events.
     private final LinkedList<DataPacketFlying> flyingQueue = new LinkedList<>();
-    /** Maximum amount of packets to store. */
-    private final int flyingQueueMaxSize = 15;
     /**
      * The maximum of so far already returned sequence values, altered under
      * lock.
@@ -130,6 +128,8 @@ public class NetData extends ACheckData {
         lock.lock();
         packetData.setSequence(++maxSequence);
         flyingQueue.addFirst(packetData);
+        /** Maximum amount of packets to store. */
+        int flyingQueueMaxSize = 15;
         if (flyingQueue.size() > flyingQueueMaxSize) {
             flyingQueue.removeLast();
             res = true;

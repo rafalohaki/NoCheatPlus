@@ -102,7 +102,7 @@ public class BridgeMisc {
         catch (NoSuchMethodError ignored) {}
         if (Bukkit_getOnlinePlayers != null) {
             Object obj = ReflectionUtil.invokeMethodNoArgs(Bukkit_getOnlinePlayers, null);
-            if (obj != null && (obj instanceof Player[])) {
+            if ((obj instanceof Player[])) {
                 return (Player[]) obj;
             }
         }

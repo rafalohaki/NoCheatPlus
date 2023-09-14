@@ -61,9 +61,9 @@ public class BlockChangeListener implements Listener {
     public final boolean is1_9 = ServerVersion.compareMinecraftVersion("1.9") >= 0;
 
     /** These blocks certainly can't be pushed nor pulled. */
-    public static long F_MOVABLE_IGNORE = BlockFlags.F_LIQUID;
+    public static final long F_MOVABLE_IGNORE = BlockFlags.F_LIQUID;
     /** These blocks might be pushed or pulled. */
-    public static long F_MOVABLE = BlockFlags.F_GROUND | BlockFlags.F_SOLID;
+    public static final long F_MOVABLE = BlockFlags.F_GROUND | BlockFlags.F_SOLID;
 
     private final BlockChangeTracker tracker;
     private final boolean retractHasBlocks;
@@ -122,7 +122,7 @@ public class BlockChangeListener implements Listener {
         },
         new MiniListener<PlayerInteractEvent>() {
             // Include cancelled events, due to the use-block part.
-            @EventHandler(ignoreCancelled = false, priority = EventPriority.MONITOR)
+            @EventHandler(priority = EventPriority.MONITOR)
             @RegisterMethodWithOrder(tag = defaultTag)
             @Override
             public void onEvent(PlayerInteractEvent event) {

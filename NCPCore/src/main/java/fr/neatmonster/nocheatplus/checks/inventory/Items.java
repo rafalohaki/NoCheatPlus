@@ -45,11 +45,8 @@ public class Items extends Check{
      */
     public static boolean checkIllegalEnchantmentsAllHands(final Player player,
                                                            final IPlayerData pData) {
-        boolean result = false;
-        if (checkIllegalEnchantments(player, Bridge1_9.getItemInMainHand(player), pData)) {
-            result = true;
-        }
-        if (Bridge1_9.hasGetItemInOffHand() 
+        boolean result = checkIllegalEnchantments(player, Bridge1_9.getItemInMainHand(player), pData);
+        if (Bridge1_9.hasGetItemInOffHand()
                 && checkIllegalEnchantments(player, Bridge1_9.getItemInOffHand(player), pData)) {
             result = true;
         }

@@ -106,7 +106,6 @@ public class MovingFlying extends BaseAdapter {
     private final int idAsyncFlying = counters.registerKey("packet.flying.asynchronous");
     /** If a packet can't be parsed, this time stamp is set for occasional logging. */
     private long packetMismatch = Long.MIN_VALUE;
-    private final long packetMismatchLogFrequency = 60000; // Every minute max, good for updating :).
     private final HashSet<PACKET_CONTENT> validContent = new LinkedHashSet<>();
     private final PacketType confirmTeleportType = ProtocolLibComponent.findPacketTypeByName(Protocol.PLAY, Sender.CLIENT, "TeleportAccept");
     private boolean acceptConfirmTeleportPackets = confirmTeleportType != null;
@@ -310,10 +309,7 @@ public class MovingFlying extends BaseAdapter {
         if (packetData.hasPos && LocUtil.isBadCoordinate(packetData.getX(), packetData.getY(), packetData.getZ())) {
             return true;
         }
-        if (packetData.hasLook && LocUtil.isBadCoordinate(packetData.getYaw(), packetData.getPitch())) {
-            return true;
-        }
-        return false;
+        return packetData.hasLook && LocUtil.isBadCoordinate(packetData.getYaw(), packetData.getPitch());
     }
 
     /**
@@ -386,6 +382,8 @@ public class MovingFlying extends BaseAdapter {
      */
     private void packetMismatch(final PacketEvent packetEvent) {
         final long time = Monotonic.synchMillis();
+        // Every minute max, good for updating :).
+        long packetMismatchLogFrequency = 60000;
         if (time - packetMismatchLogFrequency > packetMismatch) {
             packetMismatch = time;
             StringBuilder builder = new StringBuilder(512);

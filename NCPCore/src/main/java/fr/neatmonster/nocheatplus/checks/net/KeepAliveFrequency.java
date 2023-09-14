@@ -48,9 +48,7 @@ public class KeepAliveFrequency extends Check implements Listener {
         if (first > 1f) {
             // Trigger a violation.
             final double vl = Math.max(first - 1f, data.keepAliveFreq.score(1f) - data.keepAliveFreq.numberOfBuckets());
-            if (executeActions(player, vl, 1.0, cc.keepAliveFrequencyActions).willCancel()) {
-                return true;
-            }
+            return executeActions(player, vl, 1.0, cc.keepAliveFrequencyActions).willCancel();
         }
         return false;
     }

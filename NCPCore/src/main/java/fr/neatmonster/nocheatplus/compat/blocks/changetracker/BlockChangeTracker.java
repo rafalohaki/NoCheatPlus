@@ -232,7 +232,7 @@ public class BlockChangeTracker {
             if (obj == this) {
                 return true;
             }
-            if (obj == null || !(obj instanceof BlockChangeEntry)) {
+            if (!(obj instanceof BlockChangeEntry)) {
                 return false;
             }
             final BlockChangeEntry other = (BlockChangeEntry) obj;

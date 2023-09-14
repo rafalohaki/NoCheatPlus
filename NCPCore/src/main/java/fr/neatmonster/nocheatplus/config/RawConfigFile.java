@@ -25,6 +25,7 @@ import org.bukkit.Material;
 import org.bukkit.configuration.ConfigurationSection;
 import org.bukkit.configuration.file.YamlConfiguration;
 import org.bukkit.entity.EntityType;
+import org.jetbrains.annotations.NotNull;
 import org.yaml.snakeyaml.DumperOptions;
 
 import fr.neatmonster.nocheatplus.NCPAPIProvider;
@@ -88,8 +89,7 @@ public class RawConfigFile  extends YamlConfiguration {
     public double getDouble(final String path, final double min, final double max, final double preset){
         final double value = getDouble(path, preset);
         if (value < min) return min;
-        else if (value > max) return max;
-        else return value;
+        else return Math.min(value, max);
     }
 
     /**
@@ -105,8 +105,7 @@ public class RawConfigFile  extends YamlConfiguration {
     public long getLong(final String path, final long min, final long max, final long preset){
         final long value = getLong(path, preset);
         if (value < min) return min;
-        else if (value > max) return max;
-        else return value;
+        else return Math.min(value, max);
     }
 
     /**
@@ -122,8 +121,7 @@ public class RawConfigFile  extends YamlConfiguration {
     public long getInt(final String path, final int min, final int max, final int preset){
         final int value = getInt(path, preset);
         if (value < min) return min;
-        else if (value > max) return max;
-        else return value;
+        else return Math.min(value, max);
     }
 
     public AlmostBoolean getAlmostBoolean(final String path, final AlmostBoolean defaultValue) {
@@ -245,7 +243,7 @@ public class RawConfigFile  extends YamlConfiguration {
      * @see org.bukkit.configuration.file.YamlConfiguration#saveToString()
      */
     @Override
-    public String saveToString() {
+    public @NotNull String saveToString() {
         // Some reflection wizardly to avoid having a lot of linebreaks in the yaml file, and get a "footer" into the file.
         // TODO: Interesting, but review this: still necessary/useful in CB-1.4 ?.
         try {

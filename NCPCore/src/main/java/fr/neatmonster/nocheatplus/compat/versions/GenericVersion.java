@@ -286,15 +286,10 @@ public class GenericVersion {
             }
         }
         if (includeHigh) {
-            if (GenericVersion.compareVersions(version, versionHigh) == 1) {
-                return false;
-            }
+            return GenericVersion.compareVersions(version, versionHigh) != 1;
         } else {
-            if (GenericVersion.compareVersions(version, versionHigh) >= 0) {
-                return false;
-            }
+            return GenericVersion.compareVersions(version, versionHigh) < 0;
         }
-        return true;
     }
 
 }

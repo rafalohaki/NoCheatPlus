@@ -225,7 +225,7 @@ public class NoFall extends Check {
             newstate.setType(Material.DIRT);
             final BlockFadeEvent fadeevent = new BlockFadeEvent(block, newstate);
             Bukkit.getPluginManager().callEvent(fadeevent);
-            if (fadeevent.isCancelled()) return false;
+            return !fadeevent.isCancelled();
         }
         return true;
     }

@@ -49,7 +49,7 @@ public class Angle extends Check {
         public final double x, y, z;
         /** Yaw of the attacker. */
         public final float yaw;
-        public long time;
+        public final long time;
         public final UUID damagedId;
         /** Squared distance to the last location (0 if none given). */
         public final double distSqLast;
@@ -82,7 +82,7 @@ public class Angle extends Check {
     }
 
 
-    public static long maxTimeDiff = 1000L;
+    public static final long maxTimeDiff = 1000L;
 
 
     /**

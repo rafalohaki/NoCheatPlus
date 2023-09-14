@@ -41,7 +41,7 @@ public abstract class AbstractWordProcessor implements WordProcessor{
 		}
 	}
 	
-	protected String name;
+	protected final String name;
 	/** Not set by constructor. */
 	protected float weight = 1f;
 	

@@ -52,7 +52,7 @@ public class TimedCharPrefixTree<N extends TimedCharNode<N>, L extends TimedChar
 	
 	protected int depth;
 	
-	protected float arrayGrowth = 1.3f;
+	protected final float arrayGrowth = 1.3f;
 	
 	/**
 	 * 
@@ -104,9 +104,9 @@ public class TimedCharPrefixTree<N extends TimedCharNode<N>, L extends TimedChar
                     return new SimpleTimedCharNode(ts);
                 }
                 ,
-				TimedCharLookupEntry::new,
-			access
-		);
+                TimedCharLookupEntry::new,
+                access
+        );
 	}
 
 }

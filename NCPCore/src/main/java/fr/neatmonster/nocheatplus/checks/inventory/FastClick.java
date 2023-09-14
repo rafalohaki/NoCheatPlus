@@ -166,7 +166,7 @@ public class FastClick extends Check {
             // Interaction was too quick, violation.
             tags.add("interact_time");
             long duration = Math.max(data.lastClickTime - data.containerOpenTime, 20);
-            double violation = (cc.chestOpenLimit / duration) * 100D; // Normalize.
+            double violation = ((double) cc.chestOpenLimit / duration) * 100D; // Normalize.
             data.fastClickVL += violation;
             final ViolationData vd = new ViolationData(this, player, data.fastClickVL, violation, cc.fastClickActions);
             if (vd.needsParameters()) vd.setParameter(ParameterName.TAGS, StringUtil.join(tags, "+"));

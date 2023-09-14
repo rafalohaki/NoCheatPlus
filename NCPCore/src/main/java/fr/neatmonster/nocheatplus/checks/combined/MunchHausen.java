@@ -34,16 +34,14 @@ public class MunchHausen extends Check {
     }
 
     public boolean checkFish(final Player player, final Entity caught, final State state) {
-        if (caught == null || !(caught instanceof Player)) return false;
+        if (!(caught instanceof Player)) return false;
         final Player caughtPlayer = (Player) caught;
         final IPlayerData pData = DataManager.getPlayerData(player);
         final CombinedData data = pData.getGenericInstance(CombinedData.class);
         if (player.equals(caughtPlayer)){
             data.munchHausenVL += 1.0;
-            if (executeActions(player, data.munchHausenVL, 1.0, 
-                    pData.getGenericInstance(CombinedConfig.class).munchHausenActions).willCancel()){
-                return true;
-            }
+            return executeActions(player, data.munchHausenVL, 1.0,
+                    pData.getGenericInstance(CombinedConfig.class).munchHausenActions).willCancel();
         }
         else data.munchHausenVL *= 0.96;
         return false;

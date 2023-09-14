@@ -20,6 +20,7 @@ import java.util.HashSet;
 import java.util.Iterator;
 import java.util.LinkedList;
 import java.util.Map.Entry;
+import java.util.Objects;
 import java.util.Set;
 import java.util.UUID;
 import java.util.concurrent.locks.Lock;
@@ -101,7 +102,7 @@ public class PlayerData implements IPlayerData {
     /** Monitor player task load across all players (nanoseconds per server tick). */
     private static final ActionFrequency taskLoad = new ActionFrequency(6, 7);
     private static final int ticksMonitored = taskLoad.numberOfBuckets() * (int) taskLoad.bucketDuration();
-    private static final long msMonitored = ticksMonitored * 50;
+    private static final long msMonitored = ticksMonitored * 50L;
     /**
      * Some measure for heavy load, for skipping some of the (lazy) updating.
      * Assume 1% of a tick in average as heavy - just for this task. This still
@@ -396,21 +397,18 @@ public class PlayerData implements IPlayerData {
         final long timeNow = System.currentTimeMillis();
         while (it.hasNext()) {
             final PermissionNode node = it.next().getValue();
-            switch (node.getFetchingPolicy()) {
-                case INTERVAL:
-                    node.invalidate();
-                    break;
-                default:
-                    if (node.getLastFetch() > timeNow) {
-                        node.setState(node.getLastState(), timeNow);
-                    }
-                    break;
+            if (Objects.requireNonNull(node.getFetchingPolicy()) == FetchingPolicy.INTERVAL) {
+                node.invalidate();
+            } else {
+                if (node.getLastFetch() > timeNow) {
+                    node.setState(node.getLastState(), timeNow);
+                }
             }
         }
         // TODO: Register explicitly or not? (+ auto register?)...
         for (final Class<? extends IData> type : dataTypes) {
             final IData obj = dataCache.get(type);
-            if (obj != null && obj instanceof ICanHandleTimeRunningBackwards) {
+            if (obj instanceof ICanHandleTimeRunningBackwards) {
                 ((ICanHandleTimeRunningBackwards) obj).handleTimeRanBackwards();
             }
         }
@@ -748,10 +746,7 @@ public class PlayerData implements IPlayerData {
         }
         // Check permission policy/cache regardless of the thread context.
         final RegisteredPermission permission = checkType.getPermission();
-        if (permission != null && hasPermission(permission, player)) {
-            return true;
-        }
-        return false;
+        return permission != null && hasPermission(permission, player);
     }
 
     @Override
@@ -882,7 +877,6 @@ public class PlayerData implements IPlayerData {
      * Get a data/config instance (1.local cache, 2. player related factory, 3.
      * world registry).
      */
-    @SuppressWarnings("unchecked")
     @Override
     public <T> T getGenericInstance(final Class<T> registeredFor) {
         // 1. Check for cache (local).

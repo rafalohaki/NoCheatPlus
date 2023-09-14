@@ -45,7 +45,7 @@ public class ViolationHistory {
         /**
          * Descending sort by time.
          */
-        public static Comparator<ViolationLevel> VLComparator = Comparator.comparingLong(vl -> vl.time);
+        public static final Comparator<ViolationLevel> VLComparator = Comparator.comparingLong(vl -> vl.time);
 
         /** The check. */
         public final String check;
@@ -180,7 +180,7 @@ public class ViolationHistory {
     }
 
     /** Map the check string names to check types (workaround, keep at default, set by Check)*/
-    static Map<String, CheckType> checkTypeMap = new HashMap<>();
+    static final Map<String, CheckType> checkTypeMap = new HashMap<>();
 
     // TODO: Maybe add to metrics: average length of violation histories (does it pay to use SkipListSet or so).
     /** The histories of all the players. */

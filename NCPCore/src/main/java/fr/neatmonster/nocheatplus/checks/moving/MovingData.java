@@ -470,7 +470,7 @@ public class MovingData extends ACheckData implements IDataOnRemoveSubCheckData,
             // TODO: Not sure about horizontal (!).
             nextFrictionHorizontal = nextFrictionVertical = 0.0;
         }
-        else if (to.onHoneyBlock || to.onHoneyBlock) {
+        else if (to.onHoneyBlock) {
             nextFrictionHorizontal = nextFrictionVertical = 0.0;
         }
         else if (from.inBerryBush || to.inBerryBush) {

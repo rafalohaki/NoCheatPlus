@@ -137,10 +137,7 @@ public class Bridge1_9 {
             return true;
         }
         stack = getItemInOffHand(player);
-        if (stack != null && stack.getType() == material) {
-            return true;
-        }
-        return false;
+        return stack != null && stack.getType() == material;
     }
 
     @SuppressWarnings("deprecation")

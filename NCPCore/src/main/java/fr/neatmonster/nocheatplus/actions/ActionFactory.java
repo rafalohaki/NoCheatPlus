@@ -69,7 +69,7 @@ public class ActionFactory extends AbstractActionFactory<ViolationData, ActionLi
                             CancelPenalty.CANCEL));
                 }
             }
-            catch (NumberFormatException e) {
+            catch (NumberFormatException ignored) {
             }
             StaticLog.logWarning("Bad probability definition for cancel action: '" + actionDefinition + "', relay to always cancelling.");
             return new CancelAction<>();
