@@ -81,7 +81,7 @@ public class TickTask implements Runnable {
     private static List<ViolationData> delayedActions = new LinkedList<>();
 
     /** Tick listeners to call every tick. */
-    private static final Set<TickListener> tickListeners = new LinkedHashSet<>();
+    private static final Set<TickListener> tickListeners = new LinkedHashSet<>(256, 0.75F);
 
     /** Last n tick durations, measured from run to run.*/
     private static final long[] tickDurations = new long[lagMaxTicks];
