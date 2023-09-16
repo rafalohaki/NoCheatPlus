@@ -98,15 +98,6 @@ public interface IPlayerDataManager extends ComponentRegistry<IRemoveData>, IRic
     IPlayerData getPlayerData(final String playerName);
 
     /**
-     * This gets an online player by exact player name or lower-case player name
-     * only [subject to change].
-     * 
-     * @param playerName
-     * @return
-     */
-    Player getPlayerExact(final String playerName);
-
-    /**
      * Retrieve the UUID for a given input (name or UUID string of with or
      * without '-'). Might later also query a cache, if appropriate. Convenience
      * method for use with commands.

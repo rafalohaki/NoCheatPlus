@@ -285,14 +285,14 @@ public class PlayerDataManager  implements IPlayerDataManager, ComponentWithName
             BukkitVersion.init();
         }
         final String version = ServerVersion.getMinecraftVersion();
-        if (GenericVersion.compareVersions(version, "1.8") >= 0 || version.equals("1.7.10") && Bukkit.getServer().getVersion().toLowerCase().contains("spigot")) {
-            // Safe to assume Spigot, don't store Player instances.
-            playerMap = new PlayerMap(false);
-        }
-        else {
-            // Likely an older version without efficient mapping.
-            playerMap = new PlayerMap(true);
-        }
+//        if ((GenericVersion.compareVersions(version, "1.8") >= 0 || version.contains("1.7")) && Bukkit.getServer().getVersion().toLowerCase().contains("spigot")) {
+//            // Safe to assume Spigot, don't store Player instances.
+//            playerMap = new PlayerMap(false);
+//        } else {
+//            // Likely an older version without efficient mapping.
+//            playerMap = new PlayerMap(true);
+//        }
+        playerMap = new PlayerMap(true); // Dreeam - always use PlayerMap
         this.permissionRegistry = permissionRegistry; // TODO: World specific.
         this.worldDataManager = worldDataManager;
         // (Call support.) 
@@ -936,11 +936,6 @@ public class PlayerDataManager  implements IPlayerDataManager, ComponentWithName
     }
 
     @Override
-    public Player getPlayerExact(final String playerName) {
-        return playerMap.getPlayerExact(playerName);
-    }
-
-    @Override
     public UUID getUUID(final String input) {
         // TODO: Use player map.
         final Player player = getPlayer(input);
@@ -953,8 +948,8 @@ public class PlayerDataManager  implements IPlayerDataManager, ComponentWithName
     @Override
     public String getPlayerName(final UUID playerId) {
         final PlayerInfo info = playerMap.getPlayerInfo(playerId);
-        if (info != null && info.exactName != null) {
-            return info.exactName;
+        if (info != null && info.name != null) {
+            return info.name;
         }
         final PlayerData data = playerData.get(playerId);
         if (data != null) {

@@ -2654,7 +2654,7 @@ public class MovingListener extends CheckListener implements TickListener, IRemo
         for (final String playerName : hoverTicks) {
             // TODO: put players into the set (+- one tick would not matter ?)
             // TODO: might add an online flag to data !
-            final Player player = DataManager.getPlayerExact(playerName);
+            final Player player = DataManager.getPlayer(playerName);
             if (player == null || !player.isOnline()) {
                 rem.add(playerName);
                 continue;
@@ -2706,7 +2706,7 @@ public class MovingListener extends CheckListener implements TickListener, IRemo
 
         final List<String> rem = new ArrayList<>(playersEnforce.size()); // Pessimistic.
         for (final String playerName : playersEnforce) {
-            final Player player = DataManager.getPlayerExact(playerName);
+            final Player player = DataManager.getPlayer(playerName);
             if (player == null || !player.isOnline()) {
                 rem.add(playerName);
                 continue;

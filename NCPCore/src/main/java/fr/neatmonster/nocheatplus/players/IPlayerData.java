@@ -42,14 +42,6 @@ public interface IPlayerData extends IData, IBaseDataAccess, IGetGenericInstance
     String getPlayerName();
 
     /**
-     * Get the player name in lower case, as had been passed at the time of
-     * object creation.
-     * 
-     * @return
-     */
-    String getPlayerNameLowerCase();
-
-    /**
      * Get the unique id for the player.
      * 
      * @return

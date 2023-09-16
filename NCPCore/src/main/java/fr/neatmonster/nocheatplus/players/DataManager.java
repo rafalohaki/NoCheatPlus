@@ -44,6 +44,7 @@ public class DataManager {
     /**
      * Get the exact player name, stored internally.
      * @param playerId
+     * @return playerName
      */
     public static String getPlayerName(final UUID playerId) {
         return instance.getPlayerName(playerId);
@@ -139,7 +140,7 @@ public class DataManager {
      * history, violation history, normal check data).<br>
      * That should at least go for chat engine data.
      * 
-     * @param CheckType
+     * @param checkType
      * @param PlayerName
      * @return If something was removed.
      */
@@ -149,23 +150,12 @@ public class DataManager {
     }
 
     /**
-     * This gets an online player by exact player name or lower-case player name
-     * only [subject to change].
-     * 
-     * @param playerName
-     * @return
-     */
-    public static Player getPlayerExact(final String playerName) {
-        return instance.getPlayerExact(playerName);
-    }
-
-    /**
      * Retrieve the UUID for a given input (name or UUID string of with or
      * without '-'). Might later also query a cache, if appropriate. Convenience
      * method for use with commands.
      * 
      * @param input
-     * @return
+     * @return gets UUID of player
      */
     public static UUID getUUID(final String input) {
         return instance.getUUID(input);
@@ -175,7 +165,7 @@ public class DataManager {
      * Get an online player by UUID.
      * 
      * @param id
-     * @return
+     * @return player
      */
     public static Player getPlayer(final UUID id) {
         return instance.getPlayer(id);
@@ -186,7 +176,7 @@ public class DataManager {
      * to lower case.
      * 
      * @param playerName
-     * @return
+     * @return player
      */
     public static Player getPlayer(final String playerName) {
         return instance.getPlayer(playerName);
@@ -198,7 +188,7 @@ public class DataManager {
      * hides details.
      * 
      * @param player
-     * @return
+     * @return PlayerData
      */
     public static IPlayerData getPlayerData(final Player player) {
         return instance.getPlayerData(player, true);

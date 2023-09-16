@@ -110,7 +110,7 @@ public class PlayerData implements IPlayerData {
      * because we'll be adding up zeros most of the time here. Perhaps just
      * relaying to TickTask.getLag is enough.
      */
-    private static final float heavyLoad = 500000f / (float) ticksMonitored;
+    private static final float heavyLoad = 500000F / (float) ticksMonitored;
 
     // Default tags.
     // TODO: Move elsewhere (API?)
@@ -147,8 +147,6 @@ public class PlayerData implements IPlayerData {
     // TODO: Names could/should get updated. (In which case?)
     /** Exact case name of the player. */
     private String playerName;
-    /** Lower case name of the player. */
-    private String playerNameLowerCase;
 
     private long lastJoinTime = 0;
 
@@ -201,13 +199,11 @@ public class PlayerData implements IPlayerData {
             final PermissionRegistry permissionRegistry) {
         this.playerId = playerId;
         this.playerName = playerName;
-        this.playerNameLowerCase = playerName.toLowerCase();
         this.permissionRegistry = permissionRegistry;
     }
 
-    void updatePlayerName(final String exactPlayerName) {
-        this.playerName = exactPlayerName;
-        this.playerNameLowerCase = exactPlayerName.toLowerCase();
+    void updatePlayerName(final String playerName) {
+        this.playerName = playerName;
     }
 
     /**
@@ -632,11 +628,6 @@ public class PlayerData implements IPlayerData {
     @Override
     public String getPlayerName() {
         return playerName;
-    }
-
-    @Override
-    public String getPlayerNameLowerCase() {
-        return playerNameLowerCase;
     }
 
     @Override

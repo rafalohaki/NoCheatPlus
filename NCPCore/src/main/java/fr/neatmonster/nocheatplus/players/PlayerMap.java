@@ -16,8 +16,9 @@ package fr.neatmonster.nocheatplus.players;
 
 import java.util.Map;
 import java.util.UUID;
-import java.util.concurrent.ConcurrentHashMap;
 
+import java.util.concurrent.ConcurrentHashMap;
+import java.util.logging.Level;
 import org.bukkit.Bukkit;
 import org.bukkit.entity.Player;
 
@@ -28,9 +29,8 @@ import fr.neatmonster.nocheatplus.utilities.ReflectionUtil;
 /**
  * Map (online) players in various ways. Fall back to Bukkit methods if not
  * mapped.
- * 
- * @author asofold
  *
+ * @author asofold
  */
 public final class PlayerMap {
 
@@ -38,25 +38,22 @@ public final class PlayerMap {
 
     /**
      * Carry basic information about players.
-     * 
-     * @author asofold
      *
+     * @author asofold
      */
     public static final class PlayerInfo {
 
         public final UUID id;
-        public final String exactName;
-        public final String lowerCaseName;
+        public final String name;
         public Player player = null;
 
-        public PlayerInfo (UUID id, String exactName) {
+        public PlayerInfo(UUID id, String name) {
             this.id = id;
-            this.exactName = exactName;
-            this.lowerCaseName = exactName.toLowerCase();
+            this.name = name;
         }
 
-        public boolean matchesExact(UUID id, String exactName) {
-            return this.id.equals(id) && this.exactName.equals(exactName);
+        public boolean matchesExact(UUID id, String name) {
+            return this.id.equals(id) && this.name.equals(name);
         }
 
     }
@@ -67,8 +64,7 @@ public final class PlayerMap {
 
     // TODO: Map types (copy on write, lazy erase, or just keep ordinary maps?)
     private final Map<UUID, PlayerInfo> idInfoMap = new ConcurrentHashMap<>();
-    private final Map<String, PlayerInfo> exactNameInfoMap = new ConcurrentHashMap<>();
-    private final Map<String, PlayerInfo> lowerCaseNameInfoMap = new ConcurrentHashMap<>();
+    private final Map<String, PlayerInfo> nameInfoMap = new ConcurrentHashMap<>();
     // TODO: Consider: Get players by prefix (primary thread only, e.g. for use with commands).
     // TODO: get uuid/name methods?
     // TODO: unlink Player references on remove for better gc?
@@ -91,32 +87,16 @@ public final class PlayerMap {
         return idInfoMap.containsKey(id);
     }
 
-    public boolean hasPlayerInfoExact(final String exactName) {
-        return exactNameInfoMap.containsKey(exactName);
-    }
-
-    public boolean hasPlayerInfo(final String probableName) {
-        return hasPlayerInfoLowerCase(probableName.toLowerCase());
-    }
-
-    public boolean hasPlayerInfoLowerCase(final String lowerCaseName) {
-        return lowerCaseNameInfoMap.containsKey(lowerCaseName);
+    public boolean hasPlayerInfoExact(final String name) {
+        return nameInfoMap.containsKey(name);
     }
 
     public PlayerInfo getPlayerInfo(final UUID id) {
         return idInfoMap.get(id);
     }
 
-    public PlayerInfo getPlayerInfoExact(final String exactName) {
-        return exactNameInfoMap.get(exactName);
-    }
-
-    public PlayerInfo getPlayerInfo(final String probableName) {
-        return getPlayerInfoLowerCase(probableName.toLowerCase());
-    }
-
-    public PlayerInfo getPlayerInfoLowerCase(final String lowerCaseName) {
-        return lowerCaseNameInfoMap.get(lowerCaseName);
+    public PlayerInfo getPlayerInfoExact(final String name) {
+        return nameInfoMap.get(name);
     }
 
     public Player getPlayer(final UUID id) {
@@ -125,56 +105,61 @@ public final class PlayerMap {
             if (info.player != null) {
                 return info.player;
             }
-            return getPlayerBukkit(info);
+            if (storePlayerInstances) {
+                info.player = getPlayerBukkit(id);
+                return info.player;
+            } else {
+                return getPlayerBukkit(id);
+            }
         } else {
             return getPlayerBukkit(id);
         }
     }
 
-    public Player getPlayerExact(final String exactName) {
-        final PlayerInfo info = exactNameInfoMap.get(exactName);
+    public Player getPlayer(final String name) {
+        return getPlayerExact(name);
+    }
+
+    @SuppressWarnings("deprecation")
+    public Player getPlayerExact(final String name) {
+        final PlayerInfo info = nameInfoMap.get(name);
         if (info != null) {
             if (info.player != null) {
                 return info.player;
             }
             if (storePlayerInstances) {
-                info.player = getPlayerBukkit(info);
+                info.player = getPlayerBukkit(info.id);
                 return info.player;
-            } else  {
-                return getPlayerBukkit(info);
+            } else {
+                return getPlayerBukkit(info.id);
             }
         } else {
-            return Bukkit.getPlayerExact(exactName);
+            return Bukkit.getPlayerExact(name);
         }
     }
 
-    public Player getPlayer(final String probableName) {
-        return getPlayerLowerCase(probableName.toLowerCase());
-    }
-
-    public Player getPlayerLowerCase(final String lowerCaseName) {
-        final PlayerInfo info = lowerCaseNameInfoMap.get(lowerCaseName);
-        if (info != null) {
-            if (info.player != null) {
-                return info.player;
-            }
-            if (storePlayerInstances) {
-                info.player = getPlayerBukkit(info);
-                return info.player;
-            } else  {
-                return getPlayerBukkit(info);
-            }
+    private Player getPlayerBukkit(final UUID id) {
+        if (hasGetPlayer_UUID) {
+            return Bukkit.getPlayer(id);
         } else {
-            return Bukkit.getPlayer(lowerCaseName);
+            Bukkit.getLogger().log(Level.WARNING, "getPlayer should not be null, please investigate");
+            // HACKS
+            final IPlayerData pData = DataManager.getPlayerData(id);
+            if (pData != null) {
+                return getPlayer(pData.getPlayerName());
+            } else {
+                // Backwards compatibility.
+                return scanForPlayer(id);
+            }
         }
     }
 
     public PlayerInfo updatePlayer(final Player player) {
         final UUID id = player.getUniqueId();
-        final String exactName = player.getName();
+        final String name = player.getName();
         PlayerInfo info = idInfoMap.get(id);
         if (info != null) {
-            if (info.matchesExact(id, exactName)) {
+            if (info.matchesExact(id, name)) {
                 // Nothing to do, except updating the player instance.
                 if (storePlayerInstances) {
                     info.player = player;
@@ -186,20 +171,19 @@ public final class PlayerMap {
             }
         }
         // Create and link a new info.
-        info = new PlayerInfo(id, exactName);
+        info = new PlayerInfo(id, name);
         if (storePlayerInstances) {
             info.player = player;
         }
         ensureRemoved(info);
         idInfoMap.put(id, info);
-        exactNameInfoMap.put(exactName, info);
-        lowerCaseNameInfoMap.put(info.lowerCaseName, info);
+        nameInfoMap.put(name, info);
         return info;
     }
 
     /**
      * Remove the instance reference, if present at all.
-     * 
+     *
      * @param id
      */
     public void removePlayerInstance(final UUID id) {
@@ -215,8 +199,7 @@ public final class PlayerMap {
 
     public void clear() {
         idInfoMap.clear();
-        exactNameInfoMap.clear();
-        lowerCaseNameInfoMap.clear();
+        nameInfoMap.clear();
     }
 
     public int size() {
@@ -225,22 +208,6 @@ public final class PlayerMap {
     }
 
     // Private methods.
-
-    private Player getPlayerBukkit(final UUID id) {
-        if (hasGetPlayer_UUID) {
-            return Bukkit.getPlayer(id);
-        } else {
-            // HACKS
-            final IPlayerData pData = DataManager.getPlayerData(id);
-            if (pData != null) {
-                return getPlayer(pData.getPlayerName());
-            }
-            else {
-                // Backwards compatibility.
-                return scanForPlayer(id);                
-            }
-        }
-    }
 
     private Player scanForPlayer(final UUID id) {
         // TODO: Add a mapping for id->name for this case?
@@ -252,18 +219,10 @@ public final class PlayerMap {
         return null;
     }
 
-    private Player getPlayerBukkit(final PlayerInfo info) {
-        if (hasGetPlayer_UUID) {
-            return Bukkit.getPlayer(info.id);
-        } else {
-            return Bukkit.getPlayerExact(info.exactName);
-        }
-    }
-
     /**
      * Ensure there are no entries for the given info (for the case of
      * inconsistent combinations).
-     * 
+     *
      * @param info
      * @return
      */
@@ -274,12 +233,7 @@ public final class PlayerMap {
             remove(ref);
             changed = true;
         }
-        ref = exactNameInfoMap.get(info.exactName);
-        if (ref != null) {
-            remove(ref);
-            changed = true;
-        }
-        ref = lowerCaseNameInfoMap.get(info.lowerCaseName);
+        ref = nameInfoMap.get(info.name);
         if (ref != null) {
             remove(ref);
             changed = true;
@@ -290,15 +244,14 @@ public final class PlayerMap {
     /**
      * Remove an existing info from all mappings, only call for consistent
      * states.
-     * 
+     *
      * @param info
      * @return
      */
     private boolean remove(final PlayerInfo info) {
         boolean altered = false;
         altered |= idInfoMap.remove(info.id) != null;
-        altered |= exactNameInfoMap.remove(info.exactName) != null;
-        altered |= lowerCaseNameInfoMap.remove(info.lowerCaseName) != null;
+        altered |= nameInfoMap.remove(info.name) != null;
         return altered;
     }
 
