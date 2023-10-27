@@ -14,10 +14,10 @@
  */
 package fr.neatmonster.nocheatplus.checks.moving.model;
 
-import java.util.UUID;
-
 import org.bukkit.entity.Entity;
 import org.bukkit.entity.EntityType;
+
+import java.util.UUID;
 
 /**
  * Include vehicle move data for a move.

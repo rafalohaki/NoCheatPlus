@@ -14,27 +14,12 @@
  */
 package fr.neatmonster.nocheatplus.checks.net.protocollib;
 
-import java.util.ArrayList;
-import java.util.LinkedList;
-import java.util.List;
-
-import org.bukkit.Bukkit;
-import org.bukkit.Location;
-import org.bukkit.entity.Player;
-import org.bukkit.event.EventHandler;
-import org.bukkit.event.EventPriority;
-import org.bukkit.event.Listener;
-import org.bukkit.event.player.PlayerRespawnEvent;
-import org.bukkit.event.player.PlayerTeleportEvent;
-import org.bukkit.plugin.Plugin;
-
 import com.comphenix.protocol.PacketType;
 import com.comphenix.protocol.PacketType.Protocol;
 import com.comphenix.protocol.PacketType.Sender;
 import com.comphenix.protocol.ProtocolLibrary;
 import com.comphenix.protocol.ProtocolManager;
 import com.comphenix.protocol.events.PacketAdapter;
-
 import fr.neatmonster.nocheatplus.NCPAPIProvider;
 import fr.neatmonster.nocheatplus.checks.CheckType;
 import fr.neatmonster.nocheatplus.checks.net.NetData;
@@ -52,6 +37,19 @@ import fr.neatmonster.nocheatplus.players.IPlayerData;
 import fr.neatmonster.nocheatplus.stats.Counters;
 import fr.neatmonster.nocheatplus.utilities.StringUtil;
 import fr.neatmonster.nocheatplus.worlds.IWorldDataManager;
+import org.bukkit.Bukkit;
+import org.bukkit.Location;
+import org.bukkit.entity.Player;
+import org.bukkit.event.EventHandler;
+import org.bukkit.event.EventPriority;
+import org.bukkit.event.Listener;
+import org.bukkit.event.player.PlayerRespawnEvent;
+import org.bukkit.event.player.PlayerTeleportEvent;
+import org.bukkit.plugin.Plugin;
+
+import java.util.ArrayList;
+import java.util.LinkedList;
+import java.util.List;
 
 /**
  * Quick and dirty ProtocolLib setup.

@@ -14,11 +14,6 @@
  */
 package fr.neatmonster.nocheatplus.checks.moving.magic;
 
-import java.util.Collection;
-
-import org.bukkit.Location;
-import org.bukkit.entity.Player;
-
 import fr.neatmonster.nocheatplus.checks.moving.MovingConfig;
 import fr.neatmonster.nocheatplus.checks.moving.MovingData;
 import fr.neatmonster.nocheatplus.checks.moving.model.LiftOffEnvelope;
@@ -26,9 +21,13 @@ import fr.neatmonster.nocheatplus.checks.moving.model.PlayerMoveData;
 import fr.neatmonster.nocheatplus.checks.moving.velocity.SimpleEntry;
 import fr.neatmonster.nocheatplus.checks.moving.velocity.VelocityFlags;
 import fr.neatmonster.nocheatplus.checks.workaround.WRPT;
+import fr.neatmonster.nocheatplus.compat.Bridge1_13;
 import fr.neatmonster.nocheatplus.utilities.location.PlayerLocation;
 import fr.neatmonster.nocheatplus.utilities.map.BlockProperties;
-import fr.neatmonster.nocheatplus.compat.Bridge1_13;
+import org.bukkit.Location;
+import org.bukkit.entity.Player;
+
+import java.util.Collection;
 
 
 /**

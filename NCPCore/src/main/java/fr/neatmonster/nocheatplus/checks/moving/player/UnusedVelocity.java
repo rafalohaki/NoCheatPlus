@@ -14,8 +14,6 @@
  */
 package fr.neatmonster.nocheatplus.checks.moving.player;
 
-import org.bukkit.entity.Player;
-
 import fr.neatmonster.nocheatplus.checks.CheckType;
 import fr.neatmonster.nocheatplus.checks.moving.MovingConfig;
 import fr.neatmonster.nocheatplus.checks.moving.MovingData;
@@ -24,6 +22,7 @@ import fr.neatmonster.nocheatplus.checks.moving.velocity.UnusedTracker;
 import fr.neatmonster.nocheatplus.logging.debug.DebugUtil;
 import fr.neatmonster.nocheatplus.players.IPlayerData;
 import fr.neatmonster.nocheatplus.utilities.CheckUtils;
+import org.bukkit.entity.Player;
 
 public class UnusedVelocity {
     

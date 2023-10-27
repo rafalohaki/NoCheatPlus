@@ -14,15 +14,13 @@
  */
 package fr.neatmonster.nocheatplus.checks.net.protocollib;
 
-import org.bukkit.entity.Player;
-import org.bukkit.plugin.Plugin;
-
 import com.comphenix.protocol.PacketType;
 import com.comphenix.protocol.events.ListenerPriority;
 import com.comphenix.protocol.events.PacketEvent;
-
 import fr.neatmonster.nocheatplus.checks.CheckType;
 import fr.neatmonster.nocheatplus.players.DataManager;
+import org.bukkit.entity.Player;
+import org.bukkit.plugin.Plugin;
 
 public class DebugAdapter extends BaseAdapter {
 

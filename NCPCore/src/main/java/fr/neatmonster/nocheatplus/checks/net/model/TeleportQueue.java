@@ -14,12 +14,12 @@
  */
 package fr.neatmonster.nocheatplus.checks.net.model;
 
+import fr.neatmonster.nocheatplus.compat.AlmostBoolean;
+
 import java.util.Iterator;
 import java.util.LinkedList;
 import java.util.concurrent.locks.Lock;
 import java.util.concurrent.locks.ReentrantLock;
-
-import fr.neatmonster.nocheatplus.compat.AlmostBoolean;
 
 /**
  * Queue outgoing teleport locations (DataPacketFlying), in order to cancel

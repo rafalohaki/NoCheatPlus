@@ -14,28 +14,26 @@
  */
 package fr.neatmonster.nocheatplus.checks.moving.util.bounce;
 
-import java.util.UUID;
-
-import org.bukkit.entity.Player;
-import org.bukkit.Location;
-
 import fr.neatmonster.nocheatplus.checks.CheckType;
 import fr.neatmonster.nocheatplus.checks.moving.MovingConfig;
 import fr.neatmonster.nocheatplus.checks.moving.MovingData;
 import fr.neatmonster.nocheatplus.checks.moving.magic.Magic;
 import fr.neatmonster.nocheatplus.checks.moving.model.PlayerMoveData;
 import fr.neatmonster.nocheatplus.checks.moving.util.MovingUtil;
-import fr.neatmonster.nocheatplus.checks.moving.util.bounce.BounceType;
 import fr.neatmonster.nocheatplus.checks.moving.velocity.SimpleEntry;
 import fr.neatmonster.nocheatplus.checks.moving.velocity.VelocityFlags;
-import fr.neatmonster.nocheatplus.components.debug.IDebugPlayer;
-import fr.neatmonster.nocheatplus.players.IPlayerData;
-import fr.neatmonster.nocheatplus.utilities.location.PlayerLocation;
-import fr.neatmonster.nocheatplus.utilities.map.BlockProperties;
-import fr.neatmonster.nocheatplus.utilities.map.BlockFlags;
 import fr.neatmonster.nocheatplus.compat.blocks.changetracker.BlockChangeTracker;
 import fr.neatmonster.nocheatplus.compat.blocks.changetracker.BlockChangeTracker.BlockChangeEntry;
 import fr.neatmonster.nocheatplus.compat.blocks.changetracker.BlockChangeTracker.Direction;
+import fr.neatmonster.nocheatplus.components.debug.IDebugPlayer;
+import fr.neatmonster.nocheatplus.players.IPlayerData;
+import fr.neatmonster.nocheatplus.utilities.location.PlayerLocation;
+import fr.neatmonster.nocheatplus.utilities.map.BlockFlags;
+import fr.neatmonster.nocheatplus.utilities.map.BlockProperties;
+import org.bukkit.Location;
+import org.bukkit.entity.Player;
+
+import java.util.UUID;
 
 
 /**

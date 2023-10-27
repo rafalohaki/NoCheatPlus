@@ -14,15 +14,15 @@
  */
 package fr.neatmonster.nocheatplus.checks.chat.analysis.engine;
 
-import java.util.ArrayList;
-import java.util.List;
-
 import fr.neatmonster.nocheatplus.checks.chat.ChatConfig;
 import fr.neatmonster.nocheatplus.checks.chat.analysis.engine.processors.FlatWords;
 import fr.neatmonster.nocheatplus.checks.chat.analysis.engine.processors.SimilarWordsBKL;
 import fr.neatmonster.nocheatplus.checks.chat.analysis.engine.processors.WordPrefixes;
 import fr.neatmonster.nocheatplus.checks.chat.analysis.engine.processors.WordProcessor;
 import fr.neatmonster.nocheatplus.components.data.IData;
+
+import java.util.ArrayList;
+import java.util.List;
 
 /**
  * Engine specific player data.

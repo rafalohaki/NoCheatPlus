@@ -14,6 +14,16 @@
  */
 package fr.neatmonster.nocheatplus.checks.combined;
 
+import fr.neatmonster.nocheatplus.NCPAPIProvider;
+import fr.neatmonster.nocheatplus.checks.CheckListener;
+import fr.neatmonster.nocheatplus.checks.CheckType;
+import fr.neatmonster.nocheatplus.components.NoCheatPlusAPI;
+import fr.neatmonster.nocheatplus.components.data.ICheckData;
+import fr.neatmonster.nocheatplus.components.data.IData;
+import fr.neatmonster.nocheatplus.players.DataManager;
+import fr.neatmonster.nocheatplus.players.IPlayerData;
+import fr.neatmonster.nocheatplus.stats.Counters;
+import fr.neatmonster.nocheatplus.utilities.TickTask;
 import org.bukkit.entity.Entity;
 import org.bukkit.entity.Player;
 import org.bukkit.event.EventHandler;
@@ -25,17 +35,6 @@ import org.bukkit.event.player.PlayerJoinEvent;
 import org.bukkit.event.player.PlayerQuitEvent;
 import org.bukkit.event.player.PlayerToggleSneakEvent;
 import org.bukkit.event.player.PlayerToggleSprintEvent;
-
-import fr.neatmonster.nocheatplus.NCPAPIProvider;
-import fr.neatmonster.nocheatplus.checks.CheckListener;
-import fr.neatmonster.nocheatplus.checks.CheckType;
-import fr.neatmonster.nocheatplus.components.NoCheatPlusAPI;
-import fr.neatmonster.nocheatplus.components.data.ICheckData;
-import fr.neatmonster.nocheatplus.components.data.IData;
-import fr.neatmonster.nocheatplus.players.DataManager;
-import fr.neatmonster.nocheatplus.players.IPlayerData;
-import fr.neatmonster.nocheatplus.stats.Counters;
-import fr.neatmonster.nocheatplus.utilities.TickTask;
 
 /**
  * Class to combine some things, make available for other checks, or just because they don't fit into another section.<br>

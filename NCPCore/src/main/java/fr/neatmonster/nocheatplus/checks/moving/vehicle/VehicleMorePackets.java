@@ -14,8 +14,6 @@
  */
 package fr.neatmonster.nocheatplus.checks.moving.vehicle;
 
-import org.bukkit.entity.Player;
-
 import fr.neatmonster.nocheatplus.actions.ParameterName;
 import fr.neatmonster.nocheatplus.checks.Check;
 import fr.neatmonster.nocheatplus.checks.CheckType;
@@ -26,6 +24,7 @@ import fr.neatmonster.nocheatplus.checks.moving.location.setback.SetBackEntry;
 import fr.neatmonster.nocheatplus.checks.moving.model.VehicleMoveData;
 import fr.neatmonster.nocheatplus.compat.Folia;
 import fr.neatmonster.nocheatplus.players.IPlayerData;
+import org.bukkit.entity.Player;
 
 /**
  * This check does the exact same thing as the MorePacket check but this one works for players inside vehicles.

@@ -14,14 +14,13 @@
  */
 package fr.neatmonster.nocheatplus.stats;
 
+import fr.neatmonster.nocheatplus.logging.StaticLog;
+import org.bukkit.ChatColor;
+
 import java.text.DecimalFormat;
 import java.text.DecimalFormatSymbols;
 import java.util.HashMap;
 import java.util.Map;
-
-import org.bukkit.ChatColor;
-
-import fr.neatmonster.nocheatplus.logging.StaticLog;
 
 /**
  * A not too fat timings class re-used from other plugins.

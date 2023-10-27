@@ -14,11 +14,10 @@
  */
 package fr.neatmonster.nocheatplus.checks.inventory;
 
-import org.bukkit.Material;
-import org.bukkit.inventory.InventoryView;
-
 import fr.neatmonster.nocheatplus.checks.access.ACheckData;
 import fr.neatmonster.nocheatplus.utilities.ds.count.ActionFrequency;
+import org.bukkit.Material;
+import org.bukkit.inventory.InventoryView;
 
 /**
  * Player specific dataFactory for the inventory checks.

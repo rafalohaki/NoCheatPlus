@@ -14,12 +14,11 @@
  */
 package fr.neatmonster.nocheatplus.checks.net;
 
-import org.bukkit.entity.Player;
-
 import fr.neatmonster.nocheatplus.checks.Check;
 import fr.neatmonster.nocheatplus.checks.CheckType;
 import fr.neatmonster.nocheatplus.checks.net.model.DataPacketFlying;
 import fr.neatmonster.nocheatplus.players.IPlayerData;
+import org.bukkit.entity.Player;
 
 /**
  * Check frequency of (pos/look/) flying packets, disregarding packet content.

@@ -14,15 +14,6 @@
  */
 package fr.neatmonster.nocheatplus.checks.combined;
 
-import java.util.Arrays;
-import java.util.HashMap;
-import java.util.HashSet;
-import java.util.Map;
-import java.util.Set;
-
-import org.bukkit.configuration.ConfigurationSection;
-import org.bukkit.event.entity.EntityDamageEvent.DamageCause;
-
 import fr.neatmonster.nocheatplus.actions.ActionList;
 import fr.neatmonster.nocheatplus.checks.access.ACheckConfig;
 import fr.neatmonster.nocheatplus.config.ConfPaths;
@@ -31,6 +22,14 @@ import fr.neatmonster.nocheatplus.logging.StaticLog;
 import fr.neatmonster.nocheatplus.permissions.Permissions;
 import fr.neatmonster.nocheatplus.utilities.StringUtil;
 import fr.neatmonster.nocheatplus.worlds.IWorldData;
+import org.bukkit.configuration.ConfigurationSection;
+import org.bukkit.event.entity.EntityDamageEvent.DamageCause;
+
+import java.util.Arrays;
+import java.util.HashMap;
+import java.util.HashSet;
+import java.util.Map;
+import java.util.Set;
 
 public class CombinedConfig extends ACheckConfig {
 

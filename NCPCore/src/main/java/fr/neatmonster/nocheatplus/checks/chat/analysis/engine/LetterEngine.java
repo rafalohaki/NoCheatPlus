@@ -14,13 +14,6 @@
  */
 package fr.neatmonster.nocheatplus.checks.chat.analysis.engine;
 
-import java.util.ArrayList;
-import java.util.HashMap;
-import java.util.List;
-import java.util.Map;
-
-import org.bukkit.entity.Player;
-
 import fr.neatmonster.nocheatplus.checks.CheckType;
 import fr.neatmonster.nocheatplus.checks.chat.ChatConfig;
 import fr.neatmonster.nocheatplus.checks.chat.ChatData;
@@ -39,6 +32,12 @@ import fr.neatmonster.nocheatplus.components.registry.feature.IRemoveData;
 import fr.neatmonster.nocheatplus.config.ConfPaths;
 import fr.neatmonster.nocheatplus.config.ConfigFile;
 import fr.neatmonster.nocheatplus.logging.StaticLog;
+import org.bukkit.entity.Player;
+
+import java.util.ArrayList;
+import java.util.HashMap;
+import java.util.List;
+import java.util.Map;
 
 
 /**

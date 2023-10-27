@@ -14,16 +14,15 @@
  */
 package fr.neatmonster.nocheatplus.hooks;
 
+import fr.neatmonster.nocheatplus.config.ConfPaths;
+import fr.neatmonster.nocheatplus.config.ConfigFile;
+import org.bukkit.entity.Entity;
+import org.bukkit.entity.NPC;
+
 import java.util.ArrayList;
 import java.util.Collection;
 import java.util.Collections;
 import java.util.List;
-
-import org.bukkit.entity.Entity;
-import org.bukkit.entity.NPC;
-
-import fr.neatmonster.nocheatplus.config.ConfPaths;
-import fr.neatmonster.nocheatplus.config.ConfigFile;
 
 /**
  * Encapsulate generic settings and checking functionality for exemption.

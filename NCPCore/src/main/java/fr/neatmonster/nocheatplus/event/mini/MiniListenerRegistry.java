@@ -14,6 +14,13 @@
  */
 package fr.neatmonster.nocheatplus.event.mini;
 
+import fr.neatmonster.nocheatplus.components.registry.order.IGetRegistrationOrder;
+import fr.neatmonster.nocheatplus.components.registry.order.RegistrationOrder;
+import fr.neatmonster.nocheatplus.components.registry.order.RegistrationOrder.RegisterEventsWithOrder;
+import fr.neatmonster.nocheatplus.components.registry.order.RegistrationOrder.RegisterMethodWithOrder;
+import fr.neatmonster.nocheatplus.components.registry.order.RegistrationOrder.RegisterWithOrder;
+import fr.neatmonster.nocheatplus.utilities.ReflectionUtil;
+
 import java.lang.reflect.Method;
 import java.util.ArrayList;
 import java.util.Arrays;
@@ -24,13 +31,6 @@ import java.util.Iterator;
 import java.util.Map;
 import java.util.Map.Entry;
 import java.util.Set;
-
-import fr.neatmonster.nocheatplus.components.registry.order.IGetRegistrationOrder;
-import fr.neatmonster.nocheatplus.components.registry.order.RegistrationOrder;
-import fr.neatmonster.nocheatplus.components.registry.order.RegistrationOrder.RegisterEventsWithOrder;
-import fr.neatmonster.nocheatplus.components.registry.order.RegistrationOrder.RegisterMethodWithOrder;
-import fr.neatmonster.nocheatplus.components.registry.order.RegistrationOrder.RegisterWithOrder;
-import fr.neatmonster.nocheatplus.utilities.ReflectionUtil;
 
 /**
  * 

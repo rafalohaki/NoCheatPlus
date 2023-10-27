@@ -14,11 +14,10 @@
  */
 package fr.neatmonster.nocheatplus.checks.net;
 
-import org.bukkit.entity.Player;
-
 import fr.neatmonster.nocheatplus.checks.Check;
 import fr.neatmonster.nocheatplus.checks.CheckType;
 import fr.neatmonster.nocheatplus.utilities.TickTask;
+import org.bukkit.entity.Player;
 
 /**
  * Fall-back check for pre 1.9: Limit the overall packet frequency, aiming at

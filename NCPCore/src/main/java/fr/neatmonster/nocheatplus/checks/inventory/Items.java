@@ -14,18 +14,17 @@
  */
 package fr.neatmonster.nocheatplus.checks.inventory;
 
-import java.util.HashSet;
-import java.util.Map;
-
+import fr.neatmonster.nocheatplus.checks.Check;
+import fr.neatmonster.nocheatplus.checks.CheckType;
+import fr.neatmonster.nocheatplus.compat.Bridge1_9;
+import fr.neatmonster.nocheatplus.players.IPlayerData;
 import org.bukkit.Material;
 import org.bukkit.enchantments.Enchantment;
 import org.bukkit.entity.Player;
 import org.bukkit.inventory.ItemStack;
 
-import fr.neatmonster.nocheatplus.checks.Check;
-import fr.neatmonster.nocheatplus.checks.CheckType;
-import fr.neatmonster.nocheatplus.compat.Bridge1_9;
-import fr.neatmonster.nocheatplus.players.IPlayerData;
+import java.util.HashSet;
+import java.util.Map;
 
 public class Items extends Check{
 

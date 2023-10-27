@@ -14,10 +14,26 @@
  */
 package fr.neatmonster.nocheatplus.checks.moving.player;
 
-import java.util.Random;
-
+import fr.neatmonster.nocheatplus.checks.Check;
+import fr.neatmonster.nocheatplus.checks.CheckType;
+import fr.neatmonster.nocheatplus.checks.moving.MovingConfig;
+import fr.neatmonster.nocheatplus.checks.moving.MovingData;
+import fr.neatmonster.nocheatplus.checks.moving.magic.Magic;
+import fr.neatmonster.nocheatplus.checks.moving.model.LocationData;
+import fr.neatmonster.nocheatplus.checks.moving.model.PlayerMoveData;
+import fr.neatmonster.nocheatplus.compat.Bridge1_13;
+import fr.neatmonster.nocheatplus.compat.Bridge1_9;
+import fr.neatmonster.nocheatplus.compat.BridgeEnchant;
+import fr.neatmonster.nocheatplus.compat.BridgeHealth;
+import fr.neatmonster.nocheatplus.compat.BridgeMaterial;
+import fr.neatmonster.nocheatplus.compat.versions.ServerVersion;
 import fr.neatmonster.nocheatplus.components.registry.feature.TickListener;
+import fr.neatmonster.nocheatplus.players.IPlayerData;
+import fr.neatmonster.nocheatplus.utilities.ReflectionUtil;
 import fr.neatmonster.nocheatplus.utilities.TickTask;
+import fr.neatmonster.nocheatplus.utilities.location.PlayerLocation;
+import fr.neatmonster.nocheatplus.utilities.map.BlockFlags;
+import fr.neatmonster.nocheatplus.utilities.map.MaterialUtil;
 import org.bukkit.Bukkit;
 import org.bukkit.GameMode;
 import org.bukkit.Location;
@@ -36,24 +52,7 @@ import org.bukkit.event.entity.EntityDamageEvent.DamageCause;
 import org.bukkit.event.player.PlayerInteractEvent;
 import org.bukkit.util.Vector;
 
-import fr.neatmonster.nocheatplus.checks.Check;
-import fr.neatmonster.nocheatplus.checks.CheckType;
-import fr.neatmonster.nocheatplus.checks.moving.MovingConfig;
-import fr.neatmonster.nocheatplus.checks.moving.MovingData;
-import fr.neatmonster.nocheatplus.checks.moving.magic.Magic;
-import fr.neatmonster.nocheatplus.checks.moving.model.LocationData;
-import fr.neatmonster.nocheatplus.checks.moving.model.PlayerMoveData;
-import fr.neatmonster.nocheatplus.compat.Bridge1_13;
-import fr.neatmonster.nocheatplus.compat.Bridge1_9;
-import fr.neatmonster.nocheatplus.compat.BridgeEnchant;
-import fr.neatmonster.nocheatplus.compat.BridgeHealth;
-import fr.neatmonster.nocheatplus.compat.BridgeMaterial;
-import fr.neatmonster.nocheatplus.compat.versions.ServerVersion;
-import fr.neatmonster.nocheatplus.players.IPlayerData;
-import fr.neatmonster.nocheatplus.utilities.ReflectionUtil;
-import fr.neatmonster.nocheatplus.utilities.location.PlayerLocation;
-import fr.neatmonster.nocheatplus.utilities.map.BlockFlags;
-import fr.neatmonster.nocheatplus.utilities.map.MaterialUtil;
+import java.util.Random;
 
 /**
  * A check to see if people cheat by tricking the server to not deal them fall damage.

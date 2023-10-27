@@ -14,12 +14,12 @@
  */
 package fr.neatmonster.nocheatplus.checks.chat.analysis.engine.processors;
 
-import java.util.List;
-
 import fr.neatmonster.nocheatplus.checks.chat.analysis.MessageLetterCount;
 import fr.neatmonster.nocheatplus.config.ConfigFile;
 import fr.neatmonster.nocheatplus.utilities.ds.prefixtree.SimpleTimedCharPrefixTree;
 import fr.neatmonster.nocheatplus.utilities.ds.prefixtree.SimpleTimedCharPrefixTree.SimpleTimedCharLookupEntry;
+
+import java.util.List;
 
 public class WordPrefixes extends DigestedWords{
 	

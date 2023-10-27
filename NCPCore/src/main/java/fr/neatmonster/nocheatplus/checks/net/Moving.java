@@ -14,30 +14,27 @@
  */
 package fr.neatmonster.nocheatplus.checks.net;
 
-import org.bukkit.entity.Player;
-import org.bukkit.Location;
-import org.bukkit.plugin.Plugin;
-import org.bukkit.event.EventHandler;
-import org.bukkit.event.EventPriority;
-import org.bukkit.event.player.PlayerJoinEvent;
-import org.bukkit.event.player.PlayerTeleportEvent;
-import org.bukkit.event.player.PlayerRespawnEvent;
-
 import fr.neatmonster.nocheatplus.checks.Check;
 import fr.neatmonster.nocheatplus.checks.CheckType;
 import fr.neatmonster.nocheatplus.checks.moving.MovingConfig;
 import fr.neatmonster.nocheatplus.checks.moving.MovingData;
-import fr.neatmonster.nocheatplus.checks.net.NetConfig;
-import fr.neatmonster.nocheatplus.checks.net.NetData;
 import fr.neatmonster.nocheatplus.checks.net.model.DataPacketFlying;
-import fr.neatmonster.nocheatplus.players.IPlayerData;
-import fr.neatmonster.nocheatplus.utilities.location.LocUtil;
-import fr.neatmonster.nocheatplus.utilities.location.TrigUtil;
-import fr.neatmonster.nocheatplus.logging.StaticLog;
 import fr.neatmonster.nocheatplus.compat.BridgeMisc;
 import fr.neatmonster.nocheatplus.compat.Folia;
+import fr.neatmonster.nocheatplus.logging.StaticLog;
+import fr.neatmonster.nocheatplus.players.IPlayerData;
 import fr.neatmonster.nocheatplus.utilities.CheckUtils;
 import fr.neatmonster.nocheatplus.utilities.TickTask;
+import fr.neatmonster.nocheatplus.utilities.location.LocUtil;
+import fr.neatmonster.nocheatplus.utilities.location.TrigUtil;
+import org.bukkit.Location;
+import org.bukkit.entity.Player;
+import org.bukkit.event.EventHandler;
+import org.bukkit.event.EventPriority;
+import org.bukkit.event.player.PlayerJoinEvent;
+import org.bukkit.event.player.PlayerRespawnEvent;
+import org.bukkit.event.player.PlayerTeleportEvent;
+import org.bukkit.plugin.Plugin;
 
 /**
  * Misc. checks related to flying packets.

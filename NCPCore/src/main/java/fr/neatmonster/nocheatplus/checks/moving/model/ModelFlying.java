@@ -14,9 +14,8 @@
  */
 package fr.neatmonster.nocheatplus.checks.moving.model;
 
-import org.bukkit.configuration.ConfigurationSection;
-
 import fr.neatmonster.nocheatplus.config.ConfPaths;
+import org.bukkit.configuration.ConfigurationSection;
 
 /**
  * Parameters for actual flying (context dependent).

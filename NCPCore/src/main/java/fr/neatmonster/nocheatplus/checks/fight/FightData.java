@@ -14,12 +14,6 @@
  */
 package fr.neatmonster.nocheatplus.checks.fight;
 
-import java.util.Collection;
-import java.util.LinkedList;
-
-import org.bukkit.World;
-import org.bukkit.entity.Player;
-
 import fr.neatmonster.nocheatplus.checks.CheckType;
 import fr.neatmonster.nocheatplus.checks.access.ACheckData;
 import fr.neatmonster.nocheatplus.components.data.IDataOnRemoveSubCheckData;
@@ -27,6 +21,11 @@ import fr.neatmonster.nocheatplus.components.data.IDataOnWorldChange;
 import fr.neatmonster.nocheatplus.players.IPlayerData;
 import fr.neatmonster.nocheatplus.utilities.PenaltyTime;
 import fr.neatmonster.nocheatplus.utilities.ds.count.ActionFrequency;
+import org.bukkit.World;
+import org.bukkit.entity.Player;
+
+import java.util.Collection;
+import java.util.LinkedList;
 
 /**
  * Player specific data for the fight checks.

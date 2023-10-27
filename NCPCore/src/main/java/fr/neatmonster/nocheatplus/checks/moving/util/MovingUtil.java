@@ -14,17 +14,6 @@
  */
 package fr.neatmonster.nocheatplus.checks.moving.util;
 
-import java.util.UUID;
-
-import org.bukkit.Chunk;
-import org.bukkit.GameMode;
-import org.bukkit.Location;
-import org.bukkit.Material;
-import org.bukkit.entity.Entity;
-import org.bukkit.entity.EntityType;
-import org.bukkit.entity.Player;
-import org.bukkit.event.player.PlayerMoveEvent;
-
 import fr.neatmonster.nocheatplus.NCPAPIProvider;
 import fr.neatmonster.nocheatplus.checks.CheckType;
 import fr.neatmonster.nocheatplus.checks.moving.MovingConfig;
@@ -48,9 +37,19 @@ import fr.neatmonster.nocheatplus.utilities.location.LocUtil;
 import fr.neatmonster.nocheatplus.utilities.location.PlayerLocation;
 import fr.neatmonster.nocheatplus.utilities.location.RichBoundsLocation;
 import fr.neatmonster.nocheatplus.utilities.location.TrigUtil;
-import fr.neatmonster.nocheatplus.utilities.map.BlockProperties;
 import fr.neatmonster.nocheatplus.utilities.map.BlockFlags;
+import fr.neatmonster.nocheatplus.utilities.map.BlockProperties;
 import fr.neatmonster.nocheatplus.utilities.map.MapUtil;
+import org.bukkit.Chunk;
+import org.bukkit.GameMode;
+import org.bukkit.Location;
+import org.bukkit.Material;
+import org.bukkit.entity.Entity;
+import org.bukkit.entity.EntityType;
+import org.bukkit.entity.Player;
+import org.bukkit.event.player.PlayerMoveEvent;
+
+import java.util.UUID;
 
 /**
  * Static utility methods.

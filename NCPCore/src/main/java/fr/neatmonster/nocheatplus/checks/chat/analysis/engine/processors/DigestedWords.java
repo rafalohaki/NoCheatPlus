@@ -14,13 +14,13 @@
  */
 package fr.neatmonster.nocheatplus.checks.chat.analysis.engine.processors;
 
+import fr.neatmonster.nocheatplus.checks.chat.analysis.WordLetterCount;
+import fr.neatmonster.nocheatplus.config.ConfigFile;
+
 import java.util.ArrayList;
 import java.util.Collection;
 import java.util.Collections;
 import java.util.List;
-
-import fr.neatmonster.nocheatplus.checks.chat.analysis.WordLetterCount;
-import fr.neatmonster.nocheatplus.config.ConfigFile;
 
 public abstract class DigestedWords extends AbstractWordProcessor{
 	

@@ -14,13 +14,13 @@
  */
 package fr.neatmonster.nocheatplus.checks.chat.analysis.engine.processors;
 
-import java.util.List;
-
 import fr.neatmonster.nocheatplus.checks.chat.analysis.MessageLetterCount;
 import fr.neatmonster.nocheatplus.config.ConfigFile;
 import fr.neatmonster.nocheatplus.utilities.ds.bktree.SimpleTimedBKLevenshtein;
 import fr.neatmonster.nocheatplus.utilities.ds.bktree.SimpleTimedBKLevenshtein.STBKLResult;
 import fr.neatmonster.nocheatplus.utilities.ds.bktree.TimedBKLevenshtein.SimpleTimedLevenNode;
+
+import java.util.List;
 
 public class SimilarWordsBKL extends DigestedWords {
 	

@@ -14,12 +14,11 @@
  */
 package fr.neatmonster.nocheatplus.checks.moving.magic;
 
-import org.bukkit.entity.EntityType;
-
 import fr.neatmonster.nocheatplus.checks.moving.MovingData;
 import fr.neatmonster.nocheatplus.checks.moving.model.VehicleMoveData;
 import fr.neatmonster.nocheatplus.checks.moving.vehicle.VehicleEnvelope.CheckDetails;
 import fr.neatmonster.nocheatplus.checks.workaround.WRPT;
+import org.bukkit.entity.EntityType;
 
 /**
  * Magic for vehicles.

@@ -14,12 +14,6 @@
  */
 package fr.neatmonster.nocheatplus.checks.moving.player;
 
-import java.util.ArrayList;
-import java.util.List;
-
-import org.bukkit.Location;
-import org.bukkit.entity.Player;
-
 import fr.neatmonster.nocheatplus.actions.ParameterName;
 import fr.neatmonster.nocheatplus.checks.Check;
 import fr.neatmonster.nocheatplus.checks.CheckType;
@@ -30,6 +24,11 @@ import fr.neatmonster.nocheatplus.checks.net.NetStatic;
 import fr.neatmonster.nocheatplus.players.IPlayerData;
 import fr.neatmonster.nocheatplus.utilities.StringUtil;
 import fr.neatmonster.nocheatplus.utilities.location.PlayerLocation;
+import org.bukkit.Location;
+import org.bukkit.entity.Player;
+
+import java.util.ArrayList;
+import java.util.List;
 
 /**
  * The MorePackets check will try to identify players that send more than the usual

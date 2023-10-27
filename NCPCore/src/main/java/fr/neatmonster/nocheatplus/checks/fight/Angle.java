@@ -14,15 +14,6 @@
  */
 package fr.neatmonster.nocheatplus.checks.fight;
 
-import java.util.Iterator;
-import java.util.LinkedList;
-import java.util.List;
-import java.util.UUID;
-
-import org.bukkit.Location;
-import org.bukkit.entity.Entity;
-import org.bukkit.entity.Player;
-
 import fr.neatmonster.nocheatplus.actions.ParameterName;
 import fr.neatmonster.nocheatplus.checks.Check;
 import fr.neatmonster.nocheatplus.checks.CheckType;
@@ -33,6 +24,14 @@ import fr.neatmonster.nocheatplus.utilities.StringUtil;
 import fr.neatmonster.nocheatplus.utilities.TickTask;
 import fr.neatmonster.nocheatplus.utilities.location.TrigUtil;
 import org.bukkit.ChatColor;
+import org.bukkit.Location;
+import org.bukkit.entity.Entity;
+import org.bukkit.entity.Player;
+
+import java.util.Iterator;
+import java.util.LinkedList;
+import java.util.List;
+import java.util.UUID;
 
 /**
  * A check used to verify if the player isn't using a forcefield in order to attack multiple entities at the same time.

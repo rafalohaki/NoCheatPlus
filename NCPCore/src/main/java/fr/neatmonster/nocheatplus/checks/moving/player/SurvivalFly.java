@@ -14,17 +14,6 @@
  */
 package fr.neatmonster.nocheatplus.checks.moving.player;
 
-import java.util.ArrayList;
-import java.util.HashSet;
-import java.util.Locale;
-import java.util.Set;
-
-import org.bukkit.Location;
-import org.bukkit.Material;
-import org.bukkit.entity.Player;
-import org.bukkit.inventory.ItemStack;
-import org.bukkit.potion.PotionEffectType;
-
 import fr.neatmonster.nocheatplus.NCPAPIProvider;
 import fr.neatmonster.nocheatplus.actions.ParameterName;
 import fr.neatmonster.nocheatplus.checks.Check;
@@ -33,24 +22,24 @@ import fr.neatmonster.nocheatplus.checks.ViolationData;
 import fr.neatmonster.nocheatplus.checks.combined.Improbable;
 import fr.neatmonster.nocheatplus.checks.moving.MovingConfig;
 import fr.neatmonster.nocheatplus.checks.moving.MovingData;
+import fr.neatmonster.nocheatplus.checks.moving.magic.AirWorkarounds;
+import fr.neatmonster.nocheatplus.checks.moving.magic.LiquidWorkarounds;
 import fr.neatmonster.nocheatplus.checks.moving.magic.LostGround;
 import fr.neatmonster.nocheatplus.checks.moving.magic.Magic;
 import fr.neatmonster.nocheatplus.checks.moving.magic.MagicBunny;
-import fr.neatmonster.nocheatplus.checks.moving.magic.AirWorkarounds;
-import fr.neatmonster.nocheatplus.checks.moving.magic.LiquidWorkarounds;
 import fr.neatmonster.nocheatplus.checks.moving.model.LiftOffEnvelope;
 import fr.neatmonster.nocheatplus.checks.moving.model.PlayerMoveData;
 import fr.neatmonster.nocheatplus.checks.moving.util.AuxMoving;
 import fr.neatmonster.nocheatplus.checks.moving.util.MovingUtil;
 import fr.neatmonster.nocheatplus.checks.workaround.WRPT;
-import fr.neatmonster.nocheatplus.compat.Bridge1_17;
 import fr.neatmonster.nocheatplus.compat.Bridge1_13;
+import fr.neatmonster.nocheatplus.compat.Bridge1_17;
 import fr.neatmonster.nocheatplus.compat.Bridge1_9;
 import fr.neatmonster.nocheatplus.compat.BridgeEnchant;
 import fr.neatmonster.nocheatplus.compat.BridgeMisc;
-import fr.neatmonster.nocheatplus.compat.versions.ServerVersion;
 import fr.neatmonster.nocheatplus.compat.blocks.changetracker.BlockChangeTracker;
 import fr.neatmonster.nocheatplus.compat.blocks.changetracker.BlockChangeTracker.Direction;
+import fr.neatmonster.nocheatplus.compat.versions.ServerVersion;
 import fr.neatmonster.nocheatplus.components.modifier.IAttributeAccess;
 import fr.neatmonster.nocheatplus.components.registry.event.IGenericInstanceHandle;
 import fr.neatmonster.nocheatplus.logging.Streams;
@@ -58,13 +47,23 @@ import fr.neatmonster.nocheatplus.permissions.Permissions;
 import fr.neatmonster.nocheatplus.players.IPlayerData;
 import fr.neatmonster.nocheatplus.utilities.CheckUtils;
 import fr.neatmonster.nocheatplus.utilities.StringUtil;
-import fr.neatmonster.nocheatplus.utilities.ds.count.ActionAccumulator;
 import fr.neatmonster.nocheatplus.utilities.collision.CollisionUtil;
+import fr.neatmonster.nocheatplus.utilities.ds.count.ActionAccumulator;
 import fr.neatmonster.nocheatplus.utilities.location.LocUtil;
 import fr.neatmonster.nocheatplus.utilities.location.PlayerLocation;
 import fr.neatmonster.nocheatplus.utilities.location.TrigUtil;
-import fr.neatmonster.nocheatplus.utilities.map.BlockProperties;
 import fr.neatmonster.nocheatplus.utilities.map.BlockFlags;
+import fr.neatmonster.nocheatplus.utilities.map.BlockProperties;
+import org.bukkit.Location;
+import org.bukkit.Material;
+import org.bukkit.entity.Player;
+import org.bukkit.inventory.ItemStack;
+import org.bukkit.potion.PotionEffectType;
+
+import java.util.ArrayList;
+import java.util.HashSet;
+import java.util.Locale;
+import java.util.Set;
 
 /**
  * The counterpart to the CreativeFly check. People that are not allowed to fly get checked by this. It will try to

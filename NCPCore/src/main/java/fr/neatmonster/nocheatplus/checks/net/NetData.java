@@ -14,16 +14,15 @@
  */
 package fr.neatmonster.nocheatplus.checks.net;
 
-import java.util.LinkedList;
-import java.util.concurrent.locks.Lock;
-import java.util.concurrent.locks.ReentrantLock;
-
-import org.bukkit.entity.Player;
-
 import fr.neatmonster.nocheatplus.checks.access.ACheckData;
 import fr.neatmonster.nocheatplus.checks.net.model.DataPacketFlying;
 import fr.neatmonster.nocheatplus.checks.net.model.TeleportQueue;
 import fr.neatmonster.nocheatplus.utilities.ds.count.ActionFrequency;
+import org.bukkit.entity.Player;
+
+import java.util.LinkedList;
+import java.util.concurrent.locks.Lock;
+import java.util.concurrent.locks.ReentrantLock;
 
 /**
  * Data for net checks. Some data structures may not be thread-safe, intended

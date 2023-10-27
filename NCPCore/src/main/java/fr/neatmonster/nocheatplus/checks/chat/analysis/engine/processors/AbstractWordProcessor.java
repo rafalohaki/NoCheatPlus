@@ -14,12 +14,12 @@
  */
 package fr.neatmonster.nocheatplus.checks.chat.analysis.engine.processors;
 
+import fr.neatmonster.nocheatplus.checks.chat.analysis.MessageLetterCount;
+import fr.neatmonster.nocheatplus.checks.chat.analysis.WordLetterCount;
+
 import java.util.LinkedList;
 import java.util.List;
 import java.util.Map;
-
-import fr.neatmonster.nocheatplus.checks.chat.analysis.MessageLetterCount;
-import fr.neatmonster.nocheatplus.checks.chat.analysis.WordLetterCount;
 
 public abstract class AbstractWordProcessor implements WordProcessor{
 	

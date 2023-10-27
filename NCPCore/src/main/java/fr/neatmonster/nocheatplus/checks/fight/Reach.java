@@ -15,6 +15,17 @@
 package fr.neatmonster.nocheatplus.checks.fight;
 
 
+import fr.neatmonster.nocheatplus.actions.ParameterName;
+import fr.neatmonster.nocheatplus.checks.Check;
+import fr.neatmonster.nocheatplus.checks.CheckType;
+import fr.neatmonster.nocheatplus.checks.ViolationData;
+import fr.neatmonster.nocheatplus.checks.combined.Improbable;
+import fr.neatmonster.nocheatplus.checks.moving.location.tracking.LocationTrace.ITraceEntry;
+import fr.neatmonster.nocheatplus.permissions.Permissions;
+import fr.neatmonster.nocheatplus.players.IPlayerData;
+import fr.neatmonster.nocheatplus.utilities.StringUtil;
+import fr.neatmonster.nocheatplus.utilities.TickTask;
+import fr.neatmonster.nocheatplus.utilities.location.TrigUtil;
 import org.bukkit.GameMode;
 import org.bukkit.Location;
 import org.bukkit.entity.EnderDragon;
@@ -23,18 +34,6 @@ import org.bukkit.entity.Giant;
 import org.bukkit.entity.LivingEntity;
 import org.bukkit.entity.Player;
 import org.bukkit.util.Vector;
-
-import fr.neatmonster.nocheatplus.checks.Check;
-import fr.neatmonster.nocheatplus.checks.CheckType;
-import fr.neatmonster.nocheatplus.checks.combined.Improbable;
-import fr.neatmonster.nocheatplus.checks.moving.location.tracking.LocationTrace.ITraceEntry;
-import fr.neatmonster.nocheatplus.permissions.Permissions;
-import fr.neatmonster.nocheatplus.players.IPlayerData;
-import fr.neatmonster.nocheatplus.utilities.StringUtil;
-import fr.neatmonster.nocheatplus.utilities.TickTask;
-import fr.neatmonster.nocheatplus.utilities.location.TrigUtil;
-import fr.neatmonster.nocheatplus.actions.ParameterName;
-import fr.neatmonster.nocheatplus.checks.ViolationData;
 
 
 

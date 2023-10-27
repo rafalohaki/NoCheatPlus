@@ -14,15 +14,14 @@
  */
 package fr.neatmonster.nocheatplus.stats;
 
+import fr.neatmonster.nocheatplus.utilities.ds.corw.LinkedHashMapCOW;
+import org.bukkit.Bukkit;
+
 import java.util.Arrays;
 import java.util.LinkedHashMap;
 import java.util.Map;
 import java.util.Map.Entry;
 import java.util.concurrent.locks.ReentrantLock;
-
-import org.bukkit.Bukkit;
-
-import fr.neatmonster.nocheatplus.utilities.ds.corw.LinkedHashMapCOW;
 
 /**
  * Utility to count things, set up to get input from the primary server thread,

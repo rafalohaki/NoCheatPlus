@@ -14,10 +14,10 @@
  */
 package fr.neatmonster.nocheatplus.checks.moving.velocity;
 
+import fr.neatmonster.nocheatplus.utilities.TickTask;
+
 import java.util.Iterator;
 import java.util.LinkedList;
-
-import fr.neatmonster.nocheatplus.utilities.TickTask;
 
 /**
  * Simple per-axis velocity (positive + negative), only accounting for queuing

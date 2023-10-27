@@ -14,19 +14,17 @@
  */
 package fr.neatmonster.nocheatplus.checks.net.protocollib;
 
-import org.bukkit.entity.Player;
-import org.bukkit.plugin.Plugin;
-
 import com.comphenix.protocol.PacketType;
 import com.comphenix.protocol.events.ListenerOptions;
 import com.comphenix.protocol.events.ListenerPriority;
 import com.comphenix.protocol.events.PacketAdapter;
-
 import fr.neatmonster.nocheatplus.NCPAPIProvider;
 import fr.neatmonster.nocheatplus.checks.CheckType;
 import fr.neatmonster.nocheatplus.components.debug.IDebugPlayer;
 import fr.neatmonster.nocheatplus.stats.Counters;
 import fr.neatmonster.nocheatplus.utilities.CheckUtils;
+import org.bukkit.entity.Player;
+import org.bukkit.plugin.Plugin;
 
 /**
  * Convenience base class for PacketAdapter creation with using config, data, counters.

@@ -14,12 +14,11 @@
  */
 package fr.neatmonster.nocheatplus.checks.moving.model;
 
-import org.bukkit.Location;
-import org.bukkit.entity.Entity;
-
 import fr.neatmonster.nocheatplus.compat.MCAccess;
 import fr.neatmonster.nocheatplus.components.registry.event.IHandle;
 import fr.neatmonster.nocheatplus.utilities.location.RichEntityLocation;
+import org.bukkit.Location;
+import org.bukkit.entity.Entity;
 
 public class VehicleMoveInfo extends MoveInfo<RichEntityLocation, Entity> {
 

@@ -14,15 +14,6 @@
  */
 package fr.neatmonster.nocheatplus.checks.generic.block;
 
-import java.util.ArrayList;
-import java.util.List;
-
-import org.bukkit.Location;
-import org.bukkit.block.Block;
-import org.bukkit.block.BlockFace;
-import org.bukkit.entity.Player;
-import org.bukkit.util.Vector;
-
 import fr.neatmonster.nocheatplus.actions.ActionList;
 import fr.neatmonster.nocheatplus.checks.Check;
 import fr.neatmonster.nocheatplus.checks.CheckType;
@@ -36,6 +27,14 @@ import fr.neatmonster.nocheatplus.utilities.collision.CollideRayVsAABB;
 import fr.neatmonster.nocheatplus.utilities.collision.ICollideRayVsAABB;
 import fr.neatmonster.nocheatplus.utilities.location.LocUtil;
 import fr.neatmonster.nocheatplus.utilities.map.BlockFlags;
+import org.bukkit.Location;
+import org.bukkit.block.Block;
+import org.bukkit.block.BlockFace;
+import org.bukkit.entity.Player;
+import org.bukkit.util.Vector;
+
+import java.util.ArrayList;
+import java.util.List;
 
 /**
  * A first made-abstract version of a direction-towards-a-block-check.

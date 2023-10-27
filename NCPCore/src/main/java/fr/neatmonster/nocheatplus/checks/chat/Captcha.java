@@ -14,16 +14,15 @@
  */
 package fr.neatmonster.nocheatplus.checks.chat;
 
-import java.util.Random;
-
-import org.bukkit.entity.Player;
-
 import fr.neatmonster.nocheatplus.checks.Check;
 import fr.neatmonster.nocheatplus.checks.CheckType;
 import fr.neatmonster.nocheatplus.players.DataManager;
 import fr.neatmonster.nocheatplus.players.IPlayerData;
 import fr.neatmonster.nocheatplus.utilities.CheckUtils;
 import fr.neatmonster.nocheatplus.utilities.ColorUtil;
+import org.bukkit.entity.Player;
+
+import java.util.Random;
 
 /**
  * NOTE: EARLY REFACTORING STATE, MOST METHODS NEED SYNC OVER DATA !

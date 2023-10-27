@@ -14,9 +14,8 @@
  */
 package fr.neatmonster.nocheatplus.checks.chat;
 
-import org.bukkit.entity.Player;
-
 import fr.neatmonster.nocheatplus.players.IPlayerData;
+import org.bukkit.entity.Player;
 
 /**
  * Captcha related operations.<br>

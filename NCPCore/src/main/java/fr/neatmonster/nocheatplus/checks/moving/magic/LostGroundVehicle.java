@@ -14,12 +14,6 @@
  */
 package fr.neatmonster.nocheatplus.checks.moving.magic;
 
-import java.util.Collection;
-
-import org.bukkit.Location;
-import org.bukkit.World;
-import org.bukkit.entity.Entity;
-
 import fr.neatmonster.nocheatplus.checks.moving.MovingConfig;
 import fr.neatmonster.nocheatplus.checks.moving.MovingData;
 import fr.neatmonster.nocheatplus.checks.moving.model.PlayerMoveData;
@@ -30,6 +24,11 @@ import fr.neatmonster.nocheatplus.compat.blocks.changetracker.BlockChangeTracker
 import fr.neatmonster.nocheatplus.utilities.location.RichEntityLocation;
 import fr.neatmonster.nocheatplus.utilities.map.BlockCache;
 import fr.neatmonster.nocheatplus.utilities.map.BlockProperties;
+import org.bukkit.Location;
+import org.bukkit.World;
+import org.bukkit.entity.Entity;
+
+import java.util.Collection;
 
 /**
  * Lost ground workarounds.

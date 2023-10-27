@@ -14,10 +14,10 @@
  */
 package fr.neatmonster.nocheatplus.hooks;
 
-import java.util.Set;
-
 import fr.neatmonster.nocheatplus.checks.CheckType;
 import fr.neatmonster.nocheatplus.utilities.CheckTypeUtil;
+
+import java.util.Set;
 
 /**
  * @deprecated Use fr.neatmonster.utilities.CheckTypeUtil instead.

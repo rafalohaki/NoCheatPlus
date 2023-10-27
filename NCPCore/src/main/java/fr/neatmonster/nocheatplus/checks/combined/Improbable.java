@@ -14,8 +14,6 @@
  */
 package fr.neatmonster.nocheatplus.checks.combined;
 
-import org.bukkit.entity.Player;
-
 import fr.neatmonster.nocheatplus.actions.ParameterName;
 import fr.neatmonster.nocheatplus.checks.Check;
 import fr.neatmonster.nocheatplus.checks.CheckType;
@@ -24,6 +22,7 @@ import fr.neatmonster.nocheatplus.components.registry.feature.IDisableListener;
 import fr.neatmonster.nocheatplus.players.DataManager;
 import fr.neatmonster.nocheatplus.players.IPlayerData;
 import fr.neatmonster.nocheatplus.utilities.TickTask;
+import org.bukkit.entity.Player;
 
 /**
  * This check  combines different other checks frequency and occurrecnces into one count.

@@ -14,11 +14,11 @@
  */
 package fr.neatmonster.nocheatplus.checks.moving.location.tracking;
 
-import java.util.Iterator;
-
 import fr.neatmonster.nocheatplus.components.location.IGetPosition;
 import fr.neatmonster.nocheatplus.components.pool.AbstractPool;
 import fr.neatmonster.nocheatplus.utilities.location.RichBoundsLocation;
+
+import java.util.Iterator;
 
 /**
  * This class is meant to record locations for players moving, in order to allow

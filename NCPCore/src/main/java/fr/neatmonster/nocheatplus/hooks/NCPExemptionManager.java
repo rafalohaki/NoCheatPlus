@@ -14,14 +14,13 @@
  */
 package fr.neatmonster.nocheatplus.hooks;
 
-import java.util.UUID;
-
-import org.bukkit.entity.Player;
-
 import fr.neatmonster.nocheatplus.NCPAPIProvider;
 import fr.neatmonster.nocheatplus.checks.CheckType;
 import fr.neatmonster.nocheatplus.players.DataManager;
 import fr.neatmonster.nocheatplus.players.IPlayerData;
+import org.bukkit.entity.Player;
+
+import java.util.UUID;
 
 /**
  * API for exempting players of checks, checked before calculations are done.

@@ -14,13 +14,6 @@
  */
 package fr.neatmonster.nocheatplus.event.mini;
 
-import java.lang.reflect.InvocationTargetException;
-import java.lang.reflect.Method;
-import java.lang.reflect.Modifier;
-import java.util.ArrayList;
-import java.util.Collection;
-import java.util.logging.Level;
-
 import fr.neatmonster.nocheatplus.NCPAPIProvider;
 import fr.neatmonster.nocheatplus.components.registry.feature.ComponentWithName;
 import fr.neatmonster.nocheatplus.components.registry.order.RegistrationOrder;
@@ -29,6 +22,13 @@ import fr.neatmonster.nocheatplus.components.registry.order.RegistrationOrder.Re
 import fr.neatmonster.nocheatplus.logging.StaticLog;
 import fr.neatmonster.nocheatplus.logging.Streams;
 import fr.neatmonster.nocheatplus.utilities.StringUtil;
+
+import java.lang.reflect.InvocationTargetException;
+import java.lang.reflect.Method;
+import java.lang.reflect.Modifier;
+import java.util.ArrayList;
+import java.util.Collection;
+import java.util.logging.Level;
 
 /**
  * Support for registering multiple event-handler methods at once.<br>

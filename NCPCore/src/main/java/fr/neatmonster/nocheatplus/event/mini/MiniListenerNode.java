@@ -14,13 +14,6 @@
  */
 package fr.neatmonster.nocheatplus.event.mini;
 
-import java.util.ArrayList;
-import java.util.HashSet;
-import java.util.Iterator;
-import java.util.List;
-import java.util.Set;
-import java.util.logging.Level;
-
 import fr.neatmonster.nocheatplus.components.registry.feature.ComponentWithName;
 import fr.neatmonster.nocheatplus.components.registry.order.IGetRegistrationOrder;
 import fr.neatmonster.nocheatplus.components.registry.order.RegistrationOrder;
@@ -28,6 +21,13 @@ import fr.neatmonster.nocheatplus.components.registry.order.RegistrationOrder.Ab
 import fr.neatmonster.nocheatplus.logging.StaticLog;
 import fr.neatmonster.nocheatplus.logging.Streams;
 import fr.neatmonster.nocheatplus.utilities.StringUtil;
+
+import java.util.ArrayList;
+import java.util.HashSet;
+import java.util.Iterator;
+import java.util.List;
+import java.util.Set;
+import java.util.logging.Level;
 
 /**
  * Hold MiniListener instances - sort by RegistrationOrder - allow thread-safe

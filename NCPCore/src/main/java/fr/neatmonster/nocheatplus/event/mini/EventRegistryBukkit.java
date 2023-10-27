@@ -14,9 +14,9 @@
  */
 package fr.neatmonster.nocheatplus.event.mini;
 
-import java.lang.reflect.Method;
-import java.util.Collection;
-
+import fr.neatmonster.nocheatplus.components.registry.feature.ComponentWithName;
+import fr.neatmonster.nocheatplus.components.registry.order.RegistrationOrder;
+import fr.neatmonster.nocheatplus.utilities.ReflectionUtil;
 import org.bukkit.Bukkit;
 import org.bukkit.event.Cancellable;
 import org.bukkit.event.Event;
@@ -26,9 +26,8 @@ import org.bukkit.event.Listener;
 import org.bukkit.event.server.PluginDisableEvent;
 import org.bukkit.plugin.Plugin;
 
-import fr.neatmonster.nocheatplus.components.registry.feature.ComponentWithName;
-import fr.neatmonster.nocheatplus.components.registry.order.RegistrationOrder;
-import fr.neatmonster.nocheatplus.utilities.ReflectionUtil;
+import java.lang.reflect.Method;
+import java.util.Collection;
 
 /**
  * A MultiListenerRegistry that registers Bukkit types with a Spigot/CraftBukkit

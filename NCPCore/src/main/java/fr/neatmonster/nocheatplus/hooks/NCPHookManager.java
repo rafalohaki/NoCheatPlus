@@ -14,6 +14,14 @@
  */
 package fr.neatmonster.nocheatplus.hooks;
 
+import fr.neatmonster.nocheatplus.NCPAPIProvider;
+import fr.neatmonster.nocheatplus.checks.CheckType;
+import fr.neatmonster.nocheatplus.checks.ViolationData;
+import fr.neatmonster.nocheatplus.checks.access.IViolationInfo;
+import fr.neatmonster.nocheatplus.logging.Streams;
+import fr.neatmonster.nocheatplus.utilities.CheckTypeUtil;
+import org.bukkit.entity.Player;
+
 import java.util.ArrayList;
 import java.util.Collection;
 import java.util.Collections;
@@ -24,15 +32,6 @@ import java.util.LinkedList;
 import java.util.List;
 import java.util.Map;
 import java.util.Set;
-
-import org.bukkit.entity.Player;
-
-import fr.neatmonster.nocheatplus.NCPAPIProvider;
-import fr.neatmonster.nocheatplus.checks.CheckType;
-import fr.neatmonster.nocheatplus.checks.ViolationData;
-import fr.neatmonster.nocheatplus.checks.access.IViolationInfo;
-import fr.neatmonster.nocheatplus.logging.Streams;
-import fr.neatmonster.nocheatplus.utilities.CheckTypeUtil;
 
 /**
  * After-check-failure hook manager integrated into NoCheatPlus.

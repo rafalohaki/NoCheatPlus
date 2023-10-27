@@ -14,14 +14,13 @@
  */
 package fr.neatmonster.nocheatplus.checks.combined;
 
-import org.bukkit.entity.Entity;
-import org.bukkit.entity.Player;
-import org.bukkit.event.player.PlayerFishEvent.State;
-
 import fr.neatmonster.nocheatplus.checks.Check;
 import fr.neatmonster.nocheatplus.checks.CheckType;
 import fr.neatmonster.nocheatplus.players.DataManager;
 import fr.neatmonster.nocheatplus.players.IPlayerData;
+import org.bukkit.entity.Entity;
+import org.bukkit.entity.Player;
+import org.bukkit.event.player.PlayerFishEvent.State;
 
 /**
  * Very, very important check.

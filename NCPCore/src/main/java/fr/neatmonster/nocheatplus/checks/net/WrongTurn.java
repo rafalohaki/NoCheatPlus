@@ -14,10 +14,9 @@
  */
 package fr.neatmonster.nocheatplus.checks.net;
 
-import org.bukkit.entity.Player;
-
 import fr.neatmonster.nocheatplus.checks.Check;
 import fr.neatmonster.nocheatplus.checks.CheckType;
+import org.bukkit.entity.Player;
 
 public class WrongTurn extends Check {
 	

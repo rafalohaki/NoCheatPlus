@@ -14,17 +14,16 @@
  */
 package fr.neatmonster.nocheatplus.checks.chat;
 
-import java.util.HashMap;
-import java.util.Map;
-
-import org.bukkit.entity.Player;
-
 import fr.neatmonster.nocheatplus.checks.Check;
 import fr.neatmonster.nocheatplus.checks.CheckType;
 import fr.neatmonster.nocheatplus.components.data.IData;
 import fr.neatmonster.nocheatplus.components.registry.feature.IRemoveData;
 import fr.neatmonster.nocheatplus.utilities.TickTask;
 import fr.neatmonster.nocheatplus.utilities.ds.count.ActionFrequency;
+import org.bukkit.entity.Player;
+
+import java.util.HashMap;
+import java.util.Map;
 
 public class Logins extends Check implements IRemoveData{
     

@@ -14,14 +14,13 @@
  */
 package fr.neatmonster.nocheatplus.checks.inventory;
 
-import org.bukkit.entity.Player;
-
 import fr.neatmonster.nocheatplus.actions.ParameterName;
 import fr.neatmonster.nocheatplus.checks.Check;
 import fr.neatmonster.nocheatplus.checks.CheckType;
 import fr.neatmonster.nocheatplus.checks.ViolationData;
 import fr.neatmonster.nocheatplus.players.DataManager;
 import fr.neatmonster.nocheatplus.players.IPlayerData;
+import org.bukkit.entity.Player;
 
 /**
  * The InstantEat check will find out if a player eats their food too fast.

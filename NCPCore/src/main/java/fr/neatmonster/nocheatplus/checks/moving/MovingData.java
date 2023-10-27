@@ -14,14 +14,6 @@
  */
 package fr.neatmonster.nocheatplus.checks.moving;
 
-import java.util.Collection;
-
-import org.bukkit.Location;
-import org.bukkit.World;
-import org.bukkit.entity.Entity;
-import org.bukkit.entity.EntityType;
-import org.bukkit.entity.Player;
-
 import fr.neatmonster.nocheatplus.NCPAPIProvider;
 import fr.neatmonster.nocheatplus.checks.CheckType;
 import fr.neatmonster.nocheatplus.checks.access.ACheckData;
@@ -29,8 +21,8 @@ import fr.neatmonster.nocheatplus.checks.moving.location.setback.DefaultSetBackS
 import fr.neatmonster.nocheatplus.checks.moving.location.tracking.LocationTrace;
 import fr.neatmonster.nocheatplus.checks.moving.location.tracking.LocationTrace.TraceEntryPool;
 import fr.neatmonster.nocheatplus.checks.moving.magic.Magic;
-import fr.neatmonster.nocheatplus.checks.moving.model.LocationData;
 import fr.neatmonster.nocheatplus.checks.moving.model.LiftOffEnvelope;
+import fr.neatmonster.nocheatplus.checks.moving.model.LocationData;
 import fr.neatmonster.nocheatplus.checks.moving.model.MoveConsistency;
 import fr.neatmonster.nocheatplus.checks.moving.model.MoveTrace;
 import fr.neatmonster.nocheatplus.checks.moving.model.PlayerMoveData;
@@ -60,6 +52,13 @@ import fr.neatmonster.nocheatplus.utilities.location.RichEntityLocation;
 import fr.neatmonster.nocheatplus.utilities.location.TrigUtil;
 import fr.neatmonster.nocheatplus.utilities.map.BlockProperties;
 import fr.neatmonster.nocheatplus.workaround.IWorkaroundRegistry.WorkaroundSet;
+import org.bukkit.Location;
+import org.bukkit.World;
+import org.bukkit.entity.Entity;
+import org.bukkit.entity.EntityType;
+import org.bukkit.entity.Player;
+
+import java.util.Collection;
 
 /**
  * Player specific data for the moving checks.

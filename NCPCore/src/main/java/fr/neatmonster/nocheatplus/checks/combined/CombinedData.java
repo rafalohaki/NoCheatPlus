@@ -14,13 +14,13 @@
  */
 package fr.neatmonster.nocheatplus.checks.combined;
 
-import java.util.Collection;
-
 import fr.neatmonster.nocheatplus.checks.CheckType;
 import fr.neatmonster.nocheatplus.checks.access.ACheckData;
 import fr.neatmonster.nocheatplus.components.data.IDataOnRemoveSubCheckData;
 import fr.neatmonster.nocheatplus.utilities.PenaltyTime;
 import fr.neatmonster.nocheatplus.utilities.ds.count.ActionFrequency;
+
+import java.util.Collection;
 
 public class CombinedData extends ACheckData implements IDataOnRemoveSubCheckData {
 

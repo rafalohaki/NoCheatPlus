@@ -14,10 +14,9 @@
  */
 package fr.neatmonster.nocheatplus.hooks;
 
-import org.bukkit.entity.Player;
-
 import fr.neatmonster.nocheatplus.checks.CheckType;
 import fr.neatmonster.nocheatplus.checks.access.IViolationInfo;
+import org.bukkit.entity.Player;
 
 /**
  * Extend this class for maximum future compatibility.<br>

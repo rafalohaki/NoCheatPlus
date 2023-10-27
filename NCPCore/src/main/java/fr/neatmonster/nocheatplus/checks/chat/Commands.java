@@ -14,13 +14,12 @@
  */
 package fr.neatmonster.nocheatplus.checks.chat;
 
-import org.bukkit.entity.Player;
-
 import fr.neatmonster.nocheatplus.checks.Check;
 import fr.neatmonster.nocheatplus.checks.CheckType;
 import fr.neatmonster.nocheatplus.players.IPlayerData;
 import fr.neatmonster.nocheatplus.utilities.ColorUtil;
 import fr.neatmonster.nocheatplus.utilities.TickTask;
+import org.bukkit.entity.Player;
 
 /**
  * Check only for commands

@@ -14,15 +14,14 @@
  */
 package fr.neatmonster.nocheatplus.checks.inventory;
 
-import org.bukkit.ChatColor;
-import org.bukkit.entity.Player;
-
 import fr.neatmonster.nocheatplus.checks.Check;
 import fr.neatmonster.nocheatplus.checks.CheckType;
 import fr.neatmonster.nocheatplus.permissions.Permissions;
 import fr.neatmonster.nocheatplus.players.DataManager;
 import fr.neatmonster.nocheatplus.players.IPlayerData;
 import fr.neatmonster.nocheatplus.utilities.TickTask;
+import org.bukkit.ChatColor;
+import org.bukkit.entity.Player;
 
 /**
  * The InstantBow check will find out if a player pulled the string of their bow too fast.
