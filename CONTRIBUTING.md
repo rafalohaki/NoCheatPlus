@@ -4,14 +4,14 @@ Contributing to NoCheatPlus
 This page describes how to contribute code to the project by means of pull requests.
 
 Other types of contribution:
-* [Issues/Tickets] (https://github.com/NoCheatPlus/Issues/issues) are hosted on GitHub.
+* [Issues/Tickets] (https://github.com/Updated-NoCheatPlus/NoCheatPlus/issues) are hosted on GitHub.
 
 Pull Requests
 ---------
 
 This is a quick go, not covering all the areas.
 
-Do comply with the [GPLv3 License] (https://github.com/NoCheatPlus/NoCheatPlus/blob/master/LICENSE.txt) of the project, ensure contributed code can be used in a GPLv3 project.
+Do comply with the [GPLv3 License] (https://github.com/Updated-NoCheatPlus/NoCheatPlus/blob/master/LICENSE.txt) of the project, ensure contributed code can be used in a GPLv3 project.
 
 Pull request conventions:
 * Do provide some reason for a pull request, if that feels better. Currently, we don't demand anything in terms of elaboration and formatting. This may change with receiving more pull requests.

@@ -14,7 +14,7 @@
  */
 package fr.neatmonster.nocheatplus.test;
 
-import static org.junit.Assert.fail;
+import static org.junit.jupiter.api.Assertions.fail;
 
 import java.util.ArrayList;
 import java.util.Collection;
@@ -26,7 +26,7 @@ import java.util.List;
 import java.util.Random;
 import java.util.Set;
 
-import org.junit.Test;
+import org.junit.jupiter.api.Test;
 
 import fr.neatmonster.nocheatplus.components.registry.order.IGetRegistrationOrder;
 import fr.neatmonster.nocheatplus.components.registry.order.RegistrationOrder;
@@ -278,7 +278,7 @@ public class TestRegistrationOrder {
 
     /**
      * Get one using the default tags, beforeTag and afterTag get set to null, 1 2 or 3 others.
-     * @param priority
+     * @param basePriority
      * @return
      */
     private RegistrationOrder getRegistrationOrder(Integer basePriority) {
