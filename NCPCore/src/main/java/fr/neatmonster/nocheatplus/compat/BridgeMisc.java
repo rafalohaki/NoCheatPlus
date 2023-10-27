@@ -42,7 +42,9 @@ public class BridgeMisc {
     private static GameMode getSpectatorGameMode() {
         try {
             return GameMode.SPECTATOR;
-        } catch (Throwable ignored) {}
+        } catch (Throwable e) {
+            e.printStackTrace();
+        }
         return null;
     }
 
@@ -99,7 +101,9 @@ public class BridgeMisc {
             Collection<? extends Player> players = Bukkit.getOnlinePlayers();
             return players.isEmpty() ? new Player[0] : players.toArray(new Player[0]);
         }
-        catch (NoSuchMethodError ignored) {}
+        catch (NoSuchMethodError e) {
+            e.printStackTrace();
+        }
         if (Bukkit_getOnlinePlayers != null) {
             Object obj = ReflectionUtil.invokeMethodNoArgs(Bukkit_getOnlinePlayers, null);
             if ((obj instanceof Player[])) {

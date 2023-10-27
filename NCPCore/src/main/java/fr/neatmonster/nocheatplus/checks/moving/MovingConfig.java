@@ -372,7 +372,9 @@ public class MovingConfig extends ACheckConfig {
                     ignoredVehicles.add(type);
                 }
             }
-            catch (IllegalArgumentException ignored) {}
+            catch (IllegalArgumentException e) {
+                e.printStackTrace();
+            }
         }
 
 

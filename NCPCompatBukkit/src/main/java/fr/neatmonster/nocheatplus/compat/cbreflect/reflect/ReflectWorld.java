@@ -43,7 +43,9 @@ public class ReflectWorld {
             reflectIBlockData = new ReflectIBlockData(base, reflectMaterial);
             nmsClass = Class.forName(base.nmsPackageName + ".World");
         }
-        catch (Throwable ignored) {}
+        catch (Throwable e) {
+            e.printStackTrace();
+        }
         this.nmsClass = nmsClass;
         if (reflectIBlockData == null || nmsClass == null) {
             nmsGetType = null;

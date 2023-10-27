@@ -1034,7 +1034,9 @@ public class BlockProperties {
                 StaticLog.logWarning("Attempt to set block breaking properties for a non-block: " + material);
             }
         }
-        catch (Exception ignored) {}
+        catch (Exception e) {
+            e.printStackTrace();
+        }
         blocks.put(material, props);
     }
 

@@ -180,7 +180,9 @@ public class DefaultComponentFactory {
             available.add(new HotFixFallingBlockPortalEnter());
             NCPAPIProvider.getNoCheatPlusAPI().addFeatureTags("checks", Collections.singletonList(HotFixFallingBlockPortalEnter.class.getSimpleName()));
         }
-        catch (RuntimeException ignored) {}
+        catch (RuntimeException e) {
+            e.printStackTrace();
+        }
 
         // ProtocolLib dependencies.
         if (protocolLibPresent.isAvailable()) {

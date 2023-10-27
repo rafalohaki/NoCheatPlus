@@ -404,7 +404,9 @@ public class BlockFlags {
                         nameFlagMap.put(name, value);
                         nameFlagMap.put(name.substring(2), value);
                     } 
-                    catch (IllegalArgumentException | IllegalAccessException ignored) {}
+                    catch (IllegalArgumentException | IllegalAccessException e) {
+                        e.printStackTrace();
+                    }
                 }
             }
         }
@@ -417,7 +419,9 @@ public class BlockFlags {
                 StaticLog.logWarning("Attempt to set flag for a non-block: " + material);
             }
         } 
-        catch (Exception ignored) {}
+        catch (Exception e) {
+            e.printStackTrace();
+        }
         blockFlags.put(material, blockFlags.get(material) | addFlag);
     }
 
@@ -428,7 +432,9 @@ public class BlockFlags {
                 StaticLog.logWarning("Attempt to mask flag for a non-block: " + material);
             }
         } 
-        catch (Exception ignored) {}
+        catch (Exception e) {
+            e.printStackTrace();
+        }
         blockFlags.put(material, blockFlags.get(material) & addFlag);
     }
 
@@ -502,7 +508,9 @@ public class BlockFlags {
         }
         try {
             return Long.parseLong(input);
-        } catch (NumberFormatException ignored) {}
+        } catch (NumberFormatException e) {
+            e.printStackTrace();
+        }
         // TODO: This very exception type?
         throw new InputMismatchException();
     }
@@ -544,7 +552,9 @@ public class BlockFlags {
                 StaticLog.logWarning("Attempt to set flags for a non-block: " + blockType);
             }
         } 
-        catch (Exception ignored) {}
+        catch (Exception e) {
+            e.printStackTrace();
+        }
         blockFlags.put(blockType, flags);
     }
 

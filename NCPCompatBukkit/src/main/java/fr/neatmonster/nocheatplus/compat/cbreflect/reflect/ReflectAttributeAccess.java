@@ -133,7 +133,9 @@ public class ReflectAttributeAccess implements IAttributeAccess {
             try {
                 reflectAxisAlignedBB = new ReflectAxisAlignedBB(reflectBase);
             }
-            catch (NullPointerException ignored) {}
+            catch (NullPointerException e) {
+                e.printStackTrace();
+            }
             reflectGenericAttributes = new ReflectGenericAttributes(reflectBase);
             reflectAttributeInstance = new ReflectAttributeInstance(reflectBase);
             reflectAttributeModifier = new ReflectAttributeModifier(reflectBase);

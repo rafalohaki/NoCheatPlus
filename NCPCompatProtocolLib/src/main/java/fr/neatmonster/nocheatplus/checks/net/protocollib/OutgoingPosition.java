@@ -53,7 +53,9 @@ public class OutgoingPosition extends BaseAdapter {
     public void onPacketSending(PacketEvent event) {
         try {
             if (event.isPlayerTemporary()) return;
-        } catch(NoSuchMethodError ignored) {}
+        } catch(NoSuchMethodError e) {
+            e.printStackTrace();
+        }
     	if (event.isCancelled()) {
             return;
         }

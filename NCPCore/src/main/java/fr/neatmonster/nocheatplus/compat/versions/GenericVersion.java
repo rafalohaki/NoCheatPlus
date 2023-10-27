@@ -195,7 +195,9 @@ public class GenericVersion {
             else if (v1Int.length > v2Int.length) {
                 return 1;
             }
-        } catch (NumberFormatException ignored) {}
+        } catch (NumberFormatException e) {
+            e.printStackTrace();
+        }
 
         // Equality was tested above, so it would seem.
         throw new IllegalArgumentException("Bad version input.");

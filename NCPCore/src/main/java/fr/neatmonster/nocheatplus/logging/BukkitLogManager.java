@@ -56,7 +56,9 @@ public class BukkitLogManager extends AbstractLogManager implements INotifyReloa
     private static final ContentLogger<String> serverLogger = (level, content) -> {
         try {
             Bukkit.getLogger().log(level, "[NoCheatPlus] " + content);
-        } catch (Throwable ignored) {}
+        } catch (Throwable e) {
+            e.printStackTrace();
+        }
     };
 
     protected final Plugin plugin;

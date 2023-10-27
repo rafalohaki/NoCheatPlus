@@ -47,7 +47,9 @@ public class VanillaBlocksFactory {
             setups.add(new BlocksMC1_19());
             setups.add(new BlocksMC1_20());
         }
-        catch(Throwable ignored){}
+        catch(Throwable e){
+            e.printStackTrace();
+        }
         for (final BlockPropertiesSetup setup : setups){
             try{
                 // Assume the blocks setup to message success.

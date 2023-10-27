@@ -261,7 +261,9 @@ public class MCAccessBukkitBase implements MCAccess {
                 default:
                     break;
             }
-        } catch (Throwable ignored) {}
+        } catch (Throwable e) {
+            e.printStackTrace();
+        }
         // Default entity width.
         return 0.6f;
     }

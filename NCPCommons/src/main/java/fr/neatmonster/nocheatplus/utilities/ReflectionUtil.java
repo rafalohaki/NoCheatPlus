@@ -222,7 +222,9 @@ public class ReflectionUtil {
         try {
             return method.invoke(object);
         }
-        catch (IllegalAccessException | InvocationTargetException | IllegalArgumentException ignored) {}
+        catch (IllegalAccessException | InvocationTargetException | IllegalArgumentException e) {
+            e.printStackTrace();
+        }
         return null;
     }
 
@@ -238,7 +240,9 @@ public class ReflectionUtil {
         try {
             return method.invoke(object, arguments);
         }
-        catch (IllegalAccessException | InvocationTargetException | IllegalArgumentException ignored) {}
+        catch (IllegalAccessException | InvocationTargetException | IllegalArgumentException e) {
+            e.printStackTrace();
+        }
         return null;
     }
 
@@ -264,7 +268,8 @@ public class ReflectionUtil {
                     }
                 }
             }
-        } catch (SecurityException | NoSuchMethodException ignored) {
+        } catch (SecurityException | NoSuchMethodException e) {
+            e.printStackTrace();
         }
         return null;
     }
@@ -354,7 +359,9 @@ public class ReflectionUtil {
                 return field;
             }
         }
-        catch (NoSuchFieldException | SecurityException ignored) {}
+        catch (NoSuchFieldException | SecurityException e) {
+            e.printStackTrace();
+        }
         return null;
     }
 
@@ -371,7 +378,9 @@ public class ReflectionUtil {
             field.set(object, value);
             return true;
         }
-        catch (IllegalArgumentException | IllegalAccessException ignored) {}
+        catch (IllegalArgumentException | IllegalAccessException e) {
+            e.printStackTrace();
+        }
         return false;
     }
 
@@ -379,7 +388,9 @@ public class ReflectionUtil {
         try {
             return field.getBoolean(object);
         }
-        catch (IllegalArgumentException | IllegalAccessException ignored) {}
+        catch (IllegalArgumentException | IllegalAccessException e) {
+            e.printStackTrace();
+        }
         return defaultValue;
     }
 
@@ -387,7 +398,9 @@ public class ReflectionUtil {
         try {
             return field.getInt(object);
         }
-        catch (IllegalArgumentException | IllegalAccessException ignored) {}
+        catch (IllegalArgumentException | IllegalAccessException e) {
+            e.printStackTrace();
+        }
         return defaultValue;
     }
 
@@ -395,7 +408,9 @@ public class ReflectionUtil {
         try {
             return field.getFloat(object);
         }
-        catch (IllegalArgumentException | IllegalAccessException ignored) {}
+        catch (IllegalArgumentException | IllegalAccessException e) {
+            e.printStackTrace();
+        }
         return defaultValue;
     }
 
@@ -403,7 +418,9 @@ public class ReflectionUtil {
         try {
             return field.getDouble(object);
         }
-        catch (IllegalArgumentException | IllegalAccessException ignored) {}
+        catch (IllegalArgumentException | IllegalAccessException e) {
+            e.printStackTrace();
+        }
         return defaultValue;
     }
 
@@ -411,7 +428,9 @@ public class ReflectionUtil {
         try {
             return field.get(object);
         }
-        catch (IllegalArgumentException | IllegalAccessException ignored) {}
+        catch (IllegalArgumentException | IllegalAccessException e) {
+            e.printStackTrace();
+        }
         return defaultValue;
     }
 
@@ -427,7 +446,9 @@ public class ReflectionUtil {
         try {
             return clazz.getMethod(methodName, arguments);
         }
-        catch (NoSuchMethodException | SecurityException ignored) {}
+        catch (NoSuchMethodException | SecurityException e) {
+            e.printStackTrace();
+        }
         return null;
     }
 
@@ -461,7 +482,9 @@ public class ReflectionUtil {
         try {
             return clazz.getConstructor(parameterTypes);
         }
-        catch (NoSuchMethodException | SecurityException ignored) {}
+        catch (NoSuchMethodException | SecurityException e) {
+            e.printStackTrace();
+        }
         return null;
     }
 
@@ -476,7 +499,9 @@ public class ReflectionUtil {
         try {
             return constructor.newInstance(arguments);
         } catch (InstantiationException | InvocationTargetException | IllegalArgumentException |
-                 IllegalAccessException ignored) {}
+                 IllegalAccessException e) {
+            e.printStackTrace();
+        }
         return null;
     }
 

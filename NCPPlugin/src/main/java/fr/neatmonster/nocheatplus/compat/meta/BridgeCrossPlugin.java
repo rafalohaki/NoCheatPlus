@@ -43,7 +43,9 @@ public class BridgeCrossPlugin implements IBridgeCrossPlugin, IPostRegisterRunna
         try {
             reflectBase = new ReflectBase();
         }
-        catch (NullPointerException | ReflectFailureException ignored) {}
+        catch (NullPointerException | ReflectFailureException e) {
+            e.printStackTrace();
+        }
         if (reflectBase != null) {
             this.playerClass = getEntityClass(reflectBase, "Player");
             this.entityClass = getEntityClass(reflectBase, "Entity", "");

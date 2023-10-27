@@ -36,7 +36,9 @@ public class AttributeAccessFactory {
         try {
             fallBackDedicated = new BukkitAttributeAccess();
         }
-        catch (Throwable ignored) {}
+        catch (Throwable e) {
+            e.printStackTrace();
+        }
         RegistryHelper.setupGenericInstance(new String[] {
                 "fr.neatmonster.nocheatplus.compat.cbdev.AttributeAccess",
                 "fr.neatmonster.nocheatplus.compat.spigotcb1_10_R1.AttributeAccess",

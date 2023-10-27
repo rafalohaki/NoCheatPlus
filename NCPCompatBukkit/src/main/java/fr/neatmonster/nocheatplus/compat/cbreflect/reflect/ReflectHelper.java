@@ -86,13 +86,17 @@ public class ReflectHelper {
             try {
                 reflectAxisAlignedBB = new ReflectAxisAlignedBB(reflectBase);
             }
-            catch (NullPointerException ignored) {}
+            catch (NullPointerException e) {
+                e.printStackTrace();
+            }
             this.reflectAxisAlignedBB = reflectAxisAlignedBB;
             ReflectBlockPosition reflectBlockPosition = null;
             try {
                 reflectBlockPosition = new ReflectBlockPosition(this.reflectBase);
             }
-            catch (ClassNotFoundException ignored) {}
+            catch (ClassNotFoundException e) {
+                e.printStackTrace();
+            }
             this.reflectBlockPosition = reflectBlockPosition;
             this.reflectMaterial = new ReflectMaterial(this.reflectBase);
             this.reflectWorld = new ReflectWorld(reflectBase, reflectMaterial, reflectBlockPosition);
@@ -101,7 +105,9 @@ public class ReflectHelper {
                 reflectBlockLatest = new ReflectBlock(this.reflectBase, this.reflectBlockPosition,
                         reflectMaterial, reflectWorld);
             }
-            catch (Throwable ignored) {}
+            catch (Throwable e) {
+                e.printStackTrace();
+            }
             if (reflectBlockLatest == null) {
                 // More lenient constructor.
                 this.reflectBlock = new ReflectBlockSix(this.reflectBase, this.reflectBlockPosition);

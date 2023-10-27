@@ -200,7 +200,8 @@ public class PathUtils {
             if (path != null) {
                 pathPrefixes.feed(path);
             }
-        } catch (IllegalArgumentException | IllegalAccessException ignored) {
+        } catch (IllegalArgumentException | IllegalAccessException e) {
+            e.printStackTrace();
         }
     }
 
@@ -208,7 +209,8 @@ public class PathUtils {
         try {
             final String path = field.get(null).toString();
             movedPaths.put(path, new WrapMoved(path, rel));
-        } catch (IllegalArgumentException | IllegalAccessException ignored) {
+        } catch (IllegalArgumentException | IllegalAccessException e) {
+            e.printStackTrace();
         }
     }
 
@@ -251,7 +253,8 @@ public class PathUtils {
                     StaticLog.logSevere(t);
                 }
             }
-        } catch (InvalidConfigurationException | IOException ignored) {
+        } catch (InvalidConfigurationException | IOException e) {
+            e.printStackTrace();
         }
     }
 

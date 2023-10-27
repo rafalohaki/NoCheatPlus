@@ -110,20 +110,20 @@ public class TestLocationTrace {
         try {
             trace.oldestIterator();
             fail("Expect an exception on trying to get an empty iterator (oldest).");
-        } catch (IllegalArgumentException ignored) {
-
+        } catch (IllegalArgumentException e) {
+            e.printStackTrace();
         }
         try {
             trace.latestIterator();
             fail("Expect an exception on trying to get an empty iterator (latest).");
-        } catch (IllegalArgumentException ignored) {
-
+        } catch (IllegalArgumentException e) {
+            e.printStackTrace();
         }
         try {
             trace.maxAgeIterator(0);
             fail("Expect an exception on trying to get an empty iterator (maxAge).");
-        } catch (IllegalArgumentException ignored) {
-
+        } catch (IllegalArgumentException e) {
+            e.printStackTrace();
         }
     }
 
