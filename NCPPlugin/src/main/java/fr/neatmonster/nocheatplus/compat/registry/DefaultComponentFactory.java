@@ -27,6 +27,7 @@ import fr.neatmonster.nocheatplus.config.ConfPaths;
 import fr.neatmonster.nocheatplus.config.ConfigManager;
 import fr.neatmonster.nocheatplus.logging.StaticLog;
 import fr.neatmonster.nocheatplus.logging.Streams;
+import fr.neatmonster.nocheatplus.utilities.ReflectionUtil;
 import fr.neatmonster.nocheatplus.utilities.StringUtil;
 
 import java.util.ArrayList;
@@ -155,33 +156,32 @@ public class DefaultComponentFactory {
         // TODO: catch ClassNotFound, incompatibleXY rather !?
 
         // Check: inventory.fastconsume.
-        try{
-            // TODO: Static test methods !?
-            FastConsume.testAvailability();
+        try {
+            ReflectionUtil.getClass("org.bukkit.event.player.PlayerItemConsumeEvent");
             available.add(new FastConsume());
             NCPAPIProvider.getNoCheatPlusAPI().addFeatureTags("checks", Collections.singletonList(FastConsume.class.getSimpleName()));
-        }
-        catch (Throwable t){
+        } catch (Throwable t) {
             StaticLog.logInfo("Inventory checks: FastConsume is not available.");
         }
 
         // Check: inventory.gutenberg.
         try {
-            Gutenberg.testAvailability();
+            ReflectionUtil.getClass("org.bukkit.event.player.PlayerEditBookEvent");
             available.add(new Gutenberg());
             NCPAPIProvider.getNoCheatPlusAPI().addFeatureTags("checks", Collections.singletonList(Gutenberg.class.getSimpleName()));
         } catch (Throwable t) {
-            StaticLog.logInfo("Inventory checks: Gutenberg is not available.");
+            StaticLog.logInfo("Inventory checks: Gutenberg is not available, disabled.");
         }
 
         // Hot fix: falling block end portal.
         try {
-            HotFixFallingBlockPortalEnter.testAvailability();
-            available.add(new HotFixFallingBlockPortalEnter());
-            NCPAPIProvider.getNoCheatPlusAPI().addFeatureTags("checks", Collections.singletonList(HotFixFallingBlockPortalEnter.class.getSimpleName()));
+            if (HotFixFallingBlockPortalEnter.testAvailability()) {
+                available.add(new HotFixFallingBlockPortalEnter());
+                NCPAPIProvider.getNoCheatPlusAPI().addFeatureTags("checks", Collections.singletonList(HotFixFallingBlockPortalEnter.class.getSimpleName()));
+            }
         }
-        catch (RuntimeException e) {
-            e.printStackTrace();
+        catch (Throwable t) {
+            StaticLog.logInfo("Inventory checks: HotFixFallingBlockPortalEnter is not available, disabled.");
         }
 
         // ProtocolLib dependencies.

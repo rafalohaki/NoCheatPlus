@@ -45,12 +45,6 @@ import org.bukkit.inventory.ItemStack;
  */
 public class FastConsume extends Check implements Listener, INotifyReload {
 
-    public static void testAvailability(){
-        if (!PlayerItemConsumeEvent.class.getSimpleName().equals("PlayerItemConsumeEvent")){
-            throw new RuntimeException("This exception should not even get thrown.");
-        }
-    }
-
     private final Counters counters = NCPAPIProvider.getNoCheatPlusAPI().getGenericInstance(Counters.class);
     private final int idCancelDead = counters.registerKey("cancel.dead");
 

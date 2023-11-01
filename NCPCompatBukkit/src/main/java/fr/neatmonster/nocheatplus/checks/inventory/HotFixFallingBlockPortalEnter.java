@@ -46,14 +46,9 @@ import org.bukkit.event.entity.EntityPortalEnterEvent;
  */
 public class HotFixFallingBlockPortalEnter implements Listener {
 
-    public static void testAvailability() {
-        if (ReflectionUtil.getClass("org.bukkit.event.entity.EntityPortalEnterEvent") == null
-                || ReflectionUtil.getClass("org.bukkit.entity.FallingBlock") == null) {
-            throw new RuntimeException("Not available.");
-        }
-        if (!ServerVersion.isMinecraftVersionUnknown() && ServerVersion.compareMinecraftVersion("1.9") < 0) {
-            throw new RuntimeException("Not needed.");
-        }
+    public static boolean testAvailability() {
+        return (ReflectionUtil.getClass("org.bukkit.event.entity.EntityPortalEnterEvent") != null || ReflectionUtil.getClass("org.bukkit.entity.FallingBlock") != null)
+                || (!ServerVersion.isMinecraftVersionUnknown() && ServerVersion.compareMinecraftVersion("1.9") >= 0);
     }
 
     /** Temporary use only: setWorld(null) after use. */
@@ -62,7 +57,6 @@ public class HotFixFallingBlockPortalEnter implements Listener {
     private final WrapBlockCache wrapBlockCache; // TODO: Fetch a getter from the registry.
 
     public HotFixFallingBlockPortalEnter() {
-        testAvailability();
         wrapBlockCache = new WrapBlockCache();
     }
 

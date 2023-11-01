@@ -27,12 +27,6 @@ import org.bukkit.inventory.meta.BookMeta;
 
 public class Gutenberg extends Check implements Listener {
 
-    public static void testAvailability(){
-        if (!PlayerEditBookEvent.class.getSimpleName().equals("PlayerEditBookEvent")){
-            throw new RuntimeException("This exception should not even get thrown.");
-        }
-    }
-
     public Gutenberg() {
         super(CheckType.INVENTORY_GUTENBERG);
     }

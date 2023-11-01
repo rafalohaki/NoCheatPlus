@@ -14,6 +14,9 @@
  */
 package fr.neatmonster.nocheatplus.utilities;
 
+import org.jetbrains.annotations.NotNull;
+import org.jetbrains.annotations.Nullable;
+
 import java.lang.reflect.AccessibleObject;
 import java.lang.reflect.Constructor;
 import java.lang.reflect.Field;
@@ -446,8 +449,8 @@ public class ReflectionUtil {
         try {
             return clazz.getMethod(methodName, arguments);
         }
-        catch (NoSuchMethodException | SecurityException e) {
-            e.printStackTrace();
+        catch (NoSuchMethodException e) {
+            System.out.println("Can't find " + methodName + " in " + clazz.getName());
         }
         return null;
     }
@@ -460,8 +463,8 @@ public class ReflectionUtil {
      * @param argumentLists
      * @return The first matching method (given order).
      */
-    public static Method getMethod(Class<?> clazz, String methodName, Class<?>[]... argumentLists) {
-        Method method = null;
+    public static @Nullable Method getMethod(Class<?> clazz, String methodName, Class<?>[] @NotNull ... argumentLists) {
+        Method method;
         for (Class<?>[] arguments : argumentLists) {
             method = getMethod(clazz, methodName, arguments);
             if (method != null) {
@@ -514,7 +517,7 @@ public class ReflectionUtil {
         try {
             return Class.forName(fullName);
         } catch (ClassNotFoundException e) {
-            // Ignore.
+            System.out.println("Can't find Class: " + fullName);
         }
         return null;
     }
