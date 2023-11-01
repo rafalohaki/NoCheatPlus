@@ -30,6 +30,7 @@ import java.util.Objects;
 import java.util.Random;
 import java.util.Set;
 
+import net.kyori.adventure.platform.bukkit.BukkitAudiences;
 import net.kyori.adventure.text.serializer.plain.PlainTextComponentSerializer;
 import org.bukkit.Bukkit;
 import org.bukkit.ChatColor;
@@ -142,6 +143,7 @@ import fr.neatmonster.nocheatplus.utilities.map.BlockProperties;
 import fr.neatmonster.nocheatplus.worlds.IWorldData;
 import fr.neatmonster.nocheatplus.worlds.IWorldDataManager;
 import fr.neatmonster.nocheatplus.worlds.WorldDataManager;
+import org.checkerframework.checker.nullness.qual.NonNull;
 
 /**
  * This is the main class of NoCheatPlus. The commands, events listeners and tasks are registered here.
@@ -642,6 +644,12 @@ public class NoCheatPlus extends JavaPlugin implements NoCheatPlusAPI {
     @Override
     public void onDisable() {
 
+        // Set BukkitAudiences to null
+        if(this.adventure != null) {
+            this.adventure.close();
+            this.adventure = null;
+        }
+
         final boolean verbose = ConfigManager.getConfigFile().getBoolean(ConfPaths.LOGGING_EXTENDED_STATUS);
 
         // Remove listener references.
@@ -899,6 +907,9 @@ public class NoCheatPlus extends JavaPlugin implements NoCheatPlusAPI {
     @Override
     public void onEnable() {
 
+        // Create BukkitAudiences
+        this.adventure = BukkitAudiences.create(this);
+
         // Reset TickTask (just in case).
         TickTask.setLocked(true);
         TickTask.purge();
@@ -1072,6 +1083,19 @@ public class NoCheatPlus extends JavaPlugin implements NoCheatPlusAPI {
         StaticLog.setStreamID(Streams.STATUS);
         // Tell the server administrator that we finished loading NoCheatPlus now.
         logManager.info(Streams.INIT, "Version " + getDescription().getVersion() + " is enabled.");
+    }
+
+    /**
+     * Initialize the BukkitAudiences
+     */
+    private BukkitAudiences adventure;
+
+    @Override
+    public @NonNull BukkitAudiences adventure() {
+        if(this.adventure == null) {
+            throw new IllegalStateException("Tried to access Adventure when the plugin was disabled!");
+        }
+        return this.adventure;
     }
 
     /**

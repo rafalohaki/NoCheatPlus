@@ -19,6 +19,7 @@ import java.util.Map;
 import java.util.Map.Entry;
 import java.util.Set;
 
+import fr.neatmonster.nocheatplus.components.NoCheatPlusAPI;
 import net.kyori.adventure.text.Component;
 import net.kyori.adventure.text.JoinConfiguration;
 import net.kyori.adventure.text.format.NamedTextColor;
@@ -36,6 +37,7 @@ import fr.neatmonster.nocheatplus.compat.versions.ServerVersion;
 import fr.neatmonster.nocheatplus.hooks.NCPHook;
 import fr.neatmonster.nocheatplus.hooks.NCPHookManager;
 import fr.neatmonster.nocheatplus.permissions.Permissions;
+import org.jetbrains.annotations.NotNull;
 
 public class VersionCommand extends BaseCommand {
 
@@ -44,8 +46,8 @@ public class VersionCommand extends BaseCommand {
     }
 
     @Override
-    public boolean onCommand(CommandSender sender, Command command, String label, String[] args) {
-        sender.sendMessage(getVersionInfo());
+    public boolean onCommand(@NotNull CommandSender sender, @NotNull Command command, @NotNull String label, String[] args) {
+        NCPAPIProvider.getNoCheatPlusAPI().adventure().sender(sender).sendMessage(getVersionInfo());
         return true;
     }
 

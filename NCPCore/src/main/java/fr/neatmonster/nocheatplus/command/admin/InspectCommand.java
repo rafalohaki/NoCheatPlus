@@ -102,7 +102,7 @@ public class InspectCommand extends BaseCommand {
         if (Bukkit.getPluginManager().isPluginEnabled("ViaVersion")) {
             builder.append("\n " + c1 + c2 + "•" + c1 + " Is playing with version " + ProtocolVersion.getProtocol(Via.getAPI().getPlayerVersion(pData.getPlayerId())));
         } else {
-            builder.append("\n " + c1 + c2 + "•" + c1 + " Is playing with version " + Bukkit.getMinecraftVersion() + "(" + Bukkit.getUnsafe().getProtocolVersion() + ")");
+//            builder.append("\n " + c1 + c2 + "•" + c1 + " Is playing with version " + pData.getClientVersion().getReleaseName() + "(" + pData.getClientVersionID() + ")"); // Dreeam TODO - Add back
         }
         if (player.isOp()){
             builder.append("\n "+ c1 + c2 + "•"  + c1 + cI + " Is OP" + c1 + ".");

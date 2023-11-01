@@ -29,7 +29,8 @@ import fr.neatmonster.nocheatplus.logging.LogManager;
 import fr.neatmonster.nocheatplus.permissions.PermissionRegistry;
 import fr.neatmonster.nocheatplus.players.IPlayerDataManager;
 import fr.neatmonster.nocheatplus.worlds.IWorldDataManager;
-
+import net.kyori.adventure.platform.bukkit.BukkitAudiences;
+import org.checkerframework.checker.nullness.qual.NonNull;
 
 
 /**
@@ -166,6 +167,12 @@ public interface NoCheatPlusAPI extends ComponentRegistry<Object>, ComponentRegi
      * @return
      */
     boolean isLoginDenied(String playerName, long time);
+
+    /**
+     * Get BukkitAudiences of Adventure.
+     * @return
+     */
+    @NonNull BukkitAudiences adventure();
 
     /**
      * Get the central access point for logging (LogManager),
