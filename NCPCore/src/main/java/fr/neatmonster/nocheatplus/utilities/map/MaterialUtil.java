@@ -14,6 +14,14 @@
  */
 package fr.neatmonster.nocheatplus.utilities.map;
 
+import fr.neatmonster.nocheatplus.compat.AlmostBoolean;
+import fr.neatmonster.nocheatplus.compat.BridgeMaterial;
+import fr.neatmonster.nocheatplus.logging.StaticLog;
+import fr.neatmonster.nocheatplus.utilities.InventoryUtil;
+import fr.neatmonster.nocheatplus.utilities.StringUtil;
+import org.bukkit.Material;
+import org.bukkit.entity.EntityType;
+
 import java.lang.reflect.Field;
 import java.lang.reflect.Modifier;
 import java.util.Arrays;
@@ -24,15 +32,6 @@ import java.util.LinkedList;
 import java.util.List;
 import java.util.Set;
 import java.util.logging.Level;
-
-import org.bukkit.Material;
-import org.bukkit.entity.EntityType;
-
-import fr.neatmonster.nocheatplus.compat.AlmostBoolean;
-import fr.neatmonster.nocheatplus.compat.BridgeMaterial;
-import fr.neatmonster.nocheatplus.logging.StaticLog;
-import fr.neatmonster.nocheatplus.utilities.InventoryUtil;
-import fr.neatmonster.nocheatplus.utilities.StringUtil;
 
 /**
  * Auxiliary collections and functionality for Material.

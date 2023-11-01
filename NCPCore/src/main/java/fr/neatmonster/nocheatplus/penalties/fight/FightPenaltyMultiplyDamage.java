@@ -14,9 +14,8 @@
  */
 package fr.neatmonster.nocheatplus.penalties.fight;
 
-import org.bukkit.event.entity.EntityDamageEvent;
-
 import fr.neatmonster.nocheatplus.compat.BridgeHealth;
+import org.bukkit.event.entity.EntityDamageEvent;
 
 /**
  * Multiply the final damage by a set amount.

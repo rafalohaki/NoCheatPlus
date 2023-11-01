@@ -14,17 +14,6 @@
  */
 package fr.neatmonster.nocheatplus.command;
 
-import java.util.Collection;
-import java.util.LinkedHashSet;
-import java.util.List;
-import java.util.Set;
-
-import org.bukkit.command.Command;
-import org.bukkit.command.CommandSender;
-import org.bukkit.event.Event;
-import org.bukkit.event.HandlerList;
-import org.bukkit.plugin.java.JavaPlugin;
-
 import fr.neatmonster.nocheatplus.command.actions.AllowLoginCommand;
 import fr.neatmonster.nocheatplus.command.actions.BanCommand;
 import fr.neatmonster.nocheatplus.command.actions.DenyListCommand;
@@ -56,6 +45,16 @@ import fr.neatmonster.nocheatplus.permissions.Permissions;
 import fr.neatmonster.nocheatplus.permissions.RegisteredPermission;
 import fr.neatmonster.nocheatplus.utilities.ColorUtil;
 import org.jetbrains.annotations.NotNull;
+import org.bukkit.command.Command;
+import org.bukkit.command.CommandSender;
+import org.bukkit.event.Event;
+import org.bukkit.event.HandlerList;
+import org.bukkit.plugin.java.JavaPlugin;
+
+import java.util.Collection;
+import java.util.LinkedHashSet;
+import java.util.List;
+import java.util.Set;
 
 /**
  * The /nocheatplus or /ncp command handler, delegates to sub commands.

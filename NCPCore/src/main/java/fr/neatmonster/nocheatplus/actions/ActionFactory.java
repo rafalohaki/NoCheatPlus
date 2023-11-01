@@ -14,8 +14,6 @@
  */
 package fr.neatmonster.nocheatplus.actions;
 
-import java.util.Map;
-
 import fr.neatmonster.nocheatplus.actions.types.CancelAction;
 import fr.neatmonster.nocheatplus.actions.types.LogAction;
 import fr.neatmonster.nocheatplus.actions.types.PenaltyAction;
@@ -24,6 +22,8 @@ import fr.neatmonster.nocheatplus.logging.StaticLog;
 import fr.neatmonster.nocheatplus.penalties.CancelPenalty;
 import fr.neatmonster.nocheatplus.penalties.PenaltyNode;
 import fr.neatmonster.nocheatplus.utilities.CheckUtils;
+
+import java.util.Map;
 
 /**
  * Helps with creating Actions out of text string definitions.

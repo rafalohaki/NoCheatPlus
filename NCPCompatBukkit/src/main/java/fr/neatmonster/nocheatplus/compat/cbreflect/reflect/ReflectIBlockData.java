@@ -14,11 +14,11 @@
  */
 package fr.neatmonster.nocheatplus.compat.cbreflect.reflect;
 
-import java.lang.reflect.InvocationTargetException;
-import java.lang.reflect.Method;
-
 import fr.neatmonster.nocheatplus.compat.cbreflect.reflect.ReflectHelper.ReflectFailureException;
 import fr.neatmonster.nocheatplus.utilities.ReflectionUtil;
+
+import java.lang.reflect.InvocationTargetException;
+import java.lang.reflect.Method;
 
 /**
  * IBlockData (nms).

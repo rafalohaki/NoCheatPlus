@@ -14,11 +14,10 @@
  */
 package fr.neatmonster.nocheatplus.command.admin.reset;
 
-import org.bukkit.plugin.java.JavaPlugin;
-
 import fr.neatmonster.nocheatplus.command.BaseCommand;
 import fr.neatmonster.nocheatplus.command.admin.reset.counters.CountersCommand;
 import fr.neatmonster.nocheatplus.permissions.Permissions;
+import org.bukkit.plugin.java.JavaPlugin;
 
 /**
  * Reset stuff, e.g. statistics counters.

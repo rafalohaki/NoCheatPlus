@@ -14,12 +14,11 @@
  */
 package fr.neatmonster.nocheatplus.utilities.location;
 
+import fr.neatmonster.nocheatplus.components.location.IGetPosition;
+import fr.neatmonster.nocheatplus.components.location.IGetPositionWithLook;
 import org.bukkit.Location;
 import org.bukkit.block.Block;
 import org.bukkit.util.Vector;
-
-import fr.neatmonster.nocheatplus.components.location.IGetPosition;
-import fr.neatmonster.nocheatplus.components.location.IGetPositionWithLook;
 
 
 /**

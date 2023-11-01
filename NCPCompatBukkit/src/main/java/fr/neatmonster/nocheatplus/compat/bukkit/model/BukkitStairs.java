@@ -14,10 +14,8 @@
  */
 package fr.neatmonster.nocheatplus.compat.bukkit.model;
 
-import java.util.ArrayList;
-import java.util.List;
-import java.util.stream.IntStream;
-
+import fr.neatmonster.nocheatplus.utilities.collision.Axis;
+import fr.neatmonster.nocheatplus.utilities.map.BlockCache;
 import org.bukkit.World;
 import org.bukkit.block.Block;
 import org.bukkit.block.BlockFace;
@@ -25,8 +23,9 @@ import org.bukkit.block.data.Bisected.Half;
 import org.bukkit.block.data.BlockData;
 import org.bukkit.block.data.type.Stairs;
 
-import fr.neatmonster.nocheatplus.utilities.collision.Axis;
-import fr.neatmonster.nocheatplus.utilities.map.BlockCache;
+import java.util.ArrayList;
+import java.util.List;
+import java.util.stream.IntStream;
 
 public class BukkitStairs implements BukkitShapeModel {
 

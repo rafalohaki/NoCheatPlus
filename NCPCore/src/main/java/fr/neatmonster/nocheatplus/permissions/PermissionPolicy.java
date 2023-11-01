@@ -14,9 +14,9 @@
  */
 package fr.neatmonster.nocheatplus.permissions;
 
-import java.util.List;
-
 import fr.neatmonster.nocheatplus.utilities.StringUtil;
+
+import java.util.List;
 
 public class PermissionPolicy {
 

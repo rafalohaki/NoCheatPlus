@@ -14,16 +14,15 @@
  */
 package fr.neatmonster.nocheatplus.test;
 
-import static org.junit.jupiter.api.Assertions.fail;
+import fr.neatmonster.nocheatplus.utilities.ColorUtil;
+import org.junit.jupiter.api.Test;
+import org.bukkit.ChatColor;
 
 import java.util.Collections;
 import java.util.LinkedList;
 import java.util.List;
 
-import org.bukkit.ChatColor;
-import org.junit.jupiter.api.Test;
-
-import fr.neatmonster.nocheatplus.utilities.ColorUtil;
+import static org.junit.jupiter.api.Assertions.fail;
 
 public class TestColorUtil {
 	@Test

@@ -14,8 +14,8 @@
  */
 package fr.neatmonster.nocheatplus.utilities.collision;
 
-import java.util.List;
-
+import fr.neatmonster.nocheatplus.checks.moving.util.MovingUtil;
+import fr.neatmonster.nocheatplus.utilities.location.TrigUtil;
 import org.bukkit.Location;
 import org.bukkit.block.Block;
 import org.bukkit.entity.Entity;
@@ -23,8 +23,7 @@ import org.bukkit.entity.LivingEntity;
 import org.bukkit.entity.Player;
 import org.bukkit.util.Vector;
 
-import fr.neatmonster.nocheatplus.checks.moving.util.MovingUtil;
-import fr.neatmonster.nocheatplus.utilities.location.TrigUtil;
+import java.util.List;
 
 /**
  * Collision related static utility.

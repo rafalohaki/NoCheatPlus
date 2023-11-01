@@ -14,8 +14,9 @@
  */
 package fr.neatmonster.nocheatplus.compat.versions;
 
-import java.util.Objects;
 import org.bukkit.Bukkit;
+
+import java.util.Objects;
 
 /**
  * Feature selection, based on the version.

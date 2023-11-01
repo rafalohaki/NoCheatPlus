@@ -14,12 +14,11 @@
  */
 package fr.neatmonster.nocheatplus.config;
 
-import org.bukkit.configuration.MemorySection;
-
 import fr.neatmonster.nocheatplus.NCPAPIProvider;
 import fr.neatmonster.nocheatplus.actions.ActionFactoryFactory;
 import fr.neatmonster.nocheatplus.actions.ActionList;
 import fr.neatmonster.nocheatplus.checks.ViolationData;
+import org.bukkit.configuration.MemorySection;
 
 /**
  * A special configuration class created to handle the loading/saving of actions lists. This is for normal use with the plugin.

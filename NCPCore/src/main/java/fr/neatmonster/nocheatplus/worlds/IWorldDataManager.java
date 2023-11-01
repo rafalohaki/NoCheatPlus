@@ -14,16 +14,15 @@
  */
 package fr.neatmonster.nocheatplus.worlds;
 
-import java.util.Iterator;
-import java.util.Map.Entry;
-
-import org.bukkit.World;
-import org.bukkit.entity.Player;
-
 import fr.neatmonster.nocheatplus.checks.CheckType;
 import fr.neatmonster.nocheatplus.compat.AlmostBoolean;
 import fr.neatmonster.nocheatplus.components.config.value.OverrideType;
 import fr.neatmonster.nocheatplus.components.registry.factory.IRichFactoryRegistry;
+import org.bukkit.World;
+import org.bukkit.entity.Player;
+
+import java.util.Iterator;
+import java.util.Map.Entry;
 
 /**
  * 

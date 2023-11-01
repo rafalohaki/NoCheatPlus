@@ -14,10 +14,9 @@
  */
 package fr.neatmonster.nocheatplus.compat.cbreflect.reflect;
 
+import fr.neatmonster.nocheatplus.compat.versions.ServerVersion;
 import org.bukkit.Bukkit;
 import org.bukkit.Server;
-
-import fr.neatmonster.nocheatplus.compat.versions.ServerVersion;
 
 public class ReflectBase {
 

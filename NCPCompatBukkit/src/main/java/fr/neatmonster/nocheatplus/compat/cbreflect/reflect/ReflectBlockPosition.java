@@ -14,9 +14,9 @@
  */
 package fr.neatmonster.nocheatplus.compat.cbreflect.reflect;
 
-import java.lang.reflect.Constructor;
-
 import fr.neatmonster.nocheatplus.utilities.ReflectionUtil;
+
+import java.lang.reflect.Constructor;
 
 public class ReflectBlockPosition {
     

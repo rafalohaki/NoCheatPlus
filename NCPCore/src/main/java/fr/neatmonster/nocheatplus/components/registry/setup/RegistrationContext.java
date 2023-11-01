@@ -14,9 +14,6 @@
  */
 package fr.neatmonster.nocheatplus.components.registry.setup;
 
-import java.util.LinkedList;
-import java.util.List;
-
 import fr.neatmonster.nocheatplus.components.config.IConfig;
 import fr.neatmonster.nocheatplus.components.data.IData;
 import fr.neatmonster.nocheatplus.components.registry.setup.config.RegisterConfigWorld;
@@ -24,6 +21,9 @@ import fr.neatmonster.nocheatplus.components.registry.setup.data.RegisterDataPla
 import fr.neatmonster.nocheatplus.components.registry.setup.data.RegisterDataWorld;
 import fr.neatmonster.nocheatplus.components.registry.setup.instance.RegisterInstancePlayer;
 import fr.neatmonster.nocheatplus.components.registry.setup.instance.RegisterInstanceWorld;
+
+import java.util.LinkedList;
+import java.util.List;
 
 /**
  * Convenience: set up a check or similar with NCP registries.

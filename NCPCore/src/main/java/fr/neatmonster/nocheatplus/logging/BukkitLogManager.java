@@ -14,11 +14,6 @@
  */
 package fr.neatmonster.nocheatplus.logging;
 
-import java.io.File;
-
-import org.bukkit.Bukkit;
-import org.bukkit.plugin.Plugin;
-
 import fr.neatmonster.nocheatplus.NCPAPIProvider;
 import fr.neatmonster.nocheatplus.components.registry.feature.INotifyReload;
 import fr.neatmonster.nocheatplus.components.registry.order.SetupOrder;
@@ -32,6 +27,10 @@ import fr.neatmonster.nocheatplus.logging.details.FileLoggerAdapter;
 import fr.neatmonster.nocheatplus.logging.details.LogOptions;
 import fr.neatmonster.nocheatplus.logging.details.LogOptions.CallContext;
 import fr.neatmonster.nocheatplus.utilities.ColorUtil;
+import org.bukkit.Bukkit;
+import org.bukkit.plugin.Plugin;
+
+import java.io.File;
 
 
 /**

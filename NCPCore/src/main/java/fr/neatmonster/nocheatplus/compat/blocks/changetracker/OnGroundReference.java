@@ -14,13 +14,13 @@
  */
 package fr.neatmonster.nocheatplus.compat.blocks.changetracker;
 
-import java.util.LinkedList;
-import java.util.ListIterator;
-
 import fr.neatmonster.nocheatplus.compat.blocks.changetracker.BlockChangeTracker.BlockChangeEntry;
 import fr.neatmonster.nocheatplus.utilities.map.BlockCache;
 import fr.neatmonster.nocheatplus.utilities.map.BlockCache.IBlockCacheNode;
 import fr.neatmonster.nocheatplus.utilities.map.BlockProperties;
+
+import java.util.LinkedList;
+import java.util.ListIterator;
 
 /**
  * Maintain consistent past states for a block and the block above.

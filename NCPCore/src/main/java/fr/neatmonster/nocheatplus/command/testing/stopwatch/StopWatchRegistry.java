@@ -14,11 +14,7 @@
  */
 package fr.neatmonster.nocheatplus.command.testing.stopwatch;
 
-import java.util.Iterator;
-import java.util.LinkedHashMap;
-import java.util.Map;
-import java.util.Map.Entry;
-
+import fr.neatmonster.nocheatplus.utilities.OnDemandTickListener;
 import org.bukkit.ChatColor;
 import org.bukkit.entity.Player;
 import org.bukkit.event.EventHandler;
@@ -29,7 +25,10 @@ import org.bukkit.event.player.PlayerKickEvent;
 import org.bukkit.event.player.PlayerQuitEvent;
 import org.bukkit.plugin.Plugin;
 
-import fr.neatmonster.nocheatplus.utilities.OnDemandTickListener;
+import java.util.Iterator;
+import java.util.LinkedHashMap;
+import java.util.Map;
+import java.util.Map.Entry;
 
 /**
  * Registers stop-watches for players.

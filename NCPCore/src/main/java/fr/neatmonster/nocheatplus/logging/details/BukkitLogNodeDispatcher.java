@@ -14,13 +14,12 @@
  */
 package fr.neatmonster.nocheatplus.logging.details;
 
-import org.bukkit.Bukkit;
-import org.bukkit.plugin.IllegalPluginAccessException;
-import org.bukkit.plugin.Plugin;
-
 import fr.neatmonster.nocheatplus.compat.Folia;
 import fr.neatmonster.nocheatplus.components.registry.feature.TickListener;
 import fr.neatmonster.nocheatplus.utilities.TickTask;
+import org.bukkit.Bukkit;
+import org.bukkit.plugin.IllegalPluginAccessException;
+import org.bukkit.plugin.Plugin;
 
 public class BukkitLogNodeDispatcher extends AbstractLogNodeDispatcher { // TODO: Name.
 

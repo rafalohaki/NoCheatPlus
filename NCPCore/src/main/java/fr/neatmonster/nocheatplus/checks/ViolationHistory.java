@@ -14,6 +14,10 @@
  */
 package fr.neatmonster.nocheatplus.checks;
 
+import fr.neatmonster.nocheatplus.utilities.CheckTypeUtil;
+import fr.neatmonster.nocheatplus.utilities.FCFSComparator;
+import org.bukkit.entity.Player;
+
 import java.util.ArrayList;
 import java.util.Arrays;
 import java.util.Comparator;
@@ -25,11 +29,6 @@ import java.util.List;
 import java.util.Map;
 import java.util.Map.Entry;
 import java.util.Set;
-
-import org.bukkit.entity.Player;
-
-import fr.neatmonster.nocheatplus.utilities.CheckTypeUtil;
-import fr.neatmonster.nocheatplus.utilities.FCFSComparator;
 
 /**
  * The class containg the violation history of a player.

@@ -14,14 +14,14 @@
  */
 package fr.neatmonster.nocheatplus.checks.workaround;
 
-import java.util.Arrays;
-import java.util.Collection;
-import java.util.LinkedList;
-
 import fr.neatmonster.nocheatplus.workaround.IWorkaround;
 import fr.neatmonster.nocheatplus.workaround.SimpleWorkaroundRegistry;
 import fr.neatmonster.nocheatplus.workaround.WorkaroundCountDown;
 import fr.neatmonster.nocheatplus.workaround.WorkaroundCounter;
+
+import java.util.Arrays;
+import java.util.Collection;
+import java.util.LinkedList;
 
 /**
  * Workaround registry for primary thread use. Potentially cover all checks.

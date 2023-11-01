@@ -14,13 +14,12 @@
  */
 package fr.neatmonster.nocheatplus.test;
 
-import static org.junit.jupiter.api.Assertions.fail;
-
-import org.junit.jupiter.api.Test;
-
 import fr.neatmonster.nocheatplus.permissions.PermissionPolicy;
 import fr.neatmonster.nocheatplus.permissions.PermissionSettings;
 import fr.neatmonster.nocheatplus.permissions.PermissionSettings.PermissionRule;
+import org.junit.jupiter.api.Test;
+
+import static org.junit.jupiter.api.Assertions.fail;
 
 public class TestPermissionSettings {
 

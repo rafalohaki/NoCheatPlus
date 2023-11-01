@@ -14,11 +14,10 @@
  */
 package fr.neatmonster.nocheatplus.test;
 
-import static org.junit.jupiter.api.Assertions.*;
-
+import fr.neatmonster.nocheatplus.utilities.ds.count.ActionAccumulator;
 import org.junit.jupiter.api.Test;
 
-import fr.neatmonster.nocheatplus.utilities.ds.count.ActionAccumulator;
+import static org.junit.jupiter.api.Assertions.fail;
 
 
 public class TestActionAccumulator {

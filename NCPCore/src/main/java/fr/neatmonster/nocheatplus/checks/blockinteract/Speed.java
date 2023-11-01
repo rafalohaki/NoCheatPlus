@@ -14,11 +14,10 @@
  */
 package fr.neatmonster.nocheatplus.checks.blockinteract;
 
-import org.bukkit.entity.Player;
-
 import fr.neatmonster.nocheatplus.checks.Check;
 import fr.neatmonster.nocheatplus.checks.CheckType;
 import fr.neatmonster.nocheatplus.utilities.TickTask;
+import org.bukkit.entity.Player;
 
 public class Speed extends Check {
 

@@ -14,15 +14,15 @@
  */
 package fr.neatmonster.nocheatplus.actions;
 
+import fr.neatmonster.nocheatplus.config.ConfigFileWithActions;
+import fr.neatmonster.nocheatplus.permissions.RegisteredPermission;
+
 import java.util.ArrayList;
 import java.util.Collections;
 import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
 import java.util.Map.Entry;
-
-import fr.neatmonster.nocheatplus.config.ConfigFileWithActions;
-import fr.neatmonster.nocheatplus.permissions.RegisteredPermission;
 
 public abstract class AbstractActionList<D extends ActionData,  L extends AbstractActionList<D, L>>{
 

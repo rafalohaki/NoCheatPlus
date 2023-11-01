@@ -14,6 +14,17 @@
  */
 package fr.neatmonster.nocheatplus.config;
 
+import fr.neatmonster.nocheatplus.NCPAPIProvider;
+import fr.neatmonster.nocheatplus.logging.StaticLog;
+import fr.neatmonster.nocheatplus.utilities.StringUtil;
+import fr.neatmonster.nocheatplus.utilities.build.BuildParameters;
+import fr.neatmonster.nocheatplus.worlds.IWorldData;
+import fr.neatmonster.nocheatplus.worlds.IWorldDataManager;
+import fr.neatmonster.nocheatplus.worlds.WorldDataManager;
+import org.bukkit.configuration.ConfigurationSection;
+import org.bukkit.configuration.MemoryConfiguration;
+import org.bukkit.plugin.Plugin;
+
 import java.io.File;
 import java.util.ArrayList;
 import java.util.Collection;
@@ -27,18 +38,6 @@ import java.util.List;
 import java.util.Map;
 import java.util.Map.Entry;
 import java.util.Set;
-
-import org.bukkit.configuration.ConfigurationSection;
-import org.bukkit.configuration.MemoryConfiguration;
-import org.bukkit.plugin.Plugin;
-
-import fr.neatmonster.nocheatplus.NCPAPIProvider;
-import fr.neatmonster.nocheatplus.logging.StaticLog;
-import fr.neatmonster.nocheatplus.utilities.StringUtil;
-import fr.neatmonster.nocheatplus.utilities.build.BuildParameters;
-import fr.neatmonster.nocheatplus.worlds.IWorldData;
-import fr.neatmonster.nocheatplus.worlds.IWorldDataManager;
-import fr.neatmonster.nocheatplus.worlds.WorldDataManager;
 
 /**
  * Central location for everything that's described in the configuration file(s).<br>

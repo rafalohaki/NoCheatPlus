@@ -14,9 +14,9 @@
  */
 package fr.neatmonster.nocheatplus.compat;
 
-import java.util.UUID;
-
 import fr.neatmonster.nocheatplus.utilities.IdUtil;
+
+import java.util.UUID;
 
 // TODO: Auto-generated Javadoc
 /**

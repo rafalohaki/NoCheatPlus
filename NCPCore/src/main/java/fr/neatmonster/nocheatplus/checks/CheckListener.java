@@ -14,13 +14,6 @@
  */
 package fr.neatmonster.nocheatplus.checks;
 
-import java.util.ArrayList;
-import java.util.Collection;
-import java.util.LinkedList;
-import java.util.List;
-
-import org.bukkit.entity.Player;
-
 import fr.neatmonster.nocheatplus.NCPAPIProvider;
 import fr.neatmonster.nocheatplus.compat.MCAccess;
 import fr.neatmonster.nocheatplus.components.debug.IDebugPlayer;
@@ -28,6 +21,12 @@ import fr.neatmonster.nocheatplus.components.registry.event.IGenericInstanceHand
 import fr.neatmonster.nocheatplus.components.registry.feature.IHoldSubComponents;
 import fr.neatmonster.nocheatplus.components.registry.feature.NCPListener;
 import fr.neatmonster.nocheatplus.utilities.CheckUtils;
+import org.bukkit.entity.Player;
+
+import java.util.ArrayList;
+import java.util.Collection;
+import java.util.LinkedList;
+import java.util.List;
 
 /**
  * This class provides naming etc for registration with ListenerManager.

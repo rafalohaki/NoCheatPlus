@@ -14,14 +14,13 @@
  */
 package fr.neatmonster.nocheatplus.compat.bukkit.model;
 
+import fr.neatmonster.nocheatplus.utilities.map.BlockCache;
 import org.bukkit.World;
 import org.bukkit.block.Block;
 import org.bukkit.block.BlockState;
 import org.bukkit.block.data.Bisected.Half;
 import org.bukkit.block.data.BlockData;
 import org.bukkit.block.data.type.TrapDoor;
-
-import fr.neatmonster.nocheatplus.utilities.map.BlockCache;
 
 public class BukkitTrapDoor implements BukkitShapeModel {
 

@@ -14,14 +14,13 @@
  */
 package fr.neatmonster.nocheatplus.compat.cbreflect;
 
-import org.bukkit.World;
-import org.bukkit.entity.Entity;
-
 import fr.neatmonster.nocheatplus.compat.blocks.LegacyBlocks;
 import fr.neatmonster.nocheatplus.compat.bukkit.BlockCacheBukkit;
 import fr.neatmonster.nocheatplus.compat.cbreflect.reflect.ReflectHelper;
 import fr.neatmonster.nocheatplus.compat.cbreflect.reflect.ReflectHelper.ReflectFailureException;
 import fr.neatmonster.nocheatplus.utilities.map.BlockCache;
+import org.bukkit.World;
+import org.bukkit.entity.Entity;
 
 public class BlockCacheCBReflect extends BlockCacheBukkit {
 

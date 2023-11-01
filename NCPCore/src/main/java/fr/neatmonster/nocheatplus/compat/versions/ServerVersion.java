@@ -14,11 +14,11 @@
  */
 package fr.neatmonster.nocheatplus.compat.versions;
 
-import java.util.Objects;
+import fr.neatmonster.nocheatplus.utilities.ReflectionUtil;
 import org.bukkit.Bukkit;
 import org.bukkit.Server;
 
-import fr.neatmonster.nocheatplus.utilities.ReflectionUtil;
+import java.util.Objects;
 
 /**
  * Static utility that stores the Minecraft version, providing some parsing

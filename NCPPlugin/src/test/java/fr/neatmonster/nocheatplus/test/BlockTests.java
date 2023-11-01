@@ -14,10 +14,6 @@
  */
 package fr.neatmonster.nocheatplus.test;
 
-import java.util.ArrayList;
-import java.util.Collection;
-import java.util.List;
-
 import fr.neatmonster.nocheatplus.NCPAPIProvider;
 import fr.neatmonster.nocheatplus.PluginTests;
 import fr.neatmonster.nocheatplus.compat.MCAccess;
@@ -26,6 +22,10 @@ import fr.neatmonster.nocheatplus.config.DefaultConfig;
 import fr.neatmonster.nocheatplus.config.RawConfigFile;
 import fr.neatmonster.nocheatplus.config.WorldConfigProvider;
 import fr.neatmonster.nocheatplus.utilities.map.BlockProperties;
+
+import java.util.ArrayList;
+import java.util.Collection;
+import java.util.List;
 
 /**
  * Auxiliary classes packed in here.

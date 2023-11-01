@@ -14,12 +14,12 @@
  */
 package fr.neatmonster.nocheatplus.utilities.ds.prefixtree;
 
+import fr.neatmonster.nocheatplus.utilities.ds.prefixtree.CharPrefixTree.CharLookupEntry;
+import fr.neatmonster.nocheatplus.utilities.ds.prefixtree.CharPrefixTree.CharNode;
+
 import java.util.ArrayList;
 import java.util.Collection;
 import java.util.List;
-
-import fr.neatmonster.nocheatplus.utilities.ds.prefixtree.CharPrefixTree.CharLookupEntry;
-import fr.neatmonster.nocheatplus.utilities.ds.prefixtree.CharPrefixTree.CharNode;
 
 public class CharPrefixTree<N extends CharNode<N>, L extends CharLookupEntry<N>> extends PrefixTree<Character, N, L>{
 

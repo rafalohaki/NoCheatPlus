@@ -14,11 +14,6 @@
  */
 package fr.neatmonster.nocheatplus.actions;
 
-import java.util.ArrayList;
-import java.util.HashMap;
-import java.util.List;
-import java.util.Map;
-
 import fr.neatmonster.nocheatplus.NCPAPIProvider;
 import fr.neatmonster.nocheatplus.actions.AbstractActionList.ActionListFactory;
 import fr.neatmonster.nocheatplus.actions.types.CommandAction;
@@ -26,6 +21,11 @@ import fr.neatmonster.nocheatplus.actions.types.CommandActionWithColor;
 import fr.neatmonster.nocheatplus.actions.types.DummyAction;
 import fr.neatmonster.nocheatplus.logging.StaticLog;
 import fr.neatmonster.nocheatplus.permissions.RegisteredPermission;
+
+import java.util.ArrayList;
+import java.util.HashMap;
+import java.util.List;
+import java.util.Map;
 
 public abstract class AbstractActionFactory <D extends ActionData, L extends AbstractActionList<D, L>>{
 

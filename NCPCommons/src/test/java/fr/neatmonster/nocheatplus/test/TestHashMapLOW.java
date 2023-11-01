@@ -14,7 +14,8 @@
  */
 package fr.neatmonster.nocheatplus.test;
 
-import static org.junit.jupiter.api.Assertions.fail;
+import fr.neatmonster.nocheatplus.utilities.ds.map.HashMapLOW;
+import org.junit.jupiter.api.Test;
 
 import java.util.HashMap;
 import java.util.Iterator;
@@ -22,9 +23,7 @@ import java.util.LinkedHashMap;
 import java.util.Map;
 import java.util.Map.Entry;
 
-import org.junit.jupiter.api.Test;
-
-import fr.neatmonster.nocheatplus.utilities.ds.map.HashMapLOW;
+import static org.junit.jupiter.api.Assertions.fail;
 
 /**
  * Tests for HashMapLow.

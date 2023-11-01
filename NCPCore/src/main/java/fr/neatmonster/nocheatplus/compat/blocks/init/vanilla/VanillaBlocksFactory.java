@@ -14,15 +14,15 @@
  */
 package fr.neatmonster.nocheatplus.compat.blocks.init.vanilla;
 
-import java.util.Collection;
-import java.util.LinkedList;
-import java.util.List;
-
 import fr.neatmonster.nocheatplus.compat.blocks.BlockPropertiesSetup;
 import fr.neatmonster.nocheatplus.compat.blocks.IPatchBlockPropertiesSetup;
 import fr.neatmonster.nocheatplus.compat.blocks.init.vanilla.special.MultiClientProtocolBlockShapePatch;
 import fr.neatmonster.nocheatplus.config.WorldConfigProvider;
 import fr.neatmonster.nocheatplus.logging.StaticLog;
+
+import java.util.Collection;
+import java.util.LinkedList;
+import java.util.List;
 
 public class VanillaBlocksFactory {
 

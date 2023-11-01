@@ -14,6 +14,8 @@
  */
 package fr.neatmonster.nocheatplus.compat;
 
+import fr.neatmonster.nocheatplus.utilities.PotionUtil;
+import fr.neatmonster.nocheatplus.utilities.ReflectionUtil;
 import org.bukkit.Material;
 import org.bukkit.entity.LivingEntity;
 import org.bukkit.entity.Player;
@@ -22,9 +24,6 @@ import org.bukkit.event.player.PlayerInteractEvent;
 import org.bukkit.inventory.ItemStack;
 import org.bukkit.inventory.PlayerInventory;
 import org.bukkit.potion.PotionEffectType;
-
-import fr.neatmonster.nocheatplus.utilities.PotionUtil;
-import fr.neatmonster.nocheatplus.utilities.ReflectionUtil;
 
 public class Bridge1_9 {
 

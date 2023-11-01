@@ -14,9 +14,9 @@
  */
 package fr.neatmonster.nocheatplus.components.data;
 
-import java.util.Collection;
-
 import fr.neatmonster.nocheatplus.checks.CheckType;
+
+import java.util.Collection;
 
 /**
  * Check type specific data removal: Data storage specific listener for explicit

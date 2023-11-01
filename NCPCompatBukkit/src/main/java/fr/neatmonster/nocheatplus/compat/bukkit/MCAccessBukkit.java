@@ -15,16 +15,15 @@
 package fr.neatmonster.nocheatplus.compat.bukkit;
 
 
-import java.util.LinkedHashSet;
-import java.util.Set;
-
-import org.bukkit.Material;
-
 import fr.neatmonster.nocheatplus.compat.blocks.BlockPropertiesSetup;
 import fr.neatmonster.nocheatplus.config.WorldConfigProvider;
 import fr.neatmonster.nocheatplus.logging.StaticLog;
 import fr.neatmonster.nocheatplus.utilities.StringUtil;
 import fr.neatmonster.nocheatplus.utilities.map.BlockFlags;
+import org.bukkit.Material;
+
+import java.util.LinkedHashSet;
+import java.util.Set;
 
 public class MCAccessBukkit extends MCAccessBukkitBase implements BlockPropertiesSetup {
 

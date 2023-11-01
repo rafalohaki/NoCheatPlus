@@ -14,9 +14,11 @@
  */
 package fr.neatmonster.nocheatplus.utilities;
 
-import java.util.LinkedList;
-import java.util.List;
-
+import fr.neatmonster.nocheatplus.checks.inventory.InventoryData;
+import fr.neatmonster.nocheatplus.compat.Bridge1_9;
+import fr.neatmonster.nocheatplus.players.DataManager;
+import fr.neatmonster.nocheatplus.players.IPlayerData;
+import fr.neatmonster.nocheatplus.utilities.map.BlockProperties;
 import org.bukkit.Material;
 import org.bukkit.entity.Player;
 import org.bukkit.event.inventory.InventoryType;
@@ -24,11 +26,8 @@ import org.bukkit.inventory.Inventory;
 import org.bukkit.inventory.InventoryView;
 import org.bukkit.inventory.ItemStack;
 
-import fr.neatmonster.nocheatplus.compat.Bridge1_9;
-import fr.neatmonster.nocheatplus.utilities.map.BlockProperties;
-import fr.neatmonster.nocheatplus.players.DataManager;
-import fr.neatmonster.nocheatplus.players.IPlayerData;
-import fr.neatmonster.nocheatplus.checks.inventory.InventoryData;
+import java.util.LinkedList;
+import java.util.List;
 
 // TODO: Auto-generated Javadoc
 /**

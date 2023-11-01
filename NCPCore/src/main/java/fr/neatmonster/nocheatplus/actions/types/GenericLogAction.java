@@ -14,10 +14,6 @@
  */
 package fr.neatmonster.nocheatplus.actions.types;
 
-import java.util.ArrayList;
-import java.util.List;
-import java.util.logging.Level;
-
 import fr.neatmonster.nocheatplus.NCPAPIProvider;
 import fr.neatmonster.nocheatplus.actions.Action;
 import fr.neatmonster.nocheatplus.actions.ActionList;
@@ -31,6 +27,10 @@ import fr.neatmonster.nocheatplus.logging.StreamID;
 import fr.neatmonster.nocheatplus.permissions.RegisteredPermission;
 import fr.neatmonster.nocheatplus.players.DataManager;
 import fr.neatmonster.nocheatplus.utilities.ColorUtil;
+
+import java.util.ArrayList;
+import java.util.List;
+import java.util.logging.Level;
 
 /**
  * Generic log action, capable of logging to any stream of LogManager with any

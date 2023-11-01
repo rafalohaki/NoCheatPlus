@@ -14,10 +14,9 @@
  */
 package fr.neatmonster.nocheatplus.command.admin.notify;
 
-import org.bukkit.plugin.java.JavaPlugin;
-
 import fr.neatmonster.nocheatplus.command.BaseCommand;
 import fr.neatmonster.nocheatplus.permissions.Permissions;
+import org.bukkit.plugin.java.JavaPlugin;
 
 /**
  * Toggle notifications on and off.

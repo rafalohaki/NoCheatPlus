@@ -14,11 +14,10 @@
  */
 package fr.neatmonster.nocheatplus.checks.blockbreak;
 
-import org.bukkit.entity.Player;
-
 import fr.neatmonster.nocheatplus.actions.ActionList;
 import fr.neatmonster.nocheatplus.checks.CheckType;
 import fr.neatmonster.nocheatplus.checks.generic.block.AbstractBlockDirectionCheck;
+import org.bukkit.entity.Player;
 
 /**
  * The Direction check will find out if a player tried to interact with

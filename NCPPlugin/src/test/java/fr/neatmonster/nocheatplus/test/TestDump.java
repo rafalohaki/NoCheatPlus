@@ -14,12 +14,11 @@
  */
 package fr.neatmonster.nocheatplus.test;
 
-import org.junit.jupiter.api.Test;
-
 import fr.neatmonster.nocheatplus.PluginTests;
 import fr.neatmonster.nocheatplus.checks.CheckType;
 import fr.neatmonster.nocheatplus.checks.CheckType.CheckTypeType;
 import fr.neatmonster.nocheatplus.permissions.RegisteredPermission;
+import org.junit.jupiter.api.Test;
 
 /**
  * Uh oh.

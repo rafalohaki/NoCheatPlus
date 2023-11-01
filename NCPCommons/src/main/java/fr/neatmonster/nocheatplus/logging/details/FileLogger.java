@@ -14,6 +14,8 @@
  */
 package fr.neatmonster.nocheatplus.logging.details;
 
+import fr.neatmonster.nocheatplus.utilities.StringUtil;
+
 import java.io.File;
 import java.io.IOException;
 import java.text.SimpleDateFormat;
@@ -23,8 +25,6 @@ import java.util.logging.Handler;
 import java.util.logging.Level;
 import java.util.logging.LogRecord;
 import java.util.logging.Logger;
-
-import fr.neatmonster.nocheatplus.utilities.StringUtil;
 
 /**
  * Wrap a file logger, adding convenience setup methods.

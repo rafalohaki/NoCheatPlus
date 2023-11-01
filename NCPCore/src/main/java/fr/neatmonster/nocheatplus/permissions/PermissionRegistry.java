@@ -14,6 +14,10 @@
  */
 package fr.neatmonster.nocheatplus.permissions;
 
+import fr.neatmonster.nocheatplus.components.registry.exception.AlreadyRegisteredException;
+import fr.neatmonster.nocheatplus.components.registry.exception.NotRegisteredException;
+import fr.neatmonster.nocheatplus.utilities.ds.map.HashMapLOW;
+
 import java.util.Iterator;
 import java.util.LinkedHashSet;
 import java.util.LinkedList;
@@ -22,10 +26,6 @@ import java.util.Map.Entry;
 import java.util.Set;
 import java.util.concurrent.locks.Lock;
 import java.util.concurrent.locks.ReentrantLock;
-
-import fr.neatmonster.nocheatplus.components.registry.exception.AlreadyRegisteredException;
-import fr.neatmonster.nocheatplus.components.registry.exception.NotRegisteredException;
-import fr.neatmonster.nocheatplus.utilities.ds.map.HashMapLOW;
 
 /**
  * Keep registry information for permissions.

@@ -14,13 +14,12 @@
  */
 package fr.neatmonster.nocheatplus.compat;
 
+import fr.neatmonster.nocheatplus.utilities.ReflectionUtil;
 import org.bukkit.Material;
 import org.bukkit.entity.LivingEntity;
 import org.bukkit.entity.Player;
 import org.bukkit.inventory.ItemStack;
 import org.bukkit.inventory.PlayerInventory;
-
-import fr.neatmonster.nocheatplus.utilities.ReflectionUtil;
 
 
 public class Bridge1_17 {

@@ -14,9 +14,8 @@
  */
 package fr.neatmonster.nocheatplus.components.data;
 
-import org.bukkit.entity.Player;
-
 import fr.neatmonster.nocheatplus.players.IPlayerData;
+import org.bukkit.entity.Player;
 
 /**
  * Player leave (quit / kick): Data storage specific listener for explicit

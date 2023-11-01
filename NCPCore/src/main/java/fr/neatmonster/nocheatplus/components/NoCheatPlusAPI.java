@@ -14,10 +14,6 @@
  */
 package fr.neatmonster.nocheatplus.components;
 
-import java.util.Collection;
-import java.util.Map;
-import java.util.Set;
-
 import fr.neatmonster.nocheatplus.actions.ActionFactoryFactory;
 import fr.neatmonster.nocheatplus.compat.blocks.changetracker.BlockChangeTracker;
 import fr.neatmonster.nocheatplus.components.registry.ComponentRegistry;
@@ -31,6 +27,10 @@ import fr.neatmonster.nocheatplus.players.IPlayerDataManager;
 import fr.neatmonster.nocheatplus.worlds.IWorldDataManager;
 import net.kyori.adventure.platform.bukkit.BukkitAudiences;
 import org.checkerframework.checker.nullness.qual.NonNull;
+
+import java.util.Collection;
+import java.util.Map;
+import java.util.Set;
 
 
 /**

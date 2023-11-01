@@ -14,9 +14,8 @@
  */
 package fr.neatmonster.nocheatplus.penalties;
 
-import org.bukkit.configuration.MemorySection;
-
 import fr.neatmonster.nocheatplus.actions.ActionFactory;
+import org.bukkit.configuration.MemorySection;
 
 /**
  * Get config-dependent IPenaltyFactory instances

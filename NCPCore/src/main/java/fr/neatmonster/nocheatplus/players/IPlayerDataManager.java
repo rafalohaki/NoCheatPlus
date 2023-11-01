@@ -14,14 +14,13 @@
  */
 package fr.neatmonster.nocheatplus.players;
 
-import java.util.UUID;
-
-import org.bukkit.entity.Player;
-
 import fr.neatmonster.nocheatplus.checks.CheckType;
 import fr.neatmonster.nocheatplus.components.registry.ComponentRegistry;
 import fr.neatmonster.nocheatplus.components.registry.factory.IRichFactoryRegistry;
 import fr.neatmonster.nocheatplus.components.registry.feature.IRemoveData;
+import org.bukkit.entity.Player;
+
+import java.util.UUID;
 
 /**
  * Player data specific operations.

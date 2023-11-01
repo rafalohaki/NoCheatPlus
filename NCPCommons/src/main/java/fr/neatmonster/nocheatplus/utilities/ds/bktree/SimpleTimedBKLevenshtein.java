@@ -14,11 +14,10 @@
  */
 package fr.neatmonster.nocheatplus.utilities.ds.bktree;
 
-import java.util.Collection;
-
-import fr.neatmonster.nocheatplus.utilities.ds.bktree.BKModTree.LookupEntry;
 import fr.neatmonster.nocheatplus.utilities.ds.bktree.SimpleTimedBKLevenshtein.STBKLResult;
 import fr.neatmonster.nocheatplus.utilities.ds.bktree.TimedBKLevenshtein.SimpleTimedLevenNode;
+
+import java.util.Collection;
 
 public class SimpleTimedBKLevenshtein extends TimedBKLevenshtein<SimpleTimedLevenNode, STBKLResult> {
 

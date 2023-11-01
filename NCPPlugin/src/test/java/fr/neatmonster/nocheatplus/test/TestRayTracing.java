@@ -14,18 +14,17 @@
  */
 package fr.neatmonster.nocheatplus.test;
 
-import static org.junit.jupiter.api.Assertions.fail;
-
-import java.util.Random;
-
-import org.bukkit.Location;
-import org.bukkit.util.Vector;
-import org.junit.jupiter.api.Test;
-
 import fr.neatmonster.nocheatplus.utilities.StringUtil;
 import fr.neatmonster.nocheatplus.utilities.build.BuildParameters;
 import fr.neatmonster.nocheatplus.utilities.collision.RayTracing;
 import fr.neatmonster.nocheatplus.utilities.location.TrigUtil;
+import org.junit.jupiter.api.Test;
+import org.bukkit.Location;
+import org.bukkit.util.Vector;
+
+import java.util.Random;
+
+import static org.junit.jupiter.api.Assertions.fail;
 
 public class TestRayTracing {
 

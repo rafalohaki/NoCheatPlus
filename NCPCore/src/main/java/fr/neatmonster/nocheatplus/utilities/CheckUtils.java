@@ -14,13 +14,6 @@
  */
 package fr.neatmonster.nocheatplus.utilities;
 
-import java.util.Arrays;
-import java.util.Random;
-import java.util.logging.Level;
-
-import org.bukkit.Bukkit;
-import org.bukkit.entity.Player;
-
 import fr.neatmonster.nocheatplus.NCPAPIProvider;
 import fr.neatmonster.nocheatplus.checks.CheckType;
 import fr.neatmonster.nocheatplus.checks.blockbreak.BlockBreakData;
@@ -32,6 +25,12 @@ import fr.neatmonster.nocheatplus.components.concurrent.IPrimaryThreadContextTes
 import fr.neatmonster.nocheatplus.logging.StaticLog;
 import fr.neatmonster.nocheatplus.logging.Streams;
 import fr.neatmonster.nocheatplus.players.IPlayerData;
+import org.bukkit.Bukkit;
+import org.bukkit.entity.Player;
+
+import java.util.Arrays;
+import java.util.Random;
+import java.util.logging.Level;
 
 
 /**

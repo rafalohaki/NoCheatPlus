@@ -14,6 +14,14 @@
  */
 package fr.neatmonster.nocheatplus.components.registry.store;
 
+import fr.neatmonster.nocheatplus.components.registry.exception.AlreadyRegisteredException;
+import fr.neatmonster.nocheatplus.components.registry.order.IGetRegistrationOrder;
+import fr.neatmonster.nocheatplus.components.registry.order.IRegisterWithOrder;
+import fr.neatmonster.nocheatplus.components.registry.order.RegistrationOrder;
+import fr.neatmonster.nocheatplus.components.registry.order.RegistrationOrder.AbstractRegistrationOrderSort;
+import fr.neatmonster.nocheatplus.components.registry.order.RegistrationOrder.RegisterWithOrder;
+import fr.neatmonster.nocheatplus.components.registry.order.SetupOrder;
+
 import java.util.ArrayList;
 import java.util.Collection;
 import java.util.Collections;
@@ -24,14 +32,6 @@ import java.util.LinkedList;
 import java.util.List;
 import java.util.Map;
 import java.util.Set;
-
-import fr.neatmonster.nocheatplus.components.registry.exception.AlreadyRegisteredException;
-import fr.neatmonster.nocheatplus.components.registry.order.IGetRegistrationOrder;
-import fr.neatmonster.nocheatplus.components.registry.order.IRegisterWithOrder;
-import fr.neatmonster.nocheatplus.components.registry.order.RegistrationOrder;
-import fr.neatmonster.nocheatplus.components.registry.order.RegistrationOrder.AbstractRegistrationOrderSort;
-import fr.neatmonster.nocheatplus.components.registry.order.RegistrationOrder.RegisterWithOrder;
-import fr.neatmonster.nocheatplus.components.registry.order.SetupOrder;
 
 /**
  * Keep sorted arrays of registered (generic) items by type (support

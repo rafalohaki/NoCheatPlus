@@ -14,17 +14,16 @@
  */
 package fr.neatmonster.nocheatplus.players;
 
-import java.util.Map;
-import java.util.UUID;
-
-import java.util.concurrent.ConcurrentHashMap;
-import java.util.logging.Level;
-import org.bukkit.Bukkit;
-import org.bukkit.entity.Player;
-
 import fr.neatmonster.nocheatplus.compat.BridgeMisc;
 import fr.neatmonster.nocheatplus.logging.StaticLog;
 import fr.neatmonster.nocheatplus.utilities.ReflectionUtil;
+import org.bukkit.Bukkit;
+import org.bukkit.entity.Player;
+
+import java.util.Map;
+import java.util.UUID;
+import java.util.concurrent.ConcurrentHashMap;
+import java.util.logging.Level;
 
 /**
  * Map (online) players in various ways. Fall back to Bukkit methods if not

@@ -14,17 +14,16 @@
  */
 package fr.neatmonster.nocheatplus.test;
 
-import static org.junit.jupiter.api.Assertions.fail;
-
-import org.bukkit.Material;
-import org.junit.jupiter.api.Test;
-
 import fr.neatmonster.nocheatplus.compat.BridgeMaterial;
 import fr.neatmonster.nocheatplus.config.ConfPaths;
 import fr.neatmonster.nocheatplus.config.ConfigFile;
 import fr.neatmonster.nocheatplus.config.PathUtils;
 import fr.neatmonster.nocheatplus.config.RawConfigFile;
 import fr.neatmonster.nocheatplus.logging.StaticLog;
+import org.junit.jupiter.api.Test;
+import org.bukkit.Material;
+
+import static org.junit.jupiter.api.Assertions.fail;
 
 public class TestConfig {
 

@@ -14,13 +14,6 @@
  */
 package fr.neatmonster.nocheatplus.components.registry;
 
-import java.util.Iterator;
-import java.util.LinkedList;
-import java.util.List;
-import java.util.Map.Entry;
-import java.util.concurrent.locks.Lock;
-import java.util.concurrent.locks.ReentrantLock;
-
 import fr.neatmonster.nocheatplus.components.registry.event.GenericInstanceHandle.ReferenceCountHandle;
 import fr.neatmonster.nocheatplus.components.registry.event.IGenericInstanceHandle;
 import fr.neatmonster.nocheatplus.components.registry.event.IGenericInstanceRegistryListener;
@@ -29,6 +22,13 @@ import fr.neatmonster.nocheatplus.components.registry.exception.RegistrationLock
 import fr.neatmonster.nocheatplus.logging.details.IGetStreamId;
 import fr.neatmonster.nocheatplus.logging.details.ILogString;
 import fr.neatmonster.nocheatplus.utilities.ds.map.HashMapLOW;
+
+import java.util.Iterator;
+import java.util.LinkedList;
+import java.util.List;
+import java.util.Map.Entry;
+import java.util.concurrent.locks.Lock;
+import java.util.concurrent.locks.ReentrantLock;
 
 /**
  * Default/simple implementation. Handles are kept forever once fetched, for

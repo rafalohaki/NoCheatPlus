@@ -14,15 +14,14 @@
  */
 package fr.neatmonster.nocheatplus.permissions;
 
+import fr.neatmonster.nocheatplus.utilities.StringUtil;
+import org.bukkit.configuration.ConfigurationSection;
+
 import java.util.HashMap;
 import java.util.LinkedHashMap;
 import java.util.LinkedList;
 import java.util.List;
 import java.util.Map;
-
-import org.bukkit.configuration.ConfigurationSection;
-
-import fr.neatmonster.nocheatplus.utilities.StringUtil;
 
 /**
  * Configuration interface. PermissionPolicy instances can be fetched based on

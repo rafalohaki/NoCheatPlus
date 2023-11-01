@@ -14,9 +14,8 @@
  */
 package fr.neatmonster.nocheatplus.penalties.fight;
 
-import org.bukkit.event.entity.EntityDamageByEntityEvent;
-
 import fr.neatmonster.nocheatplus.penalties.AbstractPenalty;
+import org.bukkit.event.entity.EntityDamageByEntityEvent;
 
 /**
  * Specifically target damage done by entities to entities.

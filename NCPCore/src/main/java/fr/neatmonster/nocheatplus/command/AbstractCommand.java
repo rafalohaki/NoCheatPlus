@@ -15,14 +15,8 @@
 package fr.neatmonster.nocheatplus.command;
 
 
-import java.util.Collections;
-import java.util.LinkedHashMap;
-import java.util.LinkedHashSet;
-import java.util.LinkedList;
-import java.util.List;
-import java.util.Map;
-import java.util.Set;
-
+import fr.neatmonster.nocheatplus.permissions.RegisteredPermission;
+import org.jetbrains.annotations.NotNull;
 import org.bukkit.ChatColor;
 import org.bukkit.command.Command;
 import org.bukkit.command.CommandSender;
@@ -30,8 +24,13 @@ import org.bukkit.command.ConsoleCommandSender;
 import org.bukkit.command.TabExecutor;
 import org.bukkit.entity.Player;
 
-import fr.neatmonster.nocheatplus.permissions.RegisteredPermission;
-import org.jetbrains.annotations.NotNull;
+import java.util.Collections;
+import java.util.LinkedHashMap;
+import java.util.LinkedHashSet;
+import java.util.LinkedList;
+import java.util.List;
+import java.util.Map;
+import java.util.Set;
 
 /**
  * Base command class, featuring some features.<br>

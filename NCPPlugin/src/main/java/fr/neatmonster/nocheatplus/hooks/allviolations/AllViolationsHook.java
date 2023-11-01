@@ -14,13 +14,6 @@
  */
 package fr.neatmonster.nocheatplus.hooks.allviolations;
 
-import java.util.Arrays;
-import java.util.Collection;
-import java.util.LinkedHashSet;
-
-import org.bukkit.ChatColor;
-import org.bukkit.entity.Player;
-
 import fr.neatmonster.nocheatplus.NCPAPIProvider;
 import fr.neatmonster.nocheatplus.actions.ParameterName;
 import fr.neatmonster.nocheatplus.checks.CheckType;
@@ -34,6 +27,12 @@ import fr.neatmonster.nocheatplus.logging.Streams;
 import fr.neatmonster.nocheatplus.players.DataManager;
 import fr.neatmonster.nocheatplus.players.IPlayerData;
 import fr.neatmonster.nocheatplus.utilities.StringUtil;
+import org.bukkit.ChatColor;
+import org.bukkit.entity.Player;
+
+import java.util.Arrays;
+import java.util.Collection;
+import java.util.LinkedHashSet;
 
 /**
  * Default hook for logging all violations in a generic way. This will not log

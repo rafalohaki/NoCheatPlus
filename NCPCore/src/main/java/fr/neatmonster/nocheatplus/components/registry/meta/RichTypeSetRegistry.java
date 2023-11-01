@@ -14,13 +14,13 @@
  */
 package fr.neatmonster.nocheatplus.components.registry.meta;
 
+import fr.neatmonster.nocheatplus.checks.CheckType;
+import fr.neatmonster.nocheatplus.utilities.ds.map.HashMapLOW;
+
 import java.util.Collection;
 import java.util.Collections;
 import java.util.Map.Entry;
 import java.util.concurrent.locks.Lock;
-
-import fr.neatmonster.nocheatplus.checks.CheckType;
-import fr.neatmonster.nocheatplus.utilities.ds.map.HashMapLOW;
 
 public class RichTypeSetRegistry implements IRichTypeSetRegistry {
 

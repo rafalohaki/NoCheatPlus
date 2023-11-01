@@ -14,15 +14,14 @@
  */
 package fr.neatmonster.nocheatplus.compat.cbreflect.reflect;
 
-import java.lang.reflect.Field;
-import java.lang.reflect.Method;
-import java.util.UUID;
-
-import org.bukkit.entity.Player;
-
 import fr.neatmonster.nocheatplus.compat.AttribUtil;
 import fr.neatmonster.nocheatplus.components.modifier.IAttributeAccess;
 import fr.neatmonster.nocheatplus.utilities.ReflectionUtil;
+import org.bukkit.entity.Player;
+
+import java.lang.reflect.Field;
+import java.lang.reflect.Method;
+import java.util.UUID;
 
 public class ReflectAttributeAccess implements IAttributeAccess {
 

@@ -14,6 +14,10 @@
  */
 package fr.neatmonster.nocheatplus.components.data.checktype;
 
+import fr.neatmonster.nocheatplus.checks.CheckType;
+import fr.neatmonster.nocheatplus.components.data.checktype.CheckTypeTree.CheckTypeTreeNode;
+import fr.neatmonster.nocheatplus.utilities.CheckTypeUtil;
+
 import java.util.ArrayList;
 import java.util.Collections;
 import java.util.LinkedHashMap;
@@ -21,10 +25,6 @@ import java.util.LinkedList;
 import java.util.List;
 import java.util.Map;
 import java.util.Set;
-
-import fr.neatmonster.nocheatplus.checks.CheckType;
-import fr.neatmonster.nocheatplus.components.data.checktype.CheckTypeTree.CheckTypeTreeNode;
-import fr.neatmonster.nocheatplus.utilities.CheckTypeUtil;
 
 /**
  * Swift sketch of a tree structure, meant to span all check types, holding
