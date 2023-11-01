@@ -14,7 +14,7 @@
  */
 package fr.neatmonster.nocheatplus.logging.details;
 
-import java.util.logging.Level;
+import org.apache.logging.log4j.Level;
 
 /**
  * A log message to be executed within a task from a queue, hiding the generics.

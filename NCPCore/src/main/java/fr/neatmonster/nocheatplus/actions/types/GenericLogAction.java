@@ -27,10 +27,10 @@ import fr.neatmonster.nocheatplus.logging.StreamID;
 import fr.neatmonster.nocheatplus.permissions.RegisteredPermission;
 import fr.neatmonster.nocheatplus.players.DataManager;
 import fr.neatmonster.nocheatplus.utilities.ColorUtil;
+import org.apache.logging.log4j.Level;
 
 import java.util.ArrayList;
 import java.util.List;
-import java.util.logging.Level;
 
 /**
  * Generic log action, capable of logging to any stream of LogManager with any

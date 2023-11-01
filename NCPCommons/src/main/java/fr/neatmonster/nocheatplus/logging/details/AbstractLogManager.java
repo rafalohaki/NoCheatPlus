@@ -18,13 +18,13 @@ import fr.neatmonster.nocheatplus.logging.LogManager;
 import fr.neatmonster.nocheatplus.logging.LoggerID;
 import fr.neatmonster.nocheatplus.logging.StreamID;
 import fr.neatmonster.nocheatplus.utilities.StringUtil;
+import org.apache.logging.log4j.Level;
+import org.apache.logging.log4j.Logger;
 
 import java.io.File;
 import java.util.HashMap;
 import java.util.IdentityHashMap;
 import java.util.Map;
-import java.util.logging.Level;
-import java.util.logging.Logger;
 
 /**
  * Central access point for logging. Abstract class providing basic registration functionality.
@@ -159,7 +159,7 @@ public abstract class AbstractLogManager implements LogManager {
 
     @Override
     public void debug(final StreamID streamID, final String message) {
-        log(streamID, Level.FINE, message); // TODO: Not sure what happens with FINE and provided Logger instances.
+        log(streamID, Level.DEBUG, message); // TODO: Not sure what happens with FINE and provided Logger instances.
     }
 
     @Override
@@ -169,12 +169,12 @@ public abstract class AbstractLogManager implements LogManager {
 
     @Override
     public void warning(final StreamID streamID, final String message) {
-        log(streamID, Level.WARNING, message);
+        log(streamID, Level.WARN, message);
     }
 
     @Override
     public void severe(final StreamID streamID, final String message) {
-        log(streamID, Level.SEVERE, message);
+        log(streamID, Level.FATAL, message);
     }
 
     @Override
@@ -199,7 +199,7 @@ public abstract class AbstractLogManager implements LogManager {
 
     @Override
     public void debug(final StreamID streamID, final Throwable t) {
-        log(streamID, Level.FINE, t); // TODO: Not sure what happens with FINE and provided Logger instances.
+        log(streamID, Level.DEBUG, t); // TODO: Not sure what happens with FINE and provided Logger instances.
     }
 
     @Override
@@ -209,12 +209,12 @@ public abstract class AbstractLogManager implements LogManager {
 
     @Override
     public void warning(final StreamID streamID, final Throwable t) {
-        log(streamID, Level.WARNING, t);
+        log(streamID, Level.WARN, t);
     }
 
     @Override
     public void severe(final StreamID streamID, final Throwable t) {
-        log(streamID, Level.SEVERE, t);
+        log(streamID, Level.FATAL, t);
     }
 
     @Override

@@ -23,10 +23,9 @@ import fr.neatmonster.nocheatplus.config.ConfigManager;
 import fr.neatmonster.nocheatplus.logging.StaticLog;
 import fr.neatmonster.nocheatplus.utilities.CheckUtils;
 import fr.neatmonster.nocheatplus.utilities.StringUtil;
+import org.apache.logging.log4j.Level;
 import org.bukkit.Bukkit;
 import org.bukkit.plugin.Plugin;
-
-import java.util.logging.Level;
 
 /**
  * Execute a command by imitating an administrator typing the command directly into the console.
@@ -70,7 +69,7 @@ public class CommandAction<D extends ParameterHolder, L extends AbstractActionLi
                 }
             }
             catch (final Exception e) {
-                StaticLog.logOnce(Level.WARNING, "Failed to execute the command '" + command + "': " + e.getMessage()
+                StaticLog.logOnce(Level.WARN, "Failed to execute the command '" + command + "': " + e.getMessage()
                 + ", please check if everything is setup correct.", StringUtil.throwableToString(e));
             }
         });

@@ -21,13 +21,13 @@ import fr.neatmonster.nocheatplus.components.registry.order.RegistrationOrder.Ab
 import fr.neatmonster.nocheatplus.logging.StaticLog;
 import fr.neatmonster.nocheatplus.logging.Streams;
 import fr.neatmonster.nocheatplus.utilities.StringUtil;
+import org.apache.logging.log4j.Level;
 
 import java.util.ArrayList;
 import java.util.HashSet;
 import java.util.Iterator;
 import java.util.List;
 import java.util.Set;
-import java.util.logging.Level;
 
 /**
  * Hold MiniListener instances - sort by RegistrationOrder - allow thread-safe
@@ -190,7 +190,7 @@ public class MiniListenerNode<E, P> {
             cause = t.getCause();
         }
         // TODO: Add id information to compare to registry log (later).
-        StaticLog.logOnce(Streams.STATUS, Level.SEVERE, 
+        StaticLog.logOnce(Streams.STATUS, Level.FATAL,
                 "Listener exception: baseType=" + baseType.getName() 
                 + " basePriority=" + this.basePriority
                 + " eventType=" + event.getClass().getName(),

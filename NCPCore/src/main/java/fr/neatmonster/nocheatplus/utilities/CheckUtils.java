@@ -25,12 +25,12 @@ import fr.neatmonster.nocheatplus.components.concurrent.IPrimaryThreadContextTes
 import fr.neatmonster.nocheatplus.logging.StaticLog;
 import fr.neatmonster.nocheatplus.logging.Streams;
 import fr.neatmonster.nocheatplus.players.IPlayerData;
+import org.apache.logging.log4j.Level;
 import org.bukkit.Bukkit;
 import org.bukkit.entity.Player;
 
 import java.util.Arrays;
 import java.util.Random;
-import java.util.logging.Level;
 
 
 /**
@@ -52,7 +52,7 @@ public class CheckUtils {
     public static void improperAsynchronousAPIAccess(final CheckType checkType) {
         // TODO: Log once + examine stack (which plugins/things are involved).
         final String trace = Arrays.toString(Thread.currentThread().getStackTrace());
-        StaticLog.logOnce(Streams.STATUS, Level.SEVERE, "Off primary thread processing for " + checkType, trace);
+        StaticLog.logOnce(Streams.STATUS, Level.FATAL, "Off primary thread processing for " + checkType, trace);
     }
 
     /**

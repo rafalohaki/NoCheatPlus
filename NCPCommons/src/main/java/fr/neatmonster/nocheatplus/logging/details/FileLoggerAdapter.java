@@ -14,8 +14,10 @@
  */
 package fr.neatmonster.nocheatplus.logging.details;
 
+import org.apache.logging.log4j.Level;
+import org.apache.logging.log4j.LogManager;
+
 import java.io.File;
-import java.util.logging.Level;
 
 public class FileLoggerAdapter extends FileLogger implements ContentLogger<String> {
 
@@ -46,7 +48,7 @@ public class FileLoggerAdapter extends FileLogger implements ContentLogger<Strin
     @Override
     public void log(Level level, String content) {
         // TODO: Check loggerisInoperable() ?
-        logger.log(level, prefix == null ? content : (prefix + content));
+        LogManager.getLogger(logger).log(level, prefix == null ? content : (prefix + content));
     }
 
 }

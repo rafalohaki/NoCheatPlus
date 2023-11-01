@@ -14,7 +14,7 @@
  */
 package fr.neatmonster.nocheatplus.logging.details;
 
-import java.util.logging.Level;
+import org.apache.logging.log4j.Level;
 
 /**
  * Minimal interface for logging content to.

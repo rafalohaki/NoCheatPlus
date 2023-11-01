@@ -16,8 +16,7 @@ package fr.neatmonster.nocheatplus.actions.types;
 
 import fr.neatmonster.nocheatplus.config.ConfPaths;
 import fr.neatmonster.nocheatplus.logging.Streams;
-
-import java.util.logging.Level;
+import org.apache.logging.log4j.Level;
 
 /**
  * Default log action for standard targets.
