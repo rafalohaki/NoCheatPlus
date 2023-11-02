@@ -158,7 +158,7 @@ public abstract class AbstractCommand<A> implements TabExecutor{
     }
 
     @Override
-    public List<String> onTabComplete(@NotNull CommandSender sender, @NotNull Command command, @NotNull String alias, String[] args)
+    public List<String> onTabComplete(@NotNull CommandSender sender, @NotNull Command command, @NotNull String alias, String @NotNull [] args)
     {
         final Set<String> choices = new LinkedHashSet<>(subCommands.size());
         int len = args.length;

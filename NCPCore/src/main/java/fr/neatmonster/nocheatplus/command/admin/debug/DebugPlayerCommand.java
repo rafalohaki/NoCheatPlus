@@ -37,6 +37,7 @@ import fr.neatmonster.nocheatplus.players.DataManager;
 import fr.neatmonster.nocheatplus.players.IPlayerData;
 import fr.neatmonster.nocheatplus.utilities.IdUtil;
 import fr.neatmonster.nocheatplus.utilities.StringUtil;
+import org.jetbrains.annotations.NotNull;
 
 public class DebugPlayerCommand extends BaseCommand {
 
@@ -80,7 +81,7 @@ public class DebugPlayerCommand extends BaseCommand {
     }
 
     @Override
-    public List<String> onTabComplete(CommandSender sender, Command command, String alias, String[] args) {
+    public List<String> onTabComplete(@NotNull CommandSender sender, @NotNull Command command, @NotNull String alias, String @NotNull [] args) {
         if (args.length == 4) {
             String[] parts = args[3].split(":");
             if (parts.length == 1) {
@@ -98,7 +99,7 @@ public class DebugPlayerCommand extends BaseCommand {
     }
 
     @Override
-    public boolean onCommand(CommandSender sender, Command command, String alias, String[] args) {
+    public boolean onCommand(@NotNull CommandSender sender, @NotNull Command command, @NotNull String alias, String[] args) {
 
         final String c1, c2, c3, c4, c5, c6, c7;
         if (sender instanceof Player) {

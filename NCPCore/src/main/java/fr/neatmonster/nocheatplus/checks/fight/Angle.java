@@ -29,7 +29,6 @@ import fr.neatmonster.nocheatplus.checks.CheckType;
 import fr.neatmonster.nocheatplus.checks.ViolationData;
 import fr.neatmonster.nocheatplus.permissions.Permissions;
 import fr.neatmonster.nocheatplus.players.IPlayerData;
-import fr.neatmonster.nocheatplus.players.PlayerData;
 import fr.neatmonster.nocheatplus.utilities.StringUtil;
 import fr.neatmonster.nocheatplus.utilities.TickTask;
 import fr.neatmonster.nocheatplus.utilities.location.TrigUtil;
@@ -137,7 +136,7 @@ public class Angle extends Check {
             }
             deltaMove += refLoc.distSqLast;
             final double yawDiff = Math.abs(refLoc.yawDiffLast);
-            deltaYaw += yawDiff;
+            deltaYaw += (float) yawDiff;
             deltaTime += refLoc.timeDiff;
             if (refLoc.idDiffLast && yawDiff > 30.0) {
                 // TODO: Configurable sensitivity ? Scale with yawDiff?

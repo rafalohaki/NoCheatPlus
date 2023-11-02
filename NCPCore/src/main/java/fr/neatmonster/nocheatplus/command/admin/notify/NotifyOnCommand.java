@@ -22,6 +22,7 @@ import org.bukkit.plugin.java.JavaPlugin;
 
 import fr.neatmonster.nocheatplus.command.BaseCommand;
 import fr.neatmonster.nocheatplus.players.DataManager;
+import org.jetbrains.annotations.NotNull;
 
 public class NotifyOnCommand extends BaseCommand {
 
@@ -33,7 +34,7 @@ public class NotifyOnCommand extends BaseCommand {
      * @see fr.neatmonster.nocheatplus.command.AbstractCommand#onCommand(org.bukkit.command.CommandSender, org.bukkit.command.Command, java.lang.String, java.lang.String[])
      */
     @Override
-    public boolean onCommand(CommandSender sender, Command command, String alias, String[] args) {
+    public boolean onCommand(@NotNull CommandSender sender, @NotNull Command command, @NotNull String alias, String[] args) {
         if (args.length != 2){
             sender.sendMessage((sender instanceof Player ? TAG : CTAG) + "Not enough arguments. Command usage: /ncp notify on/off.");
             return true;

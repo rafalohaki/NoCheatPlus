@@ -29,6 +29,7 @@ import fr.neatmonster.nocheatplus.command.BaseCommand;
 import fr.neatmonster.nocheatplus.logging.StaticLog;
 import fr.neatmonster.nocheatplus.permissions.Permissions;
 import fr.neatmonster.nocheatplus.players.DataManager;
+import org.jetbrains.annotations.NotNull;
 
 public class DenyLoginCommand extends BaseCommand {
 
@@ -38,7 +39,7 @@ public class DenyLoginCommand extends BaseCommand {
     }
 
     @Override
-    public boolean onCommand(final CommandSender sender, Command command, String label, String[] args) {
+    public boolean onCommand(final @NotNull CommandSender sender, @NotNull Command command, @NotNull String label, String[] args) {
 
         if (sender instanceof Player) {
             sender.sendMessage(TAG + "This command can only be run from the console.");
@@ -85,8 +86,8 @@ public class DenyLoginCommand extends BaseCommand {
      * @see fr.neatmonster.nocheatplus.command.AbstractCommand#onTabComplete(org.bukkit.command.CommandSender, org.bukkit.command.Command, java.lang.String, java.lang.String[])
      */
     @Override
-    public List<String> onTabComplete(CommandSender sender, Command command,
-                                      String alias, String[] args) {
+    public List<String> onTabComplete(@NotNull CommandSender sender, @NotNull Command command,
+                                      @NotNull String alias, String @NotNull [] args) {
         // Complete Players
         if (args.length == 2) {
             List<String> players = Lists.newArrayList();

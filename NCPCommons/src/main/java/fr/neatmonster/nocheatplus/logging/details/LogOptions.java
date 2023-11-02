@@ -25,7 +25,7 @@ public class LogOptions {
      * @author dev1mc
      *
      */
-    public static enum CallContext {
+    public enum CallContext {
         // TODO: Consider making this a general enum for call contexts (API wrappers, player data etc. too?).
         // Primary as long as it exists...
         /** Only execute directly in the primary thread, for other threads use a task to execute within the primary thread. */

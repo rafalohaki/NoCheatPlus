@@ -121,7 +121,6 @@ public final class PlayerMap {
         return getPlayerExact(name);
     }
 
-    @SuppressWarnings("deprecation")
     public Player getPlayerExact(final String name) {
         final PlayerInfo info = nameInfoMap.get(name);
         if (info != null) {

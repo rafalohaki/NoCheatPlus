@@ -24,6 +24,7 @@ import org.bukkit.ChatColor;
 import fr.neatmonster.nocheatplus.command.BaseCommand;
 import fr.neatmonster.nocheatplus.permissions.Permissions;
 import fr.neatmonster.nocheatplus.utilities.StringUtil;
+import org.jetbrains.annotations.NotNull;
 
 /**
  * This command just shows a list of all commands.
@@ -69,7 +70,7 @@ public class CommandsCommand extends BaseCommand {
     }
 
     @Override
-    public boolean onCommand(CommandSender sender, Command command, String label, String[] args) {
+    public boolean onCommand(@NotNull CommandSender sender, @NotNull Command command, @NotNull String label, String[] args) {
         sender.sendMessage(allCommands);
         return true;
     }

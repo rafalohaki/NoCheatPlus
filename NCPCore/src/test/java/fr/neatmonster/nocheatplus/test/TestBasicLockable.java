@@ -61,9 +61,7 @@ public class TestBasicLockable {
     @Test
     public void testFailChangeLockNoSecret() {
         BasicLockable lock = getLocked();
-        IllegalArgumentException exception = assertThrows(IllegalArgumentException.class, () -> {
-            lock.lock(new Object());
-        });
+        IllegalArgumentException exception = assertThrows(IllegalArgumentException.class, () -> lock.lock(new Object()));
     }
 
     /**

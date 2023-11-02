@@ -27,6 +27,7 @@ import fr.neatmonster.nocheatplus.logging.Streams;
 import fr.neatmonster.nocheatplus.utilities.ColorUtil;
 import fr.neatmonster.nocheatplus.utilities.StringUtil;
 import org.apache.logging.log4j.Level;
+import org.jetbrains.annotations.NotNull;
 
 /**
  * Log to any log stream (console only).
@@ -42,7 +43,7 @@ public class StreamCommand extends BaseCommand {
     }
 
     @Override
-    public boolean onCommand(CommandSender sender, Command command, String alias, String[] args) {
+    public boolean onCommand(@NotNull CommandSender sender, @NotNull Command command, @NotNull String alias, String[] args) {
         if (!demandConsoleCommandSender(sender)) {
             return true;
         }

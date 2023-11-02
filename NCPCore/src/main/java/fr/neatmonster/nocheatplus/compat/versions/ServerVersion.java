@@ -14,7 +14,6 @@
  */
 package fr.neatmonster.nocheatplus.compat.versions;
 
-import java.util.Objects;
 import org.bukkit.Bukkit;
 import org.bukkit.Server;
 

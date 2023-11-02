@@ -30,6 +30,7 @@ import fr.neatmonster.nocheatplus.hooks.NCPExemptionManager;
 import fr.neatmonster.nocheatplus.permissions.Permissions;
 import fr.neatmonster.nocheatplus.players.DataManager;
 import fr.neatmonster.nocheatplus.utilities.StringUtil;
+import org.jetbrains.annotations.NotNull;
 
 public class ExemptCommand extends BaseCommand {
 
@@ -38,7 +39,7 @@ public class ExemptCommand extends BaseCommand {
     }
 
     @Override
-    public boolean onCommand(CommandSender sender, Command command, String label, String[] args) {
+    public boolean onCommand(@NotNull CommandSender sender, @NotNull Command command, @NotNull String label, String[] args) {
 
         final String c1, c2, c3, c4, c5, c6, c7;
         if (sender instanceof Player) {
@@ -91,7 +92,7 @@ public class ExemptCommand extends BaseCommand {
     }
 
     @Override
-    public List<String> onTabComplete(CommandSender sender, Command command, String alias, String[] args)
+    public List<String> onTabComplete(@NotNull CommandSender sender, @NotNull Command command, @NotNull String alias, String @NotNull [] args)
     {
         // At least complete CheckType
         if (args.length == 3) {

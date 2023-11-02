@@ -295,7 +295,7 @@ public class BlockProperties {
             boolean notool = tool.materialBase == null || tool.toolType == null || tool.toolType == ToolType.NONE;//|| tool.materialBase == MaterialBase.NONE;
 
             if (notool || !requireCorrectTool) {
-                breakingTimes[0] *= 0.3;
+                breakingTimes[0] *= (long) 0.3;
             }
 
             for (int i = 1; i < 7; i++) {
@@ -496,7 +496,7 @@ public class BlockProperties {
                 final BlockBreakKey other = (BlockBreakKey) obj;
                 // TODO: Some should be equals later.
                 return blockType == other.blockType
-                        && efficiency == other.efficiency // fastest first.
+                        && efficiency.equals(other.efficiency) // fastest first.
                         && toolType == other.toolType
                         && materialBase == other.materialBase;
             }

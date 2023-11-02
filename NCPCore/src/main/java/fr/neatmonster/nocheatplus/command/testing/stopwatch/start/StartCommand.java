@@ -22,6 +22,7 @@ import org.bukkit.entity.Player;
 
 import fr.neatmonster.nocheatplus.command.AbstractCommand;
 import fr.neatmonster.nocheatplus.command.testing.stopwatch.StopWatchRegistry;
+import org.jetbrains.annotations.NotNull;
 
 public class StartCommand extends AbstractCommand<StopWatchRegistry> {
 
@@ -32,7 +33,7 @@ public class StartCommand extends AbstractCommand<StopWatchRegistry> {
     }
 
     @Override
-    public boolean onCommand(CommandSender sender, Command command, String alias, String[] args) {
+    public boolean onCommand(@NotNull CommandSender sender, @NotNull Command command, @NotNull String alias, String[] args) {
         access.setClock((Player) sender, new SimpleStopWatch((Player) sender));
         sender.sendMessage(TAG + "New stopwatch started.");
         return true;

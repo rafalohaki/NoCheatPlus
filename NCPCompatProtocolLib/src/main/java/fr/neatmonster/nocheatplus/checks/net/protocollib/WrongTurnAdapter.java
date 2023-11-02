@@ -14,7 +14,6 @@
  */
 package fr.neatmonster.nocheatplus.checks.net.protocollib;
 
-import java.util.Arrays;
 import java.util.Collections;
 
 import org.bukkit.entity.Player;

@@ -148,7 +148,7 @@ public class TestHashMapLOW {
     }
 
     private void testInPlace(HashMapLOW<String, Integer> map, String key, Integer value) {
-        if (map.get(key) != value) {
+        if (!map.get(key).equals(value)) {
             fail("Overriding a value in-place fails. Got " + map.get(key) + " instead of " + value);
         }
     }
@@ -189,7 +189,7 @@ public class TestHashMapLOW {
     private void testValuesIdentity(HashMapLOW<String, Integer> map, Map<String, Integer> refMap) {
         for (Entry<String, Integer> entry : refMap.entrySet()) {
             // Assume identity of objects.
-            if (map.get(entry.getKey()) != entry.getValue()) {
+            if (!map.get(entry.getKey()).equals(entry.getValue())) {
                 fail("Inconsistent entry: expect " + entry.getValue() + " for key " + entry.getKey() + ", got instead: " + map.get(entry.getKey()));
             }
         }

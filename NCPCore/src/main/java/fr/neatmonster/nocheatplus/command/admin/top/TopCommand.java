@@ -39,6 +39,7 @@ import fr.neatmonster.nocheatplus.compat.Folia;
 import fr.neatmonster.nocheatplus.permissions.Permissions;
 import fr.neatmonster.nocheatplus.utilities.CheckTypeUtil;
 import fr.neatmonster.nocheatplus.utilities.FCFSComparator;
+import org.jetbrains.annotations.NotNull;
 
 public class TopCommand extends BaseCommand{
     
@@ -165,7 +166,7 @@ public class TopCommand extends BaseCommand{
     }
 
     @Override
-    public boolean onCommand(CommandSender sender, Command command, String alias, String[] args) {
+    public boolean onCommand(@NotNull CommandSender sender, @NotNull Command command, @NotNull String alias, String[] args) {
         if (args.length < 2) {
             sender.sendMessage((sender instanceof Player ? TAG : CTAG) + "Bad setup.\nOptional: Specify number of entries to show (once).\nObligatory: Specify check types (multiple possible).\nOptional: Specify what to sort by (multiple possible: -sumvl, -avgvl, -maxvl, -nvl, -name, -time).\nThis is a heavy operation, use with care."); // -check)
             return true;
@@ -220,7 +221,7 @@ public class TopCommand extends BaseCommand{
     }
 
     @Override
-    public List<String> onTabComplete(CommandSender sender, Command command, String alias, String[] args) {
+    public List<String> onTabComplete(@NotNull CommandSender sender, @NotNull Command command, @NotNull String alias, String @NotNull [] args) {
         String arg = args[args.length - 1];
         if (arg.startsWith("-")) {
             while (arg.startsWith("-")) {

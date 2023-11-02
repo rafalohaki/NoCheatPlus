@@ -15,7 +15,6 @@
 package fr.neatmonster.nocheatplus.checks.moving;
 
 import java.util.Collection;
-import java.util.concurrent.Callable;
 
 import org.bukkit.Location;
 import org.bukkit.World;

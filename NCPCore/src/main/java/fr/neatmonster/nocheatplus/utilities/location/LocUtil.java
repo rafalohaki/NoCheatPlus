@@ -370,10 +370,10 @@ public class LocUtil {
             return 0f;
         }
         if (yaw >= 360f) {
-            yaw -= 360f * Math.floor(yaw / 360f);
+            yaw -= (float) (360f * Math.floor(yaw / 360f));
         }
         if (yaw <= -360f) {
-            yaw -= 360f * Math.ceil(yaw / 360f);
+            yaw -= (float) (360f * Math.ceil(yaw / 360f));
         }
         return yaw;
     }

@@ -147,8 +147,8 @@ public class NoCheatPlusCommand extends BaseCommand {
      * java.lang.String, java.lang.String[])
      */
     @Override
-    public boolean onCommand(final CommandSender sender, final Command command, final String commandLabel,
-            final String[] args) {
+    public boolean onCommand(final @NotNull CommandSender sender, final @NotNull Command command, final @NotNull String commandLabel,
+                             final String[] args) {
 
         if (!command.getName().equalsIgnoreCase("nocheatplus")){
             // Not our command, how did it get here?

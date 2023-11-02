@@ -33,6 +33,7 @@ import fr.neatmonster.nocheatplus.logging.Streams;
 import fr.neatmonster.nocheatplus.permissions.Permissions;
 import fr.neatmonster.nocheatplus.players.DataManager;
 import fr.neatmonster.nocheatplus.worlds.WorldDataManager;
+import org.jetbrains.annotations.NotNull;
 
 public class ReloadCommand extends BaseCommand {
 
@@ -45,8 +46,8 @@ public class ReloadCommand extends BaseCommand {
     }
 
     @Override
-    public boolean onCommand(CommandSender sender, Command command, String label,
-            String[] args) {
+    public boolean onCommand(@NotNull CommandSender sender, @NotNull Command command, @NotNull String label,
+                             String[] args) {
         if (args.length != 1) 
             return false;
         handleReloadCommand(sender);

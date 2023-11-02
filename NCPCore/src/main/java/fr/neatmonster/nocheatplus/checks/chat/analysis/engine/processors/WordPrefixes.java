@@ -87,8 +87,8 @@ public class WordPrefixes extends DigestedWords{
 				score += 1f / (float) (depth - i) * (float) (durExpire - age) / (float) durExpire;
 		}
 		if (depth == len){
-			score += 0.2;
-			if (entry.insertion.isEnd) score += 0.2;
+			score += 0.2F;
+			if (entry.insertion.isEnd) score += 0.2F;
 		}
 		if (len != depth) added += len - depth;
 		return score;

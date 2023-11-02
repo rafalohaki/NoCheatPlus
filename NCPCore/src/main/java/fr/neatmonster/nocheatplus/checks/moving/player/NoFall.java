@@ -52,7 +52,6 @@ import fr.neatmonster.nocheatplus.compat.versions.ServerVersion;
 import fr.neatmonster.nocheatplus.players.IPlayerData;
 import fr.neatmonster.nocheatplus.utilities.ReflectionUtil;
 import fr.neatmonster.nocheatplus.utilities.location.PlayerLocation;
-import fr.neatmonster.nocheatplus.utilities.map.BlockProperties;
 import fr.neatmonster.nocheatplus.utilities.map.BlockFlags;
 import fr.neatmonster.nocheatplus.utilities.map.MaterialUtil;
 
@@ -482,7 +481,7 @@ public class NoFall extends Check {
             // Check if to deal damage.
             if (yDiff < 0) {
                 // In this case the player has traveled further: add the difference.
-                data.noFallFallDistance -= yDiff;
+                data.noFallFallDistance -= (float) yDiff;
             }
             touchDown(player, minY, previousSetBackY, data, cc, pData);
         }
@@ -504,7 +503,7 @@ public class NoFall extends Check {
 
         // Add y distance.
         if (!toReset && !toOnGround && yDiff < 0) {
-            data.noFallFallDistance -= yDiff;
+            data.noFallFallDistance -= (float) yDiff;
         }
         else if (cc.noFallAntiCriticals && (toReset || toOnGround || (fromReset || fromOnGround || thisMove.touchedGround) && yDiff >= 0)) {
             final double max = Math.max(data.noFallFallDistance, mcFallDistance);

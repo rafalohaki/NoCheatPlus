@@ -26,6 +26,7 @@ import fr.neatmonster.nocheatplus.command.testing.stopwatch.start.StartCommand;
 import fr.neatmonster.nocheatplus.command.testing.stopwatch.stop.StopCommand;
 import fr.neatmonster.nocheatplus.compat.Folia;
 import fr.neatmonster.nocheatplus.permissions.Permissions;
+import org.jetbrains.annotations.NotNull;
 
 
 /**
@@ -55,7 +56,7 @@ public class StopWatchCommand extends BaseCommand {
     }
 
     @Override
-    public boolean onCommand(CommandSender sender, Command command, String alias, String[] args) {
+    public boolean onCommand(@NotNull CommandSender sender, @NotNull Command command, @NotNull String alias, String[] args) {
         if (!(sender instanceof Player)) {
             // TODO: Implement checking others clocks!
             sender.sendMessage(CTAG + "Stopwatch functionality is only available to players.");

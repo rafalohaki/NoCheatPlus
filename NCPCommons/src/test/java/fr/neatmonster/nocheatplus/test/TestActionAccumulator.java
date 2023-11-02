@@ -51,7 +51,7 @@ public class TestActionAccumulator {
 			if (acc.bucketScore(i) != (float) expect)  fail("Bad value at bucket " + i + ": " + acc.bucketScore(i) + " / " + expect);
 		}
 		if (acc.count() != buckets * capacity) fail("Total count.");
-		if (acc.score() != buckets * capacity * (buckets * capacity + 1) / 2) fail ("Total score.");
+		if (acc.score() != (float) (buckets * capacity * (buckets * capacity + 1)) / 2) fail ("Total score.");
 	}
 	
 	@Test

@@ -166,11 +166,7 @@ public class ExecutionHistory {
      */
     public boolean executeAction(final ViolationData violationData, final Action<ViolationData, ActionList> action, final long time) {
         if (action.executesAlways()) return true;
-        ExecutionHistoryEntry entry = entries.get(action);
-        if (entry == null) {
-            entry = new ExecutionHistoryEntry(60);
-            entries.put(action, entry);
-        }
+        ExecutionHistoryEntry entry = entries.computeIfAbsent(action, k -> new ExecutionHistoryEntry(60));
 
         // Update entry.
         entry.addCounter(time);

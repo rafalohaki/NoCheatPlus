@@ -24,6 +24,7 @@ import fr.neatmonster.nocheatplus.command.BaseCommand;
 import fr.neatmonster.nocheatplus.permissions.Permissions;
 import fr.neatmonster.nocheatplus.utilities.StringUtil;
 import fr.neatmonster.nocheatplus.utilities.TickTask;
+import org.jetbrains.annotations.NotNull;
 
 public class LagCommand extends BaseCommand {
 
@@ -32,7 +33,7 @@ public class LagCommand extends BaseCommand {
     }
 
     @Override
-    public boolean onCommand(CommandSender sender, Command command, String label, String[] args) {
+    public boolean onCommand(@NotNull CommandSender sender, @NotNull Command command, @NotNull String label, String[] args) {
 
         final String cGO, cG, cR, bO;
         if (sender instanceof Player) {

@@ -71,7 +71,7 @@ public class TestActionFrequency {
 		int sig = 1;
 		ActionFrequency freq = new ActionFrequency(10, 100);
 		for (int i = 0; i < 1000; i++){
-			freq.update(i * sig);
+			freq.update((long) i * sig);
 			sig = sig * -1;
 		}
 	}

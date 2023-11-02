@@ -32,6 +32,7 @@ import fr.neatmonster.nocheatplus.command.CommandUtil;
 import fr.neatmonster.nocheatplus.permissions.Permissions;
 import fr.neatmonster.nocheatplus.players.DataManager;
 import fr.neatmonster.nocheatplus.utilities.StringUtil;
+import org.jetbrains.annotations.NotNull;
 
 public class RemovePlayerCommand extends BaseCommand {
 
@@ -43,7 +44,7 @@ public class RemovePlayerCommand extends BaseCommand {
 
     @SuppressWarnings("deprecation")
     @Override
-    public boolean onCommand(CommandSender sender, Command command, String label, String[] args) {
+    public boolean onCommand(@NotNull CommandSender sender, @NotNull Command command, @NotNull String label, String[] args) {
 
         final String c1, c2, c3, c5, c6;
         if (sender instanceof Player) {
@@ -114,7 +115,7 @@ public class RemovePlayerCommand extends BaseCommand {
     }
 
     @Override
-    public List<String> onTabComplete(CommandSender sender, Command command, String alias, String[] args) {
+    public List<String> onTabComplete(@NotNull CommandSender sender, @NotNull Command command, @NotNull String alias, String @NotNull [] args) {
         // Complete Players
         if (args.length == 2) {
             List<String> players = Lists.newArrayList();

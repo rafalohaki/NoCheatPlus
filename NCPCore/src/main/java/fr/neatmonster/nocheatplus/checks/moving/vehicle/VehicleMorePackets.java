@@ -101,7 +101,7 @@ public class VehicleMorePackets extends Check {
             final double seconds = (time - data.vehicleMorePacketsLastTime) / 1000.0;
 
             // For each second, fill the buffer.
-            data.vehicleMorePacketsBuffer += packetsPerTimeframe * seconds;
+            data.vehicleMorePacketsBuffer += (int) (packetsPerTimeframe * seconds);
 
             // If there was a long pause (maybe server lag?), allow buffer to grow up to 100.
             if (seconds > 2) {

@@ -14,7 +14,6 @@
  */
 package fr.neatmonster.nocheatplus.compat.cbreflect;
 
-import java.util.Objects;
 import org.bukkit.Material;
 import org.bukkit.World;
 import org.bukkit.entity.Entity;
@@ -62,7 +61,7 @@ public class MCAccessCBReflect extends MCAccessBukkit {
         }
         // Fall damage / event. TODO: Tests between 1.8 and 1.7.2. How about spigot vs. CB?
         // Assume higher versions to fire an event.
-        dealFallDamageFiresAnEvent = mcVersion != GenericVersion.UNKNOWN_VERSION && GenericVersion.compareVersions(mcVersion, "1.8") >= 0;
+        dealFallDamageFiresAnEvent = !mcVersion.equals(GenericVersion.UNKNOWN_VERSION) && GenericVersion.compareVersions(mcVersion, "1.8") >= 0;
     }
 
     @Override
