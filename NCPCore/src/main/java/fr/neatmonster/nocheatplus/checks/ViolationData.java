@@ -14,6 +14,11 @@
  */
 package fr.neatmonster.nocheatplus.checks;
 
+import java.util.HashMap;
+import java.util.Map;
+
+import org.bukkit.entity.Player;
+
 import fr.neatmonster.nocheatplus.actions.Action;
 import fr.neatmonster.nocheatplus.actions.ActionData;
 import fr.neatmonster.nocheatplus.actions.ActionList;
@@ -27,10 +32,6 @@ import fr.neatmonster.nocheatplus.logging.StreamID;
 import fr.neatmonster.nocheatplus.penalties.DefaultPenaltyList;
 import fr.neatmonster.nocheatplus.penalties.IPenaltyList;
 import fr.neatmonster.nocheatplus.permissions.RegisteredPermission;
-import org.bukkit.entity.Player;
-
-import java.util.HashMap;
-import java.util.Map;
 
 /**
  * Violation specific data, for executing actions.<br>

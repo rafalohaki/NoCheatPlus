@@ -14,12 +14,12 @@
  */
 package fr.neatmonster.nocheatplus.utilities.collision;
 
+import java.util.LinkedList;
+
 import fr.neatmonster.nocheatplus.components.location.BlockPositionGet;
 import fr.neatmonster.nocheatplus.components.location.IAddBlockPosition;
 import fr.neatmonster.nocheatplus.components.location.IContainBlockPosition;
 import fr.neatmonster.nocheatplus.components.location.IGetBlockPosition;
-
-import java.util.LinkedList;
 
 /**
  * A kept-simple container for block positions, meant to provide fast adding and

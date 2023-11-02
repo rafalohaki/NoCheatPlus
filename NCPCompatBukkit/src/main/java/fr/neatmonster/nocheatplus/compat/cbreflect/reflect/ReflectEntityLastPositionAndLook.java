@@ -14,6 +14,10 @@
  */
 package fr.neatmonster.nocheatplus.compat.cbreflect.reflect;
 
+import java.lang.reflect.Field;
+
+import org.bukkit.entity.Entity;
+
 import fr.neatmonster.nocheatplus.NCPAPIProvider;
 import fr.neatmonster.nocheatplus.components.entity.IEntityAccessLastPositionAndLook;
 import fr.neatmonster.nocheatplus.components.location.IGetPositionWithLook;
@@ -21,9 +25,6 @@ import fr.neatmonster.nocheatplus.components.location.ISetPositionWithLook;
 import fr.neatmonster.nocheatplus.logging.Streams;
 import fr.neatmonster.nocheatplus.utilities.ReflectionUtil;
 import fr.neatmonster.nocheatplus.utilities.Validate;
-import org.bukkit.entity.Entity;
-
-import java.lang.reflect.Field;
 
 /**
  * Access last position and look. This must be able to work independently of

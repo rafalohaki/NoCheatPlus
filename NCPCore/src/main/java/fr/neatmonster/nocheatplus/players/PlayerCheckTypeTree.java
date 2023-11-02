@@ -14,6 +14,13 @@
  */
 package fr.neatmonster.nocheatplus.players;
 
+import java.util.Collections;
+import java.util.LinkedList;
+import java.util.List;
+import java.util.concurrent.locks.Lock;
+
+import org.bukkit.Bukkit;
+
 import fr.neatmonster.nocheatplus.checks.CheckType;
 import fr.neatmonster.nocheatplus.compat.AlmostBoolean;
 import fr.neatmonster.nocheatplus.components.config.value.OverrideType;
@@ -25,12 +32,6 @@ import fr.neatmonster.nocheatplus.hooks.ExemptionContext;
 import fr.neatmonster.nocheatplus.players.PlayerCheckTypeTree.PlayerCheckTypeTreeNode;
 import fr.neatmonster.nocheatplus.worlds.IWorldCheckNode;
 import fr.neatmonster.nocheatplus.worlds.IWorldData;
-import org.bukkit.Bukkit;
-
-import java.util.Collections;
-import java.util.LinkedList;
-import java.util.List;
-import java.util.concurrent.locks.Lock;
 
 /**
  * <hr>

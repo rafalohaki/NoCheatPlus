@@ -14,6 +14,14 @@
  */
 package fr.neatmonster.nocheatplus.worlds;
 
+import java.util.Collection;
+import java.util.LinkedHashSet;
+import java.util.LinkedList;
+import java.util.concurrent.locks.Lock;
+import java.util.concurrent.locks.ReentrantLock;
+
+import org.bukkit.World;
+
 import fr.neatmonster.nocheatplus.checks.CheckType;
 import fr.neatmonster.nocheatplus.compat.AlmostBoolean;
 import fr.neatmonster.nocheatplus.components.config.value.AlmostBooleanWithOverride;
@@ -27,13 +35,6 @@ import fr.neatmonster.nocheatplus.components.data.checktype.CheckTypeTree.CheckT
 import fr.neatmonster.nocheatplus.components.registry.factory.IFactoryOneRegistry;
 import fr.neatmonster.nocheatplus.config.ConfigFile;
 import fr.neatmonster.nocheatplus.utilities.ds.map.InstanceMapLOW;
-import org.bukkit.World;
-
-import java.util.Collection;
-import java.util.LinkedHashSet;
-import java.util.LinkedList;
-import java.util.concurrent.locks.Lock;
-import java.util.concurrent.locks.ReentrantLock;
 
 /**
  * Data stored per world.

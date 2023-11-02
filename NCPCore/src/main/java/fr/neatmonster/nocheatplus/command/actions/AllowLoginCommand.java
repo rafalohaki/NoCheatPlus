@@ -15,16 +15,17 @@
 package fr.neatmonster.nocheatplus.command.actions;
 
 import com.google.common.collect.Lists;
-import fr.neatmonster.nocheatplus.NCPAPIProvider;
-import fr.neatmonster.nocheatplus.command.BaseCommand;
-import fr.neatmonster.nocheatplus.permissions.Permissions;
+import java.util.List;
+
 import org.bukkit.Bukkit;
 import org.bukkit.command.Command;
 import org.bukkit.command.CommandSender;
-import org.bukkit.entity.Player;
 import org.bukkit.plugin.java.JavaPlugin;
+import org.bukkit.entity.Player;
 
-import java.util.List;
+import fr.neatmonster.nocheatplus.NCPAPIProvider;
+import fr.neatmonster.nocheatplus.command.BaseCommand;
+import fr.neatmonster.nocheatplus.permissions.Permissions;
 
 public class AllowLoginCommand extends BaseCommand {
 

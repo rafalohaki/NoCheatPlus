@@ -14,14 +14,15 @@
  */
 package fr.neatmonster.nocheatplus.test;
 
-import fr.neatmonster.nocheatplus.utilities.map.BlockFlags;
-import org.junit.jupiter.api.Test;
+import static org.junit.jupiter.api.Assertions.fail;
 
 import java.util.Collection;
 import java.util.HashSet;
 import java.util.Set;
 
-import static org.junit.jupiter.api.Assertions.fail;
+import org.junit.jupiter.api.Test;
+
+import fr.neatmonster.nocheatplus.utilities.map.BlockFlags;
 
 public class TestBlockFlags {
 

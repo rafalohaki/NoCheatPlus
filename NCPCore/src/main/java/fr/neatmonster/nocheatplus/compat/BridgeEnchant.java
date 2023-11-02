@@ -14,11 +14,12 @@
  */
 package fr.neatmonster.nocheatplus.compat;
 
-import fr.neatmonster.nocheatplus.utilities.map.BlockProperties;
 import org.bukkit.enchantments.Enchantment;
 import org.bukkit.entity.Player;
 import org.bukkit.inventory.ItemStack;
 import org.bukkit.inventory.PlayerInventory;
+
+import fr.neatmonster.nocheatplus.utilities.map.BlockProperties;
 
 public final class BridgeEnchant {
 

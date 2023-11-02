@@ -14,19 +14,21 @@
  */
 package fr.neatmonster.nocheatplus.checks.fight;
 
+import java.util.LinkedList;
+import java.util.List;
+
+import org.bukkit.entity.Player;
+
 import fr.neatmonster.nocheatplus.actions.ParameterName;
 import fr.neatmonster.nocheatplus.checks.Check;
 import fr.neatmonster.nocheatplus.checks.CheckType;
-import fr.neatmonster.nocheatplus.checks.ViolationData;
-import fr.neatmonster.nocheatplus.checks.blockinteract.BlockInteractData;
 import fr.neatmonster.nocheatplus.checks.moving.MovingData;
+import fr.neatmonster.nocheatplus.checks.blockinteract.BlockInteractData;
+import fr.neatmonster.nocheatplus.checks.ViolationData;
 import fr.neatmonster.nocheatplus.players.IPlayerData;
-import fr.neatmonster.nocheatplus.utilities.InventoryUtil;
+import fr.neatmonster.nocheatplus.utilities.TickTask;
 import fr.neatmonster.nocheatplus.utilities.StringUtil;
-import org.bukkit.entity.Player;
-
-import java.util.LinkedList;
-import java.util.List;
+import fr.neatmonster.nocheatplus.utilities.InventoryUtil;
 
 /**
  * A check to see if players try to attack entities while performing something else

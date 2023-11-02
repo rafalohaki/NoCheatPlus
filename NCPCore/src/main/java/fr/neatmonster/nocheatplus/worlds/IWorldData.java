@@ -14,12 +14,12 @@
  */
 package fr.neatmonster.nocheatplus.worlds;
 
+import java.util.Collection;
+
 import fr.neatmonster.nocheatplus.checks.CheckType;
 import fr.neatmonster.nocheatplus.components.data.IDataOnRemoveSubCheckData;
 import fr.neatmonster.nocheatplus.components.data.checktype.IConfigDataAccess;
 import fr.neatmonster.nocheatplus.components.registry.IGetGenericInstance;
-
-import java.util.Collection;
 
 /**
  * Public access interface for per-world data.

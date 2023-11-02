@@ -14,9 +14,9 @@
  */
 package fr.neatmonster.nocheatplus.components.registry.meta;
 
-import fr.neatmonster.nocheatplus.checks.CheckType;
-
 import java.util.Collection;
+
+import fr.neatmonster.nocheatplus.checks.CheckType;
 
 /**
  * Combine a general with per check type TypeSetRegistries. TypeSetRegistries

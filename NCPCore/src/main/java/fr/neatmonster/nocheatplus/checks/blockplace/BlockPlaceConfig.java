@@ -14,16 +14,17 @@
  */
 package fr.neatmonster.nocheatplus.checks.blockplace;
 
+import java.util.HashSet;
+import java.util.Set;
+
+import org.bukkit.Material;
+
 import fr.neatmonster.nocheatplus.actions.ActionList;
 import fr.neatmonster.nocheatplus.checks.access.ACheckConfig;
 import fr.neatmonster.nocheatplus.config.ConfPaths;
 import fr.neatmonster.nocheatplus.config.ConfigFile;
 import fr.neatmonster.nocheatplus.permissions.Permissions;
 import fr.neatmonster.nocheatplus.worlds.IWorldData;
-import org.bukkit.Material;
-
-import java.util.HashSet;
-import java.util.Set;
 
 /**
  * Configurations specific for the block place checks. Every world gets one of these assigned to it, or if a world

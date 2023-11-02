@@ -14,11 +14,12 @@
  */
 package fr.neatmonster.nocheatplus.command.admin.log;
 
+import org.bukkit.plugin.java.JavaPlugin;
+
 import fr.neatmonster.nocheatplus.command.BaseCommand;
 import fr.neatmonster.nocheatplus.command.admin.log.counters.CountersCommand;
 import fr.neatmonster.nocheatplus.command.admin.log.stream.StreamCommand;
 import fr.neatmonster.nocheatplus.permissions.Permissions;
-import org.bukkit.plugin.java.JavaPlugin;
 
 public class LogCommand extends BaseCommand{
 

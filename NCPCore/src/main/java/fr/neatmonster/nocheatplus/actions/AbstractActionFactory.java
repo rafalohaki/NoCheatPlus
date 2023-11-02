@@ -14,6 +14,11 @@
  */
 package fr.neatmonster.nocheatplus.actions;
 
+import java.util.ArrayList;
+import java.util.HashMap;
+import java.util.List;
+import java.util.Map;
+
 import fr.neatmonster.nocheatplus.NCPAPIProvider;
 import fr.neatmonster.nocheatplus.actions.AbstractActionList.ActionListFactory;
 import fr.neatmonster.nocheatplus.actions.types.CommandAction;
@@ -21,11 +26,6 @@ import fr.neatmonster.nocheatplus.actions.types.CommandActionWithColor;
 import fr.neatmonster.nocheatplus.actions.types.DummyAction;
 import fr.neatmonster.nocheatplus.logging.StaticLog;
 import fr.neatmonster.nocheatplus.permissions.RegisteredPermission;
-
-import java.util.ArrayList;
-import java.util.HashMap;
-import java.util.List;
-import java.util.Map;
 
 public abstract class AbstractActionFactory <D extends ActionData, L extends AbstractActionList<D, L>>{
 
@@ -72,13 +72,13 @@ public abstract class AbstractActionFactory <D extends ActionData, L extends Abs
         for (String s : definition.split("vl>")) {
             s = s.trim();
 
-            if (s.isEmpty()) {
+            if (s.length() == 0) {
                 first = false;
                 continue;
             }
 
             try {
-                int vl;
+                Integer  vl;
                 String def;
                 if (first) {
                     first = false;
@@ -110,7 +110,7 @@ public abstract class AbstractActionFactory <D extends ActionData, L extends Abs
         final List<Action<D, L>> actions = new ArrayList<>();
 
         for (final String def : definitions) {
-            if (def.isEmpty())
+            if (def.length() == 0)
                 continue;
             try {
                 actions.add(createAction(def));
@@ -120,7 +120,7 @@ public abstract class AbstractActionFactory <D extends ActionData, L extends Abs
             }
         }
 
-        return (Action<D, L>[]) actions.toArray(new Action<?, ?>[0]);
+        return (Action<D, L>[]) actions.toArray(new Action<?, ?>[actions.size()]);
     }
 
     /**

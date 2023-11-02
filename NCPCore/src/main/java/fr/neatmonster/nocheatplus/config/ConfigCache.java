@@ -14,10 +14,10 @@
  */
 package fr.neatmonster.nocheatplus.config;
 
-import fr.neatmonster.nocheatplus.utilities.ds.corw.LinkedHashMapCOW;
-
 import java.util.HashMap;
 import java.util.Map;
+
+import fr.neatmonster.nocheatplus.utilities.ds.corw.LinkedHashMapCOW;
 
 /**
  * Simple cache for configurations, adding some convenience functionality.

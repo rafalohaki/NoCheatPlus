@@ -14,11 +14,12 @@
  */
 package fr.neatmonster.nocheatplus.compat.bukkit.model;
 
-import fr.neatmonster.nocheatplus.utilities.map.BlockCache;
 import org.bukkit.World;
 import org.bukkit.block.Block;
 import org.bukkit.util.BoundingBox;
 import org.bukkit.util.VoxelShape;
+
+import fr.neatmonster.nocheatplus.utilities.map.BlockCache;
 
 public class BukkitFetchableBounds implements BukkitShapeModel {
 

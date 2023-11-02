@@ -14,8 +14,6 @@
  */
 package fr.neatmonster.nocheatplus.utilities.ds.map;
 
-import org.jetbrains.annotations.NotNull;
-
 import java.util.Arrays;
 import java.util.Collection;
 import java.util.Iterator;
@@ -25,6 +23,7 @@ import java.util.NoSuchElementException;
 import java.util.Set;
 import java.util.concurrent.locks.Lock;
 import java.util.concurrent.locks.ReentrantLock;
+import org.jetbrains.annotations.NotNull;
 
 /**
  * Lock on write hash map. Less jumpy than cow, bucket oriented addition, bulk

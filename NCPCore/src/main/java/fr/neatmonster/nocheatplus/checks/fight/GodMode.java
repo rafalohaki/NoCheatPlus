@@ -14,6 +14,9 @@
  */
 package fr.neatmonster.nocheatplus.checks.fight;
 
+import org.bukkit.Bukkit;
+import org.bukkit.entity.Player;
+
 import fr.neatmonster.nocheatplus.NCPAPIProvider;
 import fr.neatmonster.nocheatplus.checks.Check;
 import fr.neatmonster.nocheatplus.checks.CheckType;
@@ -25,8 +28,6 @@ import fr.neatmonster.nocheatplus.components.registry.event.IGenericInstanceHand
 import fr.neatmonster.nocheatplus.players.IPlayerData;
 import fr.neatmonster.nocheatplus.utilities.CheckUtils;
 import fr.neatmonster.nocheatplus.utilities.TickTask;
-import org.bukkit.Bukkit;
-import org.bukkit.entity.Player;
 
 /**
  * The GodMode check will find out if a player tried to stay invulnerable after being hit or after dying.

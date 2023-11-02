@@ -14,9 +14,10 @@
  */
 package fr.neatmonster.nocheatplus.command;
 
-import fr.neatmonster.nocheatplus.permissions.RegisteredPermission;
 import org.bukkit.ChatColor;
 import org.bukkit.plugin.java.JavaPlugin;
+
+import fr.neatmonster.nocheatplus.permissions.RegisteredPermission;
 
 
 /**

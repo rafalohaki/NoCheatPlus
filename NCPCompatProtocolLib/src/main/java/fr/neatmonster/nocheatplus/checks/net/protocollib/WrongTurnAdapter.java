@@ -14,10 +14,17 @@
  */
 package fr.neatmonster.nocheatplus.checks.net.protocollib;
 
+import java.util.Arrays;
+import java.util.Collections;
+
+import org.bukkit.entity.Player;
+import org.bukkit.plugin.Plugin;
+
 import com.comphenix.protocol.PacketType;
 import com.comphenix.protocol.events.ListenerPriority;
 import com.comphenix.protocol.events.PacketEvent;
 import com.comphenix.protocol.reflect.StructureModifier;
+
 import fr.neatmonster.nocheatplus.NCPAPIProvider;
 import fr.neatmonster.nocheatplus.checks.CheckType;
 import fr.neatmonster.nocheatplus.checks.net.NetConfig;
@@ -27,10 +34,6 @@ import fr.neatmonster.nocheatplus.config.ConfPaths;
 import fr.neatmonster.nocheatplus.config.ConfigManager;
 import fr.neatmonster.nocheatplus.players.DataManager;
 import fr.neatmonster.nocheatplus.players.IPlayerData;
-import org.bukkit.entity.Player;
-import org.bukkit.plugin.Plugin;
-
-import java.util.Collections;
 
 public class WrongTurnAdapter extends BaseAdapter {
 

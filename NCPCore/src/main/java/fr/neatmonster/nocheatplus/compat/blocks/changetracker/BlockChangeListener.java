@@ -14,18 +14,11 @@
  */
 package fr.neatmonster.nocheatplus.compat.blocks.changetracker;
 
-import fr.neatmonster.nocheatplus.NCPAPIProvider;
-import fr.neatmonster.nocheatplus.compat.BridgeMaterial;
-import fr.neatmonster.nocheatplus.compat.versions.ServerVersion;
-import fr.neatmonster.nocheatplus.components.NoCheatPlusAPI;
-import fr.neatmonster.nocheatplus.components.registry.order.RegistrationOrder.RegisterMethodWithOrder;
-import fr.neatmonster.nocheatplus.event.mini.MiniListener;
-import fr.neatmonster.nocheatplus.logging.Streams;
-import fr.neatmonster.nocheatplus.utilities.ReflectionUtil;
-import fr.neatmonster.nocheatplus.utilities.map.BlockFlags;
-import fr.neatmonster.nocheatplus.utilities.map.BlockProperties;
-import fr.neatmonster.nocheatplus.utilities.map.BlockProperties.ToolProps;
-import fr.neatmonster.nocheatplus.utilities.map.BlockProperties.ToolType;
+import java.util.ArrayList;
+import java.util.HashMap;
+import java.util.List;
+import java.util.Map;
+
 import org.bukkit.Location;
 import org.bukkit.Material;
 import org.bukkit.block.Block;
@@ -46,10 +39,18 @@ import org.bukkit.material.Directional;
 import org.bukkit.material.Door;
 import org.bukkit.material.MaterialData;
 
-import java.util.ArrayList;
-import java.util.HashMap;
-import java.util.List;
-import java.util.Map;
+import fr.neatmonster.nocheatplus.NCPAPIProvider;
+import fr.neatmonster.nocheatplus.compat.BridgeMaterial;
+import fr.neatmonster.nocheatplus.compat.versions.ServerVersion;
+import fr.neatmonster.nocheatplus.components.NoCheatPlusAPI;
+import fr.neatmonster.nocheatplus.components.registry.order.RegistrationOrder.RegisterMethodWithOrder;
+import fr.neatmonster.nocheatplus.event.mini.MiniListener;
+import fr.neatmonster.nocheatplus.logging.Streams;
+import fr.neatmonster.nocheatplus.utilities.ReflectionUtil;
+import fr.neatmonster.nocheatplus.utilities.map.BlockProperties;
+import fr.neatmonster.nocheatplus.utilities.map.BlockFlags;
+import fr.neatmonster.nocheatplus.utilities.map.BlockProperties.ToolProps;
+import fr.neatmonster.nocheatplus.utilities.map.BlockProperties.ToolType;
 
 
 public class BlockChangeListener implements Listener {

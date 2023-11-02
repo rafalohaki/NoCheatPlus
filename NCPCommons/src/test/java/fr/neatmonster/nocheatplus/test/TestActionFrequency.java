@@ -14,10 +14,11 @@
  */
 package fr.neatmonster.nocheatplus.test;
 
-import fr.neatmonster.nocheatplus.utilities.ds.count.ActionFrequency;
+import static org.junit.jupiter.api.Assertions.*;
+
 import org.junit.jupiter.api.Test;
 
-import static org.junit.jupiter.api.Assertions.fail;
+import fr.neatmonster.nocheatplus.utilities.ds.count.ActionFrequency;
 
 public class TestActionFrequency {
 

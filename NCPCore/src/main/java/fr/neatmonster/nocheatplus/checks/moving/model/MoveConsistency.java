@@ -14,9 +14,10 @@
  */
 package fr.neatmonster.nocheatplus.checks.moving.model;
 
+import org.bukkit.Location;
+
 import fr.neatmonster.nocheatplus.components.location.IGetPosition;
 import fr.neatmonster.nocheatplus.utilities.location.TrigUtil;
-import org.bukkit.Location;
 
 /**
  * Consistency of a Location/thing concerning a move with a from and a to location.

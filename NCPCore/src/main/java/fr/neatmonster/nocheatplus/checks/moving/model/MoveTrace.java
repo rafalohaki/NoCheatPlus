@@ -14,6 +14,7 @@
  */
 package fr.neatmonster.nocheatplus.checks.moving.model;
 
+import java.util.Iterator;
 import java.util.LinkedList;
 import java.util.concurrent.Callable;
 

@@ -14,11 +14,11 @@
  */
 package fr.neatmonster.nocheatplus.checks.chat.analysis.engine;
 
+import java.util.Collection;
+
 import fr.neatmonster.nocheatplus.checks.chat.ChatConfig;
 import fr.neatmonster.nocheatplus.checks.chat.analysis.engine.processors.WordProcessor;
 import fr.neatmonster.nocheatplus.utilities.ds.map.ManagedMap;
-
-import java.util.Collection;
 
 /**
  * Store EnginePlayerData. Expire data on get(String, Chatonfig).

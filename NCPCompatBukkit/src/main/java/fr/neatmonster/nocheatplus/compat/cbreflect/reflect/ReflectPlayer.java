@@ -14,10 +14,10 @@
  */
 package fr.neatmonster.nocheatplus.compat.cbreflect.reflect;
 
-import fr.neatmonster.nocheatplus.utilities.ReflectionUtil;
-
 import java.lang.reflect.Field;
 import java.lang.reflect.Method;
+
+import fr.neatmonster.nocheatplus.utilities.ReflectionUtil;
 
 public class ReflectPlayer extends ReflectLivingEntity {
 

@@ -14,8 +14,9 @@
  */
 package fr.neatmonster.nocheatplus.components.data;
 
-import fr.neatmonster.nocheatplus.components.registry.IGetGenericInstance;
 import org.bukkit.World;
+
+import fr.neatmonster.nocheatplus.components.registry.IGetGenericInstance;
 
 /**
  * World unload: Data storage specific listener for explicit registration with

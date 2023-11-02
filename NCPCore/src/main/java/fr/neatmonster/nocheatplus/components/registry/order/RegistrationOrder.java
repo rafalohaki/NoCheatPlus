@@ -14,8 +14,6 @@
  */
 package fr.neatmonster.nocheatplus.components.registry.order;
 
-import fr.neatmonster.nocheatplus.utilities.ds.map.CoordHash;
-
 import java.lang.annotation.Documented;
 import java.lang.annotation.ElementType;
 import java.lang.annotation.Retention;
@@ -26,6 +24,8 @@ import java.util.Collections;
 import java.util.Comparator;
 import java.util.LinkedList;
 import java.util.List;
+
+import fr.neatmonster.nocheatplus.utilities.ds.map.CoordHash;
 
 /**
  * The order of registration. These objects can't be sorted reliably, due to

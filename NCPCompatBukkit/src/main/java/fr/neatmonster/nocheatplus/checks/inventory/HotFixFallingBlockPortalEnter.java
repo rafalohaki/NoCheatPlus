@@ -14,16 +14,6 @@
  */
 package fr.neatmonster.nocheatplus.checks.inventory;
 
-import fr.neatmonster.nocheatplus.NCPAPIProvider;
-import fr.neatmonster.nocheatplus.compat.BridgeMaterial;
-import fr.neatmonster.nocheatplus.compat.versions.ServerVersion;
-import fr.neatmonster.nocheatplus.logging.Streams;
-import fr.neatmonster.nocheatplus.utilities.ReflectionUtil;
-import fr.neatmonster.nocheatplus.utilities.location.LocUtil;
-import fr.neatmonster.nocheatplus.utilities.map.BlockCache;
-import fr.neatmonster.nocheatplus.utilities.map.BlockProperties;
-import fr.neatmonster.nocheatplus.utilities.map.WrapBlockCache;
-import fr.neatmonster.nocheatplus.worlds.IWorldData;
 import org.bukkit.Location;
 import org.bukkit.Material;
 import org.bukkit.World;
@@ -34,6 +24,17 @@ import org.bukkit.event.EventHandler;
 import org.bukkit.event.EventPriority;
 import org.bukkit.event.Listener;
 import org.bukkit.event.entity.EntityPortalEnterEvent;
+
+import fr.neatmonster.nocheatplus.NCPAPIProvider;
+import fr.neatmonster.nocheatplus.compat.BridgeMaterial;
+import fr.neatmonster.nocheatplus.compat.versions.ServerVersion;
+import fr.neatmonster.nocheatplus.logging.Streams;
+import fr.neatmonster.nocheatplus.utilities.ReflectionUtil;
+import fr.neatmonster.nocheatplus.utilities.location.LocUtil;
+import fr.neatmonster.nocheatplus.utilities.map.BlockCache;
+import fr.neatmonster.nocheatplus.utilities.map.BlockProperties;
+import fr.neatmonster.nocheatplus.utilities.map.WrapBlockCache;
+import fr.neatmonster.nocheatplus.worlds.IWorldData;
 
 /**
  * Hot fix for 1.9 and 1.10 (possibly later?): falling block duplication via end

@@ -60,14 +60,14 @@ public class ResourceUtil {
 				if (r != null){
 					try {
 						r.close();
-					} catch (IOException e2) {
-						e2.printStackTrace();
+					} catch (IOException e1) {
+						e1.printStackTrace();
 					}
 				}
 				return null;
 			}
-		} catch (MalformedURLException e3) {
-			e3.printStackTrace();
+		} catch (MalformedURLException e) {
+			e.printStackTrace();
 		}
 		return null;
 	}

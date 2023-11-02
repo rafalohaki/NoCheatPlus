@@ -14,6 +14,11 @@
  */
 package fr.neatmonster.nocheatplus.players;
 
+import java.util.Collection;
+import java.util.UUID;
+
+import org.bukkit.entity.Player;
+
 import fr.neatmonster.nocheatplus.checks.CheckType;
 import fr.neatmonster.nocheatplus.compat.AlmostBoolean;
 import fr.neatmonster.nocheatplus.components.config.value.OverrideType;
@@ -25,10 +30,6 @@ import fr.neatmonster.nocheatplus.hooks.ExemptionContext;
 import fr.neatmonster.nocheatplus.permissions.RegisteredPermission;
 import fr.neatmonster.nocheatplus.worlds.IWorldData;
 import fr.neatmonster.nocheatplus.worlds.WorldIdentifier;
-import org.bukkit.entity.Player;
-
-import java.util.Collection;
-import java.util.UUID;
 
 public interface IPlayerData extends IData, IBaseDataAccess, IGetGenericInstance {
 

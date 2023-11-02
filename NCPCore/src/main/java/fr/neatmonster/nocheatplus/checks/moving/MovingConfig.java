@@ -14,6 +14,18 @@
  */
 package fr.neatmonster.nocheatplus.checks.moving;
 
+import java.util.Arrays;
+import java.util.HashMap;
+import java.util.HashSet;
+import java.util.List;
+import java.util.Map;
+import java.util.Set;
+
+import org.bukkit.Bukkit;
+import org.bukkit.GameMode;
+import org.bukkit.entity.EntityType;
+import org.bukkit.entity.Player;
+
 import fr.neatmonster.nocheatplus.actions.ActionList;
 import fr.neatmonster.nocheatplus.checks.CheckType;
 import fr.neatmonster.nocheatplus.checks.access.ACheckConfig;
@@ -35,17 +47,6 @@ import fr.neatmonster.nocheatplus.utilities.ColorUtil;
 import fr.neatmonster.nocheatplus.utilities.ds.prefixtree.SimpleCharPrefixTree;
 import fr.neatmonster.nocheatplus.utilities.location.PlayerLocation;
 import fr.neatmonster.nocheatplus.worlds.IWorldData;
-import org.bukkit.Bukkit;
-import org.bukkit.GameMode;
-import org.bukkit.entity.EntityType;
-import org.bukkit.entity.Player;
-
-import java.util.Arrays;
-import java.util.HashMap;
-import java.util.HashSet;
-import java.util.List;
-import java.util.Map;
-import java.util.Set;
 
 /**
  * Configurations specific for the moving checks. Every world gets one of these

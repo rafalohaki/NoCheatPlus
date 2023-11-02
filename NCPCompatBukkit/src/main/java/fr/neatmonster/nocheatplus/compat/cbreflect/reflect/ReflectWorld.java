@@ -14,11 +14,11 @@
  */
 package fr.neatmonster.nocheatplus.compat.cbreflect.reflect;
 
-import fr.neatmonster.nocheatplus.compat.cbreflect.reflect.ReflectHelper.ReflectFailureException;
-import fr.neatmonster.nocheatplus.utilities.ReflectionUtil;
-
 import java.lang.reflect.InvocationTargetException;
 import java.lang.reflect.Method;
+
+import fr.neatmonster.nocheatplus.compat.cbreflect.reflect.ReflectHelper.ReflectFailureException;
+import fr.neatmonster.nocheatplus.utilities.ReflectionUtil;
 
 public class ReflectWorld {
 
@@ -43,8 +43,8 @@ public class ReflectWorld {
             reflectIBlockData = new ReflectIBlockData(base, reflectMaterial);
             nmsClass = Class.forName(base.nmsPackageName + ".World");
         }
-        catch (Throwable e) {
-            e.printStackTrace();
+        catch (Throwable t) {
+            t.printStackTrace();
         }
         this.nmsClass = nmsClass;
         if (reflectIBlockData == null || nmsClass == null) {

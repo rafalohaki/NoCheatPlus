@@ -14,10 +14,10 @@
  */
 package fr.neatmonster.nocheatplus.components.registry.factory;
 
+import java.util.concurrent.locks.Lock;
+
 import fr.neatmonster.nocheatplus.components.concurrent.IPrimaryThreadContextTester;
 import fr.neatmonster.nocheatplus.utilities.ds.map.HashMapLOW;
-
-import java.util.concurrent.locks.Lock;
 
 /**
  * Register IFactoryOne instances for object creation.

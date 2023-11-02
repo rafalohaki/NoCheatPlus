@@ -14,16 +14,17 @@
  */
 package fr.neatmonster.nocheatplus.utilities.map;
 
-import fr.neatmonster.nocheatplus.logging.debug.DebugUtil;
-import fr.neatmonster.nocheatplus.utilities.ds.map.CoordHashMap;
-import fr.neatmonster.nocheatplus.utilities.ds.map.CoordMap;
-import fr.neatmonster.nocheatplus.utilities.ds.map.CoordMap.Entry;
+import java.util.Iterator;
+
 import org.bukkit.Location;
 import org.bukkit.Material;
 import org.bukkit.World;
 import org.bukkit.entity.Entity;
 
-import java.util.Iterator;
+import fr.neatmonster.nocheatplus.logging.debug.DebugUtil;
+import fr.neatmonster.nocheatplus.utilities.ds.map.CoordHashMap;
+import fr.neatmonster.nocheatplus.utilities.ds.map.CoordMap;
+import fr.neatmonster.nocheatplus.utilities.ds.map.CoordMap.Entry;
 
 // TODO: Auto-generated Javadoc
 /**

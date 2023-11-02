@@ -14,8 +14,9 @@
  */
 package fr.neatmonster.nocheatplus.command.testing.stopwatch.start;
 
-import fr.neatmonster.nocheatplus.command.testing.stopwatch.StopWatch;
 import org.bukkit.entity.Player;
+
+import fr.neatmonster.nocheatplus.command.testing.stopwatch.StopWatch;
 
 public class SimpleStopWatch extends StopWatch{
 

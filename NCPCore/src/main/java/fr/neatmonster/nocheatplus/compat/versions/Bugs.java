@@ -14,9 +14,8 @@
  */
 package fr.neatmonster.nocheatplus.compat.versions;
 
-import org.bukkit.Bukkit;
-
 import java.util.Objects;
+import org.bukkit.Bukkit;
 
 /**
  * Feature selection, based on the version.
@@ -37,7 +36,7 @@ public class Bugs {
         pvpKnockBackVelocity = ServerVersion.compareMinecraftVersion("1.8") >= 0;
 
         // First move exploit (classic CraftBukkit or Spigot before 1.7.5). 
-        if (Objects.equals(mcVersion, GenericVersion.UNKNOWN_VERSION)) {
+        if (mcVersion.equals(GenericVersion.UNKNOWN_VERSION)) {
             // Assume something where it's not an issue.
             enforceLocation = false;
         }

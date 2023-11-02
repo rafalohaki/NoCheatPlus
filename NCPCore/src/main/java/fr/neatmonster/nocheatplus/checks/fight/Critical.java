@@ -14,6 +14,13 @@
  */
 package fr.neatmonster.nocheatplus.checks.fight;
 
+import java.util.ArrayList;
+import java.util.List;
+
+import org.bukkit.Location;
+import org.bukkit.entity.Player;
+import org.bukkit.potion.PotionEffectType;
+
 import fr.neatmonster.nocheatplus.NCPAPIProvider;
 import fr.neatmonster.nocheatplus.actions.ParameterName;
 import fr.neatmonster.nocheatplus.checks.Check;
@@ -28,14 +35,8 @@ import fr.neatmonster.nocheatplus.checks.moving.util.MovingUtil;
 import fr.neatmonster.nocheatplus.penalties.IPenaltyList;
 import fr.neatmonster.nocheatplus.players.IPlayerData;
 import fr.neatmonster.nocheatplus.utilities.StringUtil;
-import fr.neatmonster.nocheatplus.utilities.map.BlockFlags;
 import fr.neatmonster.nocheatplus.utilities.map.BlockProperties;
-import org.bukkit.Location;
-import org.bukkit.entity.Player;
-import org.bukkit.potion.PotionEffectType;
-
-import java.util.ArrayList;
-import java.util.List;
+import fr.neatmonster.nocheatplus.utilities.map.BlockFlags;
 
 /**
  * A check used to verify that critical hits done by players are legit.

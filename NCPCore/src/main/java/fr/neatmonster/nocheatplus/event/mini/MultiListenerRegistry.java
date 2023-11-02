@@ -80,8 +80,8 @@ public abstract class MultiListenerRegistry<EB, P> extends MiniListenerRegistry<
             try {
                 method.invoke(listener, event);
             }
-            catch (Throwable e) {
-                onException(event, e);
+            catch (Throwable t) {
+                onException(event, t);
             }
         }
 

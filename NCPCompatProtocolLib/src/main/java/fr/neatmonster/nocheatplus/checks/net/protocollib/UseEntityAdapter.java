@@ -14,11 +14,19 @@
  */
 package fr.neatmonster.nocheatplus.checks.net.protocollib;
 
+import java.lang.reflect.Method;
+import java.util.Arrays;
+import java.util.Collections;
+
+import org.bukkit.entity.Player;
+import org.bukkit.plugin.Plugin;
+
 import com.comphenix.protocol.PacketType;
 import com.comphenix.protocol.events.PacketContainer;
 import com.comphenix.protocol.events.PacketEvent;
 import com.comphenix.protocol.reflect.StructureModifier;
 import com.comphenix.protocol.wrappers.EnumWrappers.EntityUseAction;
+
 import fr.neatmonster.nocheatplus.NCPAPIProvider;
 import fr.neatmonster.nocheatplus.checks.CheckType;
 import fr.neatmonster.nocheatplus.checks.net.AttackFrequency;
@@ -27,11 +35,6 @@ import fr.neatmonster.nocheatplus.checks.net.NetData;
 import fr.neatmonster.nocheatplus.players.DataManager;
 import fr.neatmonster.nocheatplus.players.IPlayerData;
 import fr.neatmonster.nocheatplus.utilities.ReflectionUtil;
-import org.bukkit.entity.Player;
-import org.bukkit.plugin.Plugin;
-
-import java.lang.reflect.Method;
-import java.util.Collections;
 
 public class UseEntityAdapter extends BaseAdapter {
 

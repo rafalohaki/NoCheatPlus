@@ -14,10 +14,11 @@
  */
 package fr.neatmonster.nocheatplus.command.testing.stopwatch.returnmargin;
 
-import fr.neatmonster.nocheatplus.command.testing.stopwatch.LocationBasedStopWatchData;
-import fr.neatmonster.nocheatplus.utilities.location.TrigUtil;
 import org.bukkit.Location;
 import org.bukkit.entity.Player;
+
+import fr.neatmonster.nocheatplus.command.testing.stopwatch.LocationBasedStopWatchData;
+import fr.neatmonster.nocheatplus.utilities.location.TrigUtil;
 
 public class ReturnStopWatch extends LocationBasedStopWatchData{
 

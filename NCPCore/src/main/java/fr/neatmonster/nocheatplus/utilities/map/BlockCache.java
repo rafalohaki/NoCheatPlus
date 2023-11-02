@@ -14,14 +14,15 @@
  */
 package fr.neatmonster.nocheatplus.utilities.map;
 
-import fr.neatmonster.nocheatplus.compat.AlmostBoolean;
-import fr.neatmonster.nocheatplus.utilities.ds.map.CoordHashMap;
-import fr.neatmonster.nocheatplus.utilities.ds.map.CoordMap;
 import org.bukkit.Location;
 import org.bukkit.Material;
 import org.bukkit.World;
 import org.bukkit.block.Block;
 import org.bukkit.entity.Entity;
+
+import fr.neatmonster.nocheatplus.compat.AlmostBoolean;
+import fr.neatmonster.nocheatplus.utilities.ds.map.CoordHashMap;
+import fr.neatmonster.nocheatplus.utilities.ds.map.CoordMap;
 
 /**
  * Access to block properties using caching technique (id, data, bounds).

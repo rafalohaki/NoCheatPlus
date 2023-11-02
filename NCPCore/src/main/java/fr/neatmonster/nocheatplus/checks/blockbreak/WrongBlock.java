@@ -14,6 +14,9 @@
  */
 package fr.neatmonster.nocheatplus.checks.blockbreak;
 
+import org.bukkit.block.Block;
+import org.bukkit.entity.Player;
+
 import fr.neatmonster.nocheatplus.checks.Check;
 import fr.neatmonster.nocheatplus.checks.CheckType;
 import fr.neatmonster.nocheatplus.checks.combined.Improbable;
@@ -21,8 +24,6 @@ import fr.neatmonster.nocheatplus.compat.AlmostBoolean;
 import fr.neatmonster.nocheatplus.permissions.Permissions;
 import fr.neatmonster.nocheatplus.players.IPlayerData;
 import fr.neatmonster.nocheatplus.utilities.location.TrigUtil;
-import org.bukkit.block.Block;
-import org.bukkit.entity.Player;
 
 public class WrongBlock extends Check {
 

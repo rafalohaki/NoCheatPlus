@@ -14,10 +14,11 @@
  */
 package fr.neatmonster.nocheatplus.checks.blockbreak;
 
+import org.bukkit.entity.Player;
+
 import fr.neatmonster.nocheatplus.checks.Check;
 import fr.neatmonster.nocheatplus.checks.CheckType;
 import fr.neatmonster.nocheatplus.players.IPlayerData;
-import org.bukkit.entity.Player;
 
 /**
  * We require that the player moves their arm between block breaks, this is what gets checked here.

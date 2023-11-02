@@ -14,8 +14,9 @@
  */
 package fr.neatmonster.nocheatplus.components.location;
 
-import fr.neatmonster.nocheatplus.utilities.location.LocUtil;
 import org.bukkit.Location;
+
+import fr.neatmonster.nocheatplus.utilities.location.LocUtil;
 
 public class SimplePositionWithLook implements IPositionWithLook {
 

@@ -14,15 +14,16 @@
  */
 package fr.neatmonster.nocheatplus.checks.blockbreak;
 
+import org.bukkit.Material;
+import org.bukkit.block.Block;
+import org.bukkit.inventory.ItemStack;
+
 import fr.neatmonster.nocheatplus.checks.access.ACheckData;
 import fr.neatmonster.nocheatplus.components.data.IDataOnReload;
 import fr.neatmonster.nocheatplus.components.registry.IGetGenericInstance;
 import fr.neatmonster.nocheatplus.stats.Timings;
 import fr.neatmonster.nocheatplus.utilities.ds.count.ActionFrequency;
 import fr.neatmonster.nocheatplus.utilities.map.BlockProperties;
-import org.bukkit.Material;
-import org.bukkit.block.Block;
-import org.bukkit.inventory.ItemStack;
 
 /**
  * Player specific data for the block break checks.

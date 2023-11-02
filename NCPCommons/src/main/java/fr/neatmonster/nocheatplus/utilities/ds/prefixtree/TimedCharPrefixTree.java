@@ -14,11 +14,11 @@
  */
 package fr.neatmonster.nocheatplus.utilities.ds.prefixtree;
 
-import fr.neatmonster.nocheatplus.utilities.ds.prefixtree.TimedCharPrefixTree.TimedCharLookupEntry;
-import fr.neatmonster.nocheatplus.utilities.ds.prefixtree.TimedCharPrefixTree.TimedCharNode;
-
 import java.util.Arrays;
 import java.util.List;
+
+import fr.neatmonster.nocheatplus.utilities.ds.prefixtree.TimedCharPrefixTree.TimedCharLookupEntry;
+import fr.neatmonster.nocheatplus.utilities.ds.prefixtree.TimedCharPrefixTree.TimedCharNode;
 
 public class TimedCharPrefixTree<N extends TimedCharNode<N>, L extends TimedCharLookupEntry<N>> extends CharPrefixTree<N, L> {
 
@@ -102,11 +102,9 @@ public class TimedCharPrefixTree<N extends TimedCharNode<N>, L extends TimedChar
                     if (parent == null) ts = System.currentTimeMillis();
                     else ts = parent.ts;
                     return new SimpleTimedCharNode(ts);
-                }
-                ,
+                },
                 TimedCharLookupEntry::new,
-                access
-        );
+                access);
 	}
 
 }

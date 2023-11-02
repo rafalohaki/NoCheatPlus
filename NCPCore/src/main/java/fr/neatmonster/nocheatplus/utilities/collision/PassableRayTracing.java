@@ -14,14 +14,14 @@
  */
 package fr.neatmonster.nocheatplus.utilities.collision;
 
+import java.util.List;
+import java.util.UUID;
+
 import fr.neatmonster.nocheatplus.compat.blocks.changetracker.BlockChangeReference;
 import fr.neatmonster.nocheatplus.compat.blocks.changetracker.BlockChangeTracker;
 import fr.neatmonster.nocheatplus.utilities.location.PlayerLocation;
 import fr.neatmonster.nocheatplus.utilities.map.BlockCache;
 import fr.neatmonster.nocheatplus.utilities.map.BlockProperties;
-
-import java.util.List;
-import java.util.UUID;
 
 public class PassableRayTracing extends RayTracing implements ICollidePassable {
 

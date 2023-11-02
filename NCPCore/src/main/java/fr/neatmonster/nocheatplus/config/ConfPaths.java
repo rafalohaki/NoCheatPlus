@@ -14,13 +14,13 @@
  */
 package fr.neatmonster.nocheatplus.config;
 
-import fr.neatmonster.nocheatplus.config.PathUtils.ManyMoved;
-import fr.neatmonster.nocheatplus.config.PathUtils.WrapMoved;
-
 import java.util.Arrays;
 import java.util.Collection;
 import java.util.LinkedList;
 import java.util.List;
+
+import fr.neatmonster.nocheatplus.config.PathUtils.ManyMoved;
+import fr.neatmonster.nocheatplus.config.PathUtils.WrapMoved;
 
 /**
  * Paths for the configuration options. Making everything final static prevents accidentally modifying any of these.

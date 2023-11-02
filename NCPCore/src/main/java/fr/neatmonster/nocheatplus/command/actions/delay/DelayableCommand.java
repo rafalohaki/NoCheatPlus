@@ -14,15 +14,16 @@
  */
 package fr.neatmonster.nocheatplus.command.actions.delay;
 
-import fr.neatmonster.nocheatplus.command.BaseCommand;
-import fr.neatmonster.nocheatplus.compat.Folia;
-import fr.neatmonster.nocheatplus.logging.StaticLog;
-import fr.neatmonster.nocheatplus.permissions.RegisteredPermission;
+import java.util.List;
+
 import org.bukkit.command.Command;
 import org.bukkit.command.CommandSender;
 import org.bukkit.plugin.java.JavaPlugin;
 
-import java.util.List;
+import fr.neatmonster.nocheatplus.command.BaseCommand;
+import fr.neatmonster.nocheatplus.compat.Folia;
+import fr.neatmonster.nocheatplus.permissions.RegisteredPermission;
+import fr.neatmonster.nocheatplus.logging.StaticLog;
 
 /**
  * A command that allows to specify a delay for running.

@@ -14,9 +14,10 @@
  */
 package fr.neatmonster.nocheatplus.checks.fight;
 
+import org.bukkit.entity.Player;
+
 import fr.neatmonster.nocheatplus.checks.Check;
 import fr.neatmonster.nocheatplus.checks.CheckType;
-import org.bukkit.entity.Player;
 
 public class SelfHit extends Check {
 

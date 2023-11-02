@@ -14,16 +14,6 @@
  */
 package fr.neatmonster.nocheatplus.utilities;
 
-import fr.neatmonster.nocheatplus.checks.ViolationData;
-import fr.neatmonster.nocheatplus.checks.combined.Improbable;
-import fr.neatmonster.nocheatplus.compat.Folia;
-import fr.neatmonster.nocheatplus.components.registry.feature.TickListener;
-import fr.neatmonster.nocheatplus.logging.StaticLog;
-import fr.neatmonster.nocheatplus.players.DataManager;
-import fr.neatmonster.nocheatplus.utilities.ds.count.ActionFrequency;
-import org.bukkit.entity.Player;
-import org.bukkit.plugin.Plugin;
-
 import java.util.Arrays;
 import java.util.LinkedHashMap;
 import java.util.LinkedHashSet;
@@ -34,6 +24,17 @@ import java.util.Map.Entry;
 import java.util.Set;
 import java.util.UUID;
 import java.util.concurrent.locks.ReentrantLock;
+
+import org.bukkit.entity.Player;
+import org.bukkit.plugin.Plugin;
+
+import fr.neatmonster.nocheatplus.checks.ViolationData;
+import fr.neatmonster.nocheatplus.checks.combined.Improbable;
+import fr.neatmonster.nocheatplus.components.registry.feature.TickListener;
+import fr.neatmonster.nocheatplus.compat.Folia;
+import fr.neatmonster.nocheatplus.logging.StaticLog;
+import fr.neatmonster.nocheatplus.players.DataManager;
+import fr.neatmonster.nocheatplus.utilities.ds.count.ActionFrequency;
 
 // TODO: Auto-generated Javadoc
 /**

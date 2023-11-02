@@ -14,6 +14,16 @@
  */
 package fr.neatmonster.nocheatplus.compat.cbreflect.reflect;
 
+import java.lang.reflect.Field;
+import java.util.LinkedList;
+import java.util.List;
+
+import org.bukkit.Material;
+import org.bukkit.World;
+import org.bukkit.entity.Entity;
+import org.bukkit.entity.LivingEntity;
+import org.bukkit.entity.Player;
+
 import fr.neatmonster.nocheatplus.NCPAPIProvider;
 import fr.neatmonster.nocheatplus.compat.AlmostBoolean;
 import fr.neatmonster.nocheatplus.config.ConfPaths;
@@ -21,15 +31,6 @@ import fr.neatmonster.nocheatplus.config.ConfigManager;
 import fr.neatmonster.nocheatplus.logging.Streams;
 import fr.neatmonster.nocheatplus.utilities.ReflectionUtil;
 import fr.neatmonster.nocheatplus.utilities.StringUtil;
-import org.bukkit.Material;
-import org.bukkit.World;
-import org.bukkit.entity.Entity;
-import org.bukkit.entity.LivingEntity;
-import org.bukkit.entity.Player;
-
-import java.lang.reflect.Field;
-import java.util.LinkedList;
-import java.util.List;
 
 /**
  * More handy high level methods throwing one type of exception.
@@ -85,16 +86,16 @@ public class ReflectHelper {
             try {
                 reflectAxisAlignedBB = new ReflectAxisAlignedBB(reflectBase);
             }
-            catch (NullPointerException e) {
-                e.printStackTrace();
+            catch (NullPointerException ex1) {
+                ex1.printStackTrace();
             }
             this.reflectAxisAlignedBB = reflectAxisAlignedBB;
             ReflectBlockPosition reflectBlockPosition = null;
             try {
                 reflectBlockPosition = new ReflectBlockPosition(this.reflectBase);
             }
-            catch (ClassNotFoundException e) {
-                e.printStackTrace();
+            catch (ClassNotFoundException ex) {
+                ex.printStackTrace();
             }
             this.reflectBlockPosition = reflectBlockPosition;
             this.reflectMaterial = new ReflectMaterial(this.reflectBase);
@@ -104,8 +105,8 @@ public class ReflectHelper {
                 reflectBlockLatest = new ReflectBlock(this.reflectBase, this.reflectBlockPosition,
                         reflectMaterial, reflectWorld);
             }
-            catch (Throwable e) {
-                e.printStackTrace();
+            catch (Throwable t) {
+                t.printStackTrace();
             }
             if (reflectBlockLatest == null) {
                 // More lenient constructor.

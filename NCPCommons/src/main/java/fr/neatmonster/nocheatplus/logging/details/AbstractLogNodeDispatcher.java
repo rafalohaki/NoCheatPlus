@@ -14,10 +14,11 @@
  */
 package fr.neatmonster.nocheatplus.logging.details;
 
+import java.util.List;
+
 import fr.neatmonster.nocheatplus.utilities.ds.corw.IQueueRORA;
 import fr.neatmonster.nocheatplus.utilities.ds.corw.QueueRORA;
 import org.apache.logging.log4j.Level;
-import java.util.List;
 
 /**
  * Basic functionality, with int task ids, assuming a primary thread exists.

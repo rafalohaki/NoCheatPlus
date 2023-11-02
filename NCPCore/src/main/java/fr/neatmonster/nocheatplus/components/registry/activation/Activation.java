@@ -14,16 +14,17 @@
  */
 package fr.neatmonster.nocheatplus.components.registry.activation;
 
+import java.util.LinkedList;
+import java.util.List;
+
+import org.bukkit.Bukkit;
+import org.bukkit.plugin.Plugin;
+
 import fr.neatmonster.nocheatplus.NCPAPIProvider;
 import fr.neatmonster.nocheatplus.compat.versions.GenericVersion;
 import fr.neatmonster.nocheatplus.compat.versions.ServerVersion;
 import fr.neatmonster.nocheatplus.components.NoCheatPlusAPI;
 import fr.neatmonster.nocheatplus.utilities.ReflectionUtil;
-import org.bukkit.Bukkit;
-import org.bukkit.plugin.Plugin;
-
-import java.util.LinkedList;
-import java.util.List;
 
 /**
  * Convenience class for activation conditions for features, meant for

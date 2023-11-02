@@ -14,8 +14,7 @@
  */
 package fr.neatmonster.nocheatplus.test;
 
-import fr.neatmonster.nocheatplus.utilities.ds.map.HashMapLOW;
-import org.junit.jupiter.api.Test;
+import static org.junit.jupiter.api.Assertions.fail;
 
 import java.util.HashMap;
 import java.util.Iterator;
@@ -23,7 +22,9 @@ import java.util.LinkedHashMap;
 import java.util.Map;
 import java.util.Map.Entry;
 
-import static org.junit.jupiter.api.Assertions.fail;
+import org.junit.jupiter.api.Test;
+
+import fr.neatmonster.nocheatplus.utilities.ds.map.HashMapLOW;
 
 /**
  * Tests for HashMapLow.
@@ -222,10 +223,10 @@ public class TestHashMapLOW {
         if (map.size() != refMap.size()) {
             fail("Sizes differ: low=" + map.size() + " ref=" + refMap.size());
         }
-        if (map.isEmpty() && !map.isEmpty()) {
+        if (map.size() == 0 && !map.isEmpty()) {
             fail("Expect isEmpty() on size == 0.");
         }
-        if (!map.isEmpty() && map.isEmpty()) {
+        if (map.size() > 0 && map.isEmpty()) {
             fail("Expect !isEmpty() on size > 0");
         }
         if (map.size() < 0) {

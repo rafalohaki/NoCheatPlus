@@ -14,12 +14,12 @@
  */
 package fr.neatmonster.nocheatplus.actions.types;
 
+import java.util.ArrayList;
+
 import fr.neatmonster.nocheatplus.actions.AbstractActionList;
 import fr.neatmonster.nocheatplus.actions.Action;
 import fr.neatmonster.nocheatplus.actions.ParameterHolder;
 import fr.neatmonster.nocheatplus.actions.ParameterName;
-
-import java.util.ArrayList;
 
 /**
  * Action with parameters is used for the messages (chat, console, log) or the commands.

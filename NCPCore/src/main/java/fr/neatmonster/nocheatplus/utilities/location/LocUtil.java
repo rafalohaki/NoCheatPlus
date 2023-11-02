@@ -14,14 +14,15 @@
  */
 package fr.neatmonster.nocheatplus.utilities.location;
 
+import org.bukkit.Location;
+import org.bukkit.World;
+import org.bukkit.block.Block;
+
 import fr.neatmonster.nocheatplus.components.location.IGetBlockPosition;
 import fr.neatmonster.nocheatplus.components.location.IGetLocationWithLook;
 import fr.neatmonster.nocheatplus.components.location.IGetPosition;
 import fr.neatmonster.nocheatplus.components.location.IGetPositionWithLook;
 import fr.neatmonster.nocheatplus.components.location.ISetPositionWithLook;
-import org.bukkit.Location;
-import org.bukkit.World;
-import org.bukkit.block.Block;
 
 /**
  * Auxiliary methods for Location handling, mainly intended for use with

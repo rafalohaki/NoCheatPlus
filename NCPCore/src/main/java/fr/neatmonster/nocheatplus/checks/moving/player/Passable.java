@@ -14,6 +14,12 @@
  */
 package fr.neatmonster.nocheatplus.checks.moving.player;
 
+import java.util.Arrays;
+import java.util.Locale;
+
+import org.bukkit.Location;
+import org.bukkit.entity.Player;
+
 import fr.neatmonster.nocheatplus.NCPAPIProvider;
 import fr.neatmonster.nocheatplus.actions.ParameterName;
 import fr.neatmonster.nocheatplus.checks.Check;
@@ -30,11 +36,6 @@ import fr.neatmonster.nocheatplus.utilities.location.LocUtil;
 import fr.neatmonster.nocheatplus.utilities.location.PlayerLocation;
 import fr.neatmonster.nocheatplus.utilities.location.TrigUtil;
 import fr.neatmonster.nocheatplus.utilities.map.BlockProperties;
-import org.bukkit.Location;
-import org.bukkit.entity.Player;
-
-import java.util.Arrays;
-import java.util.Locale;
 
 public class Passable extends Check {
 

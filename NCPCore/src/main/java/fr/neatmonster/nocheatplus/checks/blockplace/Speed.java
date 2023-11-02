@@ -14,10 +14,11 @@
  */
 package fr.neatmonster.nocheatplus.checks.blockplace;
 
+import org.bukkit.entity.Player;
+
 import fr.neatmonster.nocheatplus.checks.Check;
 import fr.neatmonster.nocheatplus.checks.CheckType;
 import fr.neatmonster.nocheatplus.players.IPlayerData;
-import org.bukkit.entity.Player;
 
 /**
  * This check verifies if the player isn't throwing items too quickly, like eggs or arrows.

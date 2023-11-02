@@ -14,10 +14,6 @@
  */
 package fr.neatmonster.nocheatplus.workaround;
 
-import fr.neatmonster.nocheatplus.utilities.ds.count.acceptdeny.AcceptDenyCounter;
-import fr.neatmonster.nocheatplus.utilities.ds.count.acceptdeny.IAcceptDenyCounter;
-import fr.neatmonster.nocheatplus.utilities.ds.count.acceptdeny.ICounterWithParent;
-
 import java.util.ArrayList;
 import java.util.Arrays;
 import java.util.Collection;
@@ -27,6 +23,10 @@ import java.util.LinkedHashSet;
 import java.util.List;
 import java.util.Map;
 import java.util.Set;
+
+import fr.neatmonster.nocheatplus.utilities.ds.count.acceptdeny.AcceptDenyCounter;
+import fr.neatmonster.nocheatplus.utilities.ds.count.acceptdeny.IAcceptDenyCounter;
+import fr.neatmonster.nocheatplus.utilities.ds.count.acceptdeny.ICounterWithParent;
 
 /**
  * Simple registry for workarounds. No thread-safety built in.
@@ -75,7 +75,7 @@ public class SimpleWorkaroundRegistry implements IWorkaroundRegistry {
                 throw new IllegalArgumentException("No blueprint for id '" + id + "' in group '" + groupId + "'.");
             }
         }
-        groups.put(groupId, workaroundIds.toArray(new String[0]));
+        groups.put(groupId, workaroundIds.toArray(new String[workaroundIds.size()]));
     }
 
     @Override

@@ -14,9 +14,9 @@
  */
 package fr.neatmonster.nocheatplus.components.entity;
 
-import org.bukkit.entity.Entity;
-
 import java.util.List;
+
+import org.bukkit.entity.Entity;
 
 /**
  * Vehicle specific access to entities.

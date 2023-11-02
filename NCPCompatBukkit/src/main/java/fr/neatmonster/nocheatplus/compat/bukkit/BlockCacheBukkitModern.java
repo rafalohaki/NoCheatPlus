@@ -14,14 +14,15 @@
  */
 package fr.neatmonster.nocheatplus.compat.bukkit;
 
-import fr.neatmonster.nocheatplus.compat.bukkit.model.BukkitShapeModel;
-import fr.neatmonster.nocheatplus.utilities.map.MaterialUtil;
+import java.util.Map;
+
 import org.bukkit.Material;
 import org.bukkit.World;
 import org.bukkit.entity.Entity;
 import org.bukkit.entity.EntityType;
 
-import java.util.Map;
+import fr.neatmonster.nocheatplus.compat.bukkit.model.BukkitShapeModel;
+import fr.neatmonster.nocheatplus.utilities.map.MaterialUtil;
 
 
 /**

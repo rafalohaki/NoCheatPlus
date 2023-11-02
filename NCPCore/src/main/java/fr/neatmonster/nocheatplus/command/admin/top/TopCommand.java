@@ -14,6 +14,22 @@
  */
 package fr.neatmonster.nocheatplus.command.admin.top;
 
+import java.text.DecimalFormat;
+import java.util.Arrays;
+import java.util.Collection;
+import java.util.Comparator;
+import java.util.Iterator;
+import java.util.LinkedHashSet;
+import java.util.List;
+import java.util.Set;
+
+import org.bukkit.ChatColor;
+import org.bukkit.command.Command;
+import org.bukkit.command.CommandSender;
+import org.bukkit.entity.Player;
+import org.bukkit.plugin.Plugin;
+import org.bukkit.plugin.java.JavaPlugin;
+
 import fr.neatmonster.nocheatplus.checks.CheckType;
 import fr.neatmonster.nocheatplus.checks.ViolationHistory;
 import fr.neatmonster.nocheatplus.checks.ViolationHistory.VLView;
@@ -23,21 +39,6 @@ import fr.neatmonster.nocheatplus.compat.Folia;
 import fr.neatmonster.nocheatplus.permissions.Permissions;
 import fr.neatmonster.nocheatplus.utilities.CheckTypeUtil;
 import fr.neatmonster.nocheatplus.utilities.FCFSComparator;
-import org.bukkit.ChatColor;
-import org.bukkit.command.Command;
-import org.bukkit.command.CommandSender;
-import org.bukkit.entity.Player;
-import org.bukkit.plugin.Plugin;
-import org.bukkit.plugin.java.JavaPlugin;
-
-import java.text.DecimalFormat;
-import java.util.Arrays;
-import java.util.Collection;
-import java.util.Comparator;
-import java.util.Iterator;
-import java.util.LinkedHashSet;
-import java.util.List;
-import java.util.Set;
 
 public class TopCommand extends BaseCommand{
     
@@ -193,8 +194,8 @@ public class TopCommand extends BaseCommand{
             CheckType type = null;
             try {
                 type = CheckType.valueOf(args[i].trim().toUpperCase().replace('-', '_').replace('.', '_'));
-            } catch (Throwable e) {
-                e.printStackTrace();
+            } catch (Throwable t) {
+                t.printStackTrace();
             } // ...
             if (type != null) {
                 checkTypes.addAll(CheckTypeUtil.getWithDescendants(type)); // Includes type.

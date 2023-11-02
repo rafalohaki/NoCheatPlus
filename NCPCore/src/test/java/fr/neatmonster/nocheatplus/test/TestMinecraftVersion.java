@@ -14,11 +14,12 @@
  */
 package fr.neatmonster.nocheatplus.test;
 
-import fr.neatmonster.nocheatplus.compat.versions.GenericVersion;
-import fr.neatmonster.nocheatplus.compat.versions.ServerVersion;
+import static org.junit.jupiter.api.Assertions.fail;
+
 import org.junit.jupiter.api.Test;
 
-import static org.junit.jupiter.api.Assertions.fail;
+import fr.neatmonster.nocheatplus.compat.versions.GenericVersion;
+import fr.neatmonster.nocheatplus.compat.versions.ServerVersion;
 
 public class TestMinecraftVersion {
 

@@ -14,12 +14,13 @@
  */
 package fr.neatmonster.nocheatplus.compat.bukkit.model;
 
-import fr.neatmonster.nocheatplus.utilities.map.BlockCache;
 import org.bukkit.World;
 import org.bukkit.block.Block;
 import org.bukkit.block.BlockFace;
 import org.bukkit.block.data.BlockData;
 import org.bukkit.block.data.Directional;
+
+import fr.neatmonster.nocheatplus.utilities.map.BlockCache;
 
 public class BukkitHopper implements BukkitShapeModel {
 

@@ -14,10 +14,9 @@
  */
 package fr.neatmonster.nocheatplus.compat;
 
-import fr.neatmonster.nocheatplus.config.ConfPaths;
-import fr.neatmonster.nocheatplus.config.ConfigManager;
-import fr.neatmonster.nocheatplus.logging.StaticLog;
-import fr.neatmonster.nocheatplus.utilities.ReflectionUtil;
+import java.util.HashSet;
+import java.util.Set;
+
 import org.bukkit.entity.Entity;
 import org.bukkit.entity.LivingEntity;
 import org.bukkit.event.entity.EntityDamageEvent;
@@ -25,8 +24,10 @@ import org.bukkit.event.entity.EntityDamageEvent.DamageCause;
 import org.bukkit.event.entity.EntityDamageEvent.DamageModifier;
 import org.bukkit.event.entity.EntityRegainHealthEvent;
 
-import java.util.HashSet;
-import java.util.Set;
+import fr.neatmonster.nocheatplus.config.ConfPaths;
+import fr.neatmonster.nocheatplus.config.ConfigManager;
+import fr.neatmonster.nocheatplus.logging.StaticLog;
+import fr.neatmonster.nocheatplus.utilities.ReflectionUtil;
 
 /**
  * Health/Fight utility class with static access methods to bridge compatibility
@@ -231,7 +232,7 @@ public class BridgeHealth {
             // TODO: Better recalculate modifiers, as this scales them.
             setFinalDamage(event, event.getFinalDamage() * multiplier);
         }
-        catch (Throwable e) {
+        catch (Throwable t) {
             setFinalDamage(event, getRawDamage(event) * multiplier);
         }
     }

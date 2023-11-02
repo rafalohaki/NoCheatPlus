@@ -14,6 +14,14 @@
  */
 package fr.neatmonster.nocheatplus.test;
 
+import static org.junit.jupiter.api.Assertions.fail;
+
+import java.util.Arrays;
+import java.util.LinkedHashMap;
+import java.util.Map;
+
+import org.junit.jupiter.api.Test;
+
 import fr.neatmonster.nocheatplus.NCPAPIProvider;
 import fr.neatmonster.nocheatplus.PluginTests;
 import fr.neatmonster.nocheatplus.checks.CheckType;
@@ -25,13 +33,6 @@ import fr.neatmonster.nocheatplus.config.DefaultConfig;
 import fr.neatmonster.nocheatplus.logging.StaticLog;
 import fr.neatmonster.nocheatplus.worlds.IWorldData;
 import fr.neatmonster.nocheatplus.worlds.WorldDataManager;
-import org.junit.jupiter.api.Test;
-
-import java.util.Arrays;
-import java.util.LinkedHashMap;
-import java.util.Map;
-
-import static org.junit.jupiter.api.Assertions.fail;
 
 public class TestWorldDataManager {
 

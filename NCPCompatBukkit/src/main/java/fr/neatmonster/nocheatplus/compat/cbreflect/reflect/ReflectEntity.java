@@ -14,11 +14,12 @@
  */
 package fr.neatmonster.nocheatplus.compat.cbreflect.reflect;
 
-import fr.neatmonster.nocheatplus.utilities.ReflectionUtil;
-import org.bukkit.entity.Entity;
-
 import java.lang.reflect.Field;
 import java.lang.reflect.Method;
+
+import org.bukkit.entity.Entity;
+
+import fr.neatmonster.nocheatplus.utilities.ReflectionUtil;
 
 /**
  * Reflection for entity.

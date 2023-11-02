@@ -14,11 +14,7 @@
  */
 package fr.neatmonster.nocheatplus.test;
 
-import fr.neatmonster.nocheatplus.components.registry.order.IGetRegistrationOrder;
-import fr.neatmonster.nocheatplus.components.registry.order.RegistrationOrder;
-import fr.neatmonster.nocheatplus.utilities.StringUtil;
-import fr.neatmonster.nocheatplus.utilities.build.BuildParameters;
-import org.junit.jupiter.api.Test;
+import static org.junit.jupiter.api.Assertions.fail;
 
 import java.util.ArrayList;
 import java.util.Collection;
@@ -30,7 +26,12 @@ import java.util.List;
 import java.util.Random;
 import java.util.Set;
 
-import static org.junit.jupiter.api.Assertions.fail;
+import org.junit.jupiter.api.Test;
+
+import fr.neatmonster.nocheatplus.components.registry.order.IGetRegistrationOrder;
+import fr.neatmonster.nocheatplus.components.registry.order.RegistrationOrder;
+import fr.neatmonster.nocheatplus.utilities.StringUtil;
+import fr.neatmonster.nocheatplus.utilities.build.BuildParameters;
 
 public class TestRegistrationOrder {
 

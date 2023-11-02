@@ -16,6 +16,7 @@ package fr.neatmonster.nocheatplus.utilities.ds.prefixtree;
 
 import fr.neatmonster.nocheatplus.utilities.ds.prefixtree.SimpleTimedCharPrefixTree.SimpleTimedCharLookupEntry;
 import fr.neatmonster.nocheatplus.utilities.ds.prefixtree.TimedCharPrefixTree.SimpleTimedCharNode;
+import fr.neatmonster.nocheatplus.utilities.ds.prefixtree.TimedCharPrefixTree.TimedCharLookupEntry;
 
 public class SimpleTimedCharPrefixTree extends TimedCharPrefixTree<SimpleTimedCharNode, SimpleTimedCharLookupEntry> {
 	
@@ -32,8 +33,7 @@ public class SimpleTimedCharPrefixTree extends TimedCharPrefixTree<SimpleTimedCh
                     if (parent == null) ts = System.currentTimeMillis();
                     else ts = parent.ts;
                     return new SimpleTimedCharNode(ts);
-                }
-                ,
+                },
                 SimpleTimedCharLookupEntry::new,
 				access);
 	}

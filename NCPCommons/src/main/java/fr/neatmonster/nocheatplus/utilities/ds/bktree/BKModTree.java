@@ -14,15 +14,15 @@
  */
 package fr.neatmonster.nocheatplus.utilities.ds.bktree;
 
-import fr.neatmonster.nocheatplus.utilities.ds.bktree.BKModTree.LookupEntry;
-import fr.neatmonster.nocheatplus.utilities.ds.bktree.BKModTree.Node;
-
 import java.util.ArrayList;
 import java.util.Collection;
 import java.util.HashMap;
 import java.util.LinkedList;
 import java.util.List;
 import java.util.Map;
+
+import fr.neatmonster.nocheatplus.utilities.ds.bktree.BKModTree.LookupEntry;
+import fr.neatmonster.nocheatplus.utilities.ds.bktree.BKModTree.Node;
 
 /**
  * BK tree for int distances.

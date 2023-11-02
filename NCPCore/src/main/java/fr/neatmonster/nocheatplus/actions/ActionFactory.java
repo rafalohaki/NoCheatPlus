@@ -14,6 +14,8 @@
  */
 package fr.neatmonster.nocheatplus.actions;
 
+import java.util.Map;
+
 import fr.neatmonster.nocheatplus.actions.types.CancelAction;
 import fr.neatmonster.nocheatplus.actions.types.LogAction;
 import fr.neatmonster.nocheatplus.actions.types.PenaltyAction;
@@ -22,8 +24,6 @@ import fr.neatmonster.nocheatplus.logging.StaticLog;
 import fr.neatmonster.nocheatplus.penalties.CancelPenalty;
 import fr.neatmonster.nocheatplus.penalties.PenaltyNode;
 import fr.neatmonster.nocheatplus.utilities.CheckUtils;
-
-import java.util.Map;
 
 /**
  * Helps with creating Actions out of text string definitions.
@@ -56,7 +56,7 @@ public class ActionFactory extends AbstractActionFactory<ViolationData, ActionLi
 
         if (actionDefinition.endsWith("%cancel")) {
             try {
-                double probability = Double.parseDouble(actionDefinition.substring(
+                Double probability = Double.parseDouble(actionDefinition.substring(
                         0, actionDefinition.length() - 7));
                 if (!Double.isInfinite(probability) 
                         && !Double.isNaN(probability) 

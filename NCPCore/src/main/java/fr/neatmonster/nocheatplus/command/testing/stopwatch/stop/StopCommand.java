@@ -14,13 +14,14 @@
  */
 package fr.neatmonster.nocheatplus.command.testing.stopwatch.stop;
 
-import fr.neatmonster.nocheatplus.command.AbstractCommand;
-import fr.neatmonster.nocheatplus.command.testing.stopwatch.StopWatch;
-import fr.neatmonster.nocheatplus.command.testing.stopwatch.StopWatchRegistry;
 import org.bukkit.ChatColor;
 import org.bukkit.command.Command;
 import org.bukkit.command.CommandSender;
 import org.bukkit.entity.Player;
+
+import fr.neatmonster.nocheatplus.command.AbstractCommand;
+import fr.neatmonster.nocheatplus.command.testing.stopwatch.StopWatch;
+import fr.neatmonster.nocheatplus.command.testing.stopwatch.StopWatchRegistry;
 
 public class StopCommand extends AbstractCommand<StopWatchRegistry>{
 

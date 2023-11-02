@@ -14,9 +14,10 @@
  */
 package fr.neatmonster.nocheatplus.components.entity;
 
+import org.bukkit.entity.Entity;
+
 import fr.neatmonster.nocheatplus.components.location.IGetPositionWithLook;
 import fr.neatmonster.nocheatplus.components.location.ISetPositionWithLook;
-import org.bukkit.entity.Entity;
 
 /**
  * Retrieve last position and look for a Bukkit Entity instance.

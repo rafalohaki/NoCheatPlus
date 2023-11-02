@@ -14,21 +14,24 @@
  */
 package fr.neatmonster.nocheatplus.checks.net.protocollib;
 
+import java.util.Arrays;
+import java.util.Collections;
+import java.util.LinkedList;
+import java.util.List;
+
+import org.bukkit.entity.Player;
+import org.bukkit.plugin.Plugin;
+
 import com.comphenix.protocol.PacketType;
 import com.comphenix.protocol.events.ListenerPriority;
 import com.comphenix.protocol.events.PacketContainer;
 import com.comphenix.protocol.events.PacketEvent;
 import com.comphenix.protocol.reflect.StructureModifier;
+
 import fr.neatmonster.nocheatplus.checks.CheckType;
 import fr.neatmonster.nocheatplus.checks.moving.MovingData;
 import fr.neatmonster.nocheatplus.players.DataManager;
 import fr.neatmonster.nocheatplus.players.IPlayerData;
-import org.bukkit.entity.Player;
-import org.bukkit.plugin.Plugin;
-
-import java.util.Collections;
-import java.util.LinkedList;
-import java.util.List;
 
 public class Fight extends BaseAdapter{
     private static PacketType[] initPacketTypes() {
@@ -36,7 +39,7 @@ public class Fight extends BaseAdapter{
                 //PacketType.Play.Client.ARM_ANIMATION,
                 PacketType.Play.Server.EXPLOSION
         ));
-        return types.toArray(new PacketType[0]);
+        return types.toArray(new PacketType[types.size()]);
     }
 
     public Fight(Plugin plugin) {

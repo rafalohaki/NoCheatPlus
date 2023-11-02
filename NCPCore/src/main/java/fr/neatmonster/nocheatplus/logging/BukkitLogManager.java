@@ -14,6 +14,12 @@
  */
 package fr.neatmonster.nocheatplus.logging;
 
+import java.io.File;
+
+import org.apache.logging.log4j.LogManager;
+import org.bukkit.Bukkit;
+import org.bukkit.plugin.Plugin;
+
 import fr.neatmonster.nocheatplus.NCPAPIProvider;
 import fr.neatmonster.nocheatplus.components.registry.feature.INotifyReload;
 import fr.neatmonster.nocheatplus.components.registry.order.SetupOrder;
@@ -27,13 +33,6 @@ import fr.neatmonster.nocheatplus.logging.details.FileLoggerAdapter;
 import fr.neatmonster.nocheatplus.logging.details.LogOptions;
 import fr.neatmonster.nocheatplus.logging.details.LogOptions.CallContext;
 import fr.neatmonster.nocheatplus.utilities.ColorUtil;
-import org.apache.logging.log4j.LogManager;
-import org.apache.logging.log4j.Logger;
-import org.bukkit.Bukkit;
-import org.bukkit.plugin.Plugin;
-
-import java.io.File;
-
 
 /**
  * Central access point for logging. The default loggers use the stream names,
@@ -57,8 +56,8 @@ public class BukkitLogManager extends AbstractLogManager implements INotifyReloa
     private static final ContentLogger<String> serverLogger = (level, content) -> {
         try {
             LogManager.getLogger(Bukkit.getLogger()).log(level, "[NoCheatPlus] " + content);
-        } catch (Throwable e) {
-            e.printStackTrace();
+        } catch (Throwable t) {
+            t.printStackTrace();
         }
     };
 

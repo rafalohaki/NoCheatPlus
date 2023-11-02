@@ -14,6 +14,12 @@
  */
 package fr.neatmonster.nocheatplus.compat.cbreflect;
 
+import java.util.Objects;
+import org.bukkit.Material;
+import org.bukkit.World;
+import org.bukkit.entity.Entity;
+import org.bukkit.entity.Player;
+
 import fr.neatmonster.nocheatplus.NCPAPIProvider;
 import fr.neatmonster.nocheatplus.compat.AlmostBoolean;
 import fr.neatmonster.nocheatplus.compat.bukkit.BlockCacheBukkit;
@@ -25,12 +31,6 @@ import fr.neatmonster.nocheatplus.compat.versions.ServerVersion;
 import fr.neatmonster.nocheatplus.logging.Streams;
 import fr.neatmonster.nocheatplus.utilities.location.LocUtil;
 import fr.neatmonster.nocheatplus.utilities.map.BlockCache;
-import org.bukkit.Material;
-import org.bukkit.World;
-import org.bukkit.entity.Entity;
-import org.bukkit.entity.Player;
-
-import java.util.Objects;
 
 public class MCAccessCBReflect extends MCAccessBukkit {
 
@@ -46,7 +46,7 @@ public class MCAccessCBReflect extends MCAccessBukkit {
         helper = new ReflectHelper();
         // Version Envelope tests (1.4.5-R1.0 ... 1.8.x is considered to be ok).
         final String mcVersion = ServerVersion.getMinecraftVersion();
-        if (Objects.equals(mcVersion, GenericVersion.UNKNOWN_VERSION)) {
+        if (mcVersion.equals(GenericVersion.UNKNOWN_VERSION)) {
             NCPAPIProvider.getNoCheatPlusAPI().getLogManager().warning(Streams.INIT, "The Minecraft version could not be detected, Compat-CB-Reflect might or might not work.");
             this.knownSupportedVersion = false;
         }

@@ -18,7 +18,7 @@ jobs:
       - name: Build NoCheatPlus
         run: mvn clean package -P nonfree_build -P all
 
-      - name: Release NoCheatPlus
+      - name: Upload NoCheatPlus
         uses: marvinpinto/action-automatic-releases@master
         with:
           title: "NoCheatPlus"

@@ -14,14 +14,14 @@
  */
 package fr.neatmonster.nocheatplus.logging;
 
-import fr.neatmonster.nocheatplus.NCPAPIProvider;
-import fr.neatmonster.nocheatplus.utilities.StringUtil;
-import org.apache.logging.log4j.Level;
-
 import java.util.Collections;
 import java.util.Date;
 import java.util.HashSet;
 import java.util.Set;
+
+import fr.neatmonster.nocheatplus.NCPAPIProvider;
+import fr.neatmonster.nocheatplus.utilities.StringUtil;
+import org.apache.logging.log4j.Level;
 
 /**
  * Static access methods for more or less direct logging using either LogManager

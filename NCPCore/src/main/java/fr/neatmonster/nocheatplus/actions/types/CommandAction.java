@@ -14,6 +14,9 @@
  */
 package fr.neatmonster.nocheatplus.actions.types;
 
+import org.bukkit.Bukkit;
+import org.bukkit.plugin.Plugin;
+
 import fr.neatmonster.nocheatplus.actions.AbstractActionList;
 import fr.neatmonster.nocheatplus.actions.ParameterHolder;
 import fr.neatmonster.nocheatplus.checks.ViolationData;
@@ -24,8 +27,6 @@ import fr.neatmonster.nocheatplus.logging.StaticLog;
 import fr.neatmonster.nocheatplus.utilities.CheckUtils;
 import fr.neatmonster.nocheatplus.utilities.StringUtil;
 import org.apache.logging.log4j.Level;
-import org.bukkit.Bukkit;
-import org.bukkit.plugin.Plugin;
 
 /**
  * Execute a command by imitating an administrator typing the command directly into the console.

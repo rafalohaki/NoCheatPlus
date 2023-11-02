@@ -14,6 +14,9 @@
  */
 package fr.neatmonster.nocheatplus.actions.types;
 
+import java.util.ArrayList;
+import java.util.List;
+
 import fr.neatmonster.nocheatplus.NCPAPIProvider;
 import fr.neatmonster.nocheatplus.actions.Action;
 import fr.neatmonster.nocheatplus.actions.ActionList;
@@ -28,9 +31,6 @@ import fr.neatmonster.nocheatplus.permissions.RegisteredPermission;
 import fr.neatmonster.nocheatplus.players.DataManager;
 import fr.neatmonster.nocheatplus.utilities.ColorUtil;
 import org.apache.logging.log4j.Level;
-
-import java.util.ArrayList;
-import java.util.List;
 
 /**
  * Generic log action, capable of logging to any stream of LogManager with any
@@ -99,7 +99,7 @@ public class GenericLogAction extends ActionWithParameters<ViolationData, Action
                 checkActiveUseful = true;
             }
         }
-        this.configs = temp.toArray(new GenericLogActionConfig[0]);
+        this.configs = temp.toArray(new GenericLogActionConfig[temp.size()]);
         this.checkActive = checkActive && checkActiveUseful;
         this.replaceColor = replaceColor;
         this.stripColor = stripColor;
@@ -123,7 +123,7 @@ public class GenericLogAction extends ActionWithParameters<ViolationData, Action
         if (temp.isEmpty()) {
             return null;
         }
-        final GenericLogActionConfig[] logConfigs = temp.toArray(new GenericLogActionConfig[0]);
+        final GenericLogActionConfig[] logConfigs = temp.toArray(new GenericLogActionConfig[temp.size()]);
         return new GenericLogAction(name, delay, repeat, message, false, logConfigs);
     }
 

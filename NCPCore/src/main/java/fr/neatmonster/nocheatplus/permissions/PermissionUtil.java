@@ -14,10 +14,12 @@
  */
 package fr.neatmonster.nocheatplus.permissions;
 
-import fr.neatmonster.nocheatplus.command.CommandUtil;
-import fr.neatmonster.nocheatplus.config.ConfPaths;
-import fr.neatmonster.nocheatplus.config.ConfigManager;
-import fr.neatmonster.nocheatplus.utilities.ColorUtil;
+import java.util.Collection;
+import java.util.HashSet;
+import java.util.LinkedList;
+import java.util.List;
+import java.util.Set;
+
 import org.bukkit.Bukkit;
 import org.bukkit.command.Command;
 import org.bukkit.permissions.Permission;
@@ -25,11 +27,10 @@ import org.bukkit.permissions.PermissionDefault;
 import org.bukkit.plugin.Plugin;
 import org.bukkit.plugin.PluginManager;
 
-import java.util.Collection;
-import java.util.HashSet;
-import java.util.LinkedList;
-import java.util.List;
-import java.util.Set;
+import fr.neatmonster.nocheatplus.command.CommandUtil;
+import fr.neatmonster.nocheatplus.config.ConfPaths;
+import fr.neatmonster.nocheatplus.config.ConfigManager;
+import fr.neatmonster.nocheatplus.utilities.ColorUtil;
 
 public class PermissionUtil {
 

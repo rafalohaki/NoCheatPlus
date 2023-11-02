@@ -14,11 +14,11 @@
  */
 package fr.neatmonster.nocheatplus.compat.versions;
 
-import fr.neatmonster.nocheatplus.utilities.ReflectionUtil;
+import java.util.Objects;
 import org.bukkit.Bukkit;
 import org.bukkit.Server;
 
-import java.util.Objects;
+import fr.neatmonster.nocheatplus.utilities.ReflectionUtil;
 
 /**
  * Static utility that stores the Minecraft version, providing some parsing
@@ -221,7 +221,7 @@ public class ServerVersion {
      */
     public static <V> V select(final String cmpVersion, final V valueLT, final V valueEQ, final V valueGT, final V valueUnknown) {
         final String mcVersion = ServerVersion.getMinecraftVersion();
-        if (Objects.equals(mcVersion, GenericVersion.UNKNOWN_VERSION)) {
+        if (mcVersion.equals(GenericVersion.UNKNOWN_VERSION)) {
             return valueUnknown;
         } else {
             final int cmp = GenericVersion.compareVersions(mcVersion, cmpVersion);

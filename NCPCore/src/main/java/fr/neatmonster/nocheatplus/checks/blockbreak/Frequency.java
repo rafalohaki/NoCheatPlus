@@ -14,12 +14,13 @@
  */
 package fr.neatmonster.nocheatplus.checks.blockbreak;
 
+import org.bukkit.GameMode;
+import org.bukkit.entity.Player;
+
 import fr.neatmonster.nocheatplus.checks.Check;
 import fr.neatmonster.nocheatplus.checks.CheckType;
 import fr.neatmonster.nocheatplus.players.IPlayerData;
 import fr.neatmonster.nocheatplus.utilities.TickTask;
-import org.bukkit.GameMode;
-import org.bukkit.entity.Player;
 
 /**
  * This checks just limits the number of blocks broken per time frame.

@@ -14,12 +14,13 @@
  */
 package fr.neatmonster.nocheatplus.checks.fight;
 
+import org.bukkit.entity.Player;
+
 import fr.neatmonster.nocheatplus.checks.Check;
 import fr.neatmonster.nocheatplus.checks.CheckType;
 import fr.neatmonster.nocheatplus.permissions.Permissions;
 import fr.neatmonster.nocheatplus.players.IPlayerData;
 import fr.neatmonster.nocheatplus.utilities.TickTask;
-import org.bukkit.entity.Player;
 
 /**
  * Legacy check (client side health regeneration).

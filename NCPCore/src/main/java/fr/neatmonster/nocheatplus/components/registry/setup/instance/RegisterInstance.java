@@ -14,6 +14,11 @@
  */
 package fr.neatmonster.nocheatplus.components.registry.setup.instance;
 
+import java.util.Collection;
+import java.util.Collections;
+import java.util.LinkedList;
+import java.util.List;
+
 import fr.neatmonster.nocheatplus.NCPAPIProvider;
 import fr.neatmonster.nocheatplus.checks.CheckType;
 import fr.neatmonster.nocheatplus.components.config.ICheckConfig;
@@ -27,11 +32,6 @@ import fr.neatmonster.nocheatplus.components.registry.setup.IDoRegister;
 import fr.neatmonster.nocheatplus.components.registry.setup.RegistrationContext;
 import fr.neatmonster.nocheatplus.players.IPlayerDataManager;
 import fr.neatmonster.nocheatplus.utilities.CheckTypeUtil;
-
-import java.util.Collection;
-import java.util.Collections;
-import java.util.LinkedList;
-import java.util.List;
 
 /**
  * Base class.

@@ -14,11 +14,11 @@
  */
 package fr.neatmonster.nocheatplus.compat.cbreflect.reflect;
 
+import java.lang.reflect.Field;
+
 import fr.neatmonster.nocheatplus.compat.cbreflect.reflect.ReflectHelper.ReflectFailureException;
 import fr.neatmonster.nocheatplus.utilities.ReflectionUtil;
 import fr.neatmonster.nocheatplus.utilities.Validate;
-
-import java.lang.reflect.Field;
 
 /**
  * AxisAlignedBB (nms).

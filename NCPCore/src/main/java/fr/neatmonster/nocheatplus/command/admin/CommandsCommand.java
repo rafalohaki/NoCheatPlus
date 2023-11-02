@@ -14,15 +14,16 @@
  */
 package fr.neatmonster.nocheatplus.command.admin;
 
-import fr.neatmonster.nocheatplus.command.BaseCommand;
-import fr.neatmonster.nocheatplus.permissions.Permissions;
-import fr.neatmonster.nocheatplus.utilities.StringUtil;
-import org.bukkit.ChatColor;
+import java.util.Arrays;
+
 import org.bukkit.command.Command;
 import org.bukkit.command.CommandSender;
 import org.bukkit.plugin.java.JavaPlugin;
+import org.bukkit.ChatColor;
 
-import java.util.Arrays;
+import fr.neatmonster.nocheatplus.command.BaseCommand;
+import fr.neatmonster.nocheatplus.permissions.Permissions;
+import fr.neatmonster.nocheatplus.utilities.StringUtil;
 
 /**
  * This command just shows a list of all commands.

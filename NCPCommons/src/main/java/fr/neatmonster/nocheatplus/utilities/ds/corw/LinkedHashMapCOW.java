@@ -14,13 +14,12 @@
  */
 package fr.neatmonster.nocheatplus.utilities.ds.corw;
 
-import org.jetbrains.annotations.NotNull;
-
 import java.util.Collection;
 import java.util.Collections;
 import java.util.LinkedHashMap;
 import java.util.Map;
 import java.util.Set;
+import org.jetbrains.annotations.NotNull;
 
 /**
  * More cows, more fun: Copy on write for a LinkedHashMap (optimized for fast reading from any thread).

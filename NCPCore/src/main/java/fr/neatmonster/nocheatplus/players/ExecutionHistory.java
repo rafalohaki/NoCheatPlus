@@ -14,12 +14,12 @@
  */
 package fr.neatmonster.nocheatplus.players;
 
+import java.util.HashMap;
+import java.util.Map;
+
 import fr.neatmonster.nocheatplus.actions.Action;
 import fr.neatmonster.nocheatplus.actions.ActionList;
 import fr.neatmonster.nocheatplus.checks.ViolationData;
-
-import java.util.HashMap;
-import java.util.Map;
 
 /**
  * Store amount of action executions for last 60 seconds for various actions.<br>

@@ -14,6 +14,12 @@
  */
 package fr.neatmonster.nocheatplus.checks;
 
+import java.util.HashMap;
+import java.util.Map;
+
+import org.bukkit.Bukkit;
+import org.bukkit.entity.Player;
+
 import fr.neatmonster.nocheatplus.NCPAPIProvider;
 import fr.neatmonster.nocheatplus.actions.ActionList;
 import fr.neatmonster.nocheatplus.compat.MCAccess;
@@ -27,11 +33,6 @@ import fr.neatmonster.nocheatplus.players.IPlayerData;
 import fr.neatmonster.nocheatplus.utilities.CheckUtils;
 import fr.neatmonster.nocheatplus.utilities.TickTask;
 import fr.neatmonster.nocheatplus.worlds.IWorldData;
-import org.bukkit.Bukkit;
-import org.bukkit.entity.Player;
-
-import java.util.HashMap;
-import java.util.Map;
 
 /**
  * The parent class of all checks. Don't let this implement Listener without

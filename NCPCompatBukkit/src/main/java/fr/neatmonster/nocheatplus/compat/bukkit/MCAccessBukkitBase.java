@@ -14,15 +14,9 @@
  */
 package fr.neatmonster.nocheatplus.compat.bukkit;
 
-import fr.neatmonster.nocheatplus.compat.AlmostBoolean;
-import fr.neatmonster.nocheatplus.compat.BridgeHealth;
-import fr.neatmonster.nocheatplus.compat.MCAccess;
-import fr.neatmonster.nocheatplus.utilities.PotionUtil;
-import fr.neatmonster.nocheatplus.utilities.ReflectionUtil;
-import fr.neatmonster.nocheatplus.utilities.map.BlockCache;
-import fr.neatmonster.nocheatplus.utilities.map.BlockFlags;
-import fr.neatmonster.nocheatplus.utilities.map.BlockProperties;
-import fr.neatmonster.nocheatplus.utilities.map.MaterialUtil;
+import java.util.LinkedHashSet;
+import java.util.Set;
+
 import org.bukkit.Bukkit;
 import org.bukkit.Material;
 import org.bukkit.World;
@@ -37,8 +31,15 @@ import org.bukkit.entity.Player;
 import org.bukkit.entity.Slime;
 import org.bukkit.potion.PotionEffectType;
 
-import java.util.LinkedHashSet;
-import java.util.Set;
+import fr.neatmonster.nocheatplus.compat.AlmostBoolean;
+import fr.neatmonster.nocheatplus.compat.BridgeHealth;
+import fr.neatmonster.nocheatplus.compat.MCAccess;
+import fr.neatmonster.nocheatplus.utilities.PotionUtil;
+import fr.neatmonster.nocheatplus.utilities.ReflectionUtil;
+import fr.neatmonster.nocheatplus.utilities.map.BlockCache;
+import fr.neatmonster.nocheatplus.utilities.map.BlockFlags;
+import fr.neatmonster.nocheatplus.utilities.map.BlockProperties;
+import fr.neatmonster.nocheatplus.utilities.map.MaterialUtil;
 
 public class MCAccessBukkitBase implements MCAccess {
 
@@ -81,8 +82,8 @@ public class MCAccessBukkitBase implements MCAccess {
          */
         if (BlockFlags.hasAnyFlag(flags, BlockFlags.F_IGN_PASSABLE)) {
             // TODO: Blocks with min_height may actually be ok, if xz100 and some height are set.
-            // Explicitly passable.
-            // Potentially itchy.
+            // return False: Explicitly passable.
+            // return True: Potentially itchy.
             return !BlockFlags.hasNoFlags(flags,
                     BlockFlags.F_GROUND_HEIGHT
                             | BlockFlags.F_GROUND
@@ -260,8 +261,8 @@ public class MCAccessBukkitBase implements MCAccess {
                 default:
                     break;
             }
-        } catch (Throwable e) {
-            e.printStackTrace();
+        } catch (Throwable t) {
+            t.printStackTrace();
         }
         // Default entity width.
         return 0.6f;

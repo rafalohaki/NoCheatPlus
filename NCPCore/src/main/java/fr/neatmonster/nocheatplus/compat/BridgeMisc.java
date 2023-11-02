@@ -14,7 +14,10 @@
  */
 package fr.neatmonster.nocheatplus.compat;
 
-import fr.neatmonster.nocheatplus.utilities.ReflectionUtil;
+import java.lang.reflect.InvocationTargetException;
+import java.lang.reflect.Method;
+import java.util.Collection;
+
 import org.bukkit.Bukkit;
 import org.bukkit.GameMode;
 import org.bukkit.Material;
@@ -26,9 +29,7 @@ import org.bukkit.inventory.ItemStack;
 import org.bukkit.inventory.meta.FireworkMeta;
 import org.bukkit.inventory.meta.ItemMeta;
 
-import java.lang.reflect.InvocationTargetException;
-import java.lang.reflect.Method;
-import java.util.Collection;
+import fr.neatmonster.nocheatplus.utilities.ReflectionUtil;
 
 
 /**
@@ -41,8 +42,8 @@ public class BridgeMisc {
     private static GameMode getSpectatorGameMode() {
         try {
             return GameMode.SPECTATOR;
-        } catch (Throwable e) {
-            e.printStackTrace();
+        } catch (Throwable t) {
+            t.printStackTrace();
         }
         return null;
     }

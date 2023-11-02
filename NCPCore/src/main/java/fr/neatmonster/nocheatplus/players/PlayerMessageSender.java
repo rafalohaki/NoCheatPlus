@@ -14,11 +14,12 @@
  */
 package fr.neatmonster.nocheatplus.players;
 
-import fr.neatmonster.nocheatplus.utilities.OnDemandTickListener;
-import org.bukkit.entity.Player;
-
 import java.util.LinkedList;
 import java.util.List;
+
+import org.bukkit.entity.Player;
+
+import fr.neatmonster.nocheatplus.utilities.OnDemandTickListener;
 
 /**
  * Unregisters during delegateTick to achieve thread-safety.

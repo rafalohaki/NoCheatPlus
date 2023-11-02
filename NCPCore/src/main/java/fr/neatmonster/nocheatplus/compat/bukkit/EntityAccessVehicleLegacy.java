@@ -14,12 +14,13 @@
  */
 package fr.neatmonster.nocheatplus.compat.bukkit;
 
-import fr.neatmonster.nocheatplus.components.entity.IEntityAccessVehicle;
-import org.bukkit.entity.Entity;
-
 import java.util.ArrayList;
 import java.util.Collections;
 import java.util.List;
+
+import org.bukkit.entity.Entity;
+
+import fr.neatmonster.nocheatplus.components.entity.IEntityAccessVehicle;
 
 /**
  * Legacy access to vehicle entities (single passenger only).

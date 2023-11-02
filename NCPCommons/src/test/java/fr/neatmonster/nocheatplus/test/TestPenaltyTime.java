@@ -14,10 +14,11 @@
  */
 package fr.neatmonster.nocheatplus.test;
 
-import fr.neatmonster.nocheatplus.utilities.PenaltyTime;
+import static org.junit.jupiter.api.Assertions.fail;
+
 import org.junit.jupiter.api.Test;
 
-import static org.junit.jupiter.api.Assertions.fail;
+import fr.neatmonster.nocheatplus.utilities.PenaltyTime;
 
 
 public class TestPenaltyTime {

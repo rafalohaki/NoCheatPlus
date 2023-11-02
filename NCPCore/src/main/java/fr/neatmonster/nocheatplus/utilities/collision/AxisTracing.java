@@ -14,9 +14,9 @@
  */
 package fr.neatmonster.nocheatplus.utilities.collision;
 
-import org.bukkit.Location;
-
 import java.util.List;
+
+import org.bukkit.Location;
 
 /**
  * Similar to ray-tracing, attempt to model how the client processes move vs.

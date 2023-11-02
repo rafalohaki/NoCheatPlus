@@ -14,24 +14,10 @@
  */
 package fr.neatmonster.nocheatplus.checks.net.protocollib;
 
-import com.comphenix.protocol.PacketType;
-import com.comphenix.protocol.events.ListenerPriority;
-import com.comphenix.protocol.events.PacketContainer;
-import com.comphenix.protocol.events.PacketEvent;
-import com.comphenix.protocol.reflect.StructureModifier;
-import com.comphenix.protocol.wrappers.EnumWrappers.PlayerDigType;
-import fr.neatmonster.nocheatplus.NCPAPIProvider;
-import fr.neatmonster.nocheatplus.checks.moving.MovingData;
-import fr.neatmonster.nocheatplus.compat.Bridge1_13;
-import fr.neatmonster.nocheatplus.compat.Bridge1_9;
-import fr.neatmonster.nocheatplus.compat.versions.ServerVersion;
-import fr.neatmonster.nocheatplus.components.NoCheatPlusAPI;
-import fr.neatmonster.nocheatplus.components.registry.order.RegistrationOrder.RegisterMethodWithOrder;
-import fr.neatmonster.nocheatplus.event.mini.MiniListener;
-import fr.neatmonster.nocheatplus.logging.StaticLog;
-import fr.neatmonster.nocheatplus.players.DataManager;
-import fr.neatmonster.nocheatplus.players.IPlayerData;
-import fr.neatmonster.nocheatplus.utilities.InventoryUtil;
+import java.util.Arrays;
+import java.util.LinkedList;
+import java.util.List;
+
 import org.bukkit.GameMode;
 import org.bukkit.Material;
 import org.bukkit.entity.Player;
@@ -49,9 +35,25 @@ import org.bukkit.inventory.PlayerInventory;
 import org.bukkit.inventory.meta.CrossbowMeta;
 import org.bukkit.plugin.Plugin;
 
-import java.util.Arrays;
-import java.util.LinkedList;
-import java.util.List;
+import com.comphenix.protocol.PacketType;
+import com.comphenix.protocol.events.ListenerPriority;
+import com.comphenix.protocol.events.PacketContainer;
+import com.comphenix.protocol.events.PacketEvent;
+import com.comphenix.protocol.reflect.StructureModifier;
+import com.comphenix.protocol.wrappers.EnumWrappers.PlayerDigType;
+
+import fr.neatmonster.nocheatplus.NCPAPIProvider;
+import fr.neatmonster.nocheatplus.checks.moving.MovingData;
+import fr.neatmonster.nocheatplus.compat.Bridge1_13;
+import fr.neatmonster.nocheatplus.compat.Bridge1_9;
+import fr.neatmonster.nocheatplus.compat.versions.ServerVersion;
+import fr.neatmonster.nocheatplus.components.NoCheatPlusAPI;
+import fr.neatmonster.nocheatplus.components.registry.order.RegistrationOrder.RegisterMethodWithOrder;
+import fr.neatmonster.nocheatplus.event.mini.MiniListener;
+import fr.neatmonster.nocheatplus.logging.StaticLog;
+import fr.neatmonster.nocheatplus.players.DataManager;
+import fr.neatmonster.nocheatplus.players.IPlayerData;
+import fr.neatmonster.nocheatplus.utilities.InventoryUtil;
 
 public class NoSlow extends BaseAdapter {
     private final static String dftag = "system.nocheatplus.noslow";
@@ -97,7 +99,7 @@ public class NoSlow extends BaseAdapter {
                 PacketType.Play.Client.BLOCK_DIG,
                 PacketType.Play.Client.BLOCK_PLACE
         ));
-        return types.toArray(new PacketType[0]);
+        return types.toArray(new PacketType[types.size()]);
     }
 
     public NoSlow(Plugin plugin) {

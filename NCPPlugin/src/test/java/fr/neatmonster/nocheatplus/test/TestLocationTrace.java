@@ -14,16 +14,17 @@
  */
 package fr.neatmonster.nocheatplus.test;
 
-import fr.neatmonster.nocheatplus.checks.moving.location.tracking.LocationTrace;
-import fr.neatmonster.nocheatplus.checks.moving.location.tracking.LocationTrace.ITraceEntry;
-import fr.neatmonster.nocheatplus.checks.moving.location.tracking.LocationTrace.TraceEntryPool;
-import fr.neatmonster.nocheatplus.checks.moving.location.tracking.LocationTrace.TraceIterator;
-import org.junit.jupiter.api.Test;
+import static org.junit.jupiter.api.Assertions.fail;
 
 import java.util.Iterator;
 import java.util.Random;
 
-import static org.junit.jupiter.api.Assertions.fail;
+import org.junit.jupiter.api.Test;
+
+import fr.neatmonster.nocheatplus.checks.moving.location.tracking.LocationTrace;
+import fr.neatmonster.nocheatplus.checks.moving.location.tracking.LocationTrace.ITraceEntry;
+import fr.neatmonster.nocheatplus.checks.moving.location.tracking.LocationTrace.TraceEntryPool;
+import fr.neatmonster.nocheatplus.checks.moving.location.tracking.LocationTrace.TraceIterator;
 
 
 public class TestLocationTrace {

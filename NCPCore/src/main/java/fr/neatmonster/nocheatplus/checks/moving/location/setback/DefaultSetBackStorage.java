@@ -14,9 +14,10 @@
  */
 package fr.neatmonster.nocheatplus.checks.moving.location.setback;
 
+import org.bukkit.Location;
+
 import fr.neatmonster.nocheatplus.components.location.IGetLocationWithLook;
 import fr.neatmonster.nocheatplus.time.monotonic.Monotonic;
-import org.bukkit.Location;
 
 /**
  * A default extension of SetBackStorage, featuring convenience methods for

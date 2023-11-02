@@ -14,14 +14,15 @@
  */
 package fr.neatmonster.nocheatplus.compat;
 
-import fr.neatmonster.nocheatplus.components.entity.IEntityAccessDimensions;
-import fr.neatmonster.nocheatplus.components.map.IGetBlockCache;
-import fr.neatmonster.nocheatplus.utilities.map.BlockCache;
 import org.bukkit.Material;
 import org.bukkit.World;
 import org.bukkit.command.CommandMap;
 import org.bukkit.entity.Entity;
 import org.bukkit.entity.Player;
+
+import fr.neatmonster.nocheatplus.components.entity.IEntityAccessDimensions;
+import fr.neatmonster.nocheatplus.components.map.IGetBlockCache;
+import fr.neatmonster.nocheatplus.utilities.map.BlockCache;
 
 
 /**

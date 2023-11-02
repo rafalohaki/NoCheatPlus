@@ -14,14 +14,15 @@
  */
 package fr.neatmonster.nocheatplus.test;
 
+import org.bukkit.Material;
+import org.junit.jupiter.api.Test;
+
 import fr.neatmonster.nocheatplus.compat.BridgeMaterial;
 import fr.neatmonster.nocheatplus.logging.StaticLog;
 import fr.neatmonster.nocheatplus.utilities.build.BuildParameters;
 import fr.neatmonster.nocheatplus.utilities.collision.PassableRayTracing;
 import fr.neatmonster.nocheatplus.utilities.map.BlockFlags;
 import fr.neatmonster.nocheatplus.utilities.map.FakeBlockCache;
-import org.junit.jupiter.api.Test;
-import org.bukkit.Material;
 
 public class TestPassableRayTracing {
     

@@ -14,9 +14,16 @@
  */
 package fr.neatmonster.nocheatplus.checks.net.protocollib;
 
+import java.util.LinkedHashSet;
+import java.util.Set;
+
+import org.bukkit.entity.Player;
+import org.bukkit.plugin.Plugin;
+
 import com.comphenix.protocol.PacketType;
 import com.comphenix.protocol.events.ListenerPriority;
 import com.comphenix.protocol.events.PacketEvent;
+
 import fr.neatmonster.nocheatplus.NCPAPIProvider;
 import fr.neatmonster.nocheatplus.checks.net.NetConfig;
 import fr.neatmonster.nocheatplus.checks.net.NetData;
@@ -24,11 +31,6 @@ import fr.neatmonster.nocheatplus.checks.net.PacketFrequency;
 import fr.neatmonster.nocheatplus.logging.StaticLog;
 import fr.neatmonster.nocheatplus.players.DataManager;
 import fr.neatmonster.nocheatplus.players.IPlayerData;
-import org.bukkit.entity.Player;
-import org.bukkit.plugin.Plugin;
-
-import java.util.LinkedHashSet;
-import java.util.Set;
 
 /**
  * Pre-1.9.

@@ -14,19 +14,20 @@
  */
 package fr.neatmonster.nocheatplus.compat.blocks;
 
-import fr.neatmonster.nocheatplus.compat.BridgeMaterial;
-import fr.neatmonster.nocheatplus.utilities.collision.Axis;
-import fr.neatmonster.nocheatplus.utilities.map.BlockCache;
-import fr.neatmonster.nocheatplus.utilities.map.BlockProperties;
-import fr.neatmonster.nocheatplus.utilities.map.MaterialUtil;
-import org.bukkit.Material;
-import org.bukkit.block.BlockFace;
-
 import java.util.ArrayList;
 import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
 import java.util.stream.IntStream;
+
+import org.bukkit.Material;
+import org.bukkit.block.BlockFace;
+
+import fr.neatmonster.nocheatplus.compat.BridgeMaterial;
+import fr.neatmonster.nocheatplus.utilities.collision.Axis;
+import fr.neatmonster.nocheatplus.utilities.map.BlockCache;
+import fr.neatmonster.nocheatplus.utilities.map.BlockProperties;
+import fr.neatmonster.nocheatplus.utilities.map.MaterialUtil;
 
 public class LegacyBlocks {
     private static final BlockStairs STAIRS = new BlockStairs();

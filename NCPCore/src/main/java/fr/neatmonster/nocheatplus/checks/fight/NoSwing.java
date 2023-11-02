@@ -14,9 +14,10 @@
  */
 package fr.neatmonster.nocheatplus.checks.fight;
 
+import org.bukkit.entity.Player;
+
 import fr.neatmonster.nocheatplus.checks.Check;
 import fr.neatmonster.nocheatplus.checks.CheckType;
-import org.bukkit.entity.Player;
 
 /**
  * We require that the player moves their arm between attacks, this is basically what gets checked here.

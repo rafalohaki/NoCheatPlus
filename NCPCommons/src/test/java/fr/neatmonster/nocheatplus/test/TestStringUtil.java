@@ -15,13 +15,14 @@
 package fr.neatmonster.nocheatplus.test;
 
 
-import fr.neatmonster.nocheatplus.utilities.StringUtil;
-import org.junit.jupiter.api.Test;
+import static org.junit.jupiter.api.Assertions.fail;
 
 import java.util.Collection;
 import java.util.List;
 
-import static org.junit.jupiter.api.Assertions.fail;
+import org.junit.jupiter.api.Test;
+
+import fr.neatmonster.nocheatplus.utilities.StringUtil;
 
 /**
  * Tests for StringUtil.

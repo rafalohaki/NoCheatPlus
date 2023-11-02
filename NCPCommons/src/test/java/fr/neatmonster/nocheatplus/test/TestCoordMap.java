@@ -14,13 +14,7 @@
  */
 package fr.neatmonster.nocheatplus.test;
 
-import fr.neatmonster.nocheatplus.utilities.build.BuildParameters;
-import fr.neatmonster.nocheatplus.utilities.ds.map.CoordHashMap;
-import fr.neatmonster.nocheatplus.utilities.ds.map.CoordMap;
-import fr.neatmonster.nocheatplus.utilities.ds.map.CoordMap.Entry;
-import fr.neatmonster.nocheatplus.utilities.ds.map.LinkedCoordHashMap;
-import fr.neatmonster.nocheatplus.utilities.ds.map.LinkedCoordHashMap.MoveOrder;
-import org.junit.jupiter.api.Test;
+import static org.junit.jupiter.api.Assertions.fail;
 
 import java.util.Arrays;
 import java.util.HashMap;
@@ -30,7 +24,14 @@ import java.util.Map;
 import java.util.Random;
 import java.util.Set;
 
-import static org.junit.jupiter.api.Assertions.fail;
+import org.junit.jupiter.api.Test;
+
+import fr.neatmonster.nocheatplus.utilities.build.BuildParameters;
+import fr.neatmonster.nocheatplus.utilities.ds.map.CoordHashMap;
+import fr.neatmonster.nocheatplus.utilities.ds.map.CoordMap;
+import fr.neatmonster.nocheatplus.utilities.ds.map.CoordMap.Entry;
+import fr.neatmonster.nocheatplus.utilities.ds.map.LinkedCoordHashMap.MoveOrder;
+import fr.neatmonster.nocheatplus.utilities.ds.map.LinkedCoordHashMap;
 
 public class TestCoordMap {
 

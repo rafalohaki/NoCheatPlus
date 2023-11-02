@@ -14,12 +14,13 @@
  */
 package fr.neatmonster.nocheatplus.players;
 
-import fr.neatmonster.nocheatplus.NCPAPIProvider;
-import fr.neatmonster.nocheatplus.checks.CheckType;
-import org.bukkit.entity.Player;
-
 import java.util.Map;
 import java.util.UUID;
+
+import org.bukkit.entity.Player;
+
+import fr.neatmonster.nocheatplus.NCPAPIProvider;
+import fr.neatmonster.nocheatplus.checks.CheckType;
 
 
 /**

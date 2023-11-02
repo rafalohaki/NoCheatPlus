@@ -14,11 +14,11 @@
  */
 package fr.neatmonster.nocheatplus.checks.blockplace;
 
-import fr.neatmonster.nocheatplus.checks.access.ACheckData;
-import fr.neatmonster.nocheatplus.utilities.ds.count.ActionFrequency;
-
 import java.util.ArrayList;
 import java.util.List;
+
+import fr.neatmonster.nocheatplus.checks.access.ACheckData;
+import fr.neatmonster.nocheatplus.utilities.ds.count.ActionFrequency;
 
 /**
  * Player specific dataFactory for the block place checks.

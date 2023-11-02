@@ -14,8 +14,9 @@
  */
 package fr.neatmonster.nocheatplus.penalties.fight;
 
-import fr.neatmonster.nocheatplus.penalties.AbstractPenalty;
 import org.bukkit.event.entity.EntityDamageEvent;
+
+import fr.neatmonster.nocheatplus.penalties.AbstractPenalty;
 
 /**
  * Basic fight specific penalty.

@@ -14,12 +14,12 @@
  */
 package fr.neatmonster.nocheatplus.utilities;
 
+import java.util.Collection;
+
 import org.bukkit.entity.LivingEntity;
 import org.bukkit.entity.Player;
 import org.bukkit.potion.PotionEffect;
 import org.bukkit.potion.PotionEffectType;
-
-import java.util.Collection;
 
 // TODO: Auto-generated Javadoc
 /**

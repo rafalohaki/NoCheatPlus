@@ -14,11 +14,12 @@
  */
 package fr.neatmonster.nocheatplus.compat.bukkit;
 
-import fr.neatmonster.nocheatplus.components.entity.IEntityAccessVehicle;
-import fr.neatmonster.nocheatplus.utilities.ReflectionUtil;
+import java.util.List;
+
 import org.bukkit.entity.Entity;
 
-import java.util.List;
+import fr.neatmonster.nocheatplus.components.entity.IEntityAccessVehicle;
+import fr.neatmonster.nocheatplus.utilities.ReflectionUtil;
 
 public class EntityAccessVehicleMultiPassenger implements IEntityAccessVehicle {
 

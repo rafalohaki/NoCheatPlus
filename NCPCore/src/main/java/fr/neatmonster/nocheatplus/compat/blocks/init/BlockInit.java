@@ -14,10 +14,11 @@
  */
 package fr.neatmonster.nocheatplus.compat.blocks.init;
 
+import org.bukkit.Material;
+
 import fr.neatmonster.nocheatplus.compat.BridgeMaterial;
 import fr.neatmonster.nocheatplus.utilities.map.BlockFlags;
 import fr.neatmonster.nocheatplus.utilities.map.BlockProperties;
-import org.bukkit.Material;
 
 /**
  * Auxiliary methods for block initialization.

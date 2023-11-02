@@ -14,14 +14,15 @@
  */
 package fr.neatmonster.nocheatplus.compat.cbreflect.reflect;
 
-import fr.neatmonster.nocheatplus.compat.AttribUtil;
-import fr.neatmonster.nocheatplus.components.modifier.IAttributeAccess;
-import fr.neatmonster.nocheatplus.utilities.ReflectionUtil;
-import org.bukkit.entity.Player;
-
 import java.lang.reflect.Field;
 import java.lang.reflect.Method;
 import java.util.UUID;
+
+import org.bukkit.entity.Player;
+
+import fr.neatmonster.nocheatplus.compat.AttribUtil;
+import fr.neatmonster.nocheatplus.components.modifier.IAttributeAccess;
+import fr.neatmonster.nocheatplus.utilities.ReflectionUtil;
 
 public class ReflectAttributeAccess implements IAttributeAccess {
 
@@ -118,13 +119,13 @@ public class ReflectAttributeAccess implements IAttributeAccess {
 
     }
 
+    // TODO: Register each and every one of these as generic instances and fetch from there.
     private final ReflectGenericAttributes reflectGenericAttributes;
     private final ReflectAttributeInstance reflectAttributeInstance;
     private final ReflectAttributeModifier reflectAttributeModifier;
     private final ReflectPlayer reflectPlayer;
 
     public ReflectAttributeAccess() {
-        // TODO: Register each and every one of these as generic instances and fetch from there.
         ReflectBase reflectBase;
         try {
             reflectBase = new ReflectBase();

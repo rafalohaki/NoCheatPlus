@@ -14,17 +14,17 @@
  */
 package fr.neatmonster.nocheatplus.logging.details;
 
+import java.io.File;
+import java.util.HashMap;
+import java.util.IdentityHashMap;
+import java.util.Map;
+
 import fr.neatmonster.nocheatplus.logging.LogManager;
 import fr.neatmonster.nocheatplus.logging.LoggerID;
 import fr.neatmonster.nocheatplus.logging.StreamID;
 import fr.neatmonster.nocheatplus.utilities.StringUtil;
 import org.apache.logging.log4j.Level;
 import org.apache.logging.log4j.Logger;
-
-import java.io.File;
-import java.util.HashMap;
-import java.util.IdentityHashMap;
-import java.util.Map;
 
 /**
  * Central access point for logging. Abstract class providing basic registration functionality.
