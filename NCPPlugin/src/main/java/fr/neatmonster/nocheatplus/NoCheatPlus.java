@@ -143,7 +143,7 @@ import fr.neatmonster.nocheatplus.utilities.map.BlockProperties;
 import fr.neatmonster.nocheatplus.worlds.IWorldData;
 import fr.neatmonster.nocheatplus.worlds.IWorldDataManager;
 import fr.neatmonster.nocheatplus.worlds.WorldDataManager;
-import org.checkerframework.checker.nullness.qual.NonNull;
+import org.jetbrains.annotations.NotNull;
 
 /**
  * This is the main class of NoCheatPlus. The commands, events listeners and tasks are registered here.
@@ -1091,7 +1091,7 @@ public class NoCheatPlus extends JavaPlugin implements NoCheatPlusAPI {
     private BukkitAudiences adventure;
 
     @Override
-    public @NonNull BukkitAudiences adventure() {
+    public @NotNull BukkitAudiences adventure() {
         if(this.adventure == null) {
             throw new IllegalStateException("Tried to access Adventure when the plugin was disabled!");
         }
