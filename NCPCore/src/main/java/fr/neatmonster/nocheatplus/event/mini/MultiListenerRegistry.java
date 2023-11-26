@@ -24,6 +24,7 @@ import fr.neatmonster.nocheatplus.logging.Streams;
 import fr.neatmonster.nocheatplus.utilities.StringUtil;
 import org.apache.logging.log4j.Level;
 
+import java.lang.reflect.InvocationTargetException;
 import java.lang.reflect.Method;
 import java.lang.reflect.Modifier;
 import java.util.ArrayList;
@@ -80,8 +81,8 @@ public abstract class MultiListenerRegistry<EB, P> extends MiniListenerRegistry<
             try {
                 method.invoke(listener, event);
             }
-            catch (Throwable t) {
-                onException(event, t);
+            catch (InvocationTargetException | IllegalAccessException | IllegalArgumentException e) {
+                onException(event, e);
             }
         }
 
