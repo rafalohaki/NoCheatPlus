@@ -8,6 +8,7 @@ jobs:
   build:
     name: Build
     runs-on: ubuntu-latest
+    if: "github.actor != 'dependabot[bot]'"
     steps:
       - uses: actions/checkout@main
       - name: Set up JDK 17
@@ -15,6 +16,7 @@ jobs:
         with:
           java-version: 17
           distribution: temurin
+
       - name: Build NoCheatPlus
         run: mvn clean package -P nonfree_build -P all
 
