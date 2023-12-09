@@ -144,7 +144,7 @@ public class MCAccessBukkitModern extends MCAccessBukkit {
             this.reflectDamageSources = new ReflectDamageSources(this.reflectBase, this.reflectDamageSource);
         } 
         catch (ClassNotFoundException ex) {
-            ex.printStackTrace();
+            //ex.printStackTrace();
         }
     }
 

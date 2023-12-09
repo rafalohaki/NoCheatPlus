@@ -196,7 +196,7 @@ public class GenericVersion {
                 return 1;
             }
         } catch (NumberFormatException e) {
-            e.printStackTrace();
+            //e.printStackTrace();
         }
 
         // Equality was tested above, so it would seem.

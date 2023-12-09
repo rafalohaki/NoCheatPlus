@@ -201,7 +201,7 @@ public class PathUtils {
                 pathPrefixes.feed(path);
             }
         } catch (IllegalArgumentException | IllegalAccessException e) {
-            e.printStackTrace();
+            //e.printStackTrace();
         }
     }
 
@@ -210,7 +210,7 @@ public class PathUtils {
             final String path = field.get(null).toString();
             movedPaths.put(path, new WrapMoved(path, rel));
         } catch (IllegalArgumentException | IllegalAccessException e) {
-            e.printStackTrace();
+            //e.printStackTrace();
         }
     }
 
@@ -254,7 +254,7 @@ public class PathUtils {
                 }
             }
         } catch (InvalidConfigurationException | IOException e) {
-            e.printStackTrace();
+            //e.printStackTrace();
         }
     }
 

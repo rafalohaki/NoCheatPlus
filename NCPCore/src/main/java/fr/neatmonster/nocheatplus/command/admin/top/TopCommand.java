@@ -177,7 +177,7 @@ public class TopCommand extends BaseCommand{
             n = Integer.parseInt(args[1].trim());
             startIndex = 2;
         } catch (NumberFormatException e) {
-            e.printStackTrace();
+            //e.printStackTrace();
         }
         if (n <= 0) {
             sender.sendMessage((sender instanceof Player ? TAG : CTAG) + "Setting number of entries to 10");
@@ -196,7 +196,7 @@ public class TopCommand extends BaseCommand{
             try {
                 type = CheckType.valueOf(args[i].trim().toUpperCase().replace('-', '_').replace('.', '_'));
             } catch (Throwable t) {
-                t.printStackTrace();
+                //t.printStackTrace();
             } // ...
             if (type != null) {
                 checkTypes.addAll(CheckTypeUtil.getWithDescendants(type)); // Includes type.

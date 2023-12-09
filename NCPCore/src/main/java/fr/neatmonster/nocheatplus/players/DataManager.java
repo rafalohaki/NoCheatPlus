@@ -261,19 +261,19 @@ public class DataManager {
             return getPlayerData(player);
         } 
         catch (UnsupportedOperationException e) {
-            e.printStackTrace();
+            //e.printStackTrace();
         }
         try {
             return getPlayerData(player.getUniqueId());
         } 
         catch (UnsupportedOperationException e2) {
-            e2.printStackTrace();
+            //e2.printStackTrace();
         }
         try {
             return getPlayerData(player.getName());
         } 
         catch (UnsupportedOperationException e3) {
-            e3.printStackTrace();
+            //e3.printStackTrace();
         }
         // Failure.
         return null;

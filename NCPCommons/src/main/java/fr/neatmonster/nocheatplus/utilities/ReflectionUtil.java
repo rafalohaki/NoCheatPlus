@@ -223,7 +223,7 @@ public class ReflectionUtil {
             return method.invoke(object);
         }
         catch (IllegalAccessException | InvocationTargetException | IllegalArgumentException e) {
-            e.printStackTrace();
+            //e.printStackTrace();
         }
         return null;
     }
@@ -241,7 +241,7 @@ public class ReflectionUtil {
             return method.invoke(object, arguments);
         }
         catch (IllegalAccessException | InvocationTargetException | IllegalArgumentException e) {
-            e.printStackTrace();
+            //e.printStackTrace();
         }
         return null;
     }
@@ -269,7 +269,7 @@ public class ReflectionUtil {
                 }
             }
         } catch (SecurityException | NoSuchMethodException e) {
-            e.printStackTrace();
+            //e.printStackTrace();
         }
         return null;
     }
@@ -360,7 +360,7 @@ public class ReflectionUtil {
             }
         }
         catch (NoSuchFieldException | SecurityException e) {
-            e.printStackTrace();
+            //e.printStackTrace();
         }
         return null;
     }
@@ -379,7 +379,7 @@ public class ReflectionUtil {
             return true;
         }
         catch (IllegalArgumentException | IllegalAccessException e) {
-            e.printStackTrace();
+            //e.printStackTrace();
         }
         return false;
     }
@@ -389,7 +389,7 @@ public class ReflectionUtil {
             return field.getBoolean(object);
         }
         catch (IllegalArgumentException | IllegalAccessException e) {
-            e.printStackTrace();
+            //e.printStackTrace();
         }
         return defaultValue;
     }
@@ -399,7 +399,7 @@ public class ReflectionUtil {
             return field.getInt(object);
         }
         catch (IllegalArgumentException | IllegalAccessException e) {
-            e.printStackTrace();
+            //e.printStackTrace();
         }
         return defaultValue;
     }
@@ -409,7 +409,7 @@ public class ReflectionUtil {
             return field.getFloat(object);
         }
         catch (IllegalArgumentException | IllegalAccessException e) {
-            e.printStackTrace();
+            //e.printStackTrace();
         }
         return defaultValue;
     }
@@ -419,7 +419,7 @@ public class ReflectionUtil {
             return field.getDouble(object);
         }
         catch (IllegalArgumentException | IllegalAccessException e) {
-            e.printStackTrace();
+            //e.printStackTrace();
         }
         return defaultValue;
     }
@@ -429,7 +429,7 @@ public class ReflectionUtil {
             return field.get(object);
         }
         catch (IllegalArgumentException | IllegalAccessException e) {
-            e.printStackTrace();
+            //e.printStackTrace();
         }
         return defaultValue;
     }
@@ -447,7 +447,7 @@ public class ReflectionUtil {
             return clazz.getMethod(methodName, arguments);
         }
         catch (NoSuchMethodException | SecurityException e) {
-            e.printStackTrace();
+            //e.printStackTrace();
         }
         return null;
     }
@@ -483,7 +483,7 @@ public class ReflectionUtil {
             return clazz.getConstructor(parameterTypes);
         }
         catch (NoSuchMethodException | SecurityException e) {
-            e.printStackTrace();
+            //e.printStackTrace();
         }
         return null;
     }
@@ -500,7 +500,7 @@ public class ReflectionUtil {
             return constructor.newInstance(arguments);
         } catch (InstantiationException | InvocationTargetException | IllegalArgumentException |
                  IllegalAccessException e) {
-            e.printStackTrace();
+            //e.printStackTrace();
         }
         return null;
     }

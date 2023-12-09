@@ -209,11 +209,11 @@ public class GodMode extends Check {
                             mcAccess.getHandle().setDead(player, 19);
                         }
                     } catch (final Exception e) {
-                        e.printStackTrace();
+                        //e.printStackTrace();
                     }
             	}, null, 30);
             } catch (final Exception e) {
-                e.printStackTrace();
+                //e.printStackTrace();
             }
         }
     }

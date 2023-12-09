@@ -405,7 +405,7 @@ public class BlockFlags {
                         nameFlagMap.put(name.substring(2), value);
                     } 
                     catch (IllegalArgumentException | IllegalAccessException e) {
-                        e.printStackTrace();
+                        //e.printStackTrace();
                     }
                 }
             }
@@ -420,7 +420,7 @@ public class BlockFlags {
             }
         } 
         catch (Exception e) {
-            e.printStackTrace();
+            //e.printStackTrace();
         }
         blockFlags.put(material, blockFlags.get(material) | addFlag);
     }
@@ -433,7 +433,7 @@ public class BlockFlags {
             }
         } 
         catch (Exception e) {
-            e.printStackTrace();
+            //e.printStackTrace();
         }
         blockFlags.put(material, blockFlags.get(material) & addFlag);
     }
@@ -509,7 +509,7 @@ public class BlockFlags {
         try {
             return Long.parseLong(input);
         } catch (NumberFormatException e) {
-            e.printStackTrace();
+            //e.printStackTrace();
         }
         // TODO: This very exception type?
         throw new InputMismatchException();
@@ -553,7 +553,7 @@ public class BlockFlags {
             }
         } 
         catch (Exception e) {
-            e.printStackTrace();
+            //e.printStackTrace();
         }
         blockFlags.put(blockType, flags);
     }

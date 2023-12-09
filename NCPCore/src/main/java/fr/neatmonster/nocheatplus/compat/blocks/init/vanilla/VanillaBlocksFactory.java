@@ -48,7 +48,7 @@ public class VanillaBlocksFactory {
             setups.add(new BlocksMC1_20());
         }
         catch(Throwable e){
-            e.printStackTrace();
+            //e.printStackTrace();
         }
         for (final BlockPropertiesSetup setup : setups){
             try{

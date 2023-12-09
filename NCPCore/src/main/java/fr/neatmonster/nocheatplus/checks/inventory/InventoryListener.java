@@ -253,7 +253,7 @@ public class InventoryListener  extends CheckListener implements JoinLeaveListen
             }
         }
         catch (final ArrayIndexOutOfBoundsException e) {
-            e.printStackTrace();
+            //e.printStackTrace();
         } // Hotfix (CB)
         try {
             if (!cancel && Items.checkIllegalEnchantments(player, cursor, pData)) {
@@ -262,7 +262,7 @@ public class InventoryListener  extends CheckListener implements JoinLeaveListen
             }
         }
         catch (final ArrayIndexOutOfBoundsException e) {
-            e.printStackTrace();
+            //e.printStackTrace();
         } // Hotfix (CB)
 
         // Fast inventory manipulation check.

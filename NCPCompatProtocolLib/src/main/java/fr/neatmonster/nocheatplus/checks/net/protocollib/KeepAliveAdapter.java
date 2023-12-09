@@ -60,7 +60,7 @@ public class KeepAliveAdapter extends BaseAdapter {
         try {
             if (event.isPlayerTemporary()) return;
         } catch(NoSuchMethodError e) {
-            e.printStackTrace();
+            //e.printStackTrace();
         }
         final long time = System.currentTimeMillis();
         final Player player = event.getPlayer();

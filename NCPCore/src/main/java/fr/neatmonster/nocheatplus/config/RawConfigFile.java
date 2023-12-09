@@ -53,7 +53,7 @@ public class RawConfigFile  extends YamlConfiguration {
             return Material.matchMaterial(prepareMatchMaterial(content));
         }
         catch (Exception e) {
-            e.printStackTrace();
+            //e.printStackTrace();
         }
         return null;
     }
@@ -230,7 +230,7 @@ public class RawConfigFile  extends YamlConfiguration {
                     type = EntityType.valueOf(ucKey);
                 }
                 catch (IllegalArgumentException e) {
-                    e.printStackTrace();
+                    //e.printStackTrace();
                 }
                 if (type == null) {
                     // TODO: Log once per file only (needs new framework)?
@@ -257,7 +257,7 @@ public class RawConfigFile  extends YamlConfiguration {
             final DumperOptions options = (DumperOptions) op.get(this);
             options.setWidth(200);
         } catch (final Exception e) {
-            e.printStackTrace();
+            //e.printStackTrace();
         }
 
         return super.saveToString();

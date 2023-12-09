@@ -57,7 +57,7 @@ public class BukkitLogManager extends AbstractLogManager implements INotifyReloa
         try {
             LogManager.getLogger(Bukkit.getLogger()).log(level, "[NoCheatPlus] " + content);
         } catch (Throwable t) {
-            t.printStackTrace();
+            //t.printStackTrace();
         }
     };
 

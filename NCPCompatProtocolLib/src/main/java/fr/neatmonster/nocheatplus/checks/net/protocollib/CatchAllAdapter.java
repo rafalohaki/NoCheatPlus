@@ -71,7 +71,7 @@ public class CatchAllAdapter extends BaseAdapter {
         try {
             if (event.isPlayerTemporary()) return;
         } catch(NoSuchMethodError e) {
-            e.printStackTrace();
+            //e.printStackTrace();
         }
         final Player player = event.getPlayer();
         if (player == null) {

@@ -51,7 +51,7 @@ public class IdUtil {
 			return UUIDFromString(input);
 		}
 		catch (IllegalArgumentException e1) {
-			e1.printStackTrace();
+			//e1.printStackTrace();
 		}
 		return null;
 	}

@@ -68,7 +68,7 @@ public class MultiClientProtocolBlockShapePatch extends AbstractBlockPropertiesP
             done.add("honey_block");
         }
         catch (Throwable t) {
-            t.printStackTrace();
+            //t.printStackTrace();
         }
 
 
@@ -79,7 +79,7 @@ public class MultiClientProtocolBlockShapePatch extends AbstractBlockPropertiesP
             done.add("shulker_box");
         }
         catch (Throwable t) {
-            t.printStackTrace();
+            //t.printStackTrace();
         }
 
         StaticLog.logInfo("Applied block patches for multi client protocol support: " + StringUtil.join(done, ", "));

@@ -62,7 +62,7 @@ public class DenyLoginCommand extends BaseCommand {
             duration = Integer.parseInt(args[2]);
         }
         catch( NumberFormatException e) {
-            e.printStackTrace();
+            //e.printStackTrace();
         }
         if (duration <= 0) return false;
         final long finalDuration = duration * base;

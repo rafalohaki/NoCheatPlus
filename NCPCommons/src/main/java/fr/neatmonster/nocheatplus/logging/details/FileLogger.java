@@ -123,7 +123,7 @@ public class FileLogger {
                 logger.log(Level.INFO, "Logger started.");
                 inoperable = false;
             } catch (SecurityException | IOException e) {
-                e.printStackTrace();
+                //e.printStackTrace();
             }
         }
         

@@ -1035,7 +1035,7 @@ public class BlockProperties {
             }
         }
         catch (Exception e) {
-            e.printStackTrace();
+            //e.printStackTrace();
         }
         blocks.put(material, props);
     }

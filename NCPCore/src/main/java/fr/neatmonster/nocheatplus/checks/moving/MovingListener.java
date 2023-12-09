@@ -2869,7 +2869,7 @@ public class MovingListener extends CheckListener implements TickListener, IRemo
                 // TODO: Check backwards compatibility (1.4.2). Remove try-catch
                 builder.append("\n(walkspeed=" + player.getWalkSpeed() + " flyspeed=" + player.getFlySpeed() + ")");
             } catch (Throwable t) {
-                t.printStackTrace();
+                //t.printStackTrace();
             }
             if (player.isSprinting()) {
                 builder.append("(sprinting)");

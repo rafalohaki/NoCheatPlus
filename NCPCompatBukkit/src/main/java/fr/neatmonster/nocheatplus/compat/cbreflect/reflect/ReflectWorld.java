@@ -44,7 +44,7 @@ public class ReflectWorld {
             nmsClass = Class.forName(base.nmsPackageName + ".World");
         }
         catch (Throwable t) {
-            t.printStackTrace();
+            //t.printStackTrace();
         }
         this.nmsClass = nmsClass;
         if (reflectIBlockData == null || nmsClass == null) {

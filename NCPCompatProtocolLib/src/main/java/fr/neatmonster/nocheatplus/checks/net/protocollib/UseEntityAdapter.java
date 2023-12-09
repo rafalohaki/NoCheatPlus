@@ -117,7 +117,7 @@ public class UseEntityAdapter extends BaseAdapter {
                 return new LegacyReflectionSet(versionDetail);
             }
             catch (RuntimeException e) {
-                e.printStackTrace();
+                //e.printStackTrace();
             } // +-
         }
         return null;
@@ -128,7 +128,7 @@ public class UseEntityAdapter extends BaseAdapter {
         try {
             if (event.isPlayerTemporary()) return;
         } catch(NoSuchMethodError e) {
-            e.printStackTrace();
+            //e.printStackTrace();
         }
         final long time = System.currentTimeMillis();
         final Player player = event.getPlayer();

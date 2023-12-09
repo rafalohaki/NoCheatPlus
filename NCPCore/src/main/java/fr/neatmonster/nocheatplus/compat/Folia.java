@@ -96,7 +96,7 @@ public class Folia {
             //ReflectionUtil.invokeMethod(executeMethod, syncScheduler, plugin, run, delay, period);
             return executeMethod.invoke(syncScheduler, plugin, run, delay, period);
         } catch (Exception e) {
-            e.printStackTrace();
+            //e.printStackTrace();
         }
         return null;
     }
@@ -120,7 +120,7 @@ public class Folia {
 
             return executeMethod.invoke(syncScheduler, plugin, run);
         } catch (Exception e) {
-            e.printStackTrace();
+            //e.printStackTrace();
         }
         return null;
     }
@@ -145,7 +145,7 @@ public class Folia {
 
             return executeMethod.invoke(syncScheduler, plugin, run, delay);
         } catch (Exception e) {
-            e.printStackTrace();
+            //e.printStackTrace();
         }
         return null;
     }
@@ -184,7 +184,7 @@ public class Folia {
 
             return executeMethod.invoke(syncEntityScheduler, plugin, run, retired, delay);
         } catch (Exception e) {
-            e.printStackTrace();
+            //e.printStackTrace();
         }
         return null;
     }
@@ -228,7 +228,7 @@ public class Folia {
                 //executeMethod = schedulerClass.getMethod("cancelTasks", Plugin.class);
                 //executeMethod.invoke(asyncScheduler, plugin);
             } catch (Exception e) {
-                e.printStackTrace();
+                //e.printStackTrace();
             }
         }
     }
@@ -243,7 +243,7 @@ public class Folia {
             CompletableFuture<Boolean> res = (CompletableFuture<Boolean>) result;
             return res.get();
         } catch (Exception e) {
-            e.printStackTrace();
+            //e.printStackTrace();
         }
         return false;
     }

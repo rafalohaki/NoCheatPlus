@@ -56,7 +56,7 @@ public class OutgoingPosition extends BaseAdapter {
         try {
             if (event.isPlayerTemporary()) return;
         } catch(NoSuchMethodError e) {
-            e.printStackTrace();
+            //e.printStackTrace();
         }
     	if (event.isCancelled()) {
             return;

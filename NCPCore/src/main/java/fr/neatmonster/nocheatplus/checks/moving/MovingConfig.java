@@ -374,7 +374,7 @@ public class MovingConfig extends ACheckConfig {
                 }
             }
             catch (IllegalArgumentException e) {
-                e.printStackTrace();
+                //e.printStackTrace();
             }
         }
 

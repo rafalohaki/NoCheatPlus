@@ -181,7 +181,7 @@ public class DefaultComponentFactory {
             NCPAPIProvider.getNoCheatPlusAPI().addFeatureTags("checks", Collections.singletonList(HotFixFallingBlockPortalEnter.class.getSimpleName()));
         }
         catch (RuntimeException e) {
-            e.printStackTrace();
+            //e.printStackTrace();
         }
 
         // ProtocolLib dependencies.

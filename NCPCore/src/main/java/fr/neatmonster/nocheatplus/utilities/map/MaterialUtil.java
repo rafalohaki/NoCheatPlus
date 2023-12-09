@@ -146,7 +146,7 @@ public class MaterialUtil {
                         builder.append('\n');
                     }
                 } catch (IllegalArgumentException | IllegalAccessException e) {
-                    e.printStackTrace();
+                    //e.printStackTrace();
                 }
             }
         }
