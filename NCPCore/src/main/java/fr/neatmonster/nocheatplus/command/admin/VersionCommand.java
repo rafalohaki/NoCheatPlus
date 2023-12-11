@@ -16,7 +16,6 @@ package fr.neatmonster.nocheatplus.command.admin;
 
 import java.util.Collection;
 import java.util.Map;
-import java.util.Map.Entry;
 import java.util.Set;
 
 import net.kyori.adventure.text.Component;
@@ -60,15 +59,13 @@ public class VersionCommand extends BaseCommand {
             features.append(Component.text("Features: ", NamedTextColor.GOLD).decoration(TextDecoration.BOLD, true)
                     .appendNewline());
             // Add present features.
-            for (final Entry<String, Set<String>> entry : featureTags.entrySet()) {
-                features.append(Component.text()
-                        .append(Component.text(entry.getKey(), NamedTextColor.YELLOW))
-                        .append(Component.text(": ", NamedTextColor.GRAY))
-                        .appendNewline()
-                        .append(Component.join(JoinConfiguration.commas(true), Component.text(entry.getValue().toString(), NamedTextColor.GRAY)))
-                        .appendNewline()
-                        .build());
-            }
+            featureTags.forEach((key, value) -> features.append(Component.text()
+                    .append(Component.text(key, NamedTextColor.YELLOW))
+                    .append(Component.text(": ", NamedTextColor.GRAY))
+                    .appendNewline()
+                    .append(Component.text(String.join(", ", value), NamedTextColor.GRAY))
+                    .appendNewline()
+                    .build()));
         }
 
         final Collection<NCPHook> hooks = NCPHookManager.getAllHooks();
@@ -98,27 +95,27 @@ public class VersionCommand extends BaseCommand {
 
         return Component.text()
                 .append(Component.text("»Version information«", NamedTextColor.RED).decoration(TextDecoration.BOLD, true))
-                .append(Component.newline())
+                .appendNewline()
                 .append(Component.text("Server: ", NamedTextColor.GOLD).decoration(TextDecoration.BOLD, true))
                 .append(Component.text(Bukkit.getServer().getVersion(), NamedTextColor.GRAY))
-                .append(Component.newline())
+                .appendNewline()
                 .append(Component.text("Detected: ", NamedTextColor.YELLOW))
                 .append(Component.text(ServerVersion.getMinecraftVersion(), NamedTextColor.GRAY))
-                .append(Component.newline())
+                .appendNewline()
                 .append(Component.text("NoCheatPlus:", NamedTextColor.GOLD).decoration(TextDecoration.BOLD, true))
-                .append(Component.newline())
+                .appendNewline()
                 .append(Component.text("Plugin: ", NamedTextColor.YELLOW))
                 .append(Component.text(Bukkit.getPluginManager().getPlugin("NoCheatPlus").getDescription().getVersion(), NamedTextColor.GRAY))
-                .append(Component.newline())
+                .appendNewline()
                 .append(Component.text("MCAccess: ", NamedTextColor.YELLOW))
                 .append(Component.text((mcAccess.getMCVersion() + " / " + mcAccess.getServerVersionTag()), NamedTextColor.GRAY))
-                .append(Component.newline())
+                .appendNewline()
 
                 .append(features)
-                .append(Component.newline())
+                .appendNewline()
 
                 .append(fullNames)
-                .append(Component.newline())
+                .appendNewline()
 
                 .append(relatedPlugins)
 
