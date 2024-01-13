@@ -26,8 +26,6 @@ import java.util.LinkedList;
 import java.util.List;
 import java.util.Map;
 import java.util.Map.Entry;
-import java.util.Objects;
-import java.util.Random;
 import java.util.Set;
 
 import net.kyori.adventure.platform.bukkit.BukkitAudiences;
@@ -950,7 +948,6 @@ public class NoCheatPlus extends JavaPlugin implements NoCheatPlusAPI {
         registerGenericInstance(new PassengerUtil());
         genericInstanceRegistry.denyChangeExistingRegistration(PassengerUtil.class);
         // (Allow override others.)
-        registerGenericInstance(new Random(System.currentTimeMillis() ^ ((long) this.hashCode() * (long) eventRegistry.hashCode() * (long) logManager.hashCode())));
         addComponent(new BridgeCrossPlugin());
 
         // World data init (basic).

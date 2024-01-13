@@ -23,8 +23,8 @@ import java.util.HashSet;
 import java.util.LinkedHashSet;
 import java.util.LinkedList;
 import java.util.List;
-import java.util.Random;
 import java.util.Set;
+import java.util.concurrent.ThreadLocalRandom;
 
 import org.junit.jupiter.api.Test;
 
@@ -65,10 +65,6 @@ public class TestRegistrationOrder {
     public static final IAccessSort<IGetRegistrationOrder> accessIGetRegistrationOrder = new AccessIGetRegistrationOrder();
 
     private static final String[] tags = new String[]{null, "foo", "bar", "low", "high", "ledge", "bravo", "bravissimo"};
-
-
-
-    private final Random random = new Random(System.currentTimeMillis() ^ System.nanoTime());
 
     @Test
     public void testRegistrationOrder() {
@@ -250,12 +246,12 @@ public class TestRegistrationOrder {
             prioArr = new int[0];
         }
         else {
-            Set<Integer> prios = new LinkedHashSet<>();
-            if (random.nextBoolean()) {
+            Set<Integer> prios = new LinkedHashSet<Integer>();
+            if (ThreadLocalRandom.current().nextBoolean()) {
                 prios.add(0);
             }
             while (prios.size() < priorities) {
-                prios.add(random.nextInt(2 * priorities + 1) - priorities);
+                prios.add(ThreadLocalRandom.current().nextInt(2 * priorities + 1) - priorities);
             }
             prioArr = new int[priorities];
             int index = 0;
@@ -282,9 +278,9 @@ public class TestRegistrationOrder {
      * @return
      */
     private RegistrationOrder getRegistrationOrder(Integer basePriority) {
-        String tag = tags[random.nextInt(tags.length)];
-        String afterTag = random.nextBoolean() ? null : getTagRegex(random.nextInt(3) + 1);
-        String beforeTag = random.nextBoolean() ? null : getTagRegex(random.nextInt(3) + 1);
+        String tag = tags[ThreadLocalRandom.current().nextInt(tags.length)];
+        String afterTag = ThreadLocalRandom.current().nextBoolean() ? null : getTagRegex(ThreadLocalRandom.current().nextInt(3) + 1);
+        String beforeTag = ThreadLocalRandom.current().nextBoolean() ? null : getTagRegex(ThreadLocalRandom.current().nextInt(3) + 1);
         // StaticLog.logInfo("RegistrationOrder(b " + basePriority + " t " + tag + " bt " + beforeTag + " at " + afterTag +  ")");
         return new RegistrationOrder(basePriority, tag, beforeTag, afterTag);
     }
@@ -296,7 +292,7 @@ public class TestRegistrationOrder {
     private String getTagRegex(int combinations) {
         Set<String> indices = new HashSet<>();
         while (indices.size() < combinations) {
-            indices.add(tags[1 + random.nextInt(tags.length - 1)]); // Avoid null here.
+            indices.add(tags[1 + ThreadLocalRandom.current().nextInt(tags.length - 1)]); // Avoid null here.
         }
         // Combine tags to a regex (simple).
         return"(" + StringUtil.join(indices, "|") + ")";
@@ -354,8 +350,8 @@ public class TestRegistrationOrder {
     private int[][] getSwapIndices(int upperBound, int n) {
         int[][] out = new int[n][2];
         for (int i = 0; i < n; i++) {
-            out[i][0] = random.nextInt(upperBound);
-            out[i][1] = random.nextInt(upperBound);
+            out[i][0] = ThreadLocalRandom.current().nextInt(upperBound);
+            out[i][1] = ThreadLocalRandom.current().nextInt(upperBound);
         }
         return out;
     }

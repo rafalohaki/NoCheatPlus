@@ -59,7 +59,8 @@ public class ImpossibleHit extends Check {
         boolean cancel = false;
         boolean violation = false;
         final long currentEventTime = System.currentTimeMillis();
-        List<String> tags = new LinkedList<>();
+        boolean slientCancel = false;
+        List<String> tags = new LinkedList<String>();
         final MovingData mData = pData.getGenericInstance(MovingData.class);
         final BlockInteractData biData = pData.getGenericInstance(BlockInteractData.class);
         
@@ -77,7 +78,7 @@ public class ImpossibleHit extends Check {
         else if (InventoryUtil.hasAnyInventoryOpen(player)) {
             violation = true;
             tags.add("inventoryopen");
-            player.closeInventory();
+            slientCancel = true;
         }
         // Blocking/Using item and attacking
         else if ((mData.isUsingItem || player.isBlocking()) && !resetActiveItem) {
@@ -94,6 +95,10 @@ public class ImpossibleHit extends Check {
             final ViolationData vd = new ViolationData(this, player, data.impossibleHitVL, 1D, cc.impossibleHitActions);
             if (vd.needsParameters()) vd.setParameter(ParameterName.TAGS, StringUtil.join(tags, "+"));
             cancel = executeActions(vd).willCancel();
+            if (slientCancel && cancel) {
+                cancel = false;
+                player.closeInventory();
+            }
         }
         // Cooldown
         else {
