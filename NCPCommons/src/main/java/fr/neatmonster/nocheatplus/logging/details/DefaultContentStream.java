@@ -14,9 +14,8 @@
  */
 package fr.neatmonster.nocheatplus.logging.details;
 
-import org.apache.logging.log4j.Level;
-
 import java.util.ArrayList;
+import java.util.logging.Level;
 
 /**
  * Locking is done with the internal node list, log does not block (extra to whatever loggers would do).

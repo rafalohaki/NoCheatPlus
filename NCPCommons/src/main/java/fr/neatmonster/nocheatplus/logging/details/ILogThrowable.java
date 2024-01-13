@@ -14,9 +14,9 @@
  */
 package fr.neatmonster.nocheatplus.logging.details;
 
-import org.apache.logging.log4j.Level;
-
 import fr.neatmonster.nocheatplus.logging.StreamID;
+
+import java.util.logging.Level;
 
 /**
  * Standard logging for Throwable throwables.

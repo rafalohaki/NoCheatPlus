@@ -26,8 +26,9 @@ import fr.neatmonster.nocheatplus.logging.StreamID;
 import fr.neatmonster.nocheatplus.logging.Streams;
 import fr.neatmonster.nocheatplus.utilities.ColorUtil;
 import fr.neatmonster.nocheatplus.utilities.StringUtil;
-import org.apache.logging.log4j.Level;
 import org.jetbrains.annotations.NotNull;
+
+import java.util.logging.Level;
 
 /**
  * Log to any log stream (console only).
@@ -90,7 +91,7 @@ public class StreamCommand extends BaseCommand {
                 // Attempt to parse level.
                 try {
                     // Convert to upper-case to ignore case.
-                    level = Level.toLevel(split[1].toUpperCase());
+                    level = Level.parse(split[1].toUpperCase());
                 }
                 catch (IllegalArgumentException e) {
                     sender.sendMessage("Bad level: " + split[1]);
@@ -109,7 +110,7 @@ public class StreamCommand extends BaseCommand {
                     case "debug":
                         streamId = Streams.TRACE_FILE;
                         if (level == null) {
-                            level = Level.DEBUG;
+                            level = Level.FINE;
                         }
                         break;
                     case "status":

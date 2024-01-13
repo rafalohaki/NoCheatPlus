@@ -16,7 +16,6 @@ package fr.neatmonster.nocheatplus.logging;
 
 import java.io.File;
 
-import org.apache.logging.log4j.LogManager;
 import org.bukkit.Bukkit;
 import org.bukkit.plugin.Plugin;
 
@@ -55,7 +54,7 @@ public class BukkitLogManager extends AbstractLogManager implements INotifyReloa
 
     private static final ContentLogger<String> serverLogger = (level, content) -> {
         try {
-            LogManager.getLogger(Bukkit.getLogger()).log(level, "[NoCheatPlus] " + content);
+            Bukkit.getLogger().log(level, "[NoCheatPlus] " + content);
         } catch (Throwable t) {
             //t.printStackTrace();
         }
@@ -127,7 +126,7 @@ public class BukkitLogManager extends AbstractLogManager implements INotifyReloa
         attachStringLogger(tempID, Streams.SERVER_LOGGER);
 
         // Plugin logger.
-        tempID = registerStringLogger(LogManager.getLogger(plugin.getLogger()), new LogOptions(Streams.PLUGIN_LOGGER.name, bukkitLoggerAsynchronous ? defaultAsynchronousContext : CallContext.PRIMARY_THREAD_TASK));
+        tempID = registerStringLogger(plugin.getLogger(), new LogOptions(Streams.PLUGIN_LOGGER.name, bukkitLoggerAsynchronous ? defaultAsynchronousContext : CallContext.PRIMARY_THREAD_TASK));
         attachStringLogger(tempID, Streams.PLUGIN_LOGGER);
 
         // Ingame logger (assume not thread-safe at first).

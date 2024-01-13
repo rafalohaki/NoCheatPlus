@@ -14,7 +14,7 @@
  */
 package fr.neatmonster.nocheatplus.logging.details;
 
-import org.apache.logging.log4j.Level;
+import java.util.logging.Level;
 
 /**
  * Handle logging on LogNode instances (log directly, skip, schedule to log within tasks).

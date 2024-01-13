@@ -15,10 +15,10 @@
 package fr.neatmonster.nocheatplus.logging.details;
 
 import java.util.List;
+import java.util.logging.Level;
 
 import fr.neatmonster.nocheatplus.utilities.ds.corw.IQueueRORA;
 import fr.neatmonster.nocheatplus.utilities.ds.corw.QueueRORA;
-import org.apache.logging.log4j.Level;
 
 /**
  * Basic functionality, with int task ids, assuming a primary thread exists.
@@ -211,10 +211,10 @@ public abstract class AbstractLogNodeDispatcher implements LogNodeDispatcher { /
                 // Never mind :).
                 return; 
             }
-            logINIT(Level.WARN, "Dropping log entries from the " + (queue == queueAsynchronous ? "asynchronous" : "primary thread") + " queue to reduce memory consumption...");
+            logINIT(Level.WARNING, "Dropping log entries from the " + (queue == queueAsynchronous ? "asynchronous" : "primary thread") + " queue to reduce memory consumption...");
             dropped = queue.reduce(maxQueueSize / 2);
         }
-        logINIT(Level.WARN, "Dropped " + dropped + " log entries from the " + (queue == queueAsynchronous ? "asynchronous" : "primary thread") + " queue.");
+        logINIT(Level.WARNING, "Dropped " + dropped + " log entries from the " + (queue == queueAsynchronous ? "asynchronous" : "primary thread") + " queue.");
     }
 
     @Override

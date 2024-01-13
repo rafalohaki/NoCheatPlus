@@ -18,10 +18,10 @@ import java.util.Collections;
 import java.util.Date;
 import java.util.HashSet;
 import java.util.Set;
+import java.util.logging.Level;
 
 import fr.neatmonster.nocheatplus.NCPAPIProvider;
 import fr.neatmonster.nocheatplus.utilities.StringUtil;
-import org.apache.logging.log4j.Level;
 
 /**
  * Static access methods for more or less direct logging using either LogManager
@@ -59,7 +59,7 @@ public class StaticLog {
     }
 
     public static void logDebug(final String msg) {
-        log(Level.DEBUG, msg);
+        log(Level.FINE, msg);
     }
 
     public static void logInfo(final String msg) {
@@ -67,15 +67,15 @@ public class StaticLog {
     }
 
     public static void logWarning(final String msg) {
-        log(Level.WARN, msg);
+        log(Level.WARNING, msg);
     }
 
     public static void logSevere(final String msg) {
-        log(Level.FATAL, msg);
+        log(Level.SEVERE, msg);
     }
 
     public static void logDebug(final Throwable t) {
-        log(Level.DEBUG, StringUtil.throwableToString(t));
+        log(Level.FINE, StringUtil.throwableToString(t));
     }
 
     public static void logInfo(final Throwable t) {
@@ -83,11 +83,11 @@ public class StaticLog {
     }
 
     public static void logWarning(final Throwable t) {
-        log(Level.WARN, StringUtil.throwableToString(t));
+        log(Level.WARNING, StringUtil.throwableToString(t));
     }
 
     public static void logSevere(final Throwable t) {
-        log(Level.FATAL, StringUtil.throwableToString(t));
+        log(Level.SEVERE, StringUtil.throwableToString(t));
     }
 
     public static void log(final Level level, final String msg) {

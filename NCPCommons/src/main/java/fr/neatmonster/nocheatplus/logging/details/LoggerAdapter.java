@@ -14,8 +14,8 @@
  */
 package fr.neatmonster.nocheatplus.logging.details;
 
-import org.apache.logging.log4j.Level;
-import org.apache.logging.log4j.Logger;
+import java.util.logging.Level;
+import java.util.logging.Logger;
 
 public class LoggerAdapter implements ContentLogger<String> {
     

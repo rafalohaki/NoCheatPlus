@@ -18,14 +18,14 @@ import java.util.Map;
 import java.util.UUID;
 
 import java.util.concurrent.ConcurrentHashMap;
+import java.util.logging.Level;
+
 import org.bukkit.Bukkit;
 import org.bukkit.entity.Player;
 
 import fr.neatmonster.nocheatplus.compat.BridgeMisc;
 import fr.neatmonster.nocheatplus.logging.StaticLog;
 import fr.neatmonster.nocheatplus.utilities.ReflectionUtil;
-import org.apache.logging.log4j.Level;
-import org.apache.logging.log4j.LogManager;
 
 /**
  * Map (online) players in various ways. Fall back to Bukkit methods if not
@@ -142,7 +142,7 @@ public final class PlayerMap {
         if (hasGetPlayer_UUID) {
             return Bukkit.getPlayer(id);
         } else {
-            LogManager.getLogger(Bukkit.getLogger()).log(Level.WARN, "getPlayer should not be null, please investigate");
+            Bukkit.getLogger().log(Level.WARNING, "getPlayer should not be null, please investigate");
             // HACKS
             final IPlayerData pData = DataManager.getPlayerData(id);
             if (pData != null) {

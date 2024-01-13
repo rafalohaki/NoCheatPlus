@@ -22,13 +22,13 @@ import fr.neatmonster.nocheatplus.components.registry.order.RegistrationOrder.Re
 import fr.neatmonster.nocheatplus.logging.StaticLog;
 import fr.neatmonster.nocheatplus.logging.Streams;
 import fr.neatmonster.nocheatplus.utilities.StringUtil;
-import org.apache.logging.log4j.Level;
 
 import java.lang.reflect.InvocationTargetException;
 import java.lang.reflect.Method;
 import java.lang.reflect.Modifier;
 import java.util.ArrayList;
 import java.util.Collection;
+import java.util.logging.Level;
 
 /**
  * Support for registering multiple event-handler methods at once.<br>
@@ -96,7 +96,7 @@ public abstract class MultiListenerRegistry<EB, P> extends MiniListenerRegistry<
                 builder.append(StringUtil.throwableToString(t.getCause()));
                 cause = cause.getCause();
             }
-            StaticLog.logOnce(Level.FATAL,
+            StaticLog.logOnce(Level.SEVERE,
                     "Exception with " + getComponentName() + ", processing " + event.getClass().getName() + ": " + t.getClass().getSimpleName(), 
                     builder.toString());
         }
