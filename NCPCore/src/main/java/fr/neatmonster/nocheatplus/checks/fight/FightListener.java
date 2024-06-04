@@ -352,7 +352,8 @@ public class FightListener extends CheckListener implements JoinLeaveListener{
         // TODO: To be replaced by Fight.HitBox
         if (!cancelled) {
 
-            final boolean reachEnabled = reach.isEnabled(player, pData);
+            final boolean isDamagedPlayer = damaged instanceof Player; // Disable reach check for non-player since the low accuracy
+            final boolean reachEnabled = reach.isEnabled(player, pData) && isDamagedPlayer;
             final boolean directionEnabled = direction.isEnabled(player, pData) && mData.timeRiptiding + 3000 < now;
             if (reachEnabled || directionEnabled) {
                 if (damagedTrace != null) {
