@@ -500,13 +500,6 @@ public class MovingListener extends CheckListener implements TickListener, IRemo
             // TODO: Micro moves can be detected as duplicate !
             // NOTE: on ground status does not seem to change
         }
-        // Allow elytra fly (not packet mode)
-        // Since in Winds Anarchy, we have another plugin to handle elyta fly better.
-        else if (pData.hasPermission(Permissions.MOVING_ELYTRAFLY, player)
-                && player.getInventory().getChestplate() != null && player.getInventory().getChestplate().getType() == Material.ELYTRA) {
-            earlyReturn = player.isGliding();
-            token = "elytrafly-bypass";
-        }
         else {
             earlyReturn = false;
             token = null;
