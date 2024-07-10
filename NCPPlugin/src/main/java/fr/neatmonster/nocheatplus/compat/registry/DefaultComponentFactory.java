@@ -49,10 +49,16 @@ public class DefaultComponentFactory {
     public DefaultComponentFactory() {
         protocolLibActivation.addAll(Arrays.asList(
                 new Activation()
-                        .neutralDescription("ProtocolLib 5.1.0 or later for Minecraft 1.20.x")
-                        .pluginVersionGT("ProtocolLib", "5.1.0", true)
-                        .minecraftVersionBetween("1.20", true, "1.21", false)
-                        .advertise(true)
+                .neutralDescription("ProtocolLib 5.3.0 or later for Minecraft 1.21.x")
+                .pluginVersionGT("ProtocolLib", "5.3.0", true)
+                .minecraftVersionBetween("1.21", true, "1.22", false)
+                .advertise(true)
+                ,
+                new Activation()
+                .neutralDescription("ProtocolLib 5.1.0 or later for Minecraft 1.20.x")
+                .pluginVersionGT("ProtocolLib", "5.1.0", true)
+                .minecraftVersionBetween("1.20", true, "1.21", false)
+                .advertise(true)
                 ,
                 new Activation()
                         .neutralDescription("ProtocolLib 5.0.0 or later for Minecraft 1.19.x")

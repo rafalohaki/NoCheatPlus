@@ -48,6 +48,7 @@ import fr.neatmonster.nocheatplus.compat.Bridge1_13;
 import fr.neatmonster.nocheatplus.compat.Bridge1_9;
 import fr.neatmonster.nocheatplus.compat.BridgeEnchant;
 import fr.neatmonster.nocheatplus.compat.BridgeMisc;
+import fr.neatmonster.nocheatplus.compat.BridgePotionEffect;
 import fr.neatmonster.nocheatplus.compat.versions.ServerVersion;
 import fr.neatmonster.nocheatplus.compat.blocks.changetracker.BlockChangeTracker;
 import fr.neatmonster.nocheatplus.compat.blocks.changetracker.BlockChangeTracker.Direction;
@@ -1434,7 +1435,7 @@ public class SurvivalFly extends Check {
                 if (sprinting && hAllowedDistance < 0.29 && cc.sfSlownessSprintHack 
                     && (
                         // TODO: Test/balance thresholds (walkSpeed, attrMod).
-                        player.hasPotionEffect(PotionEffectType.SLOW)
+                        player.hasPotionEffect(BridgePotionEffect.SLOWNESS)
                         || data.walkSpeed < Magic.DEFAULT_WALKSPEED
                         || attrMod < 1.0
                     )) {
