@@ -486,13 +486,18 @@ public class CollisionUtil {
         return pos < minPos ? Math.abs(pos - minPos) : (pos > maxPos ? Math.abs(pos - maxPos) : 0.0);
     }
 
-    public static boolean isCollidingWithEntities(final Player p, final boolean onlylivingenitites) {
-        if (onlylivingenitites) {
-            List<Entity> entities = p.getNearbyEntities(0.15, 0.2, 0.15);
-            entities.removeIf(e -> !(e instanceof LivingEntity));
-            return !entities.isEmpty();
+    public static boolean isCollidingWithEntities(final Player p, final boolean onlyLivingEntities) {
+        double xzRange = 0.15;
+        double yRange = onlyLivingEntities ? 0.2 : 0.15;
+
+        // Directly iterate over entities and check conditions to avoid unnecessary collection creation.
+        for (Entity entity : p.getWorld().getNearbyEntities(p.getLocation(), xzRange, yRange, xzRange)) {
+            if (!onlyLivingEntities || entity instanceof LivingEntity) {
+                return true; // Collision detected, return early
+            }
         }
-        return !p.getNearbyEntities(0.15, 0.15, 0.15).isEmpty();
+
+        return false; // No collision detected
     }
 
     /**
