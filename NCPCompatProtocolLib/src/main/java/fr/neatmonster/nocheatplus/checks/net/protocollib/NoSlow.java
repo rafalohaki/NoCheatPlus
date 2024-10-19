@@ -217,10 +217,10 @@ public class NoSlow extends BaseAdapter {
         //    data.changeslot = false;
         //}
         if (e.getPreviousSlot() != e.getNewSlot()) {
-            if ((data.isUsingItem || p.isBlocking()) && data.playerMoves.getCurrentMove() != null) {
+            /*if ((data.isUsingItem || p.isBlocking()) && data.playerMoves.getCurrentMove() != null) {
                 p.getInventory().setHeldItemSlot(e.getPreviousSlot());
                 data.invalidItemUse = true;
-            }
+            }*/
             data.isUsingItem = false;
         }
     }
