@@ -46,6 +46,7 @@ public final class PlayerMap {
 
         public final UUID id;
         public final String exactName;
+        public final String lowerCaseName;
         public Player player = null;
 
         public PlayerInfo (UUID id, String exactName) {

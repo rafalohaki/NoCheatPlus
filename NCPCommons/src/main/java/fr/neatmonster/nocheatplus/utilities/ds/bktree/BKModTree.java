@@ -98,7 +98,7 @@ public abstract class BKModTree<V, N extends Node<V, N>, L extends LookupEntry<V
 			else{
 				for (final Integer key : children.keySet()){
 					// TODO: Not sure this is faster than the EntrySet in average.
-					if (Math.abs(distance - key) <= range) nodes.add(children.get(key));
+					if (Math.abs(distance - key.intValue()) <= range) nodes.add(children.get(key));
 				}
 			}
 			return nodes;

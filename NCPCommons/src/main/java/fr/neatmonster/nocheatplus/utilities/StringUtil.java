@@ -19,6 +19,7 @@ import java.text.DecimalFormatSymbols;
 import java.util.ArrayList;
 import java.util.Arrays;
 import java.util.Collection;
+import java.util.Collections;
 import java.util.Iterator;
 import java.util.List;
 
@@ -56,9 +57,9 @@ public class StringUtil {
      * @return
      */
     public static List<Character> characterList(char...chars) {
-        final List<Character> res = new ArrayList<>(chars.length);
-        for (char aChar : chars) {
-            res.add(aChar);
+        final List<Character> res = new ArrayList<Character>(chars.length);
+        for (char charx : chars) {
+            res.add(charx);
         }
         return res;
     }
@@ -180,7 +181,7 @@ public class StringUtil {
             }
             for (final String s : out){
                 final String[] split = s.split("\\u" + hex);
-                queue.addAll(Arrays.asList(split));
+                Collections.addAll(queue, split);
             }
             List<String> temp = out;
             out = queue;

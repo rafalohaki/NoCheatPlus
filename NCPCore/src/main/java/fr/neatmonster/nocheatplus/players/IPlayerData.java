@@ -336,4 +336,5 @@ public interface IPlayerData extends IData, IBaseDataAccess, IGetGenericInstance
      * 
      * @return
      */
+    public boolean isPlayerSetBackScheduled();
 }
