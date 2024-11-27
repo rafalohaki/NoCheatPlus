@@ -99,7 +99,7 @@ public class ReloadCommand extends BaseCommand {
             sender.sendMessage(TAG + "Configuration reloaded.");
         }
         logManager.info(Streams.INIT, "Configuration reloaded.");
-        logManager.info(Streams.DEFAULT_FILE, PlainTextComponentSerializer.plainText().serialize(VersionCommand.getVersionInfo())); // Queued (!).
+        logManager.info(Streams.DEFAULT_FILE, VersionCommand.getFormattedVersionInfo()); // Queued (!).
     }
 
 }

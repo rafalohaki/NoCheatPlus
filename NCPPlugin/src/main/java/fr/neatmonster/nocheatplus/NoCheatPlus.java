@@ -30,7 +30,6 @@ import java.util.Map.Entry;
 import java.util.Set;
 
 import net.kyori.adventure.platform.bukkit.BukkitAudiences;
-import net.kyori.adventure.text.serializer.plain.PlainTextComponentSerializer;
 import org.bukkit.Bukkit;
 import org.bukkit.ChatColor;
 import org.bukkit.World;
@@ -1142,7 +1141,7 @@ public class NoCheatPlus extends JavaPlugin implements NoCheatPlusAPI {
         // Finished.
         logManager.info(Streams.INIT, "Post-enable finished.");
         // Log version to file (queued).
-        logManager.info(Streams.DEFAULT_FILE, PlainTextComponentSerializer.plainText().serialize(VersionCommand.getVersionInfo()));
+        logManager.info(Streams.DEFAULT_FILE, VersionCommand.getFormattedVersionInfo());
     }
 
     /**
