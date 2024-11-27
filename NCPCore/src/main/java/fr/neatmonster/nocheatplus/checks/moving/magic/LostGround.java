@@ -96,8 +96,11 @@ public class LostGround {
         }
 
         // Block change tracker (kept extra for now).
-        return blockChangeTracker != null && lostGroundPastState(player, from, to, data, cc, blockChangeTracker, tags);
+        if (blockChangeTracker != null && lostGroundPastState(player, from, to, data, cc, blockChangeTracker, tags)) {
+            return true;
+        }
         // Nothing found.
+        return false;
     }
 
 
@@ -228,10 +231,12 @@ public class LostGround {
                          * to testing this.
                          */
                         final double xzMargin = lastMove.yDistance <= -0.23 ? 0.3 : 0.15;
-                        return lostGroundEdgeAsc(player, from.getBlockCache(), to.getWorld(), to.getX(), to.getY(),
-                                to.getZ(), from.getX(), from.getY(), from.getZ(),
-                                hDistance, to.getBoxMarginHorizontal(), xzMargin,
-                                data, "asc5", tags, from.getMCAccess());
+                        if (lostGroundEdgeAsc(player, from.getBlockCache(), to.getWorld(), to.getX(), to.getY(), 
+                                              to.getZ(), from.getX(), from.getY(), from.getZ(), 
+                                              hDistance, to.getBoxMarginHorizontal(), xzMargin, 
+                                              data, "asc5", tags, from.getMCAccess())) {
+                            return true;
+                        }
                     }
                     else if (from.isOnGround(from.getyOnGround(), 0.0625, 0.0)) {
                         // (Minimal margin.)
@@ -280,9 +285,11 @@ public class LostGround {
                                           final PlayerMoveData lastMove, final MovingData data, final MovingConfig cc, 
                                           final Collection<String> tags) {
 
-        if (lastMove.hDistance > 0.0 && lastMove.yDistance < -0.3) {
+        if (lastMove.yDistance <= -0.23 && lastMove.hDistance > 0.0 && lastMove.yDistance < -0.3) {
             // TODO: Code duplication with edgeasc5 above.
-            return lostGroundEdgeAsc(player, from.getBlockCache(), to.getWorld(), to.getX(), to.getY(), to.getZ(), from.getX(), from.getY(), from.getZ(), hDistance, to.getBoxMarginHorizontal(), 0.3, data, "asc7", tags, from.getMCAccess());
+            if (lostGroundEdgeAsc(player, from.getBlockCache(), to.getWorld(), to.getX(), to.getY(), to.getZ(), from.getX(), from.getY(), from.getZ(), hDistance, to.getBoxMarginHorizontal(), 0.3, data, "asc7", tags, from.getMCAccess())) {
+                return true;
+            }
         }
         else if ((lastMove.yDistance == 0.0 && lastMove.touchedGround || lastMove.yDistance < 0.0)
                 && data.liftOffEnvelope.getMaxJumpGain(data.jumpAmplifier) > yDistance
@@ -453,7 +460,7 @@ public class LostGround {
         // Lost ground while falling onto/over edges of blocks.
         if (yDistance < 0 && hDistance <= 1.5 && lastMove.yDistance < 0.0 && yDistance > lastMove.yDistance && !to.isOnGround()) {
             // TODO: yDistance <= 0 might be better.
-            if (from.isOnGround(0.5, 0.2, 0) || to.isOnGround(0.5, Math.min(0.2, 0.01 + hDistance), Math.min(0.1, 0.01 - yDistance))) {
+            if (from.isOnGround(0.5, 0.2, 0) || to.isOnGround(0.5, Math.min(0.2, 0.01 + hDistance), Math.min(0.1, 0.01 + -yDistance))) {
                 return applyLostGround(player, from, true, thisMove, data, "edgedesc", tags);
             }
         }
@@ -487,7 +494,7 @@ public class LostGround {
             // TODO: stairs ?
             // TODO: Can it be safe to only check to with raised margin ? [in fact should be checked from higher yMin down]
             // TODO: Interpolation method (from to)?
-            if (from.isOnGround(0.5, 0.2, 0) || to.isOnGround(0.5, Math.min(0.3, 0.01 + hDistance), Math.min(0.1, 0.01 - yDistance))) {
+            if (from.isOnGround(0.5, 0.2, 0) || to.isOnGround(0.5, Math.min(0.3, 0.01 + hDistance), Math.min(0.1, 0.01 + -yDistance))) {
                 // (Usually yDistance should be -0.078)
                 return applyLostGround(player, from, true, data.playerMoves.getCurrentMove(), data, "fastedge", tags);
             }

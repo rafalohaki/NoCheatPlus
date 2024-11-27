@@ -27,7 +27,7 @@ import fr.neatmonster.nocheatplus.utilities.ds.map.ManagedMap;
  */
 public class EnginePlayerDataMap extends ManagedMap<String, EnginePlayerData> {
 
-	protected final long durExpire;
+	protected long durExpire;
 	
 	/** Timestamp of last time get was called.*/
 	protected long lastAccess = System.currentTimeMillis();

@@ -42,7 +42,7 @@ public class CheckListener extends NCPListener implements IHoldSubComponents, ID
     protected final IGenericInstanceHandle<MCAccess> mcAccess;
 
     /** */
-    protected final List<Object> queuedComponents = new LinkedList<>();
+    protected final List<Object> queuedComponents = new LinkedList<Object>();
 
     public CheckListener(CheckType checkType){
         this.checkType = checkType; 
@@ -69,7 +69,7 @@ public class CheckListener extends NCPListener implements IHoldSubComponents, ID
 
     @Override
     public Collection<Object> getSubComponents() {
-        final List<Object> res = new ArrayList<>(this.queuedComponents);
+        final List<Object> res = new ArrayList<Object>(this.queuedComponents);
         this.queuedComponents.clear();
         return res;
     }

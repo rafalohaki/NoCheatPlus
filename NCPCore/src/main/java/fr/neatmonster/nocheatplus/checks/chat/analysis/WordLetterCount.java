@@ -31,7 +31,7 @@ public final class WordLetterCount{
 		this.word = word;
 		char[] a = word.toCharArray();
 		// Preserve insertion order.
-		counts = new LinkedHashMap<>(a.length);
+		counts = new LinkedHashMap<Character, Integer>(a.length);
 		int upperCase = 0;
 		int notLetter = 0;
         for (final char c : a) {

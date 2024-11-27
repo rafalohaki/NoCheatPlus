@@ -37,6 +37,7 @@ import fr.neatmonster.nocheatplus.compat.BridgeMisc;
 import fr.neatmonster.nocheatplus.components.NoCheatPlusAPI;
 import fr.neatmonster.nocheatplus.components.data.ICheckData;
 import fr.neatmonster.nocheatplus.components.data.IData;
+import fr.neatmonster.nocheatplus.components.registry.factory.IFactoryOne;
 import fr.neatmonster.nocheatplus.components.registry.feature.INotifyReload;
 import fr.neatmonster.nocheatplus.components.registry.feature.JoinLeaveListener;
 import fr.neatmonster.nocheatplus.config.ConfPaths;
@@ -45,8 +46,10 @@ import fr.neatmonster.nocheatplus.config.ConfigManager;
 import fr.neatmonster.nocheatplus.logging.Streams;
 import fr.neatmonster.nocheatplus.players.DataManager;
 import fr.neatmonster.nocheatplus.players.IPlayerData;
+import fr.neatmonster.nocheatplus.players.PlayerFactoryArgument;
 import fr.neatmonster.nocheatplus.utilities.StringUtil;
 import fr.neatmonster.nocheatplus.utilities.ds.prefixtree.SimpleCharPrefixTree;
+import fr.neatmonster.nocheatplus.worlds.WorldFactoryArgument;
 
 /**
  * Central location to listen to events that are relevant for the chat checks.
@@ -86,6 +89,7 @@ public class ChatListener extends CheckListener implements INotifyReload, JoinLe
     /** Set world to null after use, primary thread only. */
     private final Location useLoc = new Location(null, 0, 0, 0);
 
+    @SuppressWarnings("unchecked")
     public ChatListener() {
         super(CheckType.CHAT);
         ConfigFile config = ConfigManager.getConfigFile();
@@ -116,7 +120,7 @@ public class ChatListener extends CheckListener implements INotifyReload, JoinLe
      * @param event
      *            the event
      */
-    @EventHandler(priority = EventPriority.LOWEST)
+    @EventHandler(ignoreCancelled = false, priority = EventPriority.LOWEST)
     public void onPlayerChat(final AsyncPlayerChatEvent event) {
 
         final Player player = event.getPlayer();
@@ -160,7 +164,7 @@ public class ChatListener extends CheckListener implements INotifyReload, JoinLe
         final String alias = split[0].substring(1);
         final Command command = CommandUtil.getCommand(alias);
 
-        final List<String> messageVars = new ArrayList<>(); // Could as well use an array and allow null on input of SimpleCharPrefixTree.
+        final List<String> messageVars = new ArrayList<String>(); // Could as well use an array and allow null on input of SimpleCharPrefixTree.
         messageVars.add(lcMessage);
         String checkMessage = message; // Message to run chat checks on.
         if (command != null) {

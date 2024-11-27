@@ -35,7 +35,7 @@ public interface ICaptcha {
      * @param data
      * @param isMainThread
      */
-    void checkCaptcha(Player player, String message, ChatConfig cc, ChatData data, boolean isMainThread);
+    public void checkCaptcha(Player player, String message, ChatConfig cc, ChatData data, boolean isMainThread);
 
     /**
      * Just send the current captcha to the player.
@@ -43,7 +43,7 @@ public interface ICaptcha {
      * @param cc
      * @param data
      */
-    void sendCaptcha(Player player, ChatConfig cc, ChatData data);
+    public void sendCaptcha(Player player, ChatConfig cc, ChatData data);
 
     /**
      * Generate a new captcha and send to the player.
@@ -51,7 +51,7 @@ public interface ICaptcha {
      * @param cc
      * @param data
      */
-    void sendNewCaptcha(Player player, ChatConfig cc, ChatData data);
+    public void sendNewCaptcha(Player player, ChatConfig cc, ChatData data);
 
     /**
      * Check if checkCaptcha should be called.
@@ -62,7 +62,7 @@ public interface ICaptcha {
      * @param pData
      * @return
      */
-    boolean shouldCheckCaptcha(Player player, ChatConfig cc, ChatData data, IPlayerData pData);
+    public boolean shouldCheckCaptcha(Player player, ChatConfig cc, ChatData data, IPlayerData pData);
 
     /**
      * Check if captcha should be generated and send to the player.
@@ -73,7 +73,7 @@ public interface ICaptcha {
      * @param pData
      * @return
      */
-    boolean shouldStartCaptcha(Player player, ChatConfig cc, ChatData data, IPlayerData pData);
+    public boolean shouldStartCaptcha(Player player, ChatConfig cc, ChatData data, IPlayerData pData);
 
     /**
      * Just resets tries, generate new captcha if necessary.
@@ -83,13 +83,13 @@ public interface ICaptcha {
      * @param data
      * @param pData
      */
-    void resetCaptcha(Player player, ChatConfig cc, ChatData data, IPlayerData pData);
+    public void resetCaptcha(Player player, ChatConfig cc, ChatData data, IPlayerData pData);
 
     /**
      * Convenience method. Should synchronize over data of player (!).
      * @param player
      */
-    void resetCaptcha(Player player);
+    public void resetCaptcha(Player player);
 
     /**
      * Generate a captcha.
@@ -97,5 +97,5 @@ public interface ICaptcha {
      * @param data
      * @param reset If to reset tries.
      */
-    void generateCaptcha(ChatConfig cc, ChatData data, boolean reset);
+    public void generateCaptcha(ChatConfig cc, ChatData data, boolean reset);
 }

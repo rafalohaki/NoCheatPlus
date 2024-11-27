@@ -47,13 +47,13 @@ public enum LiftOffEnvelope {
     POWDER_SNOW(0.63, 0.63, 0.63, 0, true)
     ;
 
-    private final double maxJumpGain;
-    private final double maxJumpHeight;
-    private final double minJumpHeight;
-    private final int maxJumpPhase;
-    private final boolean jumpEffectApplies;
+    private double maxJumpGain;
+    private double maxJumpHeight;
+    private double minJumpHeight;
+    private int maxJumpPhase;
+    private boolean jumpEffectApplies;
 
-    LiftOffEnvelope(double maxJumpGain, double maxJumpHeight, double minJumpHeight, int maxJumpPhase, boolean jumpEffectApplies) {
+    private LiftOffEnvelope(double maxJumpGain, double maxJumpHeight, double minJumpHeight, int maxJumpPhase, boolean jumpEffectApplies) {
         this.maxJumpGain = maxJumpGain; //(Lift-off speed gain)
         this.maxJumpHeight = maxJumpHeight; //(Actual jump height)
         this.minJumpHeight = minJumpHeight;

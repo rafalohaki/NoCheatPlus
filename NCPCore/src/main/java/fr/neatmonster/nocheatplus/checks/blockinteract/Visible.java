@@ -101,7 +101,7 @@ public class Visible extends Check {
 
     private final RayChecker checker = new RayChecker();
 
-    private final List<String> tags = new ArrayList<>();
+    private final List<String> tags = new ArrayList<String>();
 
     /** For temporary use, no nested use, setWorld(null) after use, etc. */
     private final Location useLoc = new Location(null, 0, 0, 0);

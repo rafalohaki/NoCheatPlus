@@ -69,14 +69,18 @@ public class LostGroundVehicle {
             }
             // Descending.
             if (yDistance <= 0.0) {
-                return lostGroundDescend(vehicle, from, to, hDistance, yDistance, sprinting, lastMove, data, cc, tags);
+                if (lostGroundDescend(vehicle, from, to, hDistance, yDistance, sprinting, lastMove, data, cc, tags)) {
+                    return true;	
+                }
             }
         }
         else if (yDistance < -0.7) {
             // Clearly descending.
             // TODO: Might want to remove this one.
             if (lastMove.toIsValid && hDistance <= 0.5) {
-                return lostGroundFastDescend(vehicle, from, to, hDistance, yDistance, sprinting, lastMove, data, cc, tags);
+                if (lostGroundFastDescend(vehicle, from, to, hDistance, yDistance, sprinting, lastMove, data, cc, tags)) {
+                    return true;
+                }
             }
         }
         // Block change tracker (kept extra for now).
@@ -154,10 +158,12 @@ public class LostGroundVehicle {
                          * to testing this.
                          */
                         final double xzMargin = lastMove.yDistance <= -0.23 ? 0.3 : 0.15;
-                        return lostGroundEdgeAsc(vehicle, from.getBlockCache(), to.getWorld(), to.getX(), to.getY(),
-                                to.getZ(), from.getX(), from.getY(), from.getZ(),
-                                hDistance, to.getBoxMarginHorizontal(), xzMargin,
-                                data, "asc5", tags, from.getMCAccess());
+                        if (lostGroundEdgeAsc(vehicle, from.getBlockCache(), to.getWorld(), to.getX(), to.getY(), 
+                                to.getZ(), from.getX(), from.getY(), from.getZ(), 
+                                hDistance, to.getBoxMarginHorizontal(), xzMargin, 
+                                data, "asc5", tags, from.getMCAccess())) {
+                            return true;
+                        }
                     }
 
                     else if (from.isOnGround(from.getyOnGround(), 0.0625, 0.0)) {
@@ -346,7 +352,7 @@ public class LostGroundVehicle {
             // TODO: yDistance <= 0 might be better.
             // Also clear accounting data.
             //			if (to.isOnGround(0.5) || from.isOnGround(0.5)) {
-            if (from.isOnGround(0.5, 0.2, 0) || to.isOnGround(0.5, Math.min(0.2, 0.01 + hDistance), Math.min(0.1, 0.01 - yDistance))) {
+            if (from.isOnGround(0.5, 0.2, 0) || to.isOnGround(0.5, Math.min(0.2, 0.01 + hDistance), Math.min(0.1, 0.01 + -yDistance))) {
                 return applyLostGround(vehicle, from, true, thisMove, data, "edgedesc", tags);
             }
         }
@@ -382,7 +388,7 @@ public class LostGroundVehicle {
             // TODO: stairs ?
             // TODO: Can it be safe to only check to with raised margin ? [in fact should be checked from higher yMin down]
             // TODO: Interpolation method (from to)?
-            if (from.isOnGround(0.5, 0.2, 0) || to.isOnGround(0.5, Math.min(0.3, 0.01 + hDistance), Math.min(0.1, 0.01 - yDistance))) {
+            if (from.isOnGround(0.5, 0.2, 0) || to.isOnGround(0.5, Math.min(0.3, 0.01 + hDistance), Math.min(0.1, 0.01 + -yDistance))) {
                 // (Usually yDistance should be -0.078)
                 return applyLostGround(vehicle, from, true, data.vehicleMoves.getCurrentMove(), data, "fastedge", tags);
             }

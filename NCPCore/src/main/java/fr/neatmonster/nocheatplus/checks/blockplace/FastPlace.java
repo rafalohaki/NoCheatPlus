@@ -96,8 +96,9 @@ public class FastPlace extends Check {
 
         boolean cancel = false;
         if (violation > 0f) {
-            data.fastPlaceVL += violation;
-            cancel = executeActions(player, data.fastPlaceVL, violation, cc.fastPlaceActions).willCancel();
+            final double change = (double) violation;
+            data.fastPlaceVL += change;
+            cancel = executeActions(player, data.fastPlaceVL, change, cc.fastPlaceActions).willCancel();
         }
         else if (data.fastPlaceVL > 0d && fullScore < cc.fastPlaceLimit * .75) {
             data.fastPlaceVL *= 0.95;

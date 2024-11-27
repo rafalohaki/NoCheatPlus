@@ -41,14 +41,17 @@ import fr.neatmonster.nocheatplus.compat.BridgeMisc;
 import fr.neatmonster.nocheatplus.components.NoCheatPlusAPI;
 import fr.neatmonster.nocheatplus.components.data.ICheckData;
 import fr.neatmonster.nocheatplus.components.data.IData;
+import fr.neatmonster.nocheatplus.components.registry.factory.IFactoryOne;
 import fr.neatmonster.nocheatplus.players.DataManager;
 import fr.neatmonster.nocheatplus.players.IPlayerData;
+import fr.neatmonster.nocheatplus.players.PlayerFactoryArgument;
 import fr.neatmonster.nocheatplus.stats.Counters;
 import fr.neatmonster.nocheatplus.utilities.CheckUtils;
 import fr.neatmonster.nocheatplus.utilities.InventoryUtil;
 import fr.neatmonster.nocheatplus.utilities.TickTask;
 import fr.neatmonster.nocheatplus.utilities.location.LocUtil;
 import fr.neatmonster.nocheatplus.utilities.map.BlockProperties;
+import fr.neatmonster.nocheatplus.worlds.WorldFactoryArgument;
 
 /**
  * Central location to listen to events that are relevant for the block interact checks.
@@ -103,6 +106,7 @@ public class BlockInteractListener extends CheckListener {
     private final int idInteractLookFlyingFirst = counters.registerKey("block.interact.look.flying.first");
     private final int idInteractLookFlyingOther = counters.registerKey("block.interact.look.flying.other");
 
+    @SuppressWarnings("unchecked")
     public BlockInteractListener() {
         super(CheckType.BLOCKINTERACT);
         final NoCheatPlusAPI api = NCPAPIProvider.getNoCheatPlusAPI();
@@ -126,7 +130,7 @@ public class BlockInteractListener extends CheckListener {
      * @param event
      *            the event
      */
-    @EventHandler(priority = EventPriority.LOWEST)
+    @EventHandler(ignoreCancelled = false, priority = EventPriority.LOWEST)
     public void onPlayerInteract(final PlayerInteractEvent event) {
         final Player player = event.getPlayer();
         final IPlayerData pData = DataManager.getPlayerData(player);
@@ -333,7 +337,7 @@ public class BlockInteractListener extends CheckListener {
         }
     }
 
-    @EventHandler(priority = EventPriority.MONITOR)
+    @EventHandler(ignoreCancelled = false, priority = EventPriority.MONITOR)
     public void onPlayerInteractMonitor(final PlayerInteractEvent event) {
         // Set event resolution.
         final Player player = event.getPlayer();

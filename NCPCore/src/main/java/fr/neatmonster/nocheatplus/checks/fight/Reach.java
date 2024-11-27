@@ -15,17 +15,6 @@
 package fr.neatmonster.nocheatplus.checks.fight;
 
 
-import fr.neatmonster.nocheatplus.actions.ParameterName;
-import fr.neatmonster.nocheatplus.checks.Check;
-import fr.neatmonster.nocheatplus.checks.CheckType;
-import fr.neatmonster.nocheatplus.checks.ViolationData;
-import fr.neatmonster.nocheatplus.checks.combined.Improbable;
-import fr.neatmonster.nocheatplus.checks.moving.location.tracking.LocationTrace.ITraceEntry;
-import fr.neatmonster.nocheatplus.permissions.Permissions;
-import fr.neatmonster.nocheatplus.players.IPlayerData;
-import fr.neatmonster.nocheatplus.utilities.StringUtil;
-import fr.neatmonster.nocheatplus.utilities.TickTask;
-import fr.neatmonster.nocheatplus.utilities.location.TrigUtil;
 import org.bukkit.GameMode;
 import org.bukkit.Location;
 import org.bukkit.entity.EnderDragon;
@@ -34,6 +23,18 @@ import org.bukkit.entity.Giant;
 import org.bukkit.entity.LivingEntity;
 import org.bukkit.entity.Player;
 import org.bukkit.util.Vector;
+
+import fr.neatmonster.nocheatplus.checks.Check;
+import fr.neatmonster.nocheatplus.checks.CheckType;
+import fr.neatmonster.nocheatplus.checks.combined.Improbable;
+import fr.neatmonster.nocheatplus.checks.moving.location.tracking.LocationTrace.ITraceEntry;
+import fr.neatmonster.nocheatplus.permissions.Permissions;
+import fr.neatmonster.nocheatplus.players.IPlayerData;
+import fr.neatmonster.nocheatplus.utilities.StringUtil;
+import fr.neatmonster.nocheatplus.utilities.TickTask;
+import fr.neatmonster.nocheatplus.utilities.location.TrigUtil;
+import fr.neatmonster.nocheatplus.actions.ParameterName;
+import fr.neatmonster.nocheatplus.checks.ViolationData;
 
 
 
@@ -99,9 +100,9 @@ public class Reach extends Check {
         // TODO: Make a little more accurate by counting in the actual bounding box.
         final double pY = pLoc.getY() + player.getEyeHeight();
         final double dY = dRef.getY();
-        // Level with damaged.
         if (pY <= dY); // Keep the foot level y.
-        else dRef.setY(Math.min(pY, dY + height)); // Highest ref y.
+        else if (pY >= dY + height) dRef.setY(dY + height); // Highest ref y.
+        else dRef.setY(pY); // Level with damaged.
 
         final Vector pRel = dRef.toVector().subtract(pLoc.toVector().setY(pY)); // TODO: Run calculations on numbers only :p.
         // Distance is calculated from eye location to center of targeted. If the player is further away from their target
@@ -201,11 +202,15 @@ public class Reach extends Check {
         final double dY = dRef.getY();
         double y = dRef.getY();
 
-        // Level with damaged.
         if (context.pY <= dY) {
             // Keep the foot level y.
         }
-        else y = Math.min(context.pY, dY + dRef.getBoxMarginVertical()); // Highest ref y.
+        else if (context.pY >= dY + dRef.getBoxMarginVertical()) {
+            y = dY + dRef.getBoxMarginVertical(); // Highest ref y.
+        }
+        else {
+            y = context.pY; // Level with damaged.
+        }
 
         double centertoedge = 0.0;
         if (cc.reachPrecision) centertoedge = getinset(pLoc, new Location(null, dRef.getX(), dRef.getY(), dRef.getZ()), dRef.getBoxMarginHorizontal(), y - context.pY);

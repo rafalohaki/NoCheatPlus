@@ -50,7 +50,7 @@ public class ActionFactory extends AbstractActionFactory<ViolationData, ActionLi
         actionDefinition = actionDefinition.toLowerCase();
 
         if (actionDefinition.equals("cancel")) {
-            return new CancelAction<>();
+            return new CancelAction<ViolationData, ActionList>();
         }
 
         if (actionDefinition.endsWith("%cancel")) {
@@ -68,10 +68,9 @@ public class ActionFactory extends AbstractActionFactory<ViolationData, ActionLi
                 }
             }
             catch (NumberFormatException e) {
-                //e.printStackTrace();
             }
             StaticLog.logWarning("Bad probability definition for cancel action: '" + actionDefinition + "', relay to always cancelling.");
-            return new CancelAction<>();
+            return new CancelAction<ViolationData, ActionList>();
         }
 
         if (actionDefinition.startsWith("cmd:")) {

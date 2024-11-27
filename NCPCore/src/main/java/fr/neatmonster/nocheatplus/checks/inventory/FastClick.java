@@ -30,6 +30,7 @@ import fr.neatmonster.nocheatplus.checks.ViolationData;
 import fr.neatmonster.nocheatplus.checks.combined.Improbable;
 import fr.neatmonster.nocheatplus.permissions.Permissions;
 import fr.neatmonster.nocheatplus.players.IPlayerData;
+import fr.neatmonster.nocheatplus.utilities.InventoryUtil;
 import fr.neatmonster.nocheatplus.utilities.TickTask;
 import fr.neatmonster.nocheatplus.utilities.StringUtil;
 import fr.neatmonster.nocheatplus.utilities.InventoryUtil;
@@ -41,7 +42,7 @@ import fr.neatmonster.nocheatplus.utilities.InventoryUtil;
 public class FastClick extends Check {
 
 
-    final List<String> tags = new ArrayList<>();
+    final List<String> tags = new ArrayList<String>();
 
 
     /**
@@ -110,7 +111,7 @@ public class FastClick extends Check {
         float shortTerm = data.fastClickFreq.bucketScore(0);
         if (shortTerm > cc.fastClickShortTermLimit) {
             // Check for lag.
-            shortTerm /= TickTask.getLag(data.fastClickFreq.bucketDuration(), true);
+            shortTerm /= (float) TickTask.getLag(data.fastClickFreq.bucketDuration(), true);
         }
         shortTerm -= cc.fastClickShortTermLimit;
         
@@ -118,7 +119,7 @@ public class FastClick extends Check {
         float normal = data.fastClickFreq.score(1f);
         if (normal > cc.fastClickNormalLimit) {
             // Check for lag.
-            normal /= TickTask.getLag(data.fastClickFreq.bucketDuration() * data.fastClickFreq.numberOfBuckets(), true);
+            normal /= (float) TickTask.getLag(data.fastClickFreq.bucketDuration() * data.fastClickFreq.numberOfBuckets(), true);
         }
         normal -= cc.fastClickNormalLimit;
         
@@ -166,7 +167,7 @@ public class FastClick extends Check {
             // Interaction was too quick, violation.
             tags.add("interact_time");
             long duration = Math.max(data.lastClickTime - data.containerOpenTime, 20);
-            double violation = ((double) cc.chestOpenLimit / duration) * 100D; // Normalize.
+            double violation = (cc.chestOpenLimit / duration) * 100D; // Normalize.
             data.fastClickVL += violation;
             final ViolationData vd = new ViolationData(this, player, data.fastClickVL, violation, cc.fastClickActions);
             if (vd.needsParameters()) vd.setParameter(ParameterName.TAGS, StringUtil.join(tags, "+"));

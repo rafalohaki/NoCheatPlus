@@ -14,6 +14,7 @@
  */
 package fr.neatmonster.nocheatplus.checks.blockplace;
 
+import org.bukkit.Bukkit;
 import org.bukkit.Location;
 import org.bukkit.Material;
 import org.bukkit.block.Block;
@@ -51,12 +52,16 @@ import fr.neatmonster.nocheatplus.checks.net.model.DataPacketFlying;
 import fr.neatmonster.nocheatplus.compat.BridgeEntityType;
 import fr.neatmonster.nocheatplus.compat.Bridge1_9;
 import fr.neatmonster.nocheatplus.compat.BridgeMisc;
+import fr.neatmonster.nocheatplus.compat.Folia;
+import fr.neatmonster.nocheatplus.compat.versions.ServerVersion;
 import fr.neatmonster.nocheatplus.components.NoCheatPlusAPI;
 import fr.neatmonster.nocheatplus.components.data.ICheckData;
 import fr.neatmonster.nocheatplus.components.data.IData;
+import fr.neatmonster.nocheatplus.components.registry.factory.IFactoryOne;
 import fr.neatmonster.nocheatplus.permissions.Permissions;
 import fr.neatmonster.nocheatplus.players.DataManager;
 import fr.neatmonster.nocheatplus.players.IPlayerData;
+import fr.neatmonster.nocheatplus.players.PlayerFactoryArgument;
 import fr.neatmonster.nocheatplus.stats.Counters;
 import fr.neatmonster.nocheatplus.utilities.ReflectionUtil;
 import fr.neatmonster.nocheatplus.utilities.TickTask;
@@ -64,6 +69,7 @@ import fr.neatmonster.nocheatplus.utilities.location.TrigUtil;
 import fr.neatmonster.nocheatplus.utilities.map.BlockProperties;
 import fr.neatmonster.nocheatplus.utilities.map.BlockFlags;
 import fr.neatmonster.nocheatplus.utilities.map.MaterialUtil;
+import fr.neatmonster.nocheatplus.worlds.WorldFactoryArgument;
 
 import java.util.Arrays;
 import java.util.List;
@@ -79,7 +85,7 @@ public class BlockPlaceListener extends CheckListener {
     private static final int p2 = 19349663;
     private static final int p3 = 83492791;
 
-    private static int getHash(final int x, final int y, final int z) {
+    private static final int getHash(final int x, final int y, final int z) {
         return p1 * x ^ p2 * y ^ p3 * z;
     }
 
@@ -132,10 +138,11 @@ public class BlockPlaceListener extends CheckListener {
     private final boolean hasGetReplacedState = ReflectionUtil.getMethodNoArgs(BlockPlaceEvent.class, "getReplacedState", BlockState.class) != null;
     public final List<BlockFace> faces;
 
+    @SuppressWarnings("unchecked")
     public BlockPlaceListener() {
         super(CheckType.BLOCKPLACE);
         final NoCheatPlusAPI api = NCPAPIProvider.getNoCheatPlusAPI();
-        faces = Arrays.asList(BlockFace.SOUTH, BlockFace.WEST, BlockFace.EAST, BlockFace.NORTH);
+        faces = Arrays.asList(new BlockFace[] {BlockFace.SOUTH, BlockFace.WEST, BlockFace.EAST, BlockFace.NORTH});
         api.register(api.newRegistrationContext()
                 // BlockPlaceConfig
                 .registerConfigWorld(BlockPlaceConfig.class)

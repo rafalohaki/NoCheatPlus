@@ -15,6 +15,7 @@
 package fr.neatmonster.nocheatplus.checks.moving;
 
 import java.util.Collection;
+import java.util.concurrent.Callable;
 
 import org.bukkit.Location;
 import org.bukkit.World;
@@ -475,7 +476,7 @@ public class MovingData extends ACheckData implements IDataOnRemoveSubCheckData,
             // TODO: Not sure about horizontal (!).
             nextFrictionHorizontal = nextFrictionVertical = 0.0;
         }
-        else if (to.onHoneyBlock) {
+        else if (to.onHoneyBlock || to.onHoneyBlock) {
             nextFrictionHorizontal = nextFrictionVertical = 0.0;
         }
         else if (from.inBerryBush || to.inBerryBush) {
@@ -1445,7 +1446,7 @@ public class MovingData extends ACheckData implements IDataOnRemoveSubCheckData,
     }
 
 
-    private boolean shouldRetainSFDirty(final Collection<String> tags) {
+    private final boolean shouldRetainSFDirty(final Collection<String> tags) {
         final PlayerMoveData thisMove = playerMoves.getLatestValidMove();
 
         if (thisMove == null || !thisMove.toIsValid || thisMove.yDistance >= 0.0) {

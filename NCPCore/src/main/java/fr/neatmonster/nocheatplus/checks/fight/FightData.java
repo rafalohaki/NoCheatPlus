@@ -73,7 +73,7 @@ public class FightData extends ACheckData implements IDataOnRemoveSubCheckData, 
     public long damageTakenByEntityTick;
 
     // Data of the angle check.
-    public final LinkedList<Angle.AttackLocation> angleHits = new LinkedList<>();
+    public LinkedList<Angle.AttackLocation> angleHits = new LinkedList<Angle.AttackLocation>();
 
     // FastHeal
     public long					   fastHealRefTime = 0;
@@ -101,7 +101,7 @@ public class FightData extends ACheckData implements IDataOnRemoveSubCheckData, 
     public double                  reachMod = 1.0;
 
     // Data of the SelfHit check.
-    public final ActionFrequency selfHitVL = new ActionFrequency(6, 5000);
+    public ActionFrequency selfHitVL = new ActionFrequency(6, 5000);
 
     // Data of the frequency check.
     public final ActionFrequency   speedBuckets;

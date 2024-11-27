@@ -93,7 +93,8 @@ public class Commands extends Check {
                 }
                 return true;
             }
-            else return executeActions(player, data.commandsVL, violation, cc.commandsActions).willCancel();
+            else if (executeActions(player, data.commandsVL, violation, cc.commandsActions).willCancel())
+                return true;
         }
         else if (cc.chatWarningCheck && now - data.chatWarningTime > cc.chatWarningTimeout && (100f * nw / cc.commandsLevel > cc.chatWarningLevel || 100f * data.commandsShortTermWeight / cc.commandsShortTermLevel > cc.chatWarningLevel)){
             player.sendMessage(ColorUtil.replaceColors(cc.chatWarningMessage));

@@ -134,7 +134,7 @@ public class Text extends Check implements INotifyReload {
 
         final List<String> debugParts;
         if (debug) {
-            debugParts = new LinkedList<>();
+            debugParts = new LinkedList<String>();
             debugParts.add("Message (length=" + message.length()+"): ");
         }
         else debugParts = null;
@@ -254,10 +254,10 @@ public class Text extends Check implements INotifyReload {
             // TODO: different methods (add or max or add+max or something else).
             for (final  Float res : engMap.values()) {
                 if (cc.textEngineMaximum) {
-                    wEngine = Math.max(wEngine, res);
+                    wEngine = Math.max(wEngine, res.floatValue());
                 }
                 else {
-                    wEngine += res;
+                    wEngine += res.floatValue();
                 }
             }
         }
@@ -319,11 +319,11 @@ public class Text extends Check implements INotifyReload {
         }
 
         if (debug) {
-            final List<String> keys = new LinkedList<>(engMap.keySet());
+            final List<String> keys = new LinkedList<String>(engMap.keySet());
             Collections.sort(keys);
             for (String key : keys) {
                 Float s = engMap.get(key);
-                if (s > 0.0f)
+                if (s.floatValue() > 0.0f)
                     debugParts.add(key + ":" + StringUtil.fdec3.format(s));
             }
             if (wEngine > 0.0f)

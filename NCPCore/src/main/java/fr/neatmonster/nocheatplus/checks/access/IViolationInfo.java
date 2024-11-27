@@ -31,7 +31,7 @@ public interface IViolationInfo extends ParameterHolder {
      * 
      * @return
      */
-    double getAddedVl();
+    public double getAddedVl();
 
     /**
      * Get the total violation level the player has right now. This is not the
@@ -39,7 +39,7 @@ public interface IViolationInfo extends ParameterHolder {
      * 
      * @return
      */
-    double getTotalVl();
+    public double getTotalVl();
 
     /**
      * Check if a cancel would happen.
@@ -48,7 +48,7 @@ public interface IViolationInfo extends ParameterHolder {
      * @deprecated The concept of cancel has been changed to be contained in
      *             penalties, use willCancel instead.
      */
-    boolean hasCancel();
+    public boolean hasCancel();
 
     /**
      * Test, if the evaluation of penalties will lead to canceling. This may be
@@ -56,7 +56,7 @@ public interface IViolationInfo extends ParameterHolder {
      * 
      * @return
      */
-    boolean willCancel();
+    public boolean willCancel();
 
     /**
      * Test if there is any instances of (Generic)LogAction set in the
@@ -64,6 +64,6 @@ public interface IViolationInfo extends ParameterHolder {
      * 
      * @return
      */
-    boolean hasLogAction();
+    public boolean hasLogAction();
 
 }

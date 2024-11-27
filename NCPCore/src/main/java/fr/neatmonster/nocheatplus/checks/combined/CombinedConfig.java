@@ -46,8 +46,8 @@ public class CombinedConfig extends ACheckConfig {
     // Invulnerable management.
     public final boolean                    invulnerableCheck;
     public final int                        invulnerableInitialTicksJoin;
-    public final Set<DamageCause>           invulnerableIgnore = new HashSet<>();
-    public final Map<DamageCause, Integer>  invulnerableModifiers = new HashMap<>();
+    public final Set<DamageCause>           invulnerableIgnore = new HashSet<DamageCause>();
+    public final Map<DamageCause, Integer>  invulnerableModifiers = new HashMap<DamageCause, Integer>();
     public final int                        invulnerableModifierDefault;
     public final boolean                    invulnerableTriggerAlways;
     public final boolean                    invulnerableTriggerFallDistance;

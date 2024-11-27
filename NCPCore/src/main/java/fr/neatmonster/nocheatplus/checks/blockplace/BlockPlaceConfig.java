@@ -46,7 +46,7 @@ public class BlockPlaceConfig extends ACheckConfig {
     public final float      fastPlaceImprobableWeight;
     public final ActionList fastPlaceActions;
 
-    public final Set<Material> noSwingExceptions = new HashSet<>();
+    public final Set<Material> noSwingExceptions = new HashSet<Material>();
     public final ActionList noSwingActions;
 
     public final ActionList reachActions;

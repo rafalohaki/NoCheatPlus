@@ -14,10 +14,10 @@
  */
 package fr.neatmonster.nocheatplus.actions.types;
 
+import java.util.logging.Level;
+
 import fr.neatmonster.nocheatplus.config.ConfPaths;
 import fr.neatmonster.nocheatplus.logging.Streams;
-
-import java.util.logging.Level;
 
 /**
  * Default log action for standard targets.

@@ -43,10 +43,13 @@ public class Items extends Check{
      * @param player
      * @return True if the check is failed.
      */
-    public static boolean checkIllegalEnchantmentsAllHands(final Player player,
-                                                           final IPlayerData pData) {
-        boolean result = checkIllegalEnchantments(player, Bridge1_9.getItemInMainHand(player), pData);
-        if (Bridge1_9.hasGetItemInOffHand()
+    public static final boolean checkIllegalEnchantmentsAllHands(final Player player,
+            final IPlayerData pData) {
+        boolean result = false;
+        if (checkIllegalEnchantments(player, Bridge1_9.getItemInMainHand(player), pData)) {
+            result = true;
+        }
+        if (Bridge1_9.hasGetItemInOffHand() 
                 && checkIllegalEnchantments(player, Bridge1_9.getItemInOffHand(player), pData)) {
             result = true;
         }
@@ -61,8 +64,8 @@ public class Items extends Check{
      * @param stack
      * @return True if the check is failed.
      */
-    public static boolean checkIllegalEnchantments(final Player player,
-                                                   final ItemStack stack, final IPlayerData pData){
+    public static final boolean checkIllegalEnchantments(final Player player, 
+            final ItemStack stack, final IPlayerData pData){
         if (stack == null) {
             return false;
         }
@@ -73,7 +76,7 @@ public class Items extends Check{
             final Map<Enchantment, Integer> enchantments = stack.getEnchantments();
             if (enchantments != null && !enchantments.isEmpty() && pData.isCheckActive(instance.type, player)){
                 // TODO: differentiate sub checks maybe or add extra permissions, later.
-                for (final Enchantment ench : new HashSet<>(enchantments.keySet())){
+                for (final Enchantment ench : new HashSet<Enchantment>(enchantments.keySet())){
                     stack.removeEnchantment(ench);
                 }
                 // TODO: actions and similar.

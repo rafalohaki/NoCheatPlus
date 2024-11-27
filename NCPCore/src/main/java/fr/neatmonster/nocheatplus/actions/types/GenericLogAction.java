@@ -80,7 +80,7 @@ public class GenericLogAction extends ActionWithParameters<ViolationData, Action
     public GenericLogAction(final String name, final int delay, final int repeat, final String message, 
             final boolean checkActive, final GenericLogActionConfig... configs) {
         super(name, delay, repeat, message);
-        final List<GenericLogActionConfig> temp = new ArrayList<>(
+        final List<GenericLogActionConfig> temp = new ArrayList<GenericLogAction.GenericLogActionConfig>(
                 configs.length);
         boolean replaceColor = false;
         boolean stripColor = false;
@@ -92,7 +92,8 @@ public class GenericLogAction extends ActionWithParameters<ViolationData, Action
             temp.add(config);
             if (config.chatColor) {
                 replaceColor = true;
-            } else {
+            }
+            else {
                 stripColor = true;
             }
             if (config.configPathActive != null) {
@@ -100,7 +101,7 @@ public class GenericLogAction extends ActionWithParameters<ViolationData, Action
             }
         }
         this.configs = temp.toArray(new GenericLogActionConfig[temp.size()]);
-        this.checkActive = checkActive && checkActiveUseful;
+        this.checkActive = checkActive ? checkActiveUseful : false;
         this.replaceColor = replaceColor;
         this.stripColor = stripColor;
     }
@@ -111,7 +112,7 @@ public class GenericLogAction extends ActionWithParameters<ViolationData, Action
         if (!config.getBoolean(ConfPaths.LOGGING_ACTIVE) || configs.length == 0) {
             return null;
         }
-        final List<GenericLogActionConfig> temp = new ArrayList<>(
+        final List<GenericLogActionConfig> temp = new ArrayList<GenericLogAction.GenericLogActionConfig>(
                 configs.length);
         for (final GenericLogActionConfig logConfig : configs) {
             if (checkActive && logConfig.configPathActive != null

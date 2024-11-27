@@ -30,7 +30,7 @@ import fr.neatmonster.nocheatplus.utilities.TickTask;
 public class Combined {
 
     /** All hits within this angle range are regarded as stationary. */
-    private static final float stationary = 32f;
+    private static float stationary = 32f;
 
     /**
      * Check if a penalty is set by changing horizontal facing dierection too often.
@@ -40,8 +40,8 @@ public class Combined {
      * @param worldName
      * @return
      */
-    public static boolean checkYawRate(final Player player, final float yaw, final long now,
-                                       final String worldName, final IPlayerData pData) {
+    public static final boolean checkYawRate(final Player player, final float yaw, final long now, 
+            final String worldName, final IPlayerData pData) {
         return checkYawRate(player, yaw, now, worldName, 
                 pData.getGenericInstance(CombinedData.class), pData);
     }
@@ -53,8 +53,8 @@ public class Combined {
      * @param now
      * @param worldName
      */
-    public static void feedYawRate(final Player player, final float yaw, final long now,
-                                   final String worldName, final IPlayerData pData) {
+    public static final void feedYawRate(final Player player, final float yaw, final long now, 
+            final String worldName, final IPlayerData pData) {
         feedYawRate(player, yaw, now, worldName, 
                 pData.getGenericInstance(CombinedData.class), pData);
     }
@@ -70,8 +70,8 @@ public class Combined {
      * @param data
      * @return True, if the player was exempted from yawrate. False otherwise.
      */
-    public static boolean feedYawRate(final Player player, float yaw, final long now,
-                                      final String worldName, final CombinedData data, final IPlayerData pData) {
+    public static final boolean feedYawRate(final Player player, float yaw, final long now, 
+            final String worldName, final CombinedData data, final IPlayerData pData) {
         // Check for exemption (hack, sort of).
         if (NCPExemptionManager.isExempted(player, CheckType.COMBINED_YAWRATE)) {
             resetYawRate(player, yaw, now, true, pData);
@@ -130,7 +130,7 @@ public class Combined {
         }
 
         // Normalize yaw-change vs. elapsed time.
-        final float dNorm = dAbs / (float) (1 + elapsed);
+        final float dNorm = (float) dAbs / (float) (1 + elapsed);	
 
         data.yawFreq.add(now, dNorm);
         return false;
@@ -147,8 +147,8 @@ public class Combined {
      * @return Classic 'cancel' state, i.e. true in case of a violation, false
      *         otherwise.
      */
-    public static boolean checkYawRate(final Player player, final float yaw, final long now,
-                                       final String worldName, final CombinedData data, final IPlayerData pData) {
+    public static final boolean checkYawRate(final Player player, final float yaw, final long now, 
+            final String worldName, final CombinedData data, final IPlayerData pData) {
 
         if (feedYawRate(player, yaw, now, worldName, data, pData)) {
             return false;
@@ -220,8 +220,8 @@ public class Combined {
      * @param time
      * @param clear If to clear yaws.
      */
-    public static void resetYawRate(final Player player, float yaw,
-                                    final long time, final boolean clear, final IPlayerData pData) {
+    public static final void resetYawRate(final Player player, float yaw, 
+            final long time, final boolean clear, final IPlayerData pData) {
         if (yaw <= -360f) {
             yaw = -((-yaw) % 360f);
         }
@@ -246,8 +246,8 @@ public class Combined {
      * @param yawRateCheck If to actually check the yaw rate, or just feed.
      * @return
      */
-    public static boolean checkYawRate(final Player player, final float yaw, final long now,
-                                       final String worldName, final boolean yawRateCheck, final IPlayerData pData) {
+    public static final boolean checkYawRate(final Player player, final float yaw, final long now, 
+            final String worldName, final boolean yawRateCheck, final IPlayerData pData) {
         if (yawRateCheck) {
             return checkYawRate(player, yaw, now, worldName, pData);
         }

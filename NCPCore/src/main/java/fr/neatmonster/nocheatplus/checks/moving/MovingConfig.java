@@ -65,7 +65,7 @@ public class MovingConfig extends ACheckConfig {
     public final boolean    ignoreCreative;
     public final boolean    ignoreAllowFlight;
 
-    private final Map<GameMode, ModelFlying> flyingModelGameMode = new HashMap<>();
+    private final Map<GameMode, ModelFlying> flyingModelGameMode = new HashMap<GameMode, ModelFlying>();
     private final ModelFlying flyingModelElytra;
     private final ModelFlying flyingModelLevitation;
     private final ModelFlying flyingModelSlowfalling;
@@ -183,11 +183,11 @@ public class MovingConfig extends ACheckConfig {
     public final boolean scheduleVehicleSetBacks;
     public final boolean schedulevehicleSetPassenger;
 
-    public final Set<EntityType> ignoredVehicles = new HashSet<>();
+    public final Set<EntityType> ignoredVehicles = new HashSet<EntityType>();
 
     public final ActionList vehicleMorePacketsActions;
 
-    public final HashMap<EntityType, Double> vehicleEnvelopeHorizontalSpeedCap = new HashMap<>();
+    public final HashMap<EntityType, Double> vehicleEnvelopeHorizontalSpeedCap = new HashMap<EntityType, Double>();
     public final ActionList vehicleEnvelopeActions;
 
     // Trace
@@ -281,7 +281,7 @@ public class MovingConfig extends ACheckConfig {
             } else {
                 ref = "1.8";
             }
-            this.sfStepHeight = ServerVersion.select(ref, 0.5, 0.6, 0.6, 0.5);
+            this.sfStepHeight = ServerVersion.select(ref, 0.5, 0.6, 0.6, 0.5).doubleValue();
         } else {
             this.sfStepHeight = sfStepHeight;
         }
@@ -373,9 +373,7 @@ public class MovingConfig extends ACheckConfig {
                     ignoredVehicles.add(type);
                 }
             }
-            catch (IllegalArgumentException e) {
-                //e.printStackTrace();
-            }
+            catch (IllegalArgumentException e) {}
         }
 
 

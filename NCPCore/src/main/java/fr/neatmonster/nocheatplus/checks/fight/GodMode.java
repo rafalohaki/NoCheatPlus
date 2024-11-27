@@ -172,8 +172,13 @@ public class GodMode extends Check {
         if (data.godModeAcc > 2){
             // TODO: To match with old checks vls / actions, either change actions or apply a factor.
             data.godModeVL += delta;
-            cancel = executeActions(player, data.godModeVL, delta,
-                    pData.getGenericInstance(FightConfig.class).godModeActions).willCancel();
+            if (executeActions(player, data.godModeVL, delta, 
+                    pData.getGenericInstance(FightConfig.class).godModeActions).willCancel()){
+                cancel = true;
+            }
+            else {
+                cancel = false;
+            }
         }
         else{
             cancel = false;
@@ -208,13 +213,9 @@ public class GodMode extends Check {
                             // Artificially "kill" them.
                             mcAccess.getHandle().setDead(player, 19);
                         }
-                    } catch (final Exception e) {
-                        //e.printStackTrace();
-                    }
+                    } catch (final Exception e) {}
             	}, null, 30);
-            } catch (final Exception e) {
-                //e.printStackTrace();
-            }
+            } catch (final Exception e) {}
         }
     }
 }

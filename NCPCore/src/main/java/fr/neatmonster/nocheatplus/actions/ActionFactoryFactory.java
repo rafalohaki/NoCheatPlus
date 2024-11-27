@@ -17,5 +17,5 @@ package fr.neatmonster.nocheatplus.actions;
 import java.util.Map;
 
 public interface ActionFactoryFactory {
-    ActionFactory newActionFactory(Map<String, Object> library);
+    public ActionFactory newActionFactory(Map<String, Object> library);
 }

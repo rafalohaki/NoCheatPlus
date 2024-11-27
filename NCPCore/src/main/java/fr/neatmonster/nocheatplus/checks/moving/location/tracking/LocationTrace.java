@@ -45,13 +45,13 @@ public class LocationTrace {
 
     // TODO: Using System.currentTimeMillis() for timestamp not server tick?
     // TODO: Find out reason it is not recording right location for combat checks!
-    public interface ITraceEntry extends IGetPosition {
+    public static interface ITraceEntry extends IGetPosition {
 
-        double getBoxMarginHorizontal();
+        public double getBoxMarginHorizontal();
 
-        double getBoxMarginVertical();
+        public double getBoxMarginVertical();
 
-        long getTime();
+        public long getTime();
 
         /**
          * Convenience method.
@@ -61,7 +61,7 @@ public class LocationTrace {
          * @param z
          * @return
          */
-        boolean isInside(double x, double y, double z);
+        public boolean isInside(double x, double y, double z);
 
     }
 
@@ -169,7 +169,7 @@ public class LocationTrace {
          */
         final boolean nextIsNext;
 
-        private TraceIterator(final TraceEntry first, boolean nextIsNext) {
+        protected TraceIterator(final TraceEntry first, boolean nextIsNext) {
             this.first = first;
             this.nextIsNext = nextIsNext;
             next = first;
@@ -180,7 +180,7 @@ public class LocationTrace {
         }
 
         @Override
-        public ITraceEntry next() {
+        public final ITraceEntry next() {
             if (!hasNext()) {
                 throw new IndexOutOfBoundsException("No more entries to iterate.");
             }
@@ -190,7 +190,7 @@ public class LocationTrace {
         }
 
         @Override
-        public boolean hasNext() {
+        public final boolean hasNext() {
             // Just check if currentIndex is within range.
             return next != null;
         }

@@ -29,6 +29,7 @@ import fr.neatmonster.nocheatplus.checks.CheckType;
 import fr.neatmonster.nocheatplus.checks.ViolationData;
 import fr.neatmonster.nocheatplus.permissions.Permissions;
 import fr.neatmonster.nocheatplus.players.IPlayerData;
+import fr.neatmonster.nocheatplus.players.PlayerData;
 import fr.neatmonster.nocheatplus.utilities.StringUtil;
 import fr.neatmonster.nocheatplus.utilities.TickTask;
 import fr.neatmonster.nocheatplus.utilities.location.TrigUtil;
@@ -42,14 +43,14 @@ import org.bukkit.ChatColor;
 public class Angle extends Check {
   
 
-  private final List<String> tags = new LinkedList<>();
+  private final List<String> tags = new LinkedList<String>();
 
 
     public static class AttackLocation {
         public final double x, y, z;
         /** Yaw of the attacker. */
         public final float yaw;
-        public final long time;
+        public long time;
         public final UUID damagedId;
         /** Squared distance to the last location (0 if none given). */
         public final double distSqLast;
@@ -82,7 +83,7 @@ public class Angle extends Check {
     }
 
 
-    public static final long maxTimeDiff = 1000L;
+    public static long maxTimeDiff = 1000L;
 
 
     /**
@@ -136,7 +137,7 @@ public class Angle extends Check {
             }
             deltaMove += refLoc.distSqLast;
             final double yawDiff = Math.abs(refLoc.yawDiffLast);
-            deltaYaw += (float) yawDiff;
+            deltaYaw += yawDiff;
             deltaTime += refLoc.timeDiff;
             if (refLoc.idDiffLast && yawDiff > 30.0) {
                 // TODO: Configurable sensitivity ? Scale with yawDiff?
@@ -149,7 +150,7 @@ public class Angle extends Check {
             return false;
         }
 
-        final double n = data.angleHits.size() - 1;
+        final double n = (double) (data.angleHits.size() - 1);
 
         // Let's calculate the average move.
         final double averageMove = deltaMove / n;

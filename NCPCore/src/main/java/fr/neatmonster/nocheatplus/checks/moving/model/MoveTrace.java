@@ -14,6 +14,7 @@
  */
 package fr.neatmonster.nocheatplus.checks.moving.model;
 
+import java.util.Iterator;
 import java.util.LinkedList;
 import java.util.concurrent.Callable;
 
@@ -34,7 +35,7 @@ public class MoveTrace <MD extends MoveData> {
      * processed move always is currentMove. The list length always stays the
      * same.
      */
-    private final LinkedList<MD> pastMoves = new LinkedList<>();
+    private final LinkedList<MD> pastMoves = new LinkedList<MD>();
 
     /**
      * The move currently being processed. Will be inserted to first position
@@ -125,9 +126,10 @@ public class MoveTrace <MD extends MoveData> {
      * Invalidate the current move and all past moves.
      */
     public void invalidate() {
-        for (MD pastMove : pastMoves) {
+        final Iterator<MD> it = pastMoves.iterator();
+        while (it.hasNext()) {
             // TODO: If using many elements ever, stop at the first already invalidated one.
-            pastMove.invalidate();
+            it.next().invalidate();
         }
         currentMove.invalidate();
     }

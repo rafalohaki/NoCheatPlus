@@ -21,18 +21,25 @@ import org.bukkit.GameMode;
 import org.bukkit.event.inventory.InventoryType;
 import org.bukkit.event.inventory.InventoryType.SlotType;
 import org.bukkit.entity.Player;
+import org.bukkit.Material;
+import org.bukkit.Location;
+import org.bukkit.block.Block;
 
+import fr.neatmonster.nocheatplus.NCPAPIProvider;
 import fr.neatmonster.nocheatplus.actions.ParameterName;
 import fr.neatmonster.nocheatplus.checks.Check;
 import fr.neatmonster.nocheatplus.checks.CheckType;
 import fr.neatmonster.nocheatplus.checks.ViolationData;
 import fr.neatmonster.nocheatplus.checks.combined.Improbable;
 import fr.neatmonster.nocheatplus.checks.moving.model.PlayerMoveData;
+import fr.neatmonster.nocheatplus.checks.moving.model.PlayerMoveInfo;
+import fr.neatmonster.nocheatplus.checks.moving.magic.Magic;
 import fr.neatmonster.nocheatplus.checks.moving.MovingData;
 import fr.neatmonster.nocheatplus.utilities.StringUtil;
 import fr.neatmonster.nocheatplus.utilities.collision.CollisionUtil;
 import fr.neatmonster.nocheatplus.compat.Bridge1_13;
 import fr.neatmonster.nocheatplus.compat.Bridge1_9;
+import fr.neatmonster.nocheatplus.compat.BridgeEnchant;
 import fr.neatmonster.nocheatplus.players.IPlayerData;
 import fr.neatmonster.nocheatplus.utilities.InventoryUtil;
 import fr.neatmonster.nocheatplus.compat.versions.ServerVersion;
@@ -68,7 +75,7 @@ public class InventoryMove extends Check {
         
         boolean cancel = false;
         boolean violation = false;
-        List<String> tags = new LinkedList<>();
+        List<String> tags = new LinkedList<String>();
         // NOTES: 1) NoCheatPlus provides a base speed at which players can move without taking into account any mechanic:
         //        the idea is that if the base speed does not equal to the finally allowed speed then the player is being moved by friction or other means.
         //        2) Important: MC allows players to swim (and keep the status) when on ground, but this is not *consistently* reflected back to the server 
@@ -124,12 +131,12 @@ public class InventoryMove extends Check {
 
             // Feed Improbable only for actual improbable clicking (Sprinting and clicking is impossible in all cases.)
             // Later, once all known false positives are fixed, we can feed improbable for all cases (InventoryListener)
-            if (InventoryConfig.invMoveImprobableWeight > 0.0f) {
+            if (cc.invMoveImprobableWeight > 0.0f) {
 
                 if (cc.invMoveImprobableFeedOnly) {
-                    Improbable.feed(player, InventoryConfig.invMoveImprobableWeight, System.currentTimeMillis());
+                    Improbable.feed(player, cc.invMoveImprobableWeight, System.currentTimeMillis());
                 } 
-                else if (Improbable.check(player, InventoryConfig.invMoveImprobableWeight, System.currentTimeMillis(), "inventory.invmove.sprinting", pData)) {
+                else if (Improbable.check(player, cc.invMoveImprobableWeight, System.currentTimeMillis(), "inventory.invmove.sprinting", pData)) {
                     cancel = true;
                }
             }

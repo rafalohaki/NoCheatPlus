@@ -31,9 +31,11 @@ import org.bukkit.Material;
 import org.bukkit.entity.Entity;
 import org.bukkit.entity.EntityType;
 import org.bukkit.entity.Player;
+import org.bukkit.entity.Projectile;
 import org.bukkit.event.EventHandler;
 import org.bukkit.event.EventPriority;
 import org.bukkit.event.Listener;
+import org.bukkit.event.entity.EntityDamageByEntityEvent;
 import org.bukkit.event.entity.EntityDamageEvent;
 import org.bukkit.event.entity.EntityDamageEvent.DamageCause;
 import org.bukkit.event.entity.EntityExplodeEvent;
@@ -107,6 +109,7 @@ import fr.neatmonster.nocheatplus.components.data.IData;
 import fr.neatmonster.nocheatplus.components.location.SimplePositionWithLook;
 import fr.neatmonster.nocheatplus.components.modifier.IAttributeAccess;
 import fr.neatmonster.nocheatplus.components.registry.event.IGenericInstanceHandle;
+import fr.neatmonster.nocheatplus.components.registry.factory.IFactoryOne;
 import fr.neatmonster.nocheatplus.components.registry.feature.IHaveCheckType;
 import fr.neatmonster.nocheatplus.components.registry.feature.INeedConfig;
 import fr.neatmonster.nocheatplus.components.registry.feature.IRemoveData;
@@ -120,6 +123,7 @@ import fr.neatmonster.nocheatplus.logging.debug.DebugUtil;
 import fr.neatmonster.nocheatplus.permissions.Permissions;
 import fr.neatmonster.nocheatplus.players.DataManager;
 import fr.neatmonster.nocheatplus.players.IPlayerData;
+import fr.neatmonster.nocheatplus.players.PlayerFactoryArgument;
 import fr.neatmonster.nocheatplus.stats.Counters;
 import fr.neatmonster.nocheatplus.utilities.CheckUtils;
 import fr.neatmonster.nocheatplus.utilities.PotionUtil;
@@ -133,6 +137,7 @@ import fr.neatmonster.nocheatplus.utilities.map.BlockProperties;
 import fr.neatmonster.nocheatplus.utilities.map.BlockFlags;
 import fr.neatmonster.nocheatplus.utilities.map.MapUtil;
 import fr.neatmonster.nocheatplus.utilities.map.MaterialUtil;
+import fr.neatmonster.nocheatplus.worlds.WorldFactoryArgument;
 
 /**
  * Central location to listen to events that are relevant for the moving checks.
@@ -160,7 +165,7 @@ public class MovingListener extends CheckListener implements TickListener, IRemo
     private final Passable passable = addCheck(new Passable());
     
     /** Store events by player name, in order to invalidate moving processing on higher priority level in case of teleports. */
-    private final Map<String, PlayerMoveEvent> processingEvents = new HashMap<>();
+    private final Map<String, PlayerMoveEvent> processingEvents = new HashMap<String, PlayerMoveEvent>();
 
     /** Player names to check hover for, case insensitive. */
     private final Set<String> hoverTicks = ConcurrentHashMap.newKeySet(30); // TODO: Rename
@@ -184,7 +189,7 @@ public class MovingListener extends CheckListener implements TickListener, IRemo
     /** Auxiliary functionality. */
     private final AuxMoving aux = NCPAPIProvider.getNoCheatPlusAPI().getGenericInstance(AuxMoving.class);
 
-    private final IGenericInstanceHandle<IAttributeAccess> attributeAccess = NCPAPIProvider.getNoCheatPlusAPI().getGenericInstanceHandle(IAttributeAccess.class);
+    private IGenericInstanceHandle<IAttributeAccess> attributeAccess = NCPAPIProvider.getNoCheatPlusAPI().getGenericInstanceHandle(IAttributeAccess.class);
 
     private final BlockChangeTracker blockChangeTracker;
 
@@ -195,6 +200,7 @@ public class MovingListener extends CheckListener implements TickListener, IRemo
 
     private final boolean specialMinecart = ServerVersion.compareMinecraftVersion("1.19.4") >= 0;
 
+    @SuppressWarnings("unchecked")
     public MovingListener() {
         super(CheckType.MOVING);
         // Register vehicleChecks.
@@ -1276,13 +1282,14 @@ public class MovingListener extends CheckListener implements TickListener, IRemo
                 ) {
 
             if (debug) {
-                String builder = "Direct block push at (" +
-                        "x:" + entryBelowY_POS.x +
-                        " y:" + entryBelowY_POS.y +
-                        " z:" + entryBelowY_POS.z +
-                        " direction:" + entryBelowY_POS.direction.name() +
-                        ")";
-                debug(player, builder);
+                final StringBuilder builder = new StringBuilder(150);
+                builder.append("Direct block push at (");
+                builder.append("x:" + entryBelowY_POS.x);
+                builder.append(" y:" + entryBelowY_POS.y);
+                builder.append(" z:" + entryBelowY_POS.z);
+                builder.append(" direction:" + entryBelowY_POS.direction.name());
+                builder.append(")");
+                debug(player, builder.toString());
             }
             /*
              * TODO: One case left still not covered, double ascend motions (0.25, 0.649)
@@ -1400,13 +1407,14 @@ public class MovingListener extends CheckListener implements TickListener, IRemo
             data.blockChangeRef.updateSpan(entry);
 
             if (debug) {
-                String builder = "Direct block push at (" +
-                        "x:" + entry.x +
-                        " y:" + entry.y +
-                        " z:" + entry.z +
-                        " direction:" + entry.direction.name() +
-                        ")";
-                debug(player, builder);
+                final StringBuilder builder = new StringBuilder(150);
+                builder.append("Direct block push at (");
+                builder.append("x:" + entry.x);
+                builder.append(" y:" + entry.y);
+                builder.append(" z:" + entry.z);
+                builder.append(" direction:" + entry.direction.name());
+                builder.append(")");
+                debug(player, builder.toString());
                 debug(player, "checkPastStateHorizontalPush: set velocity: " + 0.6);
             }
             return true;
@@ -1624,7 +1632,7 @@ public class MovingListener extends CheckListener implements TickListener, IRemo
      * Monitor level PlayerMoveEvent. Uses useLoc.
      * @param event
      */
-    @EventHandler(priority=EventPriority.MONITOR)
+    @EventHandler(priority=EventPriority.MONITOR, ignoreCancelled = false)
     public void onPlayerMoveMonitor(final PlayerMoveEvent event) {
 
         // TODO: Use stored move data to verify if from/to have changed (thus a teleport will result, possibly a minor issue due to the teleport).
@@ -1830,7 +1838,7 @@ public class MovingListener extends CheckListener implements TickListener, IRemo
      * 
      * @param event
      */
-    @EventHandler(priority = EventPriority.LOWEST)
+    @EventHandler(ignoreCancelled = false, priority = EventPriority.LOWEST)
     public void onPlayerTeleportLowest(final PlayerTeleportEvent event) {
 
         final Player player = event.getPlayer();
@@ -1916,7 +1924,7 @@ public class MovingListener extends CheckListener implements TickListener, IRemo
      * 
      * @param event
      */
-    @EventHandler(priority = EventPriority.HIGHEST)
+    @EventHandler(ignoreCancelled = false, priority = EventPriority.HIGHEST)
     public void onPlayerTeleport(final PlayerTeleportEvent event) {
         // Only check cancelled events.
         if (event.isCancelled()) checkUndoCancelledSetBack(event);
@@ -1940,8 +1948,8 @@ public class MovingListener extends CheckListener implements TickListener, IRemo
     }
 
 
-    private void undoCancelledSetBack(final Player player, final PlayerTeleportEvent event,
-                                      final MovingData data, final IPlayerData pData) {
+    private final void undoCancelledSetBack(final Player player, final PlayerTeleportEvent event,
+                                            final MovingData data, final IPlayerData pData) {
 
         // Prevent cheaters getting rid of flying data (morepackets, other).
         // TODO: even more strict enforcing ?
@@ -1968,7 +1976,7 @@ public class MovingListener extends CheckListener implements TickListener, IRemo
      * 
      * @param event
      */
-    @EventHandler(priority = EventPriority.MONITOR)
+    @EventHandler(ignoreCancelled = false, priority = EventPriority.MONITOR)
     public void onPlayerTeleportMonitor(final PlayerTeleportEvent event) {
 
         // Evaluate result and adjust data.
@@ -2216,7 +2224,7 @@ public class MovingListener extends CheckListener implements TickListener, IRemo
                         builder.append((String) obj);
                     }
                     else {
-                        builder.append(obj);
+                        builder.append(obj.toString());
                     }
                 }
             }
@@ -2251,7 +2259,7 @@ public class MovingListener extends CheckListener implements TickListener, IRemo
     }
 
 
-    @EventHandler(priority = EventPriority.LOWEST)
+    @EventHandler(priority = EventPriority.LOWEST, ignoreCancelled = false)
     public void onEntityDamage(final EntityDamageEvent event) {
 
         if (event.getCause() != DamageCause.FALL) {
@@ -2347,7 +2355,7 @@ public class MovingListener extends CheckListener implements TickListener, IRemo
             // Be sure not to lose that block.
             // TODO: What is this and why is it right here?
             // Answer: https://github.com/NoCheatPlus/NoCheatPlus/commit/50ebbb01fb3998f5e4ebba741ed6cbd318de00c5
-            data.noFallFallDistance += 1.0F;
+            data.noFallFallDistance += 1.0; 
             // TODO: Account for liquid too?
             // Cheat: set ground to true in-air. Cancel the event and restore fall distance. NoFall data will not be reset 
             if (!pLoc.isOnGround(1.0, 0.3, 0.1) && !pLoc.isResetCond() && !pLoc.isAboveLadder() && !pLoc.isAboveStairs()) {
@@ -2395,7 +2403,7 @@ public class MovingListener extends CheckListener implements TickListener, IRemo
     }
 
 
-    private boolean noFallVL(final Player player, final String tag, final MovingData data, final MovingConfig cc) {
+    private final boolean noFallVL(final Player player, final String tag, final MovingData data, final MovingConfig cc) {
 
         data.noFallVL += 1.0;
         final ViolationData vd = new ViolationData(noFall, player, data.noFallVL, 1.0, cc.noFallActions);
@@ -2648,7 +2656,7 @@ public class MovingListener extends CheckListener implements TickListener, IRemo
     }
 
 
-    @EventHandler(priority = EventPriority.MONITOR)
+    @EventHandler(priority = EventPriority.MONITOR, ignoreCancelled = false)
     public void onPlayerToggleFlight(final PlayerToggleFlightEvent event) {
 
         // (ignoreCancelled = false: we track the bit of vertical extra momentum/thing).
@@ -2697,12 +2705,12 @@ public class MovingListener extends CheckListener implements TickListener, IRemo
      */
     private void checkOnTickHover() {
 
-        final List<String> rem = new ArrayList<>(hoverTicks.size()); // Pessimistic.
+        final List<String> rem = new ArrayList<String>(hoverTicks.size()); // Pessimistic.
         final PlayerMoveInfo info = aux.usePlayerMoveInfo();
         for (final String playerName : hoverTicks) {
             // TODO: put players into the set (+- one tick would not matter ?)
             // TODO: might add an online flag to data !
-            final Player player = DataManager.getPlayer(playerName);
+            final Player player = DataManager.getPlayerExact(playerName);
             if (player == null || !player.isOnline()) {
                 rem.add(playerName);
                 continue;
@@ -2740,7 +2748,7 @@ public class MovingListener extends CheckListener implements TickListener, IRemo
                 rem.add(playerName);
             }
         }
-        rem.forEach(hoverTicks::remove);
+        hoverTicks.removeAll(rem);
         aux.returnPlayerMoveInfo(info);
     }
 
@@ -2752,9 +2760,9 @@ public class MovingListener extends CheckListener implements TickListener, IRemo
      */
     private void checkOnTickPlayersEnforce() {
 
-        final List<String> rem = new ArrayList<>(playersEnforce.size()); // Pessimistic.
+        final List<String> rem = new ArrayList<String>(playersEnforce.size()); // Pessimistic.
         for (final String playerName : playersEnforce) {
-            final Player player = DataManager.getPlayer(playerName);
+            final Player player = DataManager.getPlayerExact(playerName);
             if (player == null || !player.isOnline()) {
                 rem.add(playerName);
                 continue;
@@ -2770,7 +2778,7 @@ public class MovingListener extends CheckListener implements TickListener, IRemo
                 player.teleport(newTo, BridgeMisc.TELEPORT_CAUSE_CORRECTION_OF_POSITION);
             }
         }
-        if (!rem.isEmpty()) rem.forEach(playersEnforce::remove);
+        if (!rem.isEmpty()) playersEnforce.removeAll(rem);
     }
 
 
@@ -2909,9 +2917,7 @@ public class MovingListener extends CheckListener implements TickListener, IRemo
             try{
                 // TODO: Check backwards compatibility (1.4.2). Remove try-catch
                 builder.append("\n(walkspeed=" + player.getWalkSpeed() + " flyspeed=" + player.getFlySpeed() + ")");
-            } catch (Throwable t) {
-                //t.printStackTrace();
-            }
+            } catch (Throwable t) {}
             if (player.isSprinting()) {
                 builder.append("(sprinting)");
             }

@@ -41,7 +41,7 @@ public class BlockPlaceData extends ACheckData {
     public long autoSignPlacedHash = 0;
 
     // Scaffold data
-    public final List<Long> placeTick = new ArrayList<>();
+    public List<Long> placeTick = new ArrayList<>();
 	public long sneakTime = 0;
 	public long sprintTime = 0;
 	public float lastYaw = 0;

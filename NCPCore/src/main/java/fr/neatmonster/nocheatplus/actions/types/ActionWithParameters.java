@@ -47,7 +47,7 @@ public abstract class ActionWithParameters<D extends ParameterHolder, L extends 
 	public ActionWithParameters(final String name, final int delay, final int repeat, final String message) {
 		super(name, delay, repeat);
 
-		messageParts = new ArrayList<>();
+		messageParts = new ArrayList<Object>();
 		this.message = message;
 		// Assume we don't nee parameters.
 		needsParameters = false;
@@ -75,7 +75,7 @@ public abstract class ActionWithParameters<D extends ParameterHolder, L extends 
             		log.append(violationData.getParameter((ParameterName) part));
             	}
             	catch (Exception e){
-            		log.append(part);
+            		log.append(part.toString());
             	}
             }
 
@@ -89,13 +89,13 @@ public abstract class ActionWithParameters<D extends ParameterHolder, L extends 
      *            the message
      */
     protected void parseMessage(final String message) {
-        final String[] parts = message.split("\\[", 2);
+        final String parts[] = message.split("\\[", 2);
 
         // No opening braces left.
         if (parts.length != 2)
             messageParts.add(message);
         else {
-            final String[] parts2 = parts[1].split("\\]", 2);
+            final String parts2[] = parts[1].split("\\]", 2);
 
             // Found no matching closing brace.
             if (parts2.length != 2)

@@ -129,7 +129,7 @@ public class ChatConfig extends ACheckConfig {
 
         commandsLevel = config.getDouble(ConfPaths.CHAT_COMMANDS_LEVEL);
         commandsShortTermTicks = config.getInt(ConfPaths.CHAT_COMMANDS_SHORTTERM_TICKS);
-        commandsShortTermLevel = config.getDouble(ConfPaths.CHAT_COMMANDS_SHORTTERM_LEVEL);
+        commandsShortTermLevel = config.getDouble(ConfPaths.CHAT_COMMANDS_SHORTTERM_LEVEL);;
         commandsActions = config.getOptimizedActionList(ConfPaths.CHAT_COMMANDS_ACTIONS, Permissions.CHAT_COMMANDS);
 
         textGlobalCheck = config.getBoolean(ConfPaths.CHAT_TEXT_GL_CHECK, true);
@@ -172,7 +172,7 @@ public class ChatConfig extends ACheckConfig {
         loginsSeconds = config.getInt(ConfPaths.CHAT_LOGINS_SECONDS);
         loginsLimit = config.getInt(ConfPaths.CHAT_LOGINS_LIMIT);
         loginsKickMessage =  config.getString(ConfPaths.CHAT_LOGINS_KICKMESSAGE);
-        loginsStartupDelay = config.getInt(ConfPaths.CHAT_LOGINS_STARTUPDELAY) * 1000L;
+        loginsStartupDelay = config.getInt(ConfPaths.CHAT_LOGINS_STARTUPDELAY) * 1000;
 
         relogKickMessage = config.getString(ConfPaths.CHAT_RELOG_KICKMESSAGE);
         relogTimeout = config.getLong(ConfPaths.CHAT_RELOG_TIMEOUT);

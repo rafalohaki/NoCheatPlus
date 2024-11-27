@@ -61,7 +61,7 @@ public class FlatWords extends DigestedWords{
 	public FlatWords(String name, FlatWordsSettings settings){
 		super(name, settings);
 		this.maxSize = settings.maxSize;
-		entries = new LinkedHashMap<>(maxSize);
+		entries = new LinkedHashMap<String, ActionFrequency>(maxSize);
 		this.nBuckets = settings.nBuckets;
 		this.durBucket = settings.durBucket;
 		this.factor = settings.factor;

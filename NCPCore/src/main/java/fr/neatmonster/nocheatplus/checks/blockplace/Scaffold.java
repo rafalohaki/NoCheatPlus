@@ -40,7 +40,7 @@ import fr.neatmonster.nocheatplus.utilities.StringUtil;
 public class Scaffold extends Check {
 
     final static double MAX_ANGLE = Math.toRadians(90);
-    public final List<String> tags = new LinkedList<>();
+    public List<String> tags = new LinkedList<>();
     
    /*
     * Instanties a new Scaffold check
@@ -105,7 +105,7 @@ public class Scaffold extends Check {
 
                 }
 
-                double avg = (double) sum / data.placeTick.size();
+                double avg = sum / data.placeTick.size();
                 if (avg < cc.scaffoldTimeAvg) {
                     cancel = violation("Time", Math.min((cc.scaffoldTimeAvg - (int) avg), 5), player, data, pData);
                     if (data.placeTick.size() > 20) data.placeTick.clear(); // Clear if it gets too big to prevent players being unable to place blocks

@@ -112,7 +112,7 @@ public enum CheckType {
     NET_WRONGTURN(CheckTypeType.CHECK, NET, Permissions.NET_WRONGTURN)
     ;
 
-    public enum CheckTypeType {
+    public static enum CheckTypeType {
         /** Special types, like ALL */
         SPECIAL,
         /** Potentially obsolete: A check group that is not a check itself. */
@@ -145,7 +145,7 @@ public enum CheckType {
      * 
      * @param parent
      */
-    CheckType(final CheckTypeType type, final CheckType parent) {
+    private CheckType(final CheckTypeType type, final CheckType parent) {
         this(type, parent, null);
     }
 
@@ -159,8 +159,8 @@ public enum CheckType {
      * @param permission
      *            Bypass permission.
      */
-    CheckType(final CheckTypeType type, final CheckType parent,
-              final RegisteredPermission permission) {
+    private CheckType(final CheckTypeType type, final CheckType parent, 
+            final RegisteredPermission permission) {
         this(type, parent, permission, null);
     }
 
@@ -172,9 +172,9 @@ public enum CheckType {
      * @param permission
      * @param configPathActive
      */
-    CheckType(final CheckTypeType type, final CheckType parent,
-              final RegisteredPermission permission,
-              final String configPathActive) {
+    private CheckType(final CheckTypeType type, final CheckType parent, 
+            final RegisteredPermission permission, 
+            final String configPathActive) {
         this.type = type;
         this.parent = parent;
         this.permission = permission;

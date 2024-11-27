@@ -54,7 +54,7 @@ public class FastHeal extends Check {
             // TODO: Consider using a simple buffer as well (to get closer to the correct interval).
             // TODO: Check if we added a buffer.
             if (correctedDiff < cc.fastHealInterval){
-                data.fastHealBuffer -= (long) (cc.fastHealInterval - correctedDiff);
+                data.fastHealBuffer -= (cc.fastHealInterval - correctedDiff);
                 if (data.fastHealBuffer <= 0){
                     final double violation = ((double) cc.fastHealInterval - correctedDiff) / 1000.0;
                     data.fastHealVL += violation;

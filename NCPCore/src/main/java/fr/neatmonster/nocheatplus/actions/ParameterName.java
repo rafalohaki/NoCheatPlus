@@ -47,7 +47,7 @@ public enum ParameterName {
      *            the text
      * @return the parameter name
      */
-    public static ParameterName get(final String text) {
+    public static final ParameterName get(final String text) {
         for (final ParameterName parameterName : ParameterName.values())
             if (parameterName.text.equals(text))
                 return parameterName;
@@ -64,7 +64,7 @@ public enum ParameterName {
      * @param text
      *            the text
      */
-    ParameterName(final String text) {
+    private ParameterName(final String text) {
         this.text = text;
     }
 

@@ -32,10 +32,13 @@ import fr.neatmonster.nocheatplus.checks.CheckType;
 import fr.neatmonster.nocheatplus.components.NoCheatPlusAPI;
 import fr.neatmonster.nocheatplus.components.data.ICheckData;
 import fr.neatmonster.nocheatplus.components.data.IData;
+import fr.neatmonster.nocheatplus.components.registry.factory.IFactoryOne;
 import fr.neatmonster.nocheatplus.players.DataManager;
 import fr.neatmonster.nocheatplus.players.IPlayerData;
+import fr.neatmonster.nocheatplus.players.PlayerFactoryArgument;
 import fr.neatmonster.nocheatplus.stats.Counters;
 import fr.neatmonster.nocheatplus.utilities.TickTask;
+import fr.neatmonster.nocheatplus.worlds.WorldFactoryArgument;
 
 /**
  * Class to combine some things, make available for other checks, or just because they don't fit into another section.<br>
@@ -54,6 +57,7 @@ public class CombinedListener extends CheckListener {
     private final Counters counters = NCPAPIProvider.getNoCheatPlusAPI().getGenericInstance(Counters.class);
     private final int idFakeInvulnerable = counters.registerKey("fakeinvulnerable");
 
+    @SuppressWarnings("unchecked")
     public CombinedListener(){
         super(CheckType.COMBINED);
         final NoCheatPlusAPI api = NCPAPIProvider.getNoCheatPlusAPI();
@@ -136,7 +140,7 @@ public class CombinedListener extends CheckListener {
         if (modifier == null) modifier = cc.invulnerableModifierDefault;
         final CombinedData data = pData.getGenericInstance(CombinedData.class);
         // TODO: account for tick task reset ? [it should not though, due to data resetting too, but API would allow it]
-        if (TickTask.getTick() >= data.invulnerableTick + modifier) return;
+        if (TickTask.getTick() >= data.invulnerableTick + modifier.intValue()) return;
         // Still invulnerable.
         event.setCancelled(true);
         counters.addPrimaryThread(idFakeInvulnerable, 1);

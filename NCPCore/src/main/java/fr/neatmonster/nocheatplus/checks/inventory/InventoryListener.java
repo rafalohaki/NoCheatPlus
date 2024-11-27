@@ -19,6 +19,7 @@ import org.bukkit.GameMode;
 import org.bukkit.Location;
 import org.bukkit.Material;
 import org.bukkit.entity.ComplexEntityPart;
+import org.bukkit.entity.Entity;
 import org.bukkit.entity.HumanEntity;
 import org.bukkit.entity.Item;
 import org.bukkit.entity.LivingEntity;
@@ -36,6 +37,7 @@ import org.bukkit.event.inventory.InventoryCloseEvent;
 import org.bukkit.event.inventory.InventoryEvent;
 import org.bukkit.event.inventory.InventoryOpenEvent;
 import org.bukkit.event.inventory.InventoryType;
+import org.bukkit.event.inventory.InventoryType.SlotType;
 import org.bukkit.event.player.PlayerBedEnterEvent;
 import org.bukkit.event.player.PlayerChangedWorldEvent;
 import org.bukkit.event.player.PlayerDropItemEvent;
@@ -65,14 +67,17 @@ import fr.neatmonster.nocheatplus.components.data.ICheckData;
 import fr.neatmonster.nocheatplus.components.data.IData;
 import fr.neatmonster.nocheatplus.components.entity.IEntityAccessVehicle;
 import fr.neatmonster.nocheatplus.components.registry.event.IGenericInstanceHandle;
+import fr.neatmonster.nocheatplus.components.registry.factory.IFactoryOne;
 import fr.neatmonster.nocheatplus.components.registry.feature.JoinLeaveListener;
 import fr.neatmonster.nocheatplus.players.DataManager;
 import fr.neatmonster.nocheatplus.players.IPlayerData;
+import fr.neatmonster.nocheatplus.players.PlayerFactoryArgument;
 import fr.neatmonster.nocheatplus.stats.Counters;
 import fr.neatmonster.nocheatplus.utilities.InventoryUtil;
 import fr.neatmonster.nocheatplus.utilities.ReflectionUtil;
 import fr.neatmonster.nocheatplus.utilities.map.BlockProperties;
 import fr.neatmonster.nocheatplus.utilities.map.MaterialUtil;
+import fr.neatmonster.nocheatplus.worlds.WorldFactoryArgument;
 
 /**
  * Central location to listen to events that are relevant for the inventory checks.
@@ -117,6 +122,7 @@ public class InventoryListener  extends CheckListener implements JoinLeaveListen
 
     private final IGenericInstanceHandle<IEntityAccessVehicle> handleVehicles = NCPAPIProvider.getNoCheatPlusAPI().getGenericInstanceHandle(IEntityAccessVehicle.class);
 
+    @SuppressWarnings("unchecked")
     public InventoryListener() {
         super(CheckType.INVENTORY);
         final NoCheatPlusAPI api = NCPAPIProvider.getNoCheatPlusAPI();
@@ -209,6 +215,7 @@ public class InventoryListener  extends CheckListener implements JoinLeaveListen
      * @param event
      *            the event
      */
+    @SuppressWarnings("deprecation")
     @EventHandler(ignoreCancelled = true, priority = EventPriority.LOWEST)
     public void onInventoryClick(final InventoryClickEvent event) {
 
@@ -231,7 +238,7 @@ public class InventoryListener  extends CheckListener implements JoinLeaveListen
         if (pData.isDebugActive(checkType)) {
             outputDebugInventoryClick(player, slot, event, inventoryAction);
         }
-        if (slot < 0) {
+        if (slot == InventoryView.OUTSIDE || slot < 0) {
             data.lastClickTime = now;
             // Update this one only if the inventory was closed previously (or was forcibly closed)
             // otherwise keep the first click time
@@ -252,18 +259,14 @@ public class InventoryListener  extends CheckListener implements JoinLeaveListen
                 counters.addPrimaryThread(idIllegalItem, 1);
             }
         }
-        catch (final ArrayIndexOutOfBoundsException e) {
-            //e.printStackTrace();
-        } // Hotfix (CB)
+        catch (final ArrayIndexOutOfBoundsException e) {} // Hotfix (CB)
         try {
             if (!cancel && Items.checkIllegalEnchantments(player, cursor, pData)) {
                 cancel = true;
                 counters.addPrimaryThread(idIllegalItem, 1);
             }
         }
-        catch (final ArrayIndexOutOfBoundsException e) {
-            //e.printStackTrace();
-        } // Hotfix (CB)
+        catch (final ArrayIndexOutOfBoundsException e) {} // Hotfix (CB)
 
         // Fast inventory manipulation check.
         if (fastClick.isEnabled(player, pData)) {
@@ -453,7 +456,7 @@ public class InventoryListener  extends CheckListener implements JoinLeaveListen
      * @param event
      *            the event
      */
-    @EventHandler(priority = EventPriority.LOWEST)
+    @EventHandler(ignoreCancelled = false, priority = EventPriority.LOWEST)
     public final void onPlayerInteract(final PlayerInteractEvent event) {
 
         // Only interested in right-clicks while holding an item.
@@ -510,7 +513,7 @@ public class InventoryListener  extends CheckListener implements JoinLeaveListen
         }
     }
 
-    @EventHandler(priority = EventPriority.LOWEST)
+    @EventHandler(ignoreCancelled = false, priority = EventPriority.LOWEST)
     public final void onPlayerInteractEntity(final PlayerInteractEntityEvent event) {
 
         final Player player = event.getPlayer();
@@ -547,7 +550,7 @@ public class InventoryListener  extends CheckListener implements JoinLeaveListen
      * @param event
      *            the event
      */
-    @EventHandler(priority = EventPriority.LOWEST)
+    @EventHandler(ignoreCancelled = false, priority = EventPriority.LOWEST)
     public final void onPlayerInventoryOpen(final InventoryOpenEvent event) {
 
         // Possibly already prevented by block + entity interaction.
