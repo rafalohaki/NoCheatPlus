@@ -86,17 +86,13 @@ public class ReflectHelper {
             try {
                 reflectAxisAlignedBB = new ReflectAxisAlignedBB(reflectBase);
             }
-            catch (NullPointerException ex1) {
-                //ex1.printStackTrace();
-            }
+            catch (NullPointerException ex1) {}
             this.reflectAxisAlignedBB = reflectAxisAlignedBB;
             ReflectBlockPosition reflectBlockPosition = null;
             try {
                 reflectBlockPosition = new ReflectBlockPosition(this.reflectBase);
             }
-            catch (ClassNotFoundException ex) {
-                //ex.printStackTrace();
-            }
+            catch (ClassNotFoundException ex) {}
             this.reflectBlockPosition = reflectBlockPosition;
             this.reflectMaterial = new ReflectMaterial(this.reflectBase);
             this.reflectWorld = new ReflectWorld(reflectBase, reflectMaterial, reflectBlockPosition);
@@ -105,9 +101,7 @@ public class ReflectHelper {
                 reflectBlockLatest = new ReflectBlock(this.reflectBase, this.reflectBlockPosition,
                         reflectMaterial, reflectWorld);
             }
-            catch (Throwable t) {
-                //t.printStackTrace();
-            }
+            catch (Throwable t) {}
             if (reflectBlockLatest == null) {
                 // More lenient constructor.
                 this.reflectBlock = new ReflectBlockSix(this.reflectBase, this.reflectBlockPosition);
@@ -125,7 +119,7 @@ public class ReflectHelper {
             throw new ReflectFailureException(ex);
         }
         if (ConfigManager.getConfigFile().getBoolean(ConfPaths.LOGGING_EXTENDED_STATUS)) {
-            List<String> parts = new LinkedList<>();
+            List<String> parts = new LinkedList<String>();
             for (Field rootField : this.getClass().getDeclaredFields()) {
                 if (rootField.isAnnotationPresent(MostlyHarmless.class)) {
                     continue;
@@ -377,7 +371,7 @@ public class ReflectHelper {
         if (width < 0f) {
             fail();
         }
-        return width;
+        return (double) width;
     }
 
     public double getHeight(final Entity entity) {
@@ -393,7 +387,7 @@ public class ReflectHelper {
         if (reflectEntity.nmsHeight != null) {
             floatHeight = Math.max(ReflectionUtil.getFloat(reflectEntity.nmsHeight, handle, floatHeight), floatHeight);
         }
-        height = floatHeight;
+        height = (double) floatHeight;
         // TODO: Consider dropping the box for performance?
         if (reflectAxisAlignedBB != null && reflectEntity.nmsGetBoundingBox != null) {
             final Object box = ReflectionUtil.invokeMethodNoArgs(reflectEntity.nmsGetBoundingBox, handle);

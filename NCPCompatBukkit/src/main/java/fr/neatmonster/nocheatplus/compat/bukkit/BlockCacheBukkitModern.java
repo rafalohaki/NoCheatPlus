@@ -93,8 +93,11 @@ public class BlockCacheBukkitModern extends BlockCacheBukkit {
                 final double vehicleY = vehicle.getLocation(useLoc).getY() + vehicle.getHeight();
                 final double entityY = entity.getLocation(useLoc).getY();
                 useLoc.setWorld(null);
-                // TODO: A "better" estimate is possible, though some more tolerance would be good.
-                return vehicleY < entityY + 0.1 && Math.abs(vehicleY - entityY) < 0.7;
+                if (vehicleY < entityY + 0.1 && Math.abs(vehicleY - entityY) < 0.7){
+                    // TODO: A "better" estimate is possible, though some more tolerance would be good. 
+                    return true; 
+                }
+                else return false;
             }		
         }
         catch (Throwable t){

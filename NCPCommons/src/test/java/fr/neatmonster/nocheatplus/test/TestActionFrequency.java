@@ -14,9 +14,9 @@
  */
 package fr.neatmonster.nocheatplus.test;
 
-import static org.junit.jupiter.api.Assertions.*;
+import static org.junit.Assert.*;
 
-import org.junit.jupiter.api.Test;
+import org.junit.Test;
 
 import fr.neatmonster.nocheatplus.utilities.ds.count.ActionFrequency;
 
@@ -71,7 +71,7 @@ public class TestActionFrequency {
 		int sig = 1;
 		ActionFrequency freq = new ActionFrequency(10, 100);
 		for (int i = 0; i < 1000; i++){
-			freq.update((long) i * sig);
+			freq.update(i * sig);
 			sig = sig * -1;
 		}
 	}

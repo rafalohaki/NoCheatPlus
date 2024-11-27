@@ -39,7 +39,7 @@ public class PrefixTree<K, N extends Node<K, N>, L extends LookupEntry<K, N>>{
 	 * @param <N>
 	 */
 	public static class Node<K, N extends Node<K,N>>{
-		protected final int minCap = 4;
+		protected int minCap = 4;
 		/** End of a sequence marker (not necessarily a leaf) */
 		public boolean isEnd = false;
 		public Map<K, N> children = null;
@@ -59,7 +59,7 @@ public class PrefixTree<K, N extends Node<K, N>, L extends LookupEntry<K, N>>{
 		 * @return The resulting child for the key.
 		 */
 		public N putChild(final K key, final N child){
-			if (children == null) children = new HashMap<>(minCap);
+			if (children == null) children = new HashMap<K, N>(minCap);
 			children.put(key, child);
 			return child;
 		}
@@ -74,13 +74,13 @@ public class PrefixTree<K, N extends Node<K, N>, L extends LookupEntry<K, N>>{
 	public static class SimpleNode<K> extends Node<K, SimpleNode<K>>{
 	}
 	
-	public interface NodeFactory<K, N extends Node<K, N>>{
+	public static interface NodeFactory<K, N extends Node<K, N>>{
 		/**
 		 * 
 		 * @param parent Can be null (root).
 		 * @return
 		 */
-        N newNode(N parent);
+		public N newNode(N parent);
 	}
 	
 	public static class LookupEntry<K, N extends Node<K, N>>{
@@ -101,8 +101,8 @@ public class PrefixTree<K, N extends Node<K, N>, L extends LookupEntry<K, N>>{
 		}
 	}
 	
-	public interface LookupEntryFactory<K, N extends Node<K, N>, L extends LookupEntry<K, N>>{
-		L newLookupEntry(N node, N insertion, int depth, boolean hasPrefix);
+	public static interface LookupEntryFactory<K, N extends Node<K, N>, L extends LookupEntry<K, N>>{
+		public L newLookupEntry(N node , N insertion, int depth, boolean hasPrefix); 
 	}
 	
 	protected final NodeFactory<K, N> nodeFactory;

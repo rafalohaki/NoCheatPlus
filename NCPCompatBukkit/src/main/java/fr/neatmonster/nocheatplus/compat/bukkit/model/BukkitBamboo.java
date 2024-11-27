@@ -24,7 +24,7 @@ public class BukkitBamboo implements BukkitShapeModel {
             final World world, final int x, final int y, final int z) {
         
         // Taken from NMS - Offset/Noise
-        long i = (x * 3129871L) ^ z * 116129781L;
+        long i = (x * 3129871L) ^ z * 116129781L ^ 0;
         i = i * i * 42317861L + i * 11L;
         i = i >> 16;
         final double xOffset = (((i & 15L) / 15.0F) - 0.5D) * 0.5D;

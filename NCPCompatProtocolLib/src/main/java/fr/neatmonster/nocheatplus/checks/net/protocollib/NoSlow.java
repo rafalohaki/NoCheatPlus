@@ -95,10 +95,10 @@ public class NoSlow extends BaseAdapter {
 
     private static int timeBetweenRL = 70;
     private static PacketType[] initPacketTypes() {
-        final List<PacketType> types = new LinkedList<>(Arrays.asList(
+        final List<PacketType> types = new LinkedList<PacketType>(Arrays.asList(
                 PacketType.Play.Client.BLOCK_DIG,
                 PacketType.Play.Client.BLOCK_PLACE
-        ));
+                ));
         return types.toArray(new PacketType[types.size()]);
     }
 

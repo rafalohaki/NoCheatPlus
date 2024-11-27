@@ -46,18 +46,17 @@ public class OutgoingPosition extends BaseAdapter {
 
     public OutgoingPosition(Plugin plugin) {
         // PacketPlayInFlying[3, legacy: 10]
-        super(plugin, ListenerPriority.HIGHEST, PacketType.Play.Server.POSITION
+        super(plugin, ListenerPriority.HIGHEST, new PacketType[] {
+                PacketType.Play.Server.POSITION
                 // TODO: POSITION_LOOK ??
-        );
+        });
     }
 
     @Override
     public void onPacketSending(PacketEvent event) {
         try {
             if (event.isPlayerTemporary()) return;
-        } catch(NoSuchMethodError e) {
-            //e.printStackTrace();
-        }
+        } catch(NoSuchMethodError e) {}
     	if (event.isCancelled()) {
             return;
         }

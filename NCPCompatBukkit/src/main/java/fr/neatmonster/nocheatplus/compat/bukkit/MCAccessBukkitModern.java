@@ -14,7 +14,7 @@
  */
 package fr.neatmonster.nocheatplus.compat.bukkit;
 
-import java.util.Arrays;
+import java.lang.reflect.Method;
 import java.util.HashMap;
 import java.util.Map;
 
@@ -34,6 +34,8 @@ import fr.neatmonster.nocheatplus.config.WorldConfigProvider;
 import fr.neatmonster.nocheatplus.utilities.ReflectionUtil;
 import fr.neatmonster.nocheatplus.utilities.map.BlockCache;
 import fr.neatmonster.nocheatplus.utilities.map.BlockFlags;
+import fr.neatmonster.nocheatplus.utilities.map.BlockProperties;
+import fr.neatmonster.nocheatplus.utilities.map.BlockFlags;
 import fr.neatmonster.nocheatplus.utilities.map.MaterialUtil;
 
 public class MCAccessBukkitModern extends MCAccessBukkit {
@@ -42,7 +44,7 @@ public class MCAccessBukkitModern extends MCAccessBukkit {
     protected ReflectDamageSource reflectDamageSource = null;
     protected ReflectDamageSources reflectDamageSources = null;
     protected ReflectLivingEntity reflectLivingEntity = null;
-    protected final Map<Material, BukkitShapeModel> shapeModels = new HashMap<>();
+    protected final Map<Material, BukkitShapeModel> shapeModels = new HashMap<Material, BukkitShapeModel>();
 
     // Blocks that can be fetched automatically from from the Bukkit API
     private static final BukkitShapeModel MODEL_AUTO_FETCH = new BukkitFetchableBounds();
@@ -143,9 +145,7 @@ public class MCAccessBukkitModern extends MCAccessBukkit {
             // Can be null
             this.reflectDamageSources = new ReflectDamageSources(this.reflectBase, this.reflectDamageSource);
         } 
-        catch (ClassNotFoundException ex) {
-            //ex.printStackTrace();
-        }
+        catch (ClassNotFoundException ex) {}
     }
 
     @Override
@@ -190,17 +190,22 @@ public class MCAccessBukkitModern extends MCAccessBukkit {
         BlockFlags.setBlockFlags(Material.SKELETON_WALL_SKULL, blockFix);
 
         // Directly keep blocks as is.
-        processedBlocks.addAll(Arrays.asList(BridgeMaterial.COBWEB,
-                BridgeMaterial.MOVING_PISTON,
-                Material.SNOW,
-                Material.BEACON,
-                Material.VINE,
-                Material.CHORUS_FLOWER));
+        for (final Material mat : new Material[] {
+            BridgeMaterial.COBWEB,
+            BridgeMaterial.MOVING_PISTON,
+            Material.SNOW,
+            Material.BEACON,
+            Material.VINE,
+            Material.CHORUS_FLOWER}) {
+            processedBlocks.add(mat);
+        }
 
-        processedBlocks.addAll(BridgeMaterial.getAllBlocks(
-                "light", "glow_lichen", "big_dripleaf_stem",
-                // TODO: Not fully tested
-                "scaffolding", "powder_snow"));
+        for (final Material mat : BridgeMaterial.getAllBlocks(
+            "light", "glow_lichen", "big_dripleaf_stem",
+            // TODO: Not fully tested
+            "scaffolding", "powder_snow")) {
+            processedBlocks.add(mat);
+        }
 
         // Candle
         for (Material mat : MaterialUtil.ALL_CANDLES) {
@@ -508,7 +513,8 @@ public class MCAccessBukkitModern extends MCAccessBukkit {
         if (this.reflectLivingEntity == null || this.reflectLivingEntity.obcGetHandle == null) {
             return null;
         }
-        return ReflectionUtil.invokeMethodNoArgs(this.reflectLivingEntity.obcGetHandle, player);
+        Object handle = ReflectionUtil.invokeMethodNoArgs(this.reflectLivingEntity.obcGetHandle, player);
+        return handle;
     }
 
     private boolean canDealFallDamage() {

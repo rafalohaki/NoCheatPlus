@@ -52,7 +52,7 @@ public class TimedCharPrefixTree<N extends TimedCharNode<N>, L extends TimedChar
 	
 	protected int depth;
 	
-	protected final float arrayGrowth = 1.3f;
+	protected float arrayGrowth = 1.3f;
 	
 	/**
 	 * 

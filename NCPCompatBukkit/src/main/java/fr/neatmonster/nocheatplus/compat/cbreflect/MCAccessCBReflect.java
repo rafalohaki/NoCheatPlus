@@ -45,7 +45,7 @@ public class MCAccessCBReflect extends MCAccessBukkit {
         helper = new ReflectHelper();
         // Version Envelope tests (1.4.5-R1.0 ... 1.8.x is considered to be ok).
         final String mcVersion = ServerVersion.getMinecraftVersion();
-        if (mcVersion.equals(GenericVersion.UNKNOWN_VERSION)) {
+        if (mcVersion == GenericVersion.UNKNOWN_VERSION) {
             NCPAPIProvider.getNoCheatPlusAPI().getLogManager().warning(Streams.INIT, "The Minecraft version could not be detected, Compat-CB-Reflect might or might not work.");
             this.knownSupportedVersion = false;
         }
@@ -60,8 +60,12 @@ public class MCAccessCBReflect extends MCAccessBukkit {
             this.knownSupportedVersion = true;
         }
         // Fall damage / event. TODO: Tests between 1.8 and 1.7.2. How about spigot vs. CB?
-        // Assume higher versions to fire an event.
-        dealFallDamageFiresAnEvent = !mcVersion.equals(GenericVersion.UNKNOWN_VERSION) && GenericVersion.compareVersions(mcVersion, "1.8") >= 0;
+        if (mcVersion == GenericVersion.UNKNOWN_VERSION || GenericVersion.compareVersions(mcVersion, "1.8") < 0) {
+            dealFallDamageFiresAnEvent = false;
+        } else {
+            // Assume higher versions to fire an event.
+            dealFallDamageFiresAnEvent = true;
+        }
     }
 
     @Override
@@ -214,7 +218,10 @@ public class MCAccessCBReflect extends MCAccessBukkit {
                 }
             }
         }
-        catch (ReflectFailureException | NullPointerException e) {
+        catch (ReflectFailureException e) {
+            // Ignore.
+        }
+        catch (NullPointerException ne) {
             // Ignore.
         }
         return AlmostBoolean.MAYBE;

@@ -29,7 +29,7 @@ public interface IReflectBlock {
      * @param id
      * @return
      */
-    Object nms_getByMaterial(Material id);
+    public Object nms_getByMaterial(Material id);
 
     /**
      * Get the material for a Block instance.
@@ -37,7 +37,7 @@ public interface IReflectBlock {
      * @param block
      * @return
      */
-    Object nms_getMaterial(Object block);
+    public Object nms_getMaterial(Object block);
 
     /**
      * Fetch bounds for a block instance (minX, minY, minZ, maxX, maxY, maxZ).
@@ -49,14 +49,14 @@ public interface IReflectBlock {
      * @param z
      * @return
      */
-    double[] nms_fetchBounds(final Object nmsWorld, final Object nmsBlock,
-                             final int x, final int y, final int z);
+    public double[] nms_fetchBounds(final Object nmsWorld, final Object nmsBlock,
+            final int x, final int y, final int z);
 
     /**
      * Indicate if nms_fetchBounds could work.
      * 
      * @return
      */
-    boolean isFetchBoundsAvailable();
+    public boolean isFetchBoundsAvailable();
 
 }

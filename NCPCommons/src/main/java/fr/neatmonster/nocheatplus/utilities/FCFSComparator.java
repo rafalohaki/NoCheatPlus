@@ -34,7 +34,7 @@ public class FCFSComparator <T> implements Comparator<T> {
     }
     
     public FCFSComparator(Collection<Comparator<T>> comparators, boolean reverse) {
-        this.comparators = new ArrayList<>(comparators);
+        this.comparators = new ArrayList<Comparator<T>>(comparators);
         this.reverse = reverse;
     }
 

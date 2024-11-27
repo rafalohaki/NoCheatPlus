@@ -155,7 +155,11 @@ public class ReflectBlock implements IReflectBlock {
     private Object nms_getBlockData(final Object block) {
         try {
             return nmsGetBlockData.invoke(block);
-        } catch (IllegalAccessException | InvocationTargetException | IllegalArgumentException e) {
+        } catch (IllegalAccessException e) {
+            throw new ReflectFailureException();
+        } catch (IllegalArgumentException e) {
+            throw new ReflectFailureException();
+        } catch (InvocationTargetException e) {
             throw new ReflectFailureException();
         }
     }
@@ -181,7 +185,11 @@ public class ReflectBlock implements IReflectBlock {
     private Object nms_fetchAABB(final Object nmsBlock, final Object iBlockData, final Object iBlockAccess, final Object blockPosition) {
         try {
             return nmsFetchAABB.invoke(nmsBlock, iBlockData, iBlockAccess, blockPosition);
-        } catch (IllegalAccessException | InvocationTargetException | IllegalArgumentException e) {
+        } catch (IllegalAccessException e) {
+            throw new ReflectFailureException();
+        } catch (IllegalArgumentException e) {
+            throw new ReflectFailureException();
+        } catch (InvocationTargetException e) {
             throw new ReflectFailureException();
         }
     }

@@ -14,7 +14,7 @@
  */
 package fr.neatmonster.nocheatplus.test;
 
-import static org.junit.jupiter.api.Assertions.fail;
+import static org.junit.Assert.fail;
 
 import java.util.HashMap;
 import java.util.Iterator;
@@ -22,7 +22,7 @@ import java.util.LinkedHashMap;
 import java.util.Map;
 import java.util.Map.Entry;
 
-import org.junit.jupiter.api.Test;
+import org.junit.Test;
 
 import fr.neatmonster.nocheatplus.utilities.ds.map.HashMapLOW;
 
@@ -41,8 +41,8 @@ public class TestHashMapLOW {
      */
     @Test
     public void testBase() {
-        HashMap<String, Integer> refMap = new LinkedHashMap<>();
-        HashMapLOW<String, Integer> map = new HashMapLOW<>(100);
+        HashMap<String, Integer> refMap = new LinkedHashMap<String, Integer>();
+        HashMapLOW<String, Integer> map = new HashMapLOW<String, Integer>(100);
 
         testSize(map, refMap);
         fill(map, refMap, 1000, true);
@@ -63,8 +63,8 @@ public class TestHashMapLOW {
      */
     @Test
     public void testRemove() {
-        HashMap<String, Integer> refMap = new LinkedHashMap<>();
-        HashMapLOW<String, Integer> map = new HashMapLOW<>(100);
+        HashMap<String, Integer> refMap = new LinkedHashMap<String, Integer>();
+        HashMapLOW<String, Integer> map = new HashMapLOW<String, Integer>(100);
         fill(map, refMap, 1000, true);
 
         int i = 0;
@@ -81,8 +81,8 @@ public class TestHashMapLOW {
      */
     @Test
     public void testRemoveWithIterator() {
-        HashMap<String, Integer> refMap = new LinkedHashMap<>();
-        HashMapLOW<String, Integer> map = new HashMapLOW<>(100);
+        HashMap<String, Integer> refMap = new LinkedHashMap<String, Integer>();
+        HashMapLOW<String, Integer> map = new HashMapLOW<String, Integer>(100);
         fill(map, refMap, 1000, true);
 
         int i = 0;
@@ -98,8 +98,8 @@ public class TestHashMapLOW {
 
     @Test
     public void testReplaceValues() {
-        HashMap<String, Integer> refMap = new LinkedHashMap<>();
-        HashMapLOW<String, Integer> map = new HashMapLOW<>(100);
+        HashMap<String, Integer> refMap = new LinkedHashMap<String, Integer>();
+        HashMapLOW<String, Integer> map = new HashMapLOW<String, Integer>(100);
         fill(map, refMap, 1000, true);
         for (Entry<String, Integer> entry : refMap.entrySet()) {
             String key = entry.getKey();
@@ -119,8 +119,8 @@ public class TestHashMapLOW {
 
     @Test
     public void testReplaceValuesIterator() {
-        HashMap<String, Integer> refMap = new LinkedHashMap<>();
-        HashMapLOW<String, Integer> map = new HashMapLOW<>(100);
+        HashMap<String, Integer> refMap = new LinkedHashMap<String, Integer>();
+        HashMapLOW<String, Integer> map = new HashMapLOW<String, Integer>(100);
         fill(map, refMap, 1000, true);
         Iterator<Entry<String, Integer>> it = map.iterator();
         while (it.hasNext()) {
@@ -148,7 +148,7 @@ public class TestHashMapLOW {
     }
 
     private void testInPlace(HashMapLOW<String, Integer> map, String key, Integer value) {
-        if (!map.get(key).equals(value)) {
+        if (map.get(key) != value) {
             fail("Overriding a value in-place fails. Got " + map.get(key) + " instead of " + value);
         }
     }
@@ -165,7 +165,7 @@ public class TestHashMapLOW {
 
     private void testIterator(HashMapLOW<String, Integer> map) {
         Iterator<Entry<String, Integer>> it = map.iterator();
-        Map<String, Integer> refMap2 = new HashMap<>();
+        Map<String, Integer> refMap2 = new HashMap<String, Integer>();
         int i = 0;
         while (it.hasNext()) {
             i++;
@@ -189,7 +189,7 @@ public class TestHashMapLOW {
     private void testValuesIdentity(HashMapLOW<String, Integer> map, Map<String, Integer> refMap) {
         for (Entry<String, Integer> entry : refMap.entrySet()) {
             // Assume identity of objects.
-            if (!map.get(entry.getKey()).equals(entry.getValue())) {
+            if (map.get(entry.getKey()) != entry.getValue()) {
                 fail("Inconsistent entry: expect " + entry.getValue() + " for key " + entry.getKey() + ", got instead: " + map.get(entry.getKey()));
             }
         }

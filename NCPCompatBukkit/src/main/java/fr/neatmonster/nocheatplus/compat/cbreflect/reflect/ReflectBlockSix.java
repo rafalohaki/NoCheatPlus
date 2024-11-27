@@ -19,6 +19,7 @@ import java.lang.reflect.Field;
 import java.lang.reflect.Method;
 import java.util.ArrayList;
 import java.util.Arrays;
+import java.util.Collections;
 import java.util.Comparator;
 import java.util.List;
 
@@ -42,7 +43,7 @@ import fr.neatmonster.nocheatplus.utilities.StringUtil;
 public class ReflectBlockSix implements IReflectBlock {
 
     /** Obfuscated nms names, allowing to find the order in the source code under certain circumstances. */
-    private static final List<String> possibleNames = new ArrayList<>();
+    private static final List<String> possibleNames = new ArrayList<String>();
 
     static {
         // These might suffice for a while.
@@ -140,7 +141,7 @@ public class ReflectBlockSix implements IReflectBlock {
 
     private String[] guessBoundsMethodNames(Class<?> clazz) {
         // Filter accepted method names.
-        List<String> names = new ArrayList<>();
+        List<String> names = new ArrayList<String>();
         for (Method method : clazz.getMethods()) {
             if (method.getReturnType() == double.class && method.getParameterTypes().length == 0 && possibleNames.contains(method.getName())) {
                 names.add(method.getName());

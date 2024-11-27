@@ -39,6 +39,7 @@ public class BukkitSlab implements BukkitShapeModel {
                 case TOP:
                     return new double[] {0.0, 0.5, 0.0, 1.0, 1.0, 1.0};
                 case DOUBLE:
+                    break;
                 default:
                     break;
             }

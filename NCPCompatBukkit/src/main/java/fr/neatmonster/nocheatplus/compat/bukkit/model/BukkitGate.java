@@ -48,9 +48,11 @@ public class BukkitGate implements BukkitShapeModel {
         if (blockData instanceof Directional) {
             switch (((Directional) blockData).getFacing()) {
                 case WEST:
+                    return new double[] {minXZ, 0.0, 0.0, maxXZ, height, 1.0};
                 case EAST:
                     return new double[] {minXZ, 0.0, 0.0, maxXZ, height, 1.0};
                 case NORTH:
+                    return new double[] {0.0, 0.0, minXZ, 1.0, height, maxXZ};
                 case SOUTH:
                     return new double[] {0.0, 0.0, minXZ, 1.0, height, maxXZ};
                 default:

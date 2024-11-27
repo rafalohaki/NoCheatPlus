@@ -37,19 +37,19 @@ import fr.neatmonster.nocheatplus.utilities.ds.count.acceptdeny.ICounterWithPare
 public class SimpleWorkaroundRegistry implements IWorkaroundRegistry {
 
     /** Global counter by id. */
-    private final Map<String, IAcceptDenyCounter> counters = new HashMap<>();
+    private final Map<String, IAcceptDenyCounter> counters = new HashMap<String, IAcceptDenyCounter>();
 
     /** Workaround blue print by id. */
-    private final Map<String, IWorkaround> bluePrints = new HashMap<>();
+    private final Map<String, IWorkaround> bluePrints = new HashMap<String, IWorkaround>();
 
     /** Map group id to array of workaround ids. */
-    private final Map<String, String[]> groups = new HashMap<>();
+    private final Map<String, String[]> groups = new HashMap<String, String[]>();
 
     /** Map WorkaroundSet id to the contained blueprint ids. */
-    private final Map<String, String[]> workaroundSets = new HashMap<>();
+    private final Map<String, String[]> workaroundSets = new HashMap<String, String[]>();
 
     /** Map WorkaroundSet id to the contained group ids. Might not contain entries for all ids. */
-    private final Map<String, String[]> workaroundSetGroups = new HashMap<>();
+    private final Map<String, String[]> workaroundSetGroups = new HashMap<String, String[]>();
 
     @Override
     public void setWorkaroundBluePrint(final IWorkaround... bluePrints) {
@@ -108,7 +108,7 @@ public class SimpleWorkaroundRegistry implements IWorkaroundRegistry {
 
     @Override
     public void setWorkaroundSetByIds(final String workaroundSetId, final Collection<String> bluePrintIds, final String... groupIds) {
-        final List<IWorkaround> bluePrints = new ArrayList<>(bluePrintIds.size());
+        final List<IWorkaround> bluePrints = new ArrayList<IWorkaround>(bluePrintIds.size());
         for (final String id : bluePrintIds) {
             final IWorkaround bluePrint = this.bluePrints.get(id);
             if (bluePrint == null) {
@@ -196,7 +196,7 @@ public class SimpleWorkaroundRegistry implements IWorkaroundRegistry {
 
     @Override
     public Set<String> getCheckedIdSet(Collection<? extends IWorkaround> workarounds) {
-        final Set<String> ids = new LinkedHashSet<>();
+        final Set<String> ids = new LinkedHashSet<String>();
         for (final IWorkaround workaround : workarounds) {
             final IWorkaround bluePrint = this.bluePrints.get(workaround.getId());
             if (bluePrint == null) {

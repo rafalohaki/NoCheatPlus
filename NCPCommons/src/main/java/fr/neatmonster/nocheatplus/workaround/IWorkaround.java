@@ -33,7 +33,7 @@ public interface IWorkaround {
 
     // TODO: Add setEnabled() ? Allow to configure workarounds (-> IConfigurableThing).
 
-    String getId();
+    public String getId();
 
     /**
      * Attempt to use the workaround, considering all preconditions and
@@ -44,7 +44,7 @@ public interface IWorkaround {
      * 
      * @return If actually can be used.
      */
-    boolean use();
+    public boolean use();
 
     /**
      * Test if this (stage of) workaround would apply. This must not have any
@@ -56,7 +56,7 @@ public interface IWorkaround {
      *         conditions are changed). If a call returns true, future
      *         implementations might still return false on use().
      */
-    boolean canUse();
+    public boolean canUse();
     
     /**
      * Retrieve the counter used for acceptance and denial with calling use().
@@ -64,7 +64,7 @@ public interface IWorkaround {
      * 
      * @return
      */
-    IAcceptDenyCounter getAllTimeCounter();
+    public IAcceptDenyCounter getAllTimeCounter();
 
     /**
      * Serving as factory, retrieve a new instance of the same kind, in the
@@ -73,6 +73,6 @@ public interface IWorkaround {
      * 
      * @return
      */
-    IWorkaround getNewInstance();
+    public IWorkaround getNewInstance();
 
 }

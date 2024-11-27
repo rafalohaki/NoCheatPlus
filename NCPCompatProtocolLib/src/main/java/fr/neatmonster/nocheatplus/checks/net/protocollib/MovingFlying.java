@@ -22,6 +22,7 @@ import java.util.LinkedList;
 import java.util.List;
 
 import org.bukkit.Bukkit;
+import org.bukkit.Location;
 import org.bukkit.entity.Player;
 import org.bukkit.plugin.Plugin;
 
@@ -35,6 +36,8 @@ import com.comphenix.protocol.reflect.StructureModifier;
 
 import fr.neatmonster.nocheatplus.NCPAPIProvider;
 import fr.neatmonster.nocheatplus.checks.CheckType;
+import fr.neatmonster.nocheatplus.checks.moving.MovingConfig;
+import fr.neatmonster.nocheatplus.checks.moving.MovingData;
 import fr.neatmonster.nocheatplus.checks.net.FlyingFrequency;
 import fr.neatmonster.nocheatplus.checks.net.Moving;
 import fr.neatmonster.nocheatplus.checks.net.NetConfig;
@@ -43,6 +46,7 @@ import fr.neatmonster.nocheatplus.checks.net.model.DataPacketFlying;
 import fr.neatmonster.nocheatplus.checks.net.model.DataPacketFlying.PACKET_CONTENT;
 import fr.neatmonster.nocheatplus.checks.net.model.TeleportQueue.AckReference;
 import fr.neatmonster.nocheatplus.compat.AlmostBoolean;
+import fr.neatmonster.nocheatplus.compat.BridgeMisc;
 import fr.neatmonster.nocheatplus.compat.versions.ServerVersion;
 import fr.neatmonster.nocheatplus.logging.StaticLog;
 import fr.neatmonster.nocheatplus.logging.Streams;
@@ -53,6 +57,7 @@ import fr.neatmonster.nocheatplus.utilities.CheckUtils;
 import fr.neatmonster.nocheatplus.utilities.StringUtil;
 import fr.neatmonster.nocheatplus.utilities.ds.count.ActionFrequency;
 import fr.neatmonster.nocheatplus.utilities.location.LocUtil;
+import fr.neatmonster.nocheatplus.utilities.location.TrigUtil;
 import fr.neatmonster.nocheatplus.worlds.IWorldData;
 
 /**
@@ -78,7 +83,7 @@ public class MovingFlying extends BaseAdapter {
     
     private final Plugin plugin = Bukkit.getPluginManager().getPlugin("NoCheatPlus");
     private static PacketType[] initPacketTypes() {
-        final List<PacketType> types = new LinkedList<>(Arrays.asList(
+        final List<PacketType> types = new LinkedList<PacketType>(Arrays.asList(
                 PacketType.Play.Client.LOOK,
                 PacketType.Play.Client.POSITION,
                 PacketType.Play.Client.POSITION_LOOK
@@ -106,8 +111,8 @@ public class MovingFlying extends BaseAdapter {
     private final int idAsyncFlying = counters.registerKey("packet.flying.asynchronous");
     /** If a packet can't be parsed, this time stamp is set for occasional logging. */
     private long packetMismatch = Long.MIN_VALUE;
-    private final long packetMismatchLogFrequency = 60000; // Every minute max, good for updating :).
-    private final HashSet<PACKET_CONTENT> validContent = new LinkedHashSet<>();
+    private long packetMismatchLogFrequency = 60000; // Every minute max, good for updating :).
+    private final HashSet<PACKET_CONTENT> validContent = new LinkedHashSet<PACKET_CONTENT>();
     private final PacketType confirmTeleportType = ProtocolLibComponent.findPacketTypeByName(Protocol.PLAY, Sender.CLIENT, "TeleportAccept");
     private boolean acceptConfirmTeleportPackets = confirmTeleportType != null;
 

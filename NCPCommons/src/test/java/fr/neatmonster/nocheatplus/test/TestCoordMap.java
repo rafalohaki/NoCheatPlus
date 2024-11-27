@@ -14,7 +14,7 @@
  */
 package fr.neatmonster.nocheatplus.test;
 
-import static org.junit.jupiter.api.Assertions.fail;
+import static org.junit.Assert.fail;
 
 import java.util.Arrays;
 import java.util.HashMap;
@@ -24,7 +24,7 @@ import java.util.Map;
 import java.util.Set;
 import java.util.SplittableRandom;
 
-import org.junit.jupiter.api.Test;
+import org.junit.Test;
 
 import fr.neatmonster.nocheatplus.utilities.build.BuildParameters;
 import fr.neatmonster.nocheatplus.utilities.ds.map.CoordHashMap;
@@ -109,7 +109,7 @@ public class TestCoordMap {
     }
 
     public Map<Integer, int[]> getIndexMap(int[][] coords) {
-        final Map<Integer, int[]> indexMap = new HashMap<>(coords.length);
+        final Map<Integer, int[]> indexMap = new HashMap<Integer, int[]>(coords.length);
         for (int i = 0; i < coords.length; i ++){
             indexMap.put(i, coords[i]);
         }
@@ -126,7 +126,7 @@ public class TestCoordMap {
             map.put(coords[i][0], coords[i][1], coords[i][2], i);
             Integer value = map.get(coords[i][0], coords[i][1], coords[i][2]);
             if (value == null) fail("Value is null, get after put: " + i);
-            else if (value != i) fail("get right after put");
+            else if (value.intValue() != i) fail("get right after put");
             if (!map.contains(coords[i][0], coords[i][1], coords[i][2])) fail("Contains returns false: " + i);
         }
     }
@@ -140,7 +140,7 @@ public class TestCoordMap {
         for (int i = 0; i < coords.length ; i++){
             Integer value = map.get(coords[i][0], coords[i][1], coords[i][2]);
             if (value == null) fail("Value is null instead of " + i);
-            if (value != i) fail("Wrong value: " + value + " vs. " + i);
+            if (value.intValue() != i) fail("Wrong value: " + value + " vs. " + i);
             if (!map.contains(coords[i][0], coords[i][1], coords[i][2])) fail("Contains returns false.");
         }
         if (map.size() != coords.length) fail("Iterator wrong number of elements: " + map.size() + "/" + coords.length);
@@ -154,7 +154,7 @@ public class TestCoordMap {
      */
     public void matchAllIterator(CoordMap<Integer> map, Map<Integer, int[]> indexMap){
         Iterator<Entry<Integer>> it = map.iterator();
-        Set<Integer> found = new HashSet<>();
+        Set<Integer> found = new HashSet<Integer>();
         while (it.hasNext()){
             Entry<Integer> entry = it.next();
             Integer value = entry.getValue();
@@ -178,7 +178,7 @@ public class TestCoordMap {
      */
     public void removeAll(CoordMap<Integer> map, int[][] coords) {
         for (int i = 0; i < coords.length ; i++){
-            if (map.remove(coords[i][0], coords[i][1], coords[i][2]) != i) fail("removed should be " + i );
+            if (map.remove(coords[i][0], coords[i][1], coords[i][2]).intValue() != i) fail("removed should be " + i );
             int expectedSize = coords.length - (i + 1);
             if (map.size() != expectedSize) fail("Bad size (" + map.size() + "), expect " + expectedSize);
             if (map.get(coords[i][0], coords[i][1], coords[i][2]) != null) fail("get right after remove not null");
@@ -195,7 +195,7 @@ public class TestCoordMap {
     public void removeAllIterator(CoordMap<Integer> map, Map<Integer, int[]> indexMap)
     {
         Iterator<Entry<Integer>> it = map.iterator();
-        Set<Integer> removed = new HashSet<>();
+        Set<Integer> removed = new HashSet<Integer>();
         while (it.hasNext()){
             Entry<Integer> entry = it.next();
             Integer value = entry.getValue();
@@ -230,6 +230,7 @@ public class TestCoordMap {
      * @param indexMap
      * @param initialSize
      */
+    @SuppressWarnings("unchecked")
     public  void series(int[][] coords, Map<Integer, int[]> indexMap, int initialSize, float loadFactor) {
 
         // Fill and check
@@ -339,7 +340,7 @@ public class TestCoordMap {
 
         // Preparecoordinates.
         int [][] coords = getUniqueRandomCoords(n, max, random);
-        LinkedCoordHashMap<Integer> map = new LinkedCoordHashMap<>(1, 0.75f);
+        LinkedCoordHashMap<Integer> map = new LinkedCoordHashMap<Integer>(1, 0.75f);
 
         // Use a map with these coordinates.
         fillMap(map, coords);
@@ -384,7 +385,9 @@ public class TestCoordMap {
         // Half the coordinates.
         int[][] halfCoords = new int[n / 2][3];
         for (int i = 0; i < n / 2; i++) {
-            System.arraycopy(coords[i * 2], 0, halfCoords[i], 0, 3);
+            for (int j = 0; j < 3; j++) {
+                halfCoords[i][j] = coords[i * 2][j];
+            }
         }
         // Test remove every second entry.
         for (int i = 0; i < n / 2; i++) {
@@ -492,7 +495,7 @@ public class TestCoordMap {
 
     private void testNext(Iterator<Entry<Integer>> it, int[][] coords, int matchIndex, int multiplyId) {
         Entry<Integer> entry = it.next();
-        if (entry.getValue() != matchIndex * multiplyId) {
+        if (entry.getValue().intValue() != matchIndex * multiplyId) {
             fail("Index vs. value mismatch, expect " + matchIndex * multiplyId + ", got instead: " + entry.getValue());
         }
         if (entry.getX() != coords[matchIndex][0] || entry.getY() != coords[matchIndex][1] || entry.getZ() != coords[matchIndex][2]) {

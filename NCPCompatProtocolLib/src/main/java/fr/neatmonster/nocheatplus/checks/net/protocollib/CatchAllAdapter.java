@@ -47,7 +47,7 @@ public class CatchAllAdapter extends BaseAdapter {
      */
     private static Iterable<? extends PacketType> getPacketTypes() {
         // TODO: Config ?
-        Set<PacketType> types = new LinkedHashSet<>();
+        Set<PacketType> types = new LinkedHashSet<PacketType>();
         for (PacketType type : PacketType.Play.Client.getInstance().values()) {
             if (type.isSupported()) {
                 types.add(type);
@@ -70,9 +70,7 @@ public class CatchAllAdapter extends BaseAdapter {
     public void onPacketReceiving(PacketEvent event) {
         try {
             if (event.isPlayerTemporary()) return;
-        } catch(NoSuchMethodError e) {
-            //e.printStackTrace();
-        }
+        } catch(NoSuchMethodError e) {}
         final Player player = event.getPlayer();
         if (player == null) {
             counters.add(ProtocolLibComponent.idNullPlayer, 1);

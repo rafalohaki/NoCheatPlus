@@ -73,7 +73,10 @@ public class ReflectAxisAlignedBB {
             arr[5] = nms_maxZ.getDouble(aabb);
             return arr;
         }
-        catch (IllegalArgumentException | IllegalAccessException e) {
+        catch (IllegalArgumentException e) {
+            throw new ReflectFailureException();
+        }
+        catch (IllegalAccessException e) {
             throw new ReflectFailureException();
         }
     }

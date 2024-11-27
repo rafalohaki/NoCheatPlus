@@ -21,6 +21,8 @@ import java.util.stream.IntStream;
 import org.bukkit.World;
 import org.bukkit.block.Block;
 import org.bukkit.block.BlockFace;
+import org.bukkit.block.BlockState;
+import org.bukkit.block.data.Bisected;
 import org.bukkit.block.data.Bisected.Half;
 import org.bukkit.block.data.BlockData;
 import org.bukkit.block.data.type.Stairs;
@@ -137,13 +139,14 @@ public class BukkitStairs implements BukkitShapeModel {
 
     // TODO: Poorly designed, Will recode better version later
     private double[] merge(double[] bounds, double[] octet) {
+        double[] res = bounds;
         final double minX = octet[0];
         final double minY = octet[1];
         final double minZ = octet[2];
         final double maxX = octet[3];
         final double maxY = octet[4];
         final double maxZ = octet[5];
-        for (int i = 2; i <= bounds.length / 6; i++) {
+        for (int i = 2; i <= (int)bounds.length / 6; i++) {
                 
             final double tminX = bounds[i*6-6];
             final double tminY = bounds[i*6-5];
@@ -159,22 +162,22 @@ public class BukkitStairs implements BukkitShapeModel {
                     Axis axis = a.get(0);
                     switch (axis) {
                     case X_AXIS:
-                        bounds[i*6-6] = Math.min(tminX, minX);
-                        bounds[i*6-3] = Math.max(tmaxX, maxX);
-                        return bounds;
+                        res[i*6-6] = Math.min(tminX, minX);
+                        res[i*6-3] = Math.max(tmaxX, maxX);
+                        return res;
                     //case Y_AXIS:
                     //        break;
                     case Z_AXIS:
-                        bounds[i*6-4] = Math.min(tminZ, minZ);
-                        bounds[i*6-1] = Math.max(tmaxZ, maxZ);
-                        return bounds;
+                        res[i*6-4] = Math.min(tminZ, minZ);
+                        res[i*6-1] = Math.max(tmaxZ, maxZ);
+                        return res;
                     default:
                             break;
                     }
                 }  
             }
         }
-        return add(bounds, octet);
+        return add(res, octet);
     }
 
     private double[] add(final double[] array1, final double[] array2) {
@@ -186,7 +189,7 @@ public class BukkitStairs implements BukkitShapeModel {
 
     private List<Axis> getRelative(double minX, double minY, double minZ, double maxX, double maxY, double maxZ,
             double tminX, double tminY, double tminZ, double tmaxX, double tmaxY, double tmaxZ) {
-        final List<Axis> list = new ArrayList<>();
+        final List<Axis> list = new ArrayList<Axis>();
         if (minX == tmaxX || maxX == tminX) {
             list.add(Axis.X_AXIS);
         }

@@ -30,7 +30,7 @@ public interface IStagedWorkaround {
      * Generic reset to the initial conditions. This does not reset the all time
      * counters, other effects depend on the implementation.
      */
-    void resetConditions();
+    public void resetConditions();
 
     /**
      * Get the counter that will reset with the next call to resetConditions.
@@ -38,6 +38,6 @@ public interface IStagedWorkaround {
      * 
      * @return
      */
-    IAcceptDenyCounter getStageCounter();
+    public IAcceptDenyCounter getStageCounter();
 
 }

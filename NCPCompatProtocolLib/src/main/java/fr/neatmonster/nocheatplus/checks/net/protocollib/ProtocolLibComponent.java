@@ -87,7 +87,7 @@ public class ProtocolLibComponent implements IDisableListener, INotifyReload, Jo
 
     // INSTANCE ----
 
-    private static final List<PacketAdapter> registeredPacketAdapters = new LinkedList<>();
+    private static final List<PacketAdapter> registeredPacketAdapters = new LinkedList<PacketAdapter>();
 
     public ProtocolLibComponent(Plugin plugin) {
         register(plugin);
@@ -144,7 +144,7 @@ public class ProtocolLibComponent implements IDisableListener, INotifyReload, Jo
             register("fr.neatmonster.nocheatplus.checks.net.protocollib.Fight", plugin);
         }
         if (!registeredPacketAdapters.isEmpty()) {
-            List<String> names = new ArrayList<>(registeredPacketAdapters.size());
+            List<String> names = new ArrayList<String>(registeredPacketAdapters.size());
             for (PacketAdapter adapter : registeredPacketAdapters) {
                 names.add(adapter.getClass().getSimpleName());
             }
@@ -163,7 +163,9 @@ public class ProtocolLibComponent implements IDisableListener, INotifyReload, Jo
             Class<?> clazz = Class.forName(name);
             register((Class<? extends PacketAdapter>) clazz, plugin);
             return;
-        } catch (ClassNotFoundException | ClassCastException e) {
+        } catch (ClassNotFoundException e) {
+            t = e;
+        } catch (ClassCastException e) {
             t = e;
         }
         StaticLog.logWarning("Could not register packet level hook: " + name);
@@ -219,7 +221,7 @@ public class ProtocolLibComponent implements IDisableListener, INotifyReload, Jo
             protocolManager.removePacketListener(adapter);
             api.removeComponent(adapter); // Bit heavy, but consistent.
             registeredPacketAdapters.remove(adapter);
-            List<String> names = new ArrayList<>(registeredPacketAdapters.size());
+            List<String> names = new ArrayList<String>(registeredPacketAdapters.size());
             for (PacketAdapter adaptern : registeredPacketAdapters) {
                 names.add(adaptern.getClass().getSimpleName());
             }
@@ -244,7 +246,7 @@ public class ProtocolLibComponent implements IDisableListener, INotifyReload, Jo
         }
     }
 
-    @EventHandler(priority = EventPriority.MONITOR)
+    @EventHandler(priority = EventPriority.MONITOR, ignoreCancelled = false)
     public void onPlayerRespawn(final PlayerRespawnEvent event) {
         if (!registeredPacketAdapters.isEmpty()) {
             final Player player = event.getPlayer();

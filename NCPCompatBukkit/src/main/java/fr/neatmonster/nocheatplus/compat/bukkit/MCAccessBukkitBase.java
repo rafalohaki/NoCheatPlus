@@ -51,7 +51,7 @@ public class MCAccessBukkitBase implements MCAccess {
     /**
      * Fill in already initialized blocks, to return false for guessItchyBlock.
      */
-    protected final Set<Material> processedBlocks = new LinkedHashSet<>();
+    protected final Set<Material> processedBlocks = new LinkedHashSet<Material>();
 
     /**
      * Constructor to let it fail.
@@ -84,12 +84,17 @@ public class MCAccessBukkitBase implements MCAccess {
          */
         if (BlockFlags.hasAnyFlag(flags, BlockFlags.F_IGN_PASSABLE)) {
             // TODO: Blocks with min_height may actually be ok, if xz100 and some height are set.
-            // return False: Explicitly passable.
-            // return True: Potentially itchy.
-            return !BlockFlags.hasNoFlags(flags,
-                    BlockFlags.F_GROUND_HEIGHT
-                            | BlockFlags.F_GROUND
-                            | BlockFlags.F_SOLID);
+            if (BlockFlags.hasNoFlags(flags, 
+                    BlockFlags.F_GROUND_HEIGHT 
+                    | BlockFlags.F_GROUND
+                    | BlockFlags.F_SOLID)) {
+                // Explicitly passable.
+                return false;
+            }
+            else {
+                // Potentially itchy.
+                return true;
+            }
         }
 
         long testFlags1 = (BlockFlags.F_SOLID | BlockFlags.F_XZ100);
@@ -166,7 +171,7 @@ public class MCAccessBukkitBase implements MCAccess {
         }
     }
 
-    private double legacyGetWidth(final Entity entity) {
+    private final double legacyGetWidth(final Entity entity) {
         // TODO: Make readable from file for defaults + register individual getters where appropriate.
         // TODO: For height too. [Automatize most by spawning + checking?]
         // Values taken from 1.7.10.
@@ -265,9 +270,7 @@ public class MCAccessBukkitBase implements MCAccess {
                 default:
                     break;
             }
-        } catch (Throwable t) {
-            //t.printStackTrace();
-        }
+        } catch (Throwable t) {}
         // Default entity width.
         return 0.6f;
     }

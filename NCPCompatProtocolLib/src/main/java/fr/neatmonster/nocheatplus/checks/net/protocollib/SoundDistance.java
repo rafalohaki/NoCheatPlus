@@ -44,7 +44,7 @@ public class SoundDistance extends BaseAdapter {
     // TODO: For lower distances more packets might need to be intercepted.
 
     /** Partly by debugging, partly from various sources, possibly including wrong spelling. */
-    private static final Set<String> effectNames = new HashSet<>(Arrays.asList(
+    private static final Set<String> effectNames = new HashSet<String>(Arrays.asList(
             ////////////
             // PRE 1.9
             ////////////
@@ -90,7 +90,7 @@ public class SoundDistance extends BaseAdapter {
             "ENTITY_WITHER_SPAWN"
 
 
-    ));
+            ));
 
     private final Integer idSoundEffectCancel = counters.registerKey("packet.sound.cancel");
     private final Location useLoc = new Location(null, 0, 0, 0);
@@ -108,7 +108,7 @@ public class SoundDistance extends BaseAdapter {
      * Ensure both lower and upper case are contained.
      */
     private void inflateEffectNames() {
-        final List<String> names = new ArrayList<>(effectNames);
+        final List<String> names = new ArrayList<String>(effectNames);
         for (String name : names) {
             effectNames.add(name.toLowerCase());
             effectNames.add(name.toUpperCase());

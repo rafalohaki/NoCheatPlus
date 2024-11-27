@@ -116,9 +116,7 @@ public class UseEntityAdapter extends BaseAdapter {
             try {
                 return new LegacyReflectionSet(versionDetail);
             }
-            catch (RuntimeException e) {
-                //e.printStackTrace();
-            } // +-
+            catch (RuntimeException e) {} // +-
         }
         return null;
     }
@@ -127,9 +125,7 @@ public class UseEntityAdapter extends BaseAdapter {
     public void onPacketReceiving(final PacketEvent event) {
         try {
             if (event.isPlayerTemporary()) return;
-        } catch(NoSuchMethodError e) {
-            //e.printStackTrace();
-        }
+        } catch(NoSuchMethodError e) {}
         final long time = System.currentTimeMillis();
         final Player player = event.getPlayer();
         if (player == null) {

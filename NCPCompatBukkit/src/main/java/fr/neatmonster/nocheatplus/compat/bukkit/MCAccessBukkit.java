@@ -25,6 +25,7 @@ import fr.neatmonster.nocheatplus.config.WorldConfigProvider;
 import fr.neatmonster.nocheatplus.logging.StaticLog;
 import fr.neatmonster.nocheatplus.utilities.StringUtil;
 import fr.neatmonster.nocheatplus.utilities.map.BlockFlags;
+import fr.neatmonster.nocheatplus.utilities.map.BlockProperties;
 
 public class MCAccessBukkit extends MCAccessBukkitBase implements BlockPropertiesSetup {
 
@@ -34,7 +35,7 @@ public class MCAccessBukkit extends MCAccessBukkitBase implements BlockPropertie
 
     @Override
     public void setupBlockProperties(final WorldConfigProvider<?> worldConfigProvider) {
-        final Set<Material> itchyBlocks = new LinkedHashSet<>();
+        final Set<Material> itchyBlocks = new LinkedHashSet<Material>();
         for (final Material mat : Material.values()) {
             if (!mat.isBlock()) {
                 continue;

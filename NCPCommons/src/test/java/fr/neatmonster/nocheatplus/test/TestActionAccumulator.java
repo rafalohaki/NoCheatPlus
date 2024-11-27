@@ -14,9 +14,9 @@
  */
 package fr.neatmonster.nocheatplus.test;
 
-import static org.junit.jupiter.api.Assertions.*;
+import static org.junit.Assert.*;
 
-import org.junit.jupiter.api.Test;
+import org.junit.Test;
 
 import fr.neatmonster.nocheatplus.utilities.ds.count.ActionAccumulator;
 
@@ -51,7 +51,7 @@ public class TestActionAccumulator {
 			if (acc.bucketScore(i) != (float) expect)  fail("Bad value at bucket " + i + ": " + acc.bucketScore(i) + " / " + expect);
 		}
 		if (acc.count() != buckets * capacity) fail("Total count.");
-		if (acc.score() != (float) (buckets * capacity * (buckets * capacity + 1)) / 2) fail ("Total score.");
+		if (acc.score() != buckets * capacity * (buckets * capacity + 1) / 2) fail ("Total score.");
 	}
 	
 	@Test
