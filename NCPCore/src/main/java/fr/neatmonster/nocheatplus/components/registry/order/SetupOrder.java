@@ -31,5 +31,5 @@ import java.lang.annotation.Target;
 @Target(ElementType.TYPE)
 @Retention(RetentionPolicy.RUNTIME)
 public @interface SetupOrder {
-    int priority() default 0;
+    public int priority() default 0;
 }

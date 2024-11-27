@@ -31,7 +31,7 @@ public interface IDescriptiveActivation extends IActivation {
      * 
      * @return
      */
-    String getNeutralDescription();
+    public String getNeutralDescription();
 
     /**
      * Test if this feature/combination is intended to be advertised, e.g. on
@@ -39,6 +39,6 @@ public interface IDescriptiveActivation extends IActivation {
      * 
      * @return
      */
-    boolean advertise();
+    public boolean advertise();
 
 }

@@ -30,7 +30,7 @@ public interface IEntityAccessDimensions {
      * @param entity
      * @return
      */
-    double getWidth(Entity entity);
+    public double getWidth(Entity entity);
 
     /**
      * Get height of an entity (attack relevant, the maximal "thing" found).
@@ -38,6 +38,6 @@ public interface IEntityAccessDimensions {
      * @param entity
      * @return
      */
-    double getHeight(Entity entity);
+    public double getHeight(Entity entity);
 
 }

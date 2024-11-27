@@ -42,7 +42,7 @@ public class ExemptionContext {
      *  -> so contexts contain contexts (...).
      */
 
-    private final Integer id;
+    private Integer id;
 
     public ExemptionContext(final Integer id) {
         if (id == null) {
@@ -69,7 +69,7 @@ public class ExemptionContext {
             return id.equals(((ExemptionContext) obj).getId());
         }
         else if (obj instanceof Integer) {
-            return id.equals(obj);
+            return id.equals((Integer) obj);
         }
         else {
             return false;

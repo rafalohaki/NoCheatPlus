@@ -22,9 +22,9 @@ package fr.neatmonster.nocheatplus.components.location;
  */
 public interface ISetPosition {
 
-    void setX(double x);
-    void setY(double y);
-    void setZ(double z);
+    public void setX(double x);
+    public void setY(double y);
+    public void setZ(double z);
 
     // public void setPosition(double x, double y, double z);
 

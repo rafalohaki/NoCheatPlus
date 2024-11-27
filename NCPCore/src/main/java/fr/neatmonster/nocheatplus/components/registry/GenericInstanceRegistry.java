@@ -37,7 +37,7 @@ public interface GenericInstanceRegistry extends IGetGenericInstance, IGetGeneri
      * @throws RegistrationLockedException
      *             If the registration of the class of instance is locked.
      */
-    <T> T registerGenericInstance(T instance);
+    public <T> T registerGenericInstance(T instance);
 
     /**
      * Register an instance under for a super-class.
@@ -49,7 +49,7 @@ public interface GenericInstanceRegistry extends IGetGenericInstance, IGetGeneri
      * @throws RegistrationLockedException
      *             If the registration of registerFor is locked.
      */
-    <T, TI extends T> T registerGenericInstance(Class<T> registerFor, TI instance);
+    public <T, TI extends T> T registerGenericInstance(Class<T> registerFor, TI instance);
 
     /**
      * Remove a registration. The registry implementation might specify id
@@ -61,6 +61,6 @@ public interface GenericInstanceRegistry extends IGetGenericInstance, IGetGeneri
      * @throws RegistrationLockedException
      *             If the registration of registerFor is locked.
      */
-    <T> T unregisterGenericInstance(Class<T> registeredFor);
+    public <T> T unregisterGenericInstance(Class<T> registeredFor);
 
 }

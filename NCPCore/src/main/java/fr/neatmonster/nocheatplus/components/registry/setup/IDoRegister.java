@@ -16,6 +16,6 @@ package fr.neatmonster.nocheatplus.components.registry.setup;
 
 public interface IDoRegister {
 
-    void doRegister();
+    public void doRegister();
 
 }

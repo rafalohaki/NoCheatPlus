@@ -21,8 +21,8 @@ package fr.neatmonster.nocheatplus.components.location;
  *
  */
 public interface IGetBox2D {
-    double getMinX();
-    double getMinZ();
-    double getMaxX();
-    double getMaxZ();
+    public double getMinX();
+    public double getMinZ();
+    public double getMaxX();
+    public double getMaxZ();
 }

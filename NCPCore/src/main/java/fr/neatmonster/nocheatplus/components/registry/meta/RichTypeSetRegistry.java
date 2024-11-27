@@ -41,7 +41,8 @@ public class RichTypeSetRegistry implements IRichTypeSetRegistry {
     public RichTypeSetRegistry(final Lock lock) {
         this.lock = lock;
         groupedTypes = new TypeSetRegistry(lock);
-        groupedTypesByCheckType = new HashMapLOW<>(lock, 35);
+        groupedTypesByCheckType = new HashMapLOW<CheckType, 
+                TypeSetRegistry>(lock, 35);
     }
 
     @Override
@@ -59,10 +60,9 @@ public class RichTypeSetRegistry implements IRichTypeSetRegistry {
                         : reg.getGroupedTypes(groupType));
     }
 
-    @SafeVarargs
     @Override
-    public final <I> void addToGroups(final Class<I> itemType,
-                                      final Class<? super I>... groupTypes) {
+    public <I> void addToGroups(final Class<I> itemType, 
+            final Class<? super I>... groupTypes) {
         lock.lock();
         for (final Class<? super I> groupType : groupTypes) {
             createGroup(groupType);
@@ -71,10 +71,9 @@ public class RichTypeSetRegistry implements IRichTypeSetRegistry {
         lock.unlock();
     }
 
-    @SafeVarargs
     @Override
-    public final <I> void addToGroups(CheckType checkType, Class<I> itemType,
-                                      Class<? super I>... groupTypes) {
+    public <I> void addToGroups(CheckType checkType, Class<I> itemType,
+            Class<? super I>... groupTypes) {
         lock.lock();
         for (final Class<? super I> groupType : groupTypes) {
             createGroup(groupType);
@@ -128,10 +127,9 @@ public class RichTypeSetRegistry implements IRichTypeSetRegistry {
         }
     }
 
-    @SafeVarargs
     @Override
-    public final <I> void addToGroups(final Collection<CheckType> checkTypes,
-                                      final Class<I> itemType, final Class<? super I>... groupTypes) {
+    public <I> void addToGroups(final Collection<CheckType> checkTypes,
+            final Class<I> itemType, final Class<? super I>... groupTypes) {
         lock.lock();
         for (final CheckType checkType : checkTypes) {
             addToGroups(checkType, itemType, groupTypes);

@@ -14,13 +14,14 @@
  */
 package fr.neatmonster.nocheatplus.hooks;
 
+import java.util.UUID;
+
+import org.bukkit.entity.Player;
+
 import fr.neatmonster.nocheatplus.NCPAPIProvider;
 import fr.neatmonster.nocheatplus.checks.CheckType;
 import fr.neatmonster.nocheatplus.players.DataManager;
 import fr.neatmonster.nocheatplus.players.IPlayerData;
-import org.bukkit.entity.Player;
-
-import java.util.UUID;
 
 /**
  * API for exempting players of checks, checked before calculations are done.
@@ -70,7 +71,7 @@ public class NCPExemptionManager {
     /**
      * Remove all exemptions.
      */
-    public static void clear() {
+    public static final void clear() {
         DataManager.clearAllExemptions();
     }
 
@@ -80,7 +81,7 @@ public class NCPExemptionManager {
      * @param id
      *            The unique id.
      */
-    public static void exemptPermanently(final UUID id) {
+    public static final void exemptPermanently(final UUID id) {
         exemptPermanently(id, CheckType.ALL);
     }
 
@@ -93,7 +94,7 @@ public class NCPExemptionManager {
      * @param checkType
      *            The check type.
      */
-    public static void exemptPermanently(final UUID id, final CheckType checkType) {
+    public static final void exemptPermanently(final UUID id, final CheckType checkType) {
         final IPlayerData data = DataManager.getPlayerData(id);
         if (data != null) {
             data.exempt(checkType);
@@ -107,7 +108,7 @@ public class NCPExemptionManager {
      * @param player
      *            the player
      */
-    public static void exemptPermanently(final Player player) {
+    public static final void exemptPermanently(final Player player) {
         exemptPermanently(player, CheckType.ALL);
     }
 
@@ -119,7 +120,7 @@ public class NCPExemptionManager {
      * @param checkType
      *            The check type.
      */
-    public static void exemptPermanently(final Player player, final CheckType checkType) {
+    public static final void exemptPermanently(final Player player, final CheckType checkType) {
         exemptPermanently(player.getUniqueId(), checkType);
     }
 
@@ -138,7 +139,7 @@ public class NCPExemptionManager {
      *            like MOVING or ALL.
      * @return If the entity is exempted from checks right now.
      */
-    public static boolean isExempted(final UUID id, final CheckType checkType) {
+    public static final boolean isExempted(final UUID id, final CheckType checkType) {
         final IPlayerData data = DataManager.getPlayerData(id);
         return data != null && data.isExempted(checkType);
     }
@@ -159,14 +160,14 @@ public class NCPExemptionManager {
      *            meta data can't be checked!
      * @return If the player is exempted from the check right now.
      */
-    public static boolean isExempted(final Player player, final CheckType checkType) {
+    public static final boolean isExempted(final Player player, final CheckType checkType) {
         return isExempted(player.getUniqueId(), checkType) 
                 || settings.isExemptedBySettings(player);
     }
 
     @Deprecated
-    public static boolean isExempted(final Player player, final CheckType checkType,
-                                     final boolean isPrimaryThread) {
+    public static final boolean isExempted(final Player player, final CheckType checkType,
+            final boolean isPrimaryThread) {
         return isExempted(player, checkType);
     }
 
@@ -177,7 +178,7 @@ public class NCPExemptionManager {
      * @param id
      *            The unique id.
      */
-    public static void unexempt(final UUID id) {
+    public static final void unexempt(final UUID id) {
         unexempt(id, CheckType.ALL);
     }
 
@@ -190,7 +191,7 @@ public class NCPExemptionManager {
      * @param checkType
      *            The check type.
      */
-    public static void unexempt(final UUID id, final CheckType checkType) {
+    public static final void unexempt(final UUID id,  final CheckType checkType) {
         final IPlayerData data = DataManager.getPlayerData(id);
         if (data != null) {
             data.unexempt(checkType);
@@ -204,7 +205,7 @@ public class NCPExemptionManager {
      * @param player
      *            the player
      */
-    public static void unexempt(final Player player) {
+    public static final void unexempt(final Player player) {
         unexempt(player, CheckType.ALL);
     }
 
@@ -217,7 +218,7 @@ public class NCPExemptionManager {
      * @param checkType
      *            the check type
      */
-    public static void unexempt(final Player player, final CheckType checkType) {
+    public static final void unexempt(final Player player, final CheckType checkType) {
         // TODO: Consider settings for removing meta data as well.
         unexempt(player.getUniqueId(), checkType);
     }

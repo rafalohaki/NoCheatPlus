@@ -16,6 +16,6 @@ package fr.neatmonster.nocheatplus.components.registry.order;
 
 public interface IRegisterWithOrder {
     
-     RegistrationOrder getRegistrationOrder(Class<?> registerForType);
+     public RegistrationOrder getRegistrationOrder(Class<?> registerForType);
     // TODO: getRegistrationOrder(Class<?> registerForType, Class<?> registryType) ?
 }

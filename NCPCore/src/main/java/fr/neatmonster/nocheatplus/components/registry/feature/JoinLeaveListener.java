@@ -27,11 +27,11 @@ public interface JoinLeaveListener {
 	 * Called on join (priority level: low).
 	 * @param player
 	 */
-    void playerJoins(final Player player);
+	public void playerJoins(final Player player);
 	
 	/**
 	 * Called both on quit/kick (priority level: monitor). Might get called twice on some server implementations.
 	 * @param player
 	 */
-    void playerLeaves(final Player player);
+	public void playerLeaves(final Player player);
 }

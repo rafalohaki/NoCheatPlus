@@ -21,6 +21,6 @@ package fr.neatmonster.nocheatplus.components.location;
  *
  */
 public interface IGetBox3D extends IGetBox2D {
-    double getMinY();
-    double getMaxY();
+    public double getMinY();
+    public double getMaxY();
 }

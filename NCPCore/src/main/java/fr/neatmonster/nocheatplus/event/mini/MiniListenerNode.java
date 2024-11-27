@@ -14,6 +14,13 @@
  */
 package fr.neatmonster.nocheatplus.event.mini;
 
+import java.util.ArrayList;
+import java.util.HashSet;
+import java.util.Iterator;
+import java.util.List;
+import java.util.Set;
+import java.util.logging.Level;
+
 import fr.neatmonster.nocheatplus.components.registry.feature.ComponentWithName;
 import fr.neatmonster.nocheatplus.components.registry.order.IGetRegistrationOrder;
 import fr.neatmonster.nocheatplus.components.registry.order.RegistrationOrder;
@@ -21,13 +28,6 @@ import fr.neatmonster.nocheatplus.components.registry.order.RegistrationOrder.Ab
 import fr.neatmonster.nocheatplus.logging.StaticLog;
 import fr.neatmonster.nocheatplus.logging.Streams;
 import fr.neatmonster.nocheatplus.utilities.StringUtil;
-
-import java.util.ArrayList;
-import java.util.HashSet;
-import java.util.Iterator;
-import java.util.List;
-import java.util.Set;
-import java.util.logging.Level;
 
 /**
  * Hold MiniListener instances - sort by RegistrationOrder - allow thread-safe
@@ -73,11 +73,11 @@ public class MiniListenerNode<E, P> {
         protected RegistrationOrder fetchRegistrationOrder(ListenerEntry<E> item) {
             return item.getRegistrationOrder();
         }
-    }
+    };
 
-    protected final SortListenerEntry<E> typedSort = new SortListenerEntry<>();
+    protected final SortListenerEntry<E> typedSort = new SortListenerEntry<E>();
 
-    protected final List<ListenerEntry<E>> registeredListeners = new ArrayList<>();
+    protected final List<ListenerEntry<E>> registeredListeners = new ArrayList<ListenerEntry<E>>();
 
     @SuppressWarnings("unchecked")
     protected ListenerEntry<E>[] sortedListeners = new ListenerEntry[0];
@@ -118,7 +118,7 @@ public class MiniListenerNode<E, P> {
     }
 
     public void addMiniListener(MiniListener<E> listener, boolean ignoreCancelled, RegistrationOrder order) {
-        registeredListeners.add(new ListenerEntry<>(listener, ignoreCancelled, order));
+        registeredListeners.add(new ListenerEntry<E>(listener, ignoreCancelled, order));
         generateSortedListeners();
     }
 
@@ -180,7 +180,7 @@ public class MiniListenerNode<E, P> {
         }
         builder.append("\n exception:\n");
         builder.append(StringUtil.throwableToString(t));
-        final Set<Throwable> done = new HashSet<>();
+        final Set<Throwable> done = new HashSet<Throwable>();
         done.add(t);
         Throwable cause = t.getCause();
         while (cause != null && !done.contains(cause)) {
@@ -190,7 +190,7 @@ public class MiniListenerNode<E, P> {
             cause = t.getCause();
         }
         // TODO: Add id information to compare to registry log (later).
-        StaticLog.logOnce(Streams.STATUS, Level.SEVERE,
+        StaticLog.logOnce(Streams.STATUS, Level.SEVERE, 
                 "Listener exception: baseType=" + baseType.getName() 
                 + " basePriority=" + this.basePriority
                 + " eventType=" + event.getClass().getName(),

@@ -15,6 +15,7 @@
 package fr.neatmonster.nocheatplus.logging;
 
 import java.io.File;
+import java.util.logging.Level;
 
 import org.bukkit.Bukkit;
 import org.bukkit.plugin.Plugin;
@@ -32,6 +33,7 @@ import fr.neatmonster.nocheatplus.logging.details.FileLoggerAdapter;
 import fr.neatmonster.nocheatplus.logging.details.LogOptions;
 import fr.neatmonster.nocheatplus.logging.details.LogOptions.CallContext;
 import fr.neatmonster.nocheatplus.utilities.ColorUtil;
+
 
 /**
  * Central access point for logging. The default loggers use the stream names,

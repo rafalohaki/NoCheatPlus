@@ -147,6 +147,7 @@ import fr.neatmonster.nocheatplus.utilities.map.BlockProperties;
 import fr.neatmonster.nocheatplus.worlds.IWorldData;
 import fr.neatmonster.nocheatplus.worlds.IWorldDataManager;
 import fr.neatmonster.nocheatplus.worlds.WorldDataManager;
+import org.jetbrains.annotations.NotNull;
 
 /**
  * This is the main class of NoCheatPlus. The commands, events listeners and tasks are registered here.

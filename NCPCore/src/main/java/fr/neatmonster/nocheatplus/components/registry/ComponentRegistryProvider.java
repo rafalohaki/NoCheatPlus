@@ -29,6 +29,6 @@ public interface ComponentRegistryProvider{
 	 * @param clazz
 	 * @return Some collection, empty collection in case no matches are found.
 	 */
-    <T> Collection<ComponentRegistry<T>> getComponentRegistries(Class<ComponentRegistry<T>> clazz);
+	public <T> Collection<ComponentRegistry<T>> getComponentRegistries(Class<ComponentRegistry<T>> clazz);
 	
 }

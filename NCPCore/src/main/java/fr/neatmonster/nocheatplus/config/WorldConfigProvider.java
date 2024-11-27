@@ -30,20 +30,20 @@ public interface WorldConfigProvider <C extends RawConfigFile>{
      * Get the default configuration.
      * @return
      */
-    C getDefaultConfig();
+    public C getDefaultConfig();
 
     /**
      * Get the world configuration. 
      * @param worldName The default config has null as world. The default config is returned, if the world is not known.
      * @return
      */
-    C getConfig(String worldName);
+    public C getConfig(String worldName);
 
     /**
      * Get a Collection-view of all worlds config files, including the default configuration.
      * @return
      */
-    Collection<C> getAllConfigs();
+    public Collection<C> getAllConfigs();
 
     // TODO: Add operations for all configs, like setForAllConfigs, get(Max|min)NumberForAllConfigs, ....
 }

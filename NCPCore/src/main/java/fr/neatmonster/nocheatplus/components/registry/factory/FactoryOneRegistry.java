@@ -41,7 +41,7 @@ public class FactoryOneRegistry<A> implements IFactoryOneRegistry<A> {
         this.lock = lock;
         this.primaryThreadContextTester = primaryThreadContextTester;
         // TODO: RegisteredItemStore can't do classes -> need RegisteredClassStore (...).
-        factories = new HashMapLOW<>(lock, 30);
+        factories = new HashMapLOW<Class<?>, IFactoryOne<A,?>>(lock, 30);
     }
 
     @Override

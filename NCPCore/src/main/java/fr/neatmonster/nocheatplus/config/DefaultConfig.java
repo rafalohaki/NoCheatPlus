@@ -14,6 +14,7 @@
  */
 package fr.neatmonster.nocheatplus.config;
 
+import java.util.ArrayList;
 import java.util.Arrays;
 import java.util.Collections;
 import java.util.LinkedList;
@@ -763,7 +764,7 @@ public class DefaultConfig extends ConfigFile {
         for (final String name : Collections.singletonList(
                 // TODO: 
                 "moving_piston"
-        )) {
+                )) {
             set(ConfPaths.COMPATIBILITY_BLOCKS + ConfPaths.SUB_OVERRIDEFLAGS + "." + name, "default+ign_passable+ground_height", 785);
         }
         set(ConfPaths.COMPATIBILITY_BLOCKS + ConfPaths.SUB_BLOCKCACHE_WORLD_MINY, ServerVersion.compareMinecraftVersion("1.18") >= 0 ? -64 : 0,  1154);

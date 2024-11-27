@@ -25,7 +25,6 @@ import org.bukkit.Material;
 import org.bukkit.configuration.ConfigurationSection;
 import org.bukkit.configuration.file.YamlConfiguration;
 import org.bukkit.entity.EntityType;
-import org.jetbrains.annotations.NotNull;
 import org.yaml.snakeyaml.DumperOptions;
 
 import fr.neatmonster.nocheatplus.NCPAPIProvider;
@@ -52,9 +51,7 @@ public class RawConfigFile  extends YamlConfiguration {
             // TODO: Custom lookup (both vanilla and Bukkit/Spigot).
             return Material.matchMaterial(prepareMatchMaterial(content));
         }
-        catch (Exception e) {
-            //e.printStackTrace();
-        }
+        catch (Exception e) {}
         return null;
     }
 
@@ -63,7 +60,7 @@ public class RawConfigFile  extends YamlConfiguration {
     ////////////////
 
     /** Meta data: The build number of the last significant change of a value. */
-    protected final Map<String, Integer> lastChangedBuildNumbers = new HashMap<>();
+    protected final Map<String, Integer> lastChangedBuildNumbers = new HashMap<String, Integer>();
 
     /**
      * Set a value depending on the detected Minecraft version.
@@ -91,7 +88,8 @@ public class RawConfigFile  extends YamlConfiguration {
     public double getDouble(final String path, final double min, final double max, final double preset){
         final double value = getDouble(path, preset);
         if (value < min) return min;
-        else return Math.min(value, max);
+        else if (value > max) return max;
+        else return value;
     }
 
     /**
@@ -107,7 +105,8 @@ public class RawConfigFile  extends YamlConfiguration {
     public long getLong(final String path, final long min, final long max, final long preset){
         final long value = getLong(path, preset);
         if (value < min) return min;
-        else return Math.min(value, max);
+        else if (value > max) return max;
+        else return value;
     }
 
     /**
@@ -123,7 +122,8 @@ public class RawConfigFile  extends YamlConfiguration {
     public long getInt(final String path, final int min, final int max, final int preset){
         final int value = getInt(path, preset);
         if (value < min) return min;
-        else return Math.min(value, max);
+        else if (value > max) return max;
+        else return value;
     }
 
     public AlmostBoolean getAlmostBoolean(final String path, final AlmostBoolean defaultValue) {
@@ -229,9 +229,7 @@ public class RawConfigFile  extends YamlConfiguration {
                 try {
                     type = EntityType.valueOf(ucKey);
                 }
-                catch (IllegalArgumentException e) {
-                    //e.printStackTrace();
-                }
+                catch (IllegalArgumentException e) {}
                 if (type == null) {
                     // TODO: Log once per file only (needs new framework)?
                     NCPAPIProvider.getNoCheatPlusAPI().getLogManager().warning(Streams.STATUS, "Bad entity type at '" + path + "': " + key);
@@ -247,7 +245,7 @@ public class RawConfigFile  extends YamlConfiguration {
      * @see org.bukkit.configuration.file.YamlConfiguration#saveToString()
      */
     @Override
-    public @NotNull String saveToString() {
+    public String saveToString() {
         // Some reflection wizardly to avoid having a lot of linebreaks in the yaml file, and get a "footer" into the file.
         // TODO: Interesting, but review this: still necessary/useful in CB-1.4 ?.
         try {
@@ -256,9 +254,7 @@ public class RawConfigFile  extends YamlConfiguration {
             op.setAccessible(true);
             final DumperOptions options = (DumperOptions) op.get(this);
             options.setWidth(200);
-        } catch (final Exception e) {
-            //e.printStackTrace();
-        }
+        } catch (final Exception e) {}
 
         return super.saveToString();
     }
@@ -317,7 +313,7 @@ public class RawConfigFile  extends YamlConfiguration {
         int max = 0;
         for (Integer v : lastChangedBuildNumbers.values()) {
             if (v != null) {
-                max = Math.max(max, v);
+                max = Math.max(max, v.intValue());
             }
         }
         return max;

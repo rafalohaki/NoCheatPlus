@@ -34,7 +34,7 @@ public interface IDataOnWorldUnload {
      * @return Return true to remove the data instance from the cache in
      *         question, false otherwise.
      */
-    boolean dataOnWorldUnload(World world,
-                              final IGetGenericInstance dataAccess);
+    public boolean dataOnWorldUnload(World world, 
+            final IGetGenericInstance dataAccess);
 
 }

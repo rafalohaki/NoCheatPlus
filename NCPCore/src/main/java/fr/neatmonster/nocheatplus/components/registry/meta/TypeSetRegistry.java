@@ -50,7 +50,7 @@ public class TypeSetRegistry {
         }
 
         void add(Class<? extends G> itemClass) {
-            final Collection<Class<? extends G>> copyGroup = new LinkedHashSet<>(group);
+            final Collection<Class<? extends G>> copyGroup = new LinkedHashSet<Class<? extends G>>(group);
             copyGroup.add(itemClass);
             group = Collections.unmodifiableCollection(copyGroup);
         }
@@ -88,7 +88,7 @@ public class TypeSetRegistry {
 
     public TypeSetRegistry(Lock lock) {
         this.lock = lock;
-        groupedTypes = new HashMapLOW<>(lock, 10);
+        groupedTypes = new HashMapLOW<Class<?>, GroupNode<?>>(lock, 10);
     }
 
     /**
@@ -97,8 +97,7 @@ public class TypeSetRegistry {
      * @param itemType
      * @param groupTypes
      */
-    @SafeVarargs
-    public final <I> void addToGroups(final Class<I> itemType, final Class<? super I>... groupTypes) {
+    public <I> void addToGroups(final Class<I> itemType, final Class<? super I>... groupTypes) {
         lock.lock();
         for (final Class<? super I> groupType : groupTypes) {
             if (!groupType.isAssignableFrom(itemType)) {
@@ -129,7 +128,7 @@ public class TypeSetRegistry {
     }
 
     private <G> GroupNode<G> newGroupNode(Class<G> groupType) {
-        final GroupNode<G> node = new GroupNode<>(groupType);
+        final GroupNode<G> node =  new GroupNode<G>(groupType);
         groupedTypes.put(groupType, node);
         return node;
     }

@@ -22,5 +22,5 @@ import fr.neatmonster.nocheatplus.checks.CheckType;
  *
  */
 public interface IHaveCheckType {
-	CheckType getCheckType();
+	public CheckType getCheckType();
 }

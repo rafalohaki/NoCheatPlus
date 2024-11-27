@@ -61,7 +61,7 @@ public class ConfigManager {
         @Override
         public Collection<ConfigFile> getAllConfigs() {
             // Avoid duplicates, which typically should exist.
-            final Set<ConfigFile> res = new LinkedHashSet<>();
+            final Set<ConfigFile> res = new LinkedHashSet<ConfigFile>();
             final IWorldDataManager worldMan = NCPAPIProvider.getNoCheatPlusAPI().getWorldDataManager();
             final Iterator<Entry<String, IWorldData>> it = worldMan.getWorldDataIterator();
             while (it.hasNext()) {
@@ -138,7 +138,7 @@ public class ConfigManager {
      */
     public static synchronized void init(final Plugin plugin, final WorldDataManager worldDataManager) {
         // (This can lead to minor problems with async checks during reloading.)
-        LinkedHashMap<String, ConfigFile> newWorldsMap = new LinkedHashMap<>();
+        LinkedHashMap<String, ConfigFile> newWorldsMap = new LinkedHashMap<String, ConfigFile>();
         // Try to obtain and parse the global configuration file.
         final File globalFile = new File(plugin.getDataFolder(), "config.yml");
         final ConfigFile defaultConfig = new DefaultConfig();
@@ -154,8 +154,11 @@ public class ConfigManager {
                 // Quick shallow ugly fix: only save back if loading was successful.
                 try {
                     if (globalConfig.getBoolean(ConfPaths.SAVEBACKCONFIG)){
-                        boolean overrideCreated = !globalConfig.contains(ConfPaths.CONFIGVERSION_CREATED);
-                        // Workaround.
+                        boolean overrideCreated = false;
+                        if (!globalConfig.contains(ConfPaths.CONFIGVERSION_CREATED)){
+                            // Workaround.
+                            overrideCreated = true;
+                        }
                         if (!overrideCreated && globalConfig.getInt(ConfPaths.CONFIGVERSION_CREATED, 0) >= 0
                                 && ConfigManager.isConfigUpToDate(globalConfig, 0) == null) {
                             // Workaround: Update the created build number, to not warn on further changes.
@@ -195,7 +198,7 @@ public class ConfigManager {
         final MemoryConfiguration worldDefaults = PathUtils.getWorldsDefaultConfig(globalConfig); 
 
         // Try to obtain and parse the world-specific configuration files.
-        final HashMap<String, File> worldFiles = new HashMap<>();
+        final HashMap<String, File> worldFiles = new HashMap<String, File>();
         if (plugin.getDataFolder().isDirectory()){
             for (final File file : plugin.getDataFolder().listFiles()){
                 if (file.isFile()) {
@@ -257,8 +260,8 @@ public class ConfigManager {
     public static String isConfigUpToDate(final ConfigFile globalConfig, final int maxPaths) {
         Object created_o = globalConfig.get(ConfPaths.CONFIGVERSION_CREATED);
         int buildCreated = -1;
-        if (created_o instanceof Integer) {
-            buildCreated = (Integer) created_o;
+        if (created_o != null && created_o instanceof Integer) {
+            buildCreated = ((Integer) created_o).intValue();
         }
         // Silence version checking with a value < 0.
         if (buildCreated < 0) {
@@ -273,7 +276,7 @@ public class ConfigManager {
             return "Your configuration seems to be created by a newer plugin version.\n" + "Some settings could have changed, you should regenerate it!";
         }
         // So far so good... test individual paths.
-        final List<String> problems = new LinkedList<>();
+        final List<String> problems = new LinkedList<String>();
         final Map<String, Integer> lastChangedBuildNumbers = defaultConfig.getLastChangedBuildNumbers();
         // TODO: Consider some behavior for entire nodes ?
         for (final Entry<String, Integer> entry : lastChangedBuildNumbers.entrySet()) {
@@ -302,7 +305,7 @@ public class ConfigManager {
             Collections.sort(problems); // Sort by path.
             final List<String> outList;
             if (maxPaths >= 0 && problems.size() > maxPaths) {
-                outList = new ArrayList<>(problems.subList(0, maxPaths));
+                outList = new ArrayList<String>(problems.subList(0, maxPaths));
             }
             else {
                 outList = problems;

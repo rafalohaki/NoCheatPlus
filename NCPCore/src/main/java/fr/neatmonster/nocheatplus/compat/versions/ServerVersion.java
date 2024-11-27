@@ -72,7 +72,8 @@ public class ServerVersion {
     public static Object getNMSMinecraftServer() {
         final Server server = Bukkit.getServer();
         try {
-            return ReflectionUtil.invokeMethodNoArgs(server, "getServer");
+            final Object obj = ReflectionUtil.invokeMethodNoArgs(server, "getServer");
+            return obj;
         }
         catch (Throwable t) {
             return null;
@@ -220,7 +221,7 @@ public class ServerVersion {
      */
     public static <V> V select(final String cmpVersion, final V valueLT, final V valueEQ, final V valueGT, final V valueUnknown) {
         final String mcVersion = ServerVersion.getMinecraftVersion();
-        if (mcVersion.equals(GenericVersion.UNKNOWN_VERSION)) {
+        if (mcVersion == GenericVersion.UNKNOWN_VERSION) {
             return valueUnknown;
         } else {
             final int cmp = GenericVersion.compareVersions(mcVersion, cmpVersion);

@@ -39,7 +39,7 @@ public interface IConfigDataAccess extends IBaseDataAccess {
      * 
      * @return
      */
-    ConfigFile getRawConfiguration();
+    public ConfigFile getRawConfiguration();
 
     /**
      * Test if a check is activated by configuration (respecting overrides).
@@ -50,7 +50,7 @@ public interface IConfigDataAccess extends IBaseDataAccess {
      * @param checkType
      * @return
      */
-    boolean isCheckActive(CheckType checkType);
+    public boolean isCheckActive(CheckType checkType);
 
     /**
      * Override the activation of a check (/group, including all descendant
@@ -84,8 +84,8 @@ public interface IConfigDataAccess extends IBaseDataAccess {
      *       overrides.
      */
     // TODO: IWorldData - move to IWorldData ?
-    void overrideCheckActivation(CheckType checkType, AlmostBoolean active,
-                                 OverrideType overrideType, boolean overrideChildren);
+    public void overrideCheckActivation(CheckType checkType, AlmostBoolean active,
+            OverrideType overrideType, boolean overrideChildren);
 
     // TODO: resetCheckActivation -> reset to config value, except if set to PERMANENT.
 
@@ -96,7 +96,7 @@ public interface IConfigDataAccess extends IBaseDataAccess {
      * @param checkType
      * @return
      */
-    IConfigCheckNode getCheckNode(CheckType checkType);
+    public IConfigCheckNode getCheckNode(CheckType checkType);
 
 
 }

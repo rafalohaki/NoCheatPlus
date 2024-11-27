@@ -34,7 +34,7 @@ public interface IAttributeAccess {
      *         modifier (!). If not possible to determine, it should
      *         Double.MAX_VALUE.
      */
-    double getSpeedAttributeMultiplier(Player player);
+    public double getSpeedAttributeMultiplier(Player player);
 
     /**
      * Sprint boost modifier as a multiplier.
@@ -43,6 +43,6 @@ public interface IAttributeAccess {
      * @return The sprint boost modifier as a multiplier. If not possible to
      *         determine, it should be Double.MAX_VALUE.
      */
-    double getSprintAttributeMultiplier(Player player);
+    public double getSprintAttributeMultiplier(Player player);
 
 }

@@ -24,6 +24,6 @@ package fr.neatmonster.nocheatplus.components.data.checktype;
  */
 public interface IConfigCheckNode extends IBaseCheckNode {
 
-    boolean isCheckActive();
+    public boolean isCheckActive();
 
 }

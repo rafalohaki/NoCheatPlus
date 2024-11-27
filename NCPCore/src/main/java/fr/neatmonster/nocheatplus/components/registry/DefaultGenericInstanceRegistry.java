@@ -65,7 +65,7 @@ public class DefaultGenericInstanceRegistry implements GenericInstanceRegistry, 
 
         private long accessFlags = 0L;
 
-        private final List<IGenericInstanceRegistryListener<T>> listeners = new LinkedList<>();
+        private final List<IGenericInstanceRegistryListener<T>> listeners = new LinkedList<IGenericInstanceRegistryListener<T>>();
 
         public Registration(Class<T> registeredFor, T instance,
                 GenericInstanceRegistry registry, 
@@ -108,7 +108,7 @@ public class DefaultGenericInstanceRegistry implements GenericInstanceRegistry, 
             this.instance = null;
             if (!listeners.isEmpty()) {
                 for (IGenericInstanceRegistryListener<T> listener : listeners) {
-                    listener.onGenericInstanceRemove(registeredFor, oldInstance);
+                    ((IGenericInstanceRegistryListener<T>) listener).onGenericInstanceRemove(registeredFor, oldInstance);
                 }
             }
             lock.unlock();
@@ -164,7 +164,7 @@ public class DefaultGenericInstanceRegistry implements GenericInstanceRegistry, 
                 unregisterListener(uniqueHandle);
             }
             if (uniqueHandle == null) {
-                uniqueHandle = new ReferenceCountHandle<>(registeredFor, registry, unregister);
+                uniqueHandle = new ReferenceCountHandle<T>(registeredFor, registry, unregister);
                 this.listeners.add(uniqueHandle);
                 uniqueHandle.getHandle(); // Keep the count up, so this never unregisters automatically.
             }
@@ -185,7 +185,7 @@ public class DefaultGenericInstanceRegistry implements GenericInstanceRegistry, 
         }
 
         public T getInstance() {
-            return instance;
+            return (T) instance;
         }
 
         /**
@@ -213,7 +213,7 @@ public class DefaultGenericInstanceRegistry implements GenericInstanceRegistry, 
 
 
     private final Lock lock = new ReentrantLock();
-    private final HashMapLOW<Class<?>, Registration<?>> registrations = new HashMapLOW<>(lock, 30);
+    private final HashMapLOW<Class<?>, Registration<?>> registrations = new HashMapLOW<Class<?>, Registration<?>>(lock,30);
 
     private ILogString logger = null;
 
@@ -246,7 +246,7 @@ public class DefaultGenericInstanceRegistry implements GenericInstanceRegistry, 
         if (registration == null) {
             try {
                 // TODO: Consider individual locks / configuration for it.
-                registration = new Registration<>(registeredFor, null, this, this, lock);
+                registration = new Registration<T>(registeredFor, null, this, this, lock);
                 this.registrations.put(registeredFor, registration);
             }
             catch (Throwable t) {

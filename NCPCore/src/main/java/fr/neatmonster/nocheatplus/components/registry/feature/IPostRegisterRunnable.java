@@ -24,6 +24,6 @@ package fr.neatmonster.nocheatplus.components.registry.feature;
  */
 public interface IPostRegisterRunnable {
 
-    void runPostRegister();
+    public void runPostRegister();
 
 }

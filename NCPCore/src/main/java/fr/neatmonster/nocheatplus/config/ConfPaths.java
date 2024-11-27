@@ -1009,8 +1009,8 @@ public abstract class ConfPaths {
      * @return A new collection of entries.
      */
     public static Collection<WrapMoved> getExtraMovedPaths() {
-        final List<WrapMoved> entries = new LinkedList<>();
-        final List<ManyMoved> multiEntries = new LinkedList<>();
+        final List<WrapMoved> entries = new LinkedList<WrapMoved>();
+        final List<ManyMoved> multiEntries = new LinkedList<ManyMoved>();
 
         // Add entries.
         final List<String> cfModels = Arrays.asList("creative", "spectator", "survival", "adventure", "elytra", "levitation", "slowfalling", "riptiding");

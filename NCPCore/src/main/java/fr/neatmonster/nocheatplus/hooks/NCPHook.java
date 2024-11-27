@@ -14,9 +14,10 @@
  */
 package fr.neatmonster.nocheatplus.hooks;
 
+import org.bukkit.entity.Player;
+
 import fr.neatmonster.nocheatplus.checks.CheckType;
 import fr.neatmonster.nocheatplus.checks.access.IViolationInfo;
-import org.bukkit.entity.Player;
 
 /**
  * Compatibility hooks have to implement this.<br>
@@ -33,14 +34,14 @@ public interface NCPHook {
      * 
      * @return the hook name
      */
-    String getHookName();
+    public String getHookName();
 
     /**
      * For logging purposes.
      * 
      * @return the hook version
      */
-    String getHookVersion();
+    public String getHookVersion();
 
     /**
      * This is called on failure of a check.<br>
@@ -56,5 +57,5 @@ public interface NCPHook {
      *            Extended information about the violations.
      * @return if we need to cancel the check failure processing
      */
-    boolean onCheckFailure(CheckType checkType, Player player, IViolationInfo info);
+    public boolean onCheckFailure(CheckType checkType, Player player, IViolationInfo info);
 }

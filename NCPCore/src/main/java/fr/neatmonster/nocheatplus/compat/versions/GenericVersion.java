@@ -195,9 +195,7 @@ public class GenericVersion {
             else if (v1Int.length > v2Int.length) {
                 return 1;
             }
-        } catch (NumberFormatException e) {
-            //e.printStackTrace();
-        }
+        } catch (NumberFormatException e) {}
 
         // Equality was tested above, so it would seem.
         throw new IllegalArgumentException("Bad version input.");
@@ -288,10 +286,15 @@ public class GenericVersion {
             }
         }
         if (includeHigh) {
-            return GenericVersion.compareVersions(version, versionHigh) != 1;
+            if (GenericVersion.compareVersions(version, versionHigh) == 1) {
+                return false;
+            }
         } else {
-            return GenericVersion.compareVersions(version, versionHigh) < 0;
+            if (GenericVersion.compareVersions(version, versionHigh) >= 0) {
+                return false;
+            }
         }
+        return true;
     }
 
 }

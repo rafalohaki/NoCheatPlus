@@ -35,7 +35,7 @@ public interface IRichTypeSetRegistry {
      * @param registeredFor
      * @return
      */
-    <T> Collection<Class<? extends T>> getGroupedTypes(
+    public <T> Collection<Class<? extends T>> getGroupedTypes(
             Class<T> groupType);
 
     /**
@@ -47,7 +47,7 @@ public interface IRichTypeSetRegistry {
      * @param registeredFor
      * @return
      */
-    <T> Collection<Class<? extends T>> getGroupedTypes(
+    public <T> Collection<Class<? extends T>> getGroupedTypes(
             Class<T> groupType, CheckType checkType);
 
     // TODO: getFactoryTypes -> registered factory return types ?
@@ -61,7 +61,7 @@ public interface IRichTypeSetRegistry {
      * @param itemType
      * @param groupTypes
      */
-    <I> void addToGroups(Class<I> itemType,
+    public <I> void addToGroups(Class<I> itemType, 
             Class<? super I>... groupTypes);
 
     /**
@@ -73,7 +73,7 @@ public interface IRichTypeSetRegistry {
      * 
      * @param itemType
      */
-    void addToExistingGroups(final Class<?> itemType);
+    public void addToExistingGroups(final Class<?> itemType);
 
     /**
      * Register an item type for group types for for a check type (and general). Types get added
@@ -87,8 +87,8 @@ public interface IRichTypeSetRegistry {
      * @param itemType
      * @param groupTypes
      */
-    <I> void addToGroups(CheckType checkType,
-                         Class<I> itemType, Class<? super I>... groupTypes);
+    public <I> void addToGroups(CheckType checkType, 
+            Class<I> itemType, Class<? super I>... groupTypes);
 
     /**
      * Register the itemType for all applicable group types that already have
@@ -102,8 +102,8 @@ public interface IRichTypeSetRegistry {
      * @param checkType
      * @param itemType
      */
-    <I> void addToExistingGroups(CheckType checkType,
-                                 Class<I> itemType);
+    public <I> void addToExistingGroups(CheckType checkType, 
+            Class<I> itemType);
 
     /**
      * Register an item type for group types for for all given check types (and
@@ -118,8 +118,8 @@ public interface IRichTypeSetRegistry {
      * @param itemType
      * @param groupTypes
      */
-    <I> void addToGroups(Collection<CheckType> checkTypes,
-                         Class<I> itemType, Class<? super I>... groupTypes);
+    public <I> void addToGroups(Collection<CheckType> checkTypes, 
+            Class<I> itemType, Class<? super I>... groupTypes);
 
     /**
      * Register the itemType for all applicable group types that already have
@@ -134,8 +134,8 @@ public interface IRichTypeSetRegistry {
      * @param checkType
      * @param itemType
      */
-    <I> void addToExistingGroups(Collection<CheckType> checkTypes,
-                                 Class<I> itemType);
+    public <I> void addToExistingGroups(Collection<CheckType> checkTypes, 
+            Class<I> itemType);
 
     /**
      * Register the group type both for the general registry and for all check
@@ -146,6 +146,6 @@ public interface IRichTypeSetRegistry {
      * 
      * @param groupType
      */
-    <G> void createGroup(Class<G> groupType);
+    public <G> void createGroup(Class<G> groupType);
 
 }

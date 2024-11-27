@@ -14,6 +14,7 @@
  */
 package fr.neatmonster.nocheatplus.components.registry.factory;
 
+import java.util.Arrays;
 import java.util.Collection;
 import java.util.Collections;
 import java.util.LinkedHashSet;
@@ -43,9 +44,9 @@ public class RichFactoryRegistry<A> extends RichTypeSetRegistry implements IRich
 
     public static class CheckRemovalSpec {
 
-        public final Collection<Class<?>> completeRemoval = new LinkedHashSet<>();
-        public final Collection<Class<? extends IDataOnRemoveSubCheckData>> subCheckRemoval = new LinkedHashSet<>();
-        public final Collection<CheckType> checkTypes;
+        public final Collection<Class<?>> completeRemoval = new LinkedHashSet<Class<?>>();
+        public final Collection<Class<? extends IDataOnRemoveSubCheckData>> subCheckRemoval = new LinkedHashSet<Class<? extends IDataOnRemoveSubCheckData>>();
+        public final Collection<CheckType> checkTypes;;
 
         public CheckRemovalSpec(final CheckType checkType, 
                 final boolean withDescendantCheckTypes, 
@@ -83,7 +84,7 @@ public class RichFactoryRegistry<A> extends RichTypeSetRegistry implements IRich
     public RichFactoryRegistry(final Lock lock) {
         super(lock);
         this.lock = lock;
-        factoryRegistry = new FactoryOneRegistry<>(
+        factoryRegistry = new FactoryOneRegistry<A>(
                 lock, CheckUtils.primaryServerThreadContextTester);
     }
 
@@ -110,7 +111,7 @@ public class RichFactoryRegistry<A> extends RichTypeSetRegistry implements IRich
     public <G> void createAutoGroup(final Class<G> groupType) {
         lock.lock();
         createGroup(groupType);
-        final Set<Class<?>> autoGroups = new LinkedHashSet<>(this.autoGroups);
+        final Set<Class<?>> autoGroups = new LinkedHashSet<Class<?>>(this.autoGroups);
         autoGroups.add(groupType);
         this.autoGroups = autoGroups;
         lock.unlock();

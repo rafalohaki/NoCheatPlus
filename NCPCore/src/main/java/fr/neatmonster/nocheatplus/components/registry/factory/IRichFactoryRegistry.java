@@ -36,14 +36,14 @@ public interface IRichFactoryRegistry<A> extends IRichTypeSetRegistry, IFactoryO
      * <hr/>
      */
     @Override
-    <T> void registerFactory(final Class<T> registerFor,
-                             final IFactoryOne<A, T> factory);
+    public <T> void registerFactory(final Class<T> registerFor, 
+            final IFactoryOne<A, T> factory);
 
 
     /**
      * Create the group, and automatically add factory return types to this group
      * @param groupType
      */
-    <G> void createAutoGroup(Class<G> groupType);
+    public <G> void createAutoGroup(Class<G> groupType);
 
 }

@@ -24,6 +24,6 @@ import fr.neatmonster.nocheatplus.checks.CheckType;
  */
 public interface IBaseDataAccess {
 
-    boolean isDebugActive(CheckType checkType);
+    public boolean isDebugActive(CheckType checkType);
 
 }

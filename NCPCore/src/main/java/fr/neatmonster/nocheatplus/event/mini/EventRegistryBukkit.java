@@ -14,20 +14,23 @@
  */
 package fr.neatmonster.nocheatplus.event.mini;
 
-import fr.neatmonster.nocheatplus.components.registry.feature.ComponentWithName;
-import fr.neatmonster.nocheatplus.components.registry.order.RegistrationOrder;
-import fr.neatmonster.nocheatplus.utilities.ReflectionUtil;
+import java.lang.reflect.Method;
+import java.util.Collection;
+
 import org.bukkit.Bukkit;
 import org.bukkit.event.Cancellable;
 import org.bukkit.event.Event;
+import org.bukkit.event.EventException;
 import org.bukkit.event.EventHandler;
 import org.bukkit.event.EventPriority;
 import org.bukkit.event.Listener;
 import org.bukkit.event.server.PluginDisableEvent;
+import org.bukkit.plugin.EventExecutor;
 import org.bukkit.plugin.Plugin;
 
-import java.lang.reflect.Method;
-import java.util.Collection;
+import fr.neatmonster.nocheatplus.components.registry.feature.ComponentWithName;
+import fr.neatmonster.nocheatplus.components.registry.order.RegistrationOrder;
+import fr.neatmonster.nocheatplus.utilities.ReflectionUtil;
 
 /**
  * A MultiListenerRegistry that registers Bukkit types with a Spigot/CraftBukkit
@@ -92,9 +95,9 @@ public class EventRegistryBukkit extends MultiListenerRegistry<Event, EventPrior
                 if (Cancellable.class.isAssignableFrom(eventClass)) {
                     // TODO: Check if order is right (eventClass extends Cancellable).
                     // TODO: Future java (see above) ?
-                    return new CancellableNodeBukkit<>(eventClass, basePriority);
+                    return new CancellableNodeBukkit<E>(eventClass, basePriority);
                 } else {
-                    return new MiniListenerNode<>(eventClass, basePriority);
+                    return new MiniListenerNode<E, EventPriority>(eventClass, basePriority);
                 }
             }
         };
@@ -210,7 +213,9 @@ public class EventRegistryBukkit extends MultiListenerRegistry<Event, EventPrior
             }
             eh = method.getAnnotation(EventHandler.class);
             eventClass = (Class<E>) method.getParameterTypes()[0];
-        } catch (NoSuchMethodException | SecurityException e) {
+        } catch (NoSuchMethodException e) {
+            throw new IllegalArgumentException(e);
+        } catch (SecurityException e) {
             throw new IllegalArgumentException(e);
         }
         register(eventClass, listener, eh.priority(), null, eh.ignoreCancelled());
@@ -234,7 +239,9 @@ public class EventRegistryBukkit extends MultiListenerRegistry<Event, EventPrior
         try {
             Method method = ReflectionUtil.seekMethodIgnoreArgs(clazz, "onEvent");
             eventClass = (Class<E>) method.getParameterTypes()[0];
-        } catch (NullPointerException | SecurityException e) {
+        } catch (NullPointerException e) {
+            throw new IllegalArgumentException(e);
+        } catch (SecurityException e) {
             throw new IllegalArgumentException(e);
         }
         register(eventClass, listener);
@@ -247,7 +254,7 @@ public class EventRegistryBukkit extends MultiListenerRegistry<Event, EventPrior
         if (defaultOrder == null && listener instanceof ComponentWithName) {
             defaultOrder = new RegistrationOrder(((ComponentWithName) listener).getComponentName());
         }
-        return super.register(listener, EventPriority.NORMAL, defaultOrder, false);
+        return super.register((Object) listener, EventPriority.NORMAL, defaultOrder, false);
     }
 
     @Override

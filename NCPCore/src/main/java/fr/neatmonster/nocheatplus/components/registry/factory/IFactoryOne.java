@@ -33,6 +33,6 @@ public interface IFactoryOne<A, R> {
      * @param arg
      * @return
      */
-    R getNewInstance(A arg);
+    public R getNewInstance(A arg);
 
 }

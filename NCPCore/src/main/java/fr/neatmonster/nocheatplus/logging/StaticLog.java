@@ -40,7 +40,7 @@ public class StaticLog {
 
     /** The Constant logOnce. */
     // TODO: Quick and dirty - should probably use an access ordered LinkedHashSet, to expire the eldest half :p.
-    private static final Set<Integer> logOnce = Collections.synchronizedSet(new HashSet<>());
+    private static final Set<Integer> logOnce = Collections.synchronizedSet(new HashSet<Integer>());
 
 
     /**
@@ -133,7 +133,7 @@ public class StaticLog {
      * traces.
      * 
      * @param level
-     * @param longMessage
+     * @param message
      */
     public static void logOnce(final StreamID stream, final Level level, 
             final String header, final String longMessage) {

@@ -30,7 +30,7 @@ public interface GenericPool <O> {
      * Get an instance.
      * @return
      */
-    O getInstance();
+    public O getInstance();
 
     /**
      * Return an instance to be returned on getInstance later on.
@@ -40,6 +40,6 @@ public interface GenericPool <O> {
      * @throws NullPointerException
      *             if instance is null.
      */
-    void returnInstance(O instance);
+    public void returnInstance(O instance);
 
 }

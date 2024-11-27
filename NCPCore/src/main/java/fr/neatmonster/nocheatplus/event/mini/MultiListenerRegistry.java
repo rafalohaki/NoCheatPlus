@@ -14,6 +14,13 @@
  */
 package fr.neatmonster.nocheatplus.event.mini;
 
+import java.lang.reflect.InvocationTargetException;
+import java.lang.reflect.Method;
+import java.lang.reflect.Modifier;
+import java.util.ArrayList;
+import java.util.Collection;
+import java.util.logging.Level;
+
 import fr.neatmonster.nocheatplus.NCPAPIProvider;
 import fr.neatmonster.nocheatplus.components.registry.feature.ComponentWithName;
 import fr.neatmonster.nocheatplus.components.registry.order.RegistrationOrder;
@@ -22,13 +29,6 @@ import fr.neatmonster.nocheatplus.components.registry.order.RegistrationOrder.Re
 import fr.neatmonster.nocheatplus.logging.StaticLog;
 import fr.neatmonster.nocheatplus.logging.Streams;
 import fr.neatmonster.nocheatplus.utilities.StringUtil;
-
-import java.lang.reflect.InvocationTargetException;
-import java.lang.reflect.Method;
-import java.lang.reflect.Modifier;
-import java.util.ArrayList;
-import java.util.Collection;
-import java.util.logging.Level;
 
 /**
  * Support for registering multiple event-handler methods at once.<br>
@@ -81,7 +81,13 @@ public abstract class MultiListenerRegistry<EB, P> extends MiniListenerRegistry<
             try {
                 method.invoke(listener, event);
             }
-            catch (InvocationTargetException | IllegalAccessException | IllegalArgumentException e) {
+            catch (InvocationTargetException e) {
+                onException(event, e);
+            }
+            catch (IllegalArgumentException e) {
+                onException(event, e);
+            }
+            catch (IllegalAccessException e) {
                 onException(event, e);
             }
         }
@@ -96,7 +102,7 @@ public abstract class MultiListenerRegistry<EB, P> extends MiniListenerRegistry<
                 builder.append(StringUtil.throwableToString(t.getCause()));
                 cause = cause.getCause();
             }
-            StaticLog.logOnce(Level.SEVERE,
+            StaticLog.logOnce(Level.SEVERE, 
                     "Exception with " + getComponentName() + ", processing " + event.getClass().getName() + ": " + t.getClass().getSimpleName(), 
                     builder.toString());
         }
@@ -159,7 +165,7 @@ public abstract class MultiListenerRegistry<EB, P> extends MiniListenerRegistry<
     @SuppressWarnings("unchecked")
     protected <E extends EB> MiniListener<E> getMiniListener(final Object listener, 
             final Method method, final RegistrationOrder order, final P basePriority) {
-        return new AutoListener<>((Class<E>) method.getParameterTypes()[0],
+        return new AutoListener<E>((Class<E>) method.getParameterTypes()[0], 
                 listener, method, order, basePriority);
     }
 
@@ -204,7 +210,7 @@ public abstract class MultiListenerRegistry<EB, P> extends MiniListenerRegistry<
      */
     protected Collection<MiniListener<? extends EB>> register(Object listener, 
             P defaultPriority, RegistrationOrder defaultOrder, boolean defaultIgnoreCancelled) {
-        Collection<MiniListener<? extends EB>> listeners = new ArrayList<>();
+        Collection<MiniListener<? extends EB>> listeners = new ArrayList<MiniListener<? extends EB>>();
         Class<?> listenerClass = listener.getClass();
         RegistrationOrder order = null;
         if (listenerClass.isAnnotationPresent(RegisterEventsWithOrder.class)) {

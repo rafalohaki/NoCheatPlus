@@ -38,7 +38,7 @@ public interface IDataOnWorldChange {
      * @return Return true to remove the data instance from the cache in
      *         question, false otherwise.
      */
-    boolean dataOnWorldChange(Player player, IPlayerData pData,
-                              World previousWorld, World newWorld);
+    public boolean dataOnWorldChange(Player player, IPlayerData pData, 
+            World previousWorld, World newWorld);
 
 }

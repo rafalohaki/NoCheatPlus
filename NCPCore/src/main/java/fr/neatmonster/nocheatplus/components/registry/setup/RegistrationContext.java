@@ -65,9 +65,9 @@ public class RegistrationContext implements IDoRegister {
      * @author asofold
      *
      */
-    public enum RegistrationType {
+    public static enum RegistrationType {
         /** Try to register directly, one time only. */
-        ONCE
+        ONCE;
     }
 
     /**
@@ -77,12 +77,12 @@ public class RegistrationContext implements IDoRegister {
      * @author asofold
      *
      */
-    public enum RemovalType {
+    public static enum RemovalType {
         /**
          * Never remove registration. Still might get removed/dented with the
          * plugin getting disabled.
          */
-        NEVER
+        NEVER;
     }
 
 
@@ -92,7 +92,7 @@ public class RegistrationContext implements IDoRegister {
 
     // TODO: Put a global registry in control of instantiation, add id(s) / tags.
 
-    private final List<IDoRegister> registerItems = new LinkedList<>();
+    private final List<IDoRegister> registerItems = new LinkedList<IDoRegister>();
 
     //////////////////////////////
     // Getter
@@ -112,7 +112,7 @@ public class RegistrationContext implements IDoRegister {
      * @return
      */
     public <T extends IConfig> RegisterInstanceWorld<T> registerInstanceWorld(Class<T> type) {
-        RegisterInstanceWorld<T> item = new RegisterInstanceWorld<>(this, type);
+        RegisterInstanceWorld<T> item = new RegisterInstanceWorld<T>(this, type);
         registerItems.add(item);
         return item;
     }
@@ -125,7 +125,7 @@ public class RegistrationContext implements IDoRegister {
      * @return
      */
     public <T extends IConfig> RegisterConfigWorld<T> registerConfigWorld(Class<T> configType) {
-        RegisterConfigWorld<T> item = new RegisterConfigWorld<>(this, configType);
+        RegisterConfigWorld<T> item = new RegisterConfigWorld<T>(this, configType);
         registerItems.add(item);
         return item;
     }
@@ -138,7 +138,7 @@ public class RegistrationContext implements IDoRegister {
      * @return
      */
     public  <T extends IData> RegisterDataWorld<T> registerDataWorld(Class<T> dataType) {
-        RegisterDataWorld<T> item = new RegisterDataWorld<>(this, dataType);
+        RegisterDataWorld<T> item = new RegisterDataWorld<T>(this, dataType);
         registerItems.add(item);
         return item;
     }
@@ -149,7 +149,7 @@ public class RegistrationContext implements IDoRegister {
      * @return
      */
     public <T extends IData> RegisterInstancePlayer<T> registerInstancePlayer(Class<T> type) {
-        RegisterInstancePlayer<T> item = new RegisterInstancePlayer<>(this, type);
+        RegisterInstancePlayer<T> item = new RegisterInstancePlayer<T>(this, type);
         registerItems.add(item);
         return item;
     }
@@ -160,7 +160,7 @@ public class RegistrationContext implements IDoRegister {
      * @return
      */
     public <T extends IData> RegisterDataPlayer<T> registerDataPlayer(Class<T> dataType) {
-        RegisterDataPlayer<T> item = new RegisterDataPlayer<>(this, dataType);
+        RegisterDataPlayer<T> item = new RegisterDataPlayer<T>(this, dataType);
         registerItems.add(item);
         return item;
     }

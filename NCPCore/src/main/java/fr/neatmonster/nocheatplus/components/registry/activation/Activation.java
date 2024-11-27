@@ -46,7 +46,7 @@ public class Activation implements IDescriptiveActivation {
      *            Lower case expected.
      * @return null on failures.
      */
-    private static String rightSideDelimiters(final String version) {
+    private static final String rightSideDelimiters(final String version) {
         String pV = GenericVersion.parseVersionDelimiters(version, "", "-snapshot");
         if (pV == null) {
             pV = GenericVersion.parseVersionDelimiters(version, "", "-b");
@@ -88,7 +88,7 @@ public class Activation implements IDescriptiveActivation {
         return pV;
     }
 
-    private final List<IActivation> conditions = new LinkedList<>();
+    private final List<IActivation> conditions = new LinkedList<IActivation>();
     private boolean conditionsAND = true;
 
     private String neutralDescription = null;

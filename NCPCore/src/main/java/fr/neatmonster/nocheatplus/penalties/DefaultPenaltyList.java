@@ -14,10 +14,12 @@
  */
 package fr.neatmonster.nocheatplus.penalties;
 
+import java.util.Iterator;
 import java.util.LinkedHashMap;
 import java.util.LinkedList;
 import java.util.List;
 import java.util.Map;
+import java.util.Map.Entry;
 
 public class DefaultPenaltyList implements IPenaltyList {
 
@@ -29,7 +31,7 @@ public class DefaultPenaltyList implements IPenaltyList {
      * @param <RI>
      */
     private static class GenericNode<RI> {
-        private final List<IPenalty<RI>> penalties = new LinkedList<>();
+        private final List<IPenalty<RI>> penalties = new LinkedList<IPenalty<RI>>();
 
         /**
          * 
@@ -45,7 +47,7 @@ public class DefaultPenaltyList implements IPenaltyList {
     }
 
     private boolean willCancel = false;
-    private final Map<Class<?>, GenericNode<?>> penaltyMap = new LinkedHashMap<>();
+    private final Map<Class<?>, GenericNode<?>> penaltyMap = new LinkedHashMap<Class<?>, GenericNode<?>>();
 
     @Override
     public <RI> void addPenalty(final Class<RI> registeredInput, 
@@ -57,7 +59,7 @@ public class DefaultPenaltyList implements IPenaltyList {
             @SuppressWarnings("unchecked")
             GenericNode<RI> node = (GenericNode<RI>) penaltyMap.get(registeredInput);
             if (node == null) {
-                node = new GenericNode<>();
+                node = new GenericNode<RI>();
                 penaltyMap.put(registeredInput, node);
             }
             node.penalties.add(penalty);

@@ -26,10 +26,10 @@ package fr.neatmonster.nocheatplus.components.location;
  */
 public interface IGetBlockPosition {
 
-    int getBlockX();
+    public int getBlockX();
 
-    int getBlockY();
+    public int getBlockY();
 
-    int getBlockZ();
+    public int getBlockZ();
 
 }

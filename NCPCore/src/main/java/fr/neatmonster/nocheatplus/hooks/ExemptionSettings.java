@@ -14,15 +14,16 @@
  */
 package fr.neatmonster.nocheatplus.hooks;
 
-import fr.neatmonster.nocheatplus.config.ConfPaths;
-import fr.neatmonster.nocheatplus.config.ConfigFile;
+import java.util.ArrayList;
+import java.util.Arrays;
+import java.util.Collection;
+import java.util.List;
+
 import org.bukkit.entity.Entity;
 import org.bukkit.entity.NPC;
 
-import java.util.ArrayList;
-import java.util.Collection;
-import java.util.Collections;
-import java.util.List;
+import fr.neatmonster.nocheatplus.config.ConfPaths;
+import fr.neatmonster.nocheatplus.config.ConfigFile;
 
 /**
  * Encapsulate generic settings and checking functionality for exemption.
@@ -46,7 +47,7 @@ public class ExemptionSettings {
                 return null;
             }
             else {
-                final List<String> notNull = new ArrayList<>(keys.size());
+                final List<String> notNull = new ArrayList<String>(keys.size());
                 for (final String key : keys) {
                     if (key != null) {
                         notNull.add(key);
@@ -56,7 +57,7 @@ public class ExemptionSettings {
                     return null;
                 }
                 else {
-                    return notNull.toArray(new String[0]);
+                    return notNull.toArray(new String[notNull.size()]);
                 }
             }
         }

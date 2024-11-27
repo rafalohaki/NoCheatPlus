@@ -14,8 +14,8 @@
  */
 package fr.neatmonster.nocheatplus.components.registry.setup.instance;
 
+import java.util.Arrays;
 import java.util.Collection;
-import java.util.Collections;
 import java.util.LinkedList;
 import java.util.List;
 
@@ -51,7 +51,7 @@ public abstract class RegisterInstance<T, A> implements IDoRegister {
      * @author asofold
      *
      */
-    protected interface IDoRegisterWithRegistry {
+    protected static interface IDoRegisterWithRegistry {
         void doRegister(IRichFactoryRegistry<?> factoryRegistry);
     }
 
@@ -69,15 +69,15 @@ public abstract class RegisterInstance<T, A> implements IDoRegister {
      * Types that may be registered as types for players as well, for the case
      * this is a per world type (with or without factory).
      */
-    protected final List<IDoRegisterWithRegistry> genericDataItems = new LinkedList<>();
+    protected final List<IDoRegisterWithRegistry> genericDataItems = new LinkedList<IDoRegisterWithRegistry>();
     /**
      * Types that may be registered as types for players as well, for the case
      * this is a per world type (with or without factory).
      */
-    protected final List<IDoRegisterWithRegistry> genericConfigItems = new LinkedList<>();
+    protected final List<IDoRegisterWithRegistry> genericConfigItems = new LinkedList<IDoRegisterWithRegistry>();
 
     /** Standard items. */
-    protected final List<IDoRegister> items = new LinkedList<>();
+    protected final List<IDoRegister> items = new LinkedList<IDoRegister>();
 
     public RegisterInstance(RegistrationContext registrationContext, Class<T> type, 
             IRichFactoryRegistry<A> factoryRegistry) {

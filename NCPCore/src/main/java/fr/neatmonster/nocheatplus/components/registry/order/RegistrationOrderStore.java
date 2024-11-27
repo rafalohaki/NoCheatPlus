@@ -28,7 +28,7 @@ import java.util.Map;
 public class RegistrationOrderStore implements IRegisterWithOrder {
     // (No generics this time.)
 
-    private final Map<Class<?>, RegistrationOrder> orderMap = new HashMap<>();
+    private final Map<Class<?>, RegistrationOrder> orderMap = new HashMap<Class<?>, RegistrationOrder>();
     private RegistrationOrder defaultOrder = null;
 
     public RegistrationOrderStore() {

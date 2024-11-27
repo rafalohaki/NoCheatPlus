@@ -34,7 +34,7 @@ public interface IGenericInstanceRegistryListener<T> {
      * @param instance
      *            Might be null, if the registry allows that.
      */
-    void onGenericInstanceRegister(Class<T> registerFor, T instance);
+    public void onGenericInstanceRegister(Class<T> registerFor, T instance);
 
     /**
      * An already registered entry gets overridden.
@@ -47,7 +47,7 @@ public interface IGenericInstanceRegistryListener<T> {
      *            The instance that had been registered before. Might be null,
      *            if the registry allows that.
      */
-    void onGenericInstanceOverride(Class<T> registerFor, T newInstance, T oldInstance);
+    public void onGenericInstanceOverride(Class<T> registerFor, T newInstance, T oldInstance);
 
     /**
      * A registration is removed explicitly.
@@ -57,6 +57,6 @@ public interface IGenericInstanceRegistryListener<T> {
      *            The instance that had been registered before. Might be null,
      *            if the registry allows that.
      */
-    void onGenericInstanceRemove(Class<T> registerFor, T oldInstance);
+    public void onGenericInstanceRemove(Class<T> registerFor, T oldInstance);
 
 }

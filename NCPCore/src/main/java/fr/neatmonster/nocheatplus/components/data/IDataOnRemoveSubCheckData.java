@@ -35,6 +35,6 @@ public interface IDataOnRemoveSubCheckData {
      * @return Return true to remove the data instance from the cache in
      *         question, false otherwise.
      */
-    boolean dataOnRemoveSubCheckData(final Collection<CheckType> checkTypes);
+    public boolean dataOnRemoveSubCheckData(final Collection<CheckType> checkTypes);
 
 }

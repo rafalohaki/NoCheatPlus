@@ -20,5 +20,5 @@ package fr.neatmonster.nocheatplus.components.registry.feature;
  *
  */
 public interface ComponentWithName {
-	String getComponentName();
+	public String getComponentName();
 }

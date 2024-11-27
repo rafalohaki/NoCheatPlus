@@ -14,10 +14,10 @@
  */
 package fr.neatmonster.nocheatplus.hooks;
 
+import java.util.Set;
+
 import fr.neatmonster.nocheatplus.checks.CheckType;
 import fr.neatmonster.nocheatplus.utilities.CheckTypeUtil;
-
-import java.util.Set;
 
 /**
  * @deprecated Use fr.neatmonster.utilities.CheckTypeUtil instead.
@@ -28,7 +28,7 @@ import java.util.Set;
 public class APIUtils {
 
     @Deprecated
-    public static Set<CheckType> getChildren(final CheckType type) {
+    public static final Set<CheckType> getChildren(final CheckType type) {
         return getDescendants(type);
     }
 
@@ -41,7 +41,7 @@ public class APIUtils {
      * @return the descendants
      */
     @Deprecated
-    public static Set<CheckType> getDescendants(
+    public static final Set<CheckType> getDescendants(
             final CheckType type) {
         return CheckTypeUtil.getDescendants(type);
     }
@@ -55,13 +55,13 @@ public class APIUtils {
      * @return the children
      */
     @Deprecated
-    public static Set<CheckType> getDirectChildren(
+    public static final Set<CheckType> getDirectChildren(
             final CheckType type) {
         return CheckTypeUtil.getDirectChildren(type);
     }
 
     @Deprecated
-    public static Set<CheckType> getWithChildren(final CheckType type) {
+    public static final Set<CheckType> getWithChildren(final CheckType type) {
         return getWithDescendants(type);
     }
 
@@ -74,7 +74,7 @@ public class APIUtils {
      * @return the given check type with descendants
      */
     @Deprecated
-    public static Set<CheckType> getWithDescendants(
+    public static final Set<CheckType> getWithDescendants(
             final CheckType type) {
         return CheckTypeUtil.getWithDescendants(type);
     }
@@ -90,14 +90,14 @@ public class APIUtils {
      * @return true, if is parent
      */
     @Deprecated
-    public static boolean isAncestor(final CheckType supposedAncestor,
-                                     final CheckType supposedDescendant) {
+    public static final boolean isAncestor(final CheckType supposedAncestor,
+            final CheckType supposedDescendant) {
         return CheckTypeUtil.isAncestor(supposedAncestor, supposedDescendant);
     }
 
     @Deprecated
-    public static boolean isParent(final CheckType supposedAncestor,
-                                   final CheckType supposedDescendant) {
+    public static final boolean isParent(final CheckType supposedAncestor,
+            final CheckType supposedDescendant) {
         return isAncestor(supposedAncestor, supposedDescendant);
     }
 
@@ -112,7 +112,7 @@ public class APIUtils {
      * @return true, if successful
      */
     @Deprecated
-    public static boolean needsSynchronization(final CheckType type) {
+    public static final boolean needsSynchronization(final CheckType type) {
         return CheckTypeUtil.needsSynchronization(type);
     }
 

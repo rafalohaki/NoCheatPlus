@@ -29,5 +29,5 @@ public interface IHoldSubComponents {
 	 * It is recommended to not return the same elements again on a second call, for the case of delegating to further registries supporting this interface.
 	 * @return Always a collection, may be empty, should be empty on the second call.
 	 */
-    Collection<Object> getSubComponents();
+	public Collection<Object> getSubComponents();
 }

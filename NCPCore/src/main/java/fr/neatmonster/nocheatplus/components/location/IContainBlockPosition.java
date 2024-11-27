@@ -22,8 +22,8 @@ package fr.neatmonster.nocheatplus.components.location;
  */
 public interface IContainBlockPosition {
 
-    boolean containsBlockPosition(int x, int y, int z);
+    public boolean containsBlockPosition(int x, int y, int z);
 
-    boolean containsBlockPosition(IGetBlockPosition blockPosition);
+    public boolean containsBlockPosition(IGetBlockPosition blockPosition);
 
 }

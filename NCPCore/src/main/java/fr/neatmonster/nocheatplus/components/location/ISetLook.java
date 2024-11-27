@@ -28,14 +28,14 @@ public interface ISetLook {
      * 
      * @param yaw
      */
-    void setYaw(float yaw);
+    public void setYaw(float yaw);
 
     /**
      * Set the angle for vertical looking direction component in grad.
      * 
      * @param pitch
      */
-    void setPitch(float pitch);
+    public void setPitch(float pitch);
 
     // public void setLook(float yaw, float pitch);
 

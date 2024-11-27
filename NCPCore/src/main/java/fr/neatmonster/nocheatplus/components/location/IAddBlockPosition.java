@@ -23,6 +23,6 @@ package fr.neatmonster.nocheatplus.components.location;
 public interface IAddBlockPosition {
 
     /** Add block coordinates. */
-    void addBlockPosition(int x, int y, int z);
+    public void addBlockPosition(int x, int y, int z);
 
 }

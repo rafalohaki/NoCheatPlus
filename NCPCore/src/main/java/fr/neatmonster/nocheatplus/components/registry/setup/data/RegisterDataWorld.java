@@ -44,9 +44,8 @@ public class RegisterDataWorld<T extends IData> extends RegisterInstanceWorld<T>
         return this;
     }
 
-    @SafeVarargs
     @Override
-    public final RegisterDataWorld<T> addToGroups(
+    public RegisterDataWorld<T> addToGroups(
             final CheckType checkType, final boolean withDescendantCheckTypes,
             final Class<? super T>... groupTypes) {
         super.addToGroups(checkType, withDescendantCheckTypes, groupTypes);

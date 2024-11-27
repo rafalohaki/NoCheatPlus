@@ -35,9 +35,8 @@ public class RegisterDataPlayer<T extends IData> extends RegisterInstancePlayer<
         return this;
     }
 
-    @SafeVarargs
     @Override
-    public final RegisterDataPlayer<T> addToGroups(
+    public RegisterDataPlayer<T> addToGroups(
             final CheckType checkType, final boolean withDescendantCheckTypes,
             final Class<? super T>... groupTypes) {
         super.addToGroups(checkType, withDescendantCheckTypes, groupTypes);

@@ -74,7 +74,7 @@ public interface NoCheatPlusAPI extends ComponentRegistry<Object>, ComponentRegi
      * @param allowComponentFactory If to allow registering ComponentFactories.
      * @return
      */
-    boolean addComponent(Object obj, boolean allowComponentFactory);
+    public boolean addComponent(Object obj, boolean allowComponentFactory);
 
     /**
      * Tell NCP that certain features are present, e.g. for display with the
@@ -84,7 +84,7 @@ public interface NoCheatPlusAPI extends ComponentRegistry<Object>, ComponentRegi
      * @param key
      * @param featureTags
      */
-    void addFeatureTags(String key, Collection<String> featureTags);
+    public void addFeatureTags(String key, Collection<String> featureTags);
 
     /**
      * Tell NCP that certain features are present, e.g. for display with the
@@ -94,7 +94,7 @@ public interface NoCheatPlusAPI extends ComponentRegistry<Object>, ComponentRegi
      * @param key
      * @param featureTags
      */
-    void setFeatureTags(String key, Collection<String> featureTags);
+    public void setFeatureTags(String key, Collection<String> featureTags);
 
     /**
      * Test if an entry has been made.
@@ -102,13 +102,13 @@ public interface NoCheatPlusAPI extends ComponentRegistry<Object>, ComponentRegi
      * @param feature
      * @return
      */
-    boolean hasFeatureTag(String key, String feature);
+    public boolean hasFeatureTag(String key, String feature);
 
     /**
      * Get a map with all feature tags that have been set.
      * @return
      */
-    Map<String, Set<String>> getAllFeatureTags();
+    public Map<String, Set<String>> getAllFeatureTags();
 
     /**
      * Send all players with the nocheatplus.admin.notify permission a message.<br>
@@ -117,14 +117,14 @@ public interface NoCheatPlusAPI extends ComponentRegistry<Object>, ComponentRegi
      * @param message
      * @return Number of players messaged.
      */
-    int sendAdminNotifyMessage(final String message);
+    public int sendAdminNotifyMessage(final String message);
 
     /**
      * Thread-safe method to send a message to a player in a scheduled task. The scheduling preserves order of messages.
      * @param playerName
      * @param message
      */
-    void sendMessageOnTick(final String playerName, final String message);
+    public void sendMessageOnTick(final String playerName, final String message);
 
 
     /**
@@ -132,33 +132,33 @@ public interface NoCheatPlusAPI extends ComponentRegistry<Object>, ComponentRegi
      * @param playerName
      * @return If player was denied to login.
      */
-    boolean allowLogin(String playerName);
+    public boolean allowLogin(String playerName);
 
     /**
      * Remove all players from the allow login set.
      * @return Number of players that had actually been denied to login.
      */
-    int allowLoginAll();
+    public int allowLoginAll();
 
     /**
      * Deny the player to login. This will also remove expired entries.
      * @param playerName
      * @param duration Duration from now on, in milliseconds.
      */
-    void denyLogin(String playerName, long duration);
+    public void denyLogin(String playerName, long duration);
 
     /**
      * Check if player is denied to login right now. 
      * @param playerName
      * @return
      */
-    boolean isLoginDenied(String playerName);
+    public boolean isLoginDenied(String playerName);
 
     /**
      * Get the names of all players who are denied to log in at present.
      * @return
      */
-    String[] getLoginDeniedPlayers();
+    public String[] getLoginDeniedPlayers();
 
     /**
      * Check if a player is denied to login at a certain point of time.
@@ -166,25 +166,26 @@ public interface NoCheatPlusAPI extends ComponentRegistry<Object>, ComponentRegi
      * @param currentTimeMillis
      * @return
      */
-    boolean isLoginDenied(String playerName, long time);
+    public boolean isLoginDenied(String playerName, long time);
 
     /**
      * Get BukkitAudiences of Adventure.
      * @return
      */
-    @NonNull BukkitAudiences adventure();
+    @NonNull
+    BukkitAudiences adventure();
 
     /**
      * Get the central access point for logging (LogManager),
      * @return
      */
-    LogManager getLogManager();
+    public LogManager getLogManager();
 
     /**
      * Get the block change tracker (pistons, other).
      * @return
      */
-    BlockChangeTracker getBlockChangeTracker();
+    public BlockChangeTracker getBlockChangeTracker();
 
     /**
      * Get the registry to register events with the
@@ -199,7 +200,7 @@ public interface NoCheatPlusAPI extends ComponentRegistry<Object>, ComponentRegi
      * 
      * @return
      */
-    EventRegistryBukkit getEventRegistry();
+    public EventRegistryBukkit getEventRegistry();
 
     /**
      * Get the internal permission registry, holding internal id mappings and
@@ -208,14 +209,14 @@ public interface NoCheatPlusAPI extends ComponentRegistry<Object>, ComponentRegi
      * @return
      */
     // TODO: Remove in favor of per world permission registries (!).
-    PermissionRegistry getPermissionRegistry();
+    public PermissionRegistry getPermissionRegistry();
 
     /**
      * Get the WorldDataManager, which stores per-world data and configuration.
      * 
      * @return
      */
-    IWorldDataManager getWorldDataManager();
+    public IWorldDataManager getWorldDataManager();
 
     /**
      * Get the PlayerDataManager, which stores per player data and
@@ -223,7 +224,7 @@ public interface NoCheatPlusAPI extends ComponentRegistry<Object>, ComponentRegi
      * 
      * @return
      */
-    IPlayerDataManager getPlayerDataManager();
+    public IPlayerDataManager getPlayerDataManager();
 
     /**
      * Get a new registration context instance for registration with
@@ -231,7 +232,7 @@ public interface NoCheatPlusAPI extends ComponentRegistry<Object>, ComponentRegi
      * 
      * @return
      */
-    RegistrationContext newRegistrationContext();
+    public RegistrationContext newRegistrationContext();
 
     /**
      * Do use {@link NoCheatPlusAPI#newRegistrationContext()} for future
@@ -239,7 +240,7 @@ public interface NoCheatPlusAPI extends ComponentRegistry<Object>, ComponentRegi
      * 
      * @param context
      */
-    void register(RegistrationContext context);
+    public void register(RegistrationContext context);
 
     /**
      * Get the registered factory for retrieving config-dependent ActionFactory
@@ -247,7 +248,7 @@ public interface NoCheatPlusAPI extends ComponentRegistry<Object>, ComponentRegi
      * 
      * @return
      */
-    ActionFactoryFactory getActionFactoryFactory();
+    public ActionFactoryFactory getActionFactoryFactory();
 
     /**
      * Register a factory for retrieving config-dependent ActionFactory
@@ -274,6 +275,6 @@ public interface NoCheatPlusAPI extends ComponentRegistry<Object>, ComponentRegi
      *            factory.
      * @return The previously registered instance.
      */
-    ActionFactoryFactory setActionFactoryFactory(final ActionFactoryFactory actionFactoryFactory);
+    public ActionFactoryFactory setActionFactoryFactory(final ActionFactoryFactory actionFactoryFactory);
 
 }

@@ -31,6 +31,6 @@ import fr.neatmonster.nocheatplus.utilities.map.BlockCache;
 public interface IWrapBlockCache extends IGetBlockCache, IHandle<BlockCache> {
 
     /** Fail-safe convenience call for BlockCache.cleanup. */
-    void cleanup();
+    public void cleanup();
 
 }

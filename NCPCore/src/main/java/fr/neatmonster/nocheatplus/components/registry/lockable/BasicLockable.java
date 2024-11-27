@@ -126,7 +126,7 @@ public class BasicLockable implements ILockable {
         this.lockFlags = lockFlags;
     }
 
-    private int setLockFlag(int flag, boolean value, int result) {
+    private final int setLockFlag(int flag, boolean value, int result) {
         if (value) {
             return result | flag;
         }
@@ -135,7 +135,7 @@ public class BasicLockable implements ILockable {
         }
     }
 
-    private boolean isLockFlagSet(int flag) {
+    private final boolean isLockFlagSet(int flag) {
         return (lockFlags & flag) == flag;
     }
 
@@ -145,7 +145,7 @@ public class BasicLockable implements ILockable {
      * @param isUnlock
      * @return
      */
-    private boolean isApplicableLockSecret(final Object givenSecret, final boolean isUnlock) {
+    private final boolean isApplicableLockSecret(final Object givenSecret, final boolean isUnlock) {
         // Secret check.
         if (this.lockSecret == null) {
             // Check if is permanently locked.

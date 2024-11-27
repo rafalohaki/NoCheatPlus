@@ -14,13 +14,6 @@
  */
 package fr.neatmonster.nocheatplus.event.mini;
 
-import fr.neatmonster.nocheatplus.components.registry.order.IGetRegistrationOrder;
-import fr.neatmonster.nocheatplus.components.registry.order.RegistrationOrder;
-import fr.neatmonster.nocheatplus.components.registry.order.RegistrationOrder.RegisterEventsWithOrder;
-import fr.neatmonster.nocheatplus.components.registry.order.RegistrationOrder.RegisterMethodWithOrder;
-import fr.neatmonster.nocheatplus.components.registry.order.RegistrationOrder.RegisterWithOrder;
-import fr.neatmonster.nocheatplus.utilities.ReflectionUtil;
-
 import java.lang.reflect.Method;
 import java.util.ArrayList;
 import java.util.Arrays;
@@ -31,6 +24,13 @@ import java.util.Iterator;
 import java.util.Map;
 import java.util.Map.Entry;
 import java.util.Set;
+
+import fr.neatmonster.nocheatplus.components.registry.order.IGetRegistrationOrder;
+import fr.neatmonster.nocheatplus.components.registry.order.RegistrationOrder;
+import fr.neatmonster.nocheatplus.components.registry.order.RegistrationOrder.RegisterEventsWithOrder;
+import fr.neatmonster.nocheatplus.components.registry.order.RegistrationOrder.RegisterMethodWithOrder;
+import fr.neatmonster.nocheatplus.components.registry.order.RegistrationOrder.RegisterWithOrder;
+import fr.neatmonster.nocheatplus.utilities.ReflectionUtil;
 
 /**
  * 
@@ -63,8 +63,8 @@ import java.util.Set;
  */
 public abstract class MiniListenerRegistry<EB, P> {
 
-    public interface NodeFactory<EB, P> {
-        <E extends EB> MiniListenerNode<E, P> newNode(Class<E> eventClass, P basePriority);
+    public static interface NodeFactory<EB, P> {
+        public <E extends EB> MiniListenerNode<E, P> newNode(Class<E> eventClass, P basePriority);
     }
 
     ///////////////
@@ -81,12 +81,12 @@ public abstract class MiniListenerRegistry<EB, P> {
      * based on super-classes like the Bukkit implementation of the Listener
      * registry would do.
      */
-    protected final Map<Class<? extends EB>, Map<P, MiniListenerNode<? extends EB, P>>> classMap = new HashMap<>();
+    protected final Map<Class<? extends EB>, Map<P, MiniListenerNode<? extends EB, P>>> classMap = new HashMap<Class<? extends EB>, Map<P, MiniListenerNode<? extends EB, P>>>();
 
     /**
      * Store attached MiniListener instances by anchor objects.
      */
-    protected final Map<Object, Set<MiniListener<? extends EB>>> attachments = new HashMap<>();
+    protected final Map<Object, Set<MiniListener<? extends EB>>> attachments = new HashMap<Object, Set<MiniListener<? extends EB>>>();
 
     public void attach(MiniListener<? extends EB>[] listeners, Object anchor) {
         attach(Arrays.asList(listeners), anchor);
@@ -153,7 +153,7 @@ public abstract class MiniListenerRegistry<EB, P> {
         // TODO: Consider more signatures for Collection + Array.
         Set<MiniListener<? extends EB>> attached = attachments.get(anchor);
         if (attached != null) {
-            for (MiniListener<? extends EB> listener : new ArrayList<>(attached)) {
+            for (MiniListener<? extends EB> listener : new ArrayList<MiniListener<? extends EB>>(attached)) {
                 unregister(listener);
             }
         }

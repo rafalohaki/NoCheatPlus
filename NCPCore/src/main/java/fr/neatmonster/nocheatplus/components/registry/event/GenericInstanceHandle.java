@@ -106,7 +106,7 @@ public class GenericInstanceHandle<T> implements IGenericInstanceRegistryListene
                 throw new RuntimeException("Already disabled.");
             }
             references ++;
-            return new ParentDelegateHandle<>(getRegisteredFor(), getRegistry(), this);
+            return new ParentDelegateHandle<T>(getRegisteredFor(), getRegistry(), this);
         }
 
         public int getNumberOfReferences() {

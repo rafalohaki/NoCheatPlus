@@ -35,7 +35,7 @@ public @interface Moved {
      * The new path where the content has moved to.
      * @return
      */
-    String newPath() default "";
+    public String newPath() default "";
 
     /**
      * Only added to be able to explicitly deny moving configuration sections.
@@ -43,5 +43,5 @@ public @interface Moved {
      * 
      * @return If to allow moving configuration sections.
      */
-    boolean configurationSection() default false;
+    public boolean configurationSection() default false;
 }

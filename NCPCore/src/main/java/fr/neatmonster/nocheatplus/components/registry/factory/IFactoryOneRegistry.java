@@ -22,8 +22,8 @@ public interface IFactoryOneRegistry<A> {
      * @param registerFor
      * @param factory
      */
-    <T> void registerFactory(final Class<T> registerFor,
-                             final IFactoryOne<A, T> factory);
+    public <T> void registerFactory(final Class<T> registerFor, 
+            final IFactoryOne<A, T> factory);
 
     /**
      * Fetch a new instance from a registered factory.
@@ -35,6 +35,6 @@ public interface IFactoryOneRegistry<A> {
      *             (might get changed to a registry type of exception), in case
      *             a factory throws something-
      */
-    <T> T getNewInstance(final Class<T> registeredFor, final A arg);
+    public <T> T getNewInstance(final Class<T> registeredFor, final A arg);
 
 }

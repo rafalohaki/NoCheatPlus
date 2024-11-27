@@ -35,19 +35,19 @@ public abstract class BaseCheckNode<N extends BaseCheckNode<N>> extends CheckTyp
     // TODO: Not optimal - references that are from the container should be fetched from there.
     protected OverrideType configOverrideType = OverrideType.DEFAULT;
 
-    protected interface IConfigFlagAccess<N> {
+    protected static interface IConfigFlagAccess<N> {
         // Might move somewhere generic.
 
-        AlmostBooleanWithOverride getConfigState(N node);
-        boolean getState(N node);
-        void setState(N node, boolean state);
-        String getConfigPath(N node);
+        public AlmostBooleanWithOverride getConfigState(N node);
+        public boolean getState(N node);
+        public void setState(N node, boolean state);
+        public String getConfigPath(N node);
 
         /**
          * The flag state to use, if a node doesn't have a parent and it's
          * config state is MAYBE.
          */
-        boolean getMissingParentState();
+        public boolean getMissingParentState();
 
     }
 
