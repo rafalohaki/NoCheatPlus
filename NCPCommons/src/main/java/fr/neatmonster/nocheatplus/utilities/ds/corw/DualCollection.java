@@ -175,6 +175,7 @@ public abstract class DualCollection<T, C extends Collection<T>> {
             return false;
         }
         else {
+            ;
             lock.lock();
             // (Could be set to null within the primary thread.)
             final boolean res = asynchronousCollection != null && asynchronousCollection.contains(element);

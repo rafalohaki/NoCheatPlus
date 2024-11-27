@@ -37,7 +37,7 @@ public class DualList<T> extends DualCollection<T, List<T>> {
 
     @Override
     protected List<T> newCollection() {
-        return new LinkedList<>();
+        return new LinkedList<T>();
     }
 
 }

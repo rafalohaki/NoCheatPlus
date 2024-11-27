@@ -43,7 +43,7 @@ public class ManagedMap<K, V>{
     protected final LinkedHashMap<K, ValueWrap> map;
 
     public ManagedMap(int defaultCapacity, float loadFactor){
-        map = new LinkedHashMap<>(defaultCapacity, loadFactor, true);
+        map = new LinkedHashMap<K, ValueWrap>(defaultCapacity, loadFactor, true);
     }
 
     /**
@@ -91,7 +91,7 @@ public class ManagedMap<K, V>{
      * @return
      */
     public Collection<K> expire(final long ts){
-        final List<K> rem = new LinkedList<>();
+        final List<K> rem = new LinkedList<K>(); 
         for (final Entry<K, ValueWrap> entry : map.entrySet()){
             final ValueWrap wrap = entry.getValue();
             if (wrap.ts < ts) rem.add(entry.getKey());

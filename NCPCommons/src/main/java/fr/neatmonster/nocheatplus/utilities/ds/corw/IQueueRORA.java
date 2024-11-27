@@ -33,14 +33,14 @@ public interface IQueueRORA<E> {
      * @param element
      * @return Size of queue after adding.
      */
-    int add(final E element);
+    public int add(final E element);
 
     /**
      * 
      * @return An ordinary List containing all elements. This should be the
      *         previously internally stored list, to keep locking time minimal.
      */
-    List<E> removeAll();
+    public List<E> removeAll();
 
     /**
      * Remove oldest entries until maxSize is reached.
@@ -48,15 +48,15 @@ public interface IQueueRORA<E> {
      * @param maxSize
      * @return
      */
-    int reduce(final int maxSize);
+    public int reduce(final int maxSize);
 
 
-    void clear();
+    public void clear();
 
 
-    boolean isEmpty();
+    public boolean isEmpty();
 
 
-    int size();
+    public int size();
 
 }

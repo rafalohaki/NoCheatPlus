@@ -30,7 +30,7 @@ public interface ContentStream <C> extends ContentLogger<C> {
     // Maybe not: addFilter (filter away some stuff, e.g. by regex from config).
     
     // TODO: Consider extra arguments for efficient registratioon with COWs.
-    void addNode(LogNode<C> node);
+    public void addNode(LogNode<C> node);
     
     // addAdapter(ContentAdapter<C, ?> adapter) ? ID etc., attach to another stream.
     
@@ -39,6 +39,6 @@ public interface ContentStream <C> extends ContentLogger<C> {
     /**
      * Remove all attached loggers and other.
      */
-    void clear();
+    public void clear();
     
 }

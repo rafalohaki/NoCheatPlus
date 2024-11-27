@@ -42,7 +42,7 @@ public abstract class BKModTree<V, N extends Node<V, N>, L extends LookupEntry<V
 	 * @param <N>
 	 */
 	public static abstract class Node<V, N extends Node<V, N>>{
-		public final V value;
+		public V value;
 		
 		public Node(V value){
 			this.value = value;
@@ -65,7 +65,7 @@ public abstract class BKModTree<V, N extends Node<V, N>, L extends LookupEntry<V
 	 */
 	public static abstract class MapNode<V, N extends HashMapNode<V, N>> extends Node<V, N>{
 		protected Map<Integer, N> children = null; // Only created if needed.
-		protected final int maxIterate = 12; // Maybe add a setter.
+		protected int maxIterate = 12; // Maybe add a setter.
 		public MapNode(V value) {
 			super(value);
 		}
@@ -119,15 +119,15 @@ public abstract class BKModTree<V, N extends Node<V, N>, L extends LookupEntry<V
 	 */
 	public static class HashMapNode<V, N extends HashMapNode<V, N>> extends MapNode<V, N>{
 		/** Map Levenshtein distance to next nodes. */
-		protected final int initialCapacity = 4;
-		protected final float loadFactor = 0.75f;
+		protected int initialCapacity = 4;
+		protected float loadFactor = 0.75f;
 		public HashMapNode(V value) {
 			super(value);
 		}
 
 		@Override
 		protected Map<Integer, N> newMap() {
-			return new HashMap<>(initialCapacity, loadFactor);
+			return new HashMap<Integer, N>(initialCapacity, loadFactor);
 		}
 	}
 	
@@ -137,8 +137,8 @@ public abstract class BKModTree<V, N extends Node<V, N>, L extends LookupEntry<V
 		}
 	}
 	
-	public interface NodeFactory<V, N extends Node<V, N>>{
-		N newNode(V value, N parent);
+	public static interface NodeFactory<V, N extends Node<V, N>>{
+		public N newNode(V value, N parent);
 	}
 	
 	/**
@@ -170,8 +170,8 @@ public abstract class BKModTree<V, N extends Node<V, N>, L extends LookupEntry<V
 		}
 	}
 	
-	public interface LookupEntryFactory<V, N extends Node<V, N>, L extends LookupEntry<V, N>>{
-		L newLookupEntry(Collection<N> nodes, N match, int distance, boolean isNew);
+	public static interface LookupEntryFactory<V, N extends Node<V, N>, L extends LookupEntry<V, N>>{
+		public L newLookupEntry(Collection<N> nodes, N match, int distance, boolean isNew);
 	}
 
 	protected final NodeFactory<V, N> nodeFactory;
@@ -181,7 +181,7 @@ public abstract class BKModTree<V, N extends Node<V, N>, L extends LookupEntry<V
 	protected N root = null;
 	
 	/** Set to true to have visit called */
-	protected final boolean visit = false;
+	protected boolean visit = false;
 	
 	public BKModTree(NodeFactory<V, N> nodeFactory, LookupEntryFactory<V, N, L> resultFactory){
 		this.nodeFactory = nodeFactory;
@@ -201,7 +201,7 @@ public abstract class BKModTree<V, N extends Node<V, N>, L extends LookupEntry<V
 	 * @return
 	 */
 	public L lookup(final V value, final int range, final int seekMax, final boolean create){ // TODO: signature.
-		final List<N> inRange = new LinkedList<>();
+		final List<N> inRange = new LinkedList<N>();
 		if (root == null){
 			if (create){
 				root = nodeFactory.newNode(value, null);
@@ -212,7 +212,7 @@ public abstract class BKModTree<V, N extends Node<V, N>, L extends LookupEntry<V
 			}
 		}
 		// TODO: best queue type.
-		final List<N> open = new ArrayList<>();
+		final List<N> open = new ArrayList<N>();
 		open.add(root);
 		N insertion = null;
 		int insertionDist = 0;

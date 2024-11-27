@@ -30,7 +30,7 @@ public class CoordHash {
      * @return
      */
     // TODO: Link paper, or find a better one :p.
-    public static int hashCode3DPrimes(final int x, final int y, final int z) {
+    public static final int hashCode3DPrimes(final int x, final int y, final int z) {
         return p1 * x ^ p2 * y ^ p3 * z;
     }
 

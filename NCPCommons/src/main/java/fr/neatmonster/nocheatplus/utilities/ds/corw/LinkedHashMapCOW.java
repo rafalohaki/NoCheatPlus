@@ -19,7 +19,6 @@ import java.util.Collections;
 import java.util.LinkedHashMap;
 import java.util.Map;
 import java.util.Set;
-import org.jetbrains.annotations.NotNull;
 
 /**
  * More cows, more fun: Copy on write for a LinkedHashMap (optimized for fast reading from any thread).
@@ -62,7 +61,7 @@ public class LinkedHashMapCOW<K, V> implements Map<K, V> {
     public LinkedHashMapCOW(int initialCapacity, float loadFactor) {
         this.initialCapacity = initialCapacity;
         this.loadFactor = loadFactor;
-        this.map = new LinkedHashMap<>(initialCapacity, loadFactor, false);
+        this.map = new LinkedHashMap<K, V>(initialCapacity, loadFactor, false);
     }
 
     /**
@@ -79,7 +78,7 @@ public class LinkedHashMapCOW<K, V> implements Map<K, V> {
      * @return
      */
     private LinkedHashMap<K, V> copyMap() {
-        final LinkedHashMap<K, V> newMap = new LinkedHashMap<>(initialCapacity, loadFactor, false);
+        final LinkedHashMap<K, V> newMap = new LinkedHashMap<K, V>(initialCapacity, loadFactor, false);
         newMap.putAll(this.map);
         return newMap;
     }
@@ -105,7 +104,7 @@ public class LinkedHashMapCOW<K, V> implements Map<K, V> {
      * Unmodifiable version of the EntrySet. Entry.setValue might be possible, but dangerous :p
      */
     @Override
-    public @NotNull Set<java.util.Map.Entry<K, V>> entrySet() {
+    public Set<java.util.Map.Entry<K, V>> entrySet() {
         return Collections.unmodifiableSet(map.entrySet());
     }
 
@@ -124,7 +123,7 @@ public class LinkedHashMapCOW<K, V> implements Map<K, V> {
      * Unmodifiable version of the KeySet.
      */
     @Override
-    public @NotNull Set<K> keySet() {
+    public Set<K> keySet() {
         return Collections.unmodifiableSet(map.keySet());
     }
 
@@ -140,7 +139,7 @@ public class LinkedHashMapCOW<K, V> implements Map<K, V> {
     }
 
     @Override
-    public void putAll(final @NotNull Map<? extends K, ? extends V> m) {
+    public void putAll(final Map<? extends K, ? extends V> m) {
         synchronized (this) {
             final LinkedHashMap<K, V> newMap = copyMap();
             newMap.putAll(m);
@@ -185,7 +184,7 @@ public class LinkedHashMapCOW<K, V> implements Map<K, V> {
      * Unmodifiable version of the values (Collection).
      */
     @Override
-    public @NotNull Collection<V> values() {
+    public Collection<V> values() {
         return Collections.unmodifiableCollection(map.values());
     }
 

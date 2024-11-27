@@ -33,8 +33,8 @@ public abstract class AbstractLogNodeDispatcher implements LogNodeDispatcher { /
     /**
      * This queue has to be processed in a task within the primary thread with calling runLogsPrimary.
      */
-    protected final IQueueRORA<LogRecord<?>> queuePrimary = new QueueRORA<>();
-    protected final IQueueRORA<LogRecord<?>> queueAsynchronous = new QueueRORA<>();
+    protected final IQueueRORA<LogRecord<?>> queuePrimary = new QueueRORA<LogRecord<?>>();
+    protected final IQueueRORA<LogRecord<?>> queueAsynchronous = new QueueRORA<LogRecord<?>>();
 
     /** Once a queue reaches this size, it will be reduced (loss of content). */
     protected int maxQueueSize = 5000;
@@ -83,6 +83,7 @@ public abstract class AbstractLogNodeDispatcher implements LogNodeDispatcher { /
                 }
             }
         }
+
     };
 
     /**
@@ -172,7 +173,7 @@ public abstract class AbstractLogNodeDispatcher implements LogNodeDispatcher { /
     }
 
     protected <C> void scheduleLog(LogNode<C> node, Level level, C content) {
-        final LogRecord<C> record = new LogRecord<>(node, level, content); // TODO: parameters.
+        final LogRecord<C> record = new LogRecord<C>(node, level, content); // TODO: parameters.
         switch (node.options.callContext) {
             case ASYNCHRONOUS_TASK:
             case ASYNCHRONOUS_DIRECT:

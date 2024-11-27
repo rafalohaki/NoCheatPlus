@@ -52,32 +52,32 @@ public abstract class AbstractLogManager implements LogManager {
     /**
      * Fast streamID access map (runtime). Copy on write with registryLock.
      */
-    private Map<StreamID, ContentStream<String>> idStreamMap = new IdentityHashMap<>();
+    private Map<StreamID, ContentStream<String>> idStreamMap = new IdentityHashMap<StreamID, ContentStream<String>>();
 
     /** 
      * Map name to Stream. Copy on write with registryLock.
      */
-    private Map<String, ContentStream<String>> nameStreamMap = new HashMap<>();
+    private Map<String, ContentStream<String>> nameStreamMap = new HashMap<String, ContentStream<String>>();
 
     /**
      * Lower-case name to StreamID.
      */
-    private Map<String, StreamID> nameStreamIDMap = new HashMap<>();
+    private Map<String, StreamID> nameStreamIDMap = new HashMap<String, StreamID>();
 
     /**
      * LogNode registry by LoggerID. Copy on write with registryLock.
      */
-    private Map<LoggerID, LogNode<String>> idNodeMap = new IdentityHashMap<>();
+    private Map<LoggerID, LogNode<String>> idNodeMap = new IdentityHashMap<LoggerID, LogNode<String>>();
 
     /**
      * LogNode registry by lower-case name. Copy on write with registryLock.
      */
-    private Map<String, LogNode<String>> nameNodeMap = new HashMap<>();
+    private Map<String, LogNode<String>> nameNodeMap = new HashMap<String, LogNode<String>>();
 
     /**
      * Lower-case name to LoggerID.
      */
-    private Map<String, LoggerID> nameLoggerIDMap = new HashMap<>();
+    private Map<String, LoggerID> nameLoggerIDMap = new HashMap<String, LoggerID>();
 
     /** Registry changes have to be done under this lock (copy on write) */
     protected final Object registryCOWLock = new Object();
@@ -256,10 +256,10 @@ public abstract class AbstractLogManager implements LogManager {
         ContentStream<String> stream;
         synchronized (registryCOWLock) {
             testRegisterStream(streamID);
-            Map<StreamID, ContentStream<String>> idStreamMap = new IdentityHashMap<>(this.idStreamMap);
-            Map<String, ContentStream<String>> nameStreamMap = new HashMap<>(this.nameStreamMap);
-            Map<String, StreamID> nameStreamIDMap = new HashMap<>(this.nameStreamIDMap);
-            stream = new DefaultContentStream<>(dispatcher);
+            Map<StreamID, ContentStream<String>> idStreamMap = new IdentityHashMap<StreamID, ContentStream<String>>(this.idStreamMap);
+            Map<String, ContentStream<String>> nameStreamMap = new HashMap<String, ContentStream<String>>(this.nameStreamMap);
+            Map<String, StreamID> nameStreamIDMap = new HashMap<String, StreamID>(this.nameStreamIDMap);
+            stream = new DefaultContentStream<String>(dispatcher);
             idStreamMap.put(streamID, stream);
             nameStreamMap.put(streamID.name.toLowerCase(), stream);
             nameStreamIDMap.put(streamID.name.toLowerCase(), streamID);
@@ -348,10 +348,10 @@ public abstract class AbstractLogManager implements LogManager {
         LogNode<String> node;
         synchronized (registryCOWLock) {
             testRegisterLogger(loggerID);
-            Map<LoggerID, LogNode<String>> idNodeMap = new IdentityHashMap<>(this.idNodeMap);
-            Map<String, LogNode<String>> nameNodeMap = new HashMap<>(this.nameNodeMap);
-            Map<String, LoggerID> nameLoggerIDMap = new HashMap<>(this.nameLoggerIDMap);
-            node = new LogNode<>(loggerID, logger, options);
+            Map<LoggerID, LogNode<String>> idNodeMap = new IdentityHashMap<LoggerID, LogNode<String>>(this.idNodeMap);
+            Map<String, LogNode<String>> nameNodeMap = new HashMap<String, LogNode<String>>(this.nameNodeMap);
+            Map<String, LoggerID> nameLoggerIDMap = new HashMap<String, LoggerID>(this.nameLoggerIDMap);
+            node = new LogNode<String>(loggerID, logger, options);
             idNodeMap.put(loggerID, node);
             nameNodeMap.put(loggerID.name.toLowerCase(), node);
             nameLoggerIDMap.put(loggerID.name.toLowerCase(), loggerID);
@@ -457,13 +457,13 @@ public abstract class AbstractLogManager implements LogManager {
                     logger.detachLogger();
                 }
             }
-            idNodeMap = new IdentityHashMap<>();
-            nameNodeMap = new HashMap<>();
-            nameLoggerIDMap = new HashMap<>();
+            idNodeMap = new IdentityHashMap<LoggerID, LogNode<String>>();
+            nameNodeMap = new HashMap<String, LogNode<String>>();
+            nameLoggerIDMap = new HashMap<String, LoggerID>();
             // Remove string streams.
-            idStreamMap = new IdentityHashMap<>();
-            nameStreamMap = new HashMap<>();
-            nameStreamIDMap = new HashMap<>();
+            idStreamMap = new IdentityHashMap<StreamID, ContentStream<String>>();
+            nameStreamMap = new HashMap<String, ContentStream<String>>();
+            nameStreamIDMap = new HashMap<String, StreamID>();
             if (recreateInitLogger) {
                 createInitStream();
                 registerInitLogger();

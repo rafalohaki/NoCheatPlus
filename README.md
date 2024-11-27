@@ -69,21 +69,21 @@ Do set the correct version alongside the file name. On newer version of maven, y
 
 Options and profiles related to enabling/disabling including/building "non free" compatibility modules.
 
-| Profile            | Parameter | Description                                       |
-|:-------------------|:----------|:--------------------------------------------------|
-| `-P nonfree_build` | _none_    | Enable building "non free" compatibility modules. |
-| _none_             | _none_    | The "non free" modules won't be included.         |
+| Profile | Parameter | Description |
+| :------------------ | :-------------- | :-------------- |
+| `-P nonfree_build` | _none_ | Enable building "non free" compatibility modules. |
+| _none_ | _none_ | The "non free" modules won't be included. |
 
 Profiles for choice of "non free" compatibility modules to build:
 
-| Profile            | Description                                                                                                                                                           |
-|:-------------------|:----------------------------------------------------------------------------------------------------------------------------------------------------------------------|
-| _none_             | Default build without any of the native access modules, might pose compatibility issues with legacy Minecraft versions. The reflection based module is included here. |
-| `-P all`           | All compatibility modules.                                                                                                                                            |
-| `-P cbdev`         | Spigot 1.12 R1 (MC 1.12-1.12.2).                                                                                                                                      |
-| `-P spigot1_11_r1` | Spigot 1.11 R1 (MC 1.11-1.11.2).                                                                                                                                      |
-| `-P spigot1_10_r1` | Spigot 1.10 R1 (MC 1.10-1.10.2).                                                                                                                                      |
-| `-P spigot1_9_r2`  | Spigot 1.9 R2 (MC 1.9.4).                                                                                                                                             |
-| `-P spigot1_8_r3`  | Spigot 1.8 R3 (MC 1.8.4-1.8.8).                                                                                                                                       |
-| `-P spigot1_7_r4`  | Spigot 1.7 R4 (MC 1.7.10).                                                                                                                                            |
-| `-P cblegacy`      | The pre-DMCA CraftBukkit builds.                                                                                                                                      |
+| Profile | Description |
+| :------------------ | :-------------- |
+| _none_ | Default build without any of the native access modules, might pose compatibility issues with legacy Minecraft versions. The reflection based module is included here. |
+| `-P all` | All compatibility modules. |
+| `-P cbdev` | Spigot 1.12 R1 (MC 1.12-1.12.2). |
+| `-P spigot1_11_r1` | Spigot 1.11 R1 (MC 1.11-1.11.2). |
+| `-P spigot1_10_r1` | Spigot 1.10 R1 (MC 1.10-1.10.2). |
+| `-P spigot1_9_r2` | Spigot 1.9 R2 (MC 1.9.4). |
+| `-P spigot1_8_r3` | Spigot 1.8 R3 (MC 1.8.4-1.8.8). |
+| `-P spigot1_7_r4` | Spigot 1.7 R4 (MC 1.7.10). |
+| `-P cblegacy` | The pre-DMCA CraftBukkit builds. |

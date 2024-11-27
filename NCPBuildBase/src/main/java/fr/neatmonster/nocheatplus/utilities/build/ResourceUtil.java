@@ -61,13 +61,11 @@ public class ResourceUtil {
 					try {
 						r.close();
 					} catch (IOException e1) {
-						//e1.printStackTrace();
 					}
 				}
 				return null;
 			}
 		} catch (MalformedURLException e) {
-			//e.printStackTrace();
 		}
 		return null;
 	}
@@ -108,7 +106,6 @@ public class ResourceUtil {
 			return Integer.parseInt(input);
 		}
 		catch (NumberFormatException e) {
-			//e.printStackTrace();
 		}
 		return preset;
 	}

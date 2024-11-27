@@ -153,12 +153,12 @@ public class CoordHashMap<V> extends AbstractCoordHashMap<V, fr.neatmonster.noch
 
     @Override
     public Iterator<Entry<V>> iterator(){
-        return new HashIterator<>(this);
+        return new HashIterator<V>(this);
     }
 
     @Override
     protected fr.neatmonster.nocheatplus.utilities.ds.map.AbstractCoordHashMap.HashEntry<V> newEntry(int x, int y, int z, V value, int hash) {
-        return new HashEntry<>(x, y, z, value, hash);
+        return new HashEntry<V>(x, y, z, value, hash);
     }
 
 }

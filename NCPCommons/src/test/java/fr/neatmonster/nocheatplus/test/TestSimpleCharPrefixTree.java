@@ -24,24 +24,24 @@ import fr.neatmonster.nocheatplus.utilities.StringUtil;
 import fr.neatmonster.nocheatplus.utilities.ds.prefixtree.SimpleCharPrefixTree;
 
 public class TestSimpleCharPrefixTree {
-    private final List<String> feed = Arrays.asList(
+    private List<String> feed = Arrays.asList(
             "op", "op dummy", "ncp info"
             );
 
-    private final List<String> mustFind = Arrays.asList(
+    private List<String> mustFind = Arrays.asList(
             "op", "op dummy", "ncp info", "ncp info test"
             );
 
-    private final List<String> mustNotFindWords = Arrays.asList(
+    private List<String> mustNotFindWords = Arrays.asList(
             "opp", "opp dummy", "op dummy2", "ncp", "ncp dummy"
             );
 
-    private final List<String> mustNotFindPrefix = Arrays.asList(
+    private List<String> mustNotFindPrefix = Arrays.asList(
             "ok", "ncp", "ncp dummy", "ncp inf"
             );
 
     /** Numbers are neither prefix nor suffix of each other. */
-    private final List<String> uniqueNumbers = Arrays.asList(
+    private List<String> uniqueNumbers = Arrays.asList(
             "123456", "2345678", "34567", "456789"
             );
 

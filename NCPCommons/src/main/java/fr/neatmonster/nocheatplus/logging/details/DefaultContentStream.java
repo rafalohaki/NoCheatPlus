@@ -25,7 +25,7 @@ import java.util.logging.Level;
  */
 public class DefaultContentStream<C> implements ContentStream<C> {
     
-    private ArrayList<LogNode<C>> nodes = new ArrayList<>();
+    private ArrayList<LogNode<C>> nodes = new ArrayList<LogNode<C>>();
     
     private final LogNodeDispatcher dispatcher;
     
@@ -49,7 +49,7 @@ public class DefaultContentStream<C> implements ContentStream<C> {
                 // TODO: Consider throwing something.
                 return;
             }
-            ArrayList<LogNode<C>> nodes = new ArrayList<>(this.nodes);
+            ArrayList<LogNode<C>> nodes = new ArrayList<LogNode<C>>(this.nodes);
             nodes.add(node);
             this.nodes = nodes;
         }

@@ -23,7 +23,6 @@ import java.util.NoSuchElementException;
 import java.util.Set;
 import java.util.concurrent.locks.Lock;
 import java.util.concurrent.locks.ReentrantLock;
-import org.jetbrains.annotations.NotNull;
 
 /**
  * Lock on write hash map. Less jumpy than cow, bucket oriented addition, bulk
@@ -191,7 +190,7 @@ public class HashMapLOW <K, V> {
                 }
             }
             // Create a new Entry.
-            final LHMEntry<K, V> newEntry = new LHMEntry<>(hashCode, key, value);
+            final LHMEntry<K, V> newEntry = new LHMEntry<K, V>(hashCode, key, value);
             if (emptyIndex == -1) {
                 // Grow.
                 grow(newEntry);
@@ -245,7 +244,7 @@ public class HashMapLOW <K, V> {
                     final LHMEntry<K, V> entry = contents[i];
                     if (entry != null && entry.equalsKey(hashCode, key)) {
                         contents[i] = null;
-                        size--;
+                        size --;
                         return entry.getValue();
                     }
                 }
@@ -411,7 +410,7 @@ public class HashMapLOW <K, V> {
         }
 
         @Override
-        public @NotNull Iterator<Entry<K, V>> iterator() {
+        public Iterator<Entry<K, V>> iterator() {
             return iterator;
         }
 
@@ -430,7 +429,7 @@ public class HashMapLOW <K, V> {
     private LHMBucket<K, V>[] buckets;
     private int size = 0;
 
-    private final float loadFactor = 0.75f;
+    private float loadFactor = 0.75f;
 
     // TODO: Configurable: loadFactor
     // TODO: Configurable: initial size and resize multiplier for Buckets.
@@ -483,7 +482,7 @@ public class HashMapLOW <K, V> {
                         final int newIndex = getBucketIndex(entry.hashCode, newLength);
                         LHMBucket<K, V> newBucket = newBuckets[newIndex];
                         if (newBucket == null) {
-                            newBucket = new LHMBucket<>();
+                            newBucket = new LHMBucket<K, V>();
                             newBuckets[newIndex] = newBucket;
                         }
                         newBucket.addEntry(entry);
@@ -552,13 +551,13 @@ public class HashMapLOW <K, V> {
      *            overridden.
      * @return
      */
-    private V put(final K key, final V value, final boolean ifAbsent) {
+    private final V put(final K key, final V value, final boolean ifAbsent) {
         final int hashCode = getHashCode(key);
         lock.lock();
         final int index = getBucketIndex(hashCode, buckets.length);
         LHMBucket<K, V> bucket = buckets[index];
         if (bucket == null) {
-            bucket = new LHMBucket<>();
+            bucket = new LHMBucket<K, V>();
             buckets[index] = bucket;
         }
         V oldValue = bucket.put(hashCode, key, value, ifAbsent);
@@ -700,7 +699,7 @@ public class HashMapLOW <K, V> {
      * @return
      */
     public Iterator<Entry<K, V>> iterator() {
-        return size == 0 ? new LHMIterator<>(null, null) : new LHMIterator<>(this, buckets);
+        return size == 0 ? new LHMIterator<K, V>(null, null) : new LHMIterator<K, V>(this, buckets);
     }
 
     /**
@@ -710,7 +709,7 @@ public class HashMapLOW <K, V> {
      * @return
      */
     public Iterable<Entry<K, V>> iterable() {
-        return new LHMIterable<>(iterator());
+        return new LHMIterable<K, V>(iterator());
     }
 
     /**
@@ -720,7 +719,7 @@ public class HashMapLOW <K, V> {
      * @return
      */
     public Collection<K> getKeys() {
-        final Set<K> out = new LinkedHashSet<>();
+        final Set<K> out = new LinkedHashSet<K>();
         final Iterator<Entry<K, V>> it = iterator();
         while (it.hasNext()) {
             out.add(it.next().getKey());

@@ -22,13 +22,13 @@ public interface ICounterWithParent {
      * @param parent
      * @return This (counter) instance for chaining (not the previous parent).
      */
-    IAcceptDenyCounter setParentCounter(IAcceptDenyCounter parent);
+    public IAcceptDenyCounter setParentCounter(IAcceptDenyCounter parent);
 
     /**
      * Retrieve the parent counter.
      * 
      * @return
      */
-    IAcceptDenyCounter getParentCounter();
+    public IAcceptDenyCounter getParentCounter();
 
 }

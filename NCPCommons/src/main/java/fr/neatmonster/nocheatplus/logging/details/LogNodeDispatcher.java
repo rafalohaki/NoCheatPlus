@@ -23,14 +23,14 @@ import java.util.logging.Level;
  */
 public interface LogNodeDispatcher { // TODO: Name.
     
-    <C> void dispatch(LogNode<C> node, Level level, C content);
+    public <C> void dispatch(LogNode<C> node, Level level, C content);
 
     /**
      * Cancel asynchronous tasks and remove all logs based on policy (log all or clear), default is to log
      * all. Should be called from the primary thread, if it exists.
      * @param ms Milliseconds to wait in case there is something being processed by asynchronous tasks.
      */
-    void flush(long ms);
+    public abstract void flush(long ms);
 
     /**
      * Allow to add a logger, for logging errors to the init stream. Must not use the queues. Can be null (no logging).

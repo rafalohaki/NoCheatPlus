@@ -30,7 +30,7 @@ public interface LogManager extends ILogString, ILogThrowable {
      * 
      * @return
      */
-    StreamID getVoidStreamID();
+    public StreamID getVoidStreamID();
 
     /**
      * This should be a fail-safe direct String-logger, that has the highest
@@ -40,7 +40,7 @@ public interface LogManager extends ILogString, ILogThrowable {
      * 
      * @return
      */
-    StreamID getInitStreamID();
+    public StreamID getInitStreamID();
 
     /**
      * Prefix for the names of the default streams. Don't use this prefix for
@@ -48,7 +48,7 @@ public interface LogManager extends ILogString, ILogThrowable {
      * 
      * @return
      */
-    String getDefaultPrefix();
+    public String getDefaultPrefix();
 
     /**
      * Case-insensitive lookup.
@@ -56,7 +56,7 @@ public interface LogManager extends ILogString, ILogThrowable {
      * @param name
      * @return
      */
-    boolean hasLogger(String name);
+    public boolean hasLogger(String name);
 
     /**
      * A newly created id can be used here (case-insensitive comparison by
@@ -65,7 +65,7 @@ public interface LogManager extends ILogString, ILogThrowable {
      * @param loggerID
      * @return
      */
-    boolean hasLogger(final LoggerID loggerID);
+    public boolean hasLogger(final LoggerID loggerID);
 
     /**
      * Case-insensitive lookup.
@@ -73,7 +73,7 @@ public interface LogManager extends ILogString, ILogThrowable {
      * @param name
      * @return Returns the registered StreamID or null, if not registered.
      */
-    LoggerID getLoggerID(String name);
+    public LoggerID getLoggerID(String name);
 
     /**
      * Case-insensitive lookup.
@@ -81,7 +81,7 @@ public interface LogManager extends ILogString, ILogThrowable {
      * @param name
      * @return
      */
-    boolean hasStream(String name);
+    public boolean hasStream(String name);
 
     /**
      * A newly created id can be used here (case-insensitive comparison by
@@ -90,7 +90,7 @@ public interface LogManager extends ILogString, ILogThrowable {
      * @param streamID
      * @return
      */
-    boolean hasStream(StreamID streamID);
+    public boolean hasStream(StreamID streamID);
 
     /**
      * Case-insensitive lookup.
@@ -98,6 +98,6 @@ public interface LogManager extends ILogString, ILogThrowable {
      * @param name
      * @return Returns the registered StreamID or null, if not registered.
      */
-    StreamID getStreamID(String name);
+    public StreamID getStreamID(String name);
 
 }

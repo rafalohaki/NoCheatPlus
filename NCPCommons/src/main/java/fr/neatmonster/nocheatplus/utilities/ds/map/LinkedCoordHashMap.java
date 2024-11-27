@@ -41,7 +41,7 @@ public class LinkedCoordHashMap<V> extends AbstractCoordHashMap<V, fr.neatmonste
      * @author asofold
      *
      */
-    public enum MoveOrder {
+    public static enum MoveOrder {
         FRONT,
         NOT,
         END
@@ -212,7 +212,7 @@ public class LinkedCoordHashMap<V> extends AbstractCoordHashMap<V, fr.neatmonste
 
     @Override
     public LinkedHashIterator<V> iterator() {
-        return new LinkedHashIterator<>(this, false);
+        return new LinkedHashIterator<V>(this, false);
     }
 
     /**
@@ -222,12 +222,12 @@ public class LinkedCoordHashMap<V> extends AbstractCoordHashMap<V, fr.neatmonste
      * @return
      */
     public LinkedHashIterator<V> iterator(boolean reversed) {
-        return new LinkedHashIterator<>(this, reversed);
+        return new LinkedHashIterator<V>(this, reversed);
     }
 
     @Override
     protected LinkedHashEntry<V> newEntry(int x, int y, int z, V value, int hash) {
-        LinkedHashEntry<V> entry = new LinkedHashEntry<>(x, y, z, value, hash);
+        LinkedHashEntry<V> entry = new LinkedHashEntry<V>(x, y, z, value, hash);
         // Always put in last.
         setLast(entry);
         return entry;

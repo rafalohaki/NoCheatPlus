@@ -46,7 +46,7 @@ public class FileLoggerAdapter extends FileLogger implements ContentLogger<Strin
     @Override
     public void log(Level level, String content) {
         // TODO: Check loggerisInoperable() ?
-       logger.log(level, prefix == null ? content : (prefix + content));
+        logger.log(level, prefix == null ? content : (prefix + content));
     }
 
 }

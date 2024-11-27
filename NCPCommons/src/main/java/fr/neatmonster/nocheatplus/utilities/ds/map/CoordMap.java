@@ -33,11 +33,11 @@ public interface CoordMap<V> {
      *
      * @param <V>
      */
-    interface Entry<V> {
-        int getX();
-        int getY();
-        int getZ();
-        V getValue();
+    public static interface Entry<V> {
+        public int getX();
+        public int getY();
+        public int getZ();
+        public V getValue();
     }
 
     /**
@@ -49,7 +49,7 @@ public interface CoordMap<V> {
      * @param z
      * @return
      */
-    boolean contains(final int x, final int y, final int z);
+    public boolean contains(final int x, final int y, final int z);
 
     /**
      * Get the value if there is a mapping for the given coordinates.
@@ -59,7 +59,7 @@ public interface CoordMap<V> {
      * @param z
      * @return
      */
-    V get(final int x, final int y, final int z);
+    public V get(final int x, final int y, final int z);
 
     /**
      * Add value with the coordinates + hash from the last contains call.
@@ -67,7 +67,7 @@ public interface CoordMap<V> {
      * @param value
      * @return The replaced value. If no value is present, null is returned.
      */
-    V put(final int x, final int y, final int z, final V value);
+    public V put(final int x, final int y, final int z, final V value);
 
     /**
      * Remove an entry.
@@ -77,18 +77,18 @@ public interface CoordMap<V> {
      * @param z
      * @return
      */
-    V remove(final int x, final int y, final int z);
+    public V remove(final int x, final int y, final int z);
 
     /**
      * Get the number of stored elements.
      * @return
      */
-    int size();
+    public int size();
 
     /**
      * Remove all entries from the map.
      */
-    void clear();
+    public void clear();
 
     /**
      * Iterator over all elements (default order to be specified).
@@ -101,6 +101,6 @@ public interface CoordMap<V> {
      * 
      * @return
      */
-    Iterator<Entry<V>> iterator();
+    public Iterator<Entry<V>> iterator();
 
 }

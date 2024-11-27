@@ -28,7 +28,7 @@ import java.util.List;
  */
 public class QueueRORA<E> implements IQueueRORA<E> {
 
-    private LinkedList<E> elements = new LinkedList<>();
+    private LinkedList<E> elements = new LinkedList<E>();
 
     @Override
     public int add(final E element) {
@@ -45,7 +45,7 @@ public class QueueRORA<E> implements IQueueRORA<E> {
         final List<E> result;
         synchronized (this) {
             result = elements;
-            elements = new LinkedList<>();
+            elements = new LinkedList<E>();
         }
         return result;
     }
