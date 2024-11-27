@@ -166,8 +166,8 @@ public final class NCPHookManager {
      *            the hooks
      * @return true, if a hook as decided to cancel the VL processing
      */
-        for (final NCPHook hook : hooks) {
     private static final boolean applyHooks(final CheckType checkType, final Player player, final IViolationInfo info, final List<NCPHook> hooks) {
+        for (final NCPHook hook : hooks) {
             try {
                 if (hook.onCheckFailure(checkType, player, info) && !(hook instanceof IStats)) {
                     return true;

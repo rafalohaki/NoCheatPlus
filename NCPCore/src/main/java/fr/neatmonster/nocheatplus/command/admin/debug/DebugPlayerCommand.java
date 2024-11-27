@@ -16,6 +16,7 @@ package fr.neatmonster.nocheatplus.command.admin.debug;
 
 import java.util.Arrays;
 import java.util.Collection;
+import java.util.Collections;
 import java.util.LinkedHashSet;
 import java.util.List;
 import java.util.Set;
