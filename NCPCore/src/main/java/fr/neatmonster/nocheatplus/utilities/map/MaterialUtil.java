@@ -54,9 +54,9 @@ public class MaterialUtil {
             "wood" // Legacy
             );
 
-    private static List<EntityType> collectTypesBySuffix(String prefix) {
+    private final static List<EntityType> collectTypesBySuffix(String prefix) {
         prefix = prefix.toLowerCase();
-        final List<EntityType> res = new LinkedList<>();
+        final List<EntityType> res = new LinkedList<EntityType>();
         for (final EntityType type : EntityType.values()) {
             if (type.name().toLowerCase().endsWith(prefix)) {
                 res.add(type);
@@ -74,7 +74,7 @@ public class MaterialUtil {
      * @return
      */
     private static Set<Material> add(Set<Material> set, String... names) {
-        final LinkedHashSet<Material> res = new LinkedHashSet<>(set);
+        final LinkedHashSet<Material> res = new LinkedHashSet<Material>(set);
         res.addAll(BridgeMaterial.getAll(names));
         return res;
     }
@@ -88,7 +88,7 @@ public class MaterialUtil {
      * @return
      */
     public static Set<Material> addBlocks(Set<Material> set, String... names) {
-        final LinkedHashSet<Material> res = new LinkedHashSet<>(set);
+        final LinkedHashSet<Material> res = new LinkedHashSet<Material>(set);
         res.addAll(BridgeMaterial.getAllBlocks(names));
         return res;
     }
@@ -101,7 +101,7 @@ public class MaterialUtil {
      * @return
      */
     public static Set<Material> addBlocks(final Set<Material> set, final Material... materials) {
-        final LinkedHashSet<Material> res = new LinkedHashSet<>(set);
+        final LinkedHashSet<Material> res = new LinkedHashSet<Material>(set);
         for (final Material mat : materials) {
             if (mat != null && mat.isBlock()) {
                 res.add(mat);
@@ -117,9 +117,8 @@ public class MaterialUtil {
      * @param sets
      * @return
      */
-    @SafeVarargs
     public static Set<Material> join(final Set<Material>...sets ) {
-        final Set<Material> res = new LinkedHashSet<>();
+        final Set<Material> res = new LinkedHashSet<Material>();
         for (final Set<Material> set : sets) {
             res.addAll(set);
         }
@@ -145,8 +144,8 @@ public class MaterialUtil {
                         StringUtil.join(set, ", ", builder);
                         builder.append('\n');
                     }
-                } catch (IllegalArgumentException | IllegalAccessException e) {
-                    //e.printStackTrace();
+                } catch (IllegalArgumentException e) {
+                } catch (IllegalAccessException e) {
                 }
             }
         }
@@ -231,11 +230,12 @@ public class MaterialUtil {
     public static final Set<Material> BOATS;
     public static final Set<Material> ALL_SEEDS;
     static {
-        HashSet<Material> temp = new HashSet<>();
+        HashSet<Material> temp = new HashSet<Material>();
+        HashSet<Material> seedsTemp = new HashSet<Material>();
         if (BridgeMaterial.get("boat") != null) {
             temp.add(BridgeMaterial.get("boat"));
         }
-        HashSet<Material> seedsTemp = new HashSet<>(InventoryUtil.collectItemsBySuffix("_SEEDS"));
+        seedsTemp.addAll(InventoryUtil.collectItemsBySuffix("_SEEDS"));
         temp.addAll(InventoryUtil.collectItemsByPrefix("BOAT_"));
         temp.addAll(InventoryUtil.collectItemsBySuffix("_BOAT"));
         BOATS = Collections.unmodifiableSet(temp);
@@ -534,6 +534,7 @@ public class MaterialUtil {
     ///////////////////////////////
 
     /** Instantly breakable, fully passable. */
+    @SuppressWarnings("unchecked")
     public static final Set<Material> INSTANT_PLANTS = Collections.unmodifiableSet(join(
             BridgeMaterial.getBySuffix(Arrays.asList(
                     "bush", "sapling", "tulip", "orchid", "mushroom", "bluet", "fungus", "roots"), 
@@ -554,15 +555,15 @@ public class MaterialUtil {
                     "mangrove_propagule", "pink_petals", "torchflower", "torchflower_crop",
                     "pitcher_plant"
                     ),
-            new HashSet<>(Arrays.asList(BridgeMaterial.TALL_GRASS,
-                    BridgeMaterial.WHEAT_CROPS, BridgeMaterial.CARROTS,
+            new HashSet<Material>(Arrays.asList(BridgeMaterial.TALL_GRASS, 
+                    BridgeMaterial.WHEAT_CROPS, BridgeMaterial.CARROTS, 
                     BridgeMaterial.POTATOES, BridgeMaterial.GRASS,
                     Material.PUMPKIN_STEM, Material.MELON_STEM,
                     BridgeMaterial.SUGAR_CANE, BridgeMaterial.BEETROOTS))
             ));
 
-    public static final Set<Material> FARMABLE = Collections.unmodifiableSet(join(new HashSet<>(Arrays.asList(BridgeMaterial.TALL_GRASS,
-                    BridgeMaterial.WHEAT_CROPS, BridgeMaterial.CARROTS,
+    public static final Set<Material> FARMABLE = Collections.unmodifiableSet(join(new HashSet<Material>(Arrays.asList(BridgeMaterial.TALL_GRASS, 
+                    BridgeMaterial.WHEAT_CROPS, BridgeMaterial.CARROTS, 
                     BridgeMaterial.POTATOES, BridgeMaterial.GRASS,
                     Material.PUMPKIN_STEM, Material.MELON_STEM,
                     BridgeMaterial.SUGAR_CANE, BridgeMaterial.BEETROOTS)),
@@ -578,6 +579,7 @@ public class MaterialUtil {
      * Sets of fully solid blocks (in terms of: can walk on, can't pass through,
      * full bounds - not necessarily 'solid' officially).
      */
+    @SuppressWarnings("unchecked")
     public static final Set<Material> FULLY_SOLID_BLOCKS = Collections.unmodifiableSet(join(
             CONCRETE_BLOCKS,
             CONCRETE_POWDER_BLOCKS,
@@ -598,17 +600,18 @@ public class MaterialUtil {
             VARIOUS_FULLY_SOLID,
             WOOD_BLOCKS,
             WOOL_BLOCKS,
-            new HashSet<>(Arrays.asList(
+            new HashSet<Material>(Arrays.asList(
                     BridgeMaterial.BRICKS,
                     BridgeMaterial.MYCELIUM,
                     BridgeMaterial.CRAFTING_TABLE,
                     BridgeMaterial.END_STONE
-            ))
+                    ))
             ));
 
     /**
      * Collections of blocks that are fully passable.
      */
+    @SuppressWarnings("unchecked")
     public static final Set<Material> FULLY_PASSABLE_BLOCKS = Collections.unmodifiableSet(join(
             ALL_BUTTONS,
             ALL_PRESSURE_PLATES,
@@ -618,7 +621,7 @@ public class MaterialUtil {
             INSTANT_PLANTS,
             WATER_PLANTS,
             BridgeMaterial.getAllBlocks("structure_void", "end_gateway"),
-            new HashSet<>(Arrays.asList(
+            new HashSet<Material>(Arrays.asList(
                     Material.LEVER,
                     BridgeMaterial.END_PORTAL,
                     BridgeMaterial.NETHER_PORTAL))
@@ -627,6 +630,7 @@ public class MaterialUtil {
     /**
      * Collections of blocks that are allowed all types of movement.
      */
+    @SuppressWarnings("unchecked")
     public static final Set<Material> LIQUID_BLOCKS = Collections.unmodifiableSet(join(
             DEAD_CORAL_PARTS, WATER_PLANTS
             ));

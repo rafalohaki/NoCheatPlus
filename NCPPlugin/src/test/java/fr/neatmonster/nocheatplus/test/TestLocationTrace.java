@@ -14,12 +14,12 @@
  */
 package fr.neatmonster.nocheatplus.test;
 
-import static org.junit.jupiter.api.Assertions.fail;
+import static org.junit.Assert.fail;
 
 import java.util.Iterator;
 import java.util.concurrent.ThreadLocalRandom;
 
-import org.junit.jupiter.api.Test;
+import org.junit.Test;
 
 import fr.neatmonster.nocheatplus.checks.moving.location.tracking.LocationTrace;
 import fr.neatmonster.nocheatplus.checks.moving.location.tracking.LocationTrace.ITraceEntry;
@@ -59,7 +59,7 @@ public class TestLocationTrace {
     }
 
     // TODO: Test pool as well.
-    private final TraceEntryPool pool = new TraceEntryPool(1000);
+    private TraceEntryPool pool = new TraceEntryPool(1000);
 
     @Test
     public void testSize() {
@@ -69,7 +69,7 @@ public class TestLocationTrace {
         if (!trace.isEmpty()) {
             fail("Trace must be empty on start.");
         }
-        if (!trace.isEmpty()) {
+        if (trace.size() != 0) {
             fail("Size must be 0 at start.");
         }
         // Adding up to size elements.
@@ -108,20 +108,20 @@ public class TestLocationTrace {
         try {
             trace.oldestIterator();
             fail("Expect an exception on trying to get an empty iterator (oldest).");
-        } catch (IllegalArgumentException e) {
-            e.printStackTrace();
+        } catch (IllegalArgumentException ex) {
+
         }
         try {
             trace.latestIterator();
             fail("Expect an exception on trying to get an empty iterator (latest).");
-        } catch (IllegalArgumentException e) {
-            e.printStackTrace();
+        } catch (IllegalArgumentException ex) {
+
         }
         try {
             trace.maxAgeIterator(0);
             fail("Expect an exception on trying to get an empty iterator (maxAge).");
-        } catch (IllegalArgumentException e) {
-            e.printStackTrace();
+        } catch (IllegalArgumentException ex) {
+
         }
     }
 

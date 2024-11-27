@@ -74,7 +74,7 @@ public class PluginTests {
             for (RegisteredPermission rp : Permissions.getPermissions()) {
                 permissionRegistry.addRegisteredPermission(rp);
             }
-            Map<String, ConfigFile> rawConfigs = new HashMap<>();
+            Map<String, ConfigFile> rawConfigs = new HashMap<String, ConfigFile>();
             rawConfigs.put(null, new DefaultConfig());
             worldDataManager.applyConfiguration((rawConfigs));
         }

@@ -54,7 +54,7 @@ public class MapUtil {
      *            Can be null, must have 6 fields.
      * @return true, if is full bounds
      */
-    public static boolean isFullBounds(final double[] bounds) {
+    public static final boolean isFullBounds(final double[] bounds) {
         if (bounds == null) return false;
         for (int i = 0; i < 3; i ++) {
             if (bounds[i] > 0.0) return false;

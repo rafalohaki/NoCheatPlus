@@ -35,7 +35,7 @@ public interface IWorldData extends IConfigDataAccess, IGetGenericInstance {
      * {@link fr.neatmonster.nocheatplus.components.data.checktype.IConfigDataAccess}
      */
     @Override
-    IWorldCheckNode getCheckNode(CheckType checkType);
+    public IWorldCheckNode getCheckNode(CheckType checkType);
 
     /**
      * Retrieve the world name this instance has been registered for. To prevent
@@ -44,14 +44,14 @@ public interface IWorldData extends IConfigDataAccess, IGetGenericInstance {
      * 
      * @return
      */
-    String getWorldNameLowerCase();
+    public String getWorldNameLowerCase();
 
     /**
      * Get an object containing exact case name and UUID.
      * 
      * @return In case the world hasn't been loaded, null will be returned.
      */
-    WorldIdentifier getWorldIdentifier();
+    public WorldIdentifier getWorldIdentifier();
 
     /**
      * Server side lag adaption flag - subject to rename / change.
@@ -59,7 +59,7 @@ public interface IWorldData extends IConfigDataAccess, IGetGenericInstance {
      * @param checkType
      * @return
      */
-    boolean shouldAdjustToLag(CheckType checkType);
+    public boolean shouldAdjustToLag(CheckType checkType);
 
     /**
      * Remove data from the cache (not from underlying factories, nor from per
@@ -67,7 +67,7 @@ public interface IWorldData extends IConfigDataAccess, IGetGenericInstance {
      * 
      * @param registeredFor
      */
-    <T> void removeGenericInstance(Class<T> registeredFor);
+    public <T> void removeGenericInstance(Class<T> registeredFor);
 
     /**
      * Remove all generic instances from cache, which are contained in the given
@@ -75,14 +75,14 @@ public interface IWorldData extends IConfigDataAccess, IGetGenericInstance {
      * 
      * @param types
      */
-    void removeAllGenericInstances(Collection<Class<?>> types);
+    public void removeAllGenericInstances(Collection<Class<?>> types);
 
     /**
      * Call dataOnRemoveSubCheckData(...).
      * 
      * @param subCheckRemoval
      */
-    void removeSubCheckData(
+    public void removeSubCheckData(
             Collection<Class<? extends IDataOnRemoveSubCheckData>> subCheckRemoval,
             Collection<CheckType> checkTypes);
 

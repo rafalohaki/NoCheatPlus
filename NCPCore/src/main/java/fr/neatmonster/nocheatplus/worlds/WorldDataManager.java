@@ -115,9 +115,9 @@ public class WorldDataManager implements IWorldDataManager, INotifyReload {
 
     /** Lower case name to WorldData map. */
     // TODO: ID-name pairs / mappings?
-    private final HashMapLOW<String, WorldData> worldDataMap = new HashMapLOW<>(lock, 10);
-    private Map<String, ConfigFile> rawConfigurations = new HashMap<>(); // COW
-    private final RichFactoryRegistry<WorldFactoryArgument> factoryRegistry = new RichFactoryRegistry<>(lock);
+    private final HashMapLOW<String, WorldData> worldDataMap = new HashMapLOW<String, WorldData>(lock, 10);
+    private Map<String, ConfigFile> rawConfigurations = new HashMap<String, ConfigFile>(); // COW
+    private final RichFactoryRegistry<WorldFactoryArgument> factoryRegistry = new RichFactoryRegistry<WorldFactoryArgument>(lock);
 
     private final MiniListener<?>[] miniListeners = new MiniListener<?>[] {
         /*
@@ -238,7 +238,7 @@ public class WorldDataManager implements IWorldDataManager, INotifyReload {
          * instances will hold individual locks.
          */
         lock.lock();
-        final Map<String, ConfigFile> rawConfigurations = new LinkedHashMap<>(rawWorldConfigs.size());
+        final Map<String, ConfigFile> rawConfigurations = new LinkedHashMap<String, ConfigFile>(rawWorldConfigs.size());
         for (final Entry<String, ConfigFile> entry : rawWorldConfigs.entrySet()) {
             final String worldName = entry.getKey();
             rawConfigurations.put(worldName == null ? null : worldName.toLowerCase(), entry.getValue());
@@ -284,11 +284,11 @@ public class WorldDataManager implements IWorldDataManager, INotifyReload {
      * <hr/>
      */
     public void removeOfflineInheritedWorldData() {
-        final Set<String> worldNames = new HashSet<>();
+        final Set<String> worldNames = new HashSet<String>();
         for (World world : Bukkit.getWorlds()) {
             worldNames.add(world.getName().toLowerCase());
         }
-        final List<String> remove = new LinkedList<>();
+        final List<String> remove = new LinkedList<String>();
         for (final Entry<String, WorldData> entry : worldDataMap.iterable()) {
             final String lcName = entry.getKey();
             if (!rawConfigurations.containsKey(lcName) && ! worldNames.contains(lcName)) {
@@ -410,10 +410,9 @@ public class WorldDataManager implements IWorldDataManager, INotifyReload {
         return factoryRegistry.getGroupedTypes(groupType, checkType);
     }
 
-    @SafeVarargs
     @Override
-    public final <I> void addToGroups(Class<I> itemType,
-                                      Class<? super I>... groupTypes) {
+    public <I> void addToGroups(Class<I> itemType,
+            Class<? super I>... groupTypes) {
         factoryRegistry.addToGroups(itemType, groupTypes);
     }
 
@@ -422,10 +421,9 @@ public class WorldDataManager implements IWorldDataManager, INotifyReload {
         factoryRegistry.addToExistingGroups(itemType);
     }
 
-    @SafeVarargs
     @Override
-    public final <I> void addToGroups(CheckType checkType, Class<I> itemType,
-                                      Class<? super I>... groupTypes) {
+    public <I> void addToGroups(CheckType checkType, Class<I> itemType,
+            Class<? super I>... groupTypes) {
         factoryRegistry.addToGroups(checkType, itemType, groupTypes);
     }
 
@@ -435,10 +433,9 @@ public class WorldDataManager implements IWorldDataManager, INotifyReload {
         factoryRegistry.addToExistingGroups(checkType, itemType);
     }
 
-    @SafeVarargs
     @Override
-    public final <I> void addToGroups(Collection<CheckType> checkTypes,
-                                      Class<I> itemType, Class<? super I>... groupTypes) {
+    public <I> void addToGroups(Collection<CheckType> checkTypes,
+            Class<I> itemType, Class<? super I>... groupTypes) {
         factoryRegistry.addToGroups(checkTypes, itemType, groupTypes);
     }
 
@@ -506,7 +503,7 @@ public class WorldDataManager implements IWorldDataManager, INotifyReload {
 
     @Override
     public void removeCachedConfigs() {
-        final Collection<Class<?>> types = new LinkedHashSet<>(
+        final Collection<Class<?>> types = new LinkedHashSet<Class<?>>(
                 factoryRegistry.getGroupedTypes(IConfig.class));
         if (!types.isEmpty()) {
             for (final Entry<String, WorldData> entry : worldDataMap.iterable()) {

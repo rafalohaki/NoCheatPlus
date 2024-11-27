@@ -14,9 +14,9 @@
  */
 package fr.neatmonster.nocheatplus.test;
 
-import static org.junit.jupiter.api.Assertions.fail;
+import static org.junit.Assert.fail;
 
-import org.junit.jupiter.api.Test;
+import org.junit.Test;
 
 import fr.neatmonster.nocheatplus.compat.AlmostBoolean;
 import fr.neatmonster.nocheatplus.components.config.value.AlmostBooleanWithOverride;

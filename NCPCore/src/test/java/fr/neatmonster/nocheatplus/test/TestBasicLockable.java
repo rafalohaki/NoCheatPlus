@@ -14,10 +14,9 @@
  */
 package fr.neatmonster.nocheatplus.test;
 
-import static org.junit.jupiter.api.Assertions.assertThrows;
-import static org.junit.jupiter.api.Assertions.fail;
+import static org.junit.Assert.fail;
 
-import org.junit.jupiter.api.Test;
+import org.junit.Test;
 
 import fr.neatmonster.nocheatplus.components.registry.lockable.BasicLockable;
 import fr.neatmonster.nocheatplus.components.registry.lockable.ILockable;
@@ -58,10 +57,10 @@ public class TestBasicLockable {
     /**
      * Attempt to lock an already permanently locked item with a secret.
      */
-    @Test
+    @Test(expected = IllegalArgumentException.class)
     public void testFailChangeLockNoSecret() {
         BasicLockable lock = getLocked();
-        IllegalArgumentException exception = assertThrows(IllegalArgumentException.class, () -> lock.lock(new Object()));
+        lock.lock(new Object());
     }
 
     /**
@@ -80,28 +79,22 @@ public class TestBasicLockable {
         lock.lock();
     }
 
-    @Test
+    @Test(expected = IllegalArgumentException.class)
     public void testSecretTypeIdentity() {
-        IllegalArgumentException exception = assertThrows(IllegalArgumentException.class, () -> {
-            BasicLockable lock = new BasicLockable(new Dummy(), true, true);
-            lock.lock(new Dummy());
-        });
+        BasicLockable lock = new BasicLockable(new Dummy(), true, true);
+        lock.lock(new Dummy());
     }
 
-    @Test
+    @Test(expected = IllegalArgumentException.class)
     public void testSecretTypeExactFail1() {
-        IllegalArgumentException exception = assertThrows(IllegalArgumentException.class, () -> {
-            BasicLockable lock = new BasicLockable(new Dummy(), false, true, false);
-            lock.lock(new Dummy());
-        });
+        BasicLockable lock = new BasicLockable(new Dummy(), false, true, false);
+        lock.lock(new Dummy());
     }
 
-    @Test
+    @Test(expected = IllegalArgumentException.class)
     public void testSecretTypeExactFail2() {
-        IllegalArgumentException exception = assertThrows(IllegalArgumentException.class, () -> {
-            BasicLockable lock = new BasicLockable(new Dummy(), false, true, false);
-            lock.lock(new DummMY());
-        });
+        BasicLockable lock = new BasicLockable(new Dummy(), false, true, false);
+        lock.lock(new DummMY());
     }
 
     @Test
@@ -172,33 +165,27 @@ public class TestBasicLockable {
         lock.unlock(secret);
     }
 
-    @Test
+    @Test(expected = IllegalArgumentException.class)
     public void testUnlockAfterPermanentLockFail() {
-        IllegalArgumentException exception = assertThrows(IllegalArgumentException.class, () -> {
-            Dummy secret = new Dummy();
-            BasicLockable lock = new BasicLockable(secret, true, true);
-            lock.lock();
-            lock.unlock(secret);
-        });
+        Dummy secret = new Dummy();
+        BasicLockable lock = new BasicLockable(secret, true, true);
+        lock.lock();
+        lock.unlock(secret);
     }
 
-    @Test
+    @Test(expected = IllegalArgumentException.class)
     public void testUnlockWithWrongSecretFail() {
-        IllegalArgumentException exception = assertThrows(IllegalArgumentException.class, () -> {
-            Dummy secret = new Dummy();
-            BasicLockable lock = new BasicLockable(secret, true, true);
-            lock.unlock(new Dummy());
-        });
+        Dummy secret = new Dummy();
+        BasicLockable lock = new BasicLockable(secret, true, true);
+        lock.unlock(new Dummy());
     }
 
-    @Test
+    @Test(expected = IllegalArgumentException.class)
     public void testUnlockwithSubClassFail() {
-        IllegalArgumentException exception = assertThrows(IllegalArgumentException.class, () -> {
-            BasicLockable lock = new BasicLockable(false, Dummy.class, true);
-            lock.lock(new Dummy());
-            lock.unlock(new Dummy());
-            lock.lock(new DummMY());
-        });
+        BasicLockable lock = new BasicLockable(false, Dummy.class, true);
+        lock.lock(new Dummy());
+        lock.unlock(new Dummy());
+        lock.lock(new DummMY());
     }
 
 }

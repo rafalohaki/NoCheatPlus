@@ -125,7 +125,7 @@ public class RegistryHelper {
      */
     @SuppressWarnings("unchecked")
     public static <T> T getFirstAvailable(String[] classNames, Class<T> registerFor, boolean logDebug) {
-        T res;
+        T res = null;
         for (String name : classNames) {
             try {
                 res = (T) Class.forName(name).newInstance();

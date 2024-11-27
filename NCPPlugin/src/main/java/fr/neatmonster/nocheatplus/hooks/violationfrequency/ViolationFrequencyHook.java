@@ -21,7 +21,7 @@ import fr.neatmonster.nocheatplus.utilities.StringUtil;
 
 /**
  * A simple hook good at preventing false flags on small Vls and help generate larger on checks given out too small vl.
- *
+ * 
  * In default config, it will make NCP won't setback anythings till VL reach to 35,
  * SurvivalFly actions it will look like: vl>35 cancel ....
  * But it can catch if they are using shortfly depend on the flag frequency between moves.
@@ -99,7 +99,7 @@ public class ViolationFrequencyHook implements NCPHook, IFirst {
                     builder.append("(+" + StringUtil.fdec1.format(info.getAddedVl() + config.morevls) + ")");
                     log(builder.toString(), player);
                 }
-                return info.getTotalVl() + config.morevls <= config.maxtotalvls;
+                if (info.getTotalVl() + config.morevls <= config.maxtotalvls) return true; else return false;                
             }
             
             if (config.debug) {
@@ -112,7 +112,7 @@ public class ViolationFrequencyHook implements NCPHook, IFirst {
         }
         return false;
     }
-
+    
     private void log(String s, Player p) {
         final LogManager logManager = NCPAPIProvider.getNoCheatPlusAPI().getLogManager();
         final TextComponent message = Component.text()

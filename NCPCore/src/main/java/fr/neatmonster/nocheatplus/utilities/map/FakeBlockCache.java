@@ -35,13 +35,13 @@ import fr.neatmonster.nocheatplus.utilities.ds.map.CoordMap.Entry;
 public class FakeBlockCache extends BlockCache {
 
     /** Cached type-ids. */
-    private final CoordMap<Material> idMapStored = new CoordHashMap<>(23);
+    private final CoordMap<Material> idMapStored = new CoordHashMap<Material>(23);
 
     /** Cached data values. */
-    private final CoordMap<Integer> dataMapStored = new CoordHashMap<>(23);
+    private final CoordMap<Integer> dataMapStored = new CoordHashMap<Integer>(23);
 
     /** Cached shape values. */
-    private final CoordMap<double[]> boundsMapStored = new CoordHashMap<>(23);
+    private final CoordMap<double[]> boundsMapStored = new CoordHashMap<double[]>(23);
 
     /**
      * Convenience method to copy a cuboid region given by two endpoints without
@@ -401,7 +401,7 @@ public class FakeBlockCache extends BlockCache {
                     }
                 }
                 else if (boundsPrefix != null && MapUtil.isFullBounds(bounds)) {
-                    builder.append(fbcName + ".set(" + x + ", " + y + ", " + z + ", " + id + ", " + data + ", " + fullBounds + ");");
+                    builder.append(fbcName + ".set(" + x + ", " + y + ", " + z + ", " + id + ", " + data + ", " + fullBounds + ");");;
                 }
                 else {
                     builder.append(fbcName + ".set(" + x + ", " + y + ", " + z + ", " + id + ", " + data + ", ");
@@ -452,8 +452,9 @@ public class FakeBlockCache extends BlockCache {
      */
     @Override
     public double[] fetchBounds(int x, int y, int z) {
+        final double[] bounds = boundsMapStored.get(x, y, z);
         //return new double[]{0.0, 0.0, 0.0, 1.0, 1.0, 1.0};
-        return boundsMapStored.get(x, y, z);
+        return bounds;
     }
 
     /* (non-Javadoc)

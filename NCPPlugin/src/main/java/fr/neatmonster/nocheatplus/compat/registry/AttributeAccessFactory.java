@@ -38,9 +38,7 @@ public class AttributeAccessFactory {
         try {
             fallBackDedicated = ServerVersion.compareMinecraftVersion("1.21") < 0 ? new BukkitAttributeAccess() : new NSBukkitAttributeAccess();
         }
-        catch (Throwable t) {
-            //t.printStackTrace();
-        }
+        catch (Throwable t) {}
         RegistryHelper.setupGenericInstance(new String[] {
                 "fr.neatmonster.nocheatplus.compat.cbdev.AttributeAccess",
                 "fr.neatmonster.nocheatplus.compat.spigotcb1_10_R1.AttributeAccess",

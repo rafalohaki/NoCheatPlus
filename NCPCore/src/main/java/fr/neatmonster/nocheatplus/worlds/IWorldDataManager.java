@@ -63,7 +63,7 @@ public interface IWorldDataManager extends IRichFactoryRegistry<WorldFactoryArgu
      * 
      * @return
      */
-    IWorldData getDefaultWorldData();
+    public IWorldData getDefaultWorldData();
 
     /**
      * Get the world data for a specific world name (case insensitive!). Creates
@@ -75,7 +75,7 @@ public interface IWorldDataManager extends IRichFactoryRegistry<WorldFactoryArgu
      * @param worldName
      * @return
      */
-    IWorldData getWorldData(String worldName);
+    public IWorldData getWorldData(String worldName);
 
     /**
      * Bukkit specific convenience method. Further see:
@@ -89,10 +89,10 @@ public interface IWorldDataManager extends IRichFactoryRegistry<WorldFactoryArgu
      * PlayerData.getWorldIdentifier().getLowerCaseWorldName().
      * <hr/>
      * 
-     * @param world
+     * @param newWorld
      * @return
      */
-    IWorldData getWorldData(World world);
+    public IWorldData getWorldData(World world);
 
     /**
      * Thread-safe read-only iterator, see:
@@ -100,7 +100,7 @@ public interface IWorldDataManager extends IRichFactoryRegistry<WorldFactoryArgu
      * 
      * @return
      */
-    Iterator<Entry<String, IWorldData>> getWorldDataIterator();
+    public Iterator<Entry<String, IWorldData>> getWorldDataIterator();
 
     /**
      * Thread-safe Iterable, see:
@@ -108,7 +108,7 @@ public interface IWorldDataManager extends IRichFactoryRegistry<WorldFactoryArgu
      * 
      * @return
      */
-    Iterable<Entry<String, IWorldData>> getWorldDataIterable();
+    public Iterable<Entry<String, IWorldData>> getWorldDataIterable();
 
     /**
      * Update with the underlying raw configurations as reference (stored
@@ -118,7 +118,7 @@ public interface IWorldDataManager extends IRichFactoryRegistry<WorldFactoryArgu
      * primary thread only.
      * <hr/>
      */
-    void updateAllWorldData();
+    public void updateAllWorldData();
 
     /**
      * Override check activation for all stored configurations. It's not
@@ -127,7 +127,7 @@ public interface IWorldDataManager extends IRichFactoryRegistry<WorldFactoryArgu
      * Assume to be typical registry functionality, thus primary thread only.
      * <hr/>
      * 
-     * @param type
+     * @param checkType
      * @param active
      *            MAYBE means that the super type is checked for activation.
      * @param overrideType
@@ -142,8 +142,8 @@ public interface IWorldDataManager extends IRichFactoryRegistry<WorldFactoryArgu
      *             If the configuration path for the activation flag of the
      *             given check type is not set explicitly.
      */
-    void overrideCheckActivation(CheckType type, AlmostBoolean active,
-                                 OverrideType overrideType, boolean overrideChildren);
+    public void overrideCheckActivation(CheckType type, AlmostBoolean active,
+            OverrideType overrideType, boolean overrideChildren);
 
     /**
      * Test if the check is activated in any stored world data.
@@ -156,7 +156,7 @@ public interface IWorldDataManager extends IRichFactoryRegistry<WorldFactoryArgu
      * @param checkType
      * @return
      */
-    boolean isActiveAnywhere(CheckType checkType);
+    public boolean isActiveAnywhere(CheckType checkType);
 
     /**
      * Some implementations throw an UnsupportedOperationException for
@@ -166,20 +166,20 @@ public interface IWorldDataManager extends IRichFactoryRegistry<WorldFactoryArgu
      * @param player
      * @return
      */
-    IWorldData getWorldDataSafe(Player player);
+    public IWorldData getWorldDataSafe(Player player);
 
     /**
      * Remove data for all worlds for the given check type and sub checks.
      * 
      * @param checkType
      */
-    void clearData(CheckType checkType);
+    public void clearData(CheckType checkType);
 
     /**
      * Convenience method to remove cached types that implement IConfig for all
      * worlds. Types need to be registered (world data factory or explicitly).
      */
-    void removeCachedConfigs();
+    public void removeCachedConfigs();
 
 
 }

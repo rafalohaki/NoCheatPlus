@@ -39,7 +39,7 @@ public class PotionUtil {
      * @return Double.NEGATIVE_INFINITY if not present, otherwise the maximal
      *         amplifier.
      */
-    public static double getPotionEffectAmplifier(final Player player, final PotionEffectType type) {
+    public static final double getPotionEffectAmplifier(final Player player, final PotionEffectType type) {
         if (!player.hasPotionEffect(type)) {
             return Double.NEGATIVE_INFINITY; // TODO: Might not win anything.
         }
@@ -63,7 +63,7 @@ public class PotionUtil {
      * @return Double.NEGATIVE_INFINITY if not present, otherwise the maximal
      *         amplifier.
      */
-    public static double getPotionEffectAmplifier(final LivingEntity entity, final PotionEffectType type) {
+    public static final double getPotionEffectAmplifier(final LivingEntity entity, final PotionEffectType type) {
         if (!entity.hasPotionEffect(type)) {
             return Double.NEGATIVE_INFINITY; // TODO: Might not win anything.
         }

@@ -14,13 +14,13 @@
  */
 package fr.neatmonster.nocheatplus.test;
 
-import static org.junit.jupiter.api.Assertions.fail;
+import static org.junit.Assert.fail;
 
 import java.util.Arrays;
 import java.util.LinkedHashMap;
 import java.util.Map;
 
-import org.junit.jupiter.api.Test;
+import org.junit.Test;
 
 import fr.neatmonster.nocheatplus.NCPAPIProvider;
 import fr.neatmonster.nocheatplus.PluginTests;
@@ -85,7 +85,7 @@ public class TestWorldDataManager {
 
         WorldDataManager worldMan = getWorldDataManager();
 
-        Map<String, ConfigFile> rawWorldConfigs = new LinkedHashMap<>();
+        Map<String, ConfigFile> rawWorldConfigs = new LinkedHashMap<String, ConfigFile>();
 
         // (Implicitly create configurations via set).
         // Default.
@@ -204,7 +204,7 @@ public class TestWorldDataManager {
         ///////////////////
 
         worldMan = getWorldDataManager();
-        rawWorldConfigs = new LinkedHashMap<>();
+        rawWorldConfigs = new LinkedHashMap<String, ConfigFile>();
         set(rawWorldConfigs, null, "dummy", "dummy");
         worldMan.applyConfiguration(rawWorldConfigs);
 

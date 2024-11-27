@@ -14,9 +14,9 @@
  */
 package fr.neatmonster.nocheatplus.test;
 
-import static org.junit.jupiter.api.Assertions.fail;
+import static org.junit.Assert.fail;
 
-import org.junit.jupiter.api.Test;
+import org.junit.Test;
 
 import fr.neatmonster.nocheatplus.compat.versions.GenericVersion;
 import fr.neatmonster.nocheatplus.compat.versions.ServerVersion;
@@ -48,14 +48,14 @@ public class TestMinecraftVersion {
                 {"1.8", "1.8.8"}
         }) {
             testCompare(pair[0], pair[1], -1);
-        }
+        };
 
         // Expect 1
         for (String[] pair : new String[][] {
                 {"1.8.8", "1.8"}
         }) {
             testCompare(pair[0], pair[1], 1);
-        }
+        };
     }
 
     private void testCompare(String v1, String v2, int expectedResult) {

@@ -15,7 +15,7 @@
 package fr.neatmonster.nocheatplus.test;
 
 import org.bukkit.Material;
-import org.junit.jupiter.api.Test;
+import org.junit.Test;
 
 import fr.neatmonster.nocheatplus.compat.BridgeMaterial;
 import fr.neatmonster.nocheatplus.logging.StaticLog;
@@ -25,10 +25,8 @@ import fr.neatmonster.nocheatplus.utilities.map.FakeBlockCache;
 
 public class TestInteractRayTracing {
 
-    public static final class CenteredInteractRayTracing extends InteractRayTracing {
-        private final int centerX;
-        private final int centerY;
-        private final int centerZ;
+    public final class CenteredInteractRayTracing extends InteractRayTracing {
+        private int centerX, centerY, centerZ;
         public CenteredInteractRayTracing(boolean strict, int centerX, int centerY, int centerZ) {
             super(strict);
             this.centerX = centerX;

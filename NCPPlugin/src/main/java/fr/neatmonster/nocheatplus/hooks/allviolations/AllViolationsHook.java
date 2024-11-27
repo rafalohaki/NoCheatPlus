@@ -52,12 +52,15 @@ public class AllViolationsHook implements NCPHook, ILast, IStats {
     private final String[] noParameterTexts;
 
     public AllViolationsHook() {
-        Collection<ParameterName> parameters = new LinkedHashSet<>(Arrays.asList(ParameterName.values()));
+        Collection<ParameterName> parameters = new LinkedHashSet<ParameterName>();
+        for (ParameterName name : ParameterName.values()) {
+            parameters.add(name);
+        }
         for (ParameterName name : Arrays.asList(ParameterName.PLAYER, ParameterName.PLAYER_NAME, ParameterName.PLAYER_DISPLAY_NAME,
                 ParameterName.IP, ParameterName.CHECK, ParameterName.UUID, ParameterName.VIOLATIONS, ParameterName.WORLD)) {
             parameters.remove(name);
         }
-        this.parameters = parameters.toArray(new ParameterName[0]);
+        this.parameters = parameters.toArray(new ParameterName[parameters.size()]);
         noParameterTexts = new String[parameters.size()];
         for (int i = 0; i < this.parameters.length; i++) {
             this.noParameterTexts[i] = "[" + this.parameters[i].getText() + "]";

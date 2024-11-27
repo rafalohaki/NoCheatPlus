@@ -24,6 +24,7 @@ public class Updates {
      */
     public static boolean checkForUpdates(String versionString, int updateTimeout) {
         //		BufferedReader bufferedReader = null;
+        boolean updateAvailable = false;
         //        try {
         //            final String[] split = versionString.split("-b");
         //            final int currentVersion = Integer.parseInt(split[split.length - 1]);
@@ -45,6 +46,6 @@ public class Updates {
         //                 try{bufferedReader.close();}catch (IOException e) {};
         //            }
         //        }
-        return false;
+        return updateAvailable;
     }
 }

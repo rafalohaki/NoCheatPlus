@@ -73,7 +73,7 @@ public class WorldData implements IWorldData {
                 return true;
             }
 
-        }
+        };
 
         private static class AccessLag<WorldTypeCheckTreeNode> implements IConfigFlagAccess<WorldCheckTypeTreeNode> {
 
@@ -102,13 +102,13 @@ public class WorldData implements IWorldData {
                 return true;
             }
 
-        }
+        };
 
         @SuppressWarnings("rawtypes")
-        private static final AccessActive accessActive = new AccessActive();
+        private static AccessActive accessActive = new AccessActive();
 
         @SuppressWarnings("rawtypes")
-        private static final AccessLag accessLag = new AccessLag();
+        private static AccessLag accessLag = new AccessLag();
 
         /** The configuration value, featuring overriding. */
         private final AlmostBooleanWithOverride configActivation = new AlmostBooleanWithOverride();
@@ -269,8 +269,8 @@ public class WorldData implements IWorldData {
     /** World wide lock ;). */
     private final Lock lock = new ReentrantLock();
 
-    WorldData parent;
-    private final Collection<WorldData> children = new LinkedHashSet<>();
+    WorldData parent = null;
+    private final Collection<WorldData> children = new LinkedHashSet<WorldData>();
 
     private ConfigFile rawConfiguration = null;
 
@@ -279,7 +279,7 @@ public class WorldData implements IWorldData {
     private final String worldNameLowerCase;
     private WorldIdentifier worldIdentifier = null;
 
-    private final IFactoryOneRegistry<WorldFactoryArgument> factoryRegistry;
+    private IFactoryOneRegistry<WorldFactoryArgument> factoryRegistry;
     private final InstanceMapLOW dataCache = new InstanceMapLOW(lock, 25);
 
     WorldData(final String worldName, 
@@ -470,7 +470,7 @@ public class WorldData implements IWorldData {
             final Collection<Class<? extends IDataOnRemoveSubCheckData>> types,
             final Collection<CheckType> checkTypes
             ) {
-        final Collection<Class<?>> removeTypes = new LinkedList<>();
+        final Collection<Class<?>> removeTypes = new LinkedList<Class<?>>();
         for (final Class<? extends IDataOnRemoveSubCheckData> type : types) {
             final IDataOnRemoveSubCheckData impl = dataCache.get(type);
             if (impl != null) {

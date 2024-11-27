@@ -14,13 +14,13 @@
  */
 package fr.neatmonster.nocheatplus.test;
 
-import static org.junit.jupiter.api.Assertions.fail;
+import static org.junit.Assert.fail;
 
 import java.util.concurrent.ThreadLocalRandom;
 
 import org.bukkit.Location;
 import org.bukkit.util.Vector;
-import org.junit.jupiter.api.Test;
+import org.junit.Test;
 
 import fr.neatmonster.nocheatplus.utilities.StringUtil;
 import fr.neatmonster.nocheatplus.utilities.build.BuildParameters;
@@ -90,11 +90,11 @@ public class TestRayTracing {
     public static RayTracing checkConsistency(final double[] coords) {
         RayTracing rt = new RayTracing(coords[0], coords[1], coords[2], coords[3], coords[4], coords[5]) {
 
-            private int lbx, lby, lbz;
+            protected int lbx, lby, lbz;
 
-            private double ldt = 0;
+            protected double ldt = 0;
 
-            private double lox, loy, loz;
+            protected double lox, loy, loz;
 
             /* (non-Javadoc)
              * @see fr.neatmonster.nocheatplus.utilities.RayTracing#set(double, double, double, double, double, double)
