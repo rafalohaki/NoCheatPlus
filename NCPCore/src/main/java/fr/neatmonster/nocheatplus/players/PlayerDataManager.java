@@ -47,6 +47,7 @@ import fr.neatmonster.nocheatplus.checks.ViolationHistory;
 import fr.neatmonster.nocheatplus.checks.combined.CombinedData;
 import fr.neatmonster.nocheatplus.compat.BridgeMisc;
 import fr.neatmonster.nocheatplus.compat.versions.BukkitVersion;
+import fr.neatmonster.nocheatplus.compat.versions.GenericVersion;
 import fr.neatmonster.nocheatplus.compat.versions.ServerVersion;
 import fr.neatmonster.nocheatplus.components.NoCheatPlusAPI;
 import fr.neatmonster.nocheatplus.components.config.ICheckConfig;
@@ -112,12 +113,12 @@ public class PlayerDataManager  implements IPlayerDataManager, ComponentWithName
     private int foundInconsistencies = 0;
 
     /** PlayerData storage. */
-    private final HashMapLOW<UUID, PlayerData> playerData = new HashMapLOW<>(100);
+    private final HashMapLOW<UUID, PlayerData> playerData = new HashMapLOW<UUID, PlayerData>(100);
 
     /** Primary thread only (no lock for this field): UUIDs to remove upon next bulk removal. */
-    private final Set<UUID> bulkPlayerDataRemoval = new LinkedHashSet<>();
+    private final Set<UUID> bulkPlayerDataRemoval = new LinkedHashSet<UUID>();
 
-    private final DualSet<UUID> frequentPlayerTasks = new DualSet<>();
+    private final DualSet<UUID> frequentPlayerTasks = new DualSet<UUID>();
 
     /**
      * Access order for playerName (exact) -> ms time of logout.
@@ -125,7 +126,7 @@ public class PlayerDataManager  implements IPlayerDataManager, ComponentWithName
      * Later this might hold central player data objects instead of the long
      * only.
      */
-    private final Map<UUID, Long> lastLogout = new LinkedHashMap<>(50, 0.75f, true);
+    private final Map<UUID, Long> lastLogout = new LinkedHashMap<UUID, Long>(50, 0.75f, true);
 
     /**
      * Keeping track of online players. Currently id/name mappings are not kept
@@ -138,13 +139,13 @@ public class PlayerDataManager  implements IPlayerDataManager, ComponentWithName
      * IRemoveData instances.
      */
     // TODO: might use a map for those later (extra or not).
-    private final ArrayList<IRemoveData> iRemoveData = new ArrayList<>();
+    private final ArrayList<IRemoveData> iRemoveData = new ArrayList<IRemoveData>();
 
     /**
      * Execution histories of the checks.
      */
     // TODO: Move to PlayerData / CheckTypeTree (NodeS).
-    private final Map<CheckType, Map<String, ExecutionHistory>> executionHistories = new HashMap<>();
+    private final Map<CheckType, Map<String, ExecutionHistory>> executionHistories = new HashMap<CheckType, Map<String,ExecutionHistory>>();
 
     /** Flag if data expiration is active at all. */
     private boolean doExpireData = false;
@@ -171,11 +172,11 @@ public class PlayerDataManager  implements IPlayerDataManager, ComponentWithName
      */
     private final PermissionRegistry permissionRegistry;
 
-    private final WorldDataManager worldDataManager;
+    private WorldDataManager worldDataManager;
 
     private final Lock lock = new ReentrantLock();
     // TODO: Consider same lock for some registry parts (deadlocking possibilities with exposed API).
-    private final RichFactoryRegistry<PlayerFactoryArgument> factoryRegistry = new RichFactoryRegistry<>(lock);
+    private final RichFactoryRegistry<PlayerFactoryArgument> factoryRegistry = new RichFactoryRegistry<PlayerFactoryArgument>(lock);
     private final TickListener tickListener = new TickListener() {
 
         private int delayRareTasks = 0;
@@ -284,14 +285,14 @@ public class PlayerDataManager  implements IPlayerDataManager, ComponentWithName
             BukkitVersion.init();
         }
         final String version = ServerVersion.getMinecraftVersion();
-//        if ((GenericVersion.compareVersions(version, "1.8") >= 0 || version.contains("1.7")) && Bukkit.getServer().getVersion().toLowerCase().contains("spigot")) {
-//            // Safe to assume Spigot, don't store Player instances.
-//            playerMap = new PlayerMap(false);
-//        } else {
-//            // Likely an older version without efficient mapping.
-//            playerMap = new PlayerMap(true);
-//        }
-        playerMap = new PlayerMap(true); // Dreeam - always use PlayerMap
+        if (GenericVersion.compareVersions(version, "1.8") >= 0 || version.equals("1.7.10") && Bukkit.getServer().getVersion().toLowerCase().indexOf("spigot") != -1) {
+            // Safe to assume Spigot, don't store Player instances.
+            playerMap = new PlayerMap(false);
+        }
+        else {
+            // Likely an older version without efficient mapping.
+            playerMap = new PlayerMap(true);
+        }
         this.permissionRegistry = permissionRegistry; // TODO: World specific.
         this.worldDataManager = worldDataManager;
         // (Call support.) 
@@ -339,8 +340,8 @@ public class PlayerDataManager  implements IPlayerDataManager, ComponentWithName
         }
     }
 
-    private void legacyPlayerDataExpirationRemovalByName(final UUID playerId,
-                                                         final boolean deleteData) {
+    private final void legacyPlayerDataExpirationRemovalByName(final UUID playerId, 
+            final boolean deleteData) {
         final String playerName = DataManager.getPlayerName(playerId);
         if (playerName == null) {
             // TODO: WARN
@@ -366,7 +367,7 @@ public class PlayerDataManager  implements IPlayerDataManager, ComponentWithName
      * Called by the rareTasksListener (OnDemandTickListener).
      * @return "Did something" - true if data was removed or similar, i.e. reset the removal delay counter. False if nothing relevant had been done.
      */
-    private boolean rareTasks(final int tick, final long timeLast) {
+    private final boolean rareTasks(final int tick, final long timeLast) {
         boolean something = false;
         if (!bulkPlayerDataRemoval.isEmpty()) {
             doBulkPlayerDataRemoval();
@@ -379,7 +380,7 @@ public class PlayerDataManager  implements IPlayerDataManager, ComponentWithName
     /**
      * On tick.
      */
-    private void frequentTasks(final int tick, final long timeLast) {
+    private final void frequentTasks(final int tick, final long timeLast) {
         frequentPlayerTasks.mergePrimaryThread();
         final Iterator<UUID> it = frequentPlayerTasks.iteratorPrimaryThread();
         while (it.hasNext()) {
@@ -393,7 +394,7 @@ public class PlayerDataManager  implements IPlayerDataManager, ComponentWithName
     /**
      * Primary thread only. This checks for if players are/should be online.
      */
-    private void doBulkPlayerDataRemoval() {
+    private final void doBulkPlayerDataRemoval() {
         int size = bulkPlayerDataRemoval.size();
         if (size > 0) {
             // Test for online players.
@@ -513,14 +514,14 @@ public class PlayerDataManager  implements IPlayerDataManager, ComponentWithName
             return false;
         }
         else {
-            iRemoveData.add(obj);
+            iRemoveData.add((IRemoveData) obj);
             return true;
         }
     }
 
     @Override
     public void removeComponent(IRemoveData obj) {
-        iRemoveData.remove(obj);
+        iRemoveData.remove((IRemoveData) obj);
     }
 
     /**
@@ -631,9 +632,7 @@ public class PlayerDataManager  implements IPlayerDataManager, ComponentWithName
             // Update world.
             pData.updateCurrentWorld(worldDataManager.getWorldData(player.getWorld()));
         }
-        if (pData != null) {
-            pData.removeTag(PlayerData.TAG_OPTIMISTIC_CREATE);
-        }
+        pData.removeTag(PlayerData.TAG_OPTIMISTIC_CREATE);
     }
 
     private void updatePlayerName(final UUID playerId, final String playerName,
@@ -718,9 +717,7 @@ public class PlayerDataManager  implements IPlayerDataManager, ComponentWithName
         }
         // Invalidate all already fetched permissions.
         for(final Entry<UUID, PlayerData> entry : playerData.iterable()) {
-            if (changedPermissions != null) {
-                entry.getValue().adjustSettings(changedPermissions);
-            }
+            entry.getValue().adjustSettings(changedPermissions);
         }
     }
 
@@ -749,11 +746,11 @@ public class PlayerDataManager  implements IPlayerDataManager, ComponentWithName
             //          if (player.isOnline()) {
             // TODO: Add a consistency check method !?
             if (!playerMap.hasPlayerInfo(id)) {
-                missing++;
+                missing ++;
                 // TODO: Add the player [problem: messy NPC plugins?]?
             }
             if (playerMap.storesPlayerInstances() && player != playerMap.getPlayer(id)) {
-                changed++;
+                changed ++;
                 // Update the reference.
                 addOnlinePlayer(player);
                 //              }
@@ -767,7 +764,7 @@ public class PlayerDataManager  implements IPlayerDataManager, ComponentWithName
         if (missing != 0 || changed != 0 || onlinePlayers.length != storedSize) {
             foundInconsistencies ++;
             if (!ConfigManager.getConfigFile().getBoolean(ConfPaths.DATA_CONSISTENCYCHECKS_SUPPRESSWARNINGS)) {
-                final List<String> details = new LinkedList<>();
+                final List<String> details = new LinkedList<String>();
                 if (missing != 0) {
                     details.add("missing online players (" + missing + ")");
                 }
@@ -813,7 +810,7 @@ public class PlayerDataManager  implements IPlayerDataManager, ComponentWithName
      * history, violation history, normal check data).<br>
      * That should at least go for chat engine data.
      * 
-     * @param checkType
+     * @param CheckType
      * @param PlayerName
      * @return If something was removed.
      */
@@ -935,6 +932,11 @@ public class PlayerDataManager  implements IPlayerDataManager, ComponentWithName
     }
 
     @Override
+    public Player getPlayerExact(final String playerName) {
+        return playerMap.getPlayerExact(playerName);
+    }
+
+    @Override
     public UUID getUUID(final String input) {
         // TODO: Use player map.
         final Player player = getPlayer(input);
@@ -947,8 +949,8 @@ public class PlayerDataManager  implements IPlayerDataManager, ComponentWithName
     @Override
     public String getPlayerName(final UUID playerId) {
         final PlayerInfo info = playerMap.getPlayerInfo(playerId);
-        if (info != null && info.name != null) {
-            return info.name;
+        if (info != null && info.exactName != null) {
+            return info.exactName;
         }
         final PlayerData data = playerData.get(playerId);
         if (data != null) {
@@ -1101,17 +1103,15 @@ public class PlayerDataManager  implements IPlayerDataManager, ComponentWithName
         return factoryRegistry.getGroupedTypes(groupType, checkType);
     }
 
-    @SafeVarargs
     @Override
-    public final <I> void addToGroups(final Class<I> itemType,
-                                      final Class<? super I>... groupTypes) {
+    public <I> void addToGroups(final Class<I> itemType, 
+            final Class<? super I>... groupTypes) {
         factoryRegistry.addToGroups(itemType, groupTypes);
     }
 
-    @SafeVarargs
     @Override
-    public final <I> void addToGroups(CheckType checkType, Class<I> itemType,
-                                      Class<? super I>... groupTypes) {
+    public <I> void addToGroups(CheckType checkType, Class<I> itemType,
+            Class<? super I>... groupTypes) {
         factoryRegistry.addToGroups(checkType, itemType, groupTypes);
     }
 
@@ -1136,10 +1136,9 @@ public class PlayerDataManager  implements IPlayerDataManager, ComponentWithName
         factoryRegistry.createAutoGroup(groupType);
     }
 
-    @SafeVarargs
     @Override
-    public final <I> void addToGroups(final Collection<CheckType> checkTypes,
-                                      final Class<I> itemType, final Class<? super I>... groupTypes) {
+    public <I> void addToGroups(final Collection<CheckType> checkTypes,
+            final Class<I> itemType, final Class<? super I>... groupTypes) {
         factoryRegistry.addToGroups(checkTypes, itemType, groupTypes);
     }
 
@@ -1157,7 +1156,7 @@ public class PlayerDataManager  implements IPlayerDataManager, ComponentWithName
 
     @Override
     public void removeCachedConfigs() {
-        final Collection<Class<?>> types = new LinkedHashSet<>(
+        final Collection<Class<?>> types = new LinkedHashSet<Class<?>>(
                 factoryRegistry.getGroupedTypes(IConfig.class));
         if (!types.isEmpty()) {
             for (final Entry<UUID, PlayerData> entry : playerData.iterable()) {

@@ -114,7 +114,7 @@ public class PermissionUtil {
      * @return
      */
     public static List<CommandProtectionEntry> protectCommands(final Plugin plugin, final String permissionBase, final Collection<String> ignoredCommands, final boolean invertIgnored, final boolean ops, final String permissionMessage) {
-        final Set<String> checked = new HashSet<>();
+        final Set<String> checked = new HashSet<String>();
         for (String label : ignoredCommands) {
             checked.add(CommandUtil.getCommandLabel(label, false));
         }
@@ -124,7 +124,7 @@ public class PermissionUtil {
             rootPerm = new Permission(permissionBase);
             pm.addPermission(rootPerm);
         }
-        final List<CommandProtectionEntry> changed = new LinkedList<>();
+        final List<CommandProtectionEntry> changed = new LinkedList<CommandProtectionEntry>();
         // Apply protection based on white-list or black-list.
         for (final Command command : CommandUtil.getCommands()) {
             final String lcLabel = command.getLabel().trim().toLowerCase();
@@ -181,7 +181,7 @@ public class PermissionUtil {
      * @param command
      * @return
      */
-    private static boolean containsAnyAliases(final Set<String> checked, final Command command) {
+    private static final boolean containsAnyAliases(final Set<String> checked, final Command command) {
         final Collection<String> aliases = command.getAliases();
         if (aliases != null) {
             for (final String alias : aliases) {

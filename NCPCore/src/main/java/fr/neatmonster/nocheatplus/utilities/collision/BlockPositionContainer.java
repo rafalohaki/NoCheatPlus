@@ -39,7 +39,7 @@ public class BlockPositionContainer implements IAddBlockPosition, IContainBlockP
     // TODO: Future use / interfacing could involve collecting cuboids from block positions (mining/activity/areas).
 
     // TODO: Consider switching to a HashSet or an ArrayList.
-    private final LinkedList<BlockPositionGet> blocks = new LinkedList<>();
+    private final LinkedList<BlockPositionGet> blocks = new LinkedList<BlockPositionGet>();
 
     private int minX, minY, minZ, maxX, maxY, maxZ;
 

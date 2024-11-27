@@ -14,14 +14,15 @@
  */
 package fr.neatmonster.nocheatplus.stats;
 
-import fr.neatmonster.nocheatplus.utilities.ds.corw.LinkedHashMapCOW;
-import org.bukkit.Bukkit;
-
 import java.util.Arrays;
 import java.util.LinkedHashMap;
 import java.util.Map;
 import java.util.Map.Entry;
 import java.util.concurrent.locks.ReentrantLock;
+
+import org.bukkit.Bukkit;
+
+import fr.neatmonster.nocheatplus.utilities.ds.corw.LinkedHashMapCOW;
 
 /**
  * Utility to count things, set up to get input from the primary server thread,
@@ -39,7 +40,7 @@ public class Counters {
     }
 
     /** Map strings for display/processing to "fast-access" ids. */
-    private final Map<String, Integer> idMap = new LinkedHashMapCOW<>();
+    private final Map<String, Integer> idMap = new LinkedHashMapCOW<String, Integer>();
 
     /** Keys by id. */
     private String[] keys = new String[0];
@@ -69,14 +70,14 @@ public class Counters {
         }
         Integer registeredId = idMap.get(key);
         if (registeredId != null) {
-            return registeredId;
+            return registeredId.intValue();
         }
         globalLock.lock();
 
         // Need to re-check the key under lock.
         final int newId;
         if (idMap.containsKey(key)) {
-            newId = idMap.get(key);
+            newId = idMap.get(key).intValue();
         } else {
             // Add a new entry.
             newId = this.keys.length;
@@ -203,7 +204,7 @@ public class Counters {
      * @return
      */
     public Map<String, Integer> getPrimaryThreadCounts() {
-        final Map<String, Integer> counts = new LinkedHashMap<>();
+        final Map<String, Integer> counts = new LinkedHashMap<String, Integer>();
         final int length = keys.length;
         for (int i = 0; i < length; i++) {
             counts.put(keys[i], ptCounts[i].count);
@@ -217,7 +218,7 @@ public class Counters {
      * @return
      */
     public Map<String, Integer> getSynchronizedCounts() {
-        final Map<String, Integer> counts = new LinkedHashMap<>();
+        final Map<String, Integer> counts = new LinkedHashMap<String, Integer>();
         final int length = keys.length;
         for (int i = 0; i < length; i++) {
             counts.put(keys[i], syCounts[i].count);
@@ -233,7 +234,7 @@ public class Counters {
      * @return
      */
     public Map<String, Integer> getMergedCounts() {
-        final Map<String, Integer> counts = new LinkedHashMap<>();
+        final Map<String, Integer> counts = new LinkedHashMap<String, Integer>();
         final int length = keys.length;
         for (int i = 0; i < length; i++) {
             counts.put(keys[i], syCounts[i].count + ptCounts[i].count);
@@ -274,12 +275,12 @@ public class Counters {
             final int pt = entry.getValue();
             final int sy = syCounts.get(key);
             final int sum = pt + sy;
-            builder.append(sum);
+            builder.append(Integer.toString(sum));
             if (details && sum > 0) {
                 builder.append(" (");
-                builder.append(pt);
+                builder.append(Integer.toString(pt));
                 builder.append('/');
-                builder.append(sy);
+                builder.append(Integer.toString(sy));
                 builder.append(')');
             }
             builder.append(" |");

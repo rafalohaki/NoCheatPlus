@@ -52,10 +52,10 @@ public class ColorUtil {
 		}
 		// At least one color inside.
 		char[] newChars = new char[chars.length - 2];
-		int tgtIndex; // TargetIndex.
+		int tgtIndex = 0; // TargetIndex.
 		for(tgtIndex = 0; tgtIndex < srcIndex; tgtIndex++){
 			newChars[tgtIndex] = chars[tgtIndex];
-		}
+		};
 		for (srcIndex = srcIndex + 2; srcIndex < chars.length; srcIndex++){
 			if (chars[srcIndex] == '&' && srcIndex < chars.length -1 && allColorChars.indexOf(chars[srcIndex + 1]) > -1){
 				// Skip this one;

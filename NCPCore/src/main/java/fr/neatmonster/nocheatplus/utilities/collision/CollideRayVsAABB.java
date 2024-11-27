@@ -151,7 +151,7 @@ public class CollideRayVsAABB implements ICollideRayVsAABB {
             final double x = startX + dirX * time;
             final double y = startY + dirY * time;
             final double z = startZ + dirZ * time;
-            final double distanceSquared = CollisionUtil.getSquaredDistAABB(x, y, z,
+            final double distanceSquared = CollisionUtil.getSquaredDistAABB(x, y, z, 
                     minX, minY, minZ, maxX, maxY, maxZ);
             if (distanceSquared < closestDistanceSquared) {
                 closestX = x;

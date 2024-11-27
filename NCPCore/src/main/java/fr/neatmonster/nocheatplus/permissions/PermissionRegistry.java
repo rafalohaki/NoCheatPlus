@@ -45,12 +45,12 @@ public class PermissionRegistry {
      * interface for the full thing.
      */
 
-    private final int nextId;
+    private int nextId;
     private final Lock lock = new ReentrantLock();
     private PermissionSettings settings = new PermissionSettings(null, null, new PermissionPolicy());
-    private final HashMapLOW<Integer, PermissionInfo> infosInt = new HashMapLOW<>(lock, 100);
+    private final HashMapLOW<Integer, PermissionInfo> infosInt = new HashMapLOW<Integer, PermissionInfo>(lock, 100);
     /** No need to map to the strings in an extra step here. */
-    private final HashMapLOW<String, PermissionInfo> infosString = new HashMapLOW<>(lock, 100);
+    private final HashMapLOW<String, PermissionInfo> infosString = new HashMapLOW<String, PermissionInfo>(lock, 100);
 
     // TODO: Might do lazy tasks for all player data regularly.
     /**
@@ -58,7 +58,7 @@ public class PermissionRegistry {
      * Guarantees are not to actually keep them updated, but might lazily update
      * them with world changing and logging on.
      */
-    private final LinkedHashSet<RegisteredPermission> preferKeepUpdated = new LinkedHashSet<>();
+    private final LinkedHashSet<RegisteredPermission> preferKeepUpdated = new LinkedHashSet<RegisteredPermission>();
     private RegisteredPermission[] preferKeepUpdatedWorld = new RegisteredPermission[0];
     private RegisteredPermission[] preferKeepUpdatedOffline = new RegisteredPermission[0];
 
@@ -171,7 +171,7 @@ public class PermissionRegistry {
      *         checking isPolicyEquivalent).
      */
     public Set<RegisteredPermission> updateSettings(final PermissionSettings settings) {
-        final Set<RegisteredPermission> changed = new LinkedHashSet<>();
+        final Set<RegisteredPermission> changed = new LinkedHashSet<RegisteredPermission>();
         // Ensure outdated policies don't get applied from here on.
         lock.lock(); 
         this.settings = settings;
@@ -196,8 +196,8 @@ public class PermissionRegistry {
      * (Primary thread only.)
      */
     public void arrangePreferKeepUpdated() {
-        final List<RegisteredPermission> preferKeepUpdatedWorld = new LinkedList<>();
-        final List<RegisteredPermission> preferKeepUpdatedOffline = new LinkedList<>();
+        final List<RegisteredPermission> preferKeepUpdatedWorld = new LinkedList<RegisteredPermission>();
+        final List<RegisteredPermission> preferKeepUpdatedOffline = new LinkedList<RegisteredPermission>();
         // (No permanent updating yet.)
         for (final RegisteredPermission registeredPermission : this.preferKeepUpdated) {
             final PermissionInfo info = infosInt.get(registeredPermission.getId());
@@ -224,8 +224,8 @@ public class PermissionRegistry {
                     break;
             }
         }
-        this.preferKeepUpdatedWorld = preferKeepUpdatedWorld.toArray(new RegisteredPermission[0]);
-        this.preferKeepUpdatedOffline = preferKeepUpdatedOffline.toArray(new RegisteredPermission[0]);
+        this.preferKeepUpdatedWorld = preferKeepUpdatedWorld.toArray(new RegisteredPermission[preferKeepUpdatedWorld.size()]);
+        this.preferKeepUpdatedOffline = preferKeepUpdatedOffline.toArray(new RegisteredPermission[preferKeepUpdatedOffline.size()]);
     }
 
     /**

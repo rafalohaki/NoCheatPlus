@@ -33,8 +33,8 @@ public interface ICollideBlocks {
      * @param maxSteps
      */
     // TODO: Not sure :p.
-    void setMaxSteps(int maxSteps);
-    int getMaxSteps();
+    public void setMaxSteps(int maxSteps);
+    public int getMaxSteps();
 
     /**
      * Call before loop, in order to skip checking blocks that are found to be
@@ -43,8 +43,8 @@ public interface ICollideBlocks {
      * 
      * @param ignoreInitiallyColliding
      */
-    void setIgnoreInitiallyColliding(boolean ignoreInitiallyColliding);
-    boolean getIgnoreInitiallyColliding();
+    public void setIgnoreInitiallyColliding(boolean ignoreInitiallyColliding);
+    public boolean getIgnoreInitiallyColliding();
 
     /**
      * Call before loop to set the coordinates of a move.
@@ -56,12 +56,12 @@ public interface ICollideBlocks {
      * @param y1
      * @param z1
      */
-    void set(double x0, double y0, double z0, double x1, double y1, double z1);
+    public void set(double x0, double y0, double z0, double x1, double y1, double z1);
 
     /**
      * Run the collision checking.
      */
-    void loop();
+    public void loop();
 
     /**
      * Get the (primary) steps done during loop(). In case of aborting due to
@@ -70,7 +70,7 @@ public interface ICollideBlocks {
      * 
      * @return
      */
-    int getStepsDone();
+    public int getStepsDone();
 
     /**
      * Test if the testing found a collision during loop(). This should reset
@@ -78,7 +78,7 @@ public interface ICollideBlocks {
      * 
      * @return
      */
-    boolean collides();
+    public boolean collides();
 
     /**
      * Optional information about which (sub-) type of checking lead to
@@ -87,7 +87,7 @@ public interface ICollideBlocks {
      * 
      * @return
      */
-    Axis getCollidingAxis();
+    public Axis getCollidingAxis();
 
     /**
      * Get an array with the axes in checking order. Length may vary, depending
@@ -95,6 +95,6 @@ public interface ICollideBlocks {
      * 
      * @return
      */
-    Axis[] getAxisOrder();
+    public Axis[] getAxisOrder();
 
 }

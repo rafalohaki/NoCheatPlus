@@ -15,12 +15,14 @@
 package fr.neatmonster.nocheatplus.utilities.location;
 
 import org.bukkit.Location;
+import org.bukkit.Material;
 import org.bukkit.entity.Entity;
 import org.bukkit.entity.Player;
 
 import fr.neatmonster.nocheatplus.compat.MCAccess;
 import fr.neatmonster.nocheatplus.components.registry.event.IHandle;
 import fr.neatmonster.nocheatplus.utilities.map.BlockCache;
+import fr.neatmonster.nocheatplus.utilities.map.BlockProperties;
 
 // TODO: Auto-generated Javadoc
 /**
@@ -198,6 +200,24 @@ public class PlayerLocation extends RichEntityLocation {
     public boolean hasIllegalStance() {
         // TODO: This doesn't check this location, but the player.
         return getMCAccess().isIllegalBounds(player).decide(); // MAYBE = NO
+    }
+
+    /* (non-Javadoc)
+     * @see fr.neatmonster.nocheatplus.utilities.RichEntityLocation#toString()
+     */
+    @Override
+    public String toString() {
+        final StringBuilder builder = new StringBuilder(128);
+        builder.append("PlayerLocation(");
+        builder.append(world == null ? "null" : world.getName());
+        builder.append('/');
+        builder.append(Double.toString(x));
+        builder.append(", ");
+        builder.append(Double.toString(y));
+        builder.append(", ");
+        builder.append(Double.toString(z));
+        builder.append(')');
+        return builder.toString();
     }
 
 }

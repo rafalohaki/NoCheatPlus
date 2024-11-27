@@ -45,7 +45,7 @@ public abstract class RayTracing implements ICollideBlocks {
     protected double t = Double.MIN_VALUE;
 
     /** Tolerance for time, for checking the abort condition: 1.0 - t <= tol . */
-    protected final double tol = 0.0;
+    protected double tol = 0.0;
 
     /** Force calling step at the end position, for the case it is reached with block transitions. */
     protected boolean forceStepEndPos = true;
@@ -59,7 +59,7 @@ public abstract class RayTracing implements ICollideBlocks {
     protected int step = 0;
 
     /** If to call stepSecondary at all (secondary transitions).*/
-    protected final boolean secondaryStep = true;
+    protected boolean secondaryStep = true;
 
     /** Maximum steps that will be done. */
     private int maxSteps = Integer.MAX_VALUE;
@@ -120,7 +120,7 @@ public abstract class RayTracing implements ICollideBlocks {
      * @param isEndBlock If the end block coordinate is reached for this axis.
      * @return
      */
-    private static double tDiff(final double dTotal, final double offset, final boolean isEndBlock) {
+    private static final double tDiff(final double dTotal, final double offset, final boolean isEndBlock) {
         // TODO: endBlock check only for == not </> ?
         if (dTotal > 0.0) {
             if (offset >= 1.0) {
@@ -333,7 +333,9 @@ public abstract class RayTracing implements ICollideBlocks {
 
         // Handle double-transitions.
         if (transitions == 3) {
-            return handleSecondaryDoubleTransitions(transitions, transX, transY, transZ, tMin);
+            if (!handleSecondaryDoubleTransitions(transitions, transX, transY, transZ, tMin)) {
+                return false; 
+            }
         }
 
         // All passed.
@@ -360,8 +362,11 @@ public abstract class RayTracing implements ICollideBlocks {
             return false;
         }
         // Y and Z.
-        return step(blockX, blockY + (dY > 0 ? 1 : -1), blockZ + (dZ > 0 ? 1 : -1), oX, dY > 0 ? 0.0 : 1.0, dZ > 0 ? 0.0 : 1.0, 0.0, false);
+        if (!step(blockX, blockY + (dY > 0 ? 1 : -1), blockZ + (dZ > 0 ? 1 : -1), oX, dY > 0 ? 0.0 : 1.0, dZ > 0 ? 0.0 : 1.0, 0.0, false)) {
+            return false;
+        }
         // All passed.
+        return true;
     }
 
     @Override

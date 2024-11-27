@@ -139,7 +139,7 @@ public class LocUtil {
      * @throws NullPointerException
      *             if World is null.
      */
-    public static Location clone(final Location loc){
+    public static final Location clone(final Location loc){
         return new Location(testWorld(loc.getWorld()), loc.getX(), loc.getY(), loc.getZ(), loc.getYaw(), loc.getPitch());
     }
 
@@ -154,7 +154,7 @@ public class LocUtil {
      * @throws NullPointerException
      *             if the resulting world is null.
      */
-    public static Location clone(final Location loc, final float yaw, final float pitch){
+    public static final Location clone(final Location loc, final float yaw, final float pitch){
         return new Location(testWorld(loc.getWorld()), loc.getX(), loc.getY(), loc.getZ(), yaw, pitch);
     }
 
@@ -170,7 +170,7 @@ public class LocUtil {
      * @throws NullPointerException
      *             if the resulting world is null.
      */
-    public static Location clone(final Location setBack, final Location ref) {
+    public static final Location clone(final Location setBack, final Location ref) {
         if (setBack == null){
             return clone(ref);
         }
@@ -187,7 +187,7 @@ public class LocUtil {
      * @param ref
      * @return
      */
-    public static Location clone(final Location setBack, final RichBoundsLocation ref) {
+    public static final Location clone(final Location setBack, final RichBoundsLocation ref) {
         if (setBack == null) {
             return ref.getLocation();
         }
@@ -204,7 +204,7 @@ public class LocUtil {
      * @throws NullPointerException
      *             if loc.getWorld() is null.
      */
-    public static void set(final Location setBack, final Location loc) {
+    public static final void set(final Location setBack, final Location loc) {
         setBack.setWorld(testWorld(loc.getWorld()));
         setBack.setX(loc.getX());
         setBack.setY(loc.getY());
@@ -221,7 +221,7 @@ public class LocUtil {
      * @throws NullPointerException
      *             if loc.getWorld() is null.
      */
-    public static void set(final Location setBack, final RichBoundsLocation loc) {
+    public static final void set(final Location setBack, final RichBoundsLocation loc) {
         setBack.setWorld(testWorld(loc.getWorld()));
         setBack.setX(loc.getX());
         setBack.setY(loc.getY());
@@ -250,7 +250,7 @@ public class LocUtil {
      * @param yaw
      * @return
      */
-    public static boolean needsYawCorrection2(final float yaw) {
+    public static final boolean needsYawCorrection2(final float yaw) {
         return Float.isNaN(yaw) || yaw <= -360f || yaw >= 360f;
     }
 
@@ -260,7 +260,7 @@ public class LocUtil {
      * @param yaw
      * @return
      */
-    public static boolean needsYawCorrection(final float yaw) {
+    public static final boolean needsYawCorrection(final float yaw) {
         return Float.isNaN(yaw) || yaw < 0f || yaw >= 360f;
     }
 
@@ -270,7 +270,7 @@ public class LocUtil {
      * @param pitch
      * @return
      */
-    public static boolean needsPitchCorrection(final float pitch) {
+    public static final boolean needsPitchCorrection(final float pitch) {
         return Float.isNaN(pitch) || pitch < -90f || pitch > 90f;
     }
 
@@ -313,7 +313,7 @@ public class LocUtil {
      * @param pitch
      * @return
      */
-    public static boolean needsDirectionCorrection(final float yaw, final float pitch) {
+    public static final boolean needsDirectionCorrection(final float yaw, final float pitch) {
         return needsYawCorrection(yaw) || needsPitchCorrection(pitch);
     }
 
@@ -324,7 +324,7 @@ public class LocUtil {
      * @param pitch
      * @return
      */
-    public static boolean needsDirectionCorrection2(final float yaw, final float pitch) {
+    public static final boolean needsDirectionCorrection2(final float yaw, final float pitch) {
         return needsYawCorrection2(yaw) || needsPitchCorrection(pitch);
     }
 
@@ -334,7 +334,7 @@ public class LocUtil {
      * @param yaw
      * @return
      */
-    public static float correctYaw(float yaw) {
+    public static final float correctYaw(float yaw) {
         if (Float.isNaN(yaw)) {
             return 0f;
         }
@@ -365,15 +365,15 @@ public class LocUtil {
      * @param yaw
      * @return
      */
-    public static float correctYaw2(float yaw) {
+    public static final float correctYaw2(float yaw) {
         if (Float.isNaN(yaw) || yaw == Float.NEGATIVE_INFINITY || yaw == Float.POSITIVE_INFINITY) {
             return 0f;
         }
         if (yaw >= 360f) {
-            yaw -= (float) (360f * Math.floor(yaw / 360f));
+            yaw -= 360f * Math.floor(yaw / 360f);
         }
         if (yaw <= -360f) {
-            yaw -= (float) (360f * Math.ceil(yaw / 360f));
+            yaw -= 360f * Math.ceil(yaw / 360f);
         }
         return yaw;
     }
@@ -384,12 +384,16 @@ public class LocUtil {
      * @param pitch
      * @return
      */
-    public static float correctPitch(float pitch) {
+    public static final float correctPitch(float pitch) {
         if (Float.isNaN(pitch)) {
             return 0f;
         } else if (pitch < -90f) {
             return -90f;
-        } else return Math.min(pitch, 90f);
+        } else if (pitch > 90f) {
+            return 90f;
+        } else {
+            return pitch;
+        }
     }
 
     /**

@@ -78,7 +78,7 @@ public class InventoryUtil {
      */
     public static List<Material> collectItemsBySuffix(String suffix) {
         suffix = suffix.toLowerCase();
-        final List<Material> res = new LinkedList<>();
+        final List<Material> res = new LinkedList<Material>();
         for (final Material mat : Material.values()) {
             if (!mat.isBlock() && mat.name().toLowerCase().endsWith(suffix)) {
                 res.add(mat);
@@ -94,7 +94,7 @@ public class InventoryUtil {
      */
     public static List<Material> collectItemsByPrefix(String prefix) {
         prefix = prefix.toLowerCase();
-        final List<Material> res = new LinkedList<>();
+        final List<Material> res = new LinkedList<Material>();
         for (final Material mat : Material.values()) {
             if (!mat.isBlock() && mat.name().toLowerCase().startsWith(prefix)) {
                 res.add(mat);
@@ -115,7 +115,7 @@ public class InventoryUtil {
         int count = 0;
         for (ItemStack content : contents) {
             if (BlockProperties.isAir(content)) {
-                count++;
+                count ++;
             }
         }
         return count;
@@ -141,8 +141,9 @@ public class InventoryUtil {
         for (final ItemStack stack : contents) {
             if (stack == null) {
                 continue;
-            } else if (stack.getType() == mat && stack.getDurability() == durability) {
-                count++;
+            }
+            else if (stack.getType() == mat && stack.getDurability() == durability) {
+                count ++;
             }
         }
         return count;
@@ -290,7 +291,7 @@ public class InventoryUtil {
      * @return true, if is consumable
      */
     public static boolean isConsumable(final ItemStack stack) {
-        return stack != null && isConsumable(stack.getType());
+        return stack == null ? false : isConsumable(stack.getType());
     }
 
     /**

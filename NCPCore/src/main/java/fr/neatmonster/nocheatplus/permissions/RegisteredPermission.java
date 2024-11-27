@@ -28,7 +28,7 @@ import org.bukkit.plugin.PluginManager;
  */
 public class RegisteredPermission {
 
-    public static String toLowerCaseStringRepresentation(final String stringRepresentation) {
+    public static final String toLowerCaseStringRepresentation(final String stringRepresentation) {
         return stringRepresentation.toLowerCase(java.util.Locale.ENGLISH);
     }
 
@@ -38,7 +38,7 @@ public class RegisteredPermission {
     private final String lowerCaseStringRepresentation;
     private final String description;
     /** Lazily updated. */
-    private final Permission bukkitPermission = null;
+    private Permission bukkitPermission = null;
 
     public RegisteredPermission(Integer id, String stringRepresentation) {
         this(id, stringRepresentation, null);

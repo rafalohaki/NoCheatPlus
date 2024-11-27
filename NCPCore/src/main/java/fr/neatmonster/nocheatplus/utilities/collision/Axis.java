@@ -36,17 +36,17 @@ public enum Axis {
 
     // 
     public static final List<Axis> AXIS_ORDER_YXZ = Collections.unmodifiableList(
-            Arrays.asList(Y_AXIS, X_AXIS, Z_AXIS));
+            Arrays.asList(new Axis[]{Y_AXIS, X_AXIS, Z_AXIS}));
     public static final List<Axis> AXIS_ORDER_YZX = Collections.unmodifiableList(
-            Arrays.asList(Y_AXIS, Z_AXIS, X_AXIS));
+            Arrays.asList(new Axis[]{Y_AXIS, Z_AXIS, X_AXIS}));
     public static final List<Axis> AXIS_ORDER_XZY = Collections.unmodifiableList(
-            Arrays.asList(X_AXIS, Z_AXIS, Y_AXIS));
+            Arrays.asList(new Axis[]{X_AXIS, Z_AXIS, Y_AXIS}));
     public static final List<Axis> AXIS_ORDER_ZXY = Collections.unmodifiableList(
-            Arrays.asList(Z_AXIS, X_AXIS, Y_AXIS));
+            Arrays.asList(new Axis[]{Z_AXIS, X_AXIS, Y_AXIS}));
     // 
     public static final List<Axis> AXIS_ORDER_XYZ = Collections.unmodifiableList(
-            Arrays.asList(X_AXIS, Y_AXIS, Z_AXIS));
+            Arrays.asList(new Axis[]{X_AXIS, Y_AXIS, Z_AXIS}));
     public static final List<Axis> AXIS_ORDER_ZYX = Collections.unmodifiableList(
-            Arrays.asList(Z_AXIS, Y_AXIS, X_AXIS));
+            Arrays.asList(new Axis[]{Z_AXIS, Y_AXIS, X_AXIS}));
 
 }

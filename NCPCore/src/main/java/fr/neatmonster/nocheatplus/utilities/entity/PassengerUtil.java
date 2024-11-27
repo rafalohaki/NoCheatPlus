@@ -22,12 +22,14 @@ import org.bukkit.entity.Entity;
 import org.bukkit.entity.EntityType;
 import org.bukkit.entity.Player;
 import org.bukkit.plugin.Plugin;
+import org.bukkit.World;
 
 import fr.neatmonster.nocheatplus.NCPAPIProvider;
 import fr.neatmonster.nocheatplus.checks.CheckType;
 import fr.neatmonster.nocheatplus.checks.moving.MovingConfig;
 import fr.neatmonster.nocheatplus.checks.moving.MovingData;
 import fr.neatmonster.nocheatplus.checks.moving.model.VehicleMoveData;
+import fr.neatmonster.nocheatplus.checks.moving.model.PlayerMoveData;
 import fr.neatmonster.nocheatplus.checks.moving.util.AuxMoving;
 import fr.neatmonster.nocheatplus.checks.moving.vehicle.VehicleSetPassengerTask;
 import fr.neatmonster.nocheatplus.checks.workaround.WRPT;
@@ -178,7 +180,7 @@ public class PassengerUtil {
      */
     public void teleportWithPassengers(final Entity vehicle, final Player player, final Location location, final boolean debug, final IPlayerData pData) {
         final List<Entity> originalPassengers = handleVehicle.getHandle().getEntityPassengers(vehicle);
-        teleportWithPassengers(vehicle, player, location, debug, originalPassengers.toArray(new Entity[0]), false, pData);
+        teleportWithPassengers(vehicle, player, location, debug, originalPassengers.toArray(new Entity[originalPassengers.size()]), false, pData);
     }
 
     /**
@@ -196,7 +198,7 @@ public class PassengerUtil {
      *            the debug
      * @param originalPassengers
      *            The passengers at the time, that is to be restored. Must not be null.
-     * @param checkPassengers Set to true to compare current with original passengers.
+     * @param CheckPassengers Set to true to compare current with original passengers.
      */
     public void teleportWithPassengers(final Entity vehicle, final Player player, final Location location, 
                                        final boolean debug, final Entity[] originalPassengers, final boolean checkPassengers,
@@ -290,22 +292,25 @@ public class PassengerUtil {
                         if (teleportPlayerPassenger((Player) passenger, vehicle, location, vehicleTeleported, DataManager.getGenericInstance((Player) passenger, MovingData.class), debug)) {
                             if (player.equals(passenger)) {
                                 playerTeleported = true;
-                            } else {
-                                otherPlayersTeleported++;
+                            }
+                            else {
+                                otherPlayersTeleported ++;
                             }
                         }
-                    } else {
+                    }
+                    else {
                         if (Folia.teleportEntity(passenger, location, BridgeMisc.TELEPORT_CAUSE_CORRECTION_OF_POSITION)
-                                && vehicleTeleported && TrigUtil.distance(passenger.getLocation(useLoc2), vehicle.getLocation(useLoc)) < 1.5) {
+                            && vehicleTeleported && TrigUtil.distance(passenger.getLocation(useLoc2), vehicle.getLocation(useLoc)) < 1.5) {
                             if (!handleVehicle.getHandle().addPassenger(passenger, vehicle)) {
                                 // TODO: What?
                             }
                         }
                     }
-                } else if (debug) {
-                    CheckUtils.debug(player, CheckType.MOVING_VEHICLE, (!vWorldMatchesPWorld) ? "**** Prevent adding passengers to root vehicle on world change (potential exploit)"
-                            : "Can't add passenger to vehicle: passenger is dead.");
-                    // Log skipped + failed non player entities.
+                }
+                else if (debug) { 
+                   CheckUtils.debug(player, CheckType.MOVING_VEHICLE, (!vWorldMatchesPWorld) ? "**** Prevent adding passengers to root vehicle on world change (potential exploit)" 
+                                    : "Can't add passenger to vehicle: passenger is dead.");
+                // Log skipped + failed non player entities.
                 }
             }
         }
@@ -329,7 +334,7 @@ public class PassengerUtil {
      * @param data
      * @return
      */
-    private boolean teleportPlayerPassenger(final Player player, final Entity vehicle, final Location location, final boolean vehicleTeleported, final MovingData data, final boolean debug) {
+    private final boolean teleportPlayerPassenger(final Player player, final Entity vehicle, final Location location, final boolean vehicleTeleported, final MovingData data, final boolean debug) {
         final boolean playerTeleported;
         if (player.isOnline() && !player.isDead()) {
             final MovingConfig cc = DataManager.getGenericInstance(player, MovingConfig.class);

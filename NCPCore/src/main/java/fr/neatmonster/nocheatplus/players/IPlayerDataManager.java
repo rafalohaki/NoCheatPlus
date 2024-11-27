@@ -69,7 +69,7 @@ public interface IPlayerDataManager extends ComponentRegistry<IRemoveData>, IRic
      * @param create
      * @return
      */
-    IPlayerData getPlayerData(final Player player, boolean create);
+    public IPlayerData getPlayerData(final Player player, boolean create);
 
     /**
      * Get a PlayerData instance in any case - always creates a PlayerData
@@ -79,7 +79,7 @@ public interface IPlayerDataManager extends ComponentRegistry<IRemoveData>, IRic
      * @param player
      * @return
      */
-    IPlayerData getPlayerData(final Player player);
+    public IPlayerData getPlayerData(final Player player);
 
     /**
      * Get the player data, if present.
@@ -87,7 +87,7 @@ public interface IPlayerDataManager extends ComponentRegistry<IRemoveData>, IRic
      * @param playerId
      * @return The PlayerData instance if present, null otherwise.
      */
-    IPlayerData getPlayerData(final UUID playerId);
+    public IPlayerData getPlayerData(final UUID playerId);
 
     /**
      * Get the player data, if present.
@@ -95,7 +95,16 @@ public interface IPlayerDataManager extends ComponentRegistry<IRemoveData>, IRic
      * @param playerName
      * @return The PlayerData instance if present, null otherwise.
      */
-    IPlayerData getPlayerData(final String playerName);
+    public IPlayerData getPlayerData(final String playerName);
+
+    /**
+     * This gets an online player by exact player name or lower-case player name
+     * only [subject to change].
+     * 
+     * @param playerName
+     * @return
+     */
+    public Player getPlayerExact(final String playerName);
 
     /**
      * Retrieve the UUID for a given input (name or UUID string of with or
@@ -105,14 +114,14 @@ public interface IPlayerDataManager extends ComponentRegistry<IRemoveData>, IRic
      * @param input
      * @return
      */
-    UUID getUUID(final String input);
+    public UUID getUUID(final String input);
 
     /**
      * Get the exact player name, stored internally.
      * 
      * @param playerId
      */
-    String getPlayerName(final UUID playerId);
+    public String getPlayerName(final UUID playerId);
 
     /**
      * Get an online player by UUID.
@@ -120,7 +129,7 @@ public interface IPlayerDataManager extends ComponentRegistry<IRemoveData>, IRic
      * @param id
      * @return
      */
-    Player getPlayer(final UUID id);
+    public Player getPlayer(final UUID id);
 
     /**
      * This gets the online player with the exact name, but transforms the input
@@ -129,7 +138,7 @@ public interface IPlayerDataManager extends ComponentRegistry<IRemoveData>, IRic
      * @param playerName
      * @return
      */
-    Player getPlayer(final String playerName);
+    public Player getPlayer(final String playerName);
 
     /**
      * Restore the default debug flags within player data, as given in
@@ -137,7 +146,7 @@ public interface IPlayerDataManager extends ComponentRegistry<IRemoveData>, IRic
      * the data uses the same configuration for initialization which is
      * registered under the same check type.
      */
-    void restoreDefaultDebugFlags();
+    public void restoreDefaultDebugFlags();
 
     /**
      * Remove an instance from the PlayerData-local generic instance storage,
@@ -146,9 +155,9 @@ public interface IPlayerDataManager extends ComponentRegistry<IRemoveData>, IRic
      * 
      * @param registeredFor
      */
-    <T> void removeGenericInstance(Class<T> registeredFor);
+    public <T> void removeGenericInstance(Class<T> registeredFor);
 
-    void clearAllExemptions();
+    public void clearAllExemptions();
 
     /**
      * Remove data and history of all players for the given check type and sub
@@ -156,12 +165,12 @@ public interface IPlayerDataManager extends ComponentRegistry<IRemoveData>, IRic
      * 
      * @param checkType
      */
-    void clearData(CheckType checkType);
+    public void clearData(CheckType checkType);
 
     /**
      * Convenience method to remove cached types that implement IConfig for all
      * players. Types need to be registered (player data factory or explicitly).
      */
-    void removeCachedConfigs();
+    public void removeCachedConfigs();
 
 }

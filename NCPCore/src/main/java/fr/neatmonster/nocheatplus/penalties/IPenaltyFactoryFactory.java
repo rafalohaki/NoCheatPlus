@@ -33,6 +33,6 @@ public interface IPenaltyFactoryFactory {
      * @param actionFactory
      * @return
      */
-    IPenaltyFactory newPenaltyFactory(MemorySection library, ActionFactory actionFactory);
+    public IPenaltyFactory newPenaltyFactory(MemorySection library, ActionFactory actionFactory);
 
 }

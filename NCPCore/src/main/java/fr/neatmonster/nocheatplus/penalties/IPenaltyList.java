@@ -41,7 +41,7 @@ public interface IPenaltyList {
      * @param registeredInput
      * @param penalty
      */
-    <RI> void addPenalty(Class<RI> registeredInput, IPenalty<RI> penalty);
+    public <RI> void addPenalty(Class<RI> registeredInput, IPenalty<RI> penalty);
 
     /**
      * Apply generic penalties registered exactly for the given type, using the
@@ -50,8 +50,8 @@ public interface IPenaltyList {
      * @param type
      * @param input
      */
-    <RI, I extends RI> void applyPenaltiesPrecisely(Class<RI> type,
-                                                    I input, boolean removeAppliedPenalties);
+    public <RI, I extends RI> void applyPenaltiesPrecisely(Class<RI> type, 
+            I input, boolean removeAppliedPenalties);
 
     /**
      * Apply all generic penalties registered for the type and all super types
@@ -62,15 +62,15 @@ public interface IPenaltyList {
      *            If set to true, penalties that return true for
      *            {@link IPenalty#apply(Object)} will be removed from the list.
      */
-    <I> void applyAllApplicablePenalties(I input,
-                                         boolean removeAppliedPenalties);
+    public <I> void applyAllApplicablePenalties(I input, 
+            boolean removeAppliedPenalties);
 
     /**
      * 
      * @return If any penalties are contained. Note: IPenaltyList.isEmpty()
      *         might return true, despite willCancel set.
      */
-    boolean isEmpty();
+    public boolean isEmpty();
 
     /**
      * Definitive cancel contained.<br/>
@@ -78,6 +78,6 @@ public interface IPenaltyList {
      * 
      * @return
      */
-    boolean willCancel();
+    public boolean willCancel();
 
 }

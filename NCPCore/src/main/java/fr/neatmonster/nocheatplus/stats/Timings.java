@@ -14,13 +14,14 @@
  */
 package fr.neatmonster.nocheatplus.stats;
 
-import fr.neatmonster.nocheatplus.logging.StaticLog;
-import org.bukkit.ChatColor;
-
 import java.text.DecimalFormat;
 import java.text.DecimalFormatSymbols;
 import java.util.HashMap;
 import java.util.Map;
+
+import org.bukkit.ChatColor;
+
+import fr.neatmonster.nocheatplus.logging.StaticLog;
 
 /**
  * A not too fat timings class re-used from other plugins.
@@ -37,23 +38,25 @@ public final class Timings {
 	}
 	
 	private long tsStats = 0;
+	private long periodStats = 12345;
+	private long nVerbose = 500;
 	private long nDone = 0;
 	private boolean logStats = false;
 	private boolean showRange = true;
 	
-	private final Map<Integer, Entry> entries = new HashMap<>();
+	private final Map<Integer, Entry> entries = new HashMap<Integer, Timings.Entry>();
 	private final DecimalFormat f;
 	private final String label;
 	
 	/**
 	 * Map id to name.
 	 */
-	private final Map<Integer, String> idKeyMap = new HashMap<>();
+	private final Map<Integer, String> idKeyMap = new HashMap<Integer, String>();
 	
 	/**
 	 * Map exact name to id. 
 	 */
-	private final Map<String, Integer> keyIdMap = new HashMap<>();
+	private final Map<String, Integer> keyIdMap = new HashMap<String, Integer>();
 	
 	int maxId = 0;
 	
@@ -71,7 +74,7 @@ public final class Timings {
 		f.setDecimalFormatSymbols(s);
 	}
 	
-	public void addStats(final Integer key, final long value){
+	public final void addStats(final Integer key, final long value){
 		Entry entry = entries.get(key);
 		if ( entry != null){
 			entry.n += 1;
@@ -88,12 +91,10 @@ public final class Timings {
 		}
 		if (!logStats) return;
 		nDone++;
-		long nVerbose = 500;
-		if ( nDone> nVerbose){
+		if ( nDone>nVerbose){
 			nDone = 0;
 			long ts = System.currentTimeMillis();
-			long periodStats = 12345;
-			if ( ts > tsStats+ periodStats){
+			if ( ts > tsStats+periodStats){
 				tsStats = ts;
 				// print out stats !
 				StaticLog.logInfo(getStatsStr());
@@ -105,11 +106,11 @@ public final class Timings {
 	 * Get stats representation without ChatColor.
 	 * @return
 	 */
-	public String getStatsStr() {
+	public final String getStatsStr() {
 		return getStatsStr(false);
 	}
 	
-	public String getStatsStr(final boolean colors) {
+	public final String getStatsStr(final boolean colors) {
 		final StringBuilder b = new StringBuilder(400);
 		b.append(label+" ");
 		boolean first = true;
@@ -136,7 +137,7 @@ public final class Timings {
 	 * @param id
 	 * @return
 	 */
-	public String getKey(final Integer id) {
+	public final String getKey(final Integer id) {
 		String key = idKeyMap.get(id);
 		if (key == null){
 			key = "<no key for id: "+id+">";
@@ -152,7 +153,7 @@ public final class Timings {
 	 * @param key
 	 * @return
 	 */
-	public Integer getNewId(final String key){
+	public final Integer getNewId(final String key){
 		maxId++;
 		while (idKeyMap.containsKey(maxId)){
 			maxId++; // probably not going to happen...
@@ -168,7 +169,7 @@ public final class Timings {
 	 * @param create if to create a key - id mapping if not existent.
 	 * @return
 	 */
-	public Integer getId(final String key, final boolean create){
+	public final Integer getId(final String key, final boolean create){
 		final Integer id = keyIdMap.get(key);
 		if (id == null){
 			if (create) return getNewId(key);
@@ -182,19 +183,19 @@ public final class Timings {
 	 * @param key not null
 	 * @return Key or null.
 	 */
-	public Integer getId(final String key){
+	public final Integer getId(final String key){
 		return keyIdMap.get(key);
 	}
 
-	public void clear(){
+	public final void clear(){
 		entries.clear();
 	}
 	
-	public void setLogStats(final boolean log){
+	public final void setLogStats(final boolean log){
 		logStats = log;
 	}
 	
-	public void setShowRange(final boolean set){
+	public final void setShowRange(final boolean set){
 		showRange = set;
 	}
 

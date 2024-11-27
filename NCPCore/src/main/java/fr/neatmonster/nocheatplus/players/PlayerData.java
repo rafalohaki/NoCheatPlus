@@ -20,7 +20,6 @@ import java.util.HashSet;
 import java.util.Iterator;
 import java.util.LinkedList;
 import java.util.Map.Entry;
-import java.util.Objects;
 import java.util.Set;
 import java.util.UUID;
 import java.util.concurrent.locks.Lock;
@@ -100,9 +99,9 @@ public class PlayerData implements IPlayerData {
     // TODO: IPlayerData for the more official API.
 
     /** Monitor player task load across all players (nanoseconds per server tick). */
-    private static final ActionFrequency taskLoad = new ActionFrequency(6, 7);
+    private static ActionFrequency taskLoad = new ActionFrequency(6, 7);
     private static final int ticksMonitored = taskLoad.numberOfBuckets() * (int) taskLoad.bucketDuration();
-    private static final long msMonitored = ticksMonitored * 50L;
+    private static final long msMonitored = ticksMonitored * 50;
     /**
      * Some measure for heavy load, for skipping some of the (lazy) updating.
      * Assume 1% of a tick in average as heavy - just for this task. This still
@@ -110,7 +109,7 @@ public class PlayerData implements IPlayerData {
      * because we'll be adding up zeros most of the time here. Perhaps just
      * relaying to TickTask.getLag is enough.
      */
-    private static final float heavyLoad = 500000F / (float) ticksMonitored;
+    private static float heavyLoad = 500000f / (float) ticksMonitored;
 
     // Default tags.
     // TODO: Move elsewhere (API?)
@@ -147,6 +146,8 @@ public class PlayerData implements IPlayerData {
     // TODO: Names could/should get updated. (In which case?)
     /** Exact case name of the player. */
     private String playerName;
+    /** Lower case name of the player. */
+    private String playerNameLowerCase;
 
     private long lastJoinTime = 0;
 
@@ -163,7 +164,7 @@ public class PlayerData implements IPlayerData {
     private final PermissionRegistry permissionRegistry;
 
     /** Permission cache. */
-    private final HashMapLOW<Integer, PermissionNode> permissions = new HashMapLOW<>(lock, 35);
+    private final HashMapLOW<Integer, PermissionNode> permissions = new HashMapLOW<Integer, PermissionNode>(lock, 35);
     // TODO: a per entry typed variant (key - value relation)?
     private final InstanceMapLOW dataCache = new InstanceMapLOW(lock, 24);
 
@@ -174,9 +175,9 @@ public class PlayerData implements IPlayerData {
 
     private boolean frequentPlayerTaskShouldBeScheduled = false;
     /** Actually queried ones. */
-    private final DualSet<RegisteredPermission> updatePermissions = new DualSet<>(lock);
+    private final DualSet<RegisteredPermission> updatePermissions = new DualSet<RegisteredPermission>(lock);
     /** Possibly needed in future. */
-    private final DualSet<RegisteredPermission> updatePermissionsLazy = new DualSet<>(lock);
+    private final DualSet<RegisteredPermission> updatePermissionsLazy = new DualSet<RegisteredPermission>(lock);
 
     /** TODO: Soon to add minimized offline data, so these kind of things don't impact as much. */
     private final PlayerCheckTypeTree checkTypeTree = new PlayerCheckTypeTree(lock);
@@ -199,11 +200,13 @@ public class PlayerData implements IPlayerData {
             final PermissionRegistry permissionRegistry) {
         this.playerId = playerId;
         this.playerName = playerName;
+        this.playerNameLowerCase = playerName.toLowerCase();
         this.permissionRegistry = permissionRegistry;
     }
 
-    void updatePlayerName(final String playerName) {
-        this.playerName = playerName;
+    void updatePlayerName(final String exactPlayerName) {
+        this.playerName = exactPlayerName;
+        this.playerNameLowerCase = exactPlayerName.toLowerCase();
     }
 
     /**
@@ -393,18 +396,21 @@ public class PlayerData implements IPlayerData {
         final long timeNow = System.currentTimeMillis();
         while (it.hasNext()) {
             final PermissionNode node = it.next().getValue();
-            if (Objects.requireNonNull(node.getFetchingPolicy()) == FetchingPolicy.INTERVAL) {
-                node.invalidate();
-            } else {
-                if (node.getLastFetch() > timeNow) {
-                    node.setState(node.getLastState(), timeNow);
-                }
+            switch (node.getFetchingPolicy()) {
+                case INTERVAL:
+                    node.invalidate();
+                    break;
+                default:
+                    if (node.getLastFetch() > timeNow) {
+                        node.setState(node.getLastState(), timeNow);
+                    }
+                    break;
             }
         }
         // TODO: Register explicitly or not? (+ auto register?)...
         for (final Class<? extends IData> type : dataTypes) {
             final IData obj = dataCache.get(type);
-            if (obj instanceof ICanHandleTimeRunningBackwards) {
+            if (obj != null && obj instanceof ICanHandleTimeRunningBackwards) {
                 ((ICanHandleTimeRunningBackwards) obj).handleTimeRanBackwards();
             }
         }
@@ -631,6 +637,11 @@ public class PlayerData implements IPlayerData {
     }
 
     @Override
+    public String getPlayerNameLowerCase() {
+        return playerNameLowerCase;
+    }
+
+    @Override
     public UUID getPlayerId() {
         return playerId;
     }
@@ -737,7 +748,10 @@ public class PlayerData implements IPlayerData {
         }
         // Check permission policy/cache regardless of the thread context.
         final RegisteredPermission permission = checkType.getPermission();
-        return permission != null && hasPermission(permission, player);
+        if (permission != null && hasPermission(permission, player)) {
+            return true;
+        }
+        return false;
     }
 
     @Override
@@ -780,7 +794,7 @@ public class PlayerData implements IPlayerData {
      */
     public void addTag(final String tag) {
         if (tags == null) {
-            tags = new HashSet<>();
+            tags = new HashSet<String>();
         }
         tags.add(tag);
     }
@@ -868,10 +882,11 @@ public class PlayerData implements IPlayerData {
      * Get a data/config instance (1.local cache, 2. player related factory, 3.
      * world registry).
      */
+    @SuppressWarnings("unchecked")
     @Override
     public <T> T getGenericInstance(final Class<T> registeredFor) {
         // 1. Check for cache (local).
-        final T res = dataCache.get(registeredFor);
+        final Object res = dataCache.get(registeredFor);
         if (res == null) {
             /*
              * TODO: Consider storing null and check containsKey(registeredFor)
@@ -881,7 +896,7 @@ public class PlayerData implements IPlayerData {
             return cacheMissGenericInstance(registeredFor);
         }
         else {
-            return res;
+            return (T) res;
         }
     }
 
@@ -899,7 +914,7 @@ public class PlayerData implements IPlayerData {
     }
 
     private <T> T putDataCache(final Class<T> registeredFor, final T instance) {
-        final T previousInstance = dataCache.putIfAbsent(registeredFor, instance); // Under lock.
+        final T previousInstance = (T) dataCache.putIfAbsent(registeredFor, instance); // Under lock.
         return previousInstance == null ? instance : previousInstance;
     }
 
@@ -924,9 +939,9 @@ public class PlayerData implements IPlayerData {
             final Collection<Class<? extends IDataOnRemoveSubCheckData>> types,
             final Collection<CheckType> checkTypes
             ) {
-        final Collection<Class<?>> removeTypes = new LinkedList<>();
+        final Collection<Class<?>> removeTypes = new LinkedList<Class<?>>();
         for (final Class<? extends IDataOnRemoveSubCheckData> type : types) {
-            final IDataOnRemoveSubCheckData impl = dataCache.get(type);
+            final IDataOnRemoveSubCheckData impl = (IDataOnRemoveSubCheckData) dataCache.get(type);
             if (impl != null) {
                 if (impl.dataOnRemoveSubCheckData(checkTypes)) {
                     removeTypes.add(type);
@@ -943,8 +958,9 @@ public class PlayerData implements IPlayerData {
      * @param changedPermissions 
      */
     public void adjustSettings(final Set<RegisteredPermission> changedPermissions) {
-        for (RegisteredPermission changedPermission : changedPermissions) {
-            final PermissionNode node = permissions.get(changedPermission.getId());
+        final Iterator<RegisteredPermission> it = changedPermissions.iterator();
+        while (it.hasNext()) {
+            final PermissionNode node = permissions.get(it.next().getId());
             if (node != null) {
                 node.invalidate();
             }

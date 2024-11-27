@@ -182,8 +182,8 @@ public class PermissionSettings {
         catch (Exception e) {
             throw new RuntimeException("Bad default policy definition.", e);
         }
-        final Map<String, PermissionPolicy> explicitPolicy = new LinkedHashMap<>();
-        final List<PermissionRule> implicitRules = new LinkedList<>();
+        final Map<String, PermissionPolicy> explicitPolicy = new LinkedHashMap<String, PermissionPolicy>();
+        final List<PermissionRule> implicitRules = new LinkedList<PermissionSettings.PermissionRule>();
 
         // TODO: Change to List ! +- separators.
         final List<String> defs = config.getStringList(pathRules);
@@ -238,9 +238,9 @@ public class PermissionSettings {
         }
         // (Null entries within explicit/implicit yield the default policy for now.)
         this.explicitPolicy = (explicitPolicy == null || explicitPolicy.isEmpty()) ? null 
-                : new HashMap<>(explicitPolicy);
+                : new HashMap<String, PermissionPolicy>(explicitPolicy);
         this.implicitRules = (implicitRules == null || implicitRules.isEmpty()) ? null 
-                : implicitRules.toArray(new PermissionRule[0]);
+                : implicitRules.toArray(new PermissionRule[implicitRules.size()]);
         this.defaultPolicy = defaultPolicy;
     }
 

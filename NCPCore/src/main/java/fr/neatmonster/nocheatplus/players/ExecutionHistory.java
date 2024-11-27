@@ -32,30 +32,23 @@ public class ExecutionHistory {
      */
     public static class ExecutionHistoryEntry {
 
-        /**
-         * The execution times.
-         */
-        private final int[] executionTimes;
+        /** The execution times. */
+        private final int executionTimes[];
 
-        /**
-         * The last execution.
-         */
-        private long lastExecution = 0;
+        /** The last execution. */
+        private long      lastExecution   = 0;
 
-        /**
-         * The total entries.
-         */
-        private int totalEntries = 0;
+        /** The total entries. */
+        private int       totalEntries    = 0;
 
-        /**
-         * The last cleared time.
-         */
-        private long lastClearedTime = 0;
+        /** The last cleared time. */
+        private long      lastClearedTime = 0;
 
         /**
          * Instantiates a new execution history entry.
-         *
-         * @param monitoredTimeFrame the monitored time frame
+         * 
+         * @param monitoredTimeFrame
+         *            the monitored time frame
          */
         public ExecutionHistoryEntry(final int monitoredTimeFrame) {
             executionTimes = new int[monitoredTimeFrame];
@@ -63,8 +56,9 @@ public class ExecutionHistory {
 
         /**
          * Remember an execution at the specific time.
-         *
-         * @param time the time
+         * 
+         * @param time
+         *            the time
          */
         public void addCounter(final long time) {
             // Clear out now outdated values from the array.
@@ -73,13 +67,12 @@ public class ExecutionHistory {
             executionTimes[(int) (time % executionTimes.length)]++;
             totalEntries++;
         }
-
+        
         /**
          * Access method to adjust state to point of time.
-         *
          * @param time
          */
-        public void checkCounter(final long time) {
+        public void checkCounter(final long time){
             if (time - lastClearedTime > 0) {
                 // Clear the next few fields of the array.
                 clearTimes(lastClearedTime + 1, time - lastClearedTime);
@@ -89,9 +82,11 @@ public class ExecutionHistory {
 
         /**
          * Clean parts of the array.
-         *
-         * @param start  the start
-         * @param length the length
+         * 
+         * @param start
+         *            the start
+         * @param length
+         *            the length
          */
         protected void clearTimes(final long start, long length) {
             if (length <= 0)
@@ -115,7 +110,7 @@ public class ExecutionHistory {
 
         /**
          * Gets the counter.
-         *
+         * 
          * @return the counter
          */
         public int getCounter() {
@@ -124,7 +119,7 @@ public class ExecutionHistory {
 
         /**
          * Gets the last execution.
-         *
+         * 
          * @return the last execution
          */
         public long getLastExecution() {
@@ -133,40 +128,46 @@ public class ExecutionHistory {
 
         /**
          * Sets the last execution.
-         *
-         * @param time the new last execution
+         * 
+         * @param time
+         *            the new last execution
          */
         public void setLastExecution(final long time) {
             lastExecution = time;
         }
     }
 
-    /**
-     * Store data between events (time + action + action-counter).
-     **/
+    /** Store data between events (time + action + action-counter). **/
     private final Map<Action<ViolationData, ActionList>, ExecutionHistoryEntry> entries;
 
     /**
      * Instantiates a new execution history.
      */
     public ExecutionHistory() {
-        entries = new HashMap<>();
+        entries = new HashMap<Action<ViolationData, ActionList>, ExecutionHistoryEntry>();
     }
 
-    /**
-     * Returns true, if the action should be executed, because all time criteria
-     * have been met. Will add a entry with the time to a list which will
-     * influence further requests, so only use once and remember the result.
-     * If the action is to be executed always, it will not be added to the history.
-     *
-     * @param violationData the violation data
-     * @param action        the action
-     * @param time          a time IN SECONDS
-     * @return true, if the action is to be executed.
-     */
-    public boolean executeAction(final ViolationData violationData, final Action<ViolationData, ActionList> action, final long time) {
-        if (action.executesAlways()) return true;
-        ExecutionHistoryEntry entry = entries.computeIfAbsent(action, k -> new ExecutionHistoryEntry(60));
+	/**
+	 * Returns true, if the action should be executed, because all time criteria
+	 * have been met. Will add a entry with the time to a list which will
+	 * influence further requests, so only use once and remember the result.
+	 * If the action is to be executed always, it will not be added to the history.
+	 * @param violationData
+	 *            the violation data
+	 * @param action
+	 *            the action
+	 * @param time
+	 *            a time IN SECONDS
+	 * @return true, if the action is to be executed.
+	 */
+	public boolean executeAction(final ViolationData violationData, final Action<ViolationData, ActionList> action, final long time)
+	{
+		if (action.executesAlways()) return true;
+        ExecutionHistoryEntry entry = entries.get(action);
+        if (entry == null) {
+            entry = new ExecutionHistoryEntry(60);
+            entries.put(action, entry);
+        }
 
         // Update entry.
         entry.addCounter(time);
@@ -181,17 +182,17 @@ public class ExecutionHistory {
 
         return false;
     }
-
+    
     /**
      * Access API to check if the action would get executed.
-     *
      * @param violationData
      * @param action
      * @param time
      * @return
      */
-    public boolean wouldExecute(final ViolationData violationData, final Action<ViolationData, ActionList> action, final long time) {
-        if (action.executesAlways()) return true;
+	public boolean wouldExecute(final ViolationData violationData, final Action<ViolationData, ActionList> action, final long time)
+	{
+		if (action.executesAlways()) return true;
         ExecutionHistoryEntry entry = entries.get(action);
         if (entry == null) {
             return action.delay <= 0;
@@ -200,19 +201,18 @@ public class ExecutionHistory {
         // Update entry (not adding).
         entry.checkCounter(time);
 
-        if (entry.getCounter() + 1 > action.delay) {
-            return entry.getLastExecution() <= time - action.repeat;
+        if (entry.getCounter() + 1 > action.delay){
+            if (entry.getLastExecution() <= time - action.repeat) return true;
         }
         return false;
     }
-
+    
     /**
      * Access method.
-     *
      * @param action
      * @return
      */
-    public ExecutionHistoryEntry getEntry(final Action<ViolationData, ActionList> action) {
+    public ExecutionHistoryEntry getEntry(final Action<ViolationData, ActionList> action){
         return entries.get(action);
     }
 }

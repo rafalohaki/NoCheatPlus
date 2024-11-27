@@ -44,7 +44,6 @@ public class DataManager {
     /**
      * Get the exact player name, stored internally.
      * @param playerId
-     * @return playerName
      */
     public static String getPlayerName(final UUID playerId) {
         return instance.getPlayerName(playerId);
@@ -140,7 +139,7 @@ public class DataManager {
      * history, violation history, normal check data).<br>
      * That should at least go for chat engine data.
      * 
-     * @param checkType
+     * @param CheckType
      * @param PlayerName
      * @return If something was removed.
      */
@@ -150,12 +149,23 @@ public class DataManager {
     }
 
     /**
+     * This gets an online player by exact player name or lower-case player name
+     * only [subject to change].
+     * 
+     * @param playerName
+     * @return
+     */
+    public static Player getPlayerExact(final String playerName) {
+        return instance.getPlayerExact(playerName);
+    }
+
+    /**
      * Retrieve the UUID for a given input (name or UUID string of with or
      * without '-'). Might later also query a cache, if appropriate. Convenience
      * method for use with commands.
      * 
      * @param input
-     * @return gets UUID of player
+     * @return
      */
     public static UUID getUUID(final String input) {
         return instance.getUUID(input);
@@ -165,7 +175,7 @@ public class DataManager {
      * Get an online player by UUID.
      * 
      * @param id
-     * @return player
+     * @return
      */
     public static Player getPlayer(final UUID id) {
         return instance.getPlayer(id);
@@ -176,7 +186,7 @@ public class DataManager {
      * to lower case.
      * 
      * @param playerName
-     * @return player
+     * @return
      */
     public static Player getPlayer(final String playerName) {
         return instance.getPlayer(playerName);
@@ -188,7 +198,7 @@ public class DataManager {
      * hides details.
      * 
      * @param player
-     * @return PlayerData
+     * @return
      */
     public static IPlayerData getPlayerData(final Player player) {
         return instance.getPlayerData(player, true);
@@ -260,21 +270,15 @@ public class DataManager {
         try {
             return getPlayerData(player);
         } 
-        catch (UnsupportedOperationException e) {
-            //e.printStackTrace();
-        }
+        catch (UnsupportedOperationException e) {}
         try {
             return getPlayerData(player.getUniqueId());
         } 
-        catch (UnsupportedOperationException e2) {
-            //e2.printStackTrace();
-        }
+        catch (UnsupportedOperationException e) {}
         try {
             return getPlayerData(player.getName());
         } 
-        catch (UnsupportedOperationException e3) {
-            //e3.printStackTrace();
-        }
+        catch (UnsupportedOperationException e) {}
         // Failure.
         return null;
     }

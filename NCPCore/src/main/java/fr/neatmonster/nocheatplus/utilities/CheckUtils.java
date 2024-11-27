@@ -32,6 +32,7 @@ import fr.neatmonster.nocheatplus.logging.StaticLog;
 import fr.neatmonster.nocheatplus.logging.Streams;
 import fr.neatmonster.nocheatplus.players.IPlayerData;
 
+
 /**
  * Random auxiliary gear, some might have general quality. Contents are likely
  * to get moved to other classes. All that is in here should be set up with
@@ -97,8 +98,8 @@ public class CheckUtils {
      * @return Return timestamp or Long.MIN_VALUE if not possible or beyond
      *         maxAge.
      */
-    public static long guessKeepAliveTime(final Player player,
-                                          final long now, final long maxAge, final IPlayerData pData){
+    public static final long guessKeepAliveTime(final Player player, 
+            final long now, final long maxAge, final IPlayerData pData){
         final int tick = TickTask.getTick();
         long ref = Long.MIN_VALUE;
         // Estimate last fight action time (important for gode modes).

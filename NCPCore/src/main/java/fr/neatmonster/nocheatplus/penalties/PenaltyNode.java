@@ -73,7 +73,7 @@ public class PenaltyNode {
             Collection<PenaltyNode> childNodes, boolean abortOnApply) {
         this.probability = probability;
         this.penalty = penalty;
-        this.childNodes = childNodes == null ? new PenaltyNode[0] : childNodes.toArray(new PenaltyNode[0]);
+        this.childNodes = childNodes == null ? new PenaltyNode[0] : childNodes.toArray(new PenaltyNode[childNodes.size()]);
         this.abortOnApply = abortOnApply;
     }
 

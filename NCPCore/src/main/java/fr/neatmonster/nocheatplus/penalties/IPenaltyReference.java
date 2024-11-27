@@ -25,6 +25,6 @@ package fr.neatmonster.nocheatplus.penalties;
  */
 public interface IPenaltyReference {
 
-    String getReferencedPenaltyId();
+    public String getReferencedPenaltyId();
 
 }

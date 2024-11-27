@@ -107,7 +107,7 @@ public class PlayerCheckTypeTree extends CheckTypeTree<PlayerCheckTypeTreeNode>{
         void exemptAsynchronous(final ExemptionContext context) {
             exemptedAsynchronous = true;
             if (exemptionsAsynchronous == null) {
-                exemptionsAsynchronous = new LinkedList<>();
+                exemptionsAsynchronous = new LinkedList<ExemptionContext>();
             }
             exemptionsAsynchronous.add(0, context);
         }
@@ -115,7 +115,7 @@ public class PlayerCheckTypeTree extends CheckTypeTree<PlayerCheckTypeTreeNode>{
         void exemptPrimaryThread(final ExemptionContext context) {
             exemptedPrimaryThread = true;
             if (exemptionsPrimaryThread == null) {
-                exemptionsPrimaryThread = new LinkedList<>();
+                exemptionsPrimaryThread = new LinkedList<ExemptionContext>();
             }
             exemptionsPrimaryThread.add(0, context);
         }
