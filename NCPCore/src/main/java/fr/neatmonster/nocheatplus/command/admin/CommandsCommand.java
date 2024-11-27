@@ -24,7 +24,6 @@ import org.bukkit.ChatColor;
 import fr.neatmonster.nocheatplus.command.BaseCommand;
 import fr.neatmonster.nocheatplus.permissions.Permissions;
 import fr.neatmonster.nocheatplus.utilities.StringUtil;
-import org.jetbrains.annotations.NotNull;
 
 /**
  * This command just shows a list of all commands.
@@ -36,21 +35,21 @@ public class CommandsCommand extends BaseCommand {
     final String[] moreCommands = new String[]{
             // TODO: Mmmmh, spaghetti.
             ChatColor.GOLD +""+ ChatColor.BOLD + "Console commands:",
-            ChatColor.GRAY +""+ ChatColor.BOLD +"• "+ChatColor.RED + ChatColor.ITALIC + "/<command> ban (playername) (reason)"+ChatColor.GRAY+" - Ban player.",
-            ChatColor.GRAY +""+ ChatColor.BOLD +"• "+ChatColor.RED + ChatColor.ITALIC +"/<command> kick (playername) (reason)"+ChatColor.GRAY+" - Kick player.",
-            ChatColor.GRAY +""+ ChatColor.BOLD +"• "+ChatColor.RED + ChatColor.ITALIC +"/<command> tell (playername) (message)"+ChatColor.GRAY+" - Tell a private message to the player.",
-            ChatColor.GRAY +""+ ChatColor.BOLD +"• "+ChatColor.RED + ChatColor.ITALIC +"/<command> delay (delay=ticks) (command to delay)"+ChatColor.GRAY+" - Delay a command execution. Time is in ticks.",
-            ChatColor.GRAY +""+ ChatColor.BOLD +"• "+ChatColor.RED + ChatColor.ITALIC +"/<command> denylogin (playername) (minutes) (reason)"+ChatColor.GRAY+" - Deny log-in for a player.",
+            ChatColor.GRAY +""+ ChatColor.BOLD +"• "+ChatColor.RED +""+ ChatColor.ITALIC + "/<command> ban (playername) (reason)"+ChatColor.GRAY+" - Ban player.",
+            ChatColor.GRAY +""+ ChatColor.BOLD +"• "+ChatColor.RED +""+ ChatColor.ITALIC +"/<command> kick (playername) (reason)"+ChatColor.GRAY+" - Kick player.",
+            ChatColor.GRAY +""+ ChatColor.BOLD +"• "+ChatColor.RED +""+ ChatColor.ITALIC +"/<command> tell (playername) (message)"+ChatColor.GRAY+" - Tell a private message to the player.",
+            ChatColor.GRAY +""+ ChatColor.BOLD +"• "+ChatColor.RED +""+ ChatColor.ITALIC +"/<command> delay (delay=ticks) (command to delay)"+ChatColor.GRAY+" - Delay a command execution. Time is in ticks.",
+            ChatColor.GRAY +""+ ChatColor.BOLD +"• "+ChatColor.RED +""+ ChatColor.ITALIC +"/<command> denylogin (playername) (minutes) (reason)"+ChatColor.GRAY+" - Deny log-in for a player.",
             "",
             ChatColor.GOLD +""+ ChatColor.BOLD + "Auxiliary commands:",
-            ChatColor.GRAY +""+ ChatColor.BOLD +"• "+ChatColor.RED + ChatColor.ITALIC + "/<command> log counters"+ChatColor.GRAY+" - Show some stats/debug counters summary.",
-            ChatColor.GRAY +""+ ChatColor.BOLD +"• "+ChatColor.RED + ChatColor.ITALIC +"/<command> reset counters" +ChatColor.GRAY+ " - Reset some stats/debug counters",
-            ChatColor.GRAY +""+ ChatColor.BOLD +"• "+ChatColor.RED + ChatColor.ITALIC +"/<command> debug player (playername) yes/no:(checktype)"+ChatColor.GRAY+" - Start/End a debug session for a specific check.",
-            ChatColor.GRAY +""+ ChatColor.BOLD +"• "+ChatColor.RED + ChatColor.ITALIC +"/<command> denylist"+ChatColor.GRAY+"- Lists players that have been denied to log-in.",
-            ChatColor.GRAY +""+ ChatColor.BOLD +"• "+ChatColor.RED + ChatColor.ITALIC +"/<command> allowlogin (playername)"+ChatColor.GRAY+" - Allow a player to login again.",
-            ChatColor.GRAY +""+ ChatColor.BOLD +"• "+ChatColor.RED + ChatColor.ITALIC +"/<command> exemptions (playername)"+ChatColor.GRAY+" - Lists all exemptions for a player.",
-            ChatColor.GRAY +""+ ChatColor.BOLD +"• "+ChatColor.RED + ChatColor.ITALIC +"/<command> exempt (playername) (checktype)"+ChatColor.GRAY+" - Exempt a player from a check. * will exempt from all checks.",
-            ChatColor.GRAY +""+ ChatColor.BOLD +"• "+ChatColor.RED + ChatColor.ITALIC +"/<command> unexempt (playername) (checktype)"+ChatColor.GRAY+" - Unexempt a player from a check. * will unexempt from all checks.",
+            ChatColor.GRAY +""+ ChatColor.BOLD +"• "+ChatColor.RED +""+ ChatColor.ITALIC + "/<command> log counters"+ChatColor.GRAY+" - Show some stats/debug counters summary.",
+            ChatColor.GRAY +""+ ChatColor.BOLD +"• "+ChatColor.RED +""+ ChatColor.ITALIC +"/<command> reset counters" +ChatColor.GRAY+ " - Reset some stats/debug counters",
+            ChatColor.GRAY +""+ ChatColor.BOLD +"• "+ChatColor.RED +""+ ChatColor.ITALIC +"/<command> debug player (playername) yes/no:(checktype)"+ChatColor.GRAY+" - Start/End a debug session for a specific check.",
+            ChatColor.GRAY +""+ ChatColor.BOLD +"• "+ChatColor.RED +""+ ChatColor.ITALIC +"/<command> denylist"+ChatColor.GRAY+"- Lists players that have been denied to log-in.",
+            ChatColor.GRAY +""+ ChatColor.BOLD +"• "+ChatColor.RED +""+ ChatColor.ITALIC +"/<command> allowlogin (playername)"+ChatColor.GRAY+" - Allow a player to login again.",
+            ChatColor.GRAY +""+ ChatColor.BOLD +"• "+ChatColor.RED +""+ ChatColor.ITALIC +"/<command> exemptions (playername)"+ChatColor.GRAY+" - Lists all exemptions for a player.",
+            ChatColor.GRAY +""+ ChatColor.BOLD +"• "+ChatColor.RED +""+ ChatColor.ITALIC +"/<command> exempt (playername) (checktype)"+ChatColor.GRAY+" - Exempt a player from a check. * will exempt from all checks.",
+            ChatColor.GRAY +""+ ChatColor.BOLD +"• "+ChatColor.RED +""+ ChatColor.ITALIC +"/<command> unexempt (playername) (checktype)"+ChatColor.GRAY+" - Unexempt a player from a check. * will unexempt from all checks.",
     };
     
     final String allCommands;
@@ -70,7 +69,7 @@ public class CommandsCommand extends BaseCommand {
     }
 
     @Override
-    public boolean onCommand(@NotNull CommandSender sender, @NotNull Command command, @NotNull String label, String[] args) {
+    public boolean onCommand(CommandSender sender, Command command, String label, String[] args) {
         sender.sendMessage(allCommands);
         return true;
     }

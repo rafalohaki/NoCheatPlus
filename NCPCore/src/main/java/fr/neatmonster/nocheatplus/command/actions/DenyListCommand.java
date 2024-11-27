@@ -26,7 +26,6 @@ import fr.neatmonster.nocheatplus.NCPAPIProvider;
 import fr.neatmonster.nocheatplus.command.BaseCommand;
 import fr.neatmonster.nocheatplus.permissions.Permissions;
 import fr.neatmonster.nocheatplus.utilities.StringUtil;
-import org.jetbrains.annotations.NotNull;
 
 public class DenyListCommand extends BaseCommand {
 
@@ -36,7 +35,7 @@ public class DenyListCommand extends BaseCommand {
 		}
 
 	@Override
-	public boolean onCommand(@NotNull CommandSender sender, @NotNull Command command, @NotNull String label, String[] args) {
+	public boolean onCommand(CommandSender sender, Command command, String label, String[] args) {
 		final String[] kicked = NCPAPIProvider.getNoCheatPlusAPI().getLoginDeniedPlayers();
 		if (kicked.length < 100) Arrays.sort(kicked);
 		sender.sendMessage((sender instanceof Player ? TAG : CTAG) + "Players denied to login (temporarily):");

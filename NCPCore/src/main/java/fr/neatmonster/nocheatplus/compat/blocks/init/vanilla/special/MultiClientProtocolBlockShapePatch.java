@@ -17,7 +17,9 @@ package fr.neatmonster.nocheatplus.compat.blocks.init.vanilla.special;
 import java.util.LinkedList;
 import java.util.List;
 
+import fr.neatmonster.nocheatplus.compat.blocks.init.BlockInit;
 import fr.neatmonster.nocheatplus.utilities.map.MaterialUtil;
+import org.bukkit.Bukkit;
 import org.bukkit.Material;
 
 import fr.neatmonster.nocheatplus.compat.BridgeMaterial;
@@ -27,6 +29,7 @@ import fr.neatmonster.nocheatplus.config.WorldConfigProvider;
 import fr.neatmonster.nocheatplus.logging.StaticLog;
 import fr.neatmonster.nocheatplus.utilities.StringUtil;
 import fr.neatmonster.nocheatplus.utilities.map.BlockFlags;
+import fr.neatmonster.nocheatplus.utilities.map.BlockProperties;
 
 /**
  * Multi client protocol support since 1.7, roughly.
@@ -51,7 +54,7 @@ public class MultiClientProtocolBlockShapePatch extends AbstractBlockPropertiesP
     @Override
     public void setupBlockProperties(WorldConfigProvider<?> worldConfigProvider) {
 
-        final List<String> done = new LinkedList<>();
+        final List<String> done = new LinkedList<String>();
 
         //This freaks out with 1.8 using viaversion
         BlockFlags.addFlags(BridgeMaterial.LILY_PAD, BlockFlags.F_GROUND | BlockFlags.F_HEIGHT8_1 | BlockFlags.F_GROUND_HEIGHT);
@@ -67,9 +70,7 @@ public class MultiClientProtocolBlockShapePatch extends AbstractBlockPropertiesP
             BlockFlags.addFlags("HONEY_BLOCK", BlockFlags.F_MIN_HEIGHT16_15 | BlockFlags.F_HEIGHT100 | BlockFlags.F_GROUND_HEIGHT);
             done.add("honey_block");
         }
-        catch (Throwable t) {
-            //t.printStackTrace();
-        }
+        catch (Throwable t) {}
 
 
         try {
@@ -78,9 +79,7 @@ public class MultiClientProtocolBlockShapePatch extends AbstractBlockPropertiesP
             }
             done.add("shulker_box");
         }
-        catch (Throwable t) {
-            //t.printStackTrace();
-        }
+        catch (Throwable t) {}
 
         StaticLog.logInfo("Applied block patches for multi client protocol support: " + StringUtil.join(done, ", "));
     }

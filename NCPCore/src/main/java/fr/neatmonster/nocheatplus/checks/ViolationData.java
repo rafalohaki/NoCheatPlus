@@ -282,7 +282,7 @@ public class ViolationData implements IViolationInfo, ActionData {
             case UUID:
                 return player.getUniqueId().toString();
             case VIOLATIONS:
-                return String.valueOf(Math.round(vL));
+                return String.valueOf((long) Math.round(vL));
             case WORLD: {
                 String world = getParameterValue(ParameterName.WORLD);
                 return world == null ? player.getWorld().getName() : world;
@@ -299,7 +299,7 @@ public class ViolationData implements IViolationInfo, ActionData {
     @Override
     public void setParameter(final ParameterName parameterName, final String value) {
         if (parameters == null) {
-            parameters = new HashMap<>();
+            parameters = new HashMap<ParameterName, String>();
         }
         parameters.put(parameterName, value);
     }

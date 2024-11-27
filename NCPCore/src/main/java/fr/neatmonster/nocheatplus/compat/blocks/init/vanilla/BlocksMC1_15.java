@@ -28,6 +28,7 @@ public class BlocksMC1_15 implements BlockPropertiesSetup{
         BlockProperties.setBlockProps("HONEYCOMB_BLOCK", new BlockProperties.BlockProps(BlockProperties.noTool, 0.6f));
         BlockProperties.setBlockProps("HONEY_BLOCK", BlockProperties.instantType);
         ConfigFile config = ConfigManager.getConfigFile();
-        if (config.getBoolean(ConfPaths.BLOCKBREAK_DEBUG, config.getBoolean(ConfPaths.CHECKS_DEBUG, false))) StaticLog.logInfo("Added block-info for Minecraft 1.15 blocks.");
+        if (config.getBoolean(ConfPaths.BLOCKBREAK_DEBUG, config.getBoolean(ConfPaths.CHECKS_DEBUG, false)))
+        StaticLog.logInfo("Added block-info for Minecraft 1.15 blocks.");
 	}
 }

@@ -199,7 +199,8 @@ public class BlocksMC1_13 implements BlockPropertiesSetup {
         BlockFlags.addFlags(BridgeMaterial.FARMLAND, BlockFlags.F_XZ100 | BlockFlags.F_MIN_HEIGHT16_15);
         
         ConfigFile config = ConfigManager.getConfigFile();
-        if (config.getBoolean(ConfPaths.BLOCKBREAK_DEBUG, config.getBoolean(ConfPaths.CHECKS_DEBUG, false))) StaticLog.logInfo("Added block-info for Minecraft 1.13 blocks.");
+        if (config.getBoolean(ConfPaths.BLOCKBREAK_DEBUG, config.getBoolean(ConfPaths.CHECKS_DEBUG, false)))
+        StaticLog.logInfo("Added block-info for Minecraft 1.13 blocks.");
     }
 
 }

@@ -14,6 +14,8 @@
  */
 package fr.neatmonster.nocheatplus.checks.moving.vehicle;
 
+import org.bukkit.entity.Player;
+
 import fr.neatmonster.nocheatplus.actions.ParameterName;
 import fr.neatmonster.nocheatplus.checks.Check;
 import fr.neatmonster.nocheatplus.checks.CheckType;
@@ -24,7 +26,6 @@ import fr.neatmonster.nocheatplus.checks.moving.location.setback.SetBackEntry;
 import fr.neatmonster.nocheatplus.checks.moving.model.VehicleMoveData;
 import fr.neatmonster.nocheatplus.compat.Folia;
 import fr.neatmonster.nocheatplus.players.IPlayerData;
-import org.bukkit.entity.Player;
 
 /**
  * This check does the exact same thing as the MorePacket check but this one works for players inside vehicles.
@@ -101,7 +102,7 @@ public class VehicleMorePackets extends Check {
             final double seconds = (time - data.vehicleMorePacketsLastTime) / 1000.0;
 
             // For each second, fill the buffer.
-            data.vehicleMorePacketsBuffer += (int) (packetsPerTimeframe * seconds);
+            data.vehicleMorePacketsBuffer += packetsPerTimeframe * seconds;
 
             // If there was a long pause (maybe server lag?), allow buffer to grow up to 100.
             if (seconds > 2) {

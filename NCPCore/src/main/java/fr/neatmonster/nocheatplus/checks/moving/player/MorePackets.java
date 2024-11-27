@@ -38,7 +38,7 @@ import fr.neatmonster.nocheatplus.utilities.location.PlayerLocation;
  */
 public class MorePackets extends Check {
 
-    private final List<String> tags = new ArrayList<>();
+    private final List<String> tags = new ArrayList<String>();
 
     /**
      * Instantiates a new more packets check.

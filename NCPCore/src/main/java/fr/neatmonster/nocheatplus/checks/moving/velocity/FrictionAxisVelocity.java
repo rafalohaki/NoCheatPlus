@@ -32,8 +32,8 @@ public class FrictionAxisVelocity {
 
     private static final double defaultFrictionFactor = 0.93;
 
-    private final List<AccountEntry> queued = new LinkedList<>();
-    private final List<AccountEntry> active = new LinkedList<>();
+    private final List<AccountEntry> queued = new LinkedList<AccountEntry>();
+    private final List<AccountEntry> active = new LinkedList<AccountEntry>();
 
     public void add(AccountEntry vel) {
         // TODO: Merging behavior?

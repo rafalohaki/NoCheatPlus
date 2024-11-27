@@ -32,7 +32,6 @@ import fr.neatmonster.nocheatplus.checks.ViolationHistory.ViolationLevel;
 import fr.neatmonster.nocheatplus.command.BaseCommand;
 import fr.neatmonster.nocheatplus.permissions.Permissions;
 import fr.neatmonster.nocheatplus.players.DataManager;
-import org.jetbrains.annotations.NotNull;
 
 public class InfoCommand extends BaseCommand {
 
@@ -41,7 +40,7 @@ public class InfoCommand extends BaseCommand {
 	}
 
 	@Override
-	public boolean onCommand(@NotNull CommandSender sender, @NotNull Command command, @NotNull String label, String[] args) {
+	public boolean onCommand(CommandSender sender, Command command, String label, String[] args) {
 		if (args.length != 2) {
             sender.sendMessage((sender instanceof Player ? TAG : CTAG) + "Please specify a player.");
             return true;
@@ -110,7 +109,7 @@ public class InfoCommand extends BaseCommand {
 	 * @see fr.neatmonster.nocheatplus.command.AbstractCommand#onTabComplete(org.bukkit.command.CommandSender, org.bukkit.command.Command, java.lang.String, java.lang.String[])
 	 */
 	@Override
-	public List<String> onTabComplete(@NotNull CommandSender sender, @NotNull Command command, @NotNull String alias, String @NotNull [] args) {
+	public List<String> onTabComplete(CommandSender sender, Command command, String alias, String[] args) {
         // Complete Players
         if (args.length == 2) {
             List<String> players = Lists.newArrayList();

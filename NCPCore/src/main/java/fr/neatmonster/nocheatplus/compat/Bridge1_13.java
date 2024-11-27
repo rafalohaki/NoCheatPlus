@@ -80,10 +80,10 @@ public class Bridge1_13 {
     }
 
     public static boolean isRiptiding(final LivingEntity entity) {
-        return hasIsRiptiding && entity.isRiptiding();
+        return hasIsRiptiding ? entity.isRiptiding() : false;
     }
 
     public static boolean isSwimming(final LivingEntity entity) {
-        return hasIsSwimming && entity.isSwimming();
+        return hasIsSwimming ? entity.isSwimming() : false;
     }
 }

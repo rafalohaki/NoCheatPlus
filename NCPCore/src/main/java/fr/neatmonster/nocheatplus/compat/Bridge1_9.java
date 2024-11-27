@@ -137,7 +137,10 @@ public class Bridge1_9 {
             return true;
         }
         stack = getItemInOffHand(player);
-        return stack != null && stack.getType() == material;
+        if (stack != null && stack.getType() == material) {
+            return true;
+        }
+        return false;
     }
 
     @SuppressWarnings("deprecation")
@@ -168,7 +171,7 @@ public class Bridge1_9 {
     }
 
     public static boolean isGliding(final LivingEntity entity) {
-        return hasIsGliding && entity.isGliding();
+        return hasIsGliding ? entity.isGliding() : false;
     }
 
     /**

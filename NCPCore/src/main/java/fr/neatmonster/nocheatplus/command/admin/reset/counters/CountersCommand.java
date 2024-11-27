@@ -21,7 +21,6 @@ import org.bukkit.plugin.java.JavaPlugin;
 import fr.neatmonster.nocheatplus.NCPAPIProvider;
 import fr.neatmonster.nocheatplus.command.BaseCommand;
 import fr.neatmonster.nocheatplus.stats.Counters;
-import org.jetbrains.annotations.NotNull;
 
 public class CountersCommand extends BaseCommand {
 	
@@ -30,7 +29,7 @@ public class CountersCommand extends BaseCommand {
 	}
 	
 	@Override
-	public boolean onCommand(@NotNull CommandSender sender, @NotNull Command command, @NotNull String alias, String[] args) {
+	public boolean onCommand(CommandSender sender, Command command, String alias, String[] args) {
 		NCPAPIProvider.getNoCheatPlusAPI().getGenericInstance(Counters.class).resetAll();
 		sender.sendMessage("Counters reset.");
 		return true;

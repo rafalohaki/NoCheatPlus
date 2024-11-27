@@ -55,7 +55,6 @@ import fr.neatmonster.nocheatplus.config.ConfigManager;
 import fr.neatmonster.nocheatplus.permissions.Permissions;
 import fr.neatmonster.nocheatplus.permissions.RegisteredPermission;
 import fr.neatmonster.nocheatplus.utilities.ColorUtil;
-import org.jetbrains.annotations.NotNull;
 
 /**
  * The /nocheatplus or /ncp command handler, delegates to sub commands.
@@ -83,12 +82,12 @@ public class NoCheatPlusCommand extends BaseCommand {
          * @see org.bukkit.event.Event#getHandlers()
          */
         @Override
-        public @NotNull HandlerList getHandlers() {
+        public HandlerList getHandlers() {
             return handlers;
         }
     }
 
-    private final Set<String> rootLabels = new LinkedHashSet<>();
+    private Set<String> rootLabels = new LinkedHashSet<String>();
 
     /**
      * Instantiates a new command handler.
@@ -135,7 +134,7 @@ public class NoCheatPlusCommand extends BaseCommand {
      * @return
      */
     public Collection<RegisteredPermission> getAllSubCommandPermissions(){
-        final Set<RegisteredPermission> set = new LinkedHashSet<>(rootLabels.size());
+        final Set<RegisteredPermission> set = new LinkedHashSet<RegisteredPermission>(rootLabels.size());
         for (final String label : rootLabels){
             set.add(subCommands.get(label).permission);
         }
@@ -147,8 +146,8 @@ public class NoCheatPlusCommand extends BaseCommand {
      * java.lang.String, java.lang.String[])
      */
     @Override
-    public boolean onCommand(final @NotNull CommandSender sender, final @NotNull Command command, final @NotNull String commandLabel,
-                             final String[] args) {
+    public boolean onCommand(final CommandSender sender, final Command command, final String commandLabel,
+            final String[] args) {
 
         if (!command.getName().equalsIgnoreCase("nocheatplus")){
             // Not our command, how did it get here?

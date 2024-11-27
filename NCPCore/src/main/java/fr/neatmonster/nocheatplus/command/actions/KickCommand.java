@@ -16,6 +16,7 @@ package fr.neatmonster.nocheatplus.command.actions;
 
 import com.google.common.collect.Lists;
 import java.util.List;
+import java.util.logging.Level;
 
 import org.bukkit.Bukkit;
 import org.bukkit.command.Command;
@@ -27,9 +28,9 @@ import fr.neatmonster.nocheatplus.compat.Folia;
 import fr.neatmonster.nocheatplus.command.AbstractCommand;
 import fr.neatmonster.nocheatplus.command.BaseCommand;
 import fr.neatmonster.nocheatplus.logging.StaticLog;
+import fr.neatmonster.nocheatplus.logging.Streams;
 import fr.neatmonster.nocheatplus.permissions.Permissions;
 import fr.neatmonster.nocheatplus.players.DataManager;
-import org.jetbrains.annotations.NotNull;
 
 public class KickCommand extends BaseCommand {
 
@@ -40,7 +41,7 @@ public class KickCommand extends BaseCommand {
     }
 
     @Override
-    public boolean onCommand(final @NotNull CommandSender sender, @NotNull Command command, @NotNull String label, String[] args) {
+    public boolean onCommand(final CommandSender sender, Command command, String label, String[] args) {
         if (!demandConsoleCommandSender(sender)) {
             return true;
         }
@@ -70,8 +71,8 @@ public class KickCommand extends BaseCommand {
      * @see fr.neatmonster.nocheatplus.command.AbstractCommand#onTabComplete(org.bukkit.command.CommandSender, org.bukkit.command.Command, java.lang.String, java.lang.String[])
      */
     @Override
-    public List<String> onTabComplete(@NotNull CommandSender sender, @NotNull Command command,
-                                      @NotNull String alias, String @NotNull [] args) {
+    public List<String> onTabComplete(CommandSender sender, Command command,
+                                      String alias, String[] args) {
         // Complete Players
         if (args.length == 2) {
             List<String> players = Lists.newArrayList();

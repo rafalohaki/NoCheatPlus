@@ -26,7 +26,6 @@ import org.bukkit.entity.Player;
 import fr.neatmonster.nocheatplus.NCPAPIProvider;
 import fr.neatmonster.nocheatplus.command.BaseCommand;
 import fr.neatmonster.nocheatplus.permissions.Permissions;
-import org.jetbrains.annotations.NotNull;
 
 public class AllowLoginCommand extends BaseCommand {
 
@@ -36,8 +35,8 @@ public class AllowLoginCommand extends BaseCommand {
 	}
 
 	@Override
-	public boolean onCommand(@NotNull CommandSender sender, @NotNull Command command,
-                             @NotNull String label, String[] args) {
+	public boolean onCommand(CommandSender sender, Command command,
+			String label, String[] args) {
 
 		if (args.length != 2) {
 			sender.sendMessage((sender instanceof Player ? TAG : "") + "Please specify a player to allow to log-in again.");
@@ -59,8 +58,8 @@ public class AllowLoginCommand extends BaseCommand {
 	 * @see fr.neatmonster.nocheatplus.command.AbstractCommand#onTabComplete(org.bukkit.command.CommandSender, org.bukkit.command.Command, java.lang.String, java.lang.String[])
 	 */
 	@Override
-	public List<String> onTabComplete(@NotNull CommandSender sender, @NotNull Command command,
-                                      @NotNull String alias, String @NotNull [] args) {
+	public List<String> onTabComplete(CommandSender sender, Command command,
+									  String alias, String[] args) {
 		// Complete Players
 		if (args.length == 2) {
 			List<String> players = Lists.newArrayList();

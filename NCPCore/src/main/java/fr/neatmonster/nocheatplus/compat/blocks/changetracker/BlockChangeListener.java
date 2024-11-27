@@ -61,9 +61,9 @@ public class BlockChangeListener implements Listener {
     public final boolean is1_9 = ServerVersion.compareMinecraftVersion("1.9") >= 0;
 
     /** These blocks certainly can't be pushed nor pulled. */
-    public static final long F_MOVABLE_IGNORE = BlockFlags.F_LIQUID;
+    public static long F_MOVABLE_IGNORE = BlockFlags.F_LIQUID;
     /** These blocks might be pushed or pulled. */
-    public static final long F_MOVABLE = BlockFlags.F_GROUND | BlockFlags.F_SOLID;
+    public static long F_MOVABLE = BlockFlags.F_GROUND | BlockFlags.F_SOLID;
 
     private final BlockChangeTracker tracker;
     private final boolean retractHasBlocks;
@@ -122,7 +122,7 @@ public class BlockChangeListener implements Listener {
         },
         new MiniListener<PlayerInteractEvent>() {
             // Include cancelled events, due to the use-block part.
-            @EventHandler(priority = EventPriority.MONITOR)
+            @EventHandler(ignoreCancelled = false, priority = EventPriority.MONITOR)
             @RegisterMethodWithOrder(tag = defaultTag)
             @Override
             public void onEvent(PlayerInteractEvent event) {
@@ -170,7 +170,7 @@ public class BlockChangeListener implements Listener {
 
     @SuppressWarnings("deprecation")
     private Map<Material, ToolType> init() {
-        Map<Material, ToolType> blocks = new HashMap<>();
+        Map<Material, ToolType> blocks = new HashMap<Material, ToolType>();
         blocks.put(BridgeMaterial.GRASS_BLOCK, ToolType.HOE);
         blocks.put(Material.DIRT, ToolType.HOE);
         if (is1_13) {
@@ -260,7 +260,7 @@ public class BlockChangeListener implements Listener {
                 final Block retBlock = retLoc.getBlock();
                 final long flags = BlockFlags.getBlockFlags(retBlock.getType());
                 if ((flags & F_MOVABLE_IGNORE) == 0L && (flags & F_MOVABLE) != 0L) {
-                    blocks = new ArrayList<>(1);
+                    blocks = new ArrayList<Block>(1);
                     blocks.add(retBlock);
                 }
                 else {

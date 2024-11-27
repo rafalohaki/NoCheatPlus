@@ -47,7 +47,7 @@ public class BridgeHealth {
     // TODO: Move to (smaller?) IGenericInstanceHandle instances.
 
     /** For debugging purposes. TODO: Reset on shutdown !? */
-    private static final Set<String> failures = new HashSet<>();
+    private static Set<String> failures = new HashSet<String>();
 
     private static DamageCause getDamageCause(String name) {
         try {
@@ -75,8 +75,8 @@ public class BridgeHealth {
      *            incompatibility".
      * @return
      */
-    public static double getDoubleOrInt(final Object obj,
-                                        final String methodName, final Throwable reason) {
+    public static final double getDoubleOrInt(final Object obj, 
+            final String methodName, final Throwable reason) {
         if (reason != null) {
             final String tag = obj.getClass().getName() + "." + methodName;
             if (failures.add(tag)) {
@@ -232,7 +232,7 @@ public class BridgeHealth {
             // TODO: Better recalculate modifiers, as this scales them.
             setFinalDamage(event, event.getFinalDamage() * multiplier);
         }
-        catch (Throwable t) {
+        catch (Throwable e) {
             setFinalDamage(event, getRawDamage(event) * multiplier);
         }
     }

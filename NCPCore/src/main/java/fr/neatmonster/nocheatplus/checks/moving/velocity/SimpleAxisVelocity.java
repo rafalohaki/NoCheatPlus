@@ -14,10 +14,10 @@
  */
 package fr.neatmonster.nocheatplus.checks.moving.velocity;
 
-import fr.neatmonster.nocheatplus.utilities.TickTask;
-
 import java.util.Iterator;
 import java.util.LinkedList;
+
+import fr.neatmonster.nocheatplus.utilities.TickTask;
 
 /**
  * Simple per-axis velocity (positive + negative), only accounting for queuing
@@ -41,10 +41,16 @@ public class SimpleAxisVelocity {
     /** Size of queued for which to force cleanup on add. */
     private static final double thresholdCleanup = 20;
 
-    private final LinkedList<SimpleEntry> queued = new LinkedList<>();
+    private final LinkedList<SimpleEntry> queued = new LinkedList<SimpleEntry>();
 
     /** Activation flag for tracking unused velocity. */
     private boolean unusedActive = true;
+    /**
+     * Sensitivity for tracking unused velocity (absolute amount, counts for
+     * positive and negative).
+     */
+    // TODO: Ignoring 0-dist velocity allows 'moving on', though.
+    private double unusedSensitivity = 0.1;
     // TODO: Visibility of trackers, concept, etc.
     public final UnusedTracker unusedTrackerPos = new UnusedTracker();
     // TODO: Might do without tracking negative velocity.
@@ -128,7 +134,7 @@ public class SimpleAxisVelocity {
         return entry;
     }
 
-    private boolean allowsSplit(final SimpleEntry entry, final double amount) {
+    private final boolean allowsSplit(final SimpleEntry entry, final double amount) {
         if ((entry.flags & FILTER_SPLIT) == 0L) {
             return false;
         }
@@ -234,12 +240,6 @@ public class SimpleAxisVelocity {
      */
     private void addUnused(final SimpleEntry entry) {
         // Global pre-conditions (sensitivity, skip entries that are supposed to be even more fake than default).
-        /**
-         * Sensitivity for tracking unused velocity (absolute amount, counts for
-         * positive and negative).
-         */
-        // TODO: Ignoring 0-dist velocity allows 'moving on', though.
-        double unusedSensitivity = 0.1;
         if (Math.abs(entry.value) < unusedSensitivity || entry.initialActCount < 5) {
             return;
         }

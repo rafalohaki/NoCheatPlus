@@ -14,6 +14,16 @@
  */
 package fr.neatmonster.nocheatplus.checks.moving.player;
 
+import java.util.LinkedList;
+import java.util.List;
+import java.util.Locale;
+
+import org.bukkit.GameMode;
+import org.bukkit.Location;
+import org.bukkit.World;
+import org.bukkit.entity.Player;
+import org.bukkit.util.Vector;
+
 import fr.neatmonster.nocheatplus.NCPAPIProvider;
 import fr.neatmonster.nocheatplus.actions.ParameterName;
 import fr.neatmonster.nocheatplus.checks.Check;
@@ -36,22 +46,12 @@ import fr.neatmonster.nocheatplus.compat.BridgeMisc;
 import fr.neatmonster.nocheatplus.compat.blocks.changetracker.BlockChangeTracker;
 import fr.neatmonster.nocheatplus.components.modifier.IAttributeAccess;
 import fr.neatmonster.nocheatplus.components.registry.event.IGenericInstanceHandle;
-import fr.neatmonster.nocheatplus.permissions.Permissions;
 import fr.neatmonster.nocheatplus.players.IPlayerData;
 import fr.neatmonster.nocheatplus.utilities.StringUtil;
 import fr.neatmonster.nocheatplus.utilities.location.PlayerLocation;
 import fr.neatmonster.nocheatplus.utilities.location.TrigUtil;
+import fr.neatmonster.nocheatplus.utilities.map.BlockProperties;
 import fr.neatmonster.nocheatplus.utilities.map.BlockFlags;
-import org.bukkit.GameMode;
-import org.bukkit.Location;
-import org.bukkit.Material;
-import org.bukkit.World;
-import org.bukkit.entity.Player;
-import org.bukkit.util.Vector;
-
-import java.util.LinkedList;
-import java.util.List;
-import java.util.Locale;
 
 
 /**
@@ -60,9 +60,9 @@ import java.util.Locale;
  */
 public class CreativeFly extends Check {
 
-    private final List<String> tags = new LinkedList<>();
+    private final List<String> tags = new LinkedList<String>();
     private final BlockChangeTracker blockChangeTracker;
-    private final IGenericInstanceHandle<IAttributeAccess> attributeAccess = NCPAPIProvider.getNoCheatPlusAPI().getGenericInstanceHandle(IAttributeAccess.class);
+    private IGenericInstanceHandle<IAttributeAccess> attributeAccess = NCPAPIProvider.getNoCheatPlusAPI().getGenericInstanceHandle(IAttributeAccess.class);
 
 
    /**
@@ -297,7 +297,7 @@ public class CreativeFly extends Check {
                 vd.setParameter(ParameterName.LOCATION_TO, String.format(Locale.US, "%.2f, %.2f, %.2f", to.getX(), to.getY(), to.getZ()));
                 vd.setParameter(ParameterName.DISTANCE, String.format(Locale.US, "%.2f", TrigUtil.distance(from,  to)));
                 if (model != null) {
-                    vd.setParameter(ParameterName.MODEL, model.getId());
+                    vd.setParameter(ParameterName.MODEL, model.getId().toString());
                 }
                 if (!tags.isEmpty()) {
                     vd.setParameter(ParameterName.TAGS, StringUtil.join(tags, "+"));
@@ -717,7 +717,7 @@ public class CreativeFly extends Check {
                 // Handled somewhere else
                 // TODO: More strict vertical check
                 thisMove.yAllowedDistance = allowedElytraYDistance = yDistance;
-                if (Math.round((float) data.fireworksBoostTickNeedCheck / 4) > data.fireworksBoostDuration
+                if (Math.round(data.fireworksBoostTickNeedCheck / 4) > data.fireworksBoostDuration
                     && hDistance < Math.sqrt(x*x + z*z)) {
                     thisMove.hAllowedDistance = Math.sqrt(x*x + z*z);
                     if (debug) debug(player, "Set hAllowedDistance for this firework boost phase (hDist/Allowed): " + thisMove.hDistance + "/" + thisMove.hAllowedDistance);
@@ -1117,7 +1117,7 @@ public class CreativeFly extends Check {
             if (model.getScaleLevitationEffect()) {
                 final double amount = lastMove.hAllowedDistance > 0.0 ? lastMove.hAllowedDistance : lastMove.hDistance;
                 if (thisMove.touchedGround) data.addHorizontalVelocity(new AccountEntry(amount, 2, MovingData.getHorVelValCount(amount)));
-                if (debug) debug(player, lastMove.modelFlying.getId() + " -> potion.levitation: add velocity");
+                if (debug) debug(player, lastMove.modelFlying.getId().toString() + " -> potion.levitation: add velocity");
                 return;
             }
 
@@ -1154,7 +1154,7 @@ public class CreativeFly extends Check {
         // Quick change between models, reset friction, invalid
         if (secondPastMove.modelFlying != null && lastMove.modelFlying != null
             && secondPastMove.modelFlying == model && model != lastMove.modelFlying) {
-            if (debug) debug(player, "Invalidate this move on too fast model switch: " + (secondPastMove.modelFlying.getId() + " -> " + lastMove.modelFlying.getId() + " -> " + model.getId()));
+            if (debug) debug(player, "Invalidate this move on too fast model switch: " + (secondPastMove.modelFlying.getId().toString() + " -> " + lastMove.modelFlying.getId().toString() + " -> " + model.getId().toString()));
             thisMove.invalidate();
         }
     }
@@ -1237,7 +1237,7 @@ public class CreativeFly extends Check {
         if (data.fireworksBoostDuration > 0) {
             allowedElytraYDistance = Math.abs(thisMove.yDistance) < 2.0 ?
                     thisMove.yDistance : lastMove.toIsValid ? lastMove.yDistance : 0;
-            if (Math.round((float) data.fireworksBoostTickNeedCheck / 4) > data.fireworksBoostDuration
+            if (Math.round(data.fireworksBoostTickNeedCheck / 4) > data.fireworksBoostDuration 
                 && thisMove.hDistance < Math.sqrt(x*x + z*z)) {
                 return new double[] {Math.sqrt(x*x + z*z), allowedElytraYDistance};
             }

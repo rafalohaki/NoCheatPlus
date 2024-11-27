@@ -16,6 +16,7 @@ package fr.neatmonster.nocheatplus.compat.blocks.init.vanilla;
 
 import org.bukkit.Material;
 
+import fr.neatmonster.nocheatplus.compat.BridgeMaterial;
 import fr.neatmonster.nocheatplus.compat.blocks.BlockPropertiesSetup;
 import fr.neatmonster.nocheatplus.compat.blocks.init.BlockInit;
 import fr.neatmonster.nocheatplus.compat.versions.ServerVersion;
@@ -23,6 +24,8 @@ import fr.neatmonster.nocheatplus.config.*;
 import fr.neatmonster.nocheatplus.logging.StaticLog;
 import fr.neatmonster.nocheatplus.utilities.map.BlockFlags;
 import fr.neatmonster.nocheatplus.utilities.map.BlockProperties;
+import fr.neatmonster.nocheatplus.utilities.map.BlockProperties.BlockProps;
+import fr.neatmonster.nocheatplus.utilities.map.MaterialUtil;
 
 public class BlocksMC1_19 implements BlockPropertiesSetup {
     public BlocksMC1_19() {
@@ -93,6 +96,7 @@ public class BlocksMC1_19 implements BlockPropertiesSetup {
         }
 
         ConfigFile config = ConfigManager.getConfigFile();
-        if (config.getBoolean(ConfPaths.BLOCKBREAK_DEBUG, config.getBoolean(ConfPaths.CHECKS_DEBUG, false))) StaticLog.logInfo("Added block-info for Minecraft 1.19 blocks.");
+        if (config.getBoolean(ConfPaths.BLOCKBREAK_DEBUG, config.getBoolean(ConfPaths.CHECKS_DEBUG, false)))
+        StaticLog.logInfo("Added block-info for Minecraft 1.19 blocks.");
     }
 }

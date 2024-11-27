@@ -14,14 +14,16 @@
  */
 package fr.neatmonster.nocheatplus.checks.moving.vehicle;
 
+import org.bukkit.entity.Entity;
+import org.bukkit.entity.Player;
+
 import fr.neatmonster.nocheatplus.checks.moving.MovingData;
 import fr.neatmonster.nocheatplus.components.entity.IEntityAccessVehicle;
 import fr.neatmonster.nocheatplus.components.registry.event.IHandle;
 import fr.neatmonster.nocheatplus.logging.StaticLog;
 import fr.neatmonster.nocheatplus.players.DataManager;
 import fr.neatmonster.nocheatplus.players.IPlayerData;
-import org.bukkit.entity.Entity;
-import org.bukkit.entity.Player;
+import fr.neatmonster.nocheatplus.utilities.location.TrigUtil;
 
 /**
  * Task for scheduling a passenger set back. Resets the vehicleSetPassengerTaskId in

@@ -14,6 +14,8 @@
  */
 package fr.neatmonster.nocheatplus.command.admin.log.stream;
 
+import java.util.logging.Level;
+
 import org.bukkit.ChatColor;
 import org.bukkit.command.Command;
 import org.bukkit.command.CommandSender;
@@ -26,9 +28,6 @@ import fr.neatmonster.nocheatplus.logging.StreamID;
 import fr.neatmonster.nocheatplus.logging.Streams;
 import fr.neatmonster.nocheatplus.utilities.ColorUtil;
 import fr.neatmonster.nocheatplus.utilities.StringUtil;
-import org.jetbrains.annotations.NotNull;
-
-import java.util.logging.Level;
 
 /**
  * Log to any log stream (console only).
@@ -44,7 +43,7 @@ public class StreamCommand extends BaseCommand {
     }
 
     @Override
-    public boolean onCommand(@NotNull CommandSender sender, @NotNull Command command, @NotNull String alias, String[] args) {
+    public boolean onCommand(CommandSender sender, Command command, String alias, String[] args) {
         if (!demandConsoleCommandSender(sender)) {
             return true;
         }
@@ -102,33 +101,32 @@ public class StreamCommand extends BaseCommand {
             StreamID streamId = man.getStreamID(streamDef);
             if (streamId == null) {
                 String altStreamDef = streamDef.toLowerCase();
-                switch (altStreamDef) {
-                    case "notify":
-                        // Default level should be INFO.
-                        streamId = Streams.NOTIFY_INGAME;
-                        break;
-                    case "debug":
-                        streamId = Streams.TRACE_FILE;
-                        if (level == null) {
-                            level = Level.FINE;
-                        }
-                        break;
-                    case "status":
-                        streamId = Streams.STATUS;
-                        break;
-                    case "init":
-                        streamId = Streams.INIT;
-                        break;
-                    case "console":
-                        // Prefer the plugin logger.
-                        streamId = Streams.PLUGIN_LOGGER;
-                        break;
-                    case "file":
-                        streamId = Streams.DEFAULT_FILE;
-                        break;
-                    default:
-                        sender.sendMessage("Bad stream id: " + streamDef);
-                        continue;
+                if (altStreamDef.equals("notify")) {
+                    // Default level should be INFO.
+                    streamId = Streams.NOTIFY_INGAME;
+                }
+                else if (altStreamDef.equals("debug")) {
+                    streamId = Streams.TRACE_FILE;
+                    if (level == null) {
+                        level = Level.FINE;
+                    }
+                }
+                else if (altStreamDef.equals("status")) {
+                    streamId = Streams.STATUS;
+                }
+                else if (altStreamDef.equals("init")) {
+                    streamId = Streams.INIT;
+                }
+                else if (altStreamDef.equals("console")) {
+                    // Prefer the plugin logger.
+                    streamId = Streams.PLUGIN_LOGGER;
+                }
+                else if (altStreamDef.equals("file")) {
+                    streamId = Streams.DEFAULT_FILE;
+                }
+                else {
+                    sender.sendMessage("Bad stream id: " + streamDef);
+                    continue;
                 }
             }
             // Finally log.

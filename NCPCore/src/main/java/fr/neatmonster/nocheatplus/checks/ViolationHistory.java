@@ -129,7 +129,7 @@ public class ViolationHistory {
          * @return If none are found, null is returned, no errors will be thrown, duplicates are removed. 
          */
         public static Comparator<VLView> parseMixedComparator(String[] args, int startIndex) {
-            final Set<Comparator<VLView>> comparators = new LinkedHashSet<>();
+            final Set<Comparator<VLView>> comparators = new LinkedHashSet<Comparator<VLView>>();
             for (int i = startIndex; i < args.length; i ++) {
                 String arg = args[i].toLowerCase();
                 while (arg.startsWith("-")) {
@@ -154,7 +154,7 @@ public class ViolationHistory {
             if (comparators.isEmpty()) {
                 return null;
             }
-            return new FCFSComparator<>(comparators, true);
+            return new FCFSComparator<ViolationHistory.VLView>(comparators, true);
         }
 
         public final String name;
@@ -180,11 +180,11 @@ public class ViolationHistory {
     }
 
     /** Map the check string names to check types (workaround, keep at default, set by Check)*/
-    static final Map<String, CheckType> checkTypeMap = new HashMap<>();
+    static Map<String, CheckType> checkTypeMap = new HashMap<String, CheckType>();
 
     // TODO: Maybe add to metrics: average length of violation histories (does it pay to use SkipListSet or so).
     /** The histories of all the players. */
-    private static final Map<String, ViolationHistory> violationHistories = new HashMap<>();
+    private static Map<String, ViolationHistory> violationHistories = new HashMap<String, ViolationHistory>();
 
     /**
      * Gets the history of a player.
@@ -236,7 +236,7 @@ public class ViolationHistory {
      * @return Always returns a list.
      */
     public static List<VLView> getView(final CheckType checkType) {
-        final List<VLView> view = new LinkedList<>();
+        final List<VLView> view = new LinkedList<VLView>();
         for (final Entry<String, ViolationHistory> entry: violationHistories.entrySet()) {
             final ViolationHistory hist = entry.getValue();
             final ViolationLevel vl = hist.getViolationLevel(checkType);
@@ -258,7 +258,7 @@ public class ViolationHistory {
     }
 
     /** The violation levels for every check. */
-    private final List<ViolationLevel> violationLevels = new ArrayList<>();
+    private final List<ViolationLevel> violationLevels = new ArrayList<ViolationLevel>();
 
     /**
      * Gets the violation levels. Sorted by time, descending.

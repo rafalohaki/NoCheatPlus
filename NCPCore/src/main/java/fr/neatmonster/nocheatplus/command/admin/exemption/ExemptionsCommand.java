@@ -30,7 +30,6 @@ import fr.neatmonster.nocheatplus.hooks.NCPExemptionManager;
 import fr.neatmonster.nocheatplus.permissions.Permissions;
 import fr.neatmonster.nocheatplus.players.DataManager;
 import fr.neatmonster.nocheatplus.utilities.StringUtil;
-import org.jetbrains.annotations.NotNull;
 
 public class ExemptionsCommand extends BaseCommand {
 
@@ -39,7 +38,7 @@ public class ExemptionsCommand extends BaseCommand {
     }
 
     @Override
-    public boolean onCommand(@NotNull CommandSender sender, @NotNull Command command, @NotNull String label, String[] args) {
+    public boolean onCommand(CommandSender sender, Command command, String label, String[] args) {
 
 
         final String c1, c2, c3, c4, c5, c6, c7;
@@ -68,9 +67,9 @@ public class ExemptionsCommand extends BaseCommand {
         } else {
             id = DataManager.getUUID(playerName);
         }
-        final List<String> entries = new LinkedList<>();
+        final List<String> entries = new LinkedList<String>();
         if (id == null) {
-            sender.sendMessage((sender instanceof Player ? TAG : CTAG) + "Not online nor a UUID: " + c3 + playerName + c1 + " .");
+            sender.sendMessage((sender instanceof Player ? TAG : CTAG) + "Not online nor a UUID: " + c3 +""+ playerName + c1 + " .");
             return true;
         } else {
             for (CheckType type : CheckType.values()){
@@ -80,11 +79,11 @@ public class ExemptionsCommand extends BaseCommand {
             }
         }
         if (entries.isEmpty()) {
-            sender.sendMessage((sender instanceof Player ? TAG : CTAG) + "No exemption entries available for " + c3 + playerName + c1 + " .");
+            sender.sendMessage((sender instanceof Player ? TAG : CTAG) + "No exemption entries available for " + c3 +""+ playerName + c1 + " .");
         }
         else {
             // TODO: Compress entries ?
-            sender.sendMessage((sender instanceof Player ? TAG : CTAG) + "Exemptions for " + c3 +  playerName + c1 + ": " + c3 + StringUtil.join(entries, ", "));
+            sender.sendMessage((sender instanceof Player ? TAG : CTAG) + "Exemptions for " + c3 +""+  playerName + c1 + ": " + c3 +""+ StringUtil.join(entries, ", "));
         }
         return true;
     }
@@ -93,7 +92,7 @@ public class ExemptionsCommand extends BaseCommand {
      * @see fr.neatmonster.nocheatplus.command.AbstractCommand#onTabComplete(org.bukkit.command.CommandSender, org.bukkit.command.Command, java.lang.String, java.lang.String[])
      */
     @Override
-    public List<String> onTabComplete(@NotNull CommandSender sender, @NotNull Command command, @NotNull String alias, String @NotNull [] args) {
+    public List<String> onTabComplete(CommandSender sender, Command command, String alias, String[] args) {
         // Fill in players.
         return null;
     }

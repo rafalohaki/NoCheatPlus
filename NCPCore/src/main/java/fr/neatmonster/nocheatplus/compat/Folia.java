@@ -94,9 +94,10 @@ public class Folia {
             Method executeMethod = schedulerClass.getMethod("runAtFixedRate", Plugin.class, Consumer.class, long.class, long.class);
 
             //ReflectionUtil.invokeMethod(executeMethod, syncScheduler, plugin, run, delay, period);
-            return executeMethod.invoke(syncScheduler, plugin, run, delay, period);
+            Object taskInfo = executeMethod.invoke(syncScheduler, plugin, run, delay, period);
+            return taskInfo;
         } catch (Exception e) {
-            //e.printStackTrace();
+            e.printStackTrace();
         }
         return null;
     }
@@ -118,9 +119,10 @@ public class Folia {
             Class<?> schedulerClass = syncScheduler.getClass();
             Method executeMethod = schedulerClass.getMethod("run", Plugin.class, Consumer.class);
 
-            return executeMethod.invoke(syncScheduler, plugin, run);
+            Object taskInfo = executeMethod.invoke(syncScheduler, plugin, run);
+            return taskInfo;
         } catch (Exception e) {
-            //e.printStackTrace();
+            e.printStackTrace();
         }
         return null;
     }
@@ -143,9 +145,10 @@ public class Folia {
             Class<?> schedulerClass = syncScheduler.getClass();
             Method executeMethod = schedulerClass.getMethod("runDelayed", Plugin.class, Consumer.class, long.class);
 
-            return executeMethod.invoke(syncScheduler, plugin, run, delay);
+            Object taskInfo = executeMethod.invoke(syncScheduler, plugin, run, delay);
+            return taskInfo;
         } catch (Exception e) {
-            //e.printStackTrace();
+            e.printStackTrace();
         }
         return null;
     }
@@ -182,9 +185,10 @@ public class Folia {
             Class<?> schedulerClass = syncEntityScheduler.getClass();
             Method executeMethod = schedulerClass.getMethod("runDelayed", Plugin.class, Consumer.class, Runnable.class, long.class);
 
-            return executeMethod.invoke(syncEntityScheduler, plugin, run, retired, delay);
+            Object taskInfo = executeMethod.invoke(syncEntityScheduler, plugin, run, retired, delay);
+            return taskInfo;
         } catch (Exception e) {
-            //e.printStackTrace();
+            e.printStackTrace();
         }
         return null;
     }
@@ -228,7 +232,7 @@ public class Folia {
                 //executeMethod = schedulerClass.getMethod("cancelTasks", Plugin.class);
                 //executeMethod.invoke(asyncScheduler, plugin);
             } catch (Exception e) {
-                //e.printStackTrace();
+                e.printStackTrace();
             }
         }
     }
@@ -243,7 +247,7 @@ public class Folia {
             CompletableFuture<Boolean> res = (CompletableFuture<Boolean>) result;
             return res.get();
         } catch (Exception e) {
-            //e.printStackTrace();
+            e.printStackTrace();
         }
         return false;
     }

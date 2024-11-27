@@ -14,15 +14,16 @@
  */
 package fr.neatmonster.nocheatplus.checks.net;
 
+import java.util.LinkedList;
+import java.util.concurrent.locks.Lock;
+import java.util.concurrent.locks.ReentrantLock;
+
+import org.bukkit.entity.Player;
+
 import fr.neatmonster.nocheatplus.checks.access.ACheckData;
 import fr.neatmonster.nocheatplus.checks.net.model.DataPacketFlying;
 import fr.neatmonster.nocheatplus.checks.net.model.TeleportQueue;
 import fr.neatmonster.nocheatplus.utilities.ds.count.ActionFrequency;
-import org.bukkit.entity.Player;
-
-import java.util.LinkedList;
-import java.util.concurrent.locks.Lock;
-import java.util.concurrent.locks.ReentrantLock;
 
 /**
  * Data for net checks. Some data structures may not be thread-safe, intended
@@ -38,7 +39,7 @@ public class NetData extends ACheckData {
     private final Lock lock = new ReentrantLock();
 
     // AttackFrequency
-    public final ActionFrequency attackFrequencySeconds = new ActionFrequency(16, 500);
+    public ActionFrequency attackFrequencySeconds = new ActionFrequency(16, 500);
 
     // FlyingFrequency
     /** All flying packets, use System.currentTimeMillis() for time. */
@@ -60,7 +61,7 @@ public class NetData extends ACheckData {
      * Last 20 seconds keep alive packets counting. Use lastUpdate() for the
      * time of the last event. System.currentTimeMillis() is used.
      */
-    public final ActionFrequency keepAliveFreq = new ActionFrequency(20, 1000);
+    public ActionFrequency keepAliveFreq = new ActionFrequency(20, 1000);
 	
 	// Wrong Turn
     public double wrongTurnVL = 0;
@@ -84,7 +85,9 @@ public class NetData extends ACheckData {
      * primary thread. Latest packet is first.
      */
     // TODO: Might extend to synchronize with moving events.
-    private final LinkedList<DataPacketFlying> flyingQueue = new LinkedList<>();
+    private final LinkedList<DataPacketFlying> flyingQueue = new LinkedList<DataPacketFlying>();
+    /** Maximum amount of packets to store. */
+    private final int flyingQueueMaxSize = 15;
     /**
      * The maximum of so far already returned sequence values, altered under
      * lock.
@@ -127,8 +130,6 @@ public class NetData extends ACheckData {
         lock.lock();
         packetData.setSequence(++maxSequence);
         flyingQueue.addFirst(packetData);
-        /** Maximum amount of packets to store. */
-        int flyingQueueMaxSize = 15;
         if (flyingQueue.size() > flyingQueueMaxSize) {
             flyingQueue.removeLast();
             res = true;
@@ -158,7 +159,7 @@ public class NetData extends ACheckData {
          * same time ? Packet inversion is acute on 1.11.2 (dig is processed
          * before flying).
          */
-        final DataPacketFlying[] out = flyingQueue.toArray(new DataPacketFlying[0]);
+        final DataPacketFlying[] out = flyingQueue.toArray(new DataPacketFlying[flyingQueue.size()]);
         lock.unlock();
         return out;
     }

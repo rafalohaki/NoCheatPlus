@@ -52,6 +52,7 @@ import fr.neatmonster.nocheatplus.compat.versions.ServerVersion;
 import fr.neatmonster.nocheatplus.players.IPlayerData;
 import fr.neatmonster.nocheatplus.utilities.ReflectionUtil;
 import fr.neatmonster.nocheatplus.utilities.location.PlayerLocation;
+import fr.neatmonster.nocheatplus.utilities.map.BlockProperties;
 import fr.neatmonster.nocheatplus.utilities.map.BlockFlags;
 import fr.neatmonster.nocheatplus.utilities.map.MaterialUtil;
 
@@ -90,7 +91,7 @@ public class NoFall extends Check {
      * @param fallDistance
      * @return
      */
-    public static double getDamage(final float fallDistance) {
+    public static final double getDamage(final float fallDistance) {
         return fallDistance - Magic.FALL_DAMAGE_DIST;
     }
 
@@ -233,7 +234,7 @@ public class NoFall extends Check {
             newstate.setType(Material.DIRT);
             final BlockFadeEvent fadeevent = new BlockFadeEvent(block, newstate);
             Bukkit.getPluginManager().callEvent(fadeevent);
-            return !fadeevent.isCancelled();
+            if (fadeevent.isCancelled()) return false;
         }
         return true;
     }
@@ -314,7 +315,8 @@ public class NoFall extends Check {
             // TODO: In case of velocity... skip too / calculate max exempt height?
             final double correction = data.noFallMaxY - previousSetBackY;
             if (correction > 0.0) {
-                return (float) Math.max(0.0, yDistance - correction);
+                final float effectiveDistance = (float) Math.max(0.0, yDistance - correction);
+                return effectiveDistance;
             }
         }
         return yDistance;
@@ -489,7 +491,7 @@ public class NoFall extends Check {
             // Check if to deal damage.
             if (yDiff < 0) {
                 // In this case the player has traveled further: add the difference.
-                data.noFallFallDistance -= (float) yDiff;
+                data.noFallFallDistance -= yDiff;
             }
             touchDown(player, minY, previousSetBackY, data, cc, pData);
         }
@@ -511,7 +513,7 @@ public class NoFall extends Check {
 
         // Add y distance.
         if (!toReset && !toOnGround && yDiff < 0) {
-            data.noFallFallDistance -= (float) yDiff;
+            data.noFallFallDistance -= yDiff;
         }
         else if (cc.noFallAntiCriticals && (toReset || toOnGround || (fromReset || fromOnGround || thisMove.touchedGround) && yDiff >= 0)) {
             final double max = Math.max(data.noFallFallDistance, mcFallDistance);

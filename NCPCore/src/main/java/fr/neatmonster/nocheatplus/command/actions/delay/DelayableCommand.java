@@ -24,7 +24,6 @@ import fr.neatmonster.nocheatplus.command.BaseCommand;
 import fr.neatmonster.nocheatplus.compat.Folia;
 import fr.neatmonster.nocheatplus.permissions.RegisteredPermission;
 import fr.neatmonster.nocheatplus.logging.StaticLog;
-import org.jetbrains.annotations.NotNull;
 
 /**
  * A command that allows to specify a delay for running.
@@ -133,8 +132,8 @@ public abstract class DelayableCommand extends BaseCommand {
             String[] alteredArgs, long delay);
 
     @Override
-    public boolean onCommand(final @NotNull CommandSender sender, final @NotNull Command command,
-                             final @NotNull String label, final String[] args ) {
+    public boolean onCommand(final CommandSender sender, final Command command, 
+            final String label, final String[] args ) {
 
         if (demandConsoleCommandSender && !demandConsoleCommandSender(sender)) {
             return true;
@@ -144,7 +143,8 @@ public abstract class DelayableCommand extends BaseCommand {
         String[] alteredArgs;
         if (args.length <= delayIndex){
             // No delay found, if demanded return.
-            if (mustHaveDelay) StaticLog.logInfo("Bad setup. Command usage /ncp delay delay=(ticks) (command to delay).");
+            if (mustHaveDelay) 
+            StaticLog.logInfo("Bad setup. Command usage /ncp delay delay=(ticks) (command to delay).");
             alteredArgs = args;
             return true;
         }
@@ -184,7 +184,7 @@ public abstract class DelayableCommand extends BaseCommand {
      * @see fr.neatmonster.nocheatplus.command.AbstractCommand#onTabComplete(org.bukkit.command.CommandSender, org.bukkit.command.Command, java.lang.String, java.lang.String[])
      */
     @Override
-    public List<String> onTabComplete(@NotNull CommandSender sender, @NotNull Command command, @NotNull String alias, String @NotNull [] args) {
+    public List<String> onTabComplete(CommandSender sender, Command command, String alias, String[] args) {
         // Fill in players.
         // TODO: Add altered signature for alteredArgs ?
         return null;

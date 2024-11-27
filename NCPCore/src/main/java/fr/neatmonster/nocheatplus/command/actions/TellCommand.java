@@ -29,7 +29,6 @@ import fr.neatmonster.nocheatplus.permissions.Permissions;
 import fr.neatmonster.nocheatplus.players.DataManager;
 import fr.neatmonster.nocheatplus.utilities.ColorUtil;
 import fr.neatmonster.nocheatplus.logging.StaticLog;
-import org.jetbrains.annotations.NotNull;
 
 /**
  * For warnings etc.
@@ -43,7 +42,7 @@ public class TellCommand extends BaseCommand {
 	}
 
 	@Override
-	public boolean onCommand(@NotNull CommandSender sender, @NotNull Command command, @NotNull String label, final String[] args) {
+	public boolean onCommand(CommandSender sender, Command command, String label, final String[] args) {
 		if (!demandConsoleCommandSender(sender)) {
 			return true;
 		}
@@ -66,8 +65,8 @@ public class TellCommand extends BaseCommand {
 	 * @see fr.neatmonster.nocheatplus.command.BaseCommand#onTabComplete(org.bukkit.command.CommandSender, org.bukkit.command.Command, java.lang.String, java.lang.String[])
 	 */
 	@Override
-	public List<String> onTabComplete(@NotNull CommandSender sender, @NotNull Command command,
-                                      @NotNull String alias, String @NotNull [] args) {
+	public List<String> onTabComplete(CommandSender sender, Command command,
+									  String alias, String[] args) {
 		// Complete Players
 		if (args.length == 2) {
 			List<String> players = Lists.newArrayList();

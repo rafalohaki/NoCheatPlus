@@ -82,18 +82,20 @@ public class DataLocation implements IGetPositionWithLook {
 
     @Override
     public String toString() {
-        return "Location(" +
-                "x=" +
-                getX() +
-                ",y=" +
-                getY() +
-                ",z=" +
-                getZ() +
-                ",pitch=" +
-                getPitch() +
-                ",yaw=" +
-                getYaw() +
-                ")";
+        final StringBuilder builder = new StringBuilder(256);
+        builder.append("Location(");
+        builder.append("x=");
+        builder.append(getX());
+        builder.append(",y=");
+        builder.append(getY());
+        builder.append(",z=");
+        builder.append(getZ());
+        builder.append(",pitch=");
+        builder.append(getPitch());
+        builder.append(",yaw=");
+        builder.append(getYaw());
+        builder.append(")");
+        return builder.toString();
     }
 
     @Override

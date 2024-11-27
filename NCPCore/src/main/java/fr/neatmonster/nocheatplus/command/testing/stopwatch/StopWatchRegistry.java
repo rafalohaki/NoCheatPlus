@@ -38,12 +38,12 @@ import fr.neatmonster.nocheatplus.utilities.OnDemandTickListener;
  */
 public class StopWatchRegistry {
 
-    public static final String TAG = ChatColor.GRAY +""+ ChatColor.BOLD + "[" + ChatColor.RED + "NC+" + ChatColor.GRAY + ChatColor.BOLD + "] " + ChatColor.GRAY;
+    public static final String TAG = ChatColor.GRAY +""+ ChatColor.BOLD + "[" + ChatColor.RED + "NC+" + ChatColor.GRAY +""+ ChatColor.BOLD + "] " + ChatColor.GRAY;
 
     // TODO: Make its own plugin + no NCP dependency.
 
     /** Currently by player name. */
-    private final Map<String, StopWatch> clocks = new LinkedHashMap<>(20);
+    private Map<String, StopWatch> clocks = new LinkedHashMap<String, StopWatch>(20);
 
     private final OnDemandTickListener tickListener = new OnDemandTickListener() {
         @Override

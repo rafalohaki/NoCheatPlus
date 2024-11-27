@@ -121,8 +121,13 @@ public class BlockChangeReference {
          */
         if (lastSpanEntry != null && (lastUsedEntry == null || lastSpanEntry.id > lastUsedEntry.id)) {
             lastUsedEntry = lastSpanEntry;
-            valid = to != null && to.isBlockIntersecting(
-                    lastSpanEntry.x, lastSpanEntry.y, lastSpanEntry.z, lastSpanEntry.direction.blockFace);
+            if (to != null && to.isBlockIntersecting(
+                    lastSpanEntry.x, lastSpanEntry.y, lastSpanEntry.z, lastSpanEntry.direction.blockFace)) {
+                valid = true;
+            }
+            else {
+                valid = false;
+            }
         }
         firstSpanEntry = lastSpanEntry = null;
     }
@@ -151,7 +156,7 @@ public class BlockChangeReference {
         if (obj == this) {
             return true;
         }
-        if (!(obj instanceof BlockChangeReference)) {
+        if (obj == null || !(obj instanceof BlockChangeReference)) {
             return false;
         }
         final BlockChangeReference other = (BlockChangeReference) obj;

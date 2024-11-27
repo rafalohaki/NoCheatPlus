@@ -59,7 +59,7 @@ public class PlayerSetBackMethod {
     public static final PlayerSetBackMethod MODERN = new PlayerSetBackMethod("default.modern", 
             CANCEL | UPDATE_FROM | SCHEDULE);
 
-    public static PlayerSetBackMethod fromString(String name, String input) {
+    public static final PlayerSetBackMethod fromString(String name, String input) {
         input = input.toLowerCase();
         // Check for presets.
         if (input.equals(LEGACY.getId())) {

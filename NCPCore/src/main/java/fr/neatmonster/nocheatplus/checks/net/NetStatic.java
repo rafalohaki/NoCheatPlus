@@ -14,15 +14,18 @@
  */
 package fr.neatmonster.nocheatplus.checks.net;
 
+import java.util.List;
+
 import fr.neatmonster.nocheatplus.NCPAPIProvider;
 import fr.neatmonster.nocheatplus.checks.CheckType;
 import fr.neatmonster.nocheatplus.components.NoCheatPlusAPI;
 import fr.neatmonster.nocheatplus.components.data.ICheckData;
 import fr.neatmonster.nocheatplus.components.data.IData;
+import fr.neatmonster.nocheatplus.components.registry.factory.IFactoryOne;
+import fr.neatmonster.nocheatplus.players.PlayerFactoryArgument;
 import fr.neatmonster.nocheatplus.utilities.TickTask;
 import fr.neatmonster.nocheatplus.utilities.ds.count.ActionFrequency;
-
-import java.util.List;
+import fr.neatmonster.nocheatplus.worlds.WorldFactoryArgument;
 
 /**
  * Static method utility for networking related stuff.
@@ -97,7 +100,7 @@ public class NetStatic {
         packetFreq.add(time, packets);
 
         // Fill up all "used" time windows (minimum we can do without other events).
-        final float burnScore = idealPackets * (float) winDur / 1000f;
+        final float burnScore = (float) idealPackets * (float) winDur / 1000f;
         // Find index.
         int burnStart;
         int empty = 0;
@@ -125,7 +128,7 @@ public class NetStatic {
             // TODO: Consider to add a config flag for skipping the lag adaption (e.g. strict).
             final float lag = TickTask.getLag(totalDur, true); // Full seconds range considered.
             // TODO: Consider increasing the allowed maximum, for extreme server-side lag.
-            empty = Math.min(empty, Math.round((lag - 1f) * winNum));
+            empty = Math.min(empty, (int) Math.round((lag - 1f) * winNum));
         }
 
         final double fullCount;
@@ -141,7 +144,7 @@ public class NetStatic {
         }
 
         double violation = 0.0; // Classic processing.
-        final double vEPSAcc = fullCount - (double) (maxPackets * winNum * winDur / 1000f);
+        final double vEPSAcc = (double) fullCount - (double) (maxPackets * winNum * winDur / 1000f);
         if (vEPSAcc > 0.0) {
             violation = Math.max(violation, vEPSAcc);
             tags.add("epsacc");
@@ -169,6 +172,7 @@ public class NetStatic {
         return Math.max(0.0, violation);
     }
 
+    @SuppressWarnings("unchecked")
     public static void registerTypes() {
         final NoCheatPlusAPI api = NCPAPIProvider.getNoCheatPlusAPI();
         api.register(api.newRegistrationContext()

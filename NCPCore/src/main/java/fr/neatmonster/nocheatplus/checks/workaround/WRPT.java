@@ -157,6 +157,7 @@ public class WRPT extends SimpleWorkaroundRegistry {
         // Fill in blueprints, groups, workaround sets.
 
         // MOVING
+        final Collection<IWorkaround> ws_moving = new LinkedList<IWorkaround>();
 
         // MOVING_SURVIVALFLY
 
@@ -165,7 +166,7 @@ public class WRPT extends SimpleWorkaroundRegistry {
                 new WorkaroundCountDown(W_M_SF_SLIME_JP_2X0, 1),
                 new WorkaroundCountDown(W_M_V_ENV_INAIR_SKIP, 1),
         };
-        final Collection<IWorkaround> ws_moving = new LinkedList<>(Arrays.asList(resetNotInAir));
+        ws_moving.addAll(Arrays.asList(resetNotInAir));
         setWorkaroundBluePrint(resetNotInAir);
         setGroup(G_RESET_NOTINAIR, resetNotInAir);
 

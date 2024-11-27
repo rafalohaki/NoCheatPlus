@@ -29,7 +29,7 @@ public enum AlmostBoolean{
      * @param value
      * @return
      */
-    public static AlmostBoolean match(final boolean value) {
+    public static final AlmostBoolean match(final boolean value) {
         return value ? YES : NO;
     }
 
@@ -38,25 +38,21 @@ public enum AlmostBoolean{
      * @param input Can be null.
      * @return
      */
-    public static AlmostBoolean match(String input) {
+    public static final AlmostBoolean match(String input) {
         if (input == null) {
             return null;
         }
         input = input.trim().toLowerCase();
-        switch (input) {
-            case "true":
-            case "yes":
-            case "y":
-                return AlmostBoolean.YES;
-            case "false":
-            case "no":
-            case "n":
-                return AlmostBoolean.NO;
-            case "default":
-            case "maybe":
-                return AlmostBoolean.MAYBE;
-            default:
-                return null;
+        if (input.equals("true") || input.equals("yes") || input.equals("y")) {
+            return AlmostBoolean.YES;
+        }
+        else if (input.equals("false") || input.equals("no") || input.equals("n")) {
+            return AlmostBoolean.NO;
+        }
+        else if (input.equals("default") || input.equals("maybe")) {
+            return AlmostBoolean.MAYBE;
+        } else {
+            return null;
         }
     }
 

@@ -14,13 +14,16 @@
  */
 package fr.neatmonster.nocheatplus.checks.net;
 
-import fr.neatmonster.nocheatplus.checks.Check;
-import fr.neatmonster.nocheatplus.checks.CheckType;
-import fr.neatmonster.nocheatplus.players.IPlayerData;
 import org.bukkit.entity.Player;
 import org.bukkit.event.EventHandler;
 import org.bukkit.event.Listener;
 import org.bukkit.event.player.PlayerJoinEvent;
+
+import fr.neatmonster.nocheatplus.checks.Check;
+import fr.neatmonster.nocheatplus.checks.CheckType;
+import fr.neatmonster.nocheatplus.players.DataManager;
+import fr.neatmonster.nocheatplus.players.IPlayerData;
+import fr.neatmonster.nocheatplus.utilities.TickTask;
 
 public class KeepAliveFrequency extends Check implements Listener {
 
@@ -47,7 +50,9 @@ public class KeepAliveFrequency extends Check implements Listener {
         if (first > 1f) {
             // Trigger a violation.
             final double vl = Math.max(first - 1f, data.keepAliveFreq.score(1f) - data.keepAliveFreq.numberOfBuckets());
-            return executeActions(player, vl, 1.0, cc.keepAliveFrequencyActions).willCancel();
+            if (executeActions(player, vl, 1.0, cc.keepAliveFrequencyActions).willCancel()) {
+                return true;
+            }
         }
         return false;
     }

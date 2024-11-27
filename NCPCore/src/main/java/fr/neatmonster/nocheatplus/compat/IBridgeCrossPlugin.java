@@ -32,7 +32,7 @@ public interface IBridgeCrossPlugin {
      * @param player
      * @return
      */
-    boolean isNativePlayer(Player player);
+    public boolean isNativePlayer(Player player);
 
     /**
      * Safety check, enabling to skip certain checks or tests for delegate
@@ -41,6 +41,6 @@ public interface IBridgeCrossPlugin {
      * @param player
      * @return
      */
-    boolean isNativeEntity(Entity entity);
+    public boolean isNativeEntity(Entity entity);
 
 }

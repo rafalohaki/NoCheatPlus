@@ -37,7 +37,8 @@ public class BlocksMC1_11 implements BlockPropertiesSetup {
         // ALL SORTS OF SHULKER BOXES
 
         ConfigFile config = ConfigManager.getConfigFile();
-        if (config.getBoolean(ConfPaths.BLOCKBREAK_DEBUG, config.getBoolean(ConfPaths.CHECKS_DEBUG, false))) StaticLog.logInfo("Added block-info for Minecraft 1.11 blocks.");
+        if (config.getBoolean(ConfPaths.BLOCKBREAK_DEBUG, config.getBoolean(ConfPaths.CHECKS_DEBUG, false)))
+        StaticLog.logInfo("Added block-info for Minecraft 1.11 blocks.");
     }
 
 }

@@ -275,8 +275,13 @@ public class OnGroundReference {
                     node = null;
                 }
             }
-            // No more entries to check.
-            return entry != null;
+            if (entry == null){
+                // No more entries to check.
+                return false;
+            }
+            else {
+                return true;
+            }
         }
         else {
             // Both not null (that case has been excluded above).

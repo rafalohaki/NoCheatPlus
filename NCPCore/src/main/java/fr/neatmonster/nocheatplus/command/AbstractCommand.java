@@ -31,7 +31,6 @@ import org.bukkit.command.TabExecutor;
 import org.bukkit.entity.Player;
 
 import fr.neatmonster.nocheatplus.permissions.RegisteredPermission;
-import org.jetbrains.annotations.NotNull;
 
 /**
  * Base command class, featuring some features.<br>
@@ -40,10 +39,10 @@ import org.jetbrains.annotations.NotNull;
  *
  */
 public abstract class AbstractCommand<A> implements TabExecutor{
-    public static final String TAG = ChatColor.GRAY +""+ ChatColor.BOLD + "[" + ChatColor.RED + "NC+" + ChatColor.GRAY + ChatColor.BOLD + "] " + ChatColor.GRAY;
+    public static final String TAG = ChatColor.GRAY +""+ ChatColor.BOLD + "[" + ChatColor.RED + "NC+" + ChatColor.GRAY +""+ ChatColor.BOLD + "] " + ChatColor.GRAY;
     public static final String CTAG = "[NoCheatPlus] ";
 
-    public static final List<String> noTabChoices = Collections.unmodifiableList(new LinkedList<>());
+    public static final List<String> noTabChoices = Collections.unmodifiableList(new LinkedList<String>());
 
     /**
      * Convenience method: join with a space in between.
@@ -108,7 +107,7 @@ public abstract class AbstractCommand<A> implements TabExecutor{
     /** Permission necessary to use this command. May be null. */
     public final RegisteredPermission permission;
     /** Sub commands for delegation. */
-    protected final Map<String, AbstractCommand<?>> subCommands = new LinkedHashMap<>();
+    protected final Map<String, AbstractCommand<?>> subCommands = new LinkedHashMap<String, AbstractCommand<?>>();
     /** The index in args to check for sub-commands. -1 stands for default, either parent + 1 or 0 */
     protected int subCommandIndex = -1;
     /** Aliases for the command label. */
@@ -158,9 +157,9 @@ public abstract class AbstractCommand<A> implements TabExecutor{
     }
 
     @Override
-    public List<String> onTabComplete(@NotNull CommandSender sender, @NotNull Command command, @NotNull String alias, String @NotNull [] args)
+    public List<String> onTabComplete(CommandSender sender, Command command, String alias, String[] args)
     {
-        final Set<String> choices = new LinkedHashSet<>(subCommands.size());
+        final Set<String> choices = new LinkedHashSet<String>(subCommands.size());
         int len = args.length;
         // Attempt to delegate.
         int subCommandIndex = Math.max(0, this.subCommandIndex);
@@ -182,11 +181,11 @@ public abstract class AbstractCommand<A> implements TabExecutor{
         }
         // No tab completion by default.
         if (choices.isEmpty()) return noTabChoices;
-        else return new LinkedList<>(choices);
+        else return new LinkedList<String>(choices);
     }
 
     @Override
-    public boolean onCommand(@NotNull CommandSender sender, @NotNull Command command, @NotNull String alias, String[] args)
+    public boolean onCommand(CommandSender sender, Command command, String alias, String[] args)
     {
         int len = args.length;
         int subCommandIndex = Math.max(0, this.subCommandIndex);
@@ -217,7 +216,7 @@ public abstract class AbstractCommand<A> implements TabExecutor{
      * @param sender
      * @return
      */
-    public boolean testPermission(CommandSender sender, Command command, String alias, String[] args){
+    public boolean testPermission(CommandSender sender, Command command, String alias, String args[]){
         // TODO: Relay to PlayerData or not (...).
         return permission == null || sender.hasPermission(permission.getBukkitPermission());
     }

@@ -31,16 +31,17 @@ import fr.neatmonster.nocheatplus.logging.StaticLog;
 import fr.neatmonster.nocheatplus.permissions.Permissions;
 import fr.neatmonster.nocheatplus.players.DataManager;
 import fr.neatmonster.nocheatplus.utilities.IdUtil;
-import org.jetbrains.annotations.NotNull;
 
 public class BanCommand extends BaseCommand {
 
+    private final JavaPlugin plugin;
     public BanCommand(JavaPlugin plugin) {
         super(plugin, "ban", Permissions.COMMAND_BAN);
+        this.plugin = plugin;
     }
 
     @Override
-    public boolean onCommand(final @NotNull CommandSender sender, @NotNull Command command, @NotNull String label, String[] args) {
+    public boolean onCommand(final CommandSender sender, Command command, String label, String[] args) {
         if (!demandConsoleCommandSender(sender)) {
             return true;
         }
@@ -80,7 +81,7 @@ public class BanCommand extends BaseCommand {
         if (player == null && !IdUtil.isValidMinecraftUserName(name)) {
             UUID id = IdUtil.UUIDFromStringSafe(name);
             if (id != null) {
-                StaticLog.logWarning("Banning by UUID might not work (" + id +"), relay to the vanilla command.");
+                StaticLog.logWarning("Banning by UUID might not work (" + id.toString()+"), relay to the vanilla command.");
             } else {
                 StaticLog.logWarning("Might not be a valid user name: " + name);
             }
@@ -102,7 +103,7 @@ public class BanCommand extends BaseCommand {
      * @see fr.neatmonster.nocheatplus.command.AbstractCommand#onTabComplete(org.bukkit.command.CommandSender, org.bukkit.command.Command, java.lang.String, java.lang.String[])
      */
     @Override
-    public List<String> onTabComplete(@NotNull CommandSender sender, @NotNull Command command, @NotNull String alias, String @NotNull [] args) {
+    public List<String> onTabComplete(CommandSender sender, Command command, String alias, String[] args) {
         // Complete Players
         if (args.length == 2) {
             List<String> players = Lists.newArrayList();

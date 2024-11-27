@@ -14,12 +14,12 @@
  */
 package fr.neatmonster.nocheatplus.checks.net.model;
 
-import fr.neatmonster.nocheatplus.compat.AlmostBoolean;
-
 import java.util.Iterator;
 import java.util.LinkedList;
 import java.util.concurrent.locks.Lock;
 import java.util.concurrent.locks.ReentrantLock;
+
+import fr.neatmonster.nocheatplus.compat.AlmostBoolean;
 
 /**
  * Queue outgoing teleport locations (DataPacketFlying), in order to cancel
@@ -31,7 +31,7 @@ import java.util.concurrent.locks.ReentrantLock;
  */
 public class TeleportQueue {
 
-    public enum AckResolution {
+    public static enum AckResolution {
         /** Waiting for ACK. */
         WAITING,
         /** Packet is ACK. */
@@ -57,11 +57,12 @@ public class TeleportQueue {
     private final Lock lock = new ReentrantLock();
 
     /** Validated outgoing teleport locations, expected to be confirmed by the client. */
-    private final LinkedList<CountableLocation> expectIncoming = new LinkedList<>();
+    private final LinkedList<CountableLocation> expectIncoming = new LinkedList<CountableLocation>();
     /** Location from a Bukkit event, which we expect an outgoing teleport for. */
     private DataLocation expectOutgoing = null;
 
-    private final long maxAge = 4000; // TODO: configurable
+    private long maxAge = 4000; // TODO: configurable
+    private int maxQueueSize = 60; // TODO: configurable
 
     /**
      * Queried from the primary thread (read only), reset with outgoing
@@ -69,7 +70,7 @@ public class TeleportQueue {
      */
     private CountableLocation lastAck = null;
 
-    private final AckReference lastAckReference = new AckReference();
+    private AckReference lastAckReference = new AckReference();
 
     /**
      * Maximum age in milliseconds, older entries expire.
@@ -171,8 +172,6 @@ public class TeleportQueue {
                     res = new CountableLocation(x, y, z, yaw, pitch, 1, time, teleportId);
                     expectIncoming.addLast(res);
                     // Don't exceed maxQueueSize.
-                    // TODO: configurable
-                    int maxQueueSize = 60;
                     if (expectIncoming.size() > maxQueueSize) {
                         expectIncoming.removeFirst();
                     }

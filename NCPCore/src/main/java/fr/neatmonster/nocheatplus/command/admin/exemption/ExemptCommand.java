@@ -30,7 +30,6 @@ import fr.neatmonster.nocheatplus.hooks.NCPExemptionManager;
 import fr.neatmonster.nocheatplus.permissions.Permissions;
 import fr.neatmonster.nocheatplus.players.DataManager;
 import fr.neatmonster.nocheatplus.utilities.StringUtil;
-import org.jetbrains.annotations.NotNull;
 
 public class ExemptCommand extends BaseCommand {
 
@@ -39,7 +38,7 @@ public class ExemptCommand extends BaseCommand {
     }
 
     @Override
-    public boolean onCommand(@NotNull CommandSender sender, @NotNull Command command, @NotNull String label, String[] args) {
+    public boolean onCommand(CommandSender sender, Command command, String label, String[] args) {
 
         final String c1, c2, c3, c4, c5, c6, c7;
         if (sender instanceof Player) {
@@ -69,8 +68,8 @@ public class ExemptCommand extends BaseCommand {
             try{
                 checkType = CheckType.valueOf(args[2].toUpperCase().replace('-', '_').replace('.', '_'));
             } catch (Exception e){
-                sender.sendMessage((sender instanceof Player ? TAG : CTAG) + "Could not interpret: " + c3 + args[2]);
-                sender.sendMessage((sender instanceof Player ? TAG : CTAG) + "Check type should be one of: "  + c3 + StringUtil.join(Arrays.asList(CheckType.values()), c6 + ", " + c3));
+                sender.sendMessage((sender instanceof Player ? TAG : CTAG) + "Could not interpret: " + c3 +""+ args[2]);
+                sender.sendMessage((sender instanceof Player ? TAG : CTAG) + "Check type should be one of: "  + c3 +""+ StringUtil.join(Arrays.asList(CheckType.values()), c6 + ", " + c3));
                 return true;
             }
         }
@@ -80,19 +79,19 @@ public class ExemptCommand extends BaseCommand {
 
         final Player player = DataManager.getPlayer(playerName);
         if (player == null){
-            sender.sendMessage((sender instanceof Player ? TAG : CTAG) + "Player not online: " + c3+ playerName);
+            sender.sendMessage((sender instanceof Player ? TAG : CTAG) + "Player not online: " + c3+""+ playerName);
             return true;
         }
         else {
             playerName = player.getName();
         }
         NCPExemptionManager.exemptPermanently(player, checkType);
-        sender.sendMessage((sender instanceof Player ? TAG : CTAG) + "Player " + c3 + playerName + c1 + " is now exempted from: " + c3 + checkType);
+        sender.sendMessage((sender instanceof Player ? TAG : CTAG) + "Player " + c3 +""+ playerName + c1 + " is now exempted from: " + c3 +""+ checkType); 
         return true;
     }
 
     @Override
-    public List<String> onTabComplete(@NotNull CommandSender sender, @NotNull Command command, @NotNull String alias, String @NotNull [] args)
+    public List<String> onTabComplete(CommandSender sender, Command command, String alias, String[] args)
     {
         // At least complete CheckType
         if (args.length == 3) {

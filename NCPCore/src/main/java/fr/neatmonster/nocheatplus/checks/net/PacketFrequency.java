@@ -14,10 +14,11 @@
  */
 package fr.neatmonster.nocheatplus.checks.net;
 
+import org.bukkit.entity.Player;
+
 import fr.neatmonster.nocheatplus.checks.Check;
 import fr.neatmonster.nocheatplus.checks.CheckType;
 import fr.neatmonster.nocheatplus.utilities.TickTask;
-import org.bukkit.entity.Player;
 
 /**
  * Fall-back check for pre 1.9: Limit the overall packet frequency, aiming at
@@ -53,7 +54,9 @@ public class PacketFrequency extends Check {
         if (amount > cc.packetFrequencyPacketsPerSecond) {
             amount /= TickTask.getLag(fDur);
             if (amount > cc.packetFrequencyPacketsPerSecond) {
-                return executeActions(player, amount - cc.packetFrequencyPacketsPerSecond, 1.0, cc.packetFrequencyActions).willCancel();
+                if (executeActions(player, amount - cc.packetFrequencyPacketsPerSecond, 1.0, cc.packetFrequencyActions).willCancel()) {
+                    return true;
+                }
             }
         }
         return false; // Cancel state.

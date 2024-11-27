@@ -25,7 +25,7 @@ import fr.neatmonster.nocheatplus.utilities.map.BlockProperties;
 public final class BridgeEnchant {
 
     @SuppressWarnings("deprecation")
-    private static Enchantment parseEnchantment(final String name) {
+    private static final Enchantment parseEnchantment(final String name) {
         try {
             return Enchantment.getByName(name);
         } catch (Exception e) {
@@ -207,7 +207,10 @@ public final class BridgeEnchant {
             return false;
         }
         final ItemStack contents = player.getInventory().getHelmet();
-        return contents != null && contents.getEnchantmentLevel(enchantment) > 0;
+        if (contents != null && contents.getEnchantmentLevel(enchantment) > 0){
+            return true;
+        }
+        return false;
     }
 
     /**
@@ -223,7 +226,10 @@ public final class BridgeEnchant {
             return false;
         }
         final ItemStack contents = player.getInventory().getChestplate();
-        return contents != null && contents.getEnchantmentLevel(enchantment) > 0;
+        if (contents != null && contents.getEnchantmentLevel(enchantment) > 0){
+            return true;
+        }
+        return false;
     }
 
     /**
@@ -239,7 +245,10 @@ public final class BridgeEnchant {
             return false;
         }
         final ItemStack contents = player.getInventory().getLeggings();
-        return contents != null && contents.getEnchantmentLevel(enchantment) > 0;
+        if (contents != null && contents.getEnchantmentLevel(enchantment) > 0){
+            return true;
+        }
+        return false;
     }
 
     /**
@@ -255,7 +264,10 @@ public final class BridgeEnchant {
             return false;
         }
         final ItemStack contents = player.getInventory().getBoots();
-        return contents != null && contents.getEnchantmentLevel(enchantment) > 0;
+        if (contents != null && contents.getEnchantmentLevel(enchantment) > 0){
+            return true;
+        }
+        return false;
     }
 
     public static boolean hasThorns() {

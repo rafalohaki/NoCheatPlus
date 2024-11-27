@@ -22,18 +22,17 @@ import org.bukkit.entity.Player;
 import fr.neatmonster.nocheatplus.command.AbstractCommand;
 import fr.neatmonster.nocheatplus.command.testing.stopwatch.StopWatch;
 import fr.neatmonster.nocheatplus.command.testing.stopwatch.StopWatchRegistry;
-import org.jetbrains.annotations.NotNull;
 
 public class StopCommand extends AbstractCommand<StopWatchRegistry>{
 
-    public static final String TAG = ChatColor.GRAY +""+ ChatColor.BOLD + "[" + ChatColor.RED + "NC+" + ChatColor.GRAY + ChatColor.BOLD + "] " + ChatColor.GRAY;
+    public static final String TAG = ChatColor.GRAY +""+ ChatColor.BOLD + "[" + ChatColor.RED + "NC+" + ChatColor.GRAY +""+ ChatColor.BOLD + "] " + ChatColor.GRAY;
 
     public StopCommand(StopWatchRegistry registry) {
         super(registry, "stop", null);
     }
 
     @Override
-    public boolean onCommand(@NotNull CommandSender sender, @NotNull Command command, @NotNull String alias, String[] args)
+    public boolean onCommand(CommandSender sender, Command command, String alias, String[] args)
     {
         StopWatch clock = access.getClock((Player) sender);
         if (clock == null || clock.isFinished()) {
