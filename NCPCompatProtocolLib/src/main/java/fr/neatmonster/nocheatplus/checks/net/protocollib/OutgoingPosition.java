@@ -68,7 +68,7 @@ public class OutgoingPosition extends BaseAdapter {
         }
         final IPlayerData pData = DataManager.getPlayerDataSafe(player);
         if (pData == null) {
-            StaticLog.logWarning("Failed to fetch player data with " + event.getPacketType() + " for: " + player.toString());
+            StaticLog.logWarning("Failed to fetch player data with " + event.getPacketType() + " for: " + player);
             return;
         }
         // TODO: In future multiple checks might use this (!)

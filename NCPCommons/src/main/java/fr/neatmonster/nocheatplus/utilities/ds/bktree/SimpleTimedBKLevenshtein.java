@@ -31,19 +31,8 @@ public class SimpleTimedBKLevenshtein extends TimedBKLevenshtein<SimpleTimedLeve
 	
 	public SimpleTimedBKLevenshtein() {
 		super(
-			new NodeFactory<char[], SimpleTimedLevenNode>(){
-				@Override
-				public SimpleTimedLevenNode newNode( char[] value, SimpleTimedLevenNode parent) {
-					return new SimpleTimedLevenNode(value);
-				}	
-			}
-			,
-			new LookupEntryFactory<char[], SimpleTimedLevenNode, STBKLResult>() {
-				@Override
-				public STBKLResult newLookupEntry(Collection<SimpleTimedLevenNode> nodes, SimpleTimedLevenNode match, int distance, boolean isNew) {
-					return new STBKLResult(nodes, match, distance, isNew);
-				}
-			}
-			);
+                (value, parent) -> new SimpleTimedLevenNode(value),
+                STBKLResult::new
+        );
 	}
 }

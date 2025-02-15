@@ -96,24 +96,13 @@ public class BlockBreakListener extends CheckListener {
         api.register(api.newRegistrationContext()
                 // BlockBreakConfig
                 .registerConfigWorld(BlockBreakConfig.class)
-                .factory(new IFactoryOne<WorldFactoryArgument, BlockBreakConfig>() {
-                    @Override
-                    public BlockBreakConfig getNewInstance(WorldFactoryArgument arg) {
-                        return new BlockBreakConfig(arg.worldData);
-                    }
-                })
+                .factory(arg -> new BlockBreakConfig(arg.worldData))
                 .registerConfigTypesPlayer(CheckType.BLOCKBREAK, true)
                 .context() //
                 // BlockBreakData
                 .registerDataPlayer(BlockBreakData.class)
-                .factory(new IFactoryOne<PlayerFactoryArgument, BlockBreakData>() {
-                    @Override
-                    public BlockBreakData getNewInstance(
-                            PlayerFactoryArgument arg) {
-                        return new BlockBreakData(
-                                arg.playerData.getGenericInstance(BlockBreakConfig.class));
-                    }
-                })
+                .factory(arg -> new BlockBreakData(
+                        arg.playerData.getGenericInstance(BlockBreakConfig.class)))
                 // (Complete data removal for now.)
                 .addToGroups(CheckType.BLOCKBREAK, true, IData.class, ICheckData.class)
                 .context() //

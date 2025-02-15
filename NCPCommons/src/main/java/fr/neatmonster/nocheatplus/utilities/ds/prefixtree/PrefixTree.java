@@ -289,16 +289,6 @@ public class PrefixTree<K, N extends Node<K, N>, L extends LookupEntry<K, N>>{
 	 * @return
 	 */
 	public static <K> PrefixTree<K, SimpleNode<K>, LookupEntry<K, SimpleNode<K>>> newPrefixTree(){
-		return new PrefixTree<K, SimpleNode<K>, LookupEntry<K, SimpleNode<K>>>(new NodeFactory<K, SimpleNode<K>>(){
-			@Override
-			public final SimpleNode<K> newNode(final SimpleNode<K> parent) {
-				return new SimpleNode<K>();
-			}
-		}, new LookupEntryFactory<K, SimpleNode<K>, LookupEntry<K,SimpleNode<K>>>() {
-			@Override
-			public final LookupEntry<K, SimpleNode<K>> newLookupEntry(final SimpleNode<K> node, final SimpleNode<K> insertion, final int depth, final boolean hasPrefix) {
-				return new LookupEntry<K, SimpleNode<K>>(node, insertion, depth, hasPrefix);
-			}
-		});
+		return new PrefixTree<K, SimpleNode<K>, LookupEntry<K, SimpleNode<K>>>(parent -> new SimpleNode<K>(), LookupEntry::new);
 	}
 }

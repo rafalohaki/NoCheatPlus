@@ -19,6 +19,7 @@ import java.text.DecimalFormatSymbols;
 import java.util.ArrayList;
 import java.util.Arrays;
 import java.util.Collection;
+import java.util.Collections;
 import java.util.Iterator;
 import java.util.List;
 
@@ -57,8 +58,8 @@ public class StringUtil {
      */
     public static List<Character> characterList(char...chars) {
         final List<Character> res = new ArrayList<Character>(chars.length);
-        for (int i = 0; i < chars.length; i++) {
-            res.add(chars[i]);
+        for (char charx : chars) {
+            res.add(charx);
         }
         return res;
     }
@@ -180,9 +181,7 @@ public class StringUtil {
             }
             for (final String s : out){
                 final String[] split = s.split("\\u" + hex);
-                for (final String _s : split){
-                    queue.add(_s);
-                }
+                Collections.addAll(queue, split);
             }
             List<String> temp = out;
             out = queue;
@@ -307,8 +306,7 @@ public class StringUtil {
         final StackTraceElement[] elements = t.getStackTrace();
         StackTraceElement last = null; // Assume this is faster than operating on the strings.
         int repetition = 0;
-        for (int i = 0; i < elements.length; i++) {
-            final StackTraceElement element = elements[i];
+        for (final StackTraceElement element : elements) {
             if (trim) {
                 if (element.equals(last)) {
                     repetition += 1;
@@ -413,8 +411,8 @@ public class StringUtil {
     }
 
     public static boolean startsWithAnyOf(final String input, final String... startsWith) {
-        for (int i = 0; i < startsWith.length; i++) {
-            if (input.startsWith(startsWith[i])) {
+        for (String s : startsWith) {
+            if (input.startsWith(s)) {
                 return true;
             }
         }
@@ -422,8 +420,8 @@ public class StringUtil {
     }
 
     public static boolean endsWithAnyOf(final String input, final String... endsWith) {
-        for (int i = 0; i < endsWith.length; i++) {
-            if (input.endsWith(endsWith[i])) {
+        for (String s : endsWith) {
+            if (input.endsWith(s)) {
                 return true;
             }
         }

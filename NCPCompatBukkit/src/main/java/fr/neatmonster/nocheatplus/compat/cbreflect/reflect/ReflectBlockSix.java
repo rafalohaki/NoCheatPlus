@@ -151,12 +151,7 @@ public class ReflectBlockSix implements IReflectBlock {
             return null;
         }
         // Sort in the expected order.
-        Collections.sort(names, new Comparator<String>() {
-            @Override
-            public int compare(String o1, String o2) {
-                return Integer.compare(possibleNames.indexOf(o1), possibleNames.indexOf(o2));
-            }
-        });
+        names.sort(Comparator.comparingInt(possibleNames::indexOf));
         // Test for a sequence of exactly 6 consecutive entries.
         int startIndex = 0;
         if (names.size() > 6) {

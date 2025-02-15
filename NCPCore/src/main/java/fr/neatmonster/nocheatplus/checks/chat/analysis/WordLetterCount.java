@@ -34,20 +34,18 @@ public final class WordLetterCount{
 		counts = new LinkedHashMap<Character, Integer>(a.length);
 		int upperCase = 0;
 		int notLetter = 0;
-		for (int i = 0; i < a.length; i++){
-			final char c = a[i];
-			final Character key;
-			if (!Character.isLetter(c)) notLetter ++;
-			if (Character.isUpperCase(c)){
-				upperCase ++;
-				key = Character.toLowerCase(c);
-			}
-			else key = c;
-			final Integer count = counts.remove(key);
-			if (count == null) counts.put(key,  1);
-			else counts.put(key, count.intValue() + 1);
-			
-		}
+        for (final char c : a) {
+            final char key;
+            if (!Character.isLetter(c)) notLetter++;
+            if (Character.isUpperCase(c)) {
+                upperCase++;
+                key = Character.toLowerCase(c);
+            } else key = c;
+            final Integer count = counts.remove(key);
+            if (count == null) counts.put(key, 1);
+            else counts.put(key, count + 1);
+
+        }
 		this.notLetter = notLetter;
 		this.upperCase = upperCase;
 	}

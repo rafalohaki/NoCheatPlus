@@ -239,10 +239,7 @@ public class HashMapLOW <K, V> {
          * @return
          */
         V remove(final int hashCode, final K key) {
-            if (size == 0) {
-                return null;
-            }
-            else {
+            if (size != 0) {
                 for (int i = 0; i < contents.length; i++) {
                     final LHMEntry<K, V> entry = contents[i];
                     if (entry != null && entry.equalsKey(hashCode, key)) {
@@ -251,8 +248,8 @@ public class HashMapLOW <K, V> {
                         return entry.getValue();
                     }
                 }
-                return null;
             }
+            return null;
         }
 
         /**
@@ -263,18 +260,14 @@ public class HashMapLOW <K, V> {
          */
         V get(final int hashCode, final K key) {
             final LHMEntry<K, V>[] contents = this.contents; // Mind iteration.
-            if (size == 0) {
-                return null;
-            }
-            else {
-                for (int i = 0; i < contents.length; i++) {
-                    final LHMEntry<K, V> entry = contents[i];
+            if (size != 0) {
+                for (final LHMEntry<K, V> entry : contents) {
                     if (entry != null && entry.equalsKey(hashCode, key)) {
                         return entry.getValue();
                     }
                 }
-                return null;
             }
+            return null;
         }
 
         /**
@@ -285,18 +278,14 @@ public class HashMapLOW <K, V> {
          */
         boolean containsKey(final int hashCode, final K key) {
             final LHMEntry<K, V>[] contents = this.contents; // Mind iteration.
-            if (size == 0) {
-                return false;
-            }
-            else {
-                for (int i = 0; i < contents.length; i++) {
-                    final LHMEntry<K, V> entry = contents[i];
+            if (size != 0) {
+                for (final LHMEntry<K, V> entry : contents) {
                     if (entry != null && entry.equalsKey(hashCode, key)) {
                         return true;
                     }
                 }
-                return false;
             }
+            return false;
         }
 
         /**
@@ -485,8 +474,7 @@ public class HashMapLOW <K, V> {
         final LHMBucket<K, V>[] newBuckets = newBuckets(size); // Hold current number of elements.
         final int newLength = newBuckets.length;
         // Entries are reused, but not buckets (buckets would break iteration).
-        for (int index = 0; index < buckets.length; index++) {
-            final LHMBucket<K, V> bucket = buckets[index];
+        for (final LHMBucket<K, V> bucket : buckets) {
             if (bucket != null && bucket.size > 0) {
                 for (int j = 0; j < bucket.contents.length; j++) {
                     final LHMEntry<K, V> entry = bucket.contents[j];

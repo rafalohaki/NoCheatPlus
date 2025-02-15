@@ -17,6 +17,7 @@ package fr.neatmonster.nocheatplus.compat.registry;
 import java.util.ArrayList;
 import java.util.Arrays;
 import java.util.Collection;
+import java.util.Collections;
 import java.util.LinkedList;
 import java.util.List;
 
@@ -166,7 +167,7 @@ public class DefaultComponentFactory {
             // TODO: Static test methods !?
             FastConsume.testAvailability();
             available.add(new FastConsume());
-            NCPAPIProvider.getNoCheatPlusAPI().addFeatureTags("checks", Arrays.asList(FastConsume.class.getSimpleName()));
+            NCPAPIProvider.getNoCheatPlusAPI().addFeatureTags("checks", Collections.singletonList(FastConsume.class.getSimpleName()));
         }
         catch (Throwable t){
             StaticLog.logInfo("Inventory checks: FastConsume is not available.");
@@ -176,7 +177,7 @@ public class DefaultComponentFactory {
         try {
             Gutenberg.testAvailability();
             available.add(new Gutenberg());
-            NCPAPIProvider.getNoCheatPlusAPI().addFeatureTags("checks", Arrays.asList(Gutenberg.class.getSimpleName()));
+            NCPAPIProvider.getNoCheatPlusAPI().addFeatureTags("checks", Collections.singletonList(Gutenberg.class.getSimpleName()));
         } catch (Throwable t) {
             StaticLog.logInfo("Inventory checks: Gutenberg is not available.");
         }

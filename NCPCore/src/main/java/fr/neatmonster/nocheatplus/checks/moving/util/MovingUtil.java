@@ -373,8 +373,7 @@ public class MovingUtil {
         final Chunk toChunk = loc.getChunk();
         final Entity[] entities = toChunk.getEntities();
         MovingData untrackedData = null;
-        for (int i = 0; i < entities.length; i++) {
-            final Entity entity = entities[i];
+        for (final Entity entity : entities) {
             if (entity.getType() != EntityType.PLAYER) {
                 continue;
             }

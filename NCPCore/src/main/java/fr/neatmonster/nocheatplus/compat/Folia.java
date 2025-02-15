@@ -67,7 +67,7 @@ public class Folia {
             // Second attempt, should be happened during onDisable calling from BukkitLogNodeDispatcher
             Thread thread = Executors.defaultThreadFactory().newThread(() -> run.accept(null));
             if (thread == null) return null;
-            thread.run();
+            thread.start();
             return thread;
         //}
     }

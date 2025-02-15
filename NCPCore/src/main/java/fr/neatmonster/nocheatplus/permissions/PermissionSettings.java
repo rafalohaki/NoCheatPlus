@@ -99,7 +99,7 @@ public class PermissionSettings {
         }
         @Override
         public boolean matches(String permissionName) {
-            return permissionName.indexOf(contains) >= 0;
+            return permissionName.contains(contains);
         }
     }
     public static class RegexRule extends PermissionRule {
@@ -254,9 +254,9 @@ public class PermissionSettings {
         if (ref == null) {
             // Implicit second.
             if (implicitRules != null) {
-                for (int i = 0; i < implicitRules.length; i++) {
-                    if (implicitRules[i].matches(permissionName)) {
-                        ref =implicitRules[i].getPermissionPolicy();
+                for (PermissionRule implicitRule : implicitRules) {
+                    if (implicitRule.matches(permissionName)) {
+                        ref = implicitRule.getPermissionPolicy();
                     }
                 }
             }

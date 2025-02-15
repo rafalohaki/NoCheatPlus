@@ -54,8 +54,8 @@ public class SimpleWorkaroundRegistry implements IWorkaroundRegistry {
     @Override
     public void setWorkaroundBluePrint(final IWorkaround... bluePrints) {
         // TODO: Might consistency check, plus policy for overriding (ignore all if present).
-        for (int i = 0; i < bluePrints.length; i++) {
-            final IWorkaround bluePrintCopy = bluePrints[i].getNewInstance();
+        for (IWorkaround bluePrint : bluePrints) {
+            final IWorkaround bluePrintCopy = bluePrint.getNewInstance();
             this.bluePrints.put(bluePrintCopy.getId(), bluePrintCopy);
             // Set a parent counter, if not already set. 
             final IAcceptDenyCounter allTimeCounter = bluePrintCopy.getAllTimeCounter();
@@ -135,9 +135,8 @@ public class SimpleWorkaroundRegistry implements IWorkaroundRegistry {
             groups = null;
         }
         else {
-            groups = new HashMap<String, String[]>();
-            for (int i = 0; i < groupIds.length; i++) {
-                final String groupId = groupIds[i];
+            groups = new HashMap<>();
+            for (final String groupId : groupIds) {
                 groups.put(groupId, this.groups.get(groupId));
             }
         }

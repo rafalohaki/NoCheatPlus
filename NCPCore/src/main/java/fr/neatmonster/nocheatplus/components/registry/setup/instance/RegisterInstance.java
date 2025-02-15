@@ -16,6 +16,7 @@ package fr.neatmonster.nocheatplus.components.registry.setup.instance;
 
 import java.util.Arrays;
 import java.util.Collection;
+import java.util.Collections;
 import java.util.LinkedList;
 import java.util.List;
 
@@ -118,17 +119,14 @@ public abstract class RegisterInstance<T, A> implements IDoRegister {
     public RegisterInstance<T,A> addToGroups(final CheckType checkType, 
             final boolean withDescendantCheckTypes, 
             final Class<? super T>... groupTypes) {
-        items.add(new IDoRegister() {
-            @Override
-            public void doRegister() {
-                if (withDescendantCheckTypes) {
-                    factoryRegistry.addToGroups(
-                            CheckTypeUtil.getWithDescendants(checkType), 
-                            type, groupTypes);
-                }
-                else {
-                    factoryRegistry.addToGroups(checkType, type, groupTypes);
-                }
+        items.add(() -> {
+            if (withDescendantCheckTypes) {
+                factoryRegistry.addToGroups(
+                        CheckTypeUtil.getWithDescendants(checkType),
+                        type, groupTypes);
+            }
+            else {
+                factoryRegistry.addToGroups(checkType, type, groupTypes);
             }
         });
         return this;
@@ -168,28 +166,16 @@ public abstract class RegisterInstance<T, A> implements IDoRegister {
             final boolean withDescendantCheckTypes) {
         registerConfigTypesPlayer();
         final Collection<CheckType> checkTypes = withDescendantCheckTypes ? CheckTypeUtil.getWithDescendants(checkType) 
-                : Arrays.asList(checkType);
+                : Collections.singletonList(checkType);
         if (IConfig.class.isAssignableFrom(type)) {
-            genericConfigItems.add(new IDoRegisterWithRegistry() {
-                @SuppressWarnings("unchecked")
-                @Override
-                public void doRegister(IRichFactoryRegistry<?> factoryRegistry) {
-                    factoryRegistry.addToGroups(checkTypes, 
-                            (Class<? extends IConfig>) type, 
-                            IConfig.class);
-                }
-            });
+            genericConfigItems.add(factoryRegistry -> factoryRegistry.addToGroups(checkTypes,
+                    (Class<? extends IConfig>) type,
+                    IConfig.class));
         }
         if (ICheckConfig.class.isAssignableFrom(type)) {
-            genericConfigItems.add(new IDoRegisterWithRegistry() {
-                @SuppressWarnings("unchecked")
-                @Override
-                public void doRegister(IRichFactoryRegistry<?> factoryRegistry) {
-                    factoryRegistry.addToGroups(checkTypes, 
-                            (Class<? extends ICheckConfig>) type, 
-                            ICheckConfig.class);
-                }
-            });
+            genericConfigItems.add(factoryRegistry -> factoryRegistry.addToGroups(checkTypes,
+                    (Class<? extends ICheckConfig>) type,
+                    ICheckConfig.class));
         }
         return this;
     }
@@ -228,28 +214,16 @@ public abstract class RegisterInstance<T, A> implements IDoRegister {
             final boolean withDescendantCheckTypes) {
         registerDataTypesPlayer();
         final Collection<CheckType> checkTypes = withDescendantCheckTypes ? CheckTypeUtil.getWithDescendants(checkType) 
-                : Arrays.asList(checkType);
+                : Collections.singletonList(checkType);
         if (IData.class.isAssignableFrom(type)) {
-            genericConfigItems.add(new IDoRegisterWithRegistry() {
-                @SuppressWarnings("unchecked")
-                @Override
-                public void doRegister(IRichFactoryRegistry<?> factoryRegistry) {
-                    factoryRegistry.addToGroups(checkTypes, 
-                            (Class<? extends IData>) type, 
-                            IData.class);
-                }
-            });
+            genericConfigItems.add(factoryRegistry -> factoryRegistry.addToGroups(checkTypes,
+                    (Class<? extends IData>) type,
+                    IData.class));
         }
         if (ICheckData.class.isAssignableFrom(type)) {
-            genericConfigItems.add(new IDoRegisterWithRegistry() {
-                @SuppressWarnings("unchecked")
-                @Override
-                public void doRegister(IRichFactoryRegistry<?> factoryRegistry) {
-                    factoryRegistry.addToGroups(checkTypes, 
-                            (Class<? extends ICheckData>) type, 
-                            ICheckData.class);
-                }
-            });
+            genericConfigItems.add(factoryRegistry -> factoryRegistry.addToGroups(checkTypes,
+                    (Class<? extends ICheckData>) type,
+                    ICheckData.class));
         }
         return this;
     }
@@ -268,16 +242,10 @@ public abstract class RegisterInstance<T, A> implements IDoRegister {
             throw new UnsupportedOperationException();
         }
         final Collection<CheckType> checkTypes = withDescendantCheckTypes ? CheckTypeUtil.getWithDescendants(checkType) 
-                : Arrays.asList(checkType);
-        items.add(new IDoRegister() {
-            @SuppressWarnings("unchecked")
-            @Override
-            public void doRegister() {
-                factoryRegistry.addToGroups(checkTypes, 
-                        (Class<? extends IDataOnRemoveSubCheckData>) type, 
-                        IDataOnRemoveSubCheckData.class);
-            }
-        });
+                : Collections.singletonList(checkType);
+        items.add(() -> factoryRegistry.addToGroups(checkTypes,
+                (Class<? extends IDataOnRemoveSubCheckData>) type,
+                IDataOnRemoveSubCheckData.class));
         return this;
     }
 

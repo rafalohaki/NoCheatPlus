@@ -43,13 +43,10 @@ public class DelayCommand extends DelayableCommand {
 			return true;
 		}
 		final String cmd = AbstractCommand.join(alteredArgs, 1);
-		schedule(new Runnable() {
-			@Override
-			public void run() {
-				Server server = Bukkit.getServer();
-				server.dispatchCommand(server.getConsoleSender(), cmd);
-			}
-		}, delay);
+		schedule(() -> {
+            Server server = Bukkit.getServer();
+            server.dispatchCommand(server.getConsoleSender(), cmd);
+        }, delay);
 		return true;
 	}
 

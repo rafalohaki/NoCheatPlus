@@ -55,8 +55,7 @@ public class Bridge1_17 {
         }
         final PlayerInventory inv = player.getInventory();
         final ItemStack[] contents = inv.getArmorContents();
-        for (int i = 0; i < contents.length; i++){
-            final ItemStack armor = contents[i];
+        for (final ItemStack armor : contents) {
             if (armor != null && armor.getType().toString().startsWith("LEATHER")) {
                 return true;
             }

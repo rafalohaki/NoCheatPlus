@@ -16,6 +16,7 @@ package fr.neatmonster.nocheatplus.command.admin.debug;
 
 import java.util.Arrays;
 import java.util.Collection;
+import java.util.Collections;
 import java.util.LinkedHashSet;
 import java.util.List;
 import java.util.Set;
@@ -158,7 +159,7 @@ public class DebugPlayerCommand extends BaseCommand {
         final Collection<CheckType> checkTypes;
         if (entry.checkTypes.isEmpty()) {
             // CheckType.ALL
-            checkTypes = Arrays.asList(CheckType.ALL);
+            checkTypes = Collections.singletonList(CheckType.ALL);
         }
         else {
             checkTypes = entry.checkTypes;

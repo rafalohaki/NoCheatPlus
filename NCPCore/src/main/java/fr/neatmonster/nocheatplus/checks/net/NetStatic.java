@@ -178,22 +178,12 @@ public class NetStatic {
         api.register(api.newRegistrationContext()
                 // NetConfig
                 .registerConfigWorld(NetConfig.class)
-                .factory(new IFactoryOne<WorldFactoryArgument, NetConfig>() {
-                    @Override
-                    public NetConfig getNewInstance(WorldFactoryArgument arg) {
-                        return new NetConfig(arg.worldData);
-                    }
-                })
+                .factory(arg -> new NetConfig(arg.worldData))
                 .registerConfigTypesPlayer()
                 .context() //
                 // NetData
                 .registerDataPlayer(NetData.class)
-                .factory(new IFactoryOne<PlayerFactoryArgument, NetData>() {
-                    @Override
-                    public NetData getNewInstance(PlayerFactoryArgument arg) {
-                        return new NetData(arg.playerData.getGenericInstance(NetConfig.class));
-                    }
-                })
+                .factory(arg -> new NetData(arg.playerData.getGenericInstance(NetConfig.class)))
                 .addToGroups(CheckType.NET, true, IData.class, ICheckData.class)
                 .context() //
                 );

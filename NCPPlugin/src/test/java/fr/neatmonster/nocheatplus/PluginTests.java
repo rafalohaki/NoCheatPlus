@@ -43,6 +43,8 @@ import fr.neatmonster.nocheatplus.players.IPlayerDataManager;
 import fr.neatmonster.nocheatplus.worlds.IWorldData;
 import fr.neatmonster.nocheatplus.worlds.IWorldDataManager;
 import fr.neatmonster.nocheatplus.worlds.WorldDataManager;
+import net.kyori.adventure.platform.bukkit.BukkitAudiences;
+import org.jetbrains.annotations.NotNull;
 
 public class PluginTests {
 
@@ -179,6 +181,11 @@ public class PluginTests {
         }
 
         @Override
+        public @NotNull BukkitAudiences adventure() {
+            throw new UnsupportedOperationException();
+        }
+
+        @Override
         public LogManager getLogManager() {
             // TODO: Maybe do implement a dummy log manager (with file?) 
             throw new UnsupportedOperationException();
@@ -238,13 +245,7 @@ public class PluginTests {
         public ActionFactoryFactory setActionFactoryFactory(
                 ActionFactoryFactory actionFactoryFactory) {
             if (actionFactoryFactory == null) {
-                actionFactoryFactory = new ActionFactoryFactory() {
-                    @Override
-                    public final ActionFactory newActionFactory(
-                            final Map<String, Object> library) {
-                        return new ActionFactory(library);
-                    }
-                };
+                actionFactoryFactory = ActionFactory::new;
             }
             final ActionFactoryFactory previous = registerGenericInstance(
                     ActionFactoryFactory.class, actionFactoryFactory);

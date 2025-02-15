@@ -223,12 +223,7 @@ public class WorldDataManager implements IWorldDataManager, INotifyReload {
     @Override
     public Iterable<Entry<String, IWorldData>> getWorldDataIterable() {
         final Iterator<Entry<String, IWorldData>> iterator = getWorldDataIterator();
-        return new Iterable<Map.Entry<String, IWorldData>>() {
-            @Override
-            public Iterator<Entry<String, IWorldData>> iterator() {
-                return iterator;
-            }
-        };
+        return () -> iterator;
     }
 
     /**

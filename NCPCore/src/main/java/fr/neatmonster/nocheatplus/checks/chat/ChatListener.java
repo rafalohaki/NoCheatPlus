@@ -98,21 +98,11 @@ public class ChatListener extends CheckListener implements INotifyReload, JoinLe
         final NoCheatPlusAPI api = NCPAPIProvider.getNoCheatPlusAPI();
         api.register(api.newRegistrationContext()
                 .registerConfigWorld(ChatConfig.class)
-                .factory(new IFactoryOne<WorldFactoryArgument, ChatConfig>() {
-                    @Override
-                    public ChatConfig getNewInstance(WorldFactoryArgument arg) {
-                        return new ChatConfig(arg.worldData);
-                    }
-                })
+                .factory(arg -> new ChatConfig(arg.worldData))
                 .registerConfigTypesPlayer()
                 .context() //
                 .registerDataPlayer(ChatData.class)
-                .factory(new IFactoryOne<PlayerFactoryArgument, ChatData>() {
-                    @Override
-                    public ChatData getNewInstance(PlayerFactoryArgument arg) {
-                        return new ChatData();
-                    }
-                })
+                .factory(arg -> new ChatData())
                 .addToGroups(CheckType.CHAT, true, IData.class, ICheckData.class)
                 .context() //
                 );
@@ -180,7 +170,7 @@ public class ChatListener extends CheckListener implements INotifyReload, JoinLe
         if (command != null) {
             messageVars.add("/" + command.getLabel().toLowerCase() + (split.length > 1 ? (" " + split[1]) : ""));
         }
-        if (alias.indexOf(":") != -1) {
+        if (alias.contains(":")) {
             final int index = message.indexOf(":") + 1;
             if (index < message.length()) {
                 checkMessage = message.substring(index);

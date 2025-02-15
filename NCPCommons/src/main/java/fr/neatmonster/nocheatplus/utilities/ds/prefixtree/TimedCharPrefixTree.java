@@ -97,25 +97,14 @@ public class TimedCharPrefixTree<N extends TimedCharNode<N>, L extends TimedChar
 	 */
 	public static TimedCharPrefixTree<SimpleTimedCharNode, TimedCharLookupEntry<SimpleTimedCharNode>> newTimedCharPrefixTree(final boolean access) {
 		return new TimedCharPrefixTree<SimpleTimedCharNode, TimedCharLookupEntry<SimpleTimedCharNode>>(
-			new NodeFactory<Character, SimpleTimedCharNode>(){
-			@Override
-			public final SimpleTimedCharNode newNode(final SimpleTimedCharNode parent) {
-				final long ts;
-				if (parent == null) ts = System.currentTimeMillis();
-				else ts = parent.ts;
-				return new SimpleTimedCharNode(ts);
-			}
-			}
-			,
-			 new LookupEntryFactory<Character, SimpleTimedCharNode, TimedCharLookupEntry<SimpleTimedCharNode>>() {
-				@Override
-				public final TimedCharLookupEntry<SimpleTimedCharNode> newLookupEntry(final SimpleTimedCharNode node,
-						final SimpleTimedCharNode insertion, final int depth, final boolean hasPrefix) {
-					return new TimedCharLookupEntry<SimpleTimedCharNode>(node, insertion, depth, hasPrefix);
-				}
-			},
-			access
-		);
+                parent -> {
+                    final long ts;
+                    if (parent == null) ts = System.currentTimeMillis();
+                    else ts = parent.ts;
+                    return new SimpleTimedCharNode(ts);
+                },
+                TimedCharLookupEntry::new,
+                access);
 	}
 
 }

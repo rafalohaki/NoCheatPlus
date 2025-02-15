@@ -15,7 +15,7 @@
     <name>NCPCompatProtocolLib</name>
     <description>
         Features using the plugin ProtocolLib:
-        https://dev.bukkit.org/bukkit-plugins/protocollib/
+        https://www.spigotmc.org/resources/protocollib.1997/
     </description>
 
     <repositories>
@@ -41,7 +41,7 @@
         <dependency>
             <groupId>com.comphenix.protocol</groupId>
             <artifactId>ProtocolLib</artifactId>
-            <version>4.8.0</version>
+            <version>5.1.0</version>
             <scope>provided</scope>
         </dependency>
     </dependencies>

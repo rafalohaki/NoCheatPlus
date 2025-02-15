@@ -127,8 +127,7 @@ public class ViolationData implements IViolationInfo, ActionData {
         this.penaltyList = penaltyList == null ? new DefaultPenaltyList() : penaltyList;
         boolean needsParameters = false;
 
-        for (int i = 0; i < applicableActions.length; i++) {
-            final Action<ViolationData, ActionList> action = applicableActions[i];
+        for (final Action<ViolationData, ActionList> action : applicableActions) {
             if (!needsParameters && action.needsParameters()) {
                 needsParameters = true;
             }

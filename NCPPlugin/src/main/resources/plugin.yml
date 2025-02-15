@@ -13,7 +13,6 @@ folia-supported: true
 
 softdepend:
 - ProtocolLib
-- Carbon
 
 commands:
     nocheatplus:
@@ -68,8 +67,6 @@ permissions:
     nocheatplus.checks.blockplace.fastplace.silent:
         default: false
     nocheatplus.checks.blockplace.noswing.silent:
-        default: false
-    nocheatplus.checks.blockbreak.reach.silent:
         default: false
     nocheatplus.checks.blockplace.speed.silent:
         default: false
@@ -347,7 +344,6 @@ permissions:
                 description: Allow toggling notifications.
                 children:
                     nocheatplus.notify: true
-            nocheatplus.filter.command.nocheatplus: true
             nocheatplus.command.reload:
                 description: Allow the player to reload NoCheatPlus configuration.
                 children:

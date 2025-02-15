@@ -17,6 +17,7 @@ package fr.neatmonster.nocheatplus.hooks;
 import java.util.ArrayList;
 import java.util.Arrays;
 import java.util.Collection;
+import java.util.Collections;
 import java.util.List;
 
 import org.bukkit.entity.Entity;
@@ -73,17 +74,14 @@ public class ExemptionSettings {
         }
 
         public boolean hasAnyMetaDataKey(final Entity entity) {
-            if (metaDataKeys == null) {
-                return false;
-            }
-            else {
-                for (int i = 0; i < metaDataKeys.length; i++) {
-                    if (entity.hasMetadata(metaDataKeys[i])) {
+            if (metaDataKeys != null) {
+                for (String metaDataKey : metaDataKeys) {
+                    if (entity.hasMetadata(metaDataKey)) {
                         return true;
                     }
                 }
-                return false;
             }
+            return false;
         }
 
     }
@@ -115,8 +113,8 @@ public class ExemptionSettings {
      * </ul>
      */
     public ExemptionSettings() {
-        this(new MetaDataListCheck(Arrays.asList("nocheat.exempt")), 
-                true, true, new MetaDataListCheck(Arrays.asList("NPC")));
+        this(new MetaDataListCheck(Collections.singletonList("nocheat.exempt")),
+                true, true, new MetaDataListCheck(Collections.singletonList("NPC")));
     }
 
     /**

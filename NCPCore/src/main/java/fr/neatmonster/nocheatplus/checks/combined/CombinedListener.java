@@ -64,23 +64,12 @@ public class CombinedListener extends CheckListener {
         api.register(api.newRegistrationContext()
                 // CombinedConfig
                 .registerConfigWorld(CombinedConfig.class)
-                .factory(new IFactoryOne<WorldFactoryArgument, CombinedConfig>() {
-                    @Override
-                    public CombinedConfig getNewInstance(WorldFactoryArgument arg) {
-                        return new CombinedConfig(arg.worldData);
-                    }
-                })
+                .factory(arg -> new CombinedConfig(arg.worldData))
                 .registerConfigTypesPlayer()
                 .context() //
                 // CombinedData
                 .registerDataPlayer(CombinedData.class)
-                .factory(new IFactoryOne<PlayerFactoryArgument, CombinedData>() {
-                    @Override
-                    public CombinedData getNewInstance(
-                            PlayerFactoryArgument arg) {
-                        return new CombinedData();
-                    }
-                })
+                .factory(arg -> new CombinedData())
                 .addToGroups(CheckType.MOVING, false, IData.class, ICheckData.class)
                 .removeSubCheckData(CheckType.COMBINED, true)
                 .context() //

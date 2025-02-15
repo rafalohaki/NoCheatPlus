@@ -314,23 +314,17 @@ public class PlayerCheckTypeTree extends CheckTypeTree<PlayerCheckTypeTreeNode>{
     }
 
     private void exemptPrimaryThread(final PlayerCheckTypeTreeNode node, final ExemptionContext context) {
-        visitWithDescendants(node, new Visitor<PlayerCheckTypeTreeNode>() {
-            @Override
-            public boolean visit(final PlayerCheckTypeTreeNode node) {
-                node.exemptPrimaryThread(context);
-                return true;
-            }
+        visitWithDescendants(node, node1 -> {
+            node1.exemptPrimaryThread(context);
+            return true;
         });
     }
 
     private void exemptAsynchronous(final PlayerCheckTypeTreeNode node, final ExemptionContext context) {
         lock.lock();
-        visitWithDescendants(node, new Visitor<PlayerCheckTypeTreeNode>() {
-            @Override
-            public boolean visit(final PlayerCheckTypeTreeNode node) {
-                node.exemptAsynchronous(context);
-                return true;
-            }
+        visitWithDescendants(node, node1 -> {
+            node1.exemptAsynchronous(context);
+            return true;
         });
         lock.unlock();
     }
@@ -349,23 +343,17 @@ public class PlayerCheckTypeTree extends CheckTypeTree<PlayerCheckTypeTreeNode>{
     }
 
     private void unexemptPrimaryThread(final PlayerCheckTypeTreeNode node, final ExemptionContext context) {
-        visitWithDescendants(node, new Visitor<PlayerCheckTypeTreeNode>() {
-            @Override
-            public boolean visit(final PlayerCheckTypeTreeNode node) {
-                node.unexemptPrimaryThread(context);
-                return true;
-            }
+        visitWithDescendants(node, node1 -> {
+            node1.unexemptPrimaryThread(context);
+            return true;
         });
     }
 
     private void unexemptAsynchronous(final PlayerCheckTypeTreeNode node, final ExemptionContext context) {
         lock.lock();
-        visitWithDescendants(node, new Visitor<PlayerCheckTypeTreeNode>() {
-            @Override
-            public boolean visit(final PlayerCheckTypeTreeNode node) {
-                node.unexemptAsynchronous(context);
-                return true;
-            }
+        visitWithDescendants(node, node1 -> {
+            node1.unexemptAsynchronous(context);
+            return true;
         });
         lock.unlock();
     }
@@ -384,23 +372,17 @@ public class PlayerCheckTypeTree extends CheckTypeTree<PlayerCheckTypeTreeNode>{
     }
 
     private void unexemptAllPrimaryThread(final PlayerCheckTypeTreeNode node, final ExemptionContext context) {
-        visitWithDescendants(node, new Visitor<PlayerCheckTypeTreeNode>() {
-            @Override
-            public boolean visit(final PlayerCheckTypeTreeNode node) {
-                node.unexemptAllPrimaryThread(context);
-                return true;
-            }
+        visitWithDescendants(node, node1 -> {
+            node1.unexemptAllPrimaryThread(context);
+            return true;
         });
     }
 
     private void unexemptAllAsynchronous(final PlayerCheckTypeTreeNode node, final ExemptionContext context) {
         lock.lock();
-        visitWithDescendants(node, new Visitor<PlayerCheckTypeTreeNode>() {
-            @Override
-            public boolean visit(final PlayerCheckTypeTreeNode node) {
-                node.unexemptAllAsynchronous(context);
-                return true;
-            }
+        visitWithDescendants(node, node1 -> {
+            node1.unexemptAllAsynchronous(context);
+            return true;
         });
         lock.unlock();
     }
@@ -449,12 +431,9 @@ public class PlayerCheckTypeTree extends CheckTypeTree<PlayerCheckTypeTreeNode>{
             throw new IllegalArgumentException("Invalid check type.");
         }
         lock.lock();
-        visitWithDescendants(node, new Visitor<PlayerCheckTypeTreeNode>() {
-            @Override
-            public boolean visit(final PlayerCheckTypeTreeNode node) {
-                node.clearAllExemptions();
-                return true;
-            }
+        visitWithDescendants(node, node1 -> {
+            node1.clearAllExemptions();
+            return true;
         });
         lock.unlock();
     }

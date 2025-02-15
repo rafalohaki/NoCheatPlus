@@ -20,6 +20,7 @@ import java.util.Locale;
 
 import org.bukkit.GameMode;
 import org.bukkit.Location;
+import org.bukkit.Material;
 import org.bukkit.World;
 import org.bukkit.entity.Player;
 import org.bukkit.util.Vector;
@@ -46,6 +47,7 @@ import fr.neatmonster.nocheatplus.compat.BridgeMisc;
 import fr.neatmonster.nocheatplus.compat.blocks.changetracker.BlockChangeTracker;
 import fr.neatmonster.nocheatplus.components.modifier.IAttributeAccess;
 import fr.neatmonster.nocheatplus.components.registry.event.IGenericInstanceHandle;
+import fr.neatmonster.nocheatplus.permissions.Permissions;
 import fr.neatmonster.nocheatplus.players.IPlayerData;
 import fr.neatmonster.nocheatplus.utilities.StringUtil;
 import fr.neatmonster.nocheatplus.utilities.location.PlayerLocation;
@@ -104,6 +106,25 @@ public class CreativeFly extends Check {
         final boolean sprinting = time <= data.timeSprinting + cc.sprintingGrace;
         final long now = System.currentTimeMillis();
         boolean lostGround = false;
+
+        // Allow elytra fly (not packet mode)
+        // Since in Winds Anarchy, we have another plugin to handle elyta fly better.
+        if (pData.hasPermission(Permissions.MOVING_ELYTRAFLY, player)
+                && player.getInventory().getChestplate() != null && player.getInventory().getChestplate().getType() == Material.ELYTRA && player.isGliding()) {
+            // Adjust the set back and other last distances.
+            data.setSetBack(to);
+            // Adjust jump phase.
+            if (!thisMove.from.onGroundOrResetCond && !thisMove.to.onGroundOrResetCond) {
+                data.sfJumpPhase ++;
+            }
+            else if (thisMove.touchedGround && !thisMove.to.onGroundOrResetCond) {
+                data.sfJumpPhase = 1;
+            }
+            else {
+                data.sfJumpPhase = 0;
+            }
+            return null;
+        }
 
         // Lost ground, if set so.
         if (model.getGround()) {

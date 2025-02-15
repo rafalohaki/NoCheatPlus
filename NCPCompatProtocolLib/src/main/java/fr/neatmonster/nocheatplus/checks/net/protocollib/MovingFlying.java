@@ -15,6 +15,7 @@
 package fr.neatmonster.nocheatplus.checks.net.protocollib;
 
 import java.util.Arrays;
+import java.util.Collections;
 import java.util.HashSet;
 import java.util.LinkedHashSet;
 import java.util.LinkedList;
@@ -121,7 +122,7 @@ public class MovingFlying extends BaseAdapter {
         // Keep the CheckType NET for now.
         // Add feature tags for checks.
         if (NCPAPIProvider.getNoCheatPlusAPI().getWorldDataManager().isActiveAnywhere(CheckType.NET_FLYINGFREQUENCY)) {
-            NCPAPIProvider.getNoCheatPlusAPI().addFeatureTags( "checks", Arrays.asList(FlyingFrequency.class.getSimpleName()));
+            NCPAPIProvider.getNoCheatPlusAPI().addFeatureTags( "checks", Collections.singletonList(FlyingFrequency.class.getSimpleName()));
         }
         NCPAPIProvider.getNoCheatPlusAPI().addComponent(flyingFrequency);
     }
@@ -226,7 +227,7 @@ public class MovingFlying extends BaseAdapter {
                 // TODO: extra actions: log and kick (cancel state is not evaluated)
                 event.setCancelled(true);
                 if (pData.isDebugActive(this.checkType)) {
-                    debug(player, "Incoming packet, cancel due to malicious content: " + packetData.toString());
+                    debug(player, "Incoming packet, cancel due to malicious content: " + packetData);
                 }
                 return;
             }
@@ -314,10 +315,7 @@ public class MovingFlying extends BaseAdapter {
         if (packetData.hasPos && LocUtil.isBadCoordinate(packetData.getX(), packetData.getY(), packetData.getZ())) {
             return true;
         }
-        if (packetData.hasLook && LocUtil.isBadCoordinate(packetData.getYaw(), packetData.getPitch())) {
-            return true;
-        }
-        return false;
+        return packetData.hasLook && LocUtil.isBadCoordinate(packetData.getYaw(), packetData.getPitch());
     }
 
     /**
@@ -339,9 +337,9 @@ public class MovingFlying extends BaseAdapter {
             packetMismatch(event);
             return null;
         }
-        final boolean onGround = booleans.get(MovingFlying.indexOnGround).booleanValue();
-        final boolean hasPos = booleans.get(MovingFlying.indexhasPos).booleanValue();
-        final boolean hasLook = booleans.get(MovingFlying.indexhasLook).booleanValue();
+        final boolean onGround = booleans.get(MovingFlying.indexOnGround);
+        final boolean hasPos = booleans.get(MovingFlying.indexhasPos);
+        final boolean hasLook = booleans.get(MovingFlying.indexhasLook);
 
         if (!hasPos && !hasLook) {
             return new DataPacketFlying(onGround, time);
@@ -396,7 +394,7 @@ public class MovingFlying extends BaseAdapter {
             StringBuilder builder = new StringBuilder(512);
             builder.append(CheckUtils.getLogMessagePrefix(packetEvent.getPlayer(), checkType));
             builder.append("Incoming packet could not be interpreted. Are server and plugins up to date (NCP/ProtocolLib...)? This message is logged every ");
-            builder.append(Long.toString(packetMismatchLogFrequency / 1000));
+            builder.append(packetMismatchLogFrequency / 1000);
             builder.append(" seconds, disregarding for which player this happens.");
             if (!validContent.isEmpty()) {
                 builder.append(" On other occasion, valid content was received for: ");

@@ -28,6 +28,8 @@ import org.bukkit.entity.Player;
 import org.bukkit.plugin.java.JavaPlugin;
 import org.bukkit.potion.PotionEffect;
 
+import com.viaversion.viaversion.api.Via;
+import com.viaversion.viaversion.api.protocol.version.ProtocolVersion;
 import fr.neatmonster.nocheatplus.command.BaseCommand;
 import fr.neatmonster.nocheatplus.compat.BridgeHealth;
 import fr.neatmonster.nocheatplus.permissions.Permissions;
@@ -97,7 +99,10 @@ public class InspectCommand extends BaseCommand {
         
         builder.append("\n "+ c1 + "" + c2 + "•" + c1 + cI + (pData.isBedrockPlayer() ? " Is a Bedrock player" : " Is a Java player") + c1 + ".");
 
-        builder.append("\n "+ c1 + "" + c2 + "•" + c1 +" Is playing with version " + pData.getClientVersion().getReleaseName() + "(" + pData.getClientVersionID() + ")");
+        if (Bukkit.getPluginManager().isPluginEnabled("ViaVersion")) {
+            builder.append("\n " + c1 + c2 + "•" + c1 + " Is playing with version " + ProtocolVersion.getProtocol(Via.getAPI().getPlayerVersion(pData.getPlayerId())));
+        }
+        //builder.append("\n "+ c1 + "" + c2 + "•" + c1 +" Is playing with version " + pData.getClientVersion().getReleaseName() + "(" + pData.getClientVersionID() + ")");
 
         if (player.isOp()){
             builder.append("\n "+ c1 + "" + c2 + "•"  + c1 + cI + " Is OP" + c1 + ".");

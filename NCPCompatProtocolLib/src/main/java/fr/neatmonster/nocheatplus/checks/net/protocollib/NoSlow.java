@@ -261,7 +261,7 @@ public class NoSlow extends BaseAdapter {
         }
         final IPlayerData pData = DataManager.getPlayerDataSafe(p);
         if (pData == null) {
-            StaticLog.logWarning("Failed to fetch player data with " + event.getPacketType() + " for: " + p.toString());
+            StaticLog.logWarning("Failed to fetch player data with " + event.getPacketType() + " for: " + p);
             return;
         }
         final MovingData data = pData.getGenericInstance(MovingData.class);

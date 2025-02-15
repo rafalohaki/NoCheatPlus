@@ -163,7 +163,7 @@ public class SoundDistance extends BaseAdapter {
         // Compare distance of player to the weather location.
         final Location loc = player.getLocation(useLoc);
         final StructureModifier<Integer> ints = packetContainer.getIntegers();
-        final double dSq = TrigUtil.distanceSquared(ints.read(0) / 8, ints.read(2) / 8, loc.getX(), loc.getZ());
+        final double dSq = TrigUtil.distanceSquared((double) ints.read(0) / 8, (double) ints.read(2) / 8, loc.getX(), loc.getZ());
         //        if (data.debug) {
         //            debug(player, "SoundDistance(" + soundName + "): " + StringUtil.fdec1.format(Math.sqrt(dSq)));
         //        }

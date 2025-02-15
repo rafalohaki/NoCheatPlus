@@ -82,7 +82,7 @@ public class TickTask implements Runnable {
     private static List<ViolationData> delayedActions = new LinkedList<ViolationData>();
 
     /** Tick listeners to call every tick. */
-    private static final Set<TickListener> tickListeners = new LinkedHashSet<TickListener>();
+    private static final Set<TickListener> tickListeners = new LinkedHashSet<>(256, 0.75F);
 
     /** Last n tick durations, measured from run to run.*/
     private static final long[] tickDurations = new long[lagMaxTicks];
@@ -532,11 +532,10 @@ public class TickTask implements Runnable {
                 // Future purpose.
                 return;
             }
-            copyListeners = tickListeners.toArray(new TickListener[tickListeners.size()]);
-        } 
-        for (int i = 0; i < copyListeners.length; i++) {
-            final TickListener listener = copyListeners[i];
-            try{
+            copyListeners = tickListeners.toArray(new TickListener[0]);
+        }
+        for (final TickListener listener : copyListeners) {
+            try {
                 listener.onTick(tick, timeLast);
             }
             catch(Throwable t) {

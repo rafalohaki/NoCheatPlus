@@ -90,18 +90,15 @@ public class RegistrationOrder {
      * Compare on base of basePriority. Entries with null priority are sorted to
      * the front.
      */
-    public static Comparator<RegistrationOrder> cmpBasePriority = new Comparator<RegistrationOrder>() {
-        @Override
-        public int compare(final RegistrationOrder o1, final RegistrationOrder o2) {
-            final Integer p1 = o1.getBasePriority();
-            final Integer p2 = o2.getBasePriority();
-            if (p1 == null) {
-                return p2 == null ? 0 : -1; // o1 to front.
-            } else if (p2 == null) {
-                return 1; // o2 to front.
-            } else {
-                return p1.compareTo(p2);
-            }
+    public static final Comparator<RegistrationOrder> cmpBasePriority = (o1, o2) -> {
+        final Integer p1 = o1.getBasePriority();
+        final Integer p2 = o2.getBasePriority();
+        if (p1 == null) {
+            return p2 == null ? 0 : -1; // o1 to front.
+        } else if (p2 == null) {
+            return 1; // o2 to front.
+        } else {
+            return p1.compareTo(p2);
         }
     };
 
@@ -131,13 +128,8 @@ public class RegistrationOrder {
         // TODO: Signature with passing IFetchRegistrationOrder<F> to the sorting?
         // TODO: Back to generic static methods?
 
-        private final Comparator<F> cmp = new Comparator<F>() {
-            @Override
-            public int compare(final F o1, final F o2) {
-                return RegistrationOrder.cmpBasePriority.compare(
-                        fetchRegistrationOrder(o1), fetchRegistrationOrder(o2));
-            }
-        };
+        private final Comparator<F> cmp = (o1, o2) -> RegistrationOrder.cmpBasePriority.compare(
+                fetchRegistrationOrder(o1), fetchRegistrationOrder(o2));
 
         protected abstract RegistrationOrder fetchRegistrationOrder(F item);
 
@@ -259,7 +251,7 @@ public class RegistrationOrder {
          * @param output
          */
         private void addSortedSubList(final List<F> subList, final F[] output, int insertionIndex) {
-            Collections.sort(subList, cmp);
+            subList.sort(cmp);
             Collections.reverse(subList);
             for (final F item : subList) {
                 sortInFromStart(item, output, insertionIndex);

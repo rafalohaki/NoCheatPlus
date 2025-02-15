@@ -126,8 +126,7 @@ public class PenaltyNode {
     protected void evaluateChildrenFCFS(final IPenaltyList results) {
         final double ref = ThreadLocalRandom.current().nextDouble(); // No scale contained yet.
         double floor = 0.0;
-        for (int i = 0 ; i < childNodes.length; i++) {
-            final PenaltyNode childNode = childNodes[i];
+        for (final PenaltyNode childNode : childNodes) {
             final double nextFloor = floor + childNode.probability;
             // TODO: Configurable catch-all amount.
             if (nextFloor >= ref || nextFloor >= 0.999) {
@@ -145,8 +144,8 @@ public class PenaltyNode {
      * @param results
      */
     protected void evaluateAllChildren(final IPenaltyList results) {
-        for (int i = 0 ; i < childNodes.length; i++) {
-            childNodes[i].evaluate(results);
+        for (PenaltyNode childNode : childNodes) {
+            childNode.evaluate(results);
         }
     }
 

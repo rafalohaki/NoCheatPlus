@@ -43,7 +43,7 @@ public class EntityAccessVehicleLegacy implements IEntityAccessVehicle {
     @Override
     public List<Entity> getEntityPassengers(final Entity entity) {
         final Entity passenger = entity.getPassenger();
-        return passenger == null ? nullPassenger : Arrays.asList(passenger);
+        return passenger == null ? nullPassenger : Collections.singletonList(passenger);
     }
 
     @SuppressWarnings("deprecation")

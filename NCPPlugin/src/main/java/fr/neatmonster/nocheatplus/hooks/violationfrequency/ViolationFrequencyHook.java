@@ -1,6 +1,9 @@
 package fr.neatmonster.nocheatplus.hooks.violationfrequency;
 
-import org.bukkit.ChatColor;
+import net.kyori.adventure.text.Component;
+import net.kyori.adventure.text.TextComponent;
+import net.kyori.adventure.text.format.NamedTextColor;
+import net.kyori.adventure.text.serializer.legacy.LegacyComponentSerializer;
 import org.bukkit.entity.Player;
 
 import fr.neatmonster.nocheatplus.NCPAPIProvider;
@@ -112,12 +115,11 @@ public class ViolationFrequencyHook implements NCPHook, IFirst {
     
     private void log(String s, Player p) {
         final LogManager logManager = NCPAPIProvider.getNoCheatPlusAPI().getLogManager();
-        final StringBuilder builder = new StringBuilder(300);
-        builder.append("ViolationFrequency");
-        builder.append(" [" + ChatColor.YELLOW + p.getName());
-        builder.append(ChatColor.WHITE + "] ");
-        builder.append(s);
-        final String message = builder.toString();
-        logManager.info(Streams.NOTIFY_INGAME, message);
+        final TextComponent message = Component.text()
+                .append(Component.text("ViolationFrequency" + " [", NamedTextColor.WHITE))
+                .append(Component.text(p.getName(), NamedTextColor.YELLOW))
+                .append(Component.text("] " + s, NamedTextColor.WHITE))
+                .build();
+        logManager.info(Streams.NOTIFY_INGAME, LegacyComponentSerializer.legacyAmpersand().serialize(message));
     }
 }

@@ -113,23 +113,12 @@ public class BlockInteractListener extends CheckListener {
         api.register(api.newRegistrationContext() //
                 // BlockInteractConfig
                 .registerConfigWorld(BlockInteractConfig.class)
-                .factory(new IFactoryOne<WorldFactoryArgument, BlockInteractConfig>() {
-                    @Override
-                    public BlockInteractConfig getNewInstance(WorldFactoryArgument arg) {
-                        return new BlockInteractConfig(arg.worldData);
-                    }
-                })
+                .factory(arg -> new BlockInteractConfig(arg.worldData))
                 .registerConfigTypesPlayer(CheckType.BLOCKINTERACT, true)
                 .context() //
                 // BlockinteractData
                 .registerDataPlayer(BlockInteractData.class)
-                .factory(new IFactoryOne<PlayerFactoryArgument, BlockInteractData>() {
-                    @Override
-                    public BlockInteractData getNewInstance(
-                            PlayerFactoryArgument arg) {
-                        return new BlockInteractData();
-                    }
-                })
+                .factory(arg -> new BlockInteractData())
                 .addToGroups(CheckType.BLOCKINTERACT, true, IData.class, ICheckData.class)
                 .context() //
                 );

@@ -128,7 +128,7 @@ public class TopCommand extends BaseCommand{
             }
             
             // Sort
-            Collections.sort(views, comparator);
+            views.sort(comparator);
             // Display.
             final StringBuilder builder = new StringBuilder(100 + 32 * views.size());
             builder.append((sender instanceof Player ? TAG : CTAG) + "Top results for check: " + c3 + bo +""+ it + checkType.toString().toLowerCase());

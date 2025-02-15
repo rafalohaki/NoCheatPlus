@@ -79,7 +79,7 @@ public class CatchAllAdapter extends BaseAdapter {
         }
         final IPlayerData pData = DataManager.getPlayerDataSafe(player);
         if (pData == null) {
-            StaticLog.logWarning("Failed to fetch player data with " + event.getPacketType() + " for: " + player.toString());
+            StaticLog.logWarning("Failed to fetch player data with " + event.getPacketType() + " for: " + player);
             return;
         }
         if (packetFrequency.isEnabled(player, pData)) {

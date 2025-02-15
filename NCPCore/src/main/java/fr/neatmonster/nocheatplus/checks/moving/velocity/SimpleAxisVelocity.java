@@ -154,10 +154,8 @@ public class SimpleAxisVelocity {
      */
     public SimpleEntry peek(final double amount, final int minActCount, final int maxActCount, 
             final double tolerance) {
-        final Iterator<SimpleEntry> it = queued.iterator();
-        while (it.hasNext()) {
-            final SimpleEntry entry = it.next();
-            if (entry.actCount >= minActCount && entry.actCount <= maxActCount 
+        for (SimpleEntry entry : queued) {
+            if (entry.actCount >= minActCount && entry.actCount <= maxActCount
                     && matchesEntry(entry, amount, tolerance)) {
                 return entry;
             }

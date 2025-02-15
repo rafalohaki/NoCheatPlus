@@ -14,6 +14,8 @@
  */
 package fr.neatmonster.nocheatplus.utilities.ds.count;
 
+import java.util.Arrays;
+
 /**
  * Keep track of frequency of some action, 
  * put weights into buckets, which represent intervals of time. 
@@ -133,9 +135,7 @@ public class ActionFrequency {
      * @param now
      */
     public final void clear(final long now) {
-        for (int i = 0; i < buckets.length; i++) {
-            buckets[i] = 0f;
-        }
+        Arrays.fill(buckets, 0f);
         time = lastUpdate = now;
     }
 
@@ -270,8 +270,8 @@ public class ActionFrequency {
         // TODO: Backwards-compatible lastUpdate ?
         final StringBuilder buffer = new StringBuilder(50);
         buffer.append(buckets.length + ","+durBucket+","+time);
-        for (int i = 0; i < buckets.length; i++) {
-            buffer.append("," + buckets[i]);
+        for (float bucket : buckets) {
+            buffer.append("," + bucket);
         }
         return buffer.toString();
     }
@@ -285,8 +285,7 @@ public class ActionFrequency {
      * @param freqs
      */
     public static void reduce(final long time, final float amount, final ActionFrequency... freqs) {
-        for (int i = 0; i < freqs.length; i++) {
-            final ActionFrequency freq = freqs[i];
+        for (final ActionFrequency freq : freqs) {
             freq.update(time);
             freq.setBucket(0, Math.max(0f, freq.bucketScore(0) - amount));
         }
@@ -301,8 +300,7 @@ public class ActionFrequency {
      * @param freqs
      */
     public static void subtract(final long time, final float amount, final ActionFrequency... freqs) {
-        for (int i = 0; i < freqs.length; i++) {
-            final ActionFrequency freq = freqs[i];
+        for (final ActionFrequency freq : freqs) {
             freq.update(time);
             freq.setBucket(0, freq.bucketScore(0) - amount);
         }

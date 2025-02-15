@@ -223,25 +223,13 @@ public class MovingListener extends CheckListener implements TickListener, IRemo
         api.register(api.newRegistrationContext()
                 // MovingConfig
                 .registerConfigWorld(MovingConfig.class)
-                .factory(new IFactoryOne<WorldFactoryArgument, MovingConfig>() {
-                    @Override
-                    public MovingConfig getNewInstance(
-                            final WorldFactoryArgument arg) {
-                        return new MovingConfig(arg.worldData);
-                    }
-                })
+                .factory(arg -> new MovingConfig(arg.worldData))
                 .registerConfigTypesPlayer(CheckType.MOVING, true)
                 .context() //
                 // MovingData
                 .registerDataPlayer(MovingData.class)
-                .factory(new IFactoryOne<PlayerFactoryArgument, MovingData>() {
-                    @Override
-                    public MovingData getNewInstance(
-                            final PlayerFactoryArgument arg) {
-                        return new MovingData(arg.worldData.getGenericInstance(
-                                MovingConfig.class), arg.playerData);
-                    }
-                })
+                .factory(arg -> new MovingData(arg.worldData.getGenericInstance(
+                        MovingConfig.class), arg.playerData))
                 .addToGroups(CheckType.MOVING, false, IData.class, ICheckData.class)
                 .removeSubCheckData(CheckType.MOVING, true)
                 .context() //

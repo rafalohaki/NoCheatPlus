@@ -65,8 +65,8 @@ public class ActionAccumulator {
      */
     public float score() {
         float score = 0;
-        for (int i = 0; i < buckets.length; i++) {
-            score += buckets[i];
+        for (float bucket : buckets) {
+            score += bucket;
         }
         return score;
     }
@@ -77,8 +77,8 @@ public class ActionAccumulator {
      */
     public int count() {
         int count = 0;
-        for (int i = 0; i < counts.length; i++) {
-            count += counts[i];
+        for (int j : counts) {
+            count += j;
         }
         return count;
     }

@@ -94,12 +94,7 @@ public abstract class AbstractLogManager implements LogManager {
     /**
      * Wrapping logging to the init stream.
      */
-    protected final ContentLogger<String> initLogger = new ContentLogger<String>() {
-        @Override
-        public void log(final Level level, final String content) {
-            AbstractLogManager.this.log(getInitStreamID(), level, content);
-        }
-    };
+    protected final ContentLogger<String> initLogger = (level, content) -> AbstractLogManager.this.log(getInitStreamID(), level, content);
 
     /**
      * 

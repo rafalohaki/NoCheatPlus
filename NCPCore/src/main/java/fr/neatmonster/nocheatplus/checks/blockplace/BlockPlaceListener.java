@@ -146,23 +146,12 @@ public class BlockPlaceListener extends CheckListener {
         api.register(api.newRegistrationContext()
                 // BlockPlaceConfig
                 .registerConfigWorld(BlockPlaceConfig.class)
-                .factory(new IFactoryOne<WorldFactoryArgument, BlockPlaceConfig>() {
-                    @Override
-                    public BlockPlaceConfig getNewInstance(WorldFactoryArgument arg) {
-                        return new BlockPlaceConfig(arg.worldData);
-                    }
-                })
+                .factory(arg -> new BlockPlaceConfig(arg.worldData))
                 .registerConfigTypesPlayer()
                 .context() //
                 // BlockPlaceData
                 .registerDataPlayer(BlockPlaceData.class)
-                .factory(new IFactoryOne<PlayerFactoryArgument, BlockPlaceData>() {
-                    @Override
-                    public BlockPlaceData getNewInstance(
-                            PlayerFactoryArgument arg) {
-                        return new BlockPlaceData();
-                    }
-                })
+                .factory(arg -> new BlockPlaceData())
                 .addToGroups(CheckType.BLOCKPLACE, true, IData.class, ICheckData.class)
                 .context() //
                 );

@@ -211,9 +211,7 @@ public class TeleportQueue {
             return AlmostBoolean.YES;
         }
         AlmostBoolean ackState = AlmostBoolean.NO;
-        final Iterator<CountableLocation> it = expectIncoming.iterator();
-        while (it.hasNext()) {
-            final CountableLocation ref = it.next();
+        for (CountableLocation ref : expectIncoming) {
             // No expiration checks here.
             if (ref.teleportId == teleportId) {
                 // Match an outdated id.

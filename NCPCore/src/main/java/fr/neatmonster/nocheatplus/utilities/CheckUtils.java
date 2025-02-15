@@ -40,13 +40,7 @@ import fr.neatmonster.nocheatplus.players.IPlayerData;
  */
 public class CheckUtils {
 
-    public static final IPrimaryThreadContextTester primaryServerThreadContextTester = new IPrimaryThreadContextTester() {
-
-        @Override
-        public boolean isPrimaryThread() {
-            return Bukkit.isPrimaryThread();
-        }
-    };
+    public static final IPrimaryThreadContextTester primaryServerThreadContextTester = Bukkit::isPrimaryThread;
 
     /**
      * Improper API access: Log once a message with the checkType and the

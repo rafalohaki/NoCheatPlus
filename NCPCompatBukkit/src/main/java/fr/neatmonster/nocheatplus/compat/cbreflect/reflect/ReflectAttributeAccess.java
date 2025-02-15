@@ -120,23 +120,25 @@ public class ReflectAttributeAccess implements IAttributeAccess {
     }
 
     // TODO: Register each and every one of these as generic instances and fetch from there.
-    private ReflectBase reflectBase;
-    private ReflectGenericAttributes reflectGenericAttributes;
-    private ReflectAttributeInstance reflectAttributeInstance;
-    private ReflectAttributeModifier reflectAttributeModifier;
-    private ReflectPlayer reflectPlayer;
+    private final ReflectGenericAttributes reflectGenericAttributes;
+    private final ReflectAttributeInstance reflectAttributeInstance;
+    private final ReflectAttributeModifier reflectAttributeModifier;
+    private final ReflectPlayer reflectPlayer;
 
     public ReflectAttributeAccess() {
+        ReflectBase reflectBase;
         try {
-            this.reflectBase = new ReflectBase();
+            reflectBase = new ReflectBase();
             ReflectAxisAlignedBB reflectAxisAlignedBB = null;
             try {
                 reflectAxisAlignedBB = new ReflectAxisAlignedBB(reflectBase);
             }
-            catch (NullPointerException e) {}
-            reflectGenericAttributes = new ReflectGenericAttributes(this.reflectBase);
-            reflectAttributeInstance = new ReflectAttributeInstance(this.reflectBase);
-            reflectAttributeModifier = new ReflectAttributeModifier(this.reflectBase);
+            catch (NullPointerException e) {
+                //e.printStackTrace();
+            }
+            reflectGenericAttributes = new ReflectGenericAttributes(reflectBase);
+            reflectAttributeInstance = new ReflectAttributeInstance(reflectBase);
+            reflectAttributeModifier = new ReflectAttributeModifier(reflectBase);
             reflectPlayer = new ReflectPlayer(reflectBase, reflectAxisAlignedBB, new ReflectDamageSource(reflectBase));
         } catch (ClassNotFoundException ex) {
             throw new RuntimeException("Not available.");
@@ -174,7 +176,7 @@ public class ReflectAttributeAccess implements IAttributeAccess {
      */
     private double getSpeedAttributeMultiplier(Player player, boolean removeSprint) {
         Object attributeInstance = getMovementSpeedAttributeInstance(player);
-        double val = ((Double) ReflectionUtil.invokeMethodNoArgs(this.reflectAttributeInstance.nmsGetValue, attributeInstance)).doubleValue() / ((Double) ReflectionUtil.invokeMethodNoArgs(this.reflectAttributeInstance.nmsGetBaseValue, attributeInstance)).doubleValue();
+        double val = (Double) ReflectionUtil.invokeMethodNoArgs(this.reflectAttributeInstance.nmsGetValue, attributeInstance) / (Double) ReflectionUtil.invokeMethodNoArgs(this.reflectAttributeInstance.nmsGetBaseValue, attributeInstance);
         if (!removeSprint) {
             return val;
         }
@@ -204,8 +206,7 @@ public class ReflectAttributeAccess implements IAttributeAccess {
     }
 
     private Object getHandle(Player player) {
-        Object handle = ReflectionUtil.invokeMethodNoArgs(this.reflectPlayer.obcGetHandle, player);
-        return handle;
+        return ReflectionUtil.invokeMethodNoArgs(this.reflectPlayer.obcGetHandle, player);
     }
 
 }

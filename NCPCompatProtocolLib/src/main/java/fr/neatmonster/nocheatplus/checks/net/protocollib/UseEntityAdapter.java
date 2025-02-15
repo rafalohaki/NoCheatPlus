@@ -15,7 +15,7 @@
 package fr.neatmonster.nocheatplus.checks.net.protocollib;
 
 import java.lang.reflect.Method;
-import java.util.Arrays;
+import java.util.Collections;
 
 import org.bukkit.entity.Player;
 import org.bukkit.plugin.Plugin;
@@ -104,7 +104,7 @@ public class UseEntityAdapter extends BaseAdapter {
         if (NCPAPIProvider.getNoCheatPlusAPI().getWorldDataManager().isActiveAnywhere(
                 CheckType.NET_ATTACKFREQUENCY)) {
             NCPAPIProvider.getNoCheatPlusAPI().addFeatureTags(
-                    "checks", Arrays.asList(AttackFrequency.class.getSimpleName()));
+                    "checks", Collections.singletonList(AttackFrequency.class.getSimpleName()));
         }
         attackFrequency = new AttackFrequency();
         NCPAPIProvider.getNoCheatPlusAPI().addComponent(attackFrequency);

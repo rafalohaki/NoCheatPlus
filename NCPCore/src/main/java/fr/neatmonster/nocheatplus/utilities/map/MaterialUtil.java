@@ -162,7 +162,7 @@ public class MaterialUtil {
 
     public static final Set<Material> ALL_DOORS = Collections.unmodifiableSet(
             BridgeMaterial.getByPrefixAndSuffix(
-                    null, Arrays.asList("_door"), AlmostBoolean.YES,
+                    null, Collections.singletonList("_door"), AlmostBoolean.YES,
                     "trap", "legacy")
             );
 
@@ -217,8 +217,8 @@ public class MaterialUtil {
 
     public static final Set<Material> BANNERS = Collections.unmodifiableSet(addBlocks(
             BridgeMaterial.getByPrefixAndSuffix(
-                    null, 
-                    Arrays.asList("_banner"),
+                    null,
+                    Collections.singletonList("_banner"),
                     AlmostBoolean.YES,
                     "legacy", "_wall"
                     ), "standing_banner"));
@@ -270,7 +270,7 @@ public class MaterialUtil {
      */
     public static final Set<Material> DEAD_CORAL_PARTS = Collections.unmodifiableSet(
             BridgeMaterial.getByPrefixAndSuffix(
-                    Arrays.asList("dead_"),
+                    Collections.singletonList("dead_"),
                     Arrays.asList("coral_fan", "coral_wall_fan", "coral"),
                     AlmostBoolean.YES, 
                     "block", "legacy"
@@ -322,8 +322,8 @@ public class MaterialUtil {
 
     public static final Set<Material> LEAVES = Collections.unmodifiableSet(addBlocks(
             BridgeMaterial.getByPrefixAndSuffix(
-                    woodTypes, 
-                    Arrays.asList("_leaves"),
+                    woodTypes,
+                    Collections.singletonList("_leaves"),
                     AlmostBoolean.YES
                     // , ...
                     ), "leaves", "leaves_2", "azalea_leaves", "flowering_azalea_leaves"));
@@ -331,8 +331,8 @@ public class MaterialUtil {
     /** LOGS. */
     public static final Set<Material> LOGS = Collections.unmodifiableSet(addBlocks(
             BridgeMaterial.getByPrefixAndSuffix(
-                    woodTypes, 
-                    Arrays.asList("_log"),
+                    woodTypes,
+                    Collections.singletonList("_log"),
                     AlmostBoolean.YES,
                     "legacy"
                     ), "log", "log_2"));
@@ -367,21 +367,21 @@ public class MaterialUtil {
 
     public static final Set<Material> STRIPPED_LOGS = Collections.unmodifiableSet(
             BridgeMaterial.getByPrefixAndSuffix(
-                    Arrays.asList("stripped_"), 
-                    Arrays.asList("_log"), AlmostBoolean.YES)
+                    Collections.singletonList("stripped_"),
+                    Collections.singletonList("_log"), AlmostBoolean.YES)
             );
 
     public static final Set<Material> STRIPPED_WOOD_BLOCKS = Collections.unmodifiableSet(
             BridgeMaterial.getByPrefixAndSuffix(
-                    Arrays.asList("stripped_"), 
-                    Arrays.asList("_wood"), AlmostBoolean.YES)
+                    Collections.singletonList("stripped_"),
+                    Collections.singletonList("_wood"), AlmostBoolean.YES)
             );
 
     /** All ordinary terracotta (hard clay) blocks. */
     public static final Set<Material> TERRACOTTA_BLOCKS = Collections.unmodifiableSet(addBlocks(
             // TODO: exclude GLAZED or not?
             BridgeMaterial.getByPrefixAndSuffix(
-                    null, Arrays.asList("_terracotta"), 
+                    null, Collections.singletonList("_terracotta"),
                     AlmostBoolean.YES, 
                     "legacy", "glazed"),
             "terracotta", "hard_clay", "stained_clay"
@@ -419,8 +419,8 @@ public class MaterialUtil {
 
     public static final Set<Material> WALL_BANNERS = Collections.unmodifiableSet(addBlocks(
             BridgeMaterial.getByPrefixAndSuffix(
-                    null, 
-                    Arrays.asList("_wall_banner"),
+                    null,
+                    Collections.singletonList("_wall_banner"),
                     AlmostBoolean.YES,
                     "legacy"
                     ), "wall_banner"));
@@ -434,8 +434,8 @@ public class MaterialUtil {
     /** Wood types (1.13 rather). */
     public static final Set<Material> WOOD_BLOCKS = Collections.unmodifiableSet(addBlocks(
             BridgeMaterial.getByPrefixAndSuffix(
-                    woodTypes, 
-                    Arrays.asList("_wood"),
+                    woodTypes,
+                    Collections.singletonList("_wood"),
                     AlmostBoolean.YES
                     // , ...
                     ), "wood"));
@@ -451,38 +451,38 @@ public class MaterialUtil {
     // These are SOLID
     public static final Set<Material> WALL_HANGING_SIGNS = Collections.unmodifiableSet(
             BridgeMaterial.getByPrefixAndSuffix(
-                    woodTypes, 
-                    Arrays.asList("_wall_hanging_sign"),
+                    woodTypes,
+                    Collections.singletonList("_wall_hanging_sign"),
                     AlmostBoolean.YES
                     ));
 
     public static final Set<Material> WOODEN_BUTTONS = Collections.unmodifiableSet(
             BridgeMaterial.getByPrefixAndSuffix(
-                    woodTypes, 
-                    Arrays.asList("_button"),
+                    woodTypes,
+                    Collections.singletonList("_button"),
                     AlmostBoolean.YES
                     ));
 
     public static final Set<Material> WOODEN_DOORS = Collections.unmodifiableSet(
             BridgeMaterial.getByPrefixAndSuffix(
-                    woodTypes, 
-                    Arrays.asList("_door"),
+                    woodTypes,
+                    Collections.singletonList("_door"),
                     AlmostBoolean.YES,
                     "trap"
                     ));
 
     public static final Set<Material> WOODEN_FENCES = Collections.unmodifiableSet(addBlocks(
             BridgeMaterial.getByPrefixAndSuffix(
-                    woodTypes, 
-                    Arrays.asList("_fence"),
+                    woodTypes,
+                    Collections.singletonList("_fence"),
                     AlmostBoolean.YES
                     // , ...
                     ), "fence"));
 
     public static final Set<Material> WOODEN_FENCE_GATES = Collections.unmodifiableSet(addBlocks(
             BridgeMaterial.getByPrefixAndSuffix(
-                    woodTypes, 
-                    Arrays.asList("_fence_gate"),
+                    woodTypes,
+                    Collections.singletonList("_fence_gate"),
                     AlmostBoolean.YES
                     // , ...
                     ), "fence_gate"));
@@ -490,8 +490,8 @@ public class MaterialUtil {
     /** Wooden pressure plates. */
     public static final Set<Material> WOODEN_PRESSURE_PLATES = Collections.unmodifiableSet(
             BridgeMaterial.getByPrefixAndSuffix(
-                    woodTypes, 
-                    Arrays.asList("_plate"), // Strictly _pressure_plate for 1.13.
+                    woodTypes,
+                    Collections.singletonList("_plate"), // Strictly _pressure_plate for 1.13.
                     AlmostBoolean.YES
                     // , ...
                     ));
@@ -508,8 +508,8 @@ public class MaterialUtil {
     /** Wooden stairs. */
     public static final Set<Material> WOODEN_STAIRS = Collections.unmodifiableSet(
             BridgeMaterial.getByPrefixAndSuffix(
-                    woodTypes, 
-                    Arrays.asList("_stairs"),
+                    woodTypes,
+                    Collections.singletonList("_stairs"),
                     AlmostBoolean.YES
                     // , ...
                     ));

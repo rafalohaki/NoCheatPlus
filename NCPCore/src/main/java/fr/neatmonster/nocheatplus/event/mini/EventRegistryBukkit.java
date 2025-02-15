@@ -103,12 +103,7 @@ public class EventRegistryBukkit extends MultiListenerRegistry<Event, EventPrior
         };
         // Auto register for plugin disable.
         // TODO: Ensure the ignoreCancelled setting is correct (do listeners really not unregister if the event is cancelled).
-        register(new MiniListener<PluginDisableEvent>() {
-            @Override
-            public void onEvent(PluginDisableEvent event) {
-                unregisterAttached(event.getPlugin());
-            }
-        }, EventPriority.MONITOR, new RegistrationOrder("nocheatplus.system.registry", null, ".*"), true);
+        register((MiniListener<PluginDisableEvent>) event -> unregisterAttached(event.getPlugin()), EventPriority.MONITOR, new RegistrationOrder("nocheatplus.system.registry", null, ".*"), true);
     }
 
     @Override
@@ -116,15 +111,11 @@ public class EventRegistryBukkit extends MultiListenerRegistry<Event, EventPrior
             final MiniListenerNode<E, EventPriority> node, final EventPriority basePriority) {
         Bukkit.getPluginManager().registerEvent(eventClass, 
                 dummyListener,
-                basePriority, new EventExecutor() {
-            @SuppressWarnings("unchecked")
-            @Override
-            public void execute(Listener dummy, Event event) throws EventException {
-                if (eventClass.isAssignableFrom(event.getClass())) {
-                    node.onEvent((E) event);
-                }
-            }
-        }, plugin, false);
+                basePriority, (dummy, event) -> {
+                    if (eventClass.isAssignableFrom(event.getClass())) {
+                        node.onEvent((E) event);
+                    }
+                }, plugin, false);
     }
 
     /**

@@ -144,22 +144,12 @@ public class FightListener extends CheckListener implements JoinLeaveListener{
         api.register(api.newRegistrationContext()
                 // FightConfig
                 .registerConfigWorld(FightConfig.class)
-                .factory(new IFactoryOne<WorldFactoryArgument, FightConfig>() {
-                    @Override
-                    public FightConfig getNewInstance(WorldFactoryArgument arg) {
-                        return new FightConfig(arg.worldData);
-                    }
-                })
+                .factory(arg -> new FightConfig(arg.worldData))
                 .registerConfigTypesPlayer()
                 .context() //
                 // FightData
                 .registerDataPlayer(FightData.class)
-                .factory(new IFactoryOne<PlayerFactoryArgument, FightData>() {
-                    @Override
-                    public FightData getNewInstance(PlayerFactoryArgument arg) {
-                        return new FightData(arg.playerData.getGenericInstance(FightConfig.class));
-                    }
-                })
+                .factory(arg -> new FightData(arg.playerData.getGenericInstance(FightConfig.class)))
                 .addToGroups(CheckType.FIGHT, false, IData.class, ICheckData.class)
                 .removeSubCheckData(CheckType.FIGHT, true)
                 .context() //
@@ -369,7 +359,8 @@ public class FightListener extends CheckListener implements JoinLeaveListener{
         // TODO: To be replaced by Fight.HitBox
         if (!cancelled) {
 
-            final boolean reachEnabled = reach.isEnabled(player, pData);
+            final boolean isDamagedPlayer = damaged instanceof Player; // Disable reach check for non-player since the low accuracy
+            final boolean reachEnabled = reach.isEnabled(player, pData) && isDamagedPlayer;
             final boolean directionEnabled = direction.isEnabled(player, pData) && mData.timeRiptiding + 3000 < now;
             if (reachEnabled || directionEnabled) {
                 if (damagedTrace != null) {

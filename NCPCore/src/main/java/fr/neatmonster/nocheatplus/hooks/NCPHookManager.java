@@ -136,7 +136,7 @@ public final class NCPHookManager {
             else {
                 hooks.add(hook);
             }
-            Collections.sort(hooks, HookComparator);
+            hooks.sort(HookComparator);
         }
     }
 
@@ -167,8 +167,7 @@ public final class NCPHookManager {
      * @return true, if a hook as decided to cancel the VL processing
      */
     private static final boolean applyHooks(final CheckType checkType, final Player player, final IViolationInfo info, final List<NCPHook> hooks) {
-        for (int i = 0; i < hooks.size(); i++) {
-            final NCPHook hook = hooks.get(i);
+        for (final NCPHook hook : hooks) {
             try {
                 if (hook.onCheckFailure(checkType, player, info) && !(hook instanceof IStats)) {
                     return true;

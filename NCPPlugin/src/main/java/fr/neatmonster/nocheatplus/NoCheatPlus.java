@@ -29,6 +29,7 @@ import java.util.Map;
 import java.util.Map.Entry;
 import java.util.Set;
 
+import net.kyori.adventure.platform.bukkit.BukkitAudiences;
 import org.bukkit.Bukkit;
 import org.bukkit.ChatColor;
 import org.bukkit.World;
@@ -145,6 +146,7 @@ import fr.neatmonster.nocheatplus.utilities.map.BlockProperties;
 import fr.neatmonster.nocheatplus.worlds.IWorldData;
 import fr.neatmonster.nocheatplus.worlds.IWorldDataManager;
 import fr.neatmonster.nocheatplus.worlds.WorldDataManager;
+import org.jetbrains.annotations.NotNull;
 
 /**
  * This is the main class of NoCheatPlus. The commands, events listeners and tasks are registered here.
@@ -645,6 +647,12 @@ public class NoCheatPlus extends JavaPlugin implements NoCheatPlusAPI {
     @Override
     public void onDisable() {
 
+        // Set BukkitAudiences to null
+        if(this.adventure != null) {
+            this.adventure.close();
+            this.adventure = null;
+        }
+
         final boolean verbose = ConfigManager.getConfigFile().getBoolean(ConfPaths.LOGGING_EXTENDED_STATUS);
 
         // Remove listener references.
@@ -884,13 +892,7 @@ public class NoCheatPlus extends JavaPlugin implements NoCheatPlusAPI {
             logManager.info(Streams.INIT, "Logging system initialized.");
             logManager.info(Streams.INIT, "Detected Minecraft version: " + ServerVersion.getMinecraftVersion());
             genericInstanceRegistry.setLogger(
-                    logManager, new IGetStreamId() {
-                        @Override
-                        public StreamID getStreamId() {
-                            // TODO Auto-generated method stub
-                            return NoCheatPlus.this.getRegistryStreamId();
-                        }
-                    }, "[GenericInstanceRegistry] ");
+                    logManager, NoCheatPlus.this::getRegistryStreamId, "[GenericInstanceRegistry] ");
         }
     }
 
@@ -908,6 +910,9 @@ public class NoCheatPlus extends JavaPlugin implements NoCheatPlusAPI {
     @Override
     public void onEnable() {
 
+        // Create BukkitAudiences
+        this.adventure = BukkitAudiences.create(this);
+
         // Reset TickTask (just in case).
         TickTask.setLocked(true);
         TickTask.purge();
@@ -920,13 +925,13 @@ public class NoCheatPlus extends JavaPlugin implements NoCheatPlusAPI {
         // Re-check basic setup (if onLoad gets skipped by some custom thing).
         setupBasics();
         if (Bugs.shouldEnforceLocation()) {
-            addFeatureTags("defaults", Arrays.asList("enforceLocation"));
+            addFeatureTags("defaults", Collections.singletonList("enforceLocation"));
         }
         if (Bugs.shouldPvpKnockBackVelocity()) {
-            addFeatureTags("defaults", Arrays.asList("pvpKnockBackVelocity"));
+            addFeatureTags("defaults", Collections.singletonList("pvpKnockBackVelocity"));
         }
         if (pDataMan.storesPlayerInstances()) {
-            addFeatureTags("defaults", Arrays.asList("storePlayers"));
+            addFeatureTags("defaults", Collections.singletonList("storePlayers"));
         }
 
         // Start logger task(s).
@@ -1081,6 +1086,19 @@ public class NoCheatPlus extends JavaPlugin implements NoCheatPlusAPI {
     }
 
     /**
+     * Initialize the BukkitAudiences
+     */
+    private BukkitAudiences adventure;
+
+    @Override
+    public @NotNull BukkitAudiences adventure() {
+        if(this.adventure == null) {
+            throw new IllegalStateException("Tried to access Adventure when the plugin was disabled!");
+        }
+        return this.adventure;
+    }
+
+    /**
      * Log other notes once on enabling.
      * 
      * @param config
@@ -1123,7 +1141,7 @@ public class NoCheatPlus extends JavaPlugin implements NoCheatPlusAPI {
         // Finished.
         logManager.info(Streams.INIT, "Post-enable finished.");
         // Log version to file (queued).
-        logManager.info(Streams.DEFAULT_FILE, StringUtil.join(VersionCommand.getVersionInfo(), "\n"));
+        logManager.info(Streams.DEFAULT_FILE, VersionCommand.getFormattedVersionInfo());
     }
 
     /**
@@ -1460,11 +1478,7 @@ public class NoCheatPlus extends JavaPlugin implements NoCheatPlusAPI {
 
     @Override
     public void addFeatureTags(String key, Collection<String> featureTags) {
-        LinkedHashSet<String> present = this.featureTags.get(key);
-        if (present == null) {
-            present = new LinkedHashSet<String>();
-            this.featureTags.put(key, present);
-        }
+        LinkedHashSet<String> present = this.featureTags.computeIfAbsent(key, k -> new LinkedHashSet<>());
         present.addAll(featureTags);
     }
 
@@ -1539,13 +1553,7 @@ public class NoCheatPlus extends JavaPlugin implements NoCheatPlusAPI {
     public ActionFactoryFactory setActionFactoryFactory(
             ActionFactoryFactory actionFactoryFactory) {
         if (actionFactoryFactory == null) {
-            actionFactoryFactory = new ActionFactoryFactory() {
-                @Override
-                public final ActionFactory newActionFactory(
-                        final Map<String, Object> library) {
-                    return new ActionFactory(library);
-                }
-            };
+            actionFactoryFactory = ActionFactory::new;
         }
         final ActionFactoryFactory previous = registerGenericInstance(
                 ActionFactoryFactory.class, actionFactoryFactory);

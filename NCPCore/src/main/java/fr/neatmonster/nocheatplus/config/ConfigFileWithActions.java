@@ -94,7 +94,7 @@ public abstract class ConfigFileWithActions<D extends ActionData, L extends Abst
      *            the list
      */
     public void set(final String path, final L list) {
-        final StringBuffer string = new StringBuffer();
+        final StringBuilder string = new StringBuilder();
 
         for (final Integer threshold : list.getThresholds()) {
             if (threshold > 0)

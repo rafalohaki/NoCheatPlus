@@ -54,31 +54,23 @@ public class RichFactoryRegistry<A> extends RichTypeSetRegistry implements IRich
                 ) {
             this(withDescendantCheckTypes 
                     ? CheckTypeUtil.getWithDescendants(checkType)
-                            : Arrays.asList(checkType), factoryRegistry);
+                            : Collections.singletonList(checkType), factoryRegistry);
         }
 
         public CheckRemovalSpec(final Collection<CheckType> checkTypes, 
                 final IRichFactoryRegistry<?> factoryRegistry) {
             this.checkTypes = checkTypes;
             for (final CheckType refType : checkTypes) {
-                for (final Class<? extends IData> type : factoryRegistry.getGroupedTypes(
-                        IData.class, refType)) {
-                    completeRemoval.add(type);
-                }
-                for (final Class<? extends IDataOnRemoveSubCheckData> type : factoryRegistry.getGroupedTypes(
-                        IDataOnRemoveSubCheckData.class, refType)) {
-                    subCheckRemoval.add(type);
-                }
+                completeRemoval.addAll(factoryRegistry.getGroupedTypes(
+                        IData.class, refType));
+                subCheckRemoval.addAll(factoryRegistry.getGroupedTypes(
+                        IDataOnRemoveSubCheckData.class, refType));
             }
             if (checkTypes.contains(CheckType.ALL)) {
-                for (final Class<? extends IData> type : factoryRegistry.getGroupedTypes(
-                        IData.class)) {
-                    completeRemoval.add(type);
-                }
-                for (final Class<? extends IDataOnRemoveSubCheckData> type : factoryRegistry.getGroupedTypes(
-                        IDataOnRemoveSubCheckData.class)) {
-                    subCheckRemoval.add(type);
-                }
+                completeRemoval.addAll(factoryRegistry.getGroupedTypes(
+                        IData.class));
+                subCheckRemoval.addAll(factoryRegistry.getGroupedTypes(
+                        IDataOnRemoveSubCheckData.class));
             }
         }
     }

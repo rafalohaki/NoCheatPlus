@@ -55,7 +55,7 @@ public class BridgeCrossPlugin implements IBridgeCrossPlugin, IPostRegisterRunna
         }
     }
 
-    private Class<?> getEntityClass(ReflectBase reflectBase, String entityName) {
+    private Class<?> getEntityClass(ReflectBase reflectBase, String entityName) { // Dreeam - TODO: idk what's this
         return getEntityClass(reflectBase, entityName, entityName);
     }
 

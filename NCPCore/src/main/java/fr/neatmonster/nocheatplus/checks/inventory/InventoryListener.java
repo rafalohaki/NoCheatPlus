@@ -129,24 +129,12 @@ public class InventoryListener  extends CheckListener implements JoinLeaveListen
         api.register(api.newRegistrationContext()
                 // InventoryConfig
                 .registerConfigWorld(InventoryConfig.class)
-                .factory(new IFactoryOne<WorldFactoryArgument, InventoryConfig>() {
-                    @Override
-                    public InventoryConfig getNewInstance(
-                            WorldFactoryArgument arg) {
-                        return new InventoryConfig(arg.worldData);
-                    }
-                })
+                .factory(arg -> new InventoryConfig(arg.worldData))
                 .registerConfigTypesPlayer()
                 .context() //
                 // InventoryData
                 .registerDataPlayer(InventoryData.class)
-                .factory(new IFactoryOne<PlayerFactoryArgument, InventoryData>() {
-                    @Override
-                    public InventoryData getNewInstance(
-                            PlayerFactoryArgument arg) {
-                        return new InventoryData();
-                    }
-                })
+                .factory(arg -> new InventoryData())
                 .addToGroups(CheckType.INVENTORY, true, IData.class, ICheckData.class)
                 .context() //
                 );

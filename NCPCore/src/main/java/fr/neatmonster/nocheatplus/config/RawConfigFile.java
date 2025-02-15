@@ -181,9 +181,7 @@ public class RawConfigFile  extends YamlConfiguration {
     public void readStringlFromList(final String path, final Collection<String> target) {
         final List<String> content = getStringList(path);
         if (content == null || content.isEmpty()) return;
-        for (final String entry : content){
-                target.add(entry);
-        }
+        target.addAll(content);
     }
 
     /**

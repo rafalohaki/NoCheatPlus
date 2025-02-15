@@ -48,42 +48,38 @@ public abstract class AbstractLogNodeDispatcher implements LogNodeDispatcher { /
      * Optional implementation for an asynchronous task, using the
      * taskAsynchronousID, synchronized over queueAsynchronous.
      */
-    protected final Runnable taskAsynchronous = new Runnable() {
-
-        @Override
-        public void run() {
-            // TODO: A more sophisticated System to allow "wake up on burst"?
-            int i = 0;
-            while (i < 3) {
-                if (runLogsAsynchronous()) {
-                    i = 0;
-                    if (!isTaskScheduled(taskAsynchronousID)) {
-                        // Shutdown, hard return;
-                        return;
-                    }
-                    Thread.yield();
-                } else {
-                    i ++;
-                    try {
-                        Thread.sleep(25);
-                    } catch (InterruptedException e) {
-                        synchronized (queueAsynchronous) {
-                            // Ensure re-scheduling can happen.
-                            taskAsynchronousID = null;
-                        }
-                        // TODO: throw?
-                        return;
-                    }
+    protected final Runnable taskAsynchronous = () -> {
+        // TODO: A more sophisticated System to allow "wake up on burst"?
+        int i = 0;
+        while (i < 3) {
+            if (runLogsAsynchronous()) {
+                i = 0;
+                if (!isTaskScheduled(taskAsynchronousID)) {
+                    // Shutdown, hard return;
+                    return;
                 }
-                synchronized (queueAsynchronous) {
-                    if (queueAsynchronous.isEmpty()) {
-                        if (i >= 3) {
-                            // Ensure re-scheduling can happen.
-                            taskAsynchronousID = null;
-                        }
-                    } else {
-                        i = 0;
+                Thread.yield();
+            } else {
+                i ++;
+                try {
+                    Thread.sleep(25);
+                } catch (InterruptedException e) {
+                    synchronized (queueAsynchronous) {
+                        // Ensure re-scheduling can happen.
+                        taskAsynchronousID = null;
                     }
+                    // TODO: throw?
+                    return;
+                }
+            }
+            synchronized (queueAsynchronous) {
+                if (queueAsynchronous.isEmpty()) {
+                    if (i >= 3) {
+                        // Ensure re-scheduling can happen.
+                        taskAsynchronousID = null;
+                    }
+                } else {
+                    i = 0;
                 }
             }
         }

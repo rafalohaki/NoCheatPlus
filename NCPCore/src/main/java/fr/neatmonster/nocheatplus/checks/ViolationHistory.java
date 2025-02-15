@@ -45,12 +45,7 @@ public class ViolationHistory {
         /**
          * Descending sort by time.
          */
-        public static Comparator<ViolationLevel> VLComparator = new Comparator<ViolationHistory.ViolationLevel>() {
-            @Override
-            public int compare(final ViolationLevel vl1, final ViolationLevel vl2) {
-                return Long.compare(vl1.time, vl2.time);
-            }
-        };
+        public static final Comparator<ViolationLevel> VLComparator = Comparator.comparingLong(vl -> vl.time);
 
         /** The check. */
         public final String check;
@@ -113,54 +108,19 @@ public class ViolationHistory {
 
     public static class VLView {
 
-        public static final Comparator<VLView> CmpName = new Comparator<ViolationHistory.VLView>() {
-            @Override
-            public int compare(VLView o1, VLView o2) {
-                return o1.name.compareToIgnoreCase(o2.name);
-            }
-        };
+        public static final Comparator<VLView> CmpName = (o1, o2) -> o1.name.compareToIgnoreCase(o2.name);
 
-        public static final Comparator<VLView> CmpCheck = new Comparator<ViolationHistory.VLView>() {
-            @Override
-            public int compare(VLView o1, VLView o2) {
-                return o1.check.compareToIgnoreCase(o2.check);
-            }
-        };
+        public static final Comparator<VLView> CmpCheck = (o1, o2) -> o1.check.compareToIgnoreCase(o2.check);
 
-        public static final Comparator<VLView> CmpSumVL = new Comparator<ViolationHistory.VLView>() {
-            @Override
-            public int compare(VLView o1, VLView o2) {
-                return Double.compare(o1.sumVL, o2.sumVL);
-            }
-        };
+        public static final Comparator<VLView> CmpSumVL = Comparator.comparingDouble(o -> o.sumVL);
 
-        public static final Comparator<VLView> CmpnVL = new Comparator<ViolationHistory.VLView>() {
-            @Override
-            public int compare(VLView o1, VLView o2) {
-                return Integer.compare(o1.nVL, o2.nVL);
-            }
-        };
+        public static final Comparator<VLView> CmpnVL = Comparator.comparingInt(o -> o.nVL);
 
-        public static final Comparator<VLView> CmpAvgVL = new Comparator<ViolationHistory.VLView>() {
-            @Override
-            public int compare(VLView o1, VLView o2) {
-                return Double.compare(o1.sumVL / o1.nVL, o2.sumVL / o2.nVL);
-            }
-        };
+        public static final Comparator<VLView> CmpAvgVL = Comparator.comparingDouble(o -> o.sumVL / o.nVL);
 
-        public static final Comparator<VLView> CmpMaxVL = new Comparator<ViolationHistory.VLView>() {
-            @Override
-            public int compare(VLView o1, VLView o2) {
-                return Double.compare(o1.maxVL, o2.maxVL);
-            }
-        };
+        public static final Comparator<VLView> CmpMaxVL = Comparator.comparingDouble(o -> o.maxVL);
 
-        public static final Comparator<VLView> CmpTime = new Comparator<ViolationHistory.VLView>() {
-            @Override
-            public int compare(VLView o1, VLView o2) {
-                return Long.compare(o1.time, o2.time);
-            }
-        };
+        public static final Comparator<VLView> CmpTime = Comparator.comparingLong(o -> o.time);
 
         /**
          * Get a mixed/fcfs comparator from parsing given args. Accepted are 
@@ -318,8 +278,7 @@ public class ViolationHistory {
      * @return ViolationLevel instance, if present. Otherwise null.
      */
     public ViolationLevel getViolationLevel(final CheckType type) {
-        for (int i = 0; i < violationLevels.size(); i++) {
-            final ViolationLevel vl = violationLevels.get(i);
+        for (final ViolationLevel vl : violationLevels) {
             if (checkTypeMap.get(vl.check) == type) {
                 return vl;
             }

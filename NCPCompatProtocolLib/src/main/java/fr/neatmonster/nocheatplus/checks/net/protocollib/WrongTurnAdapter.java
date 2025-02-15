@@ -14,7 +14,7 @@
  */
 package fr.neatmonster.nocheatplus.checks.net.protocollib;
 
-import java.util.Arrays;
+import java.util.Collections;
 
 import org.bukkit.entity.Player;
 import org.bukkit.plugin.Plugin;
@@ -41,7 +41,7 @@ public class WrongTurnAdapter extends BaseAdapter {
     public WrongTurnAdapter(Plugin plugin) {
         super(plugin, ListenerPriority.LOW, PacketType.Play.Client.LOOK, PacketType.Play.Client.POSITION_LOOK);
         if (ConfigManager.isTrueForAnyConfig(ConfPaths.NET_WRONGTURN_ACTIVE)) {
-            NCPAPIProvider.getNoCheatPlusAPI().addFeatureTags("checks", Arrays.asList(WrongTurn.class.getSimpleName()));
+            NCPAPIProvider.getNoCheatPlusAPI().addFeatureTags("checks", Collections.singletonList(WrongTurn.class.getSimpleName()));
         }
     }
 

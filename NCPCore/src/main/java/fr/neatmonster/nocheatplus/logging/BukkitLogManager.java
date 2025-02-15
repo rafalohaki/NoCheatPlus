@@ -54,12 +54,11 @@ public class BukkitLogManager extends AbstractLogManager implements INotifyReloa
     // TODO: ingame logging [ingame needs api to keep track of players who receive notifications.].
     // TODO: Later: Custom loggers (file, other), per-player-streams (debug per player), custom ingame loggers (one or more players).
 
-    private static ContentLogger<String> serverLogger = new ContentLogger<String>() {
-        @Override
-        public void log(Level level, String content) {
-            try {
-                Bukkit.getLogger().log(level, "[NoCheatPlus] " + content);
-            } catch (Throwable t) {}
+    private static final ContentLogger<String> serverLogger = (level, content) -> {
+        try {
+            Bukkit.getLogger().log(level, "[NoCheatPlus] " + content);
+        } catch (Throwable t) {
+            //t.printStackTrace();
         }
     };
 
@@ -135,14 +134,9 @@ public class BukkitLogManager extends AbstractLogManager implements INotifyReloa
         // Ingame logger (assume not thread-safe at first).
         // TODO: Thread-safe ProtocolLib-based implementation?
         // TODO: Consider using a task.
-        tempID = registerStringLogger(new ContentLogger<String>() {
-
-            @Override
-            public void log(Level level, String content) {
-                // Ignore level for now.
-                NCPAPIProvider.getNoCheatPlusAPI().sendAdminNotifyMessage(prefixIngame == null ? content : (prefixIngame + content));
-            }
-
+        tempID = registerStringLogger((level, content) -> {
+            // Ignore level for now.
+            NCPAPIProvider.getNoCheatPlusAPI().sendAdminNotifyMessage(prefixIngame == null ? content : (prefixIngame + content));
         }, new LogOptions(Streams.NOTIFY_INGAME.name, CallContext.PRIMARY_THREAD_DIRECT));
         attachStringLogger(tempID, Streams.NOTIFY_INGAME);
 

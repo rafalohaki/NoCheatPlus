@@ -86,7 +86,7 @@ public class ReloadCommand extends BaseCommand {
         DataManager.restoreDefaultDebugFlags();
 
         // Tell the registered listeners to adapt to new config, first sort them (!).
-        Collections.sort(notifyReload, Order.cmpSetupOrder);
+        notifyReload.sort(Order.cmpSetupOrder);
         for (final INotifyReload component : notifyReload){
             component.onReload();
         }
@@ -99,7 +99,7 @@ public class ReloadCommand extends BaseCommand {
             sender.sendMessage(TAG + "Configuration reloaded.");
         }
         logManager.info(Streams.INIT, "Configuration reloaded.");
-        logManager.info(Streams.DEFAULT_FILE, StringUtil.join(VersionCommand.getVersionInfo(), "\n")); // Queued (!).
+        logManager.info(Streams.DEFAULT_FILE, VersionCommand.getFormattedVersionInfo()); // Queued (!).
     }
 
 }
