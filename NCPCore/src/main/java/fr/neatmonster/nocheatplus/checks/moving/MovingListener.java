@@ -2934,37 +2934,66 @@ public class MovingListener extends CheckListener implements TickListener, IRemo
      * @param to
      * @param mcAccess
      */
-    private void outputMoveDebug(final Player player, final PlayerLocation from, final PlayerLocation to, 
+    private void outputMoveDebug(final Player player, final PlayerLocation from, final PlayerLocation to,
             final double maxYOnGround, final MCAccess mcAccess) {
         final StringBuilder builder = new StringBuilder(250);
         final Location loc = player.getLocation();
         builder.append(CheckUtils.getLogMessagePrefix(player, checkType));
         builder.append("MOVE in world " + from.getWorld().getName() + ":\n");
         DebugUtil.addMove(from, to, loc, builder);
-        final double jump = mcAccess.getJumpAmplifier(player);
-        final double speed = mcAccess.getFasterMovementAmplifier(player);
-        final double strider = BridgeEnchant.getDepthStriderLevel(player);
         if (BuildParameters.debugLevel > 0) {
-            try {
-                // Check backwards compatibility (1.4.2). Remove try-catch
-                builder.append("\n(walkspeed=" + player.getWalkSpeed() + " flyspeed=" + player.getFlySpeed() + ")");
-            } catch (Throwable t) {
-                // Ignore missing methods on older server versions.
-            }
-            if (player.isSprinting()) {
-                builder.append("(sprinting)");
-            }
-            if (player.isSneaking()) {
-                builder.append("(sneaking)");
-            }
-            if (player.isBlocking()) {
-                builder.append("(blocking)");
-            }
-            final Vector v = player.getVelocity();
-            if (v.lengthSquared() > 0.0) {
-                builder.append("(svel=" + v.getX() + "," + v.getY() + "," + v.getZ() + ")");
-            }
+            appendPlayerAttributeDetails(player, builder);
         }
+
+        appendPotionEffectDetails(player, mcAccess, builder);
+        appendFlightInfo(player, builder);
+        // Print basic info first in order
+        NCPAPIProvider.getNoCheatPlusAPI().getLogManager().debug(Streams.TRACE_FILE, builder.toString());
+        // Extended info.
+        if (BuildParameters.debugLevel > 0) {
+            appendBlockFlagDetails(from, to, maxYOnGround, builder);
+            NCPAPIProvider.getNoCheatPlusAPI().getLogManager().debug(Streams.TRACE_FILE, builder.toString());
+        }
+    }
+
+    /**
+     * Append player attribute information such as walk speed or sprinting state.
+     *
+     * @param player the player to read data from
+     * @param builder the builder to append to
+     */
+    private void appendPlayerAttributeDetails(final Player player, final StringBuilder builder) {
+        try {
+            // Check backwards compatibility (1.4.2). Remove try-catch
+            builder.append("\n(walkspeed=" + player.getWalkSpeed() + " flyspeed=" + player.getFlySpeed() + ")");
+        } catch (Throwable t) {
+            // Ignore missing methods on older server versions.
+        }
+        if (player.isSprinting()) {
+            builder.append("(sprinting)");
+        }
+        if (player.isSneaking()) {
+            builder.append("(sneaking)");
+        }
+        if (player.isBlocking()) {
+            builder.append("(blocking)");
+        }
+        final Vector v = player.getVelocity();
+        if (v.lengthSquared() > 0.0) {
+            builder.append("(svel=" + v.getX() + "," + v.getY() + "," + v.getZ() + ")");
+        }
+    }
+
+    /**
+     * Append potion effect related information.
+     *
+     * @param player the player to read data from
+     * @param mcAccess the MCAccess instance to use
+     * @param builder the builder to append to
+     */
+    private void appendPotionEffectDetails(final Player player, final MCAccess mcAccess,
+            final StringBuilder builder) {
+        final double speed = mcAccess.getFasterMovementAmplifier(player);
         if (!Double.isInfinite(speed)) {
             builder.append("(e_speed=" + (speed + 1) + ")");
         }
@@ -2972,12 +3001,23 @@ public class MovingListener extends CheckListener implements TickListener, IRemo
         if (!Double.isInfinite(slow)) {
             builder.append("(e_slow=" + (slow + 1) + ")");
         }
+        final double jump = mcAccess.getJumpAmplifier(player);
         if (!Double.isInfinite(jump)) {
             builder.append("(e_jump=" + (jump + 1) + ")");
         }
+        final double strider = BridgeEnchant.getDepthStriderLevel(player);
         if (strider != 0) {
             builder.append("(e_depth_strider=" + strider + ")");
         }
+    }
+
+    /**
+     * Append information about flight or gliding states.
+     *
+     * @param player the player to read data from
+     * @param builder the builder to append to
+     */
+    private void appendFlightInfo(final Player player, final StringBuilder builder) {
         if (Bridge1_9.isGliding(player)) {
             builder.append("(gliding)");
         }
@@ -2987,39 +3027,45 @@ public class MovingListener extends CheckListener implements TickListener, IRemo
         if (player.isFlying()) {
             builder.append("(flying)");
         }
-        // Print basic info first in order
-        NCPAPIProvider.getNoCheatPlusAPI().getLogManager().debug(Streams.TRACE_FILE, builder.toString());
-        // Extended info.
-        if (BuildParameters.debugLevel > 0) {
-            builder.setLength(0);
-            // Note: the block flags are for normal on-ground checking, not with yOnGrond set to 0.5.
-            from.collectBlockFlags(maxYOnGround);
-            if (from.getBlockFlags() != 0) {
-                builder.append("\nFrom flags: " + StringUtil.join(BlockFlags.getFlagNames(from.getBlockFlags()), "+"));
-            }
-            if (!BlockProperties.isAir(from.getTypeId())) {
-                DebugUtil.addBlockInfo(builder, from, "\nFrom");
-            }
-            if (!BlockProperties.isAir(from.getTypeIdBelow())) {
-                DebugUtil.addBlockBelowInfo(builder, from, "\nFrom");
-            }
-            if (!from.isOnGround() && from.isOnGround(0.5)) {
-                builder.append(" (ground within 0.5)");
-            }
-            to.collectBlockFlags(maxYOnGround);
-            if (to.getBlockFlags() != 0) {
-                builder.append("\nTo flags: " + StringUtil.join(BlockFlags.getFlagNames(to.getBlockFlags()), "+"));
-            }
-            if (!BlockProperties.isAir(to.getTypeId())) {
-                DebugUtil.addBlockInfo(builder, to, "\nTo");
-            }
-            if (!BlockProperties.isAir(to.getTypeIdBelow())) {
-                DebugUtil.addBlockBelowInfo(builder, to, "\nTo");
-            }
-            if (!to.isOnGround() && to.isOnGround(0.5)) {
-                builder.append(" (ground within 0.5)");
-            }
-            NCPAPIProvider.getNoCheatPlusAPI().getLogManager().debug(Streams.TRACE_FILE, builder.toString());
+    }
+
+    /**
+     * Collect and append block flag information for the given locations.
+     *
+     * @param from the starting location
+     * @param to the target location
+     * @param maxYOnGround the max y on ground value
+     * @param builder the builder to append to
+     */
+    private void appendBlockFlagDetails(final PlayerLocation from, final PlayerLocation to,
+            final double maxYOnGround, final StringBuilder builder) {
+        builder.setLength(0);
+        // Note: the block flags are for normal on-ground checking, not with yOnGrond set to 0.5.
+        from.collectBlockFlags(maxYOnGround);
+        if (from.getBlockFlags() != 0) {
+            builder.append("\nFrom flags: " + StringUtil.join(BlockFlags.getFlagNames(from.getBlockFlags()), "+"));
+        }
+        if (!BlockProperties.isAir(from.getTypeId())) {
+            DebugUtil.addBlockInfo(builder, from, "\nFrom");
+        }
+        if (!BlockProperties.isAir(from.getTypeIdBelow())) {
+            DebugUtil.addBlockBelowInfo(builder, from, "\nFrom");
+        }
+        if (!from.isOnGround() && from.isOnGround(0.5)) {
+            builder.append(" (ground within 0.5)");
+        }
+        to.collectBlockFlags(maxYOnGround);
+        if (to.getBlockFlags() != 0) {
+            builder.append("\nTo flags: " + StringUtil.join(BlockFlags.getFlagNames(to.getBlockFlags()), "+"));
+        }
+        if (!BlockProperties.isAir(to.getTypeId())) {
+            DebugUtil.addBlockInfo(builder, to, "\nTo");
+        }
+        if (!BlockProperties.isAir(to.getTypeIdBelow())) {
+            DebugUtil.addBlockBelowInfo(builder, to, "\nTo");
+        }
+        if (!to.isOnGround() && to.isOnGround(0.5)) {
+            builder.append(" (ground within 0.5)");
         }
     }
 }
