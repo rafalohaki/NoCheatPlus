@@ -48,6 +48,13 @@ public class BlocksMC1_20 implements BlockPropertiesSetup {
         }
         // (Hanging signs are treated as a normal sign and added in BlocksMC1_14)
 
+        if (ServerVersion.compareMinecraftVersion("1.20") >= 0) {
+            BlockInit.setAsIfExists("BAMBOO_DOOR", Material.OAK_DOOR);
+            BlockInit.setAsIfExists("BAMBOO_TRAPDOOR", Material.OAK_TRAPDOOR);
+            BlockInit.setAsIfExists("CHERRY_DOOR", Material.OAK_DOOR);
+            BlockInit.setAsIfExists("CHERRY_TRAPDOOR", Material.OAK_TRAPDOOR);
+        }
+
         if (ServerVersion.compareMinecraftVersion("1.20.4") >= 0) {
             BlockProperties.setBlockProps("CRAFTER", new BlockProperties.BlockProps(BlockProperties.woodPickaxe, 1.5f));
             BlockFlags.setBlockFlags("CRAFTER", BlockFlags.FULLY_SOLID_BOUNDS);
