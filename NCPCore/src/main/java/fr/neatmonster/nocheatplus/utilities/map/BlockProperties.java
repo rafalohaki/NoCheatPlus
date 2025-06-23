@@ -1034,11 +1034,14 @@ public class BlockProperties {
     private static void setBlock(Material material, BlockProps props) {
         try {
             if (!material.isBlock()) {
-                // Let's not fail hard here.
-                StaticLog.logWarning("Attempt to set block breaking properties for a non-block: " + material);
+                StaticLog.logWarning("Material is not a block: " + material);
             }
-        } 
-        catch (Exception e) {}
+        } catch (Throwable t) {
+            StaticLog.logSevere("Failed to validate block material: " + material);
+            StaticLog.logSevere(t);
+            // Don't re-throw to preserve stability in production.
+            // Developers can catch severe logs during testing.
+        }
         blocks.put(material, props);
     }
 
@@ -2113,10 +2116,17 @@ public class BlockProperties {
                 }
                 if (fatigue > 0) {
                     switch (fatigue) {
-                        case 1: {speed *= 0.3; break;}
-                        case 2: {speed *= 0.09; break;}
-                        case 3: {speed *= 0.027; break;}
-                        default: speed *= 0.00081;
+                        case 1:
+                            speed *= 0.3;
+                            break;
+                        case 2:
+                            speed *= 0.09;
+                            break;
+                        case 3:
+                            speed *= 0.027;
+                            break;
+                        default:
+                            speed *= 0.00081;
                     }
                 }
                 speed /= getBlockBreakingPenaltyMultiplier(onGround, inWater, aquaAffinity);
