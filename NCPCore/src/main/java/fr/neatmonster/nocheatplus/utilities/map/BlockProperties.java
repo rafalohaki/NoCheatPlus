@@ -1820,123 +1820,34 @@ public class BlockProperties {
      *            at all, so 1 is conduit power I, 2 is conduit power II,...).
      * @return
      */
-    public static long getBreakingDuration(final Material blockId, final BlockProps blockProps, final ToolProps toolProps, 
-                                           final  boolean onGround, final boolean inWater, boolean aquaAffinity, 
+    public static long getBreakingDuration(final Material blockId, final BlockProps blockProps, final ToolProps toolProps,
+                                           final boolean onGround, final boolean inWater, boolean aquaAffinity,
                                            int efficiency, int haste, int fatigue, int conduit) {
         // First check for direct breaking time overrides.
         final BlockBreakKey bbKey = new BlockBreakKey();
-        // Add the basic properties.
-        bbKey.blockType(blockId).toolType(toolProps.toolType).materialBase(toolProps.materialBase).efficiency(efficiency); // NOTE: Might leave this out and calculate based on the already fetched.
+        bbKey.blockType(blockId).toolType(toolProps.toolType).materialBase(toolProps.materialBase).efficiency(efficiency);
         Long override = breakingTimeOverrides.get(bbKey);
         if (override != null) {
             float mult = getBlockBreakingPenaltyMultiplier(onGround, inWater, aquaAffinity);
             return mult == 1.0f ? override : (long) (mult * override);
         }
-        // NOTE: Keep up to date with BlockBreakKey, allow inWater and haste to not be set (calculate).
 
-        // Classic calculation.
         boolean isValidTool = isValidTool(blockId, blockProps, toolProps, efficiency);
         boolean isRightTool = isRightToolMaterial(blockId, blockProps, toolProps, isValidTool);
-        long duration;
 
-        if (isValidTool) {
-            // appropriate tool
-            duration = blockProps.breakingTimes[toolProps.materialBase.index];
-
-            if (efficiency > 0) {
-                duration = (long) (duration / blockProps.efficiencyMod);
-            }
-        }
-        else {
-            // Inappropriate tool.
-            duration = blockProps.breakingTimes[0];
+        long duration = isValidTool ? blockProps.breakingTimes[toolProps.materialBase.index]
+                                    : blockProps.breakingTimes[0];
+        if (isValidTool && efficiency > 0) {
+            duration = (long) (duration / blockProps.efficiencyMod);
         }
 
-        boolean pureHardness = blockProps.pureHardness;
-        // Specialties:
-        if (toolProps.toolType == ToolType.SHEARS) {
-            // (Note: shears are not in the block props, anywhere)
-            // Treat these extra (partly experimental):
-            if (blockId == BridgeMaterial.COBWEB) {
-                duration = 400;
-                isValidTool = true;
-                isRightTool = true;
-                pureHardness = false;
-            }
-            else if (MaterialUtil.WOOL_BLOCKS.contains(blockId)) {
-                duration = 240;
-                isValidTool = true;
-                isRightTool = true;
-                pureHardness = false;
-            }
-            else if (isLeaves(blockId)) {
-                duration = 0; // 0.05 can be 0
-                isValidTool = true;
-            }
-        }
-        if (toolProps.toolType == ToolType.SWORD) {
-            if (blockId == Material.JACK_O_LANTERN || blockId.name().endsWith("PUMPKIN") || blockId == Material.MELON) {
-                isValidTool = true;
-                isRightTool = true;
-                duration = 1000;
-                pureHardness = false;
-            }
-            else if (blockId == Material.COCOA || blockId == Material.VINE || isLeaves(blockId)) {
-                isValidTool = true;
-                isRightTool = true;
-                duration = 200;
-                pureHardness = false;
-            }
-            else if (blockId.name().equals("BAMBOO")) {
-                isValidTool = true;
-                duration = 0; // 0.05 can be 0
-            }
-        }
+        BreakContext ctx = new BreakContext(duration, isValidTool, isRightTool, blockProps.pureHardness);
+        ctx = applySpecialToolCases(blockId, toolProps, ctx);
 
-        if (duration > 0) {
-            double hardness = blockProps.hardness;
-            double damage;
-            if (!pureHardness) {
-                // Reverse version to get hardness base on time map
-                float tick = duration / 50;
-                damage = 1 / tick;
-                hardness = 1 / damage / ((isRightTool || !blockProps.requireCorrectTool ? 30 : 100) / (isValidTool ? getToolMultiplier(blockId, blockProps, toolProps) : 1.0));
-            }
-            // Actual check
-            if (hardness > 0.0) {
-
-                double speed = isValidTool ? getToolMultiplier(blockId, blockProps, toolProps) : 1.0;
-                if (isValidTool && efficiency > 0) {
-                    speed += efficiency * efficiency + 1;
-                }
-                if (haste > 0 || conduit > 0) {
-                    speed *= 1 + 0.2 * Math.max(haste, conduit);
-                }
-                if (fatigue > 0) {
-                    switch (fatigue) {
-                        case 1:
-                            speed *= 0.3;
-                            break;
-                        case 2:
-                            speed *= 0.09;
-                            break;
-                        case 3:
-                            speed *= 0.027;
-                            break;
-                        default:
-                            speed *= 0.00081;
-                    }
-                }
-                speed /= getBlockBreakingPenaltyMultiplier(onGround, inWater, aquaAffinity);
-                damage = speed / hardness;
-                damage /= isRightTool || !blockProps.requireCorrectTool ? 30.0 : 100.0;
-                if (damage > 1) {
-                    return 0;
-                }
-                return Math.round(1 / damage) * 50;
-            }
-        }
-        return Math.max(0, duration);
+        return calculateFinalDuration(blockId, blockProps, toolProps, ctx.duration,
+                                      ctx.validTool, ctx.rightTool, ctx.pureHardness,
+                                      onGround, inWater, aquaAffinity, efficiency,
+                                      haste, fatigue, conduit);
     }
     
     /**
@@ -1954,6 +1865,109 @@ public class BlockProperties {
             mult *= breakPenaltyOffGround;
         }
         return mult;
+    }
+
+    /** Simple container for mutable break calculation data. */
+    private static final class BreakContext {
+        long duration;
+        boolean validTool;
+        boolean rightTool;
+        boolean pureHardness;
+
+        BreakContext(long duration, boolean validTool, boolean rightTool, boolean pureHardness) {
+            this.duration = duration;
+            this.validTool = validTool;
+            this.rightTool = rightTool;
+            this.pureHardness = pureHardness;
+        }
+    }
+
+    private static BreakContext applySpecialToolCases(Material blockId, ToolProps toolProps, BreakContext ctx) {
+        if (toolProps.toolType == ToolType.SHEARS) {
+            if (blockId == BridgeMaterial.COBWEB) {
+                ctx.duration = 400;
+                ctx.validTool = true;
+                ctx.rightTool = true;
+                ctx.pureHardness = false;
+            } else if (MaterialUtil.WOOL_BLOCKS.contains(blockId)) {
+                ctx.duration = 240;
+                ctx.validTool = true;
+                ctx.rightTool = true;
+                ctx.pureHardness = false;
+            } else if (isLeaves(blockId)) {
+                ctx.duration = 0;
+                ctx.validTool = true;
+            }
+        } else if (toolProps.toolType == ToolType.SWORD) {
+            if (blockId == Material.JACK_O_LANTERN || blockId.name().endsWith("PUMPKIN") || blockId == Material.MELON) {
+                ctx.validTool = true;
+                ctx.rightTool = true;
+                ctx.duration = 1000;
+                ctx.pureHardness = false;
+            } else if (blockId == Material.COCOA || blockId == Material.VINE || isLeaves(blockId)) {
+                ctx.validTool = true;
+                ctx.rightTool = true;
+                ctx.duration = 200;
+                ctx.pureHardness = false;
+            } else if (blockId.name().equals("BAMBOO")) {
+                ctx.validTool = true;
+                ctx.duration = 0;
+            }
+        }
+        return ctx;
+    }
+
+    private static double applyFatigue(double speed, int fatigue) {
+        if (fatigue <= 0) {
+            return speed;
+        }
+        switch (fatigue) {
+            case 1:
+                return speed * 0.3;
+            case 2:
+                return speed * 0.09;
+            case 3:
+                return speed * 0.027;
+            default:
+                return speed * 0.00081;
+        }
+    }
+
+    private static long calculateFinalDuration(Material blockId, BlockProps blockProps, ToolProps toolProps,
+                                               long duration, boolean isValidTool, boolean isRightTool, boolean pureHardness,
+                                               boolean onGround, boolean inWater, boolean aquaAffinity,
+                                               int efficiency, int haste, int fatigue, int conduit) {
+        if (duration <= 0) {
+            return Math.max(0, duration);
+        }
+
+        double hardness = blockProps.hardness;
+        double damage;
+        if (!pureHardness) {
+            float tick = duration / 50f;
+            damage = 1 / tick;
+            hardness = 1 / damage / ((isRightTool || !blockProps.requireCorrectTool ? 30 : 100)
+                    / (isValidTool ? getToolMultiplier(blockId, blockProps, toolProps) : 1.0));
+        }
+        if (hardness <= 0.0) {
+            return Math.max(0, duration);
+        }
+
+        double speed = isValidTool ? getToolMultiplier(blockId, blockProps, toolProps) : 1.0;
+        if (isValidTool && efficiency > 0) {
+            speed += efficiency * efficiency + 1;
+        }
+        if (haste > 0 || conduit > 0) {
+            speed *= 1 + 0.2 * Math.max(haste, conduit);
+        }
+        speed = applyFatigue(speed, fatigue);
+        speed /= getBlockBreakingPenaltyMultiplier(onGround, inWater, aquaAffinity);
+        damage = speed / hardness;
+        damage /= isRightTool || !blockProps.requireCorrectTool ? 30.0 : 100.0;
+        if (damage > 1) {
+            return 0;
+        }
+        return Math.round(1 / damage) * 50;
     }
 
     /**
