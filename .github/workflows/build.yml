@@ -5,6 +5,9 @@ on:
     branches:
       - master
 
+permissions:
+  contents: write  # Needed to allow tagging and releasing via GITHUB_TOKEN
+
 jobs:
   build:
     name: Build
@@ -14,7 +17,7 @@ jobs:
       # Checkout source code
       - uses: actions/checkout@v4
 
-      # Install Temurin JDK 21 and enable Maven cache
+      # Install Temurin JDK 21 and enable Maven cache
       - name: Set up JDK 21
         uses: actions/setup-java@v4
         with:
