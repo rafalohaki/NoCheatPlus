@@ -1993,12 +1993,12 @@ public class MovingListener extends CheckListener implements TickListener, IRemo
         // Special cases.
         final Location to = event.getTo();
         if (event.isCancelled()) {
-            onPlayerTeleportMonitorCancelled(player, event, to, data, pData);
+            handleCancelledTeleport(player, event, to, data, pData);
             return;
         }
         else if (to == null) {
             // Weird event.
-            onPlayerTeleportMonitorNullTarget(player, event, to, data, pData);
+            handleNullTargetTeleport(player, event, to, data, pData);
             return;
         }
         data.clearWindChargeImpulse();
@@ -2008,19 +2008,7 @@ public class MovingListener extends CheckListener implements TickListener, IRemo
             return;
         }
 
-        boolean skipExtras = false; // Skip extra data adjustments during special teleport, e.g. vehicle set back.
-        // Detect our own vehicle set backs (...).
-        if (data.isVehicleSetBack) {
-            // Uncertain if this is vehicle leave or vehicle enter.
-            if (event.getCause() != BridgeMisc.TELEPORT_CAUSE_CORRECTION_OF_POSITION) {
-                // Unexpected, what now?
-                NCPAPIProvider.getNoCheatPlusAPI().getLogManager().warning(Streams.STATUS, 
-                        CheckUtils.getLogMessagePrefix(player, CheckType.MOVING_VEHICLE) 
-                        + "Unexpected teleport cause on vehicle set back: " + event.getCause());
-            }
-            // Consider to verify, if this is somewhere near the vehicle as expected (might need storing more data for a set back).
-            skipExtras = true;
-        }
+        boolean skipExtras = handleVehicleSetBack(player, event, data);
 
         // Normal teleport
         final double fallDistance = data.noFallFallDistance;
@@ -2036,50 +2024,10 @@ public class MovingListener extends CheckListener implements TickListener, IRemo
         data.resetTeleported();
 
         if (!skipExtras) {
-            // Adjust fall distance, if set so.
-            // How to account for plugins that reset the fall distance here?
-            // Detect transition from valid flying that needs resetting the fall distance.
-            if (event.getCause() == TeleportCause.UNKNOWN || event.getCause() == TeleportCause.COMMAND) {
-                // Always keep fall damage.
-                player.setFallDistance((float) fallDistance);
-                data.noFallFallDistance = (float) fallDistance;
-                
-                // TEST: Detect jumping on a just placed fence.
-                // 1. Detect the low correction teleport.
-                // 2. Detect the fence.
-                // 3. Verify the past move.
-                // (4. Check for a block change entry or last placed block.)
-                // REMOVE TEST
-            }
-            else if (fallDistance > 1.0 && fallDistance - player.getFallDistance() > 0.0) {
-                // Reset fall distance if set so in the config.
-                if (!cc.noFallTpReset) {
-                    // (Set fall distance if set to not reset.)
-                    player.setFallDistance((float) fallDistance);
-                    data.noFallFallDistance = (float) fallDistance;
-                }
-                else if (fallDistance >= Magic.FALL_DAMAGE_DIST) {
-                    data.noFallSkipAirCheck = true;
-                }
-            }
-            if (event.getCause() == TeleportCause.ENDER_PEARL) {
-                // Prevent NoFall violations for ender-pearls.
-                data.noFallSkipAirCheck = true;
-            }
+            adjustFallDistance(player, event, fallDistance, data, cc);
         }
 
-        // Cross world teleportation issues with the end.
-        final Location from = event.getFrom();
-        if (from != null 
-            && event.getCause() == TeleportCause.END_PORTAL // Currently only related to this.
-            &&!from.getWorld().getName().equals(to.getWorld().getName())) { // Less java, though.
-            // Remember the position teleported from.
-            data.crossWorldFrom = new SimplePositionWithLook(from.getX(), from.getY(), from.getZ(), from.getYaw(), from.getPitch());
-        }
-        else {
-            // Reset last cross world position.
-            data.crossWorldFrom = null;
-        }
+        recordCrossWorldTeleport(event, to, data);
 
         // Log.
         if (pData.isDebugActive(checkType)) {
@@ -2158,8 +2106,8 @@ public class MovingListener extends CheckListener implements TickListener, IRemo
     }
 
 
-    private void onPlayerTeleportMonitorCancelled(final Player player, final PlayerTeleportEvent event, 
-                                                  final Location to, final MovingData data, final IPlayerData pData) {
+    private void handleCancelledTeleport(final Player player, final PlayerTeleportEvent event,
+                                         final Location to, final MovingData data, final IPlayerData pData) {
 
         if (data.isTeleported(to)) {
             // (Only precise match.)
@@ -2177,9 +2125,9 @@ public class MovingListener extends CheckListener implements TickListener, IRemo
     }
 
 
-    private void onPlayerTeleportMonitorNullTarget(final Player player, 
-                                                   final PlayerTeleportEvent event, final Location to, 
-                                                   final MovingData data, final IPlayerData pData) {
+    private void handleNullTargetTeleport(final Player player,
+                                          final PlayerTeleportEvent event, final Location to,
+                                          final MovingData data, final IPlayerData pData) {
 
         final boolean debug = pData.isDebugActive(checkType);
         if (debug) {
@@ -2197,6 +2145,60 @@ public class MovingListener extends CheckListener implements TickListener, IRemo
                 data.resetTeleported();
                 if (debug) debugTeleportMessage(player, event, "Skip set back, not being scheduled.");
             }
+        }
+    }
+
+    private boolean handleVehicleSetBack(final Player player, final PlayerTeleportEvent event,
+                                         final MovingData data) {
+
+        if (data.isVehicleSetBack) {
+            if (event.getCause() != BridgeMisc.TELEPORT_CAUSE_CORRECTION_OF_POSITION) {
+                NCPAPIProvider.getNoCheatPlusAPI().getLogManager().warning(Streams.STATUS,
+                        CheckUtils.getLogMessagePrefix(player, CheckType.MOVING_VEHICLE)
+                        + "Unexpected teleport cause on vehicle set back: " + event.getCause());
+            }
+            return true;
+        }
+        return false;
+    }
+
+    private void adjustFallDistance(final Player player, final PlayerTeleportEvent event,
+                                     final double fallDistance, final MovingData data,
+                                     final MovingConfig cc) {
+
+        // Adjust fall distance, if set so.
+        // How to account for plugins that reset the fall distance here?
+        // Detect transition from valid flying that needs resetting the fall distance.
+        if (event.getCause() == TeleportCause.UNKNOWN || event.getCause() == TeleportCause.COMMAND) {
+            player.setFallDistance((float) fallDistance);
+            data.noFallFallDistance = (float) fallDistance;
+        }
+        else if (fallDistance > 1.0 && fallDistance - player.getFallDistance() > 0.0) {
+            if (!cc.noFallTpReset) {
+                player.setFallDistance((float) fallDistance);
+                data.noFallFallDistance = (float) fallDistance;
+            }
+            else if (fallDistance >= Magic.FALL_DAMAGE_DIST) {
+                data.noFallSkipAirCheck = true;
+            }
+        }
+        if (event.getCause() == TeleportCause.ENDER_PEARL) {
+            data.noFallSkipAirCheck = true;
+        }
+    }
+
+    private void recordCrossWorldTeleport(final PlayerTeleportEvent event, final Location to,
+                                          final MovingData data) {
+
+        final Location from = event.getFrom();
+        if (from != null
+            && event.getCause() == TeleportCause.END_PORTAL
+            && !from.getWorld().getName().equals(to.getWorld().getName())) {
+            data.crossWorldFrom = new SimplePositionWithLook(from.getX(), from.getY(), from.getZ(),
+                    from.getYaw(), from.getPitch());
+        }
+        else {
+            data.crossWorldFrom = null;
         }
     }
 
