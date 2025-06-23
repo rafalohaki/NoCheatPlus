@@ -22,6 +22,7 @@ import fr.neatmonster.nocheatplus.config.ConfigManager;
 import fr.neatmonster.nocheatplus.config.WorldConfigProvider;
 import fr.neatmonster.nocheatplus.logging.StaticLog;
 import fr.neatmonster.nocheatplus.utilities.map.BlockFlags;
+import fr.neatmonster.nocheatplus.utilities.map.BlockProperties;
 
 
 /**
@@ -46,7 +47,9 @@ public class BlocksMC1_21_5 implements BlockPropertiesSetup {
 
         // Test blocks
         BlockFlags.setBlockFlags("TEST_BLOCK", BlockFlags.SOLID_GROUND);
+        BlockProperties.setBlockProps("TEST_BLOCK", new BlockProperties.BlockProps(BlockProperties.noTool, 0.5f));
         BlockFlags.setBlockFlags("TEST_INSTANCE_BLOCK", BlockFlags.SOLID_GROUND);
+        BlockProperties.setBlockProps("TEST_INSTANCE_BLOCK", new BlockProperties.BlockProps(BlockProperties.noTool, 0.5f));
 
         ConfigFile config = ConfigManager.getConfigFile();
         if (config.getBoolean(ConfPaths.BLOCKBREAK_DEBUG, config.getBoolean(ConfPaths.CHECKS_DEBUG, false)))
