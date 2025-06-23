@@ -3720,35 +3720,84 @@ public class BlockProperties {
         final Material id = node.getType();
         final long flags = BlockFlags.getBlockFlags(id);
 
-        if ((flags & BlockFlags.F_GROUND) == 0 || (flags & ignoreFlags) != 0) {
+        if (isGroundIgnored(flags, ignoreFlags)) {
             return AlmostBoolean.MAYBE;
         }
 
         final double[] bounds = node.getBounds(access, x, y, z);
-        if (bounds == null) {
+        if (isBlockWithoutBounds(bounds)) {
             return AlmostBoolean.YES;
         }
 
-        if (!collidesBlock(access, minX, minY, minZ, maxX, maxY, maxZ,
-                           x, y, z, node, nodeAbove, flags)) {
+        if (!isCollidingWithNode(access, minX, minY, minZ, maxX, maxY, maxZ,
+                                 x, y, z, node, nodeAbove, flags)) {
             return AlmostBoolean.MAYBE;
         }
 
-        if (isPassableWorkaround(access, x, y, z, minX - x, minY - y, minZ - z, node,
-                                 maxX - minX, maxY - minY, maxZ - minZ,
-                                 minX, minY, minZ, maxX, maxY, maxZ, 1.0)
-                && ((flags & BlockFlags.F_GROUND_HEIGHT) == 0
-                        || getGroundMinHeight(access, x, y, z, node, flags) > maxY - y)) {
+        final double groundMinHeight = getGroundMinHeight(access, x, y, z, node, flags);
+
+        if (isPassableButNotGroundHighEnough(access, x, y, z, minX, minY, minZ, maxX, maxY, maxZ,
+                                             node, flags, groundMinHeight)) {
             return AlmostBoolean.MAYBE;
         }
 
-        if (getGroundMinHeight(access, x, y, z, node, flags) > maxY - y) {
+        if (isFootInsideBlock(groundMinHeight, maxY - y)) {
             return isFullBounds(bounds) ? AlmostBoolean.NO : AlmostBoolean.MAYBE;
         }
 
-        if ((maxY - y) < 1.0 || y >= access.getMaxBlockY()) {
+        if (isTopOrSufficient(maxY - y, y, access)) {
             return AlmostBoolean.YES;
         }
+
+        return evaluateNodeAbove(access, minX, minY, minZ, maxX, maxY, maxZ, ignoreFlags,
+                                 x, y, z, flags, id, bounds, nodeAbove);
+    }
+
+    private static boolean isGroundIgnored(final long flags, final long ignoreFlags) {
+        return (flags & BlockFlags.F_GROUND) == 0 || (flags & ignoreFlags) != 0;
+    }
+
+    private static boolean isBlockWithoutBounds(final double[] bounds) {
+        return bounds == null;
+    }
+
+    private static boolean isCollidingWithNode(final BlockCache access,
+                                               final double minX, final double minY, final double minZ,
+                                               final double maxX, final double maxY, final double maxZ,
+                                               final int x, final int y, final int z,
+                                               final IBlockCacheNode node, final IBlockCacheNode nodeAbove,
+                                               final long flags) {
+        return collidesBlock(access, minX, minY, minZ, maxX, maxY, maxZ,
+                             x, y, z, node, nodeAbove, flags);
+    }
+
+    private static boolean isPassableButNotGroundHighEnough(
+            final BlockCache access, final int x, final int y, final int z,
+            final double minX, final double minY, final double minZ,
+            final double maxX, final double maxY, final double maxZ,
+            final IBlockCacheNode node, final long flags, final double groundMinHeight) {
+        return isPassableWorkaround(access, x, y, z, minX - x, minY - y, minZ - z, node,
+                                    maxX - minX, maxY - minY, maxZ - minZ,
+                                    minX, minY, minZ, maxX, maxY, maxZ, 1.0)
+                && ((flags & BlockFlags.F_GROUND_HEIGHT) == 0
+                        || groundMinHeight > maxY - y);
+    }
+
+    private static boolean isFootInsideBlock(final double groundMinHeight, final double maxYMinusY) {
+        return groundMinHeight > maxYMinusY;
+    }
+
+    private static boolean isTopOrSufficient(final double maxYMinusY, final int y, final BlockCache access) {
+        return maxYMinusY < 1.0 || y >= access.getMaxBlockY();
+    }
+
+    private static AlmostBoolean evaluateNodeAbove(
+            final BlockCache access,
+            final double minX, final double minY, final double minZ,
+            final double maxX, final double maxY, final double maxZ,
+            final long ignoreFlags, final int x, final int y, final int z,
+            final long flags, final Material id, final double[] bounds,
+            IBlockCacheNode nodeAbove) {
 
         if (nodeAbove == null) {
             nodeAbove = access.getOrCreateBlockCacheNode(x, y + 1, z, false);
