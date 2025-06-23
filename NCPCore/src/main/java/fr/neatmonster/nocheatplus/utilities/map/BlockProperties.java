@@ -3588,180 +3588,185 @@ public class BlockProperties {
      *            to disallow the "high edges" of blocks.
      * @return true, if successful
      */
-    public static final boolean collidesBlock(final BlockCache access, final double minX, double minY, final double minZ, 
-                                              final double maxX, final double maxY, final double maxZ, 
-                                              final int x, final int y, final int z, 
-                                              final IBlockCacheNode node, final IBlockCacheNode nodeAbove, 
-                                              final long flags) {
-        /*
-         * NOTE: Not sure with the flags parameter, these days. Often a
-         * pre-check using flags is done ... array access vs. passing an
-         * argument (+ JIT) - would be better to have a 100+ player server to
-         * take profiling data just for testing such differences.
-         */
-        final double[] bounds = node.getBounds(access, x, y, z);
-        if (bounds == null) {
+    public static boolean collidesBlock(
+            final BlockCache access,
+            final double minX, final double minY, final double minZ,
+            final double maxX, final double maxY, final double maxZ,
+            final int x, final int y, final int z,
+            final IBlockCacheNode node, final IBlockCacheNode nodeAbove,
+            final long flags) {
+
+        // 1. Primary bounding box (most blocks only have one box).
+        final double[] rawBounds = node.getBounds(access, x, y, z);
+        if (rawBounds == null) {
             return false;
         }
-        double bminX, bminZ, bminY;
-        double bmaxX, bmaxY, bmaxZ;
 
-        // NOTE: Consider a quick shortcut checks flags == F_NORMAL_GROUND
-        // xz-bounds
+        final BoundingBox primary = createBoundingBoxFromFlags(rawBounds, flags, node, nodeAbove, access, x, y, z);
+
+        final boolean allowEdge = (flags & BlockFlags.F_COLLIDE_EDGES) == 0;
+        if (!primary.intersects(minX, minY, minZ, maxX, maxY, maxZ, x, y, z, allowEdge)) {
+            // 2. Early-out: only fall back to sub-bounds if the main box misses.
+            return checkSubBoxIntersections(rawBounds, minX, minY, minZ, maxX, maxY, maxZ, x, y, z, allowEdge);
+        }
+        return true;
+    }
+
+    /** Immutable local bounding box helper */
+    private static final class BoundingBox {
+        final double minX, minY, minZ, maxX, maxY, maxZ;
+        BoundingBox(double minX, double minY, double minZ, double maxX, double maxY, double maxZ) {
+            this.minX = minX; this.minY = minY; this.minZ = minZ;
+            this.maxX = maxX; this.maxY = maxY; this.maxZ = maxZ;
+        }
+
+        /**
+         * Check intersection against another axis aligned bounding box.
+         *
+         * @param minX world space minimum x of the other box
+         * @param minY world space minimum y of the other box
+         * @param minZ world space minimum z of the other box
+         * @param maxX world space maximum x of the other box
+         * @param maxY world space maximum y of the other box
+         * @param maxZ world space maximum z of the other box
+         * @param x world offset of this box on the x-axis
+         * @param y world offset of this box on the y-axis
+         * @param z world offset of this box on the z-axis
+         * @param allowEdge whether touching the outer edge should count as
+         *                  non-colliding
+         * @return {@code true} if the boxes intersect
+         */
+        public boolean intersects(double minX, double minY, double minZ,
+                                  double maxX, double maxY, double maxZ,
+                                  int x, int y, int z, boolean allowEdge) {
+            if (minX > this.maxX + x || maxX < this.minX + x ||
+                minY > this.maxY + y || maxY < this.minY + y ||
+                minZ > this.maxZ + z || maxZ < this.minZ + z) {
+                return false;
+            }
+            if (minX == this.maxX + x && (this.maxX < 1.0 || allowEdge) ||
+                minY == this.maxY + y && (this.maxY < 1.0 || allowEdge) ||
+                minZ == this.maxZ + z && (this.maxZ < 1.0 || allowEdge)) {
+                return false;
+            }
+            return true;
+        }
+    }
+
+    /**
+     * Builds the primary bounding box, including flag-controlled fake-bounds
+     * tweaks.
+     */
+    private static BoundingBox createBoundingBoxFromFlags(
+            double[] b, long flags, IBlockCacheNode node, IBlockCacheNode nodeAbove,
+            BlockCache access, int x, int y, int z) {
+
+        double bminX, bminY, bminZ, bmaxX, bmaxY, bmaxZ;
+
+        // XZ plane (flags can force full-block extents).
         if ((flags & BlockFlags.F_XZ100) != 0) {
-            bminX = bminZ = 0;
-            bmaxX = bmaxZ = 1;
-        }
-        else {
-            bminX = bounds[0]; // block.v(); // minX
-            bminZ = bounds[2]; // block.z(); // minZ
-            bmaxX = bounds[3]; //block.w(); // maxX
-            bmaxZ = bounds[5]; //block.A(); // maxZ
+            bminX = bminZ = 0.0;
+            bmaxX = bmaxZ = 1.0;
+        } else {
+            bminX = b[0];
+            bminZ = b[2];
+            bmaxX = b[3];
+            bmaxZ = b[5];
         }
 
+        // Y extents – many liquid/height variants.
         if ((flags & BlockFlags.F_HEIGHT_8_INC) != 0) {
             bminY = 0;
             final int data = (node.getData(access, x, y, z) & 0xF) % 8;
             bmaxY = 0.125 * data;
-        }
-        else if ((flags & BlockFlags.F_HEIGHT150) != 0) {
+        } else if ((flags & BlockFlags.F_HEIGHT150) != 0) {
+            bminY = 0; bmaxY = 1.5;
+        } else if ((flags & BlockFlags.F_HEIGHT100) != 0) {
+            bminY = 0; bmaxY = 1.0;
+        } else if ((flags & BlockFlags.F_HEIGHT_8SIM_DEC) != 0) {
             bminY = 0;
-            bmaxY = 1.5;
-        }
-        else if ((flags & BlockFlags.F_HEIGHT100) != 0) {
-            bminY = 0;
-            bmaxY = 1.0;
-        }
-        else if ((flags & BlockFlags.F_HEIGHT_8SIM_DEC) != 0) {
-            bminY = 0;
-            if ((flags & BlockFlags.F_LAVA) !=0) {
-            	if (nodeAbove != null && (BlockFlags.getBlockFlags(nodeAbove.getType()) & BlockFlags.F_LAVA) !=0) {
-            		bmaxY = 1;
-            	} else {
-            		final int data = node.getData(access, x, y, z);
-                	if (data >= 8) {
-                		bmaxY = LIQUID_HEIGHT_LOWERED;
-                	} else bmaxY = (8 - data/9f);
-            	}
-            } else if ((flags & BlockFlags.F_WATER) != 0) {
-            	if (nodeAbove != null && (BlockFlags.getBlockFlags(nodeAbove.getType()) & BlockFlags.F_WATER) !=0) {
-            		bmaxY = 1;
-            	} else {
-            		final int data = node.getData(access, x, y, z);
-                	if ((data & 8) == 8) {
-                		bmaxY = Math.max(LIQUID_HEIGHT_LOWERED, bounds[4]);
-                	} else bmaxY = (8 - data/9f);
-            	}
-            } else bmaxY = LIQUID_HEIGHT_LOWERED;
-        }
-        else if ((flags & BlockFlags.F_HEIGHT8_1) != 0) {
-            bminY = 0.0;
-            bmaxY = 0.125;
-        }
-        else {
-            bminY = bounds[1]; // minY
-            bmaxY = bounds[4]; // maxY
+            bmaxY = getLiquidHeightFromFlags(flags, node, nodeAbove, access, x, y, z, b);
+        } else if ((flags & BlockFlags.F_HEIGHT8_1) != 0) {
+            bminY = 0; bmaxY = 0.125;
+        } else {
+            bminY = b[1];
+            bmaxY = b[4];
         }
 
-        // Fake the bound of thin glass
-        // (Bugged blocks bounds around 1.8. Mojang...)
+        // Fake bounds for thin-glass and similar oddities.
         if ((flags & BlockFlags.F_FAKEBOUNDS) != 0) {
-            final double dz = bmaxZ - bminZ;
-            final double dx = bmaxX - bminX;
-            if (dz == 0.125 && dx != 1.0) {
-                if (bminX == 0.0) {
-                    bmaxX = 0.5;
-                }
-                if (bmaxX == 1.0) {
-                    bminX = 0.5;
-                }
-            } 
-            else if (dx == 0.125 && dz != 1.0) {
-                if (bminZ == 0.0) {
-                    bmaxZ = 0.5;
-                }
-                if (bmaxZ == 1.0) {
-                    bminZ = 0.5;
-                }
-            } 
-            else if (dx == dz && dx != 1.0) {
-                if (bmaxX == 0.5625) {
-                    bmaxX = 0.5;
-                }
-                else if (bmaxZ == 0.5625) {
-                    bmaxZ = 0.5;
-                }
-                else if (bminX == 0.4375) {
-                    bminX = 0.5;
-                }
-                else if (bminZ == 0.4375) {
-                    bminZ = 0.5;
-                }
+            double dz = bmaxZ - bminZ;
+            double dx = bmaxX - bminX;
+            bminX = adjustBoundFaceIfFake(bminX, bmaxX, dz, dx, true);
+            bmaxX = adjustBoundFaceIfFake(bmaxX, bminX, dz, dx, false);
+            bminZ = adjustBoundFaceIfFake(bminZ, bmaxZ, dx, dz, true);
+            bmaxZ = adjustBoundFaceIfFake(bmaxZ, bminZ, dx, dz, false);
+        }
+        return new BoundingBox(bminX, bminY, bminZ, bmaxX, bmaxY, bmaxZ);
+    }
+
+    /** Liquid-height helper extracted from original branch-nest */
+    private static double getLiquidHeightFromFlags(long flags, IBlockCacheNode node, IBlockCacheNode nodeAbove,
+                                              BlockCache access, int x, int y, int z, double[] bounds) {
+        // Lava
+        if ((flags & BlockFlags.F_LAVA) != 0) {
+            if (nodeAbove != null && (BlockFlags.getBlockFlags(nodeAbove.getType()) & BlockFlags.F_LAVA) != 0) {
+                return 1.0;
             }
+            int data = node.getData(access, x, y, z);
+            return (data >= 8) ? LIQUID_HEIGHT_LOWERED : 1.0 - data / 9.0;
         }
-
-        boolean collide = false;
-        boolean skip = false;
-        final boolean allowEdge = (flags & BlockFlags.F_COLLIDE_EDGES) == 0;
-        // Still keep this primary bounds check stand alone with loop below for flags compatibility
-        // Clearly outside of bounds.
-        if (minX > bmaxX + x 
-            || maxX < bminX + x
-            || minY > bmaxY + y 
-            || maxY < bminY + y
-            || minZ > bmaxZ + z 
-            || maxZ < bminZ + z) {
-            skip = true;
-        }
-        // Hitting the max-edges (if allowed).
-        if (!skip 
-            && (
-                minX == bmaxX + x 
-                && (bmaxX < 1.0 || allowEdge)
-                || minY == bmaxY + y 
-                && (bmaxY < 1.0 || allowEdge)
-                || minZ == bmaxZ + z 
-                && (bmaxZ < 1.0 || allowEdge)
-            )) {
-            skip = true;
-        }
-
-        if (!skip) {
-            collide = true;
-        }
-
-        if (!collide && bounds.length > 6 && bounds.length % 6 == 0) {
-            for (int i = 2; i <= (int)bounds.length / 6; i++) {
-
-                // Clearly outside of bounds.
-                if (minX > bounds[i*6-3] + x 
-                   || maxX < bounds[i*6-6] + x
-                   || minY > bounds[i*6-2] + y 
-                   || maxY < bounds[i*6-5] + y
-                   || minZ > bounds[i*6-1] + z 
-                   || maxZ < bounds[i*6-4] + z) {
-                    continue;
-                }
-                // Hitting the max-edges (if allowed).
-                if (minX == bounds[i*6-3] + x 
-                    && (bounds[i*6-3] < 1.0 || allowEdge)
-                    || minY == bounds[i*6-2] + y 
-                    && (bounds[i*6-2] < 1.0 || allowEdge)
-                    || minZ == bounds[i*6-1] + z 
-                    && (bounds[i*6-1] < 1.0 || allowEdge)) {
-                    continue;
-                }
-                collide = true;
-                break;
+        // Water
+        if ((flags & BlockFlags.F_WATER) != 0) {
+            if (nodeAbove != null && (BlockFlags.getBlockFlags(nodeAbove.getType()) & BlockFlags.F_WATER) != 0) {
+                return 1.0;
             }
+            int data = node.getData(access, x, y, z);
+            if ((data & 8) == 8) {
+                return Math.max(LIQUID_HEIGHT_LOWERED, bounds[4]);
+            }
+            return 1.0 - data / 9.0;
         }
+        // Default lowered-liquid height.
+        return LIQUID_HEIGHT_LOWERED;
+    }
 
-        if (!collide) {
+    /** Simpler fake-bounds face adjustment */
+    private static double adjustBoundFaceIfFake(double faceA, double faceB, double da, double db, boolean isMin) {
+        if (da == 0.125 && db != 1.0) {
+            return isMin ? 0.0 : 0.5;
+        } else if (db == 0.125 && da != 1.0) {
+            return isMin ? 0.0 : 0.5;
+        } else if (db == da && db != 1.0) {
+            if (!isMin && faceA == 0.5625) return 0.5;
+            if (isMin && faceA == 0.4375) return 0.5;
+        }
+        return faceA; // unchanged
+    }
+
+
+    /**
+     * Iterate over additional 6-tuple sub-boxes when present.
+     * Some blocks expose multiple bounding boxes packed in a flat array.
+     * Each box occupies six consecutive entries.
+     */
+    private static boolean checkSubBoxIntersections(double[] rawBounds,
+                                                  double minX, double minY, double minZ,
+                                                  double maxX, double maxY, double maxZ,
+                                                  int x, int y, int z, boolean allowEdge) {
+        if (rawBounds.length <= 6 || rawBounds.length % 6 != 0) {
             return false;
         }
-
-        // Collision.
-        return true;
+        // Start at index 1 since index 0 represents the primary box.
+        for (int i = 1; i < rawBounds.length / 6; i++) {
+            BoundingBox sub = new BoundingBox(
+                    rawBounds[i*6],     rawBounds[i*6+1], rawBounds[i*6+2],
+                    rawBounds[i*6+3],   rawBounds[i*6+4], rawBounds[i*6+5]);
+            if (sub.intersects(minX, minY, minZ, maxX, maxY, maxZ, x, y, z, allowEdge)) {
+                return true;
+            }
+        }
+        return false;
     }
 
     /**
