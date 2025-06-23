@@ -1035,7 +1035,6 @@ public class SurvivalFly extends Check {
         //       - Powder snow in water -> Check what movement takes precedence.
         //       - Being on medium while in water (soulsand, slime block, honey block and stairs in water)
         //       - Same thing with collision tolerance [Move it as a global modifier].
-        // TODO: Horizontal medium and status transitions: needs better modeling [Add HORIZONTAL workarounds as well!? Likewise how vdistrel treats medium transitions]
         //       - Bunnyhopping around lowest liquid levels
         //       - Bunnyhoping right into a berry bush
         //       - Swimming -> not swimming transitions
@@ -2482,6 +2481,11 @@ public class SurvivalFly extends Check {
 
     /**
      * Debug output.
+     * <p>
+     * The formatting logic is split into helper methods for readability:
+     * ground state information, distance and velocity metrics, accounting
+     * statistics and tag listing.
+     *
      * @param player
      * @param to
      * @param data
@@ -2496,33 +2500,76 @@ public class SurvivalFly extends Check {
      * @param toOnGround
      * @param resetTo
      */
-    private void outputDebug(final Player player, final PlayerLocation to, 
-                             final MovingData data, final MovingConfig cc, 
-                             final double hDistance, final double hAllowedDistance, final double hFreedom, 
+    private void outputDebug(final Player player, final PlayerLocation to,
+                             final MovingData data, final MovingConfig cc,
+                             final double hDistance, final double hAllowedDistance, final double hFreedom,
                              final double yDistance, final double vAllowedDistance,
-                             final boolean fromOnGround, final boolean resetFrom, 
+                             final boolean fromOnGround, final boolean resetFrom,
                              final boolean toOnGround, final boolean resetTo,
                              final PlayerMoveData thisMove, double vDistanceAboveLimit) {
 
         final PlayerMoveData lastMove = data.playerMoves.getFirstPastMove();
         final double yDistDiffEx = yDistance - vAllowedDistance;
         final StringBuilder builder = new StringBuilder(500);
+
         builder.append(CheckUtils.getLogMessagePrefix(player, type));
-        final String hBuf = (data.sfHorizontalBuffer < cc.hBufMax ? ((" / Buffer: " + StringUtil.fdec3.format(data.sfHorizontalBuffer))) : "");
+        appendGroundStateInfo(builder, thisMove, fromOnGround, resetFrom, toOnGround, resetTo, data);
+        appendDistanceVelocityMetrics(builder, lastMove, thisMove, hDistance, hAllowedDistance, hFreedom,
+                yDistance, yDistDiffEx, vAllowedDistance, to, data, cc);
+        appendAccountStatistics(builder, data, cc, resetFrom, resetTo);
+        appendTagInfo(builder, player);
+
+        if (!justUsedWorkarounds.isEmpty()) {
+            builder.append("\n" + " Workarounds: " + StringUtil.join(justUsedWorkarounds, " , "));
+        }
+        builder.append("\n");
+        NCPAPIProvider.getNoCheatPlusAPI().getLogManager().debug(Streams.TRACE_FILE, builder.toString());
+    }
+
+    /**
+     * Append information about ground state and jump phase.
+     */
+    private void appendGroundStateInfo(final StringBuilder builder, final PlayerMoveData thisMove,
+            final boolean fromOnGround, final boolean resetFrom, final boolean toOnGround,
+            final boolean resetTo, final MovingData data) {
+        builder.append("\nOnGround: "
+                + (thisMove.headObstructed ? "(head obstr.) " : "")
+                + (thisMove.touchedGroundWorkaround ? "(touched ground) " : "")
+                + (fromOnGround ? "onground -> " : (resetFrom ? "resetcond -> " : "--- -> "))
+                + (toOnGround ? "onground" : (resetTo ? "resetcond" : "---"))
+                + ", jumpPhase: " + data.sfJumpPhase + ", LiftOff: " + data.liftOffEnvelope.name()
+                + "(" + data.insideMediumCount + ")");
+    }
+
+    /**
+     * Append distance and velocity related metrics.
+     */
+    private void appendDistanceVelocityMetrics(final StringBuilder builder, final PlayerMoveData lastMove,
+            final PlayerMoveData thisMove, final double hDistance, final double hAllowedDistance,
+            final double hFreedom, final double yDistance, final double yDistDiffEx,
+            final double vAllowedDistance, final PlayerLocation to, final MovingData data, final MovingConfig cc) {
+        final String hBuf = (data.sfHorizontalBuffer < cc.hBufMax
+                ? (" / Buffer: " + StringUtil.fdec3.format(data.sfHorizontalBuffer)) : "");
         final String lostSprint = (data.lostSprintCount > 0 ? (" , lostSprint: " + data.lostSprintCount) : "");
         final String hVelUsed = hFreedom > 0 ? " / hVelUsed: " + StringUtil.fdec3.format(hFreedom) : "";
-        builder.append("\nOnGround: " + (thisMove.headObstructed ? "(head obstr.) " : "") + (thisMove.touchedGroundWorkaround ? "(touched ground) " : "") + (fromOnGround ? "onground -> " : (resetFrom ? "resetcond -> " : "--- -> ")) + (toOnGround ? "onground" : (resetTo ? "resetcond" : "---")) + ", jumpPhase: " + data.sfJumpPhase + ", LiftOff: " + data.liftOffEnvelope.name() + "(" + data.insideMediumCount + ")");
         final String dHDist = lastMove.toIsValid ? "(" + StringUtil.formatDiff(hDistance, lastMove.hDistance) + ")" : "";
-        final String dYDist = lastMove.toIsValid ? "(" + StringUtil.formatDiff(yDistance, lastMove.yDistance)+ ")" : "";
+        final String dYDist = lastMove.toIsValid ? "(" + StringUtil.formatDiff(yDistance, lastMove.yDistance) + ")" : "";
         final String hopTick = (data.momentumTick > 0 ? ("momentumTick: " + data.momentumTick) + " , " : "");
         final String frictionTick = ("keepFrictionTick= " + data.keepfrictiontick + " , ");
         builder.append("\n Tick counters: " + hopTick + frictionTick);
-        builder.append("\n" + " hDist: " + StringUtil.fdec3.format(hDistance) + dHDist + " / hAD: " + StringUtil.fdec3.format(hAllowedDistance) + hBuf + lostSprint + hVelUsed +
-                       "\n" + " vDist: " + StringUtil.fdec3.format(yDistance) + dYDist + " / yDistDiffEx: " + StringUtil.fdec3.format(yDistDiffEx) + " / vAD: " + StringUtil.fdec3.format(vAllowedDistance) + " , setBackY: " + (data.hasSetBack() ? (data.getSetBackY() + " (setBackYDist: " + StringUtil.fdec3.format(to.getY() - data.getSetBackY()) + " / MaxJumpHeight: " + data.liftOffEnvelope.getMaxJumpHeight(data.jumpAmplifier) + ")") : "?"));
+        builder.append("\n" + " hDist: " + StringUtil.fdec3.format(hDistance) + dHDist + " / hAD: "
+                + StringUtil.fdec3.format(hAllowedDistance) + hBuf + lostSprint + hVelUsed
+                + "\n" + " vDist: " + StringUtil.fdec3.format(yDistance) + dYDist + " / yDistDiffEx: "
+                + StringUtil.fdec3.format(yDistDiffEx) + " / vAD: "
+                + StringUtil.fdec3.format(vAllowedDistance) + " , setBackY: "
+                + (data.hasSetBack() ? (data.getSetBackY() + " (setBackYDist: "
+                + StringUtil.fdec3.format(to.getY() - data.getSetBackY()) + " / MaxJumpHeight: "
+                + data.liftOffEnvelope.getMaxJumpHeight(data.jumpAmplifier) + ")") : "?"));
         if (lastMove.toIsValid) {
             builder.append("\n fdsq: " + StringUtil.fdec3.format(thisMove.distanceSquared / lastMove.distanceSquared));
             if (data.bunnyhopDelay > 0) {
-                builder.append("\n Bunny ratios: " +"c/b("+ StringUtil.fdec3.format(hDistance / thisMove.hAllowedDistanceBase) + ") / c/l(" + StringUtil.fdec3.format(hDistance / lastMove.hDistance) + ")"); // Current/base current/last
+                builder.append("\n Bunny ratios: " + "c/b(" + StringUtil.fdec3.format(hDistance / thisMove.hAllowedDistanceBase)
+                        + ") / c/l(" + StringUtil.fdec3.format(hDistance / lastMove.hDistance) + ")");
             }
         }
         if (thisMove.verVelUsed != null) {
@@ -2530,14 +2577,28 @@ public class SurvivalFly extends Check {
         }
         data.addVerticalVelocity(builder);
         data.addHorizontalVelocity(builder);
+    }
+
+    /**
+     * Append accounting related statistics.
+     */
+    private void appendAccountStatistics(final StringBuilder builder, final MovingData data, final MovingConfig cc,
+            final boolean resetFrom, final boolean resetTo) {
         if (!resetFrom && !resetTo) {
             if (cc.survivalFlyAccountingV && data.vDistAcc.count() > data.vDistAcc.bucketCapacity()) {
                 builder.append("\n" + " vAcc: " + data.vDistAcc.toInformalString());
             }
         }
         if (cc.survivalFlyAccountingH && data.hDistAcc.count() > 0) {
-            builder.append("\n hAcc: " + StringUtil.fdec3.format(data.hDistAcc.score() / data.hDistAcc.count()) + "(" + (int) data.hDistAcc.count() + ")");
+            builder.append("\n hAcc: " + StringUtil.fdec3.format(data.hDistAcc.score() / data.hDistAcc.count())
+                    + "(" + (int) data.hDistAcc.count() + ")");
         }
+    }
+
+    /**
+     * Append tag related information for the given player.
+     */
+    private void appendTagInfo(final StringBuilder builder, final Player player) {
         if (player.isSleeping()) {
             tags.add("sleeping");
         }
@@ -2552,11 +2613,6 @@ public class SurvivalFly extends Check {
         if (!tags.isEmpty()) {
             builder.append("\n" + " Tags: " + StringUtil.join(tags, "+"));
         }
-        if (!justUsedWorkarounds.isEmpty()) {
-            builder.append("\n" + " Workarounds: " + StringUtil.join(justUsedWorkarounds, " , "));
-        }
-        builder.append("\n");
-        NCPAPIProvider.getNoCheatPlusAPI().getLogManager().debug(Streams.TRACE_FILE, builder.toString());
     }
 
     
