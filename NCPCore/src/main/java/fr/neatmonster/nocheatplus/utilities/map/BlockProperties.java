@@ -1092,6 +1092,9 @@ public class BlockProperties {
         registerFenceHeights();
         registerThinFences();
         registerSpecialStaticFlags();
+        registerInstantBreakables();
+        registerLeafBlocks();
+        registerBedBlocks();
 
         //////////////////////////////////////////////////////////////////
         // Set block break properties.                                  //
@@ -1131,49 +1134,7 @@ public class BlockProperties {
         setBlock(Material.OBSIDIAN, new BlockProps(diamondPickaxe, 50, true));
 
 
-        // Instantly breakable types
-        for (final Material mat : new Material[]{
-            Material.TNT,
-            BridgeMaterial.get("DIODE_BLOCK_ON"), 
-            BridgeMaterial.get("DIODE_BLOCK_OFF"),
-            BridgeMaterial.get("repeater"),
-            BridgeMaterial.get("sea_pickle"),
-            BridgeMaterial.LILY_PAD,
-            BridgeMaterial.COMMAND_BLOCK,}) {
-            if (mat != null) setBlock(mat, instantType);
-        }
-        for (final Material mat : MaterialUtil.INSTANT_PLANTS) {
-            setBlock(mat, instantType);
-        }
-
-        // Instant break AND fully passable types
-        for (Material mat : new Material[] {
-            Material.REDSTONE_WIRE, 
-            BridgeMaterial.get("REDSTONE_TORCH_ON"), 
-            BridgeMaterial.get("REDSTONE_TORCH_OFF"),
-            BridgeMaterial.get("redstone_torch"),
-            BridgeMaterial.get("redstone_wall_torch"),
-            Material.TRIPWIRE,
-            Material.TRIPWIRE_HOOK,
-            Material.TORCH,
-            Material.FIRE,}) {
-            if (mat != null) {
-                setBlock(mat, instantType);
-                BlockFlags.addFlags(mat, BlockFlags.F_IGN_PASSABLE);
-            }
-        }
-
-        // Leaf types
-        for (final Material mat : MaterialUtil.LEAVES) {
-            setBlock(mat, leafType);
-            BlockFlags.setFlag(mat, BlockFlags.F_LEAVES);
-        }
-
-        // Bed types
-        for (Material mat : MaterialUtil.BEDS) { 
-            setBlock(mat, leafType);
-            BlockFlags.setFlag(mat, BlockFlags.F_GROUND | BlockFlags.F_SOLID | BlockFlags.F_BED);
-        }
+        // Instantly breakable, leaf and bed blocks are registered via helpers
 
         // Huge mushroom types
         for (Material mat : new Material[]{ Material.VINE, Material.COCOA}) {
@@ -1462,12 +1423,8 @@ public class BlockProperties {
             BlockFlags.setBlockFlags(mat, BlockFlags.F_SOLID | BlockFlags.F_GROUND);
         }
 
-        // Concrete
-        props = new BlockProps(BlockProperties.woodPickaxe, 1.8f, true);
-        for (Material mat : MaterialUtil.CONCRETE_BLOCKS) {
-            setBlockProps(mat, props);
-            BlockFlags.setFlagsAs(mat, Material.COBBLESTONE);
-        }
+        // Concrete blocks handled via helper
+        registerConcreteBlocks();
 
         // Wool blocks.
         props = new BlockProps(tools.get(Material.SHEARS), 0.8f);
@@ -4773,6 +4730,59 @@ public class BlockProperties {
         BlockFlags.setFlag(BridgeMaterial.IRON_BARS, paneFlags);
         for (final Material mat : MaterialUtil.GLASS_PANES) {
             BlockFlags.setFlag(mat, paneFlags);
+        }
+    }
+
+    private static void registerInstantBreakables() {
+        for (final Material mat : new Material[]{
+            Material.TNT,
+            BridgeMaterial.get("DIODE_BLOCK_ON"),
+            BridgeMaterial.get("DIODE_BLOCK_OFF"),
+            BridgeMaterial.get("repeater"),
+            BridgeMaterial.get("sea_pickle"),
+            BridgeMaterial.LILY_PAD,
+            BridgeMaterial.COMMAND_BLOCK,}) {
+            if (mat != null) setBlock(mat, instantType);
+        }
+        for (final Material mat : MaterialUtil.INSTANT_PLANTS) {
+            setBlock(mat, instantType);
+        }
+        for (final Material mat : new Material[] {
+            Material.REDSTONE_WIRE,
+            BridgeMaterial.get("REDSTONE_TORCH_ON"),
+            BridgeMaterial.get("REDSTONE_TORCH_OFF"),
+            BridgeMaterial.get("redstone_torch"),
+            BridgeMaterial.get("redstone_wall_torch"),
+            Material.TRIPWIRE,
+            Material.TRIPWIRE_HOOK,
+            Material.TORCH,
+            Material.FIRE,}) {
+            if (mat != null) {
+                setBlock(mat, instantType);
+                BlockFlags.addFlags(mat, BlockFlags.F_IGN_PASSABLE);
+            }
+        }
+    }
+
+    private static void registerLeafBlocks() {
+        for (final Material mat : MaterialUtil.LEAVES) {
+            setBlock(mat, leafType);
+            BlockFlags.setFlag(mat, BlockFlags.F_LEAVES);
+        }
+    }
+
+    private static void registerBedBlocks() {
+        for (Material mat : MaterialUtil.BEDS) {
+            setBlock(mat, leafType);
+            BlockFlags.setFlag(mat, BlockFlags.F_GROUND | BlockFlags.F_SOLID | BlockFlags.F_BED);
+        }
+    }
+
+    private static void registerConcreteBlocks() {
+        BlockProps props = new BlockProps(BlockProperties.woodPickaxe, 1.8f, true);
+        for (Material mat : MaterialUtil.CONCRETE_BLOCKS) {
+            setBlockProps(mat, props);
+            BlockFlags.setFlagsAs(mat, Material.COBBLESTONE);
         }
     }
 
