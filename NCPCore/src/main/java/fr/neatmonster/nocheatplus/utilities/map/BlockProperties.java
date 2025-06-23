@@ -1809,16 +1809,7 @@ public class BlockProperties {
             return mult == 1.0f ? override : (long) (mult * override);
         }
 
-        boolean isValidTool = isValidTool(blockId, blockProps, toolProps, efficiency);
-        boolean isRightTool = isRightToolMaterial(blockId, blockProps, toolProps, isValidTool);
-
-        long duration = isValidTool ? blockProps.breakingTimes[toolProps.materialBase.index]
-                                    : blockProps.breakingTimes[0];
-        if (isValidTool && efficiency > 0) {
-            duration = (long) (duration / blockProps.efficiencyMod);
-        }
-
-        BreakContext ctx = new BreakContext(duration, isValidTool, isRightTool, blockProps.pureHardness);
+        BreakContext ctx = determineBaseDuration(blockId, blockProps, toolProps, efficiency);
         ctx = applySpecialToolCases(blockId, toolProps, ctx);
 
         return calculateFinalDuration(blockId, blockProps, toolProps, ctx.duration,
@@ -1857,39 +1848,94 @@ public class BlockProperties {
             this.rightTool = rightTool;
             this.pureHardness = pureHardness;
         }
+
+        BreakContext(BreakContext other) {
+            this.duration = other.duration;
+            this.validTool = other.validTool;
+            this.rightTool = other.rightTool;
+            this.pureHardness = other.pureHardness;
+        }
     }
 
-    private static BreakContext applySpecialToolCases(Material blockId, ToolProps toolProps, BreakContext ctx) {
-        if (toolProps.toolType == ToolType.SHEARS) {
-            if (blockId == BridgeMaterial.COBWEB) {
+    @FunctionalInterface
+    private interface BreakModifier {
+        BreakContext apply(Material blockId, ToolProps toolProps, BreakContext ctx);
+    }
+
+    private static final List<BreakModifier> SPECIAL_CASE_MODIFIERS = new ArrayList<>();
+
+    static {
+        SPECIAL_CASE_MODIFIERS.add((blockId, tool, ctx) -> {
+            if (tool.toolType == ToolType.SHEARS && blockId == BridgeMaterial.COBWEB) {
                 ctx.duration = 400;
                 ctx.validTool = true;
                 ctx.rightTool = true;
                 ctx.pureHardness = false;
-            } else if (MaterialUtil.WOOL_BLOCKS.contains(blockId)) {
+            }
+            return ctx;
+        });
+        SPECIAL_CASE_MODIFIERS.add((blockId, tool, ctx) -> {
+            if (tool.toolType == ToolType.SHEARS && MaterialUtil.WOOL_BLOCKS.contains(blockId)) {
                 ctx.duration = 240;
                 ctx.validTool = true;
                 ctx.rightTool = true;
                 ctx.pureHardness = false;
-            } else if (isLeaves(blockId)) {
+            }
+            return ctx;
+        });
+        SPECIAL_CASE_MODIFIERS.add((blockId, tool, ctx) -> {
+            if (tool.toolType == ToolType.SHEARS && isLeaves(blockId)) {
                 ctx.duration = 0;
                 ctx.validTool = true;
             }
-        } else if (toolProps.toolType == ToolType.SWORD) {
-            if (blockId == Material.JACK_O_LANTERN || blockId.name().endsWith("PUMPKIN") || blockId == Material.MELON) {
+            return ctx;
+        });
+        SPECIAL_CASE_MODIFIERS.add((blockId, tool, ctx) -> {
+            if (tool.toolType == ToolType.SWORD && (blockId == Material.JACK_O_LANTERN || blockId.name().endsWith("PUMPKIN") || blockId == Material.MELON)) {
                 ctx.validTool = true;
                 ctx.rightTool = true;
                 ctx.duration = 1000;
                 ctx.pureHardness = false;
-            } else if (blockId == Material.COCOA || blockId == Material.VINE || isLeaves(blockId)) {
+            }
+            return ctx;
+        });
+        SPECIAL_CASE_MODIFIERS.add((blockId, tool, ctx) -> {
+            if (tool.toolType == ToolType.SWORD && (blockId == Material.COCOA || blockId == Material.VINE || isLeaves(blockId))) {
                 ctx.validTool = true;
                 ctx.rightTool = true;
                 ctx.duration = 200;
                 ctx.pureHardness = false;
-            } else if (blockId.name().equals("BAMBOO")) {
+            }
+            return ctx;
+        });
+        SPECIAL_CASE_MODIFIERS.add((blockId, tool, ctx) -> {
+            if (tool.toolType == ToolType.SWORD && blockId.name().equals("BAMBOO")) {
                 ctx.validTool = true;
                 ctx.duration = 0;
             }
+            return ctx;
+        });
+    }
+
+    private static BreakContext determineBaseDuration(Material blockId, BlockProps blockProps, ToolProps toolProps, int efficiency) {
+        boolean validTool = isValidTool(blockId, blockProps, toolProps, efficiency);
+        boolean rightTool = isRightToolMaterial(blockId, blockProps, toolProps, validTool);
+        long duration = validTool ? blockProps.breakingTimes[toolProps.materialBase.index]
+                                  : blockProps.breakingTimes[0];
+        if (validTool && efficiency > 0) {
+            duration = (long) (duration / blockProps.efficiencyMod);
+        }
+        return new BreakContext(duration, validTool, rightTool, blockProps.pureHardness);
+    }
+
+    /**
+     * Apply tool-specific overrides registered as {@link BreakModifier}s.
+     * Each modifier receives a fresh copy of the current context to keep
+     * mutation local and returns an updated context.
+     */
+    private static BreakContext applySpecialToolCases(Material blockId, ToolProps toolProps, BreakContext ctx) {
+        for (BreakModifier bm : SPECIAL_CASE_MODIFIERS) {
+            ctx = bm.apply(blockId, toolProps, new BreakContext(ctx));
         }
         return ctx;
     }
