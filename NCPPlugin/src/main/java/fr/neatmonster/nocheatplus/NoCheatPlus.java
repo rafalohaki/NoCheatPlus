@@ -1530,7 +1530,8 @@ public class NoCheatPlus extends JavaPlugin implements NoCheatPlusAPI {
 
     @Override
     public void register(RegistrationContext context) {
-        context.doRegister(); // TODO: ...
+        // Perform the registration using the provided context.
+        context.doRegister();
     }
 
     @Override
