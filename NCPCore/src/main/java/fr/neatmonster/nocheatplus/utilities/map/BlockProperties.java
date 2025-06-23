@@ -1178,19 +1178,7 @@ public class BlockProperties {
         }
 
         // Glass types
-        for (Material mat : new Material[] { 
-            BridgeMaterial.get("REDSTONE_LAMP_ON"), 
-            BridgeMaterial.get("REDSTONE_LAMP_OFF"),
-            BridgeMaterial.get("REDSTONE_LAMP"),
-            Material.GLOWSTONE,}) {
-            if (mat != null) setBlock(mat, glassType);
-        }
-        for (final Material mat : MaterialUtil.GLASS_BLOCKS) {
-            setBlock(mat, glassType);
-        }
-        for (final Material mat : MaterialUtil.GLASS_PANES) {
-            setBlock(mat, glassType);
-        }
+        registerGlassBlocks();
 
         // Plates
         for (Material mat : MaterialUtil.WOODEN_PRESSURE_PLATES) {
@@ -1262,50 +1250,10 @@ public class BlockProperties {
         setBlock(Material.JACK_O_LANTERN, pumpkinType);
 
         // Wood types
-        final List<Set<Material>> woodTypes = Arrays.asList(
-            MaterialUtil.WOODEN_FENCE_GATES, 
-            MaterialUtil.WOODEN_FENCES,
-            MaterialUtil.WOODEN_STAIRS, 
-            MaterialUtil.WOODEN_SLABS,
-            MaterialUtil.LOGS, 
-            MaterialUtil.WOOD_BLOCKS,
-            MaterialUtil.PLANKS);
-        for (final Set<Material> set : woodTypes) {
-            for (final Material mat : set) {
-                setBlock(mat, woodType);
-            }
-        }
-        for (Material mat : new Material[] {
-            Material.JUKEBOX, 
-            BridgeMaterial.get("wood_double_step"),}) { // double slabs ?
-            if (mat != null) setBlock(mat, woodType);
-        }
-        for (Material mat : MaterialUtil.STRIPPED_LOGS) {
-            BlockInit.setAs(mat, BridgeMaterial.OAK_LOG);
-        }
-        for (Material mat : MaterialUtil.STRIPPED_WOOD_BLOCKS) {
-            BlockInit.setAs(mat, BridgeMaterial.OAK_WOOD);
-        }
+        registerWoodTypes();
 
         // Brick types
-        for (Material mat : new Material[] {
-            Material.CAULDRON, 
-            Material.COBBLESTONE_STAIRS, 
-            Material.COBBLESTONE, 
-            Material.NETHER_BRICK_STAIRS, 
-            Material.MOSSY_COBBLESTONE,
-            Material.BRICK_STAIRS, 
-            Material.BRICK_STAIRS, 
-            BridgeMaterial.NETHER_BRICK_FENCE,
-            BridgeMaterial.BRICK_SLAB,
-            BridgeMaterial.STONE_SLAB, 
-            BridgeMaterial.NETHER_BRICKS,  
-            BridgeMaterial.BRICKS, 
-            BridgeMaterial.get("double_step"),}) {
-            if (mat != null) setBlock(mat, brickType);
-        }
-        BlockFlags.setBlockFlags(Material.CAULDRON, BlockFlags.SOLID_GROUND | BlockFlags.F_GROUND_HEIGHT | BlockFlags.F_MIN_HEIGHT16_5); // LEGACY
-        setBlock(BridgeMaterial.COBBLESTONE_WALL, brickType);
+        registerBrickTypes();
 
         // Chest types
         setBlock(BridgeMaterial.CRAFTING_TABLE, chestType);
@@ -1451,10 +1399,7 @@ public class BlockProperties {
         }
 
         // Shulker boxes
-        for (Material mat : MaterialUtil.SHULKER_BOXES) {
-            BlockProperties.setBlockProps(mat, new BlockProps(BlockProperties.woodPickaxe, 2f));
-            BlockFlags.setBlockFlags(mat, BlockFlags.F_SOLID | BlockFlags.F_GROUND);
-        }
+        registerShulkerBoxes();
 
         // Concrete blocks handled via helper
         registerConcreteBlocks();
@@ -4794,6 +4739,77 @@ public class BlockProperties {
         for (Material mat : MaterialUtil.CONCRETE_BLOCKS) {
             setBlockProps(mat, props);
             BlockFlags.setFlagsAs(mat, Material.COBBLESTONE);
+        }
+    }
+
+    private static void registerGlassBlocks() {
+        for (Material mat : new Material[] {
+            BridgeMaterial.get("REDSTONE_LAMP_ON"),
+            BridgeMaterial.get("REDSTONE_LAMP_OFF"),
+            BridgeMaterial.get("REDSTONE_LAMP"),
+            Material.GLOWSTONE,}) {
+            if (mat != null) setBlock(mat, glassType);
+        }
+        for (final Material mat : MaterialUtil.GLASS_BLOCKS) {
+            setBlock(mat, glassType);
+        }
+        for (final Material mat : MaterialUtil.GLASS_PANES) {
+            setBlock(mat, glassType);
+        }
+    }
+
+    private static void registerWoodTypes() {
+        final List<Set<Material>> woodTypes = Arrays.asList(
+            MaterialUtil.WOODEN_FENCE_GATES,
+            MaterialUtil.WOODEN_FENCES,
+            MaterialUtil.WOODEN_STAIRS,
+            MaterialUtil.WOODEN_SLABS,
+            MaterialUtil.LOGS,
+            MaterialUtil.WOOD_BLOCKS,
+            MaterialUtil.PLANKS);
+        for (final Set<Material> set : woodTypes) {
+            for (final Material mat : set) {
+                setBlock(mat, woodType);
+            }
+        }
+        for (Material mat : new Material[] {
+            Material.JUKEBOX,
+            BridgeMaterial.get("wood_double_step"),}) {
+            if (mat != null) setBlock(mat, woodType);
+        }
+        for (Material mat : MaterialUtil.STRIPPED_LOGS) {
+            BlockInit.setAs(mat, BridgeMaterial.OAK_LOG);
+        }
+        for (Material mat : MaterialUtil.STRIPPED_WOOD_BLOCKS) {
+            BlockInit.setAs(mat, BridgeMaterial.OAK_WOOD);
+        }
+    }
+
+    private static void registerBrickTypes() {
+        for (Material mat : new Material[] {
+            Material.CAULDRON,
+            Material.COBBLESTONE_STAIRS,
+            Material.COBBLESTONE,
+            Material.NETHER_BRICK_STAIRS,
+            Material.MOSSY_COBBLESTONE,
+            Material.BRICK_STAIRS,
+            Material.BRICK_STAIRS,
+            BridgeMaterial.NETHER_BRICK_FENCE,
+            BridgeMaterial.BRICK_SLAB,
+            BridgeMaterial.STONE_SLAB,
+            BridgeMaterial.NETHER_BRICKS,
+            BridgeMaterial.BRICKS,
+            BridgeMaterial.get("double_step"),}) {
+            if (mat != null) setBlock(mat, brickType);
+        }
+        BlockFlags.setBlockFlags(Material.CAULDRON, BlockFlags.SOLID_GROUND | BlockFlags.F_GROUND_HEIGHT | BlockFlags.F_MIN_HEIGHT16_5); // LEGACY
+        setBlock(BridgeMaterial.COBBLESTONE_WALL, brickType);
+    }
+
+    private static void registerShulkerBoxes() {
+        for (Material mat : MaterialUtil.SHULKER_BOXES) {
+            BlockProperties.setBlockProps(mat, new BlockProps(BlockProperties.woodPickaxe, 2f));
+            BlockFlags.setBlockFlags(mat, BlockFlags.F_SOLID | BlockFlags.F_GROUND);
         }
     }
 
