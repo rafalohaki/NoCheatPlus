@@ -1081,177 +1081,18 @@ public class BlockProperties {
 
         BlockProps props;
 
-        // Stairs.
-        final long stairFlags = BlockFlags.F_STAIRS | BlockFlags.F_GROUND | BlockFlags.F_SOLID;
-        for (final Material mat : MaterialUtil.ALL_STAIRS) {
-            BlockFlags.setFlag(mat, stairFlags);
-        }
+        registerSlabs(mcAccess, worldConfigProvider);
+        registerRedstoneComponents();
+        registerFluidBlocks(mcAccess);
+        // --- split former registerMiscSpecialBlocks() into focused helpers ---
+        registerClimbables();
+        registerGroundOverrides();
+        registerPistonOverrides();
+        registerIgnorePassables();
+        registerFenceHeights();
+        registerThinFences();
+        registerSpecialStaticFlags();
 
-        // Step (ground + full width).
-        final long stepFlags = BlockFlags.F_GROUND | BlockFlags.F_XZ100;
-        for (final Material mat : new Material[]{BridgeMaterial.STONE_SLAB,}) {
-            BlockFlags.setFlag(mat, stepFlags);
-        }
-        for (final Material mat : MaterialUtil.SLABS) {
-            BlockFlags.setFlag(mat, stepFlags);
-        }
-
-        // Rails
-        for (final Material mat : MaterialUtil.RAILS) {
-            BlockFlags.setFlag(mat, BlockFlags.F_RAILS);
-        }
-
-        // Water
-        for (final Material mat : MaterialUtil.WATER) {
-            BlockFlags.setFlag(mat, BlockFlags.F_LIQUID | BlockFlags.F_HEIGHT_8SIM_DEC | BlockFlags.F_WATER | BlockFlags.F_FALLDIST_ZERO);
-        }
-
-        // Lava
-        for (final Material mat : MaterialUtil.LAVA) {
-            BlockFlags.setFlag(mat, BlockFlags.F_LIQUID | BlockFlags.F_LAVA | BlockFlags.F_FALLDIST_HALF | BlockFlags.F_HEIGHT_8SIM_DEC); // Minecraft 1.13 will remove this flag.
-        }
-
-        // Climbable
-        for (final Material mat : new Material[]{Material.VINE, Material.LADDER,}) {
-            BlockFlags.setFlag(mat, BlockFlags.F_CLIMBABLE);
-        }
-
-        // Workarounds.
-        // Ground (can stand on).
-        for (final Material mat : new Material[]{
-            Material.COCOA, 
-            Material.SNOW, 
-            Material.LADDER,
-            Material.BREWING_STAND,
-            BridgeMaterial.get("DIODE_BLOCK_OFF"), 
-            BridgeMaterial.get("DIODE_BLOCK_ON"),
-            BridgeMaterial.getBlock("comparator"),
-            BridgeMaterial.getBlock("daylight_detector"),
-            BridgeMaterial.LILY_PAD, 
-            BridgeMaterial.PISTON_HEAD,
-            BridgeMaterial.STONE_SLAB,
-            BridgeMaterial.REPEATER}) {
-            if (mat != null) BlockFlags.setFlag(mat, BlockFlags.F_GROUND);
-        }
-        
-        // Moving piston
-        setBlockProps(BridgeMaterial.MOVING_PISTON, indestructibleType); // NOTE: really?
-        BlockFlags.setFlag(BridgeMaterial.MOVING_PISTON, BlockFlags.F_IGN_PASSABLE | BlockFlags.F_GROUND | BlockFlags.F_GROUND_HEIGHT | BlockFlags.FULL_BOUNDS);
-
-        // Full block height.
-        // Server reports the visible shape 0.9375, client moves on full block height.
-        for (final Material mat : new Material[]{BridgeMaterial.FARMLAND}) {
-            BlockFlags.setFlag(mat, BlockFlags.F_HEIGHT100);
-        }
-
-        // Not ground, despite the game claiming they are solid. Remove flag.
-        BlockFlags.maskFlag(BridgeMaterial.SIGN, ~(BlockFlags.F_GROUND | BlockFlags.F_SOLID));
-
-        // Ignore for passable.
-        for (final Material mat : new Material[] {
-            // More strictly needed.
-            // Plates are passable? ...
-            // ^ They are not, this is part of a workaround
-            //@See: https://github.com/Updated-NoCheatPlus/NoCheatPlus/commit/e377abe3427a6f971185fdb9ba2024c1f7803141
-            BridgeMaterial.STONE_PRESSURE_PLATE, 
-            BridgeMaterial.WOODEN_PRESSURE_PLATE,
-            BridgeMaterial.SIGN,
-            BridgeMaterial.get("DIODE_BLOCK_ON"), 
-            BridgeMaterial.get("DIODE_BLOCK_OFF"),}) {
-            // Compatibility.
-            //Material.LADDER, 
-            // Workarounds.
-            //				Material.COCOA,
-            if (mat != null) BlockFlags.setFlag(mat, BlockFlags.F_IGN_PASSABLE);
-        }
-
-        // 1.5 high blocks (fences, walls, gates)
-        final long flags150 = BlockFlags.F_HEIGHT150 | BlockFlags.F_VARIABLE | BlockFlags.F_THICK_FENCE;
-        for (final Material mat : new Material[]{BridgeMaterial.NETHER_BRICK_FENCE, BridgeMaterial.COBBLESTONE_WALL,}) {
-            BlockFlags.setFlag(mat, flags150);
-        }
-        for (final Material mat : MaterialUtil.WOODEN_FENCES) {
-            BlockFlags.setFlag(mat, flags150);
-        }
-        for (final Material mat : MaterialUtil.WOODEN_FENCE_GATES) {
-            BlockFlags.setFlag(mat, flags150);
-        }
-
-        // BlockFlags.F_PASSABLE_X4, BlockFlags.F_VARIABLE
-        // NOTE: PASSABLE_X4 is abused for other checks, need another one?
-        for (final Material mat : MaterialUtil.WOODEN_FENCE_GATES) {
-            BlockFlags.setFlag(mat, BlockFlags.F_PASSABLE_X4 | BlockFlags.F_VARIABLE);
-        }
-        for (final Material mat : MaterialUtil.WOODEN_TRAP_DOORS) {
-            BlockFlags.setFlag(mat, BlockFlags.F_VARIABLE);
-        }
-        
-        // Blocks that vary with redstone or interaction.
-        for (Material material : Material.values()) {
-            if (material.isBlock()) {
-                
-                final String name = material.name().toLowerCase();
-                if (name.endsWith("_door") 
-                    || name.endsWith("_trapdoor")
-                    || name.endsWith("fence_gate")) {
-
-                    BlockFlags.setFlag(material, BlockFlags.F_VARIABLE_REDSTONE);
-                    if (!name.contains("iron")) {
-                        BlockFlags.setFlag(material, BlockFlags.F_VARIABLE_USE);
-                    }
-                }
-                if (name.equals("iron_door_block")) {
-                    BlockFlags.setFlag(material, BlockFlags.F_VARIABLE_REDSTONE);
-                }
-            }
-        }
-
-        // BlockFlags.F_FACING_LOW3D2_NSWE
-        for (final Material mat : new Material[]{Material.LADDER}) {
-            BlockFlags.setFlag(mat, BlockFlags.F_FACING_LOW3D2_NSWE);
-        }
-
-        // BlockFlags.F_FACING_LOW2_SNEW
-        for (final Material mat : MaterialUtil.WOODEN_TRAP_DOORS) {
-            BlockFlags.setFlag(mat, BlockFlags.F_ATTACHED_LOW2_SNEW);
-        }
-
-        // Thin fences (iron fence, glass panes).
-        final long paneFlags = BlockFlags.F_THIN_FENCE | BlockFlags.F_VARIABLE;
-        for (final Material mat : new Material[]{BridgeMaterial.IRON_BARS,}) {
-            BlockFlags.setFlag(mat, paneFlags);
-        }
-        for (final Material mat : MaterialUtil.GLASS_PANES) {
-            BlockFlags.setFlag(mat, paneFlags);
-        }
-
-        // Flexible ground (height):
-        // 1.10.2 +- client uses the reported height.
-        for (final Material mat : new Material[]{BridgeMaterial.FARMLAND,}) {
-            BlockFlags.setFlag(mat, BlockFlags.F_GROUND_HEIGHT);
-        }
-
-        // End portal frame
-        BlockFlags.setFlag(BridgeMaterial.END_PORTAL_FRAME, BlockFlags.SOLID_GROUND);
-
-        // Cobweb
-        BlockFlags.setFlag(BridgeMaterial.COBWEB, BlockFlags.F_COBWEB | BlockFlags.FULL_BOUNDS | BlockFlags.F_IGN_PASSABLE);
-
-        // Soulsand
-        BlockFlags.setFlag(Material.SOUL_SAND, BlockFlags.F_SOULSAND | BlockFlags.SOLID_GROUND);
-
-        // Ice
-        BlockFlags.setFlag(Material.ICE, BlockFlags.F_ICE);
-
-        // Cake
-        BlockFlags.setFlag(BridgeMaterial.CAKE, BlockFlags.F_GROUND);
-        
-        // Walls (cobblestone)
-        BlockFlags.setFlag(BridgeMaterial.COBBLESTONE_WALL, BlockFlags.F_HEIGHT150);
-
-
-
-        
         //////////////////////////////////////////////////////////////////
         // Set block break properties.                                  //
         //////////////////////////////////////////////////////////////////
@@ -4787,4 +4628,164 @@ public class BlockProperties {
     public static int getMinWorldY() {
         return minWorldY;
     }
+    private static void registerSlabs(MCAccess access, WorldConfigProvider<?> config) {
+        final long stairFlags = BlockFlags.F_STAIRS | BlockFlags.F_GROUND | BlockFlags.F_SOLID;
+        for (final Material mat : MaterialUtil.ALL_STAIRS) {
+            BlockFlags.setFlag(mat, stairFlags);
+        }
+        final long stepFlags = BlockFlags.F_GROUND | BlockFlags.F_XZ100;
+        for (final Material mat : new Material[]{BridgeMaterial.STONE_SLAB}) {
+            BlockFlags.setFlag(mat, stepFlags);
+        }
+        for (final Material mat : MaterialUtil.SLABS) {
+            BlockFlags.setFlag(mat, stepFlags);
+        }
+    }
+
+    private static void registerFluidBlocks(MCAccess access) {
+        for (final Material mat : MaterialUtil.WATER) {
+            BlockFlags.setFlag(mat, BlockFlags.F_LIQUID | BlockFlags.F_HEIGHT_8SIM_DEC | BlockFlags.F_WATER | BlockFlags.F_FALLDIST_ZERO);
+        }
+        for (final Material mat : MaterialUtil.LAVA) {
+            BlockFlags.setFlag(mat, BlockFlags.F_LIQUID | BlockFlags.F_LAVA | BlockFlags.F_FALLDIST_HALF | BlockFlags.F_HEIGHT_8SIM_DEC);
+        }
+    }
+
+    private static void registerRedstoneComponents() {
+        for (final Material mat : MaterialUtil.RAILS) {
+            BlockFlags.setFlag(mat, BlockFlags.F_RAILS);
+        }
+        for (Material material : Material.values()) {
+            if (material.isBlock()) {
+                final String name = material.name().toLowerCase();
+                if (name.endsWith("_door") || name.endsWith("_trapdoor") || name.endsWith("fence_gate")) {
+                    BlockFlags.setFlag(material, BlockFlags.F_VARIABLE_REDSTONE);
+                    if (!name.contains("iron")) {
+                        BlockFlags.setFlag(material, BlockFlags.F_VARIABLE_USE);
+                    }
+                }
+                if (name.equals("iron_door_block")) {
+                    BlockFlags.setFlag(material, BlockFlags.F_VARIABLE_REDSTONE);
+                }
+            }
+        }
+        for (final Material mat : new Material[]{Material.LADDER}) {
+            BlockFlags.setFlag(mat, BlockFlags.F_FACING_LOW3D2_NSWE);
+        }
+        for (final Material mat : MaterialUtil.WOODEN_TRAP_DOORS) {
+            BlockFlags.setFlag(mat, BlockFlags.F_ATTACHED_LOW2_SNEW);
+        }
+        final long paneFlags = BlockFlags.F_THIN_FENCE | BlockFlags.F_VARIABLE;
+        for (final Material mat : new Material[]{BridgeMaterial.IRON_BARS}) {
+            BlockFlags.setFlag(mat, paneFlags);
+        }
+        for (final Material mat : MaterialUtil.GLASS_PANES) {
+            BlockFlags.setFlag(mat, paneFlags);
+        }
+    }
+
+
+    /* =====================================================================
+     *  Extracted helpers from the former registerMiscSpecialBlocks()
+     * ===================================================================*/
+
+    private static void registerClimbables() {
+        for (final Material mat : new Material[]{Material.VINE, Material.LADDER}) {
+            BlockFlags.setFlag(mat, BlockFlags.F_CLIMBABLE);
+        }
+    }
+
+    private static void registerGroundOverrides() {
+        final Material[] mats = {
+            Material.COCOA, Material.SNOW, Material.LADDER, Material.BREWING_STAND,
+            BridgeMaterial.get("DIODE_BLOCK_OFF"), BridgeMaterial.get("DIODE_BLOCK_ON"),
+            BridgeMaterial.getBlock("comparator"), BridgeMaterial.getBlock("daylight_detector"),
+            BridgeMaterial.LILY_PAD, BridgeMaterial.PISTON_HEAD,
+            BridgeMaterial.STONE_SLAB, BridgeMaterial.REPEATER
+        };
+        for (final Material mat : mats) {
+            if (mat != null) BlockFlags.setFlag(mat, BlockFlags.F_GROUND);
+        }
+    }
+
+    private static void registerPistonOverrides() {
+        // Moving piston: indestructible + special bounds
+        setBlockProps(BridgeMaterial.MOVING_PISTON, indestructibleType);
+        BlockFlags.setFlag(BridgeMaterial.MOVING_PISTON,
+            BlockFlags.F_IGN_PASSABLE | BlockFlags.F_GROUND | BlockFlags.F_GROUND_HEIGHT | BlockFlags.FULL_BOUNDS);
+
+        // Farmland reports 0.9375 height server-side but should be treated full
+        BlockFlags.setFlag(BridgeMaterial.FARMLAND, BlockFlags.F_HEIGHT100);
+
+        // Signs are erroneously marked solid by the server – correct that
+        BlockFlags.maskFlag(BridgeMaterial.SIGN, ~(BlockFlags.F_GROUND | BlockFlags.F_SOLID));
+    }
+
+    private static void registerIgnorePassables() {
+        final Material[] mats = {
+            BridgeMaterial.STONE_PRESSURE_PLATE,
+            BridgeMaterial.WOODEN_PRESSURE_PLATE,
+            BridgeMaterial.SIGN,
+            BridgeMaterial.get("DIODE_BLOCK_ON"),
+            BridgeMaterial.get("DIODE_BLOCK_OFF")
+        };
+        for (final Material mat : mats) {
+            if (mat != null) BlockFlags.setFlag(mat, BlockFlags.F_IGN_PASSABLE);
+        }
+    }
+
+    private static void registerFenceHeights() {
+        final long flags150 = BlockFlags.F_HEIGHT150 | BlockFlags.F_VARIABLE | BlockFlags.F_THICK_FENCE;
+
+        // 1.5-high thick fences & walls
+        for (final Material mat : new Material[]{BridgeMaterial.NETHER_BRICK_FENCE, BridgeMaterial.COBBLESTONE_WALL}) {
+            BlockFlags.setFlag(mat, flags150);
+        }
+        for (final Material mat : MaterialUtil.WOODEN_FENCES) {
+            BlockFlags.setFlag(mat, flags150);
+        }
+
+        // Fence gates require additional passable flag
+        for (final Material mat : MaterialUtil.WOODEN_FENCE_GATES) {
+            BlockFlags.setFlag(mat, flags150 | BlockFlags.F_PASSABLE_X4);
+        }
+
+        // Trap doors vary by state
+        for (final Material mat : MaterialUtil.WOODEN_TRAP_DOORS) {
+            BlockFlags.setFlag(mat, BlockFlags.F_VARIABLE);
+        }
+    }
+
+    private static void registerThinFences() {
+        final long paneFlags = BlockFlags.F_THIN_FENCE | BlockFlags.F_VARIABLE;
+        BlockFlags.setFlag(BridgeMaterial.IRON_BARS, paneFlags);
+        for (final Material mat : MaterialUtil.GLASS_PANES) {
+            BlockFlags.setFlag(mat, paneFlags);
+        }
+    }
+
+    private static void registerSpecialStaticFlags() {
+        // Flexible ground height for farmland (server uses bounding-box height)
+        BlockFlags.setFlag(BridgeMaterial.FARMLAND, BlockFlags.F_GROUND_HEIGHT);
+
+        // End-portal frames are fully solid ground
+        BlockFlags.setFlag(BridgeMaterial.END_PORTAL_FRAME, BlockFlags.SOLID_GROUND);
+
+        // Cobweb slows & is pass-through but solid for ray trace
+        BlockFlags.setFlag(BridgeMaterial.COBWEB,
+            BlockFlags.F_COBWEB | BlockFlags.FULL_BOUNDS | BlockFlags.F_IGN_PASSABLE);
+
+        // Soulsand slow walk
+        BlockFlags.setFlag(Material.SOUL_SAND, BlockFlags.F_SOULSAND | BlockFlags.SOLID_GROUND);
+
+        // Ice slipperiness
+        BlockFlags.setFlag(Material.ICE, BlockFlags.F_ICE);
+
+        // Cake (ground but not solid)
+        BlockFlags.setFlag(BridgeMaterial.CAKE, BlockFlags.F_GROUND);
+
+        // Cobblestone wall: keep legacy height flag for 1.5-high bounding box
+        BlockFlags.setFlag(BridgeMaterial.COBBLESTONE_WALL, BlockFlags.F_HEIGHT150);
+    }
+
 }
