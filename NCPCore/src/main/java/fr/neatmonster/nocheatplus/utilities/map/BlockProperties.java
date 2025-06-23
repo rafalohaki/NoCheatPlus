@@ -3616,8 +3616,12 @@ public class BlockProperties {
     private static final class BoundingBox {
         final double minX, minY, minZ, maxX, maxY, maxZ;
         BoundingBox(double minX, double minY, double minZ, double maxX, double maxY, double maxZ) {
-            this.minX = minX; this.minY = minY; this.minZ = minZ;
-            this.maxX = maxX; this.maxY = maxY; this.maxZ = maxZ;
+            this.minX = minX;
+            this.minY = minY;
+            this.minZ = minZ;
+            this.maxX = maxX;
+            this.maxY = maxY;
+            this.maxZ = maxZ;
         }
 
         /**
@@ -3680,14 +3684,17 @@ public class BlockProperties {
             final int data = (node.getData(access, x, y, z) & 0xF) % 8;
             bmaxY = 0.125 * data;
         } else if ((flags & BlockFlags.F_HEIGHT150) != 0) {
-            bminY = 0; bmaxY = 1.5;
+            bminY = 0;
+            bmaxY = 1.5;
         } else if ((flags & BlockFlags.F_HEIGHT100) != 0) {
-            bminY = 0; bmaxY = 1.0;
+            bminY = 0;
+            bmaxY = 1.0;
         } else if ((flags & BlockFlags.F_HEIGHT_8SIM_DEC) != 0) {
             bminY = 0;
             bmaxY = getLiquidHeightFromFlags(flags, node, nodeAbove, access, x, y, z, b);
         } else if ((flags & BlockFlags.F_HEIGHT8_1) != 0) {
-            bminY = 0; bmaxY = 0.125;
+            bminY = 0;
+            bmaxY = 0.125;
         } else {
             bminY = b[1];
             bmaxY = b[4];
