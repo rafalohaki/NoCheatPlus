@@ -1737,41 +1737,55 @@ public class SurvivalFly extends Check {
             final boolean InAirPhase, final boolean ChangedYDir, final PlayerMoveData thisMove,
             final PlayerMoveData lastMove, final MovingData data, final MovingConfig cc, double vDistanceAboveLimit) {
 
-        if (InAirPhase && ChangedYDir) {
-            if (yDistance > 0.0) {
-                if (lastMove.touchedGround || lastMove.to.extraPropertiesValid && lastMove.to.resetCond) {
-                    tags.add("ychinc");
+        if (!(InAirPhase && ChangedYDir)) {
+            return vDistanceAboveLimit;
+        }
+
+        if (yDistance > 0.0) {
+            return handleAscendingDirectionChange(yDistance, lastMove, data, vDistanceAboveLimit);
+        }
+
+        return handleDescendingDirectionChange(player, from, yDistance, thisMove, lastMove, data, cc,
+                vDistanceAboveLimit);
+    }
+
+    private double handleAscendingDirectionChange(final double yDistance, final PlayerMoveData lastMove,
+            final MovingData data, double vDistanceAboveLimit) {
+        if (lastMove.touchedGround || lastMove.to.extraPropertiesValid && lastMove.to.resetCond) {
+            tags.add("ychinc");
+        }
+        else if (data.bunnyhopDelay < 9 && !((lastMove.touchedGround || lastMove.from.onGroundOrResetCond)
+                && lastMove.yDistance == 0D) && data.getOrUseVerticalVelocity(yDistance) == null) {
+            vDistanceAboveLimit = Math.max(vDistanceAboveLimit, Math.abs(yDistance));
+            tags.add("airjump");
+        }
+        else {
+            tags.add("ychincair");
+        }
+        return vDistanceAboveLimit;
+    }
+
+    private double handleDescendingDirectionChange(final Player player, final PlayerLocation from,
+            final double yDistance, final PlayerMoveData thisMove, final PlayerMoveData lastMove,
+            final MovingData data, final MovingConfig cc, double vDistanceAboveLimit) {
+        tags.add("ychdec");
+        if (!data.sfLowJump && !data.sfNoLowJump && lastMove.toIsValid && lastMove.yDistance > 0.0
+                && !data.isVelocityJumpPhase()) {
+            final double setBackYDistance = from.getY() - data.getSetBackY();
+            final double minJumpHeight = data.liftOffEnvelope.getMinJumpHeight(data.jumpAmplifier);
+            if (setBackYDistance > 0.0 && setBackYDistance < minJumpHeight) {
+                if (thisMove.headObstructed
+                        || yDistance <= 0.0 && lastMove.headObstructed && lastMove.yDistance >= 0.0
+                        || Bridge1_17.hasLeatherBootsOn(player)
+                        && data.liftOffEnvelope == LiftOffEnvelope.POWDER_SNOW && lastMove.from.inPowderSnow
+                        && lastMove.yDistance <= Magic.GRAVITY_MAX * 2.36 && lastMove.yDistance > 0.0
+                        && thisMove.yDistance < 0.0) {
+                    tags.add("lowjump_skip");
                 }
-                else if (data.bunnyhopDelay < 9 && !((lastMove.touchedGround || lastMove.from.onGroundOrResetCond)
-                        && lastMove.yDistance == 0D) && data.getOrUseVerticalVelocity(yDistance) == null) {
-                    vDistanceAboveLimit = Math.max(vDistanceAboveLimit, Math.abs(yDistance));
-                    tags.add("airjump");
-                }
-                else {
-                    tags.add("ychincair");
-                }
-            }
-            else {
-                tags.add("ychdec");
-                if (!data.sfLowJump && !data.sfNoLowJump && lastMove.toIsValid && lastMove.yDistance > 0.0
-                        && !data.isVelocityJumpPhase()) {
-                    final double setBackYDistance = from.getY() - data.getSetBackY();
-                    final double minJumpHeight = data.liftOffEnvelope.getMinJumpHeight(data.jumpAmplifier);
-                    if (setBackYDistance > 0.0 && setBackYDistance < minJumpHeight) {
-                        if (thisMove.headObstructed
-                                || yDistance <= 0.0 && lastMove.headObstructed && lastMove.yDistance >= 0.0
-                                || Bridge1_17.hasLeatherBootsOn(player)
-                                && data.liftOffEnvelope == LiftOffEnvelope.POWDER_SNOW && lastMove.from.inPowderSnow
-                                && lastMove.yDistance <= Magic.GRAVITY_MAX * 2.36 && lastMove.yDistance > 0.0
-                                && thisMove.yDistance < 0.0) {
-                            tags.add("lowjump_skip");
-                        }
-                        else if (data.getOrUseVerticalVelocity(yDistance) == null) {
-                            vDistanceAboveLimit = Math.max(vDistanceAboveLimit, Math.abs(minJumpHeight - setBackYDistance));
-                            data.sfLowJump = true;
-                            Improbable.feed(player, (float) cc.yOnGround, System.currentTimeMillis());
-                        }
-                    }
+                else if (data.getOrUseVerticalVelocity(yDistance) == null) {
+                    vDistanceAboveLimit = Math.max(vDistanceAboveLimit, Math.abs(minJumpHeight - setBackYDistance));
+                    data.sfLowJump = true;
+                    Improbable.feed(player, (float) cc.yOnGround, System.currentTimeMillis());
                 }
             }
         }
