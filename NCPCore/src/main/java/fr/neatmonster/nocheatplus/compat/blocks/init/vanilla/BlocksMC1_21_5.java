@@ -21,6 +21,7 @@ import fr.neatmonster.nocheatplus.config.ConfigFile;
 import fr.neatmonster.nocheatplus.config.ConfigManager;
 import fr.neatmonster.nocheatplus.config.WorldConfigProvider;
 import fr.neatmonster.nocheatplus.logging.StaticLog;
+import fr.neatmonster.nocheatplus.utilities.map.BlockFlags;
 
 
 /**
@@ -42,7 +43,10 @@ public class BlocksMC1_21_5 implements BlockPropertiesSetup {
         BlockInit.setInstantPassable("SHORT_DRY_GRASS");
         BlockInit.setInstantPassable("TALL_DRY_GRASS");
         BlockInit.setInstantPassable("WILDFLOWERS");
-        
+
+        // Test blocks
+        BlockFlags.setBlockFlags("TEST_BLOCK", BlockFlags.SOLID_GROUND);
+        BlockFlags.setBlockFlags("TEST_INSTANCE_BLOCK", BlockFlags.SOLID_GROUND);
 
         ConfigFile config = ConfigManager.getConfigFile();
         if (config.getBoolean(ConfPaths.BLOCKBREAK_DEBUG, config.getBoolean(ConfPaths.CHECKS_DEBUG, false)))
