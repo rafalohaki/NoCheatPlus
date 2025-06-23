@@ -62,9 +62,9 @@ Compiling NoCheatPlus
 * For a build with full compatibility modules, You can compile with this goal: `mvn clean package -P nonfree_build -P all`.
 * "Non free" jar file dependencies needed for the dedicated compat modules, which your local maven repository might be missing, can be installed manually.
 Example for Eclipse with embedded maven:
-Add a new maven build run configuration, name it appropriately, e.g. ```Install CB 1.7.5```.
-Set goals to: ```install:install-file -Dfile=<PATH TO JAR> -DgroupId=org.bukkit -DartifactId=craftbukkit -Dversion=1.7.5-R0.1-SNAPSHOT -Dpackaging=jar```
-On Windows the <PATH TO JAR> might look like:  ```X:\...\craftbukkit\3042\craftbukkit-1.7.5-R0.1-20140408.020329-16.jar```
+Add a new maven build run configuration, name it appropriately, e.g. ```Install CB 1.8.8```.
+Set goals to: ```install:install-file -Dfile=<PATH TO JAR> -DgroupId=org.bukkit -DartifactId=craftbukkit -Dversion=1.8.8-R0.1-SNAPSHOT -Dpackaging=jar```
+On Windows the <PATH TO JAR> might look like:  ```X:\...\craftbukkit\1.8.8\craftbukkit-1.8.8-R0.1-SNAPSHOT.jar```
 To let it run you might have to set the base directory, e.g. to ```${workspace_loc}```, it does not seem to have significance.
 Do set the correct version alongside the file name. On newer version of maven, you might do with much simplified goals, because the pom files inside the jars are parsed.
   * **The latest versions of BuildTools.jar will automatically install the created server jars into the local .m2 repository (e.g. on linux) - provided configuration paths are standard. Thus you don't need to do this manually anymore, if you then build NCP with the specific profile, if you have run BuildTools.jar to generate the server jars on that machine/environment.**
@@ -87,5 +87,3 @@ Profiles for choice of "non free" compatibility modules to build:
 | `-P spigot1_10_r1` | Spigot 1.10 R1 (MC 1.10-1.10.2). |
 | `-P spigot1_9_r2` | Spigot 1.9 R2 (MC 1.9.4). |
 | `-P spigot1_8_r3` | Spigot 1.8 R3 (MC 1.8.4-1.8.8). |
-| `-P spigot1_7_r4` | Spigot 1.7 R4 (MC 1.7.10). |
-| `-P cblegacy` | The pre-DMCA CraftBukkit builds. |

@@ -46,14 +46,7 @@ public class AttributeAccessFactory {
                 "fr.neatmonster.nocheatplus.compat.spigotcb1_9_R1.AttributeAccess",
                 "fr.neatmonster.nocheatplus.compat.spigotcb1_8_R3.AttributeAccess",
                 "fr.neatmonster.nocheatplus.compat.spigotcb1_8_R2.AttributeAccess",
-                "fr.neatmonster.nocheatplus.compat.spigotcb1_8_R1.AttributeAccess",
-                "fr.neatmonster.nocheatplus.compat.cb3100.AttributeAccess",
-                "fr.neatmonster.nocheatplus.compat.cb3043.AttributeAccess",
-                "fr.neatmonster.nocheatplus.compat.cb3026.AttributeAccess",
-                "fr.neatmonster.nocheatplus.compat.cb2922.AttributeAccess",
-                "fr.neatmonster.nocheatplus.compat.cb2882.AttributeAccess",
-                "fr.neatmonster.nocheatplus.compat.cb2808.AttributeAccess",
-                "fr.neatmonster.nocheatplus.compat.cb2794.AttributeAccess"
+                "fr.neatmonster.nocheatplus.compat.spigotcb1_8_R1.AttributeAccess"
         }, fallBackDedicated, new String[] {
                 "fr.neatmonster.nocheatplus.compat.cbreflect.reflect.ReflectAttributeAccess" // Legacy
         }, fallBackReflect, IAttributeAccess.class, config, false);
