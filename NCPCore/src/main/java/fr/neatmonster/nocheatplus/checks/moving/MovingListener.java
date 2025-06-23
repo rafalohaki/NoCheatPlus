@@ -462,74 +462,10 @@ public class MovingListener extends CheckListener implements TickListener, IRemo
         ////////////////////////////////////////////////////
         // Early return checks (no full processing).      //
         ////////////////////////////////////////////////////
-        // Check illegal moves here anyway (!).
-        // Check if vehicle move logs correctly (fake).
-        final boolean earlyReturn;
-        final String token;
-        if (player.isInsideVehicle()) {
-            // No full processing for players in vehicles.
-            newTo = vehicleChecks.onPlayerMoveVehicle(player, from, to, data, pData);
-            earlyReturn = true;
-            token = "vehicle";
-        }
-        else if (data.lastVehicleType == EntityType.MINECART && specialMinecart
-            // The setback comes from VehicleChecks#onPlayerVehicleLeave
-            // Don't be confuse with data.getSetBack(from) here, the location "from" is used when the stored setback is null 
-            && to.distance(data.getSetBack(from)) < 3) {
-            earlyReturn = true;
-            token = "minecart-total";
-            data.lastVehicleType = null;
-            // Some changes were made in 1.19.4 make PlayerMoveEvent no longer fire while on Minecart
-            // So when the player leave the vehicle will make PlayerMoveEvent 
-            // work normal again and update the position so result in the location player start to ride minecart and location player left it
-        }
-        else if (data.vehicleLeave && to.distance(from) > 3) {
-        	earlyReturn = true;
-            token = "vehicle-leave-sb";
-            // Set-back for sure
-            newTo = data.getSetBack(from);
-            data.vehicleLeave = false;
-        }
-        else if (player.isDead()) {
-            // Ignore dead players.
-            data.sfHoverTicks = -1;
-            earlyReturn = true;
-            token = "dead";
-        }
-        else if (player.isSleeping()) {
-            // Ignore sleeping players.
-            data.sfHoverTicks = -1;
-            earlyReturn = true;
-            token = "sleeping";
-        }
-        else if (!from.getWorld().equals(to.getWorld())) {
-            // Keep hover ticks.
-            // Ignore changing worlds.
-            earlyReturn = true;
-            token = "worldchange";
-        }
-        else if (data.hasTeleported()) {
-            earlyReturn = handleTeleportedOnMove(player, event, data, cc, pData);
-            token = "awaitsetback";
-        }
-        else if (TrigUtil.isSamePos(from, to) && !data.lastMoveNoMove
-                // && ServerVersion.compareMinecraftVersion("1.17") >= 0
-                ) { 
-            //if (data.sfHoverTicks > 0) data.sfHoverTicks += hoverTicksStep;
-            earlyReturn = data.lastMoveNoMove = true;
-            token = "duplicate";
-            // Ignore 1.17+ duplicate position packets.
-            // Context: Mojang attempted to fix a bucket placement desync issue by re-sending the previous position on right clicking...
-            // On the server-side, this translates in a duplicate move which we need to ignore (i.e.: players can have 0 distance in air, MorePackets will trigger due to the extra packet if the button is pressed for long enough etc...)
-            // You would think that this would AT LEAST fix the issue, but it doesn't. However it surely does complicate things on our side.
-            // Thanks Mojang as always.
-            // Micro moves can be detected as duplicate !
-            // NOTE: on ground status does not seem to change
-        }
-        else {
-            earlyReturn = false;
-            token = null;
-        }
+        EarlyReturnDecision er = determineEarlyReturn(player, from, to, event, data, cc, pData);
+        final boolean earlyReturn = er.earlyReturn;
+        final String token = er.token;
+        newTo = er.newTo;
 
         // Reset duplicate move flag.
         if (!TrigUtil.isSamePos(from, to)) {
@@ -567,53 +503,7 @@ public class MovingListener extends CheckListener implements TickListener, IRemo
 
 
 
-        //////////////////////////////////////////////////////////////
-        // Fire one or two moves here (Split move handling).        //
-        //////////////////////////////////////////////////////////////
-        // (newTo should be null here)
-        final PlayerMoveInfo moveInfo = aux.usePlayerMoveInfo();
-        final Location loc = player.getLocation(moveInfo.useLoc);
-        final PlayerMoveData lastMove = data.playerMoves.getFirstPastMove();
-        if (cc.loadChunksOnMove) MovingUtil.ensureChunksLoaded(player, from, to, lastMove, "move", cc, pData);
-        
-        // Ordinary: Fire move from -> to
-        // This was reported and supposedely fixed by the Spigot team, however asofold decided to keep this active anyway. No reason is given from the commit.
-        // @See: https://github.com/NoCheatPlus/NoCheatPlus/commit/7d2c1ce1f8b40fac554cdef8040576d9f88503ef
-        // @See: https://hub.spigotmc.org/jira/browse/SPIGOT-1646
-        if (
-                // Handling split moves has been disabled.
-                !cc.splitMoves ||
-                // The usual case: no micro move happened.
-                TrigUtil.isSamePos(from, loc)
-                // Special case or bug? Which version of MC/spigot?
-                || lastMove.valid && TrigUtil.isSamePos(loc, lastMove.from.getX(), lastMove.from.getY(), lastMove.from.getZ())
-                // On pistons pulling the player back: -1.15 yDistance for split move 1 (untracked position > 0.5 yDistance!).
-                // (Could also be other envelopes (0.9 velocity upwards), too tedious to research.)
-            ) {
-            // 0: Fire move from -> to
-            moveInfo.set(player, from, to, cc.yOnGround);
-            checkPlayerMove(player, from, to, 0, moveInfo, debug, data, cc, pData, event);
-        }
-        else {
-            // (Special case: Location has not been updated last moving event.)
-            // Split into two moves.
-            // 1. Process from -> loc.
-            if (debug) debug(player, "Split move 1 (from -> loc):");
-            moveInfo.set(player, from, loc, cc.yOnGround);
-            if (!checkPlayerMove(player, from, loc, 1, moveInfo, debug, data, cc, pData, event) && processingEvents.containsKey(player.getName())) {
-
-                // Between -> set data accordingly (compare: onPlayerMoveMonitor).
-                onMoveMonitorNotCancelled(player, from, loc, System.currentTimeMillis(), TickTask.getTick(), pData.getGenericInstance(CombinedData.class), data, cc, pData);
-                data.joinOrRespawn = false;
-                // 2. Process loc -> to.
-                if (debug) debug(player, "Split move 2 (loc -> to):");
-                moveInfo.set(player, loc, to, cc.yOnGround);
-                checkPlayerMove(player, loc, to, 2, moveInfo, debug, data, cc, pData, event);
-            }
-        }
-        // Cleanup.
-        data.joinOrRespawn = false;
-        aux.returnPlayerMoveInfo(moveInfo);
+        handleSplitMoves(player, from, to, event, debug, data, cc, pData);
     }
 
 
@@ -627,7 +517,7 @@ public class MovingListener extends CheckListener implements TickListener, IRemo
      * 
      * @return
      */
-    private boolean handleTeleportedOnMove(final Player player, final PlayerMoveEvent event, final MovingData data, 
+    private boolean handleTeleportedOnMove(final Player player, final PlayerMoveEvent event, final MovingData data,
                                            final MovingConfig cc, final IPlayerData pData) {
 
         // This could also happen with a packet based set back such as with cancelling move events.
@@ -654,6 +544,94 @@ public class MovingListener extends CheckListener implements TickListener, IRemo
             // More to do?
             return false;
         }
+    }
+
+    private static record EarlyReturnDecision(boolean earlyReturn, Location newTo, String token) {}
+
+    private EarlyReturnDecision determineEarlyReturn(final Player player, final Location from, final Location to,
+                                                     final PlayerMoveEvent event, final MovingData data,
+                                                     final MovingConfig cc, final IPlayerData pData) {
+
+        Location newTo = null;
+        final String token;
+        final boolean earlyReturn;
+        if (player.isInsideVehicle()) {
+            newTo = vehicleChecks.onPlayerMoveVehicle(player, from, to, data, pData);
+            earlyReturn = true;
+            token = "vehicle";
+        }
+        else if (data.lastVehicleType == EntityType.MINECART && specialMinecart
+                && to.distance(data.getSetBack(from)) < 3) {
+            earlyReturn = true;
+            token = "minecart-total";
+            data.lastVehicleType = null;
+        }
+        else if (data.vehicleLeave && to.distance(from) > 3) {
+            earlyReturn = true;
+            token = "vehicle-leave-sb";
+            newTo = data.getSetBack(from);
+            data.vehicleLeave = false;
+        }
+        else if (player.isDead()) {
+            data.sfHoverTicks = -1;
+            earlyReturn = true;
+            token = "dead";
+        }
+        else if (player.isSleeping()) {
+            data.sfHoverTicks = -1;
+            earlyReturn = true;
+            token = "sleeping";
+        }
+        else if (!from.getWorld().equals(to.getWorld())) {
+            earlyReturn = true;
+            token = "worldchange";
+        }
+        else if (data.hasTeleported()) {
+            earlyReturn = handleTeleportedOnMove(player, event, data, cc, pData);
+            token = "awaitsetback";
+        }
+        else if (TrigUtil.isSamePos(from, to) && !data.lastMoveNoMove) {
+            earlyReturn = data.lastMoveNoMove = true;
+            token = "duplicate";
+        }
+        else {
+            earlyReturn = false;
+            token = null;
+        }
+        return new EarlyReturnDecision(earlyReturn, newTo, token);
+    }
+
+    private void handleSplitMoves(final Player player, final Location from, final Location to,
+                                  final PlayerMoveEvent event, final boolean debug,
+                                  final MovingData data, final MovingConfig cc, final IPlayerData pData) {
+
+        final PlayerMoveInfo moveInfo = aux.usePlayerMoveInfo();
+        final Location loc = player.getLocation(moveInfo.useLoc);
+        final PlayerMoveData lastMove = data.playerMoves.getFirstPastMove();
+        if (cc.loadChunksOnMove) {
+            MovingUtil.ensureChunksLoaded(player, from, to, lastMove, "move", cc, pData);
+        }
+
+        if (!cc.splitMoves || TrigUtil.isSamePos(from, loc)
+                || lastMove.valid && TrigUtil.isSamePos(loc, lastMove.from.getX(), lastMove.from.getY(), lastMove.from.getZ())) {
+            moveInfo.set(player, from, to, cc.yOnGround);
+            checkPlayerMove(player, from, to, 0, moveInfo, debug, data, cc, pData, event);
+        }
+        else {
+            if (debug) debug(player, "Split move 1 (from -> loc):");
+            moveInfo.set(player, from, loc, cc.yOnGround);
+            if (!checkPlayerMove(player, from, loc, 1, moveInfo, debug, data, cc, pData, event)
+                    && processingEvents.containsKey(player.getName())) {
+                onMoveMonitorNotCancelled(player, from, loc, System.currentTimeMillis(), TickTask.getTick(),
+                        pData.getGenericInstance(CombinedData.class), data, cc, pData);
+                data.joinOrRespawn = false;
+                if (debug) debug(player, "Split move 2 (loc -> to):");
+                moveInfo.set(player, loc, to, cc.yOnGround);
+                checkPlayerMove(player, loc, to, 2, moveInfo, debug, data, cc, pData, event);
+            }
+        }
+        data.joinOrRespawn = false;
+        aux.returnPlayerMoveInfo(moveInfo);
     }
 
 
