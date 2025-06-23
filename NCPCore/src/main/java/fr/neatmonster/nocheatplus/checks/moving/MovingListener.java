@@ -2583,49 +2583,78 @@ public class MovingListener extends CheckListener implements TickListener, IRemo
         // Debug logout.
         if (pData.isDebugActive(checkType)) StaticLog.logInfo("Player " + player.getName() + " leaves at location: " + loc.toString());
 
-        if (!player.isSleeping() && !player.isDead()) {
-            // Check for missed moves.
-            // Force-load chunks [log if (!)] ?
-            // Check only from the old versions, newer versions don't seem like a problem to account for
-            if (!BlockProperties.isPassable(loc) && !Bridge1_13.hasIsSwimming()) {
+        if (player.isSleeping() || player.isDead() || BlockProperties.isPassable(loc)) {
+            useLeaveLoc.setWorld(null);
+            survivalFly.setReallySneaking(player, false);
+            noFall.onLeave(player, data, pData);
+            data.onPlayerLeave();
+            resetVehicleTasks(data);
+            return;
+        }
 
-                final PlayerMoveData lastMove = data.playerMoves.getFirstPastMove();
-                final PlayerMoveData lastMove2 = data.playerMoves.getNumberOfPastMoves() > 1 ? data.playerMoves.getSecondPastMove() : null;
-                // Won't use lastMove.toIsValid to prevent players already failed some checks in last move
-                if (lastMove.valid) {
-                    Location refLoc = lastMove.toIsValid ? new Location(loc.getWorld(), lastMove.to.getX(), lastMove.to.getY(), lastMove.to.getZ()) 
-                                                           : new Location(loc.getWorld(), lastMove.from.getX(), lastMove.from.getY(), lastMove.from.getZ());
+        checkMissedMovesOnLeave(player, pData, data, loc);
+        useLeaveLoc.setWorld(null);
+        // Adjust data.
+        survivalFly.setReallySneaking(player, false);
+        noFall.onLeave(player, data, pData);
+        // Add a method for ordinary presence-change resetting (use in join + leave).
+        data.onPlayerLeave();
+        resetVehicleTasks(data);
+    }
 
-                    // More likely lastmove location is same with left location, try to check for second lastmove  
-                    if (TrigUtil.isSamePos(loc, refLoc) && !lastMove.toIsValid && lastMove2 != null) {
-                        refLoc = lastMove2.toIsValid ? new Location(loc.getWorld(), lastMove2.to.getX(), lastMove2.to.getY(), lastMove2.to.getZ()) 
-                                                       : new Location(loc.getWorld(), lastMove2.from.getX(), lastMove2.from.getY(), lastMove2.from.getZ());
-                    }
-                    // Correct position by scan block up
-                    // what about try to phase upward not downward anymore?
-                    if (!BlockProperties.isPassable(refLoc) || refLoc.distanceSquared(loc) > 1.25) {
-                        double y = Math.ceil(loc.getY());
-                        refLoc = loc.clone();
-                        refLoc.setY(y);
-                        if (!BlockProperties.isPassable(refLoc)) refLoc = loc;
-                    }
-                    final double d = refLoc.distanceSquared(loc);
-                    if (d > 0.0) {
-                        // Consider to always set back here. Might skip on big distances.
-                        if (TrigUtil.manhattan(loc, refLoc) > 0 || BlockProperties.isPassable(refLoc)) {
+    /**
+     * Check for missed moves and correct the player position if necessary.
+     */
+    private void checkMissedMovesOnLeave(final Player player, final IPlayerData pData,
+                                         final MovingData data, final Location loc) {
 
-                            if (passable.isEnabled(player, pData)) {
-                                StaticLog.logWarning("Potential exploit: Player " + player.getName() + " leaves, having moved into a block (not tracked by moving checks): " + player.getWorld().getName() + " / " + DebugUtil.formatMove(refLoc, loc));
-                                // Actually trigger a passable violation (+tag).
-                                if (d > 1.25) {
-                                    StaticLog.logWarning("SKIP set back for " + player.getName() + ", because distance is too high (risk of false positives): " + d);
-                                }
-                                else {
-                                    StaticLog.logInfo("Set back player " + player.getName() + ": " + LocUtil.simpleFormat(refLoc));
-                                    data.prepareSetBack(refLoc);
-                                    if (!player.teleport(refLoc, BridgeMisc.TELEPORT_CAUSE_CORRECTION_OF_POSITION)) {
-                                        StaticLog.logWarning("FAILED to set back player " + player.getName());
-                                    }
+        // Check for missed moves.
+        // Force-load chunks [log if (!)] ?
+        // Check only from the old versions, newer versions don't seem like a problem to account for
+        if (!BlockProperties.isPassable(loc) && !Bridge1_13.hasIsSwimming()) {
+
+            final PlayerMoveData lastMove = data.playerMoves.getFirstPastMove();
+            final PlayerMoveData lastMove2 = data.playerMoves.getNumberOfPastMoves() > 1
+                    ? data.playerMoves.getSecondPastMove() : null;
+            // Won't use lastMove.toIsValid to prevent players already failed some checks in last move
+            if (lastMove.valid) {
+                Location refLoc = lastMove.toIsValid
+                        ? new Location(loc.getWorld(), lastMove.to.getX(), lastMove.to.getY(), lastMove.to.getZ())
+                        : new Location(loc.getWorld(), lastMove.from.getX(), lastMove.from.getY(), lastMove.from.getZ());
+
+                // More likely lastmove location is same with left location, try to check for second lastmove
+                if (TrigUtil.isSamePos(loc, refLoc) && !lastMove.toIsValid && lastMove2 != null) {
+                    refLoc = lastMove2.toIsValid
+                            ? new Location(loc.getWorld(), lastMove2.to.getX(), lastMove2.to.getY(), lastMove2.to.getZ())
+                            : new Location(loc.getWorld(), lastMove2.from.getX(), lastMove2.from.getY(), lastMove2.from.getZ());
+                }
+                // Correct position by scan block up
+                // what about try to phase upward not downward anymore?
+                if (!BlockProperties.isPassable(refLoc) || refLoc.distanceSquared(loc) > 1.25) {
+                    double y = Math.ceil(loc.getY());
+                    refLoc = loc.clone();
+                    refLoc.setY(y);
+                    if (!BlockProperties.isPassable(refLoc)) refLoc = loc;
+                }
+                final double d = refLoc.distanceSquared(loc);
+                if (d > 0.0) {
+                    // Consider to always set back here. Might skip on big distances.
+                    if (TrigUtil.manhattan(loc, refLoc) > 0 || BlockProperties.isPassable(refLoc)) {
+
+                        if (passable.isEnabled(player, pData)) {
+                            StaticLog.logWarning("Potential exploit: Player" + player.getName()
+                                    + " leaves, having moved into a block (not tracked by moving checks): "
+                                    + player.getWorld().getName() + " / " + DebugUtil.formatMove(refLoc, loc));
+                            // Actually trigger a passable violation (+tag).
+                            if (d > 1.25) {
+                                StaticLog.logWarning("SKIP set back for " + player.getName()
+                                        + ", because distance is too high (risk of false positives): " + d);
+                            } else {
+                                StaticLog.logInfo("Set back player " + player.getName() + ": "
+                                        + LocUtil.simpleFormat(refLoc));
+                                data.prepareSetBack(refLoc);
+                                if (!player.teleport(refLoc, BridgeMisc.TELEPORT_CAUSE_CORRECTION_OF_POSITION)) {
+                                    StaticLog.logWarning("FAILED to set back player " + player.getName());
                                 }
                             }
                         }
@@ -2633,12 +2662,10 @@ public class MovingListener extends CheckListener implements TickListener, IRemo
                 }
             }
         }
-        useLeaveLoc.setWorld(null);
-        // Adjust data.
-        survivalFly.setReallySneaking(player, false);
-        noFall.onLeave(player, data, pData);
-        // Add a method for ordinary presence-change resetting (use in join + leave).
-        data.onPlayerLeave();
+    }
+
+    /** Reset scheduled vehicle tasks for the player. */
+    private void resetVehicleTasks(final MovingData data) {
         if (Folia.isTaskScheduled(data.vehicleSetBackTaskId)) {
             // Reset the id, assume the task will still teleport the vehicle.
             // Should rather force teleport (needs storing the task + data).
