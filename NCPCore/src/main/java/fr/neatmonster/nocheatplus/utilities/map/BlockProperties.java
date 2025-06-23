@@ -3854,9 +3854,9 @@ public class BlockProperties {
      *            Blocks with these flags are not counted as ground.
      * @return true, if is on ground
      */
-    public static final boolean isOnGround(final BlockCache access, 
-                                           final double minX, final double minY, final double minZ, 
-                                           final double maxX, final double maxY, final double maxZ, 
+    public static final boolean isOnGround(final BlockCache access,
+                                           final double minX, final double minY, final double minZ,
+                                           final double maxX, final double maxY, final double maxZ,
                                            final long ignoreFlags) {
         final int maxBlockY = access.getMaxBlockY();
         final int iMinX = Location.locToBlock(minX);
@@ -3868,22 +3868,60 @@ public class BlockProperties {
         final int iMaxY = Math.min(Location.locToBlock(maxY), maxBlockY);
         final int iMinZ = Location.locToBlock(minZ);
         final int iMaxZ = Location.locToBlock(maxZ);
+
         for (int x = iMinX; x <= iMaxX; x++) {
             for (int z = iMinZ; z <= iMaxZ; z++) {
-                IBlockCacheNode nodeAbove = null; // (Lazy fetch/update only.)
-                for (int y = iMaxY; y >= iMinY; y --) {
-                    final IBlockCacheNode node = access.getOrCreateBlockCacheNode(x, y, z, false);
-                    switch(isOnGround(access, minX, minY, minZ, maxX, maxY, maxZ, ignoreFlags, x, y, z, node, nodeAbove)) {
-                        case YES:
-                            return true;
-                        case MAYBE:
-                            nodeAbove = node;
-                            continue;
-                        case NO:
-                            break;
-                    }
-                    break; // case NO
+                if (checkColumnGround(access, minX, minY, minZ, maxX, maxY, maxZ,
+                                     ignoreFlags, x, z, iMinY, iMaxY)) {
+                    return true;
                 }
+            }
+        }
+        return false;
+    }
+
+    /**
+     * Check a single vertical column of blocks for ground.
+     *
+     * @param access
+     * @param minX
+     * @param minY
+     * @param minZ
+     * @param maxX
+     * @param maxY
+     *            Meant to be the foot-level.
+     * @param maxZ
+     * @param ignoreFlags
+     * @param x
+     *            the block x coordinate
+     * @param z
+     *            the block z coordinate
+     * @param iMinY
+     *            lowest block y to check
+     * @param iMaxY
+     *            highest block y to check
+     * @return {@code true} if ground was found in this column
+     */
+    private static boolean checkColumnGround(final BlockCache access,
+                                             final double minX, final double minY, final double minZ,
+                                             final double maxX, final double maxY, final double maxZ,
+                                             final long ignoreFlags,
+                                             final int x, final int z,
+                                             final int iMinY, final int iMaxY) {
+        IBlockCacheNode prevNodeAbove = null;
+        for (int y = iMaxY; y >= iMinY; y--) {
+            final IBlockCacheNode node = access.getOrCreateBlockCacheNode(x, y, z, false);
+            final AlmostBoolean result = evaluateGroundNode(access, minX, minY, minZ, maxX, maxY, maxZ,
+                                                            ignoreFlags, x, y, z, node, prevNodeAbove);
+            if (result == AlmostBoolean.YES) {
+                return true;
+            }
+            else if (result == AlmostBoolean.MAYBE) {
+                prevNodeAbove = node;
+                continue;
+            }
+            else {
+                break;
             }
         }
         return false;
@@ -3914,149 +3952,81 @@ public class BlockProperties {
      *         without the possibility to be on ground with checking lower
      *         y-coordinates.
      */
-    public static final AlmostBoolean isOnGround(final BlockCache access, 
-                                                 final double minX, final double minY, final double minZ, 
-                                                 final double maxX, final double maxY, final double maxZ, 
-                                                 final long ignoreFlags, final int x, final int y, final int z, 
+    public static final AlmostBoolean evaluateGroundNode(final BlockCache access,
+                                                 final double minX, final double minY, final double minZ,
+                                                 final double maxX, final double maxY, final double maxZ,
+                                                 final long ignoreFlags, final int x, final int y, final int z,
                                                  final IBlockCacheNode node, IBlockCacheNode nodeAbove) {
-        // NOTE: Relevant methods called here should be changed to use IBlockCacheNode (node, nodeAbove). 
-        final Material id = node.getType(); // NOTE: Pass on the node (signatures...).
+        final Material id = node.getType();
         final long flags = BlockFlags.getBlockFlags(id);
-        // NOTE: LIQUID could be a quick return as well.
-        // (IGN_PASSABLE might still allow standing on.)
+
         if ((flags & BlockFlags.F_GROUND) == 0 || (flags & ignoreFlags) != 0) {
             return AlmostBoolean.MAYBE;
         }
 
-        // Might collide.
         final double[] bounds = node.getBounds(access, x, y, z);
         if (bounds == null) {
             return AlmostBoolean.YES;
         }
 
-        if (!collidesBlock(access, minX, minY, minZ, maxX, maxY, maxZ, x, y, z, node, nodeAbove, flags)) {
+        if (!collidesBlock(access, minX, minY, minZ, maxX, maxY, maxZ,
+                           x, y, z, node, nodeAbove, flags)) {
             return AlmostBoolean.MAYBE;
         }
 
-        // NOTE: Make this one work (passable workaround).
-        // Check if the block can be passed through with the bounding box (disregard the ignore flag).
-        // Spider !
-        // Not nice but...
-        // NOTE: GROUND_HEIGHT: would have to check passable workaround again ?
-        // NOTE: height >= ?
-        // NOTE: Another concept is needed for the stand-on-passable !
-         // NOTE: Add getMinGroundHeight, getMaxGroundHeight.
-        if (isPassableWorkaround(access, x, y, z, minX - x, minY - y, minZ - z, node, maxX - minX, maxY - minY, maxZ - minZ, 
-                                 minX, minY, minZ, maxX, maxY, maxZ, 1.0)) {
-            if ((flags & BlockFlags.F_GROUND_HEIGHT) == 0 || getGroundMinHeight(access, x, y, z, node, flags) > maxY - y) {
-                // Don't break, though could for some cases (?), since a block below still can be ground.
-                return AlmostBoolean.MAYBE;
-            }
+        if (isPassableWorkaround(access, x, y, z, minX - x, minY - y, minZ - z, node,
+                                 maxX - minX, maxY - minY, maxZ - minZ,
+                                 minX, minY, minZ, maxX, maxY, maxZ, 1.0)
+                && ((flags & BlockFlags.F_GROUND_HEIGHT) == 0
+                        || getGroundMinHeight(access, x, y, z, node, flags) > maxY - y)) {
+            return AlmostBoolean.MAYBE;
         }
 
-        // Don't count as ground if a block contains the foot.
-        // height >= ?
         if (getGroundMinHeight(access, x, y, z, node, flags) > maxY - y) {
-            // Within block, this x and z is no candidate for ground.
-            if (isFullBounds(bounds)) {
-                return AlmostBoolean.NO;
-            }
-            else {
-                return AlmostBoolean.MAYBE; 
-            }
+            return isFullBounds(bounds) ? AlmostBoolean.NO : AlmostBoolean.MAYBE;
         }
-        
-        // No need to check the block above (half slabs, stairs).
-        if (maxY - y < 1.0) {
+
+        if ((maxY - y) < 1.0 || y >= access.getMaxBlockY()) {
             return AlmostBoolean.YES;
         }
 
-        // Check if the block above allows this to be ground. 
-        // Only air above.
-        if (y >= access.getMaxBlockY()) {
-            return AlmostBoolean.YES;
-        }
-
-        // The commented out part below looks wrong.
-        //        // NOTE: Keep an eye on this one for exploits.
-        //        if (y != iMaxY && !variable) {
-        //            // Ground found and the block above is passable, no need to check above.
-        //            return AlmostBoolean.YES;
-        //        }
-        // NOTE: Else if variable : continue ?
-        // NOTE: Highest block is always the foot position, even if just below 1.0, a return true would be ok?
-
-        // Check above, ensure nodeAbove is set.
         if (nodeAbove == null) {
             nodeAbove = access.getOrCreateBlockCacheNode(x, y + 1, z, false);
         }
         final Material aboveId = nodeAbove.getType();
         final long aboveFlags = BlockFlags.getBlockFlags(aboveId);
-        if ((aboveFlags & BlockFlags.F_IGN_PASSABLE) != 0) {
-            // Ignore these (Note for above block check before ground property).
-            // NOTE: Should this always apply ?
+
+        if ((aboveFlags & BlockFlags.F_IGN_PASSABLE) != 0
+                || (aboveFlags & BlockFlags.F_GROUND) == 0
+                || (aboveFlags & BlockFlags.F_LIQUID) != 0
+                || (aboveFlags & ignoreFlags) != 0) {
             return AlmostBoolean.YES;
         }
 
-        if ((aboveFlags & BlockFlags.F_GROUND) == 0 || (aboveFlags & BlockFlags.F_LIQUID) != 0 || (aboveFlags & ignoreFlags) != 0) {
-            return AlmostBoolean.YES;
-        }
-
-        boolean variable = (flags & BlockFlags.F_VARIABLE) != 0;
-        variable |= (aboveFlags & BlockFlags.F_VARIABLE) != 0;
-        // Check if it is the same id (walls!) and similar.
+        final boolean variable = ((flags | aboveFlags) & BlockFlags.F_VARIABLE) != 0;
         if (!variable && id == aboveId) {
-            // Exclude stone walls "quickly", can not stand on.
-            if (isFullBounds(bounds)) {
-                return AlmostBoolean.NO;
-            }
-            else {
-                return AlmostBoolean.MAYBE;
-            }
+            return isFullBounds(bounds) ? AlmostBoolean.NO : AlmostBoolean.MAYBE;
         }
 
-        // Check against spider type hacks.
         final double[] aboveBounds = nodeAbove.getBounds(access, x, y + 1, z);
-        if (aboveBounds == null) {
+        if (aboveBounds == null
+                || !collidesBlock(access, minX, minY, minZ, maxX, Math.max(maxY, y + 1.49), maxZ,
+                                   x, y + 1, z, nodeAbove, null, aboveFlags)
+                || isPassableWorkaround(access, x, y + 1, z, minX - x, minY - (y + 1), minZ - z,
+                                       nodeAbove, maxX - minX, maxY - minY, maxZ - minZ,
+                                       minX, minY, minZ, maxX, maxY, maxZ, 1.0)) {
             return AlmostBoolean.YES;
         }
 
-        // NOTE: nodeAbove + nodeAboveAbove ?? [don't want to implement a block cache for entire past state handling yet ...]
-        // NOTE: 1.49 might be obsolete !
-        if (!collidesBlock(access, minX, minY, minZ, maxX, Math.max(maxY, 1.49 + y), maxZ, x, y + 1, z, nodeAbove, null, aboveFlags)) {
-            return AlmostBoolean.YES;
-        }
-
-        // Check passable workaround without checking ignore flag.
-        if (isPassableWorkaround(access, x, y + 1, z, minX - x, minY - (y + 1), minZ - z, nodeAbove, maxX - minX, maxY - minY, maxZ - minZ,
-                                 minX, minY, minZ, maxX, maxY, maxZ, 1.0)) {
-            return AlmostBoolean.YES;
-        }
-        
-        // Can not be ground at this x - z position.
         if (isFullBounds(aboveBounds)) {
             return AlmostBoolean.NO;
         }
 
-        // NOTE: Is this variable workaround still necessary ? Has this not been tested above already (passable workaround!)
-        // NOTE: This might be seen as a violation for many block types.
-        // NOTE: More distinction necessary here.
-        if (variable) {
-            // Simplistic hot fix attempt for same type + same shape.
-            // NOTE: Needs passable workaround check.
-            if (isSameShape(bounds, aboveBounds)) {
-                // Can not stand on (rough heuristics).
-                // NOTE: Test with cactus.
-                return AlmostBoolean.MAYBE; // There could be ground underneath (block vs. fence).
-                // continue;
-            }
-            else {
-                return AlmostBoolean.YES;
-            }
+        if (variable && isSameShape(bounds, aboveBounds)) {
+            return AlmostBoolean.MAYBE;
         }
 
-        // Not regarded as ground, 
-        return AlmostBoolean.MAYBE;
+        return variable ? AlmostBoolean.YES : AlmostBoolean.MAYBE;
     }
 
     /**

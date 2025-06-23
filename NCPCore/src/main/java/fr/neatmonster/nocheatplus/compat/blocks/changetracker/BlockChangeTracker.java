@@ -854,8 +854,8 @@ public class BlockChangeTracker {
                     }
                     boolean shouldBreak = true; // Indicate no better than abort-y-iteration found.
                     do {
-                        switch(BlockProperties.isOnGround(blockCache, minX, minY, minZ, maxX, maxY, maxZ, 
-                                ignoreFlags, x, y, z, 
+                        switch(BlockProperties.evaluateGroundNode(blockCache, minX, minY, minZ, maxX, maxY, maxZ,
+                                ignoreFlags, x, y, z,
                                 onGroundReference.getNode(), onGroundReference.getNodeAbove())) {
                                     case YES:
                                         onGroundReference.updateSpan();
