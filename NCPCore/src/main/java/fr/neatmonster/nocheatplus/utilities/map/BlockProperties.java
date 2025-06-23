@@ -800,6 +800,39 @@ public class BlockProperties {
     /** Direct overrides for specific side conditions.*/
     private static Map<BlockBreakKey, Long> breakingTimeOverrides = new HashMap<BlockProperties.BlockBreakKey, Long>();
 
+    /** Lookup table for minimal ground heights defined via flags. */
+    private static final Map<Long, Double> MIN_HEIGHT_LOOKUP = new HashMap<Long, Double>();
+
+    /** Mask for all supported minimal height flags. */
+    private static final long MIN_HEIGHT_MASK;
+
+    static {
+        long mask = 0;
+        MIN_HEIGHT_LOOKUP.put(BlockFlags.F_MIN_HEIGHT16_1, 0.0625);
+        mask |= BlockFlags.F_MIN_HEIGHT16_1;
+        MIN_HEIGHT_LOOKUP.put(BlockFlags.F_MIN_HEIGHT8_1, 0.125);
+        mask |= BlockFlags.F_MIN_HEIGHT8_1;
+        MIN_HEIGHT_LOOKUP.put(BlockFlags.F_MIN_HEIGHT4_1, 0.25);
+        mask |= BlockFlags.F_MIN_HEIGHT4_1;
+        MIN_HEIGHT_LOOKUP.put(BlockFlags.F_MIN_HEIGHT16_5, 0.3125);
+        mask |= BlockFlags.F_MIN_HEIGHT16_5;
+        MIN_HEIGHT_LOOKUP.put(BlockFlags.F_MIN_HEIGHT16_7, 0.4375);
+        mask |= BlockFlags.F_MIN_HEIGHT16_7;
+        MIN_HEIGHT_LOOKUP.put(BlockFlags.F_MIN_HEIGHT16_9, 0.5625);
+        mask |= BlockFlags.F_MIN_HEIGHT16_9;
+        MIN_HEIGHT_LOOKUP.put(BlockFlags.F_MIN_HEIGHT8_5, 0.625);
+        mask |= BlockFlags.F_MIN_HEIGHT8_5;
+        MIN_HEIGHT_LOOKUP.put(BlockFlags.F_MIN_HEIGHT16_11, 0.6875);
+        mask |= BlockFlags.F_MIN_HEIGHT16_11;
+        MIN_HEIGHT_LOOKUP.put(BlockFlags.F_MIN_HEIGHT16_13, 0.8125);
+        mask |= BlockFlags.F_MIN_HEIGHT16_13;
+        MIN_HEIGHT_LOOKUP.put(BlockFlags.F_MIN_HEIGHT16_14, 0.875);
+        mask |= BlockFlags.F_MIN_HEIGHT16_14;
+        MIN_HEIGHT_LOOKUP.put(BlockFlags.F_MIN_HEIGHT16_15, 0.9375);
+        mask |= BlockFlags.F_MIN_HEIGHT16_15;
+        MIN_HEIGHT_MASK = mask;
+    }
+
     /** Breaking time for indestructible materials. */
     public static final long indestructible = Long.MAX_VALUE;
 
@@ -2875,10 +2908,11 @@ public class BlockProperties {
                                             final IBlockCacheNode node, final long flags) {
         final Material id = node.getType();
         final double[] bounds = node.getBounds(access, x, y, z);
+        final int data = node.getData(access, x, y, z);
 
         if ((flags & BlockFlags.F_HEIGHT_8_INC) != 0) {
-            final int data = (node.getData(access, x, y, z) & 0xF) % 8;
-            return 0.125 * (double) data;
+            final int val = (data & 0xF) % 8;
+            return 0.125 * (double) val;
         }
         // Height 100 is ignored (!).
         else if (((flags & BlockFlags.F_HEIGHT150) != 0)) {
@@ -2891,57 +2925,20 @@ public class BlockProperties {
             return 0.0;
         }
         else if ((flags & BlockFlags.F_GROUND_HEIGHT) != 0) {
-            // Subsequent min height flags.
-            if ((flags & BlockFlags.F_MIN_HEIGHT16_1) != 0) {
-                // 1/16
-                return 0.0625;
-            }
-            if ((flags & BlockFlags.F_MIN_HEIGHT8_1) != 0) {
-                // 1/8
-                return 0.125;
-            }
-            if ((flags & BlockFlags.F_MIN_HEIGHT4_1) != 0) {
-                // 1/4
-                return 0.25;
-            }
-            if ((flags & BlockFlags.F_MIN_HEIGHT16_5) != 0) {
-                // 5/16
-                return 0.3125;
-            }
-            if ((flags & BlockFlags.F_MIN_HEIGHT16_7) != 0) {
-                // 7/16
-                return 0.4375;
-            }
-            if ((flags & BlockFlags.F_MIN_HEIGHT16_9) != 0) {
-                // 9/16
-                return 0.5625;
-            }
-            if ((flags & BlockFlags.F_MIN_HEIGHT8_5) != 0) {
-                // 10/16
-                return 0.625;
-            }
-            if ((flags & BlockFlags.F_MIN_HEIGHT16_11) != 0) {
-                // 11/16
-                return 0.6875;
-            }
-            if ((flags & BlockFlags.F_MIN_HEIGHT16_13) != 0) {
-                // 13/16
-                return 0.8125;
-            }
-            if ((flags & BlockFlags.F_MIN_HEIGHT16_14) != 0) {
-                // 14/16
-                return 0.875;
-            }
-            if ((flags & BlockFlags.F_MIN_HEIGHT16_15) != 0) {
-                // 15/16
-                return 0.9375;
+            // Subsequent min height flags via lookup.
+            final long flag = flags & MIN_HEIGHT_MASK;
+            if (flag != 0) {
+                final Double fixed = MIN_HEIGHT_LOOKUP.get(flag);
+                if (fixed != null) {
+                    return fixed.doubleValue();
+                }
             }
             // Default height is used.
             if (id == BridgeMaterial.FARMLAND) {
                 return bounds[4];
             }
             // Assume open gates/trapdoors/things to only allow standing on to, if at all.
-            if ((flags & BlockFlags.F_PASSABLE_X4) != 0 && (node.getData(access, x, y, z) & 0x04) != 0) {
+            if ((flags & BlockFlags.F_PASSABLE_X4) != 0 && (data & 0x04) != 0) {
                 return bounds[4];
             }
             // All blocks that are not treated individually are ground all through.
