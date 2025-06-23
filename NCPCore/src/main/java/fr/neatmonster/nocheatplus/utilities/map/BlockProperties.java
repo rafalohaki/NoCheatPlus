@@ -397,11 +397,11 @@ public class BlockProperties {
         /** Efficiency enchantment. */
         private Integer efficiency = null;
 
-        // TODO: Thinkable: head in liquid, attributes, player enchantments.
+        // NOTE: Thinkable: head in liquid, attributes, player enchantments.
 
-        // TODO: SHOULD: Read from config.
+        // NOTE: SHOULD: Read from config.
         /*
-         * TODO: COULD: add support for a command to auto track these entries
+         * NOTE: COULD: add support for a command to auto track these entries
          * and create config entries automatically. Should change methods to use
          * this class as input (best with full side conditions).
          */
@@ -494,7 +494,7 @@ public class BlockProperties {
             }
             if (obj instanceof BlockBreakKey) {
                 final BlockBreakKey other = (BlockBreakKey) obj;
-                // TODO: Some should be equals later.
+                // NOTE: Some should be equals later.
                 return blockType == other.blockType 
                         && efficiency == other.efficiency // fastest first.
                         && toolType == other.toolType
@@ -517,7 +517,7 @@ public class BlockProperties {
      * @return true, if is air
      */
     public static final boolean isActuallyAir(final Material mat) {
-        // TODO: Flags rather?
+        // NOTE: Flags rather?
         return mat != null && isAir(mat);
     }
 
@@ -529,7 +529,7 @@ public class BlockProperties {
      * @return true, if is air
      */
     public static final boolean isAir(final Material mat) {
-        // TODO: Flags rather?
+        // NOTE: Flags rather?
         return mat == null || mat == Material.AIR
                 // Assume the compiler throws away further null values.
                 || mat == BridgeMaterial.VOID_AIR
@@ -639,7 +639,7 @@ public class BlockProperties {
     }
 
     /**
-     * Might hold true for liquids too. TODO: ENSURE IT DOESN'T.
+     * Might hold true for liquids too. NOTE: ENSURE IT DOESN'T.
      *
      * @param mat
      *            the mat.
@@ -650,7 +650,7 @@ public class BlockProperties {
     }
 
     /**
-     * Might hold true for liquids too. TODO: ENSURE IT DOESN'T.
+     * Might hold true for liquids too. NOTE: ENSURE IT DOESN'T.
      *
      * @param mat
      *            the mat.
@@ -971,7 +971,7 @@ public class BlockProperties {
                     StaticLog.logSevere(t);
                 }
             }
-            // TODO: Add registry for further BlockPropertiesSetup instances.
+            // NOTE: Add registry for further BlockPropertiesSetup instances.
         }
         catch (Throwable t) {
             StaticLog.logSevere(t);
@@ -1067,7 +1067,7 @@ public class BlockProperties {
         for (Material mat : Material.values()) {
             BlockFlags.blockFlags.put(mat, 0L);
             if (mcAccess.isBlockLiquid(mat).decide()) {
-                // TODO: do not set BlockFlags.F_GROUND for liquids ?
+                // NOTE: do not set BlockFlags.F_GROUND for liquids ?
                 BlockFlags.setFlag(mat, BlockFlags.F_LIQUID);
                 if (mcAccess.isBlockSolid(mat).decide()) BlockFlags.setFlag(mat, BlockFlags.F_SOLID);
             }
@@ -1132,7 +1132,7 @@ public class BlockProperties {
         }
         
         // Moving piston
-        setBlockProps(BridgeMaterial.MOVING_PISTON, indestructibleType); // TODO: really?
+        setBlockProps(BridgeMaterial.MOVING_PISTON, indestructibleType); // NOTE: really?
         BlockFlags.setFlag(BridgeMaterial.MOVING_PISTON, BlockFlags.F_IGN_PASSABLE | BlockFlags.F_GROUND | BlockFlags.F_GROUND_HEIGHT | BlockFlags.FULL_BOUNDS);
 
         // Full block height.
@@ -1175,7 +1175,7 @@ public class BlockProperties {
         }
 
         // BlockFlags.F_PASSABLE_X4, BlockFlags.F_VARIABLE
-        // TODO: PASSABLE_X4 is abused for other checks, need another one?
+        // NOTE: PASSABLE_X4 is abused for other checks, need another one?
         for (final Material mat : MaterialUtil.WOODEN_FENCE_GATES) {
             BlockFlags.setFlag(mat, BlockFlags.F_PASSABLE_X4 | BlockFlags.F_VARIABLE);
         }
@@ -1540,7 +1540,7 @@ public class BlockProperties {
         setBlock(Material.DIAMOND_BLOCK, diamondBlockType);
 
         // More 1.4 (not insta).
-        // TODO: Either move all to an extra setup class, or integrate above.
+        // NOTE: Either move all to an extra setup class, or integrate above.
         for (Material mat : MaterialUtil.WOODEN_BUTTONS) {
             //setBlock(mat, leverType);
             setBlock(mat,new BlockProps(woodAxe, 0.5f));
@@ -1630,7 +1630,7 @@ public class BlockProperties {
         for (Material mat : MaterialUtil.WOOL_BLOCKS) {
             BlockFlags.setFlagsAs(mat, Material.STONE);
             setBlockProps(mat, props);
-            // TODO: Model shears directly somehow (per-block list).
+            // NOTE: Model shears directly somehow (per-block list).
         }
 
         // Fully solid blocks (shape / passable) - simplifies MCAccessBukkit setup, aim at 1.13+.
@@ -1673,7 +1673,7 @@ public class BlockProperties {
 
         // Check for initialized block breaking data.
         /*
-         * TODO: Possibly switch to a class per block, to see what/if-anything
+         * NOTE: Possibly switch to a class per block, to see what/if-anything
          * is initialized, including flags.
          */
         final LogManager logManager = NCPAPIProvider.getNoCheatPlusAPI().getLogManager();
@@ -1967,7 +1967,7 @@ public class BlockProperties {
                                            final boolean onGround, final boolean inWater, final boolean aquaAffinity, 
                                            final int haste, final int fatigue, final int conduit) {
 
-        // TODO: more configurability / load from file for blocks (i.e. set for shears etc.
+        // NOTE: more configurability / load from file for blocks (i.e. set for shears etc.
         if (isAir(itemInHand)) {
             return getBreakingDuration(blockId, getBlockProps(blockId), noTool, onGround, inWater, aquaAffinity, 0, haste, fatigue, conduit); // Nor efficiency do apply.
         }
@@ -2025,13 +2025,13 @@ public class BlockProperties {
         // First check for direct breaking time overrides.
         final BlockBreakKey bbKey = new BlockBreakKey();
         // Add the basic properties.
-        bbKey.blockType(blockId).toolType(toolProps.toolType).materialBase(toolProps.materialBase).efficiency(efficiency); // TODO: Might leave this out and calculate based on the already fetched.
+        bbKey.blockType(blockId).toolType(toolProps.toolType).materialBase(toolProps.materialBase).efficiency(efficiency); // NOTE: Might leave this out and calculate based on the already fetched.
         Long override = breakingTimeOverrides.get(bbKey);
         if (override != null) {
             float mult = getBlockBreakingPenaltyMultiplier(onGround, inWater, aquaAffinity);
             return mult == 1.0f ? override : (long) (mult * override);
         }
-        // TODO: Keep up to date with BlockBreakKey, allow inWater and haste to not be set (calculate).
+        // NOTE: Keep up to date with BlockBreakKey, allow inWater and haste to not be set (calculate).
 
         // Classic calculation.
         boolean isValidTool = isValidTool(blockId, blockProps, toolProps, efficiency);
@@ -2601,7 +2601,7 @@ public class BlockProperties {
         if (!MaterialUtil.ALL_TRAP_DOORS.contains(access.getType(x, y, z))) {
             return false;
         }
-        // TODO: Really confine to trap door types (add a flag or something else)?
+        // NOTE: Really confine to trap door types (add a flag or something else)?
         final int data1 = access.getData(x, y, z);
         // (Trap door may be attached to top or bottom, regardless.)
         // Trap door must be open (really?).
@@ -2644,7 +2644,7 @@ public class BlockProperties {
      */
     public static final boolean isPassable(final Material blockType) {
         final long flags = BlockFlags.getBlockFlags(blockType);
-        // TODO: What with non-solid blocks that are not passable ?
+        // NOTE: What with non-solid blocks that are not passable ?
         if ((flags & (BlockFlags.F_LIQUID | BlockFlags.F_IGN_PASSABLE)) != 0) {
             return true;
         }
@@ -2682,7 +2682,7 @@ public class BlockProperties {
             return true;
         }
         // Check if the position is inside of a bounding box.
-        // TODO: Consider to pass these as arguments too.
+        // NOTE: Consider to pass these as arguments too.
         final int bx = Location.locToBlock(x);
         final int by = Location.locToBlock(y);
         final int bz = Location.locToBlock(z);
@@ -2694,7 +2694,7 @@ public class BlockProperties {
         final double fx = x - bx;
         final double fy = y - by;
         final double fz = z - bz;
-        // TODO: Check f_itchy if/once exists.
+        // NOTE: Check f_itchy if/once exists.
         // Check workarounds (blocks with bigger collision box but passable on some spots).
         if (!isPassableWorkaround(access, bx, by, bz, fx, fy, fz, node, 0, 0, 0, 0)) {
             // Not passable.
@@ -2829,7 +2829,7 @@ public class BlockProperties {
                                                      final double maxX, final double maxY, final double maxZ,
                                                      final double dT) {
         // Note: Since this is only called if the bounding box collides, out-of-bounds checks should not be necessary.
-        // TODO: Add a flag if a workaround exists (!), might store the type of workaround extra (generic!), or extra flags.
+        // NOTE: Add a flag if a workaround exists (!), might store the type of workaround extra (generic!), or extra flags.
         final Material id = node.getType();
         final long flags = BlockFlags.getBlockFlags(id);
         if ((flags & BlockFlags.F_PASSABLE_X4) != 0 && (access.getData(bx, by, bz) & 0x4) != 0) {
@@ -2856,7 +2856,7 @@ public class BlockProperties {
         else if (id == Material.CAULDRON || id == Material.HOPPER) {
             if (Math.min(fy, fy + dY * dT) >= getGroundMinHeight(access, bx, by, bz, node, flags)) {
                 // Check for moving through walls or floor.
-                // TODO: Maybe this is too exact...
+                // NOTE: Maybe this is too exact...
                 return isInsideCenter(fx, fz, dX, dZ, dT, 0.125);
             }
         }
@@ -3029,7 +3029,7 @@ public class BlockProperties {
      * Reference block height for on-ground judgment: player must be at this or
      * greater height to stand on this block.<br>
      * <br>
-     * TODO: Check naming convention, might change to something with max ...
+     * NOTE: Check naming convention, might change to something with max ...
      * volatile! <br>
      * This might return 0 or somewhat arbitrary values for some blocks that
      * don't have full bounds (!), might return 0 for blocks with the
@@ -3127,7 +3127,7 @@ public class BlockProperties {
         }
         else {
             // Nothing found.
-            // TODO: Consider using Math.min(1.0, bounds[4]) for compatibility rather?
+            // NOTE: Consider using Math.min(1.0, bounds[4]) for compatibility rather?
             double minHeight = bounds[4];
             for (int i = 2; i <= (int)bounds.length / 6; i++) {
                 minHeight = Math.min(minHeight, bounds[i*6-2]);
@@ -3219,7 +3219,7 @@ public class BlockProperties {
     private static boolean isPassable(final ICollidePassable rt, final Location from, final Location to) {
         final BlockCache blockCache = wrapBlockCache.getBlockCache();
         blockCache.setAccess(from.getWorld());
-        rt.setMaxSteps(60); // TODO: Configurable ?
+        rt.setMaxSteps(60); // NOTE: Configurable ?
         rt.setBlockCache(blockCache);
         rt.set(from.getX(), from.getY(), from.getZ(), to.getX(), to.getY(), to.getZ());
         rt.loop();
@@ -3440,7 +3440,7 @@ public class BlockProperties {
         final int iMinX = Location.locToBlock(minX);
         final int iMaxX = Location.locToBlock(maxX);
         // At least find fences etc. if searched for.
-        // TODO: BlockFlags.F_HEIGHT150 could also be ground etc., more consequent might be to always use or flag it.
+        // NOTE: BlockFlags.F_HEIGHT150 could also be ground etc., more consequent might be to always use or flag it.
         final int iMinY = Location.locToBlock(minY - ((flags & BlockFlags.F_HEIGHT150) != 0 ? 0.5625 : 0));
         final int iMaxY = Math.min(Location.locToBlock(maxY), access.getMaxBlockY());
         final int iMinZ = Location.locToBlock(minZ);
@@ -3691,10 +3691,10 @@ public class BlockProperties {
     //     * @return true, if successful
     //     */
     //    public static final boolean collidesBlock(final BlockCache access, final double minX, double minY, final double minZ, final double maxX, final double maxY, final double maxZ, final int x, final int y, final int z, final int id) {
-    //        // TODO: use internal block data unless delegation wanted?
+    //        // NOTE: use internal block data unless delegation wanted?
     //        final double[] bounds = access.getBounds(x,y,z);
     //        if (bounds == null) {
-    //            return false; // TODO: policy ?
+    //            return false; // NOTE: policy ?
     //        }
     //        final long flags = blockFlags[id];
     //        return collidesBlock(access, minX, minY, minZ, maxX, maxY, maxZ, x, y, z, id, bounds, flags);
@@ -3743,7 +3743,7 @@ public class BlockProperties {
                                               final IBlockCacheNode node, final IBlockCacheNode nodeAbove, 
                                               final long flags) {
         /*
-         * TODO: Not sure with the flags parameter, these days. Often a
+         * NOTE: Not sure with the flags parameter, these days. Often a
          * pre-check using flags is done ... array access vs. passing an
          * argument (+ JIT) - would be better to have a 100+ player server to
          * take profiling data just for testing such differences.
@@ -3755,7 +3755,7 @@ public class BlockProperties {
         double bminX, bminZ, bminY;
         double bmaxX, bmaxY, bmaxZ;
 
-        // TODO: Consider a quick shortcut checks flags == F_NORMAL_GROUND
+        // NOTE: Consider a quick shortcut checks flags == F_NORMAL_GROUND
         // xz-bounds
         if ((flags & BlockFlags.F_XZ100) != 0) {
             bminX = bminZ = 0;
@@ -4098,10 +4098,10 @@ public class BlockProperties {
                                                  final double maxX, final double maxY, final double maxZ, 
                                                  final long ignoreFlags, final int x, final int y, final int z, 
                                                  final IBlockCacheNode node, IBlockCacheNode nodeAbove) {
-        // TODO: Relevant methods called here should be changed to use IBlockCacheNode (node, nodeAbove). 
-        final Material id = node.getType(); // TODO: Pass on the node (signatures...).
+        // NOTE: Relevant methods called here should be changed to use IBlockCacheNode (node, nodeAbove). 
+        final Material id = node.getType(); // NOTE: Pass on the node (signatures...).
         final long flags = BlockFlags.getBlockFlags(id);
-        // TODO: LIQUID could be a quick return as well.
+        // NOTE: LIQUID could be a quick return as well.
         // (IGN_PASSABLE might still allow standing on.)
         if ((flags & BlockFlags.F_GROUND) == 0 || (flags & ignoreFlags) != 0) {
             return AlmostBoolean.MAYBE;
@@ -4117,14 +4117,14 @@ public class BlockProperties {
             return AlmostBoolean.MAYBE;
         }
 
-        // TODO: Make this one work (passable workaround).
+        // NOTE: Make this one work (passable workaround).
         // Check if the block can be passed through with the bounding box (disregard the ignore flag).
         // Spider !
         // Not nice but...
-        // TODO: GROUND_HEIGHT: would have to check passable workaround again ?
-        // TODO: height >= ?
-        // TODO: Another concept is needed for the stand-on-passable !
-         // TODO: Add getMinGroundHeight, getMaxGroundHeight.
+        // NOTE: GROUND_HEIGHT: would have to check passable workaround again ?
+        // NOTE: height >= ?
+        // NOTE: Another concept is needed for the stand-on-passable !
+         // NOTE: Add getMinGroundHeight, getMaxGroundHeight.
         if (isPassableWorkaround(access, x, y, z, minX - x, minY - y, minZ - z, node, maxX - minX, maxY - minY, maxZ - minZ, 
                                  minX, minY, minZ, maxX, maxY, maxZ, 1.0)) {
             if ((flags & BlockFlags.F_GROUND_HEIGHT) == 0 || getGroundMinHeight(access, x, y, z, node, flags) > maxY - y) {
@@ -4157,13 +4157,13 @@ public class BlockProperties {
         }
 
         // The commented out part below looks wrong.
-        //        // TODO: Keep an eye on this one for exploits.
+        //        // NOTE: Keep an eye on this one for exploits.
         //        if (y != iMaxY && !variable) {
         //            // Ground found and the block above is passable, no need to check above.
         //            return AlmostBoolean.YES;
         //        }
-        // TODO: Else if variable : continue ?
-        // TODO: Highest block is always the foot position, even if just below 1.0, a return true would be ok?
+        // NOTE: Else if variable : continue ?
+        // NOTE: Highest block is always the foot position, even if just below 1.0, a return true would be ok?
 
         // Check above, ensure nodeAbove is set.
         if (nodeAbove == null) {
@@ -4173,7 +4173,7 @@ public class BlockProperties {
         final long aboveFlags = BlockFlags.getBlockFlags(aboveId);
         if ((aboveFlags & BlockFlags.F_IGN_PASSABLE) != 0) {
             // Ignore these (Note for above block check before ground property).
-            // TODO: Should this always apply ?
+            // NOTE: Should this always apply ?
             return AlmostBoolean.YES;
         }
 
@@ -4200,8 +4200,8 @@ public class BlockProperties {
             return AlmostBoolean.YES;
         }
 
-        // TODO: nodeAbove + nodeAboveAbove ?? [don't want to implement a block cache for entire past state handling yet ...]
-        // TODO: 1.49 might be obsolete !
+        // NOTE: nodeAbove + nodeAboveAbove ?? [don't want to implement a block cache for entire past state handling yet ...]
+        // NOTE: 1.49 might be obsolete !
         if (!collidesBlock(access, minX, minY, minZ, maxX, Math.max(maxY, 1.49 + y), maxZ, x, y + 1, z, nodeAbove, null, aboveFlags)) {
             return AlmostBoolean.YES;
         }
@@ -4217,15 +4217,15 @@ public class BlockProperties {
             return AlmostBoolean.NO;
         }
 
-        // TODO: Is this variable workaround still necessary ? Has this not been tested above already (passable workaround!)
-        // TODO: This might be seen as a violation for many block types.
-        // TODO: More distinction necessary here.
+        // NOTE: Is this variable workaround still necessary ? Has this not been tested above already (passable workaround!)
+        // NOTE: This might be seen as a violation for many block types.
+        // NOTE: More distinction necessary here.
         if (variable) {
             // Simplistic hot fix attempt for same type + same shape.
-            // TODO: Needs passable workaround check.
+            // NOTE: Needs passable workaround check.
             if (isSameShape(bounds, aboveBounds)) {
                 // Can not stand on (rough heuristics).
-                // TODO: Test with cactus.
+                // NOTE: Test with cactus.
                 return AlmostBoolean.MAYBE; // There could be ground underneath (block vs. fence).
                 // continue;
             }
@@ -4266,8 +4266,8 @@ public class BlockProperties {
      *         even if the other is a full block.
      */
     public static final boolean isSameShape(final double[] bounds1, final double[] bounds2) {
-        // TODO: further exclude simple full shape blocks, or confine to itchy block types
-        // TODO: make flags for it.
+        // NOTE: further exclude simple full shape blocks, or confine to itchy block types
+        // NOTE: make flags for it.
         if (bounds1 == null || bounds2 == null) {
             return bounds1 == bounds2;
         }
@@ -4507,7 +4507,7 @@ public class BlockProperties {
             wrapBlockCache.cleanup();
             wrapBlockCache = null;
         }
-        // TODO: might empty mappings...
+        // NOTE: might empty mappings...
     }
 
     /**
@@ -4541,7 +4541,7 @@ public class BlockProperties {
                                               final int blockX, final int blockY, final int blockZ, 
                                               final double oX, final double oY, final double oZ, 
                                               final double dX, final double dY, final double dZ, final double dT) {
-        // TODO: Method signature with node, nodeAbove.
+        // NOTE: Method signature with node, nodeAbove.
         final IBlockCacheNode node = access.getOrCreateBlockCacheNode(blockX, blockY, blockZ, false);
         if (BlockProperties.isPassable(node.getType())) {
             return true;
@@ -4580,14 +4580,14 @@ public class BlockProperties {
             minZ = oZ + blockZ;
         }
         if (!collidesBlock(access, minX, minY, minZ, maxX, maxY, maxZ, blockX, blockY, blockZ, node, null, BlockFlags.getBlockFlags(node.getType()) | BlockFlags.F_COLLIDE_EDGES)) {
-            // TODO: Might check for fence too, here.
+            // NOTE: Might check for fence too, here.
             return true;
         }
 
-        // TODO: Actual ray-collision checking?
+        // NOTE: Actual ray-collision checking?
 
         // Check for workarounds.
-        // TODO: check f_itchy once exists.
+        // NOTE: check f_itchy once exists.
         if (BlockProperties.isPassableWorkaround(access, blockX, blockY, blockZ, oX, oY, oZ, node, dX, dY, dZ,
                                                  minX, minY, minZ, maxX, maxY, maxZ, dT)) {
             return true;
@@ -4626,7 +4626,7 @@ public class BlockProperties {
                                               final int blockX, final int blockY, final int blockZ,
                                               final double minX, final double minY, final double minZ,
                                               final double maxX, final double maxY, final double maxZ) {
-        // TODO: This mostly is copy and paste from isPassableRay.
+        // NOTE: This mostly is copy and paste from isPassableRay.
         final IBlockCacheNode node = access.getOrCreateBlockCacheNode(blockX, blockY, blockZ, false);
         final Material id = node.getType();
         if (BlockProperties.isPassable(id)) {
@@ -4642,8 +4642,8 @@ public class BlockProperties {
         }
 
         // Check for workarounds.
-        // TODO: Adapted to use the version initially intended for ray-tracing. Should have an explicit thing for the box, and let the current ray-tracing variant use that, until THEY implement something real.
-        // TODO: check f_itchy once exists.
+        // NOTE: Adapted to use the version initially intended for ray-tracing. Should have an explicit thing for the box, and let the current ray-tracing variant use that, until THEY implement something real.
+        // NOTE: check f_itchy once exists.
         if (BlockProperties.isPassableWorkaround(access, blockX, blockY, blockZ, minX - blockX, minY - blockY, minZ - blockZ, node, maxX - minX, maxY - minY, maxZ - minZ, 
                                                  minX, minY, minZ, maxX, maxY, maxZ, 1.0)) {
             return true;
