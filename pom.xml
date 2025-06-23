@@ -58,6 +58,14 @@
             <id>viaversion-repo</id>
             <url>https://repo.viaversion.com</url>
         </repository>
+        <repository>
+            <id>jitpack.io</id>
+            <url>https://jitpack.io</url>
+        </repository>
+        <repository>
+            <id>md5net</id>
+            <url>https://repo.md-5.net/content/repositories/public/</url>
+        </repository>
     </repositories>
 
     <build>
