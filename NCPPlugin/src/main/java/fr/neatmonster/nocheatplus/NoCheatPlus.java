@@ -1176,7 +1176,6 @@ public class NoCheatPlus extends JavaPlugin implements NoCheatPlusAPI {
         }
         // (Re-) schedule consistency checking.
         scheduleConsistencyCheckers();
-        // Cache some things. TODO: Where is this comment from !?
         // Re-setup allViolationsHook.
         allViolationsHook.setConfig(new AllViolationsConfig(config));
         vlFrequencyHook.setConfig(new ViolationFrequencyConfig(config));
