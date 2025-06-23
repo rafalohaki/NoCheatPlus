@@ -98,14 +98,6 @@
         <directory>../target</directory> <!-- Build it one level up, because it is the one we care about -->
         <finalName>NoCheatPlus</finalName>
         <resources>
-            <resource>
-                <targetPath>.</targetPath>
-                <filtering>true</filtering>
-                <directory>..</directory>
-                <includes>
-                    <include>LICENSE.txt</include>
-                </includes>
-            </resource>
             <!-- plugin.yml here to fill in the correct content. -->
             <resource>
                 <targetPath>.</targetPath>
