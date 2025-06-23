@@ -102,11 +102,11 @@ def main_interactive(path):
         return False
     # Ask for replacement properties.
     # TODO: Determine by version tag of MCAccess, or a specific comment in there (if left empty)?
-    dst_name = raw_input("Significant module name (after NCPCompat) excluding revision (e.g. _R1): ")
+    dst_name = input("Significant module name (after NCPCompat) excluding revision (e.g. _R1): ")
     if not dst_name.strip():
         print("[ERROR] Can't be empty.")
         return False
-    dst_rev = raw_input("Revision (kept exact case for package naming, no leading '_', default is none): ")
+    dst_rev = input("Revision (kept exact case for package naming, no leading '_', default is none): ")
     dst_rev = dst_rev.replace(".", "_").strip()
     dst_name_with_rev = dst_name + (("_" + dst_rev) if dst_rev else "")
     dst_dir = os.path.join(path, "NCPCompat" + dst_name_with_rev)

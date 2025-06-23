@@ -1,3 +1,4 @@
+#!/usr/bin/env python3
 # ~ coding: UTF-8 ~
 '''
 - Find files that don't start with the GPLv3 header.
@@ -5,7 +6,6 @@
 - Add a GPLv3 header to each .java file where it may be missing.
 @license: See #LICENSE below.
 '''
-from cgitb import text
 
 LICENSE = """/*
  * This program is free software: you can redistribute it and/or modify
@@ -94,7 +94,7 @@ def main():
     print("Working on path: " + path)
     
     items = os.listdir(path)
-    license = unicode(LICENSE)
+    license = LICENSE
     files_java = ResultCollector(lc_exts = (".java",), ignore_startswith = (license,))
     for item in items:
         fp = os.path.join(path, item)

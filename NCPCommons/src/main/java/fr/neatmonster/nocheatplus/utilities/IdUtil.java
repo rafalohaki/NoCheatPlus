@@ -19,49 +19,50 @@ import java.util.UUID;
 // TODO: Auto-generated Javadoc
 /**
  * Utility for UUIDs, player names.
+ * 
  * @author mc_dev
  *
  */
 public class IdUtil {
-	
+
 	/**
-     * Valid user name check (Minecraft).<br>
-     * (Taken from TrustCore.)
-     *
-     * @param name
-     *            Allows null input.
-     * @return true, if is valid minecraft user name
-     */
+	 * Valid user name check (Minecraft).<br>
+	 * (Taken from TrustCore.)
+	 *
+	 * @param name
+	 *             Allows null input.
+	 * @return true, if is valid minecraft user name
+	 */
 	public static boolean isValidMinecraftUserName(final String name) {
 		return name != null && name.matches("[\\w]{2,16}");
 	}
-	
+
 	/**
-     * Safe method to parse a UUID, using UUIDFromString internally.
-     *
-     * @param input
-     *            the input
-     * @return the uuid
-     */
+	 * Safe method to parse a UUID, using UUIDFromString internally.
+	 *
+	 * @param input
+	 *              the input
+	 * @return the uuid
+	 */
 	public static UUID UUIDFromStringSafe(final String input) {
 		if (input == null) {
 			return null;
 		}
 		try {
 			return UUIDFromString(input);
+		} catch (IllegalArgumentException e1) {
 		}
-		catch (IllegalArgumentException e1) {}
 		return null;
 	}
-	
+
 	/**
-     * More flexible UUID parsing.<br>
-     * (Taken from TrustCore.)
-     *
-     * @param input
-     *            the input
-     * @return the uuid
-     */
+	 * More flexible UUID parsing.<br>
+	 * (Taken from TrustCore.)
+	 *
+	 * @param input
+	 *              the input
+	 * @return the uuid
+	 */
 	public static UUID UUIDFromString(final String input) {
 		// TODO: Add unit tests.
 		final int len = input.length();
@@ -76,16 +77,16 @@ public class IdUtil {
 			int targetIndex = 0;
 			while (targetIndex < 36) {
 				newChars[targetIndex] = chars[index];
-				index ++;
-				targetIndex ++;
+				index++;
+				targetIndex++;
 				switch (index) {
-    				case 8:
-    				case 12:
-    				case 16:
-    				case 20:
-    					newChars[targetIndex] = '-';
-    					targetIndex ++;
-    					break;
+					case 8:
+					case 12:
+					case 16:
+					case 20:
+						newChars[targetIndex] = '-';
+						targetIndex++;
+						break;
 					default:
 						break;
 				}
@@ -95,5 +96,5 @@ public class IdUtil {
 			throw new IllegalArgumentException("Unexpected length (" + len + ") for uuid: " + input);
 		}
 	}
-	
+
 }
