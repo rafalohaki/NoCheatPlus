@@ -89,8 +89,11 @@ public class MovingData extends ACheckData implements IDataOnRemoveSubCheckData,
     public int liqtick = 0;
     /** ID for players leaving a liquid in order to patch waterwalk exploits: 0= no checking, 1= enforce speed restriction until ground is touched or the player sinks back in water/lava. */
     public int surfaceId = 0;
-    /** Tick counter used to workaround certain transitions with repeated or high motion (e.g.: gliding->normal, riptiding->normal). */
-    // TODO: Rename -> motionTransitionTick/(...)
+    /**
+     * Tick counter used during motion transitions with repeated or high motion
+     * (e.g. gliding->normal, riptiding->normal). Also known internally as the
+     * motion transition tick.
+     */
     public int keepfrictiontick = 0;
     /** Countdown for ending a bunnyfly phase(= phase after bunnyhop). 10(max) represents a bunnyhop, 9-1 represent the tick at which this bunnfly phase currently is. */
     public int bunnyhopDelay;
@@ -120,14 +123,19 @@ public class MovingData extends ACheckData implements IDataOnRemoveSubCheckData,
     public long timeSprinting = 0;
     /** Last time the player was riptiding */
     public long timeRiptiding = 0;
-    /** Represents how long a vehicle has been tossed up by a bubble column */
-    // TODO: Deprecate and use the blockChangeTracker, rather.
+    /**
+     * Represents how long a vehicle has been tossed up by a bubble column.
+     * TODO: replace this once the BlockChangeTracker fully covers bubble column
+     * interactions.
+     */
     public long timeVehicletoss = 0;
     /** Used as a workaround for boats leaving ice while still having velocity from ice */
     public int boatIceVelocityTicks = 0;
     public long timeCamelDash = 0;
-    /** Temporary snow fix flag */
-    // TODO: remove.
+    /**
+     * Temporary snow fix flag. TODO: remove once bounding box handling for
+     * powder snow is reworked.
+     */
     public boolean snowFix = false;
     /** Whether or not this horizontal movement is leading downstream. */
     public boolean isdownstream = false;
@@ -149,11 +157,11 @@ public class MovingData extends ACheckData implements IDataOnRemoveSubCheckData,
     // *----------No slowdown related data----------*
     /** Whether the player is using an item */
     public boolean isUsingItem = false;
-    /** TODO: Whether the player use the item on left hand */
+    /** Whether the player uses the item in their off hand */
     public boolean offHandUse = false;
-    /** TODO: Pre check conditions */
+    /** Whether pre-check conditions indicate that the player might use an item */
     public boolean mightUseItem = false;
-    /** TODO: */
+    /** Time at which the current item use was released */
     public long releaseItemTime = 0;
     /** Detection flag */
     public boolean isHackingRI = false;
@@ -164,8 +172,12 @@ public class MovingData extends ACheckData implements IDataOnRemoveSubCheckData,
     // *----------Move / Vehicle move tracking----------*
     /** Keep track of currently processed (if) and past moves for player moving. Stored moves can be altered by modifying the int. */
     public final MoveTrace <PlayerMoveData> playerMoves = new MoveTrace<>(PlayerMoveData::new, 16); //+ currentmove = 17. For keeping track of moves influenced by ice friction and such, perhaps it's too much... The 6 extra past moves are for bunnyhop on ice with jump boost.
-    /** Keep track of currently processed (if) and past moves for vehicle moving. Stored moves can be altered by modifying the int. */
-    // TODO: There may be need to store such data with vehicles, or detect tandem abuse in a different way.
+    /**
+     * Keep track of currently processed (if) and past moves for vehicle moving.
+     * Stored moves can be altered by modifying the int.
+     * TODO: consider alternative storage or handling to better detect tandem
+     * abuse with vehicles.
+     */
     public final MoveTrace <VehicleMoveData> vehicleMoves = new MoveTrace<>(VehicleMoveData::new, 2);
 
     // *----------Velocity handling----------* 
@@ -229,7 +241,10 @@ public class MovingData extends ACheckData implements IDataOnRemoveSubCheckData,
     public Location noFallCurrentLocOnWindChargeHit = null;
 
     // *----------Data of the SurvivalFly check----------*
-    /** Default lift-off envelope, used after resetting. <br> TODO: Test, might be better ground. */
+    /**
+     * Default lift-off envelope used after resetting. TODO: evaluate if using
+     * {@link LiftOffEnvelope#GROUND} would be more appropriate.
+     */
     private static final LiftOffEnvelope defaultLiftOffEnvelope = LiftOffEnvelope.UNKNOWN;
     /** playerMoveCount at the time of the last sf violation. */
     public int sfVLMoveCount = 0;
@@ -271,7 +286,7 @@ public class MovingData extends ACheckData implements IDataOnRemoveSubCheckData,
     public static final int vehicleMorePacketsBufferDefault = 50;
     /** The buffer used for VehicleMP violations. */
     public int vehicleMorePacketsBuffer = vehicleMorePacketsBufferDefault;
-    /** TODO: */
+    /** Timestamp of the last received vehicle move packet */
     public long vehicleMorePacketsLastTime;
     /** Task id of the vehicle set back task. */ 
     public Object vehicleSetBackTaskId = null;
@@ -300,13 +315,13 @@ public class MovingData extends ACheckData implements IDataOnRemoveSubCheckData,
     /** Inconsistency-flag. Set on moving inside of vehicles, reset on exiting properly. Workaround for VehicleLeaveEvent missing. */
     public boolean wasInVehicle = false; 
     public boolean vehicleLeave = false;
-    /** TODO: */
+    /** The last type of vehicle the player was in */
     public EntityType lastVehicleType = null;
     /** Set to indicate that events happen during a vehicle set back. Allows skipping some resetting. */
     public boolean isVehicleSetBack = false;
-    /** TODO: Movement consistency */
+    /** Tracks vehicle movement consistency */
     public MoveConsistency vehicleConsistency = MoveConsistency.INCONSISTENT;
-    /** TODO: */
+    /** Set back locations related to vehicles */
     public final DefaultSetBackStorage vehicleSetBacks = new DefaultSetBackStorage();
 
 
@@ -357,7 +372,7 @@ public class MovingData extends ACheckData implements IDataOnRemoveSubCheckData,
      * Clear vehicle related data, except more packets.
      */
     public void clearVehicleData() {
-        // TODO: Not entirely sure what to do here.
+        // TODO: review if additional vehicle related fields should be reset
         vehicleMoves.invalidate();
         vehicleSetBacks.invalidateAll();
     }
@@ -408,7 +423,7 @@ public class MovingData extends ACheckData implements IDataOnRemoveSubCheckData,
         // Keep no-fall data.
         // Fly data: problem is we don't remember the settings for the set back location.
         // Assume the player to start falling from there rather, or be on ground.
-        // TODO: Check if to adjust some counters to state before setback? 
+        // TODO: consider restoring counters to their state before the setback
         // Keep jump amplifier
         // Keep bunny-hop delay. Harsher on bunnyhop cheats.
         // keep jump phase.
@@ -450,7 +465,7 @@ public class MovingData extends ACheckData implements IDataOnRemoveSubCheckData,
         verticalBounce = null;
         // Remember where we send the player to.
         setTeleported(loc);
-        // TODO: sfHoverTicks ?
+        // TODO: evaluate if sfHoverTicks should be reset here
     }
 
 
@@ -461,7 +476,7 @@ public class MovingData extends ACheckData implements IDataOnRemoveSubCheckData,
     public void setNextFriction(final PlayerMoveData thisMove) {
 
         // NOTE: Other methods might still override nextFriction to 1.0 due to burst/lift-off envelope.
-        // TODO: Other media / medium transitions / friction by block.
+        // TODO: handle additional media transitions and block specific friction
         final LocationData from = thisMove.from;
         final LocationData to = thisMove.to;
 
@@ -471,9 +486,9 @@ public class MovingData extends ACheckData implements IDataOnRemoveSubCheckData,
         else if (from.inPowderSnow || to.inPowderSnow) {
             nextFrictionHorizontal = nextFrictionVertical = 0.0;
         }
-        // No from#onClimbable check to fix vines fps casue by medium counts, probably wrong place! 
+        // No from#onClimbable check to fix vines fps cause by medium counts, probably wrong place!
         else if (to.onClimbable) {
-            // TODO: Not sure about horizontal (!).
+            // TODO: verify horizontal friction handling here
             nextFrictionHorizontal = nextFrictionVertical = 0.0;
         }
         else if (to.onHoneyBlock || to.onHoneyBlock) {
@@ -484,7 +499,7 @@ public class MovingData extends ACheckData implements IDataOnRemoveSubCheckData,
             nextFrictionVertical = Magic.FRICTION_MEDIUM_BERRY_BUSH;
         }
         else if (from.inLiquid) {
-            // TODO: Exact conditions ?!
+            // TODO: refine the conditions for liquid friction
             if (from.inLava) {
                 nextFrictionHorizontal = nextFrictionVertical = Magic.FRICTION_MEDIUM_LAVA;
             }
@@ -535,7 +550,7 @@ public class MovingData extends ACheckData implements IDataOnRemoveSubCheckData,
             nextFrictionHorizontal = nextFrictionVertical = 0.0;
         }
         else if (loc.isInLiquid()) {
-            // TODO: Distinguish strong limit.
+            // TODO: distinguish between strong and weak liquid limits
             liftOffEnvelope = LiftOffEnvelope.LIMIT_LIQUID;
             if (loc.isInLava()) {
                 nextFrictionHorizontal = nextFrictionVertical = Magic.FRICTION_MEDIUM_LAVA;
@@ -595,7 +610,7 @@ public class MovingData extends ACheckData implements IDataOnRemoveSubCheckData,
         lastFrictionHorizontal = lastFrictionVertical = 0.0;
         verticalBounce = null;
         blockChangeRef.valid = false;
-        // TODO: other buffers ?
+        // TODO: check if additional buffers should be reset here
         // No reset of vehicleConsistency.
     }
 
@@ -606,7 +621,7 @@ public class MovingData extends ACheckData implements IDataOnRemoveSubCheckData,
      * @param loc
      */
     public void resetVehiclePositions(final RichEntityLocation loc) {
-        // TODO: Other properties (convenience, e.g. set back?) ?
+        // TODO: also reset related convenience fields such as set back
         vehicleMoves.invalidate();
         if (loc != null) {
             final VehicleMoveData lastMove = vehicleMoves.getFirstPastMove();
@@ -649,7 +664,7 @@ public class MovingData extends ACheckData implements IDataOnRemoveSubCheckData,
         final long now = System.currentTimeMillis();
         morePacketsFreq.clear(now);
         morePacketsBurstFreq.clear(now);
-        // TODO: Also reset other data ?
+        // TODO: evaluate if further player data should be reset here
     }
 
 
@@ -667,8 +682,8 @@ public class MovingData extends ACheckData implements IDataOnRemoveSubCheckData,
     public void clearVehicleMorePacketsData() {
         vehicleMorePacketsLastTime = 0;
         vehicleMorePacketsBuffer = vehicleMorePacketsBufferDefault;
-        vehicleSetBacks.getMidTermEntry().setValid(false); // TODO: Will have other resetting conditions later on.
-        // TODO: Also reset other data ?
+        vehicleSetBacks.getMidTermEntry().setValid(false); // TODO: more conditions may be required
+        // TODO: evaluate if other vehicle data should be reset
     }
 
 
@@ -804,7 +819,7 @@ public class MovingData extends ACheckData implements IDataOnRemoveSubCheckData,
      * @return
      */
     public final Location getTeleported() {
-        // TODO: here a reference might do.
+        // TODO: returning a reference may be sufficient here
         return teleported == null ? teleported : LocUtil.clone(teleported);
     }
 
@@ -955,7 +970,7 @@ public class MovingData extends ACheckData implements IDataOnRemoveSubCheckData,
      */
     public void addVelocity(final Player player, final MovingConfig cc, final double vx, final double vy, final double vz, final long flags) {
         final int tick = TickTask.getTick();
-        // TODO: Slightly odd to call this each time, might switch to a counter-strategy (move - remove). 
+        // TODO: calling this every tick might be inefficient; consider a counter strategy
         removeInvalidVelocity(tick  - cc.velocityActivationTicks);
 
         if (pData.isDebugActive(CheckType.MOVING)) {
@@ -965,15 +980,15 @@ public class MovingData extends ACheckData implements IDataOnRemoveSubCheckData,
         // Always add vertical velocity.
         verVel.add(new SimpleEntry(tick, vy, flags, cc.velocityActivationCounter));
 
-        // TODO: Should also switch to adding always.
+        // TODO: horizontal velocity should possibly always be added
         if (vx != 0.0 || vz != 0.0) {
             final double newVal = Math.sqrt(vx * vx + vz * vz);
             horVel.add(new AccountEntry(tick, newVal, cc.velocityActivationCounter, getHorVelValCount(newVal)));
         }
 
         // Set dirty flag here.
-        sfDirty = true; // TODO: Set on using the velocity, due to latency !
-        sfNoLowJump = true; // TODO: Set on using the velocity, due to latency !
+        sfDirty = true; // TODO: set when applying the velocity to account for latency
+        sfNoLowJump = true; // TODO: set when applying the velocity to account for latency
     }
 
 
@@ -1042,8 +1057,8 @@ public class MovingData extends ACheckData implements IDataOnRemoveSubCheckData,
      * @return
      */
     public static int getHorVelValCount(double velocity) {
-        // TODO: Configable max cap
-        // TODO: Not sure if this is intentional but the cap would force NCP to always pick 30 for velocity entries smaller than 3.0
+        // TODO: make the maximum cap configurable
+        // TODO: review whether the current cap forces a minimum of 30 for small values
         // As a workaround/fix simply increase the actual velocity value
         // See: https://github.com/NoCheatPlus/NoCheatPlus/commit/a5ed7805429c73f8f2fec409c1947fb032210833
         return Math.max(30, 1 + (int) Math.round(velocity * 50.0));
@@ -1214,7 +1229,7 @@ public class MovingData extends ACheckData implements IDataOnRemoveSubCheckData,
         if (available != null) {
             playerMoves.getCurrentMove().verVelUsed = available;
             sfDirty = true;
-            // TODO: Consider sfNoLowJump = true;
+            // TODO: evaluate if sfNoLowJump should also be set here
         }
         return available;
     }
@@ -1346,7 +1361,7 @@ public class MovingData extends ACheckData implements IDataOnRemoveSubCheckData,
      */
     private LocationTrace getTrace(final int maxAge, final int maxSize) {
         if (trace.getMaxSize() != maxSize || trace.getMaxAge() != maxAge) {
-            // TODO: Might want to have tick passed as argument?
+            // TODO: consider passing the current tick as argument instead
             trace.adjustSettings(maxAge, maxSize, TickTask.getTick());
         } 
         return trace;
@@ -1368,7 +1383,7 @@ public class MovingData extends ACheckData implements IDataOnRemoveSubCheckData,
     public LocationTrace updateTrace(final Player player, final Location loc, final long time, final IEntityAccessDimensions iead) {
         final LocationTrace trace = getTrace(player);
         if (iead == null) {
-            // TODO: 0.3 from bukkit based default heights (needs extra registered classes).
+            // TODO: 0.3 is taken from Bukkit's default heights; consider deriving from registered classes
             trace.addEntry(time, loc.getX(), loc.getY(), loc.getZ(), 0.3, player.getEyeHeight());
         }
         else {
@@ -1437,7 +1452,7 @@ public class MovingData extends ACheckData implements IDataOnRemoveSubCheckData,
     public boolean resetVelocityJumpPhase(final Collection<String> tags) {
         if (horVel.hasActive() || horVel.hasQueued() 
             || sfDirty && shouldRetainSFDirty(tags)) {
-            // TODO: What with vertical ?
+            // TODO: clarify how vertical velocity should influence this state
             return sfDirty = true;
         }
         else {
@@ -1456,7 +1471,7 @@ public class MovingData extends ACheckData implements IDataOnRemoveSubCheckData,
                 || thisMove != null && thisMove.verVelUsed != null 
                 && thisMove.verVelUsed.hasFlag(VelocityFlags.ORIGIN_BLOCK_BOUNCE)) {
 
-                // TODO: Strictly, pastground_from/to should rather be skipped instead of this.
+                // TODO: ideally pastground_from/to should be skipped instead
                 if (tags != null) {
                     tags.add("retain_dirty_bounce"); // +- block/push
                 }
@@ -1472,7 +1487,7 @@ public class MovingData extends ACheckData implements IDataOnRemoveSubCheckData,
      * implemented as setting velocity jump phase.
      */
     public void setFrictionJumpPhase() {
-        // TODO: Better and more reliable modeling.
+        // TODO: implement better modeling for friction jump phases
         sfDirty = true;
     }
 
@@ -1495,7 +1510,7 @@ public class MovingData extends ACheckData implements IDataOnRemoveSubCheckData,
         delayWorkaround = Math.min(delayWorkaround, time);
         vehicleMorePacketsLastTime = Math.min(vehicleMorePacketsLastTime, time);
         clearAccounting(); // Not sure: adding up might not be nice.
-        removeAllPlayerSpeedModifiers(); // TODO: This likely leads to problems.
+        removeAllPlayerSpeedModifiers(); // TODO: review if clearing modifiers here causes issues
         // (ActionFrequency can handle this.)
     }
 
@@ -1535,9 +1550,9 @@ public class MovingData extends ACheckData implements IDataOnRemoveSubCheckData,
 
     @Override
     public boolean dataOnRemoveSubCheckData(Collection<CheckType> checkTypes) {
-        // TODO: Detect if it is ok to remove data.
-        // TODO: LocationTrace stays (leniency for other players!).
-        // TODO: Likely more fields left to change.
+        // TODO: verify when it is safe to remove data
+        // TODO: LocationTrace is kept for leniency toward other players
+        // TODO: additional fields might need to be cleared here
         for (final CheckType checkType : checkTypes) {
             switch (checkType) {
                 /*
@@ -1546,16 +1561,16 @@ public class MovingData extends ACheckData implements IDataOnRemoveSubCheckData,
                  */
                 case MOVING_SURVIVALFLY:
                     survivalFlyVL = 0;
-                    clearFlyData(); // TODO: ...
-                    resetSetBack(); // TODO: Not sure this is really best for compatibility.
+                    clearFlyData(); // TODO: verify which fields should remain
+                    resetSetBack(); // TODO: ensure compatibility with other plugins
                     wasInBed = false;
-                    // TODO: other?
+                    // TODO: consider additional cleanup
                     break;
                 case MOVING_CREATIVEFLY:
                     creativeFlyVL = 0;
-                    clearFlyData(); // TODO: ...
-                    resetSetBack(); // TODO: Not sure this is really best for compatibility.
-                    // TODO: other?
+                    clearFlyData(); // TODO: verify which fields should remain
+                    resetSetBack(); // TODO: ensure compatibility with other plugins
+                    // TODO: consider additional cleanup
                     break;
                 case MOVING_NOFALL:
                     noFallVL = 0;
@@ -1597,7 +1612,7 @@ public class MovingData extends ACheckData implements IDataOnRemoveSubCheckData,
 
     @Override
     public boolean dataOnWorldUnload(final World world, final IGetGenericInstance dataAccess) {
-        // TODO: Unlink world references.
+        // TODO: ensure references to unloaded worlds are cleared
         final String worldName = world.getName();
         if (teleported != null && worldName.equalsIgnoreCase(teleported.getWorld().getName())) {
             resetTeleported();
