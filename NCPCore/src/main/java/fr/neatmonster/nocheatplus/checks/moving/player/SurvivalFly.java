@@ -1881,17 +1881,61 @@ public class SurvivalFly extends Check {
      * @param skipPermChecks
      * @return hAllowedDistance, hDistanceAboveLimit, hFreedom
      */
-    private double[] hDistAfterFailure(final Player player, 
-                                       final PlayerLocation from, final PlayerLocation to, 
-                                       double hAllowedDistance, double hDistanceAboveLimit, final boolean sprinting, 
-                                       final PlayerMoveData thisMove, final PlayerMoveData lastMove, 
-                                       final MovingData data, final MovingConfig cc, final IPlayerData pData, 
+    private double[] hDistAfterFailure(final Player player,
+                                       final PlayerLocation from, final PlayerLocation to,
+                                       double hAllowedDistance, double hDistanceAboveLimit, final boolean sprinting,
+                                       final PlayerMoveData thisMove, final PlayerMoveData lastMove,
+                                       final MovingData data, final MovingConfig cc, final IPlayerData pData,
                                        final boolean skipPermChecks) {
 
         final double speedAmplifier = mcAccess.getHandle().getFasterMovementAmplifier(player);
 
         // 1: Attempt to reset item on NoSlow Violation, if set so in the configuration.
-        if (cc.survivalFlyResetItem && hDistanceAboveLimit > 0.0 && data.sfHorizontalBuffer <= 0.5 && tags.contains("usingitem")) {
+        final double[] reset = attemptItemReset(player, from, to, hAllowedDistance, hDistanceAboveLimit,
+                sprinting, thisMove, data, cc, pData);
+        hAllowedDistance = reset[0];
+        hDistanceAboveLimit = reset[1];
+
+        // 2: Test bunny early, because it applies often and destroys as little as possible. 1st call
+        // Strictly speaking, bunnyhopping backwards is not possible, so we should reset the bhop model in such case.
+        // However, we'd need a better "ismovingbackwards" model first tho, as the current one in TrigUtil is unreliable.
+        hDistanceAboveLimit = applyBunnyHop(from, to, player, hAllowedDistance, hDistanceAboveLimit, sprinting,
+                thisMove, lastMove, data, cc, speedAmplifier);
+
+        // 3: Check being moved by blocks.
+        final double[] block = checkBlockMove(from, to, thisMove, data, cc, hAllowedDistance, hDistanceAboveLimit);
+        hAllowedDistance = block[0];
+        hDistanceAboveLimit = block[1];
+
+        // 4: Check velocity.
+        // See: https://github.com/NoCheatPlus/Issues/issues/374#issuecomment-296172316
+        final double[] vel = applyVelocity(hDistanceAboveLimit, data);
+        hDistanceAboveLimit = vel[0];
+        double hFreedom = vel[1];
+
+        // 5: Re-check for bunnyhopping if the hDistance is still above limit (2nd).
+        if (hDistanceAboveLimit > 0.0) {
+            hDistanceAboveLimit = applyBunnyHop(from, to, player, hAllowedDistance, hDistanceAboveLimit, sprinting,
+                    thisMove, lastMove, data, cc, speedAmplifier);
+        }
+
+        // 6: Finally, check for the Horizontal buffer if the hDistance is still above limit.
+        hDistanceAboveLimit = applyHorizontalBuffer(hDistanceAboveLimit, data, cc);
+
+        // Add the hspeed tag on violation.
+        if (hDistanceAboveLimit > 0.0) {
+            tags.add("hspeed");
+        }
+        return new double[]{hAllowedDistance, hDistanceAboveLimit, hFreedom};
+    }
+
+    /** Step 1: Reset the held item if configured and possible. */
+    private double[] attemptItemReset(final Player player, final PlayerLocation from, final PlayerLocation to,
+                                      double hAllowedDistance, double hDistanceAboveLimit, final boolean sprinting,
+                                      final PlayerMoveData thisMove, final MovingData data,
+                                      final MovingConfig cc, final IPlayerData pData) {
+        if (cc.survivalFlyResetItem && hDistanceAboveLimit > 0.0 && data.sfHorizontalBuffer <= 0.5
+                && tags.contains("usingitem")) {
             tags.add("itemreset");
             // Handle through nms
             if (mcAccess.getHandle().resetActiveItem(player)) {
@@ -1908,7 +1952,7 @@ public class SurvivalFly extends Check {
                         }
                         // False positive
                         else data.isUsingItem = false;
-                    } 
+                    }
                     else {
                         player.getInventory().setItemInOffHand(stack);
                         data.isUsingItem = false;
@@ -1928,7 +1972,7 @@ public class SurvivalFly extends Check {
                     }
                     // False positive
                     else data.isUsingItem = false;
-                } 
+                }
                 else {
                     if (stack != null) {
                         Bridge1_9.setItemInMainHand(player, stack);
@@ -1941,33 +1985,45 @@ public class SurvivalFly extends Check {
                 hDistanceAboveLimit = thisMove.hDistance - hAllowedDistance;
             }
         }
+        return new double[]{hAllowedDistance, hDistanceAboveLimit};
+    }
 
-        // 2: Test bunny early, because it applies often and destroys as little as possible. 1st call
-        // Strictly speaking, bunnyhopping backwards is not possible, so we should reset the bhop model in such case.
-        // However, we'd need a better "ismovingbackwards" model first tho, as the current one in TrigUtil is unreliable.
-        hDistanceAboveLimit = MagicBunny.bunnyHop(from, to, player, hAllowedDistance, hDistanceAboveLimit, sprinting, thisMove, lastMove, data, cc, tags, speedAmplifier);
+    /** Step 2 and 5: Apply bunny hop adjustments. */
+    private double applyBunnyHop(final PlayerLocation from, final PlayerLocation to, final Player player,
+                                 final double hAllowedDistance, final double hDistanceAboveLimit, final boolean sprinting,
+                                 final PlayerMoveData thisMove, final PlayerMoveData lastMove, final MovingData data,
+                                 final MovingConfig cc, final double speedAmplifier) {
+        return MagicBunny.bunnyHop(from, to, player, hAllowedDistance, hDistanceAboveLimit, sprinting, thisMove,
+                lastMove, data, cc, tags, speedAmplifier);
+    }
 
-        // 3: Check being moved by blocks.
-        // 1.025 is a Magic value
+    /** Step 3: Movement caused by blocks such as pistons. */
+    private double[] checkBlockMove(final PlayerLocation from, final PlayerLocation to, final PlayerMoveData thisMove,
+                                    final MovingData data, final MovingConfig cc,
+                                    double hAllowedDistance, double hDistanceAboveLimit) {
         if (cc.trackBlockMove && hDistanceAboveLimit > 0.0 && hDistanceAboveLimit < 1.025) {
             // Push by 0.49-0.51 in one direction. Also observed 1.02.
             final double xDistance = to.getX() - from.getX();
             final double zDistance = to.getZ() - from.getZ();
             if (Math.abs(xDistance) > 0.485 && Math.abs(xDistance) < 1.025
-                && from.matchBlockChange(blockChangeTracker, data.blockChangeRef, xDistance < 0 ? Direction.X_NEG : Direction.X_POS, 0.05)) {
+                && from.matchBlockChange(blockChangeTracker, data.blockChangeRef,
+                        xDistance < 0 ? Direction.X_NEG : Direction.X_POS, 0.05)) {
                 hAllowedDistance = thisMove.hDistance; // MAGIC
                 hDistanceAboveLimit = 0.0;
             }
             else if (Math.abs(zDistance) > 0.485 && Math.abs(zDistance) < 1.025
-                    && from.matchBlockChange(blockChangeTracker, data.blockChangeRef, zDistance < 0 ? Direction.Z_NEG : Direction.Z_POS, 0.05)) {
+                    && from.matchBlockChange(blockChangeTracker, data.blockChangeRef,
+                        zDistance < 0 ? Direction.Z_NEG : Direction.Z_POS, 0.05)) {
                 hAllowedDistance = thisMove.hDistance; // MAGIC
                 hDistanceAboveLimit = 0.0;
             }
         }
+        return new double[]{hAllowedDistance, hDistanceAboveLimit};
+    }
 
-        // 4: Check velocity.
-        // See: https://github.com/NoCheatPlus/Issues/issues/374#issuecomment-296172316
-        double hFreedom = 0.0; // Horizontal velocity used.
+    /** Step 4: Consume velocity for compensation if available. */
+    private double[] applyVelocity(double hDistanceAboveLimit, final MovingData data) {
+        double hFreedom = 0.0;
         if (hDistanceAboveLimit > 0.0) {
             hFreedom = data.getHorizontalFreedom();
             if (hFreedom < hDistanceAboveLimit) {
@@ -1985,26 +2041,19 @@ public class SurvivalFly extends Check {
                 }
             }
         }
+        return new double[]{hDistanceAboveLimit, hFreedom};
+    }
 
-        // 5: Re-check for bunnyhopping if the hDistance is still above limit (2nd).
-        if (hDistanceAboveLimit > 0.0) {
-            hDistanceAboveLimit = MagicBunny.bunnyHop(from, to, player, hAllowedDistance, hDistanceAboveLimit, sprinting, thisMove, lastMove, data, cc, tags, speedAmplifier);
-        }
-
-        // 6: Finally, check for the Horizontal buffer if the hDistance is still above limit.
+    /** Step 6: Apply the horizontal buffer if configured. */
+    private double applyHorizontalBuffer(double hDistanceAboveLimit, final MovingData data, final MovingConfig cc) {
         if (hDistanceAboveLimit > 0.0 && data.sfHorizontalBuffer > 0.0 && bufferUse) {
             final double amount = Math.min(data.sfHorizontalBuffer, hDistanceAboveLimit);
             hDistanceAboveLimit -= amount;
             data.sfHorizontalBuffer = Math.max(0.0, data.sfHorizontalBuffer - amount); // Ensure we never end up below zero.
-            tags.add("hbufuse("+ data.sfHorizontalBuffer + "/" + cc.hBufMax +")" );
+            tags.add("hbufuse(" + data.sfHorizontalBuffer + "/" + cc.hBufMax + ")");
 
         }
-
-        // Add the hspeed tag on violation.
-        if (hDistanceAboveLimit > 0.0) {
-            tags.add("hspeed");
-        }
-        return new double[]{hAllowedDistance, hDistanceAboveLimit, hFreedom};
+        return hDistanceAboveLimit;
     }
 
 
