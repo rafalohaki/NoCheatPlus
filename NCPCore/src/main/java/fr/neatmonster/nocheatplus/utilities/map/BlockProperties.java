@@ -4799,6 +4799,12 @@ public class BlockProperties {
         for (Material mat : MaterialUtil.STRIPPED_WOOD_BLOCKS) {
             BlockInit.setAs(mat, BridgeMaterial.OAK_WOOD);
         }
+        for (Material mat : MaterialUtil.WOODEN_DOORS) {
+            setBlock(mat, woodDoorType);
+        }
+        for (Material mat : MaterialUtil.WOODEN_TRAP_DOORS) {
+            setBlock(mat, woodDoorType);
+        }
     }
 
     private static void registerBrickTypes() {
