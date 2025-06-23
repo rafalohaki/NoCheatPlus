@@ -2,26 +2,42 @@ name: Build NoCheatPlus
 
 on:
   push:
-    branches: [ master ]
+    branches:
+      - master
 
 jobs:
   build:
     name: Build
     runs-on: ubuntu-latest
-    if: "github.actor != 'dependabot[bot]'"
+    if: github.actor != 'dependabot[bot]'
     steps:
-      - uses: actions/checkout@main
-      - name: Set up JDK 17
-        uses: actions/setup-java@main
+      # Checkout source code
+      - uses: actions/checkout@v4
+
+      # Install Temurin JDK 21 and enable Maven cache
+      - name: Set up JDK 21
+        uses: actions/setup-java@v4
         with:
-          java-version: 17
-          distribution: temurin
+          distribution: 'temurin'
+          java-version: '21'
+          cache: 'maven'
 
+      # Optional: Install Maven Daemon (mvnd) for faster incremental builds
+      - name: Set up Maven Daemon (mvnd)
+        uses: gauthamchandra/mvnd-action@v0.2.1
+        # You can pin a specific daemon version (defaults to the latest)
+        # with:
+        #   version: '1.0.2'
+
+      # Build the project (tries mvnd first, falls back to mvn if not present)
       - name: Build NoCheatPlus
-        run: mvn clean package -P nonfree_build -P all
+        run: |
+          (command -v mvnd >/dev/null 2>&1 && mvnd -B clean package -P nonfree_build -P all) || \
+          mvn -B clean package -P nonfree_build -P all
 
+      # Upload the produced JAR(s) as a prerelease asset
       - name: Upload NoCheatPlus
-        uses: marvinpinto/action-automatic-releases@master
+        uses: marvinpinto/action-automatic-releases@v1.2.0
         with:
           title: "NoCheatPlus"
           automatic_release_tag: "ncp"
