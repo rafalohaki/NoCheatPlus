@@ -2282,12 +2282,6 @@ public class MovingListener extends CheckListener implements TickListener, IRemo
         final IPlayerData pData = DataManager.getPlayerData(player);
         final MovingData data = pData.getGenericInstance(MovingData.class);
         final PlayerMoveData thisMove = data.playerMoves.getCurrentMove();
-        if (!pData.isCheckActive(CheckType.MOVING, player)) return;
-        if (player.isInsideVehicle()) {
-            // Ignore vehicles (noFallFallDistance will be inaccurate anyway).
-            data.clearNoFallData();
-            return;
-        }
         final MovingConfig cc = pData.getGenericInstance(MovingConfig.class);
         final PlayerMoveInfo moveInfo = aux.usePlayerMoveInfo();
         final double yOnGround = Math.max(cc.noFallyOnGround, cc.yOnGround);
@@ -2296,114 +2290,156 @@ public class MovingListener extends CheckListener implements TickListener, IRemo
         final PlayerLocation pLoc = moveInfo.from;
         pLoc.collectBlockFlags(yOnGround);
 
-        if (event.isCancelled() || !MovingUtil.shouldCheckSurvivalFly(player, pLoc, moveInfo.to, data, cc, pData) 
-            || !noFall.isEnabled(player, pData)) {
-            data.clearNoFallData();
+        if (shouldSkipFallDamageCheck(player, event, pData, data, pLoc, cc, moveInfo)) {
             useFallLoc.setWorld(null);
             aux.returnPlayerMoveInfo(moveInfo);
             return;
         }
+
         final boolean debug = pData.isDebugActive(CheckType.MOVING_NOFALL);
-        boolean allowReset = true;
         float fallDistance = player.getFallDistance();
         final float yDiff = (float) (data.noFallMaxY - loc.getY());
         final double damage = BridgeHealth.getRawDamage(event); // Raw damage.
         if (debug) debug(player, "Damage(FALL/PRE): " + damage + " / mc=" + player.getFallDistance() + " nf=" + data.noFallFallDistance + " yDiff=" + yDiff);
 
-        // NoFall bypass checks.
-        // data.noFallSkipAirCheck is used to skip checking in general, thus move into that block or not?
-        // Could consider skipping accumulated fall distance for NoFall in general as well.
+        NoFallBypassResult result = handleNoFallBypass(player, event, data, thisMove, moveInfo, damage, yDiff, fallDistance, cc, pLoc, debug);
+        if (result.earlyExit) {
+            useFallLoc.setWorld(null);
+            aux.returnPlayerMoveInfo(moveInfo);
+            return;
+        }
+        fallDistance = result.fallDistance;
+        boolean allowReset = result.allowReset;
+        aux.returnPlayerMoveInfo(moveInfo);
+
+        adjustFallDamage(player, event, data, loc, fallDistance, yDiff, allowReset, damage, debug);
+        resetNoFallData(player, allowReset, data, cc, debug);
+
+        useFallLoc.setWorld(null);
+    }
+
+    /** Decide if fall damage checks should be skipped for the given event. */
+    private boolean shouldSkipFallDamageCheck(final Player player, final EntityDamageEvent event,
+                                              final IPlayerData pData, final MovingData data,
+                                              final PlayerLocation pLoc, final MovingConfig cc,
+                                              final PlayerMoveInfo moveInfo) {
+
+        if (!pData.isCheckActive(CheckType.MOVING, player)) {
+            return true;
+        }
+        if (player.isInsideVehicle()) {
+            data.clearNoFallData();
+            return true;
+        }
+        if (event.isCancelled() ||
+                !MovingUtil.shouldCheckSurvivalFly(player, pLoc, moveInfo.to, data, cc, pData) ||
+                !noFall.isEnabled(player, pData)) {
+            data.clearNoFallData();
+            return true;
+        }
+        return false;
+    }
+
+    /** Container for results of {@link #handleNoFallBypass}. */
+    private static class NoFallBypassResult {
+        final float fallDistance;
+        final boolean allowReset;
+        final boolean earlyExit;
+        NoFallBypassResult(float fallDistance, boolean allowReset, boolean earlyExit) {
+            this.fallDistance = fallDistance;
+            this.allowReset = allowReset;
+            this.earlyExit = earlyExit;
+        }
+    }
+
+    /**
+     * Handle NoFall bypass logic, possibly adjusting damage and returning early.
+     */
+    private NoFallBypassResult handleNoFallBypass(final Player player, final EntityDamageEvent event,
+                                                  final MovingData data, final PlayerMoveData thisMove,
+                                                  final PlayerMoveInfo moveInfo, final double damage,
+                                                  final float yDiff, final float fallDistance,
+                                                  final MovingConfig cc, final PlayerLocation pLoc,
+                                                  final boolean debug) {
+
+        float fDist = fallDistance;
+        boolean allowReset = true;
+
         if (!data.noFallSkipAirCheck) {
-            
-            // Cheat: let Minecraft gather and deal fall damage.
             final float dataDist = Math.max(yDiff, data.noFallFallDistance);
             final double dataDamage = NoFall.getDamage(dataDist);
             if (damage > dataDamage + 0.5 || dataDamage <= 0.0) {
-
-                // Hot fix: allow fall damage in lava.
-                // Correctly model the half fall distance per in-lava move and taking fall damage in lava. 
-                // Also relate past y-distance(s) to the fall distance (mc).
-                // Original issue: https://github.com/NoCheatPlus/Issues/issues/439#issuecomment-299300421
                 final PlayerMoveData firstPastMove = data.playerMoves.getFirstPastMove();
                 if (pLoc.isOnGround() && pLoc.isInLava() && firstPastMove.toIsValid && firstPastMove.yDistance < 0.0) {
                     if (debug) debug(player, "NoFall/Damage: allow fall damage in lava (hotfix).");
-                } 
-                // Fix issues when gliding down vines with elytra.
-                // Checking for velocity does not work since sometimes it can be applied after this check runs
-                // Actually find out why NoFall is running at all when still gliding, rather.
-                else if (moveInfo.from.isOnClimbable() 
+                }
+                else if (moveInfo.from.isOnClimbable()
                         && (firstPastMove.modelFlying != null && firstPastMove.modelFlying.getVerticalAscendGliding()
-                        || firstPastMove.elytrafly || thisMove.modelFlying != null && thisMove.modelFlying.getVerticalAscendGliding()
-                        || thisMove.elytrafly)) {
+                            || firstPastMove.elytrafly || thisMove.modelFlying != null && thisMove.modelFlying.getVerticalAscendGliding()
+                            || thisMove.elytrafly)) {
                     if (debug) debug(player, "Ignore fakefall on climbable on elytra move");
                 }
-                // NOTE: Double violations are possible with the in-air check below.
-                // Differing sub checks, once cancel action...
                 else if (noFallVL(player, "fakefall", data, cc)) {
                     player.setFallDistance(dataDist);
                     if (dataDamage <= 0.0) {
-                        // Cancel the event.
                         event.setCancelled(true);
-                        useFallLoc.setWorld(null);
-                        aux.returnPlayerMoveInfo(moveInfo);
-                        return;
-                    }
-                    else {
-                        // Adjust and continue.
-                        if (debug) debug(player, "NoFall/Damage: override player fall distance and damage (" + fallDistance + " -> " + dataDist + ").");
-                        fallDistance = dataDist;
+                        return new NoFallBypassResult(fDist, allowReset, true);
+                    } else {
+                        if (debug) debug(player, "NoFall/Damage: override player fall distance and damage (" + fDist + " -> " + dataDist + ").");
+                        fDist = dataDist;
                         BridgeHealth.setRawDamage(event, dataDamage);
                     }
                 }
             }
-            // Be sure not to lose that block.
-            // What is this and why is it right here?
-            // Answer: https://github.com/NoCheatPlus/NoCheatPlus/commit/50ebbb01fb3998f5e4ebba741ed6cbd318de00c5
-            data.noFallFallDistance += 1.0; 
-            // Account for liquid too?
-            // Cheat: set ground to true in-air. Cancel the event and restore fall distance. NoFall data will not be reset 
+            data.noFallFallDistance += 1.0;
             if (!pLoc.isOnGround(1.0, 0.3, 0.1) && !pLoc.isResetCond() && !pLoc.isAboveLadder() && !pLoc.isAboveStairs()) {
                 if (noFallVL(player, "fakeground", data, cc) && data.hasSetBack()) {
                     allowReset = false;
                 }
             }
-            // Legitimate damage: clear accounting data.
-            // Why only reset in case of !data.noFallSkipAirCheck?
-            // Also reset in other cases (moved too quickly)?
-            else data.vDistAcc.clear();
+            else {
+                data.vDistAcc.clear();
+            }
         }
-        aux.returnPlayerMoveInfo(moveInfo);
-        // Fall-back check (skip with jump amplifier).
-        final double maxD = data.jumpAmplifier > 0.0 ? NoFall.getDamage((float) NoFall.getApplicableFallHeight(player, loc.getY(), data))
-                                                     : NoFall.getDamage(Math.max(yDiff, Math.max(data.noFallFallDistance, fallDistance))) + (allowReset ? 0.0 : Magic.FALL_DAMAGE_DIST);
-        if (maxD > damage) {
-            // respect dealDamage ?
-            double damageafter = NoFall.calcDamagewithfeatherfalling(player, NoFall.calcReducedDamageByBlock(player, data, maxD), mcAccess.getHandle().dealFallDamageFiresAnEvent().decide());
-            BridgeHealth.setRawDamage(event, damageafter);
-            if (debug) debug(player, "Adjust fall damage to: " + (damageafter != maxD ? damageafter : maxD));
-        }
+        return new NoFallBypassResult(fDist, allowReset, false);
+    }
 
+    /** Adjust fall damage based on calculated values. */
+    private void adjustFallDamage(final Player player, final EntityDamageEvent event,
+                                  final MovingData data, final Location loc,
+                                  final float fallDistance, final float yDiff,
+                                  final boolean allowReset, final double damage,
+                                  final boolean debug) {
+
+        final double maxD = data.jumpAmplifier > 0.0
+                ? NoFall.getDamage((float) NoFall.getApplicableFallHeight(player, loc.getY(), data))
+                : NoFall.getDamage(Math.max(yDiff, Math.max(data.noFallFallDistance, fallDistance)))
+                        + (allowReset ? 0.0 : Magic.FALL_DAMAGE_DIST);
+        if (maxD > damage) {
+            double damageAfter = NoFall.calcDamagewithfeatherfalling(player,
+                    NoFall.calcReducedDamageByBlock(player, data, maxD),
+                    mcAccess.getHandle().dealFallDamageFiresAnEvent().decide());
+            BridgeHealth.setRawDamage(event, damageAfter);
+            if (debug) debug(player, "Adjust fall damage to: " + (damageAfter != maxD ? damageAfter : maxD));
+        }
+    }
+
+    /** Reset NoFall related data after damage has been processed. */
+    private void resetNoFallData(final Player player, final boolean allowReset,
+                                 final MovingData data, final MovingConfig cc,
+                                 final boolean debug) {
         if (allowReset) {
-            // Normal fall damage, reset data.
             data.clearNoFallData();
             if (debug) debug(player, "Reset NoFall data on fall damage.");
-        }
-        else {
-            // Minecraft/NCP bug or cheating.
-            // (Do not cancel the event, otherwise: "moved too quickly exploit".)
+        } else {
             if (cc.noFallViolationReset) {
                 data.clearNoFallData();
             }
-
-            // Add player to hover checks.
             if (cc.sfHoverCheck && data.sfHoverTicks < 0) {
                 data.sfHoverTicks = 0;
                 hoverTicks.add(player.getName());
             }
         }
-        // Entity fall-distance should be reset elsewhere.
-        // Cleanup.
-        useFallLoc.setWorld(null);
     }
 
 
