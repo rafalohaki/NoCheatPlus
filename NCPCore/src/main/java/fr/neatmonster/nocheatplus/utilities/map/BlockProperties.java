@@ -1196,11 +1196,10 @@ public class BlockProperties {
 
         // Lever types
         for (Material mat: new Material[]{
-            Material.LEVER, 
-            BridgeMaterial.PISTON, 
-            BridgeMaterial.PISTON_HEAD, 
-            BridgeMaterial.STICKY_PISTON,
-            BridgeMaterial.PISTON}) {
+            Material.LEVER,
+            BridgeMaterial.PISTON,
+            BridgeMaterial.PISTON_HEAD,
+            BridgeMaterial.STICKY_PISTON}) {
             setBlock(mat, leverType);
         }
         setBlock(BridgeMaterial.CAKE, leverType);
@@ -4787,13 +4786,15 @@ public class BlockProperties {
 
     private static void registerBrickTypes() {
         for (Material mat : new Material[] {
+            // Vanilla blocks
             Material.CAULDRON,
             Material.COBBLESTONE_STAIRS,
             Material.COBBLESTONE,
             Material.NETHER_BRICK_STAIRS,
             Material.MOSSY_COBBLESTONE,
             Material.BRICK_STAIRS,
-            Material.BRICK_STAIRS,
+            
+            // Bridge/alias materials
             BridgeMaterial.NETHER_BRICK_FENCE,
             BridgeMaterial.BRICK_SLAB,
             BridgeMaterial.STONE_SLAB,
