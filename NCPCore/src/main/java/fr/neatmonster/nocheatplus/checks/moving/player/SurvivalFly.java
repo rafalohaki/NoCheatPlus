@@ -889,48 +889,73 @@ public class SurvivalFly extends Check {
     private void setHorVerDataExAnte(final PlayerMoveData thisMove, final PlayerLocation from, final PlayerLocation to, final MovingData data, final double yDistance,
                                      final IPlayerData pData, final Player player, final MovingConfig cc, final double xDistance, final double zDistance) {
         
-        final PlayerMoveData lastMove = data.playerMoves.getFirstPastMove();
-        // Decrease bunnyhop delay counter (bunnyfly)
-        data.bunnyhopDelay--; 
-        // (Workaround, see Magicbunny.bunnyhop)
-        data.lastbunnyhopDelay -= data.lastbunnyhopDelay > 0 ? 1 : 0;
-        // Set flag for swimming with the flowing direction of liquid.
-        thisMove.downStream = from.isDownStream(xDistance, zDistance); 
-        // Set flag for swimming in a waterfall
-        thisMove.inWaterfall = from.isWaterfall(yDistance);
-        // Check if head is obstructed.
-        thisMove.headObstructed = (yDistance > 0.0 ? from.isHeadObstructed(yDistance) : from.isHeadObstructed());
+        decreaseBunnyhopCounters(data);
+        updateSwimmingFlags(thisMove, from, xDistance, zDistance, yDistance);
         // Get the distance to set-back.
         thisMove.setBackYDistance = to.getY() - data.getSetBackY();
 
         // Reset no slow hop
-        if (data.noSlowHop != 0 && (data.isVelocityJumpPhase() || (!data.isUsingItem && !player.isBlocking()))) data.noSlowHop = 0;
+        resetNoSlowHop(data, player);
 
         // Lift off envelope has changed or velocity is present, reset the liquid surface ID
+        resetSurfaceIdIfNeeded(data);
+
+        updateDownstreamState(data, thisMove, from);
+
+        updateMomentumTicks(thisMove, to, data);
+    }
+
+    /** Helper to decrease bunnyhop related counters. */
+    private void decreaseBunnyhopCounters(final MovingData data) {
+        data.bunnyhopDelay--;
+        data.lastbunnyhopDelay -= data.lastbunnyhopDelay > 0 ? 1 : 0;
+    }
+
+    /** Set downstream and waterfall flags as well as head obstruction. */
+    private void updateSwimmingFlags(final PlayerMoveData move, final PlayerLocation from,
+                                     final double xDist, final double zDist, final double yDist) {
+        move.downStream = from.isDownStream(xDist, zDist);
+        move.inWaterfall = from.isWaterfall(yDist);
+        move.headObstructed = (yDist > 0.0 ? from.isHeadObstructed(yDist) : from.isHeadObstructed());
+    }
+
+    /** Reset the noSlowHop counter if conditions are met. */
+    private void resetNoSlowHop(final MovingData data, final Player player) {
+        if (data.noSlowHop != 0 && (data.isVelocityJumpPhase() || (!data.isUsingItem && !player.isBlocking()))) {
+            data.noSlowHop = 0;
+        }
+    }
+
+    /** Reset surfaceId if liftOffEnvelope changed or velocity is present. */
+    private void resetSurfaceIdIfNeeded(final MovingData data) {
         if (!data.liftOffEnvelope.name().startsWith("LIMIT") || data.isVelocityJumpPhase()) {
             data.surfaceId = 0;
         }
+    }
 
-        // Pass downstream for later uses
-        if (!data.isdownstream) data.isdownstream = thisMove.downStream;
-        else if (from.isOnGround() && !from.isInLiquid()) data.isdownstream = false;
-        
-        // Set momentum ticks.
-        // Lostground pyramid:
-        // Since this ground collision is lost, momentum ticks are never added after landing on ground, causing a VL.
-        // Also this happens only AFTER a setback has happened. Will need further investigation. 
-        if ((!thisMove.from.onGround && thisMove.to.onGround || tags.contains("lostground_pyramid") && data.sfJumpPhase <= 4) && !thisMove.headObstructed) {
-            // Landing on ice after a bunnyhop allows to slide on it, conserving more speed from the hop.
+    /** Update downstream state for later usage. */
+    private void updateDownstreamState(final MovingData data, final PlayerMoveData move, final PlayerLocation from) {
+        if (!data.isdownstream) {
+            data.isdownstream = move.downStream;
+        } else if (from.isOnGround() && !from.isInLiquid()) {
+            data.isdownstream = false;
+        }
+    }
+
+    /**
+     * Update the momentum tick counter if landing from air or lost ground.
+     */
+    private void updateMomentumTicks(final PlayerMoveData move, final PlayerLocation to, final MovingData data) {
+        boolean landingNow = (!move.from.onGround && move.to.onGround ||
+                tags.contains("lostground_pyramid") && data.sfJumpPhase <= 4) && !move.headObstructed;
+        if (landingNow) {
             if (Magic.wasOnIceRecently(data)) {
                 data.momentumTick = 31;
-            }
-            // Bunnyhopping 1 block up and then walking causes delayed, mini bursts of accelerations.
-            // (Which can be covered by simply giving more momentum ticks instead of resorting to the bhop mechanism)
-            else if (Magic.jumpedUpSlope(data, to, 10)) {
+            } else if (Magic.jumpedUpSlope(data, to, 10)) {
                 data.momentumTick = 11;
+            } else {
+                data.momentumTick = ServerIsAtLeast1_13 ? 6 : 3;
             }
-            // Ordinary landing
-            else data.momentumTick = ServerIsAtLeast1_13 ? 6 : 3;
         }
     }
 
