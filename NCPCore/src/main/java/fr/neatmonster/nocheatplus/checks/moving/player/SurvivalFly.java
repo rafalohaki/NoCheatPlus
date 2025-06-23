@@ -1533,11 +1533,11 @@ public class SurvivalFly extends Check {
      *
      * @return
      */
-    private double[] vDistAir(final long now, final Player player, final PlayerLocation from, 
-                              final boolean fromOnGround, final boolean resetFrom, final PlayerLocation to, 
-                              final boolean toOnGround, final boolean resetTo, 
-                              final double hDistance, final double yDistance, 
-                              final int multiMoveCount, final PlayerMoveData lastMove, 
+    private double[] vDistAir(final long now, final Player player, final PlayerLocation from,
+                              final boolean fromOnGround, final boolean resetFrom, final PlayerLocation to,
+                              final boolean toOnGround, final boolean resetTo,
+                              final double hDistance, final double yDistance,
+                              final int multiMoveCount, final PlayerMoveData lastMove,
                               final MovingData data, final MovingConfig cc, final IPlayerData pData) {
 
         //            (Aim is to fix the lowjump detection (see notes))
@@ -1547,25 +1547,59 @@ public class SurvivalFly extends Check {
         final double yDistChange         = lastMove.toIsValid ? yDistance - lastMove.yDistance : Double.MAX_VALUE; // Change seen from last yDistance.
         final double maxJumpGain         = data.liftOffEnvelope.getMaxJumpGain(data.jumpAmplifier);
         final int maxJumpPhase           = data.liftOffEnvelope.getMaxJumpPhase(data.jumpAmplifier);
-        final double jumpGainMargin      = 0.005; 
-        final boolean strictVdistRel;
+        final double jumpGainMargin      = 0.005;
+
+        // Allowed distance and envelope/velocity handling.
+        final double[] allowedRes = calculateAllowedVDist(from, resetFrom, to, toOnGround, resetTo, yDistance,
+                lastMove, thisMove, data, cc, maxJumpGain, jumpGainMargin);
+        vAllowedDistance = allowedRes[0];
+        final boolean strictVdistRel = allowedRes[1] > 0.0;
+
+        final double[] envRes = applyEnvelopeVelocityExemptions(now, player, from, to, yDistance, yDistChange,
+                vAllowedDistance, strictVdistRel, fromOnGround, toOnGround, resetFrom, resetTo, thisMove, lastMove, data, cc,
+                maxJumpGain);
+        vDistanceAboveLimit = envRes[0];
+        final boolean VEnvHack = envRes[1] > 0.0;
+
+        vDistanceAboveLimit = applyAbsoluteLimit(now, player, from, to, toOnGround, yDistance, fromOnGround, thisMove,
+                lastMove, data, cc, pData, vDistanceAboveLimit);
+
+        vDistanceAboveLimit = checkAirStayTime(VEnvHack, maxJumpPhase, yDistance, resetFrom, thisMove, data, cc,
+                vDistanceAboveLimit);
+
+        final boolean InAirPhase = !VEnvHack && !resetFrom && !resetTo;
+        final boolean ChangedYDir = lastMove.toIsValid && lastMove.yDistance != yDistance
+                && (yDistance <= 0.0 && lastMove.yDistance >= 0.0 || yDistance >= 0.0 && lastMove.yDistance <= 0.0);
+
+        vDistanceAboveLimit = handleDirectionChange(player, from, yDistance, InAirPhase, ChangedYDir, thisMove,
+                lastMove, data, cc, vDistanceAboveLimit);
+
+        vDistanceAboveLimit = applyVerticalAccounting(now, from, to, yDistance, vDistanceAboveLimit, InAirPhase,
+                ChangedYDir, thisMove, lastMove, data, cc);
+        if (data.sfLowJump) {
+            tags.add("lowjump");
+        }
+
+        return new double[]{vAllowedDistance, vDistanceAboveLimit};
+    }
 
 
-        ///////////////////////////////////////////////////////////////////////////////////
-        // Estimate the allowed relative yDistance (per-move distance check)             //
-        ///////////////////////////////////////////////////////////////////////////////////
-        // Less headache: Always allow falling. 
+    private double[] calculateAllowedVDist(final PlayerLocation from, final boolean resetFrom,
+            final PlayerLocation to, final boolean toOnGround, final boolean resetTo, final double yDistance,
+            final PlayerMoveData lastMove, final PlayerMoveData thisMove, final MovingData data,
+            final MovingConfig cc, final double maxJumpGain, final double jumpGainMargin) {
+
+        double vAllowedDistance;
+        boolean strictVdistRel;
+
         if (lastMove.toIsValid && Magic.fallingEnvelope(yDistance, lastMove.yDistance, data.lastFrictionVertical, 0.0)) {
             vAllowedDistance = lastMove.yDistance * data.lastFrictionVertical - Magic.GRAVITY_MIN;
             strictVdistRel = true;
         }
         else if (resetFrom || thisMove.touchedGroundWorkaround) {
-
             if (toOnGround) {
-
-                // Hack for boats (coarse: allows minecarts too): allow staying on the entity
-                if (yDistance > cc.sfStepHeight && yDistance - cc.sfStepHeight < 0.00000003 
-                    && to.isOnGroundDueToStandingOnAnEntity()) {
+                if (yDistance > cc.sfStepHeight && yDistance - cc.sfStepHeight < 0.00000003
+                        && to.isOnGroundDueToStandingOnAnEntity()) {
                     vAllowedDistance = yDistance;
                 }
                 else {
@@ -1575,23 +1609,18 @@ public class SurvivalFly extends Check {
                 }
             }
             else {
-
-                // Code duplication with the absolute limit below.
                 if (yDistance < 0.0 || yDistance > cc.sfStepHeight || !tags.contains("lostground_couldstep")) {
                     vAllowedDistance = maxJumpGain + jumpGainMargin;
                     thisMove.allowjump = true;
                 }
-                // Lostground_couldstep was applied.
                 else vAllowedDistance = yDistance;
             }
             strictVdistRel = false;
         }
         else if (lastMove.toIsValid) {
-
-            if (lastMove.yDistance >= -Math.max(Magic.GRAVITY_MAX / 2.0, 1.3 * Math.abs(yDistance)) 
-                && lastMove.yDistance <= 0.0 
-                && (lastMove.touchedGround || lastMove.to.extraPropertiesValid && lastMove.to.resetCond)) {
-
+            if (lastMove.yDistance >= -Math.max(Magic.GRAVITY_MAX / 2.0, 1.3 * Math.abs(yDistance))
+                    && lastMove.yDistance <= 0.0
+                    && (lastMove.touchedGround || lastMove.to.extraPropertiesValid && lastMove.to.resetCond)) {
                 if (resetTo) {
                     vAllowedDistance = cc.sfStepHeight;
                     thisMove.allowstep = true;
@@ -1599,253 +1628,191 @@ public class SurvivalFly extends Check {
                 else {
                     vAllowedDistance = maxJumpGain + jumpGainMargin;
                     thisMove.allowjump = true;
-                } 
+                }
                 strictVdistRel = false;
             }
             else {
-                // Friction.
-                vAllowedDistance = lastMove.yDistance * data.lastFrictionVertical - Magic.GRAVITY_ODD; // Upper bound.
+                vAllowedDistance = lastMove.yDistance * data.lastFrictionVertical - Magic.GRAVITY_ODD;
                 strictVdistRel = true;
             }
         }
-        // Teleport/join/respawn.
         else {
             tags.add(lastMove.valid ? "data_reset" : "data_missing");
-            
-            // Allow falling.
             if (thisMove.yDistance > -(Magic.GRAVITY_MAX + Magic.GRAVITY_SPAN) && yDistance < 0.0) {
-                vAllowedDistance = yDistance; 
-                // vAllowedDistance = lastMove.yDistance * data.lastFrictionVertical - Magic.GRAVITY_MIN;
+                vAllowedDistance = yDistance;
             }
-            // Allow jumping.
             else if (thisMove.from.onGround || (lastMove.valid && lastMove.to.onGround)) {
                 vAllowedDistance = maxJumpGain + jumpGainMargin;
                 if (lastMove.to.onGround && vAllowedDistance < 0.1) vAllowedDistance = maxJumpGain + jumpGainMargin;
-                // Allow stepping
                 if (thisMove.to.onGround) vAllowedDistance = Math.max(cc.sfStepHeight, vAllowedDistance);
             }
-            // Double arithmetics, moving up after join/teleport/respawn. Edge case in PaperMC/Spigot 1.7.10
             else if (Magic.skipPaper(thisMove, lastMove, data)) {
                 vAllowedDistance = Magic.PAPER_DIST;
                 tags.add("skip_paper");
             }
-            // Do not allow any distance.
             else vAllowedDistance = 0.0;
             strictVdistRel = false;
         }
+        return new double[]{vAllowedDistance, strictVdistRel ? 1.0 : 0.0};
+    }
 
-        // Compare yDistance to expected and search for an existing match. Use velocity on violations, if nothing has been found.
-        /** Relative vertical distance violation */
-        boolean vDistRelVL = false;
-        /** Expected difference from current to allowed */       
-        final double yDistDiffEx          = yDistance - vAllowedDistance; 
+    private double[] applyEnvelopeVelocityExemptions(final long now, final Player player,
+            final PlayerLocation from, final PlayerLocation to, final double yDistance, final double yDistChange,
+            final double vAllowedDistance, final boolean strictVdistRel, final boolean fromOnGround,
+            final boolean toOnGround, final boolean resetFrom, final boolean resetTo, final PlayerMoveData thisMove, final PlayerMoveData lastMove,
+            final MovingData data, final MovingConfig cc, final double maxJumpGain) {
+
+        double vDistanceAboveLimit = 0.0;
+        final double yDistDiffEx = yDistance - vAllowedDistance;
         final boolean honeyBlockCollision = MovingUtil.isCollideWithHB(from, to, data) && yDistance < -0.125 && yDistance > -0.128;
-        final boolean GravityEffects      = AirWorkarounds.oddJunction(from, to, yDistance, yDistChange, yDistDiffEx, maxJumpGain, resetTo, thisMove, lastMove, data, cc, resetFrom);
-        final boolean TooBigMove          = AirWorkarounds.outOfEnvelopeExemptions(yDistance, yDistDiffEx, lastMove, data, from, to, now, yDistChange, maxJumpGain, player, thisMove, resetTo);
-        final boolean TooShortMove        = AirWorkarounds.shortMoveExemptions(yDistance, yDistDiffEx, lastMove, data, from, to, now, strictVdistRel, maxJumpGain, vAllowedDistance, player, thisMove);
-        final boolean TooFastFall         = AirWorkarounds.fastFallExemptions(yDistance, yDistDiffEx, lastMove, data, from, to, now, strictVdistRel, yDistChange, resetTo, fromOnGround, toOnGround, maxJumpGain, player, thisMove, resetFrom);
-        final boolean VEnvHack            = AirWorkarounds.venvHacks(from, to, yDistance, yDistChange, thisMove, lastMove, data, resetFrom, resetTo);
-        final boolean TooBigMoveNoData    = AirWorkarounds.outOfEnvelopeNoData(yDistance, from, to, thisMove, resetTo, data);
+        final boolean GravityEffects = AirWorkarounds.oddJunction(from, to, yDistance, yDistChange, yDistDiffEx, maxJumpGain, resetTo, thisMove, lastMove,
+                data, cc, resetFrom);
+        final boolean TooBigMove = AirWorkarounds.outOfEnvelopeExemptions(yDistance, yDistDiffEx, lastMove, data, from, to, now, yDistChange, maxJumpGain, player, thisMove, resetTo);
+        final boolean TooShortMove = AirWorkarounds.shortMoveExemptions(yDistance, yDistDiffEx, lastMove, data, from, to, now, strictVdistRel, maxJumpGain, vAllowedDistance, player, thisMove);
+        final boolean TooFastFall = AirWorkarounds.fastFallExemptions(yDistance, yDistDiffEx, lastMove, data, from, to, now, strictVdistRel, yDistChange, resetTo, fromOnGround, toOnGround, maxJumpGain, player, thisMove, resetFrom);
+        final boolean VEnvHack = AirWorkarounds.venvHacks(from, to, yDistance, yDistChange, thisMove, lastMove, data, resetFrom, resetTo);
+        final boolean TooBigMoveNoData = AirWorkarounds.outOfEnvelopeNoData(yDistance, from, to, thisMove, resetTo, data);
 
-        // Quick invalidation for too much water envelope
-        // if (!from.isInLiquid() && strictVdistRel 
-        //     && data.liftOffEnvelope == LiftOffEnvelope.LIMIT_LIQUID
-        //     && yDistance > 0.3 && yDistance > vAllowedDistance 
-        //     && data.getOrUseVerticalVelocity(yDistance) == null) {
-        //     thisMove.invalidate();
-        // }
-
+        boolean vDistRelVL = false;
         if (VEnvHack || yDistDiffEx <= 0.0 && yDistDiffEx > -Magic.GRAVITY_SPAN && data.ws.use(WRPT.W_M_SF_ACCEPTED_ENV)) {
-            // Accepted envelopes first
         }
-        // Upper bound violation: bigger move than expected
-        else if (yDistDiffEx > 0.0) { 
-            
-            if (TooBigMove || TooBigMoveNoData || GravityEffects 
-                || (lastMove.toIsValid && honeyBlockCollision)) {
-                // Several types of odd in-air moves, mostly with gravity near its maximum, friction and medium change.
+        else if (yDistDiffEx > 0.0) {
+            if (!(TooBigMove || TooBigMoveNoData || GravityEffects || (lastMove.toIsValid && honeyBlockCollision))) {
+                vDistRelVL = true;
             }
-            else vDistRelVL = true;
-        } 
-        // Smaller move than expected (yDistDiffEx <= 0.0 && yDistance >= 0.0)
-        else if (yDistance >= 0.0) { 
-
-            if (TooShortMove || GravityEffects) {
-                // Several types of odd in-air moves, mostly with gravity near its maximum, friction and medium change.
-            }
-            else vDistRelVL = true;
         }
-        // Too fast fall (yDistDiffEx <= 0.0 && yDistance < 0.0)
-        else { 
-
-            if (TooFastFall || GravityEffects || honeyBlockCollision) {
-                // Several types of odd in-air moves, mostly with gravity near its maximum, friction and medium change.
+        else if (yDistance >= 0.0) {
+            if (!(TooShortMove || GravityEffects)) {
+                vDistRelVL = true;
             }
-            else vDistRelVL = true;
         }
-        
-        // No match found (unexpected move) or move is within allowed dist: use velocity as compensation, if available.
-        if (vDistRelVL) {
-            if (data.getOrUseVerticalVelocity(yDistance) == null) {
-                vDistanceAboveLimit = Math.max(vDistanceAboveLimit, Math.abs(yDistance - vAllowedDistance));
-                tags.add("vdistrel");
+        else {
+            if (!(TooFastFall || GravityEffects || honeyBlockCollision)) {
+                vDistRelVL = true;
             }
         }
 
+        if (vDistRelVL && data.getOrUseVerticalVelocity(yDistance) == null) {
+            vDistanceAboveLimit = Math.max(vDistanceAboveLimit, Math.abs(yDistance - vAllowedDistance));
+            tags.add("vdistrel");
+        }
 
-        ////////////////////////////////////////////////////////////////////////////////////////////////////////////////////
-        // Vertical absolute distance to setback: prevent players from jumping higher than maximum jump height.           //
-        ////////////////////////////////////////////////////////////////////////////////////////////////////////////////////
-        if (!pData.hasPermission(Permissions.MOVING_SURVIVALFLY_STEP, player) && yDistance > 0.0 
-            && !data.isVelocityJumpPhase() && data.hasSetBack()) {
-            
+        return new double[]{vDistanceAboveLimit, VEnvHack ? 1.0 : 0.0};
+    }
+
+    private double applyAbsoluteLimit(final long now, final Player player, final PlayerLocation from,
+            final PlayerLocation to, final boolean toOnGround, final double yDistance, final boolean fromOnGround,
+            final PlayerMoveData thisMove, final PlayerMoveData lastMove, final MovingData data, final MovingConfig cc,
+            final IPlayerData pData, double vDistanceAboveLimit) {
+
+        if (!pData.hasPermission(Permissions.MOVING_SURVIVALFLY_STEP, player) && yDistance > 0.0
+                && !data.isVelocityJumpPhase() && data.hasSetBack()) {
             final double maxJumpHeight = data.liftOffEnvelope.getMaxJumpHeight(data.jumpAmplifier);
             final double totalVDistViolation = to.getY() - data.getSetBackY() - maxJumpHeight;
             if (totalVDistViolation > 0.0) {
-        
-                if (AirWorkarounds.vDistSBExemptions(toOnGround, thisMove, lastMove, data, cc, now, player, 
-                                                     totalVDistViolation, yDistance, fromOnGround, tags, to, from)) {
-                    // Edge cases.
-                }
-                // Attempt to use velocity.
-                else if (data.getOrUseVerticalVelocity(yDistance) == null) {
+                if (!AirWorkarounds.vDistSBExemptions(toOnGround, thisMove, lastMove, data, cc, now, player,
+                        totalVDistViolation, yDistance, fromOnGround, tags, to, from)
+                        && data.getOrUseVerticalVelocity(yDistance) == null) {
                     vDistanceAboveLimit = Math.max(vDistanceAboveLimit, Math.max(totalVDistViolation, 0.4));
-                    tags.add("vdistsb(" + StringUtil.fdec3.format((to.getY()-data.getSetBackY())) +"/"+ maxJumpHeight + ")");
+                    tags.add("vdistsb(" + StringUtil.fdec3.format((to.getY() - data.getSetBackY())) + "/" + maxJumpHeight + ")");
                 }
             }
         }
+        return vDistanceAboveLimit;
+    }
 
+    private double checkAirStayTime(final boolean VEnvHack, final int maxJumpPhase, final double yDistance,
+            final boolean resetFrom, final PlayerMoveData thisMove, final MovingData data, final MovingConfig cc,
+            double vDistanceAboveLimit) {
 
-        ///////////////////////////////////////////////////////////////////////////////////////
-        // Air-stay-time: prevent players from ascending further than the maximum jump phase.//
-        ///////////////////////////////////////////////////////////////////////////////////////
         if (!VEnvHack && data.sfJumpPhase > maxJumpPhase && !data.isVelocityJumpPhase()) {
-
-            if (yDistance < Magic.GRAVITY_MIN) {
-                // Ignore falling, and let accounting deal with it.
-            }
-            else if (resetFrom) {
-                // Ignore bunny etc.
-            }
-            // Violation (Too high jumping or step).
-            else if (data.getOrUseVerticalVelocity(yDistance) == null) {
+            if (yDistance >= Magic.GRAVITY_MIN && !resetFrom
+                    && data.getOrUseVerticalVelocity(yDistance) == null) {
                 vDistanceAboveLimit = Math.max(vDistanceAboveLimit, Math.abs(yDistance));
-                tags.add("maxphase("+ data.sfJumpPhase +"/"+ maxJumpPhase + ")");
+                tags.add("maxphase(" + data.sfJumpPhase + "/" + maxJumpPhase + ")");
             }
         }
-        
+        return vDistanceAboveLimit;
+    }
 
-        //////////////////////////////////////////////////////////////////////////////////////////////////////////////////////
-        // Check on change of Y direction: prevent players from jumping lower than normal, also includes an air-jump check. //
-        /////////////////////////////////////////////////////////////////////////////////////////////////////////////////////
-        final boolean InAirPhase = !VEnvHack && !resetFrom && !resetTo;
-        final boolean ChangedYDir = lastMove.toIsValid && lastMove.yDistance != yDistance && (yDistance <= 0.0 && lastMove.yDistance >= 0.0 || yDistance >= 0.0 && lastMove.yDistance <= 0.0); 
+    private double handleDirectionChange(final Player player, final PlayerLocation from, final double yDistance,
+            final boolean InAirPhase, final boolean ChangedYDir, final PlayerMoveData thisMove,
+            final PlayerMoveData lastMove, final MovingData data, final MovingConfig cc, double vDistanceAboveLimit) {
 
         if (InAirPhase && ChangedYDir) {
-
-            // (Does this account for velocity in a sufficient way?)
             if (yDistance > 0.0) {
                 if (lastMove.touchedGround || lastMove.to.extraPropertiesValid && lastMove.to.resetCond) {
-                    // Change to increasing phase
                     tags.add("ychinc");
                 }
-                else {
-
-                    // Moving upwards after falling without having touched the ground.
-                    if (data.bunnyhopDelay < 9 && !((lastMove.touchedGround || lastMove.from.onGroundOrResetCond)
+                else if (data.bunnyhopDelay < 9 && !((lastMove.touchedGround || lastMove.from.onGroundOrResetCond)
                         && lastMove.yDistance == 0D) && data.getOrUseVerticalVelocity(yDistance) == null) {
-                        vDistanceAboveLimit = Math.max(vDistanceAboveLimit, Math.abs(yDistance));
-                        tags.add("airjump");
-                    }
-                    else tags.add("ychincair");
+                    vDistanceAboveLimit = Math.max(vDistanceAboveLimit, Math.abs(yDistance));
+                    tags.add("airjump");
+                }
+                else {
+                    tags.add("ychincair");
                 }
             }
             else {
-                // Change to decreasing phase.
                 tags.add("ychdec");
-                // Catch low jump between last ascending phase and current descend phase
-                // NOTE: this only checks jump height, not motion speed.
-                if (!data.sfLowJump && !data.sfNoLowJump && lastMove.toIsValid && lastMove.yDistance > 0.0 
-                    && !data.isVelocityJumpPhase()) {
-                    
-                    /** Only count it if the player has actually been jumping (higher than setback). */
+                if (!data.sfLowJump && !data.sfNoLowJump && lastMove.toIsValid && lastMove.yDistance > 0.0
+                        && !data.isVelocityJumpPhase()) {
                     final double setBackYDistance = from.getY() - data.getSetBackY();
-                    /** Estimation of minimal jump height */
                     final double minJumpHeight = data.liftOffEnvelope.getMinJumpHeight(data.jumpAmplifier);
                     if (setBackYDistance > 0.0 && setBackYDistance < minJumpHeight) {
-
-                        if (
-                            // Head obstruction obviously allows to lowjump
-                            thisMove.headObstructed 
-                            || yDistance <= 0.0 && lastMove.headObstructed && lastMove.yDistance >= 0.0
-                            // Skip if the player is jumping out of powder snow
-                            || Bridge1_17.hasLeatherBootsOn(player) 
-                            && data.liftOffEnvelope == LiftOffEnvelope.POWDER_SNOW && lastMove.from.inPowderSnow
-                            && lastMove.yDistance <= Magic.GRAVITY_MAX * 2.36 && lastMove.yDistance > 0.0
-                            && thisMove.yDistance < 0.0
-                            ) {
-                            // Exempt.
+                        if (thisMove.headObstructed
+                                || yDistance <= 0.0 && lastMove.headObstructed && lastMove.yDistance >= 0.0
+                                || Bridge1_17.hasLeatherBootsOn(player)
+                                && data.liftOffEnvelope == LiftOffEnvelope.POWDER_SNOW && lastMove.from.inPowderSnow
+                                && lastMove.yDistance <= Magic.GRAVITY_MAX * 2.36 && lastMove.yDistance > 0.0
+                                && thisMove.yDistance < 0.0) {
                             tags.add("lowjump_skip");
                         }
-                        else {
-                            // Attempt to consume velocity
-                            if (data.getOrUseVerticalVelocity(yDistance) == null) {
-                                // Violation
-                                vDistanceAboveLimit = Math.max(vDistanceAboveLimit, Math.abs(minJumpHeight - setBackYDistance));
-                                // Set a flag to tell us that from here, this whole descending phase is due to a lowjump
-                                data.sfLowJump = true;
-                                // Feed the Improbable.
-                                Improbable.feed(player, (float) cc.yOnGround, System.currentTimeMillis());
-                            }
+                        else if (data.getOrUseVerticalVelocity(yDistance) == null) {
+                            vDistanceAboveLimit = Math.max(vDistanceAboveLimit, Math.abs(minJumpHeight - setBackYDistance));
+                            data.sfLowJump = true;
+                            Improbable.feed(player, (float) cc.yOnGround, System.currentTimeMillis());
                         }
                     }
-                } 
+                }
             }
         }
-        
+        return vDistanceAboveLimit;
+    }
 
-        ////////////////////////////////////////////////////////
-        // The Vertical Accounting subcheck: gravity enforcer //
-        ///////////////////////////////////////////////////////
+    private double applyVerticalAccounting(final long now, final PlayerLocation from, final PlayerLocation to,
+            final double yDistance, double vDistanceAboveLimit, final boolean InAirPhase, final boolean ChangedYDir,
+            final PlayerMoveData thisMove, final PlayerMoveData lastMove, final MovingData data, final MovingConfig cc) {
+
         if (InAirPhase && cc.survivalFlyAccountingV) {
-
-            // Currently only for "air" phases.
             if (MovingUtil.isCollideWithHB(from, to, data) && thisMove.yDistance < 0.0 && thisMove.yDistance > -0.21) {
                 data.vDistAcc.clear();
                 data.vDistAcc.add((float) -0.2033);
             }
-            else if (ChangedYDir && lastMove.yDistance > 0.0) { // lastMove.toIsValid is checked above. 
-                // Change to descending phase.
+            else if (ChangedYDir && lastMove.yDistance > 0.0) {
                 data.vDistAcc.clear();
-                // Allow adding 0.
                 data.vDistAcc.add((float) yDistance);
             }
-            else if (thisMove.verVelUsed == null // Only skip if just used.
-                    && !(lastMove.from.inLiquid && Math.abs(yDistance) < 0.31 
-                    || data.timeRiptiding + 1000 > now)) { 
-                
-                // Here yDistance can be negative and positive.
+            else if (thisMove.verVelUsed == null && !(lastMove.from.inLiquid && Math.abs(yDistance) < 0.31
+                    || data.timeRiptiding + 1000 > now)) {
                 data.vDistAcc.add((float) yDistance);
-                final double accAboveLimit = verticalAccounting(yDistance, data.vDistAcc, tags, "vacc" + (data.isVelocityJumpPhase() ? "dirty" : ""));
-
-                if (accAboveLimit > vDistanceAboveLimit) {
-                    if (data.getOrUseVerticalVelocity(yDistance) == null) {
-                        vDistanceAboveLimit = accAboveLimit;
-                    }
-                }         
+                final double accAboveLimit = verticalAccounting(yDistance, data.vDistAcc, tags,
+                        "vacc" + (data.isVelocityJumpPhase() ? "dirty" : ""));
+                if (accAboveLimit > vDistanceAboveLimit && data.getOrUseVerticalVelocity(yDistance) == null) {
+                    vDistanceAboveLimit = accAboveLimit;
+                }
             }
-            // Just to exclude source of error, might be redundant.
-            else data.vDistAcc.clear(); 
-        } 
+            else {
+                data.vDistAcc.clear();
+            }
+        }
 
-
-        // Add lowjump tag for the whole descending phase.
         if (data.sfLowJump) {
             tags.add("lowjump");
         }
-
-        return new double[]{vAllowedDistance, vDistanceAboveLimit};
+        return vDistanceAboveLimit;
     }
+
     
 
     /**
