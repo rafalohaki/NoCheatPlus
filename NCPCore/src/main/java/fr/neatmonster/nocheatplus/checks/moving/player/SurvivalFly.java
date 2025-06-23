@@ -2088,73 +2088,81 @@ public class SurvivalFly extends Check {
      * @param data
      * @return vAllowedDistance, vDistanceAboveLimit
      */
-    private double[] vDistLiquid(final PlayerMoveData thisMove, final PlayerLocation from, final PlayerLocation to, 
-                                 final boolean toOnGround, final double yDistance, final PlayerMoveData lastMove, 
+
+    private double[] vDistLiquid(final PlayerMoveData thisMove, final PlayerLocation from, final PlayerLocation to,
+                                 final boolean toOnGround, final double yDistance, final PlayerMoveData lastMove,
                                  final MovingData data, final Player player, final MovingConfig cc) {
 
         data.sfNoLowJump = true;
         final double yDistAbs = Math.abs(yDistance);
         final double baseSpeed = thisMove.from.onGround ? Magic.swimBaseSpeedV(Bridge1_13.isSwimming(player)) + 0.1 : Magic.swimBaseSpeedV(Bridge1_13.isSwimming(player));
         final PlayerMoveData pastMove2 = data.playerMoves.getSecondPastMove();
-        
-        ////////////////////////
-        // Minimal speed.     //
-        ////////////////////////
+
         if (yDistAbs <= baseSpeed) {
             return new double[]{baseSpeed, 0.0};
         }
-        
 
-        /////////////////////////////////////
-        // 1: Handle bubble columns 1.13+  // 
-        ////////////////////////////////////
-        //[^ Problem: we only get told if the column can drag players]
-        // NOTE: Launch speed depends on how long one has been in the column (!)
-        if (from.isInBubbleStream() || to.isInBubbleStream()) { 
+        double[] res;
+
+        res = handleBubbleStream(from, to, yDistance, yDistAbs, data);
+        if (res != null) return res;
+
+        res = checkWaterloggedBlocks(thisMove, from, toOnGround, yDistance, data, cc);
+        if (res != null) return res;
+
+        final double frictDist = lastMove.toIsValid ? Math.abs(lastMove.yDistance) * data.lastFrictionVertical : baseSpeed;
+
+        res = applyFrictionEnvelope(thisMove, lastMove, pastMove2, yDistance, yDistAbs, frictDist, data);
+        if (res != null) return res;
+
+        res = applyLiquidWorkarounds(from, to, baseSpeed, frictDist, lastMove, data);
+        if (res != null) return res;
+
+        res = handleVerticalVelocity(yDistance, data);
+        if (res != null) return res;
+
+        return calculateViolation(player, yDistance, yDistAbs, baseSpeed, frictDist, lastMove);
+    }
+    private double[] handleBubbleStream(final PlayerLocation from, final PlayerLocation to, final double yDistance,
+                                        final double yDistAbs, final MovingData data) {
+        if (from.isInBubbleStream() || to.isInBubbleStream()) {
             if (from.isDraggedByBubbleStream() && to.isDraggedByBubbleStream()) {
                 tags.add("bubblestream_drag");
-                // Players cannot ascend if they get dragged down.
                 if (yDistance > 0.0 && data.insideBubbleStreamCount < 0) {
                     return new double[]{0.0, Math.abs(yDistance)};
                 }
                 return new double[]{Magic.bubbleStreamDescend, yDistAbs - Magic.bubbleStreamDescend};
             }
-            else {
-                tags.add("bubblestream_push("+ data.insideBubbleStreamCount +")");
-                // Players can't descend if getting pushed up by a bubble stream (unless they are on the surface, in this case they'll sink back in a bit)
-                if (yDistance < 0.0 && BlockProperties.isLiquid(from.getTypeIdAbove())) {
-                    return new double[]{0.0, Math.abs(yDistance)};
-                }
-                return new double[]{Magic.bubbleStreamAscend, yDistAbs - Magic.bubbleStreamAscend};
+            tags.add("bubblestream_push(" + data.insideBubbleStreamCount + ")");
+            if (yDistance < 0.0 && BlockProperties.isLiquid(from.getTypeIdAbove())) {
+                return new double[]{0.0, Math.abs(yDistance)};
             }
+            return new double[]{Magic.bubbleStreamAscend, yDistAbs - Magic.bubbleStreamAscend};
         }
-        
+        return null;
+    }
 
-        /////////////////////////////////////////////////////////
-        // 2: Vertical checking for waterlogged blocks 1.13+   //
-        /////////////////////////////////////////////////////////
-        // Waterlogged after columns because it can conflict with particular elevators (made of honey)
+    private double[] checkWaterloggedBlocks(final PlayerMoveData thisMove, final PlayerLocation from,
+                                            final boolean toOnGround, final double yDistance, final MovingData data,
+                                            final MovingConfig cc) {
         if (from.isOnGround() && !BlockProperties.isLiquid(from.getTypeIdAbove())
-            && from.isInWaterLogged()
-            && !from.isInBubbleStream() && !thisMove.headObstructed
-            && !from.isSubmerged(0.75)) {
-            // (Envelope change shouldn't be done here but, eh.)
+                && from.isInWaterLogged()
+                && !from.isInBubbleStream() && !thisMove.headObstructed
+                && !from.isSubmerged(0.75)) {
             data.liftOffEnvelope = LiftOffEnvelope.NORMAL;
             final double minJumpGain = data.liftOffEnvelope.getMinJumpGain(data.jumpAmplifier);
-            // Allow stepping.
             final boolean step = (toOnGround || thisMove.to.resetCond) && yDistance > minJumpGain && yDistance <= cc.sfStepHeight;
             final double vAllowedDistance = step ? cc.sfStepHeight : minJumpGain;
             tags.add("liquidground");
             return new double[]{vAllowedDistance, yDistance - vAllowedDistance};
         }
+        return null;
+    }
 
-
-        /////////////////////////////////////////////////////////
-        // 3: Friction envelope (allow any kind of slow down). //
-        ////////////////////////////////////////////////////////
-        final double frictDist = lastMove.toIsValid ? Math.abs(lastMove.yDistance) * data.lastFrictionVertical : baseSpeed; // Bounds differ with sign.
+    private double[] applyFrictionEnvelope(final PlayerMoveData thisMove, final PlayerMoveData lastMove,
+                                           final PlayerMoveData pastMove2, final double yDistance,
+                                           final double yDistAbs, final double frictDist, final MovingData data) {
         if (lastMove.toIsValid) {
-            // (Descend speed depends on how fast one dives in)
             if (lastMove.yDistance < 0.0 && yDistance < 0.0 && yDistAbs < frictDist + Magic.GRAVITY_MAX + Magic.GRAVITY_SPAN) {
                 tags.add("frictionenv(desc)");
                 return new double[]{-frictDist - Magic.GRAVITY_MAX - Magic.GRAVITY_SPAN, 0.0};
@@ -2163,52 +2171,47 @@ public class SurvivalFly extends Check {
                 tags.add("frictionenv(asc)");
                 return new double[]{frictDist - Magic.GRAVITY_SPAN, 0.0};
             }
-            // 1.13+ clients can bunnyhop in waterfalls and conserve more speed than ordinary ascending friction. (Observed/i.e.: 0.208 -> 0.202, almost no gravity gets applied)
             if (Bridge1_13.hasIsSwimming() && data.insideMediumCount < 19
-                && yDistance > 0.0 && lastMove.yDistance > 0.0 && yDistance <= lastMove.yDistance * 0.99 // (Don't care about gravity here)
-                && thisMove.from.inWater && (thisMove.inWaterfall || pastMove2.inWaterfall)
-                && yDistance < LiftOffEnvelope.NORMAL.getMaxJumpGain(0.0)) {
+                    && yDistance > 0.0 && lastMove.yDistance > 0.0 && yDistance <= lastMove.yDistance * 0.99
+                    && thisMove.from.inWater && (thisMove.inWaterfall || pastMove2.inWaterfall)
+                    && yDistance < LiftOffEnvelope.NORMAL.getMaxJumpGain(0.0)) {
                 tags.add("waterfall(asc)");
                 return new double[]{lastMove.yDistance * 0.99, 0.0};
             }
-            // ("== 0.0" is covered by the minimal speed check above.)
         }
+        return null;
+    }
 
-
-        ///////////////////////////////////////
-        // 4: Workarounds for special cases. // 
-        //////////////////////////////////////
+    private double[] applyLiquidWorkarounds(final PlayerLocation from, final PlayerLocation to, final double baseSpeed,
+                                            final double frictDist, final PlayerMoveData lastMove, final MovingData data) {
         final Double wRes = LiquidWorkarounds.liquidWorkarounds(from, to, baseSpeed, frictDist, lastMove, data);
         if (wRes != null) {
             return new double[]{wRes, 0.0};
         }
+        return null;
+    }
 
-
-        ///////////////////////////////////////////////
-        // 5: Try to use velocity for compensation.  //
-        ///////////////////////////////////////////////
+    private double[] handleVerticalVelocity(final double yDistance, final MovingData data) {
         if (data.getOrUseVerticalVelocity(yDistance) != null) {
             return new double[]{yDistance, 0.0};
         }
-        
+        return null;
+    }
 
-        ///////////////////////////////////
-        // 6: At this point a violation. //
-        //////////////////////////////////
+    private double[] calculateViolation(final Player player, final double yDistance, final double yDistAbs,
+                                        final double baseSpeed, final double frictDist, final PlayerMoveData lastMove) {
         tags.add(yDistance < 0.0 ? "swimdown" : "swimup");
-        // Can't ascend in liquid if sneaking.
-        if (player.isSneaking() && reallySneaking.contains(player.getName()) 
-            // (Clearly ascending)
-            && yDistance > 0.0 && lastMove.yDistance > 0.0 && yDistance >= lastMove.yDistance) {
+        if (player.isSneaking() && reallySneaking.contains(player.getName())
+                && yDistance > 0.0 && lastMove.yDistance > 0.0 && yDistance >= lastMove.yDistance) {
             return new double[]{0.0, yDistance};
         }
         final double vl1 = yDistAbs - baseSpeed;
         final double vl2 = Math.abs(yDistAbs - frictDist - (yDistance < 0.0 ? Magic.GRAVITY_MAX + Magic.GRAVITY_SPAN : Magic.GRAVITY_MIN));
-        if (vl1 <= vl2) return new double[]{yDistance < 0.0 ? -baseSpeed : baseSpeed, vl1};
-        else return new double[]{yDistance < 0.0 ? -frictDist - Magic.GRAVITY_MAX - Magic.GRAVITY_SPAN : frictDist - Magic.GRAVITY_SPAN, vl2};
-        
+        if (vl1 <= vl2) {
+            return new double[]{yDistance < 0.0 ? -baseSpeed : baseSpeed, vl1};
+        }
+        return new double[]{yDistance < 0.0 ? -frictDist - Magic.GRAVITY_MAX - Magic.GRAVITY_SPAN : frictDist - Magic.GRAVITY_SPAN, vl2};
     }
-
 
     /**
      * On-climbable vertical distance checking.
