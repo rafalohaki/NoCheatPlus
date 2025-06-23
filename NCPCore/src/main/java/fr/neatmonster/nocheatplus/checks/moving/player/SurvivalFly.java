@@ -2279,55 +2279,79 @@ public class SurvivalFly extends Check {
      * @param cc
      * @return vAllowedDistance, vDistanceAboveLimit
      */
-    private double[] vDistWeb(final Player player, final PlayerMoveData thisMove, 
-                              final boolean toOnGround, final double hDistanceAboveLimit, final long now, 
+    private double[] vDistWeb(final Player player, final PlayerMoveData thisMove,
+                              final boolean toOnGround, final double hDistanceAboveLimit, final long now,
                               final MovingData data, final MovingConfig cc, final PlayerLocation from) {
 
         final PlayerMoveData lastMove = data.playerMoves.getFirstPastMove();
         final double yDistance = thisMove.yDistance;
-        final boolean step = toOnGround && yDistance > 0.0 && yDistance <= cc.sfStepHeight || thisMove.from.inWeb && !lastMove.from.inWeb && yDistance <= cc.sfStepHeight;
-        double vAllowedDistance, vDistanceAboveLimit;
+        final boolean step = toOnGround && yDistance > 0.0 && yDistance <= cc.sfStepHeight
+                || thisMove.from.inWeb && !lastMove.from.inWeb && yDistance <= cc.sfStepHeight;
         data.sfNoLowJump = true;
-        data.jumpAmplifier = 0; 
+        data.jumpAmplifier = 0;
 
         if (yDistance >= 0.0) {
-            // Allow ascending if the player is on ground
-            if (thisMove.from.onGround) {
-                vAllowedDistance = 0.1;
-                vDistanceAboveLimit = yDistance - vAllowedDistance;
-            }
-            // Bubble columns can slowly push the player upwards through the web.
-            else if (from.isInBubbleStream() && !from.isDraggedByBubbleStream() && yDistance < Magic.bubbleStreamAscend) {
-                vAllowedDistance = lastMove.yDistance * Magic.FRICTION_MEDIUM_WATER;
-                vDistanceAboveLimit = yDistance - vAllowedDistance;
-                tags.add("bubbleweb");
-            }
-            // Allow stepping anyway
-            else if (step) {
-                vAllowedDistance = yDistance;
-                vDistanceAboveLimit = 0.0;
-                tags.add("webstep");
-            }
-            // Don't allow players to ascend in web.
-            else {
-                vAllowedDistance = 0.0;
-                vDistanceAboveLimit = yDistance;
-            }
+            return vDistWebAscend(thisMove, lastMove, step, from);
+        } else {
+            return vDistWebDescend(thisMove, lastMove, data);
         }
-        // (Falling speed is static, however if falling from high enough places, it can depend on how fast one "dives" in.)
+    }
+
+    private double[] vDistWebAscend(final PlayerMoveData thisMove, final PlayerMoveData lastMove,
+                                    final boolean step, final PlayerLocation from) {
+
+        final double yDistance = thisMove.yDistance;
+        final double vAllowedDistance;
+        final double vDistanceAboveLimit;
+
+        // Allow ascending if the player is on ground
+        if (thisMove.from.onGround) {
+            vAllowedDistance = 0.1;
+            vDistanceAboveLimit = yDistance - vAllowedDistance;
+        }
+        // Bubble columns can slowly push the player upwards through the web.
+        else if (from.isInBubbleStream() && !from.isDraggedByBubbleStream() && yDistance < Magic.bubbleStreamAscend) {
+            vAllowedDistance = lastMove.yDistance * Magic.FRICTION_MEDIUM_WATER;
+            vDistanceAboveLimit = yDistance - vAllowedDistance;
+            tags.add("bubbleweb");
+        }
+        // Allow stepping anyway
+        else if (step) {
+            vAllowedDistance = yDistance;
+            vDistanceAboveLimit = 0.0;
+            tags.add("webstep");
+        }
+        // Don't allow players to ascend in web.
         else {
-            // Lenient on first move(s) in web.
-            if (data.insideMediumCount < 4 && lastMove.yDistance <= 0.0) {
-                vAllowedDistance = lastMove.yDistance * Magic.FRICTION_MEDIUM_AIR - Magic.GRAVITY_MAX;
-            }
-            // Ordinary.
-            // We could be stricter but spamming WASD in a tower of webs results in random falling speed changes: ca. observed -0.058 (!? Mojang...)
-            else vAllowedDistance = -Magic.GRAVITY_MIN * Magic.FRICTION_MEDIUM_AIR;
-            vDistanceAboveLimit = yDistance < vAllowedDistance ? Math.abs(yDistance - vAllowedDistance) : 0.0;
+            vAllowedDistance = 0.0;
+            vDistanceAboveLimit = yDistance;
         }
 
         if (vDistanceAboveLimit > 0.0) {
-            tags.add(yDistance >= 0.0 ? "vweb" : "vwebdesc");
+            tags.add("vweb");
+        }
+        return new double[]{vAllowedDistance, vDistanceAboveLimit};
+    }
+
+    private double[] vDistWebDescend(final PlayerMoveData thisMove, final PlayerMoveData lastMove,
+                                     final MovingData data) {
+
+        final double yDistance = thisMove.yDistance;
+        final double vAllowedDistance;
+
+        // Lenient on first move(s) in web.
+        if (data.insideMediumCount < 4 && lastMove.yDistance <= 0.0) {
+            vAllowedDistance = lastMove.yDistance * Magic.FRICTION_MEDIUM_AIR - Magic.GRAVITY_MAX;
+        }
+        // Ordinary.
+        // We could be stricter but spamming WASD in a tower of webs results in random falling speed changes: ca. observed -0.058 (!? Mojang...)
+        else {
+            vAllowedDistance = -Magic.GRAVITY_MIN * Magic.FRICTION_MEDIUM_AIR;
+        }
+        final double vDistanceAboveLimit = yDistance < vAllowedDistance ? Math.abs(yDistance - vAllowedDistance) : 0.0;
+
+        if (vDistanceAboveLimit > 0.0) {
+            tags.add("vwebdesc");
         }
         return new double[]{vAllowedDistance, vDistanceAboveLimit};
     }
