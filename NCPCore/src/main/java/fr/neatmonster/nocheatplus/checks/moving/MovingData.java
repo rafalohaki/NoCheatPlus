@@ -480,44 +480,35 @@ public class MovingData extends ACheckData implements IDataOnRemoveSubCheckData,
         final LocationData from = thisMove.from;
         final LocationData to = thisMove.to;
 
-        if (from.inWeb || to.inWeb) {
+        if (from.inWeb || to.inWeb
+                || from.inPowderSnow || to.inPowderSnow
+                || to.onClimbable
+                || to.onHoneyBlock || to.onHoneyBlock) {
             nextFrictionHorizontal = nextFrictionVertical = 0.0;
+            return;
         }
-        else if (from.inPowderSnow || to.inPowderSnow) {
-            nextFrictionHorizontal = nextFrictionVertical = 0.0;
-        }
-        // No from#onClimbable check to fix vines fps cause by medium counts, probably wrong place!
-        else if (to.onClimbable) {
-            // Verify horizontal friction handling here
-            nextFrictionHorizontal = nextFrictionVertical = 0.0;
-        }
-        else if (to.onHoneyBlock || to.onHoneyBlock) {
-            nextFrictionHorizontal = nextFrictionVertical = 0.0;
-        }
-        else if (from.inBerryBush || to.inBerryBush) {
+
+        if (from.inBerryBush || to.inBerryBush) {
             nextFrictionHorizontal = 0.0;
             nextFrictionVertical = Magic.FRICTION_MEDIUM_BERRY_BUSH;
+            return;
         }
-        else if (from.inLiquid) {
+
+        if (from.inLiquid) {
             // Refine the conditions for liquid friction
-            if (from.inLava) {
-                nextFrictionHorizontal = nextFrictionVertical = Magic.FRICTION_MEDIUM_LAVA;
-            }
-            else {
-                nextFrictionHorizontal = nextFrictionVertical = Magic.FRICTION_MEDIUM_WATER;
-            }
+            nextFrictionHorizontal = nextFrictionVertical = from.inLava
+                    ? Magic.FRICTION_MEDIUM_LAVA
+                    : Magic.FRICTION_MEDIUM_WATER;
+            return;
         }
-        else if (Magic.touchedIce(thisMove)) {
+
+        if (Magic.touchedIce(thisMove) || (!from.onGround && !to.onGround)) {
             nextFrictionHorizontal = nextFrictionVertical = Magic.FRICTION_MEDIUM_AIR;
+            return;
         }
-        // Consider setting minimum friction last (air), do add ground friction.
-        else if (!from.onGround && !to.onGround) {
-            nextFrictionHorizontal = nextFrictionVertical = Magic.FRICTION_MEDIUM_AIR;
-        }
-        else {
-            nextFrictionHorizontal = 0.0;
-            nextFrictionVertical = Magic.FRICTION_MEDIUM_AIR;
-        }
+
+        nextFrictionHorizontal = 0.0;
+        nextFrictionVertical = Magic.FRICTION_MEDIUM_AIR;
     }
 
 
