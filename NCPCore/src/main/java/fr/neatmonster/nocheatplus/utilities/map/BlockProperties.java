@@ -1126,6 +1126,7 @@ public class BlockProperties {
         registerThinFences();
         registerSpecialStaticFlags();
         registerInstantBreakables();
+        registerPassableInstantBreakables();
         registerLeafBlocks();
         registerBedBlocks();
 
@@ -1169,258 +1170,17 @@ public class BlockProperties {
 
         // Instantly breakable, leaf and bed blocks are registered via helpers
 
-        // Huge mushroom types
-        for (Material mat : new Material[]{ Material.VINE, Material.COCOA}) {
-            setBlock(mat, hugeMushroomType);
-        }
-        for (Material mat : MaterialUtil.MUSHROOM_BLOCKS) {
-            setBlock(mat, hugeMushroomType);
-        }
-
-        // Glass types
+        registerHugeMushroomBlocks();
         registerGlassBlocks();
-
-        // Plates
-        for (Material mat : MaterialUtil.WOODEN_PRESSURE_PLATES) {
-            setBlockProps(mat, new BlockProps(woodAxe, 0.5f));
-        }
-        setBlock(BridgeMaterial.STONE_PRESSURE_PLATE, new BlockProps(woodPickaxe, 0.5f, true));
-
-        // Sand types
-        setBlock(Material.SAND, sandType);
-        setBlock(Material.SOUL_SAND, sandType);
-        setBlock(Material.DIRT, sandType);
-        for (Material mat : MaterialUtil.CONCRETE_POWDER_BLOCKS) {
-            BlockInit.setAs(mat, Material.DIRT);
-        }
-
-        // Lever types
-        for (Material mat: new Material[]{
-            Material.LEVER,
-            BridgeMaterial.PISTON,
-            BridgeMaterial.PISTON_HEAD,
-            BridgeMaterial.STICKY_PISTON}) {
-            setBlock(mat, leverType);
-        }
-        setBlock(BridgeMaterial.CAKE, leverType);
-
-
-        // Gravel types
-        for (Material mat : new Material[] {
-            BridgeMaterial.MYCELIUM, 
-            BridgeMaterial.FARMLAND,
-            BridgeMaterial.GRASS_BLOCK,
-            Material.GRAVEL, 
-            Material.CLAY,}) {
-            setBlock(mat, gravelType);
-        }
-        
-        // All rails
-        for (Material mat : MaterialUtil.RAILS) {
-            setBlock(mat, new BlockProps(woodPickaxe, 0.7f));
-        }
-        
-        // Infested bricks
-        for (Material mat : MaterialUtil.INFESTED_BLOCKS) {
-            setBlock(mat, new BlockProps(noTool, 0.75f));
-        }
-
-        // Wood blocks
-        for (Material mat : MaterialUtil.WOOD_BLOCKS) {
-            setBlock(mat, new BlockProps(noTool, 0.8f));
-        }
-
-        // Sandstone types
-        setBlock(Material.SANDSTONE, sandStoneType);
-        setBlock(Material.SANDSTONE_STAIRS, sandStoneType);
-
-        // Stone types
-        for (Material mat : new Material[] {
-            Material.STONE, 
-            BridgeMaterial.STONE_BRICKS, 
-            BridgeMaterial.STONE_BRICK_STAIRS}) {
-            setBlock(mat, stoneTypeI);
-        }
-
-        // Pumpkin types
-        final BlockProps pumpkinType = new BlockProps(woodAxe, 1f);
-        setBlock(BridgeMaterial.SIGN, pumpkinType);
-        setBlock(Material.PUMPKIN, pumpkinType);
-        setBlock(Material.JACK_O_LANTERN, pumpkinType);
-
-        // Wood types
-        registerWoodTypes();
-
-        // Brick types
-        registerBrickTypes();
-
-        // Chest types
-        setBlock(BridgeMaterial.CRAFTING_TABLE, chestType);
-        setBlock(Material.CHEST, chestType);
-        if (BridgeMaterial.has("locked_chest")) {  // blocks[95] = indestructibleType; // Locked chest (prevent crash with 1.7).
-            BlockFlags.setFlagsAs("LOCKED_CHEST", Material.CHEST);
-            setBlockProps("LOCKED_CHEST", BlockProperties.chestType); // Breaks like chest later on.
-        }
-
-        // Wood door types
-        for (Material mat : MaterialUtil.WOODEN_DOORS) {
-            setBlock(mat, woodDoorType);
-        }
-        for (Material mat : MaterialUtil.WOODEN_TRAP_DOORS) {
-            setBlock(mat, woodDoorType);
-        }
-
-        // Coal types
-        for (Material mat : new Material[] {
-            BridgeMaterial.END_STONE, 
-            Material.COAL_ORE,}) {
-            setBlock(mat, coalType);
-        }
-
-        // Iron types
-        final BlockProps ironType = new BlockProps(stonePickaxe, 3f, true);
-        for (Material mat : new Material[] {
-            Material.LAPIS_ORE, 
-            Material.LAPIS_BLOCK, 
-            Material.IRON_ORE,}) {
-            setBlock(mat, ironType);
-        }
-
-        // Diamond types
-        final BlockProps diamondType = new BlockProps(ironPickaxe, 3f, true);
-        for (Material mat : new Material[] {
-            Material.REDSTONE_ORE, 
-            Material.EMERALD_ORE, 
-            Material.GOLD_ORE, 
-            Material.DIAMOND_ORE,
-            BridgeMaterial.get("glowing_redstone_ore"),}) {
-            if (mat != null) setBlock(mat, diamondType);
-        }
-
-        // Gold block types
-        setBlock(Material.GOLD_BLOCK, goldBlockType);
-
-        // Dispenser types
-        setBlock(Material.FURNACE, dispenserType);
-        if (BridgeMaterial.has("burning_furnace")) {
-            setBlock(BridgeMaterial.get("burning_furnace"), dispenserType);
-        }
-        setBlock(Material.DISPENSER, dispenserType);
-
-        // Iron door types
-        for (Material mat : new Material[] {
-            Material.EMERALD_BLOCK,
-            BridgeMaterial.SPAWNER, 
-            BridgeMaterial.IRON_DOOR,
-            BridgeMaterial.IRON_BARS, 
-            BridgeMaterial.ENCHANTING_TABLE,}) {
-            setBlock(mat, ironDoorType);
-        }
-        
-        // Iron block types
-        setBlock(Material.IRON_BLOCK, ironBlockType);
-        setBreakingTimeOverridesByEfficiency(new BlockBreakKey().blockType(Material.IRON_BLOCK).toolType(ToolType.PICKAXE).materialBase(MaterialBase.WOOD), ironBlockType.breakingTimes[1], 6200L, 3500L, 2050L, 1350L, 900L, 500L);
-        
-        // Diamond block types
-        setBlock(Material.DIAMOND_BLOCK, diamondBlockType);
-
-        // More 1.4 (not insta).
-        // NOTE: Either move all to an extra setup class, or integrate above.
-        for (Material mat : MaterialUtil.WOODEN_BUTTONS) {
-            //setBlock(mat, leverType);
-            setBlock(mat,new BlockProps(woodAxe, 0.5f));
-        }
-        props = new BlockProps(noTool, 1f);
-        for (Material mat : MaterialUtil.HEADS_GROUND) {
-            setBlock(mat, props);
-            BlockFlags.setFlag(mat, BlockFlags.F_SOLID | BlockFlags.F_GROUND);
-        }
-        setBlock(Material.ANVIL, new BlockProps(woodPickaxe, 5f, true)); 
-        for (final Material mat : MaterialUtil.FLOWER_POTS) {
-            BlockFlags.addFlags(mat, BlockFlags.F_SOLID | BlockFlags.F_GROUND);
-            setBlockProps(mat, instantType);
-        }
-
-        // Indestructible types
-        for (Material mat : new Material[]{
-            Material.AIR, 
-            Material.BEDROCK,
-            BridgeMaterial.END_PORTAL, 
-            BridgeMaterial.END_PORTAL_FRAME,
-            BridgeMaterial.NETHER_PORTAL,
-            BridgeMaterial.get("void_air")}) {
-            if (mat != null) setBlock(mat, indestructibleType); 
-        }
-        final List<Set<Material>> indestructible = new LinkedList<Set<Material>>(Arrays.asList(MaterialUtil.LAVA, MaterialUtil.WATER));
-        for (Set<Material> set : indestructible) {
-            for (Material mat : set) {
-                setBlock(mat, indestructibleType); 
-            }
-        }
-        BlockFlags.setBlockFlags(Material.BEDROCK, BlockFlags.FULLY_SOLID_BOUNDS);
-
-        // Terracotta (hard_clay).
-        props = new BlockProps(BlockProperties.woodPickaxe, 1.25f, true);
-        for (final Material mat : MaterialUtil.TERRACOTTA_BLOCKS) {
-            if (mat != null) {
-                BlockProperties.setBlockProps(mat, props);
-                BlockFlags.setFlagsAs(mat, Material.STONE);
-            }
-        }
-
-        // Glazed Terracotta
-        props = new BlockProps(BlockProperties.woodPickaxe, 1.4f, true);
-        for (final Material mat : MaterialUtil.GLAZED_TERRACOTTA_BLOCKS) {
-            if (mat != null) {
-                BlockProperties.setBlockProps(mat, props);
-                BlockFlags.setFlagsAs(mat, BridgeMaterial.TERRACOTTA);
-            }
-        }
-
-        // Carpets.
-        final BlockProps carpetProps = new BlockProps(BlockProperties.noTool, 0.1f);
-        final long carpetFlags = BlockFlags.F_GROUND | BlockFlags.F_CARPET;
-        for (final Material mat : MaterialUtil.CARPETS) {
-            BlockProperties.setBlockProps(mat, carpetProps);
-            BlockFlags.setBlockFlags(mat, carpetFlags);
-        }
-
-        // Banners.
-        props = new BlockProps(BlockProperties.woodAxe, 1f);
-        for (Material mat : MaterialUtil.BANNERS) {
-            BlockFlags.setBlockFlags(mat, 0L);
-            setBlockProps(mat, props);
-        }
-
-        // Wall banners.
-        for (Material mat : MaterialUtil.WALL_BANNERS) {
-            setBlockProps(mat, props);
-        }
-
-        // Shulker boxes
-        registerShulkerBoxes();
-
-        // Concrete blocks handled via helper
-        registerConcreteBlocks();
-
-        // Wool blocks.
-        props = new BlockProps(tools.get(Material.SHEARS), 0.8f);
-        for (Material mat : MaterialUtil.WOOL_BLOCKS) {
-            BlockFlags.setFlagsAs(mat, Material.STONE);
-            setBlockProps(mat, props);
-            // NOTE: Model shears directly somehow (per-block list).
-        }
-
-        // Fully solid blocks (shape / passable) - simplifies MCAccessBukkit setup, aim at 1.13+.
-        for (Material mat : MaterialUtil.FULLY_SOLID_BLOCKS) {
-            BlockFlags.addFlags(mat, BlockFlags.FULL_BOUNDS | BlockFlags.F_SOLID);
-        }
-
-        // Fully passable blocks.
-        for (Material mat : MaterialUtil.FULLY_PASSABLE_BLOCKS) {
-            BlockFlags.addFlags(mat, BlockFlags.F_IGN_PASSABLE);
-            BlockFlags.removeFlags(mat, BlockFlags.F_SOLID | BlockFlags.F_GROUND);
-        }
+        registerPressurePlates();
+        registerSandAndGravelBlocks();
+        registerLeverAndPistonBlocks();
+        registerMiscBlockSets();
+        registerOreAndMineralBlocks();
+        registerToolSensitiveBlocks();
+        registerIndestructibleBlocks();
+        registerSpecialBlocks();
+        registerBoundsAndPassables();
     }
 
     /**
@@ -4698,12 +4458,15 @@ public class BlockProperties {
             BridgeMaterial.get("repeater"),
             BridgeMaterial.get("sea_pickle"),
             BridgeMaterial.LILY_PAD,
-            BridgeMaterial.COMMAND_BLOCK,}) {
+            BridgeMaterial.COMMAND_BLOCK }) {
             if (mat != null) setBlock(mat, instantType);
         }
         for (final Material mat : MaterialUtil.INSTANT_PLANTS) {
             setBlock(mat, instantType);
         }
+    }
+
+    private static void registerPassableInstantBreakables() {
         for (final Material mat : new Material[] {
             Material.REDSTONE_WIRE,
             BridgeMaterial.get("REDSTONE_TORCH_ON"),
@@ -4713,7 +4476,7 @@ public class BlockProperties {
             Material.TRIPWIRE,
             Material.TRIPWIRE_HOOK,
             Material.TORCH,
-            Material.FIRE,}) {
+            Material.FIRE }) {
             if (mat != null) {
                 setBlock(mat, instantType);
                 BlockFlags.addFlags(mat, BlockFlags.F_IGN_PASSABLE);
@@ -4732,6 +4495,209 @@ public class BlockProperties {
         for (Material mat : MaterialUtil.BEDS) {
             setBlock(mat, leafType);
             BlockFlags.setFlag(mat, BlockFlags.F_GROUND | BlockFlags.F_SOLID | BlockFlags.F_BED);
+        }
+    }
+
+    private static void registerHugeMushroomBlocks() {
+        for (Material mat : new Material[]{ Material.VINE, Material.COCOA }) {
+            setBlock(mat, hugeMushroomType);
+        }
+        for (Material mat : MaterialUtil.MUSHROOM_BLOCKS) {
+            setBlock(mat, hugeMushroomType);
+        }
+    }
+
+    private static void registerPressurePlates() {
+        for (Material mat : MaterialUtil.WOODEN_PRESSURE_PLATES) {
+            setBlockProps(mat, new BlockProps(woodAxe, 0.5f));
+        }
+        setBlock(BridgeMaterial.STONE_PRESSURE_PLATE, new BlockProps(woodPickaxe, 0.5f, true));
+    }
+
+    private static void registerSandAndGravelBlocks() {
+        setBlock(Material.SAND, sandType);
+        setBlock(Material.SOUL_SAND, sandType);
+        setBlock(Material.DIRT, sandType);
+        for (Material mat : MaterialUtil.CONCRETE_POWDER_BLOCKS) {
+            BlockInit.setAs(mat, Material.DIRT);
+        }
+        for (Material mat : new Material[] {
+            BridgeMaterial.MYCELIUM,
+            BridgeMaterial.FARMLAND,
+            BridgeMaterial.GRASS_BLOCK,
+            Material.GRAVEL,
+            Material.CLAY }) {
+            setBlock(mat, gravelType);
+        }
+    }
+
+    private static void registerLeverAndPistonBlocks() {
+        for (Material mat : new Material[]{
+            Material.LEVER,
+            BridgeMaterial.PISTON,
+            BridgeMaterial.PISTON_HEAD,
+            BridgeMaterial.STICKY_PISTON }) {
+            setBlock(mat, leverType);
+        }
+        setBlock(BridgeMaterial.CAKE, leverType);
+    }
+
+    private static void registerMiscBlockSets() {
+        for (Material mat : MaterialUtil.RAILS) {
+            setBlock(mat, new BlockProps(woodPickaxe, 0.7f));
+        }
+        for (Material mat : MaterialUtil.INFESTED_BLOCKS) {
+            setBlock(mat, new BlockProps(noTool, 0.75f));
+        }
+        for (Material mat : MaterialUtil.WOOD_BLOCKS) {
+            setBlock(mat, new BlockProps(noTool, 0.8f));
+        }
+        setBlock(Material.SANDSTONE, sandStoneType);
+        setBlock(Material.SANDSTONE_STAIRS, sandStoneType);
+        for (Material mat : new Material[] {
+            Material.STONE,
+            BridgeMaterial.STONE_BRICKS,
+            BridgeMaterial.STONE_BRICK_STAIRS }) {
+            setBlock(mat, stoneTypeI);
+        }
+        BlockProps pumpkinType = new BlockProps(woodAxe, 1f);
+        setBlock(BridgeMaterial.SIGN, pumpkinType);
+        setBlock(Material.PUMPKIN, pumpkinType);
+        setBlock(Material.JACK_O_LANTERN, pumpkinType);
+        registerWoodTypes();
+        registerBrickTypes();
+        setBlock(BridgeMaterial.CRAFTING_TABLE, chestType);
+        setBlock(Material.CHEST, chestType);
+        if (BridgeMaterial.has("locked_chest")) {
+            BlockFlags.setFlagsAs("LOCKED_CHEST", Material.CHEST);
+            setBlockProps("LOCKED_CHEST", BlockProperties.chestType);
+        }
+    }
+
+    private static void registerOreAndMineralBlocks() {
+        for (Material mat : new Material[] {
+            BridgeMaterial.END_STONE,
+            Material.COAL_ORE }) {
+            setBlock(mat, coalType);
+        }
+        BlockProps ironType = new BlockProps(stonePickaxe, 3f, true);
+        for (Material mat : new Material[] {
+            Material.LAPIS_ORE,
+            Material.LAPIS_BLOCK,
+            Material.IRON_ORE }) {
+            setBlock(mat, ironType);
+        }
+        BlockProps diamondType = new BlockProps(ironPickaxe, 3f, true);
+        for (Material mat : new Material[] {
+            Material.REDSTONE_ORE,
+            Material.EMERALD_ORE,
+            Material.GOLD_ORE,
+            Material.DIAMOND_ORE,
+            BridgeMaterial.get("glowing_redstone_ore") }) {
+            if (mat != null) setBlock(mat, diamondType);
+        }
+        setBlock(Material.GOLD_BLOCK, goldBlockType);
+    }
+
+    private static void registerToolSensitiveBlocks() {
+        setBlock(Material.FURNACE, dispenserType);
+        if (BridgeMaterial.has("burning_furnace")) {
+            setBlock(BridgeMaterial.get("burning_furnace"), dispenserType);
+        }
+        setBlock(Material.DISPENSER, dispenserType);
+        for (Material mat : new Material[] {
+            Material.EMERALD_BLOCK,
+            BridgeMaterial.SPAWNER,
+            BridgeMaterial.IRON_DOOR,
+            BridgeMaterial.IRON_BARS,
+            BridgeMaterial.ENCHANTING_TABLE }) {
+            setBlock(mat, ironDoorType);
+        }
+        setBlock(Material.IRON_BLOCK, ironBlockType);
+        setBreakingTimeOverridesByEfficiency(
+            new BlockBreakKey().blockType(Material.IRON_BLOCK).toolType(ToolType.PICKAXE).materialBase(MaterialBase.WOOD),
+            ironBlockType.breakingTimes[1], 6200L, 3500L, 2050L, 1350L, 900L, 500L);
+        setBlock(Material.DIAMOND_BLOCK, diamondBlockType);
+        for (Material mat : MaterialUtil.WOODEN_BUTTONS) {
+            setBlock(mat, new BlockProps(woodAxe, 0.5f));
+        }
+        BlockProps props = new BlockProps(noTool, 1f);
+        for (Material mat : MaterialUtil.HEADS_GROUND) {
+            setBlock(mat, props);
+            BlockFlags.setFlag(mat, BlockFlags.F_SOLID | BlockFlags.F_GROUND);
+        }
+        setBlock(Material.ANVIL, new BlockProps(woodPickaxe, 5f, true));
+        for (final Material mat : MaterialUtil.FLOWER_POTS) {
+            BlockFlags.addFlags(mat, BlockFlags.F_SOLID | BlockFlags.F_GROUND);
+            setBlockProps(mat, instantType);
+        }
+    }
+
+    private static void registerIndestructibleBlocks() {
+        for (Material mat : new Material[]{
+            Material.AIR,
+            Material.BEDROCK,
+            BridgeMaterial.END_PORTAL,
+            BridgeMaterial.END_PORTAL_FRAME,
+            BridgeMaterial.NETHER_PORTAL,
+            BridgeMaterial.get("void_air") }) {
+            if (mat != null) setBlock(mat, indestructibleType);
+        }
+        List<Set<Material>> indestructible = new LinkedList<Set<Material>>(Arrays.asList(MaterialUtil.LAVA, MaterialUtil.WATER));
+        for (Set<Material> set : indestructible) {
+            for (Material mat : set) {
+                setBlock(mat, indestructibleType);
+            }
+        }
+        BlockFlags.setBlockFlags(Material.BEDROCK, BlockFlags.FULLY_SOLID_BOUNDS);
+    }
+
+    private static void registerSpecialBlocks() {
+        BlockProps props;
+        props = new BlockProps(BlockProperties.woodPickaxe, 1.25f, true);
+        for (final Material mat : MaterialUtil.TERRACOTTA_BLOCKS) {
+            if (mat != null) {
+                BlockProperties.setBlockProps(mat, props);
+                BlockFlags.setFlagsAs(mat, Material.STONE);
+            }
+        }
+        props = new BlockProps(BlockProperties.woodPickaxe, 1.4f, true);
+        for (final Material mat : MaterialUtil.GLAZED_TERRACOTTA_BLOCKS) {
+            if (mat != null) {
+                BlockProperties.setBlockProps(mat, props);
+                BlockFlags.setFlagsAs(mat, BridgeMaterial.TERRACOTTA);
+            }
+        }
+        BlockProps carpetProps = new BlockProps(BlockProperties.noTool, 0.1f);
+        long carpetFlags = BlockFlags.F_GROUND | BlockFlags.F_CARPET;
+        for (final Material mat : MaterialUtil.CARPETS) {
+            BlockProperties.setBlockProps(mat, carpetProps);
+            BlockFlags.setBlockFlags(mat, carpetFlags);
+        }
+        props = new BlockProps(BlockProperties.woodAxe, 1f);
+        for (Material mat : MaterialUtil.BANNERS) {
+            BlockFlags.setBlockFlags(mat, 0L);
+            setBlockProps(mat, props);
+        }
+        for (Material mat : MaterialUtil.WALL_BANNERS) {
+            setBlockProps(mat, props);
+        }
+        registerShulkerBoxes();
+        registerConcreteBlocks();
+        props = new BlockProps(tools.get(Material.SHEARS), 0.8f);
+        for (Material mat : MaterialUtil.WOOL_BLOCKS) {
+            BlockFlags.setFlagsAs(mat, Material.STONE);
+            setBlockProps(mat, props);
+        }
+    }
+
+    private static void registerBoundsAndPassables() {
+        for (Material mat : MaterialUtil.FULLY_SOLID_BLOCKS) {
+            BlockFlags.addFlags(mat, BlockFlags.FULL_BOUNDS | BlockFlags.F_SOLID);
+        }
+        for (Material mat : MaterialUtil.FULLY_PASSABLE_BLOCKS) {
+            BlockFlags.addFlags(mat, BlockFlags.F_IGN_PASSABLE);
+            BlockFlags.removeFlags(mat, BlockFlags.F_SOLID | BlockFlags.F_GROUND);
         }
     }
 
