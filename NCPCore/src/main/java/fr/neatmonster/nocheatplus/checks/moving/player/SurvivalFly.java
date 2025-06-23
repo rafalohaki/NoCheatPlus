@@ -1674,9 +1674,7 @@ public class SurvivalFly extends Check {
         final boolean TooBigMoveNoData = AirWorkarounds.outOfEnvelopeNoData(yDistance, from, to, thisMove, resetTo, data);
 
         boolean vDistRelVL = false;
-        if (VEnvHack || yDistDiffEx <= 0.0 && yDistDiffEx > -Magic.GRAVITY_SPAN && data.ws.use(WRPT.W_M_SF_ACCEPTED_ENV)) {
-        }
-        else if (yDistDiffEx > 0.0) {
+        if (yDistDiffEx > 0.0) {
             if (!(TooBigMove || TooBigMoveNoData || GravityEffects || (lastMove.toIsValid && honeyBlockCollision))) {
                 vDistRelVL = true;
             }
