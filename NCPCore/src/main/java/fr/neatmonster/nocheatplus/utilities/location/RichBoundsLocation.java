@@ -1691,6 +1691,42 @@ public class RichBoundsLocation implements IGetBukkitLocation, IGetBlockPosition
     }
 
     /* (non-Javadoc)
+     * @see java.lang.Object#equals(java.lang.Object)
+     */
+    @Override
+    public boolean equals(final Object obj) {
+        if (this == obj) {
+            return true;
+        }
+        if (obj == null) {
+            return false;
+        }
+        if (obj instanceof IGetLocationWithLook) {
+            final IGetLocationWithLook other = (IGetLocationWithLook) obj;
+            final String wnThis = world == null ? null : world.getName();
+            final String wnOther = other.getWorldName();
+            return (wnThis == null ? wnOther == null : wnThis.equals(wnOther))
+                    && x == other.getX()
+                    && y == other.getY()
+                    && z == other.getZ()
+                    && yaw == other.getYaw()
+                    && pitch == other.getPitch();
+        }
+        if (obj instanceof Location) {
+            final Location other = (Location) obj;
+            final String wnThis = world == null ? null : world.getName();
+            final String wnOther = other.getWorld() == null ? null : other.getWorld().getName();
+            return (wnThis == null ? wnOther == null : wnThis.equals(wnOther))
+                    && x == other.getX()
+                    && y == other.getY()
+                    && z == other.getZ()
+                    && yaw == other.getYaw()
+                    && pitch == other.getPitch();
+        }
+        return false;
+    }
+
+    /* (non-Javadoc)
      * @see java.lang.Object#toString()
      */
     @Override
