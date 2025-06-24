@@ -132,7 +132,7 @@ def main_interactive(path):
         # TODO: May leak file descriptors :p.
         copy_and_replace(src_dir, dst_dir, repl_filename, repl_content)
         return True
-    except:
+    except Exception:
         traceback.print_exc()
         sys.stderr.flush()
         print("[ERROR] Module creation failed, remove destination directory...")

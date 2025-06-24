@@ -169,6 +169,11 @@ public abstract class BlockCache {
         }
 
         @Override
+        public int hashCode() {
+            return 42;
+        }
+
+        @Override
         public boolean equals(final Object obj) {
             if (obj == this) {
                 return true;
