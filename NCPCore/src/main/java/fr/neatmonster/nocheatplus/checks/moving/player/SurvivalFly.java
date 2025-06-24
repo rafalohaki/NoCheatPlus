@@ -1035,7 +1035,7 @@ public class SurvivalFly extends Check {
         //       - Powder snow in water -> Check what movement takes precedence.
         //       - Being on medium while in water (soulsand, slime block, honey block and stairs in water)
         //       - Same thing with collision tolerance [Move it as a global modifier].
-        // TODO: Horizontal medium and status transitions: needs better modeling [Add HORIZONTAL workarounds as well!? Likewise how vdistrel treats medium transitions]
+        // NOTE: Horizontal medium and status transitions need better modeling [Add HORIZONTAL workarounds as well!? Likewise how vdistrel treats medium transitions]
         //       - Bunnyhopping around lowest liquid levels
         //       - Bunnyhoping right into a berry bush
         //       - Swimming -> not swimming transitions
