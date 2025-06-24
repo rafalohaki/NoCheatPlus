@@ -101,8 +101,8 @@ import fr.neatmonster.nocheatplus.worlds.WorldDataManager;
  * @author asofold
  *
  */
-// TODO: RegisterWithOrder still relevant ?
-// TODO: Tag utility (common stuff).
+// NOTE: Check if RegisterWithOrder is still relevant.
+// NOTE: Tag utility (common stuff).
 @RegisterWithOrder(tag = "system.nocheatplus.datamanager", beforeTag = "(^feature.*)", basePriority = "-80")
 public class PlayerDataManager  implements IPlayerDataManager, ComponentWithName, INeedConfig, ConsistencyChecker, IDisableListener {
 
@@ -132,19 +132,19 @@ public class PlayerDataManager  implements IPlayerDataManager, ComponentWithName
      * Keeping track of online players. Currently id/name mappings are not kept
      * on logout, but might be later.
      */
-    // TODO: Switch to UUIDs as keys, get data by uuid when possible, use PlayerMap for getting the UUID.
+    // NOTE: Consider switching to UUIDs as keys and retrieve UUIDs via PlayerMap.
     private final PlayerMap playerMap;
 
     /**
      * IRemoveData instances.
      */
-    // TODO: might use a map for those later (extra or not).
+    // NOTE: Might use a map for those later (extra or not).
     private final ArrayList<IRemoveData> iRemoveData = new ArrayList<IRemoveData>();
 
     /**
      * Execution histories of the checks.
      */
-    // TODO: Move to PlayerData / CheckTypeTree (NodeS).
+    // NOTE: Candidate to move to PlayerData / CheckTypeTree (NodeS).
     private final Map<CheckType, Map<String, ExecutionHistory>> executionHistories = new HashMap<CheckType, Map<String,ExecutionHistory>>();
 
     /** Flag if data expiration is active at all. */
@@ -166,16 +166,16 @@ public class PlayerDataManager  implements IPlayerDataManager, ComponentWithName
      * policies.
      */
     /*
-     * TODO: Per world (rule/proxy) registries, with one central registry for
-     * ids (per-world registries would proxy id registration, but have their own
-     * rule settings).
+     * Future work: provide per world (rule/proxy) registries with one central
+     * registry for ids. Per-world registries would proxy id registration but
+     * have their own rule settings.
      */
     private final PermissionRegistry permissionRegistry;
 
     private WorldDataManager worldDataManager;
 
     private final Lock lock = new ReentrantLock();
-    // TODO: Consider same lock for some registry parts (deadlocking possibilities with exposed API).
+    // NOTE: Evaluate using the same lock for some registry parts to avoid deadlocks with the exposed API.
     private final RichFactoryRegistry<PlayerFactoryArgument> factoryRegistry = new RichFactoryRegistry<PlayerFactoryArgument>(lock);
     private final TickListener tickListener = new TickListener() {
 
@@ -186,12 +186,8 @@ public class PlayerDataManager  implements IPlayerDataManager, ComponentWithName
             if (rareTasks(tick, timeLast)) {
                 delayRareTasks = 10;
             }
-            else {
-                if (delayRareTasks == 0) {
-                }
-                else {
-                    delayRareTasks --;
-                }
+            else if (delayRareTasks > 0) {
+                delayRareTasks--;
             }
             frequentTasks(tick, timeLast);
         }
@@ -199,9 +195,9 @@ public class PlayerDataManager  implements IPlayerDataManager, ComponentWithName
 
     private final MiniListener<?>[] miniListeners = new MiniListener<?>[] {
         /*
-         * TODO: Constants in a class 'ListenerTags', plus a plan
-         * (system.data.player.nocheatplus, system.nocheatplus.data ??,
-         * nocheatplus.system.data.player...). (RegistryTags for other?).
+         * NOTE: constants belong in a 'ListenerTags' class with a plan for
+         * system.data.player.nocheatplus, system.nocheatplus.data ??,
+         * nocheatplus.system.data.player... (RegistryTags for others?).
          */
         new MiniListener<PlayerQuitEvent>() {
             @EventHandler(priority = EventPriority.MONITOR)
@@ -212,8 +208,8 @@ public class PlayerDataManager  implements IPlayerDataManager, ComponentWithName
             }
         },
         new MiniListener<PlayerKickEvent>() {
-            // TODO: ignoreCancelled !?
-            // TODO: afterTag !?
+            // NOTE: Should we ignoreCancelled?
+            // NOTE: Determine appropriate afterTag.
             @EventHandler(priority = EventPriority.MONITOR, ignoreCancelled = true)
             @RegisterMethodWithOrder(tag = "system.nocheatplus.datamanager", afterTag = "feature.*")
             @Override
@@ -226,7 +222,7 @@ public class PlayerDataManager  implements IPlayerDataManager, ComponentWithName
             @RegisterMethodWithOrder(tag = "system.nocheatplus.datamanager", beforeTag = ".*")
             @Override
             public void onEvent(final AsyncPlayerPreLoginEvent event) {
-                // TODO: Maintain a flag for precondition (e.g. ProtocolLib present).
+                // NOTE: Should maintain a flag for precondition (e.g. ProtocolLib present).
                 if (event.getLoginResult() == AsyncPlayerPreLoginEvent.Result.ALLOWED) {
                     onAsyncPlayerPreLogin(event);
                 }
@@ -237,7 +233,7 @@ public class PlayerDataManager  implements IPlayerDataManager, ComponentWithName
             @RegisterMethodWithOrder(tag = "system.nocheatplus.datamanager", beforeTag = ".*")
             @Override
             public void onEvent(final PlayerLoginEvent event) {
-                // TODO: Maintain a flag for precondition (e.g. ProtocolLib present).
+                // NOTE: Should maintain a flag for precondition (e.g. ProtocolLib present).
                 if (event.getResult() == PlayerLoginEvent.Result.ALLOWED) {
                     onPlayerLogin(event);
                 }
@@ -279,7 +275,7 @@ public class PlayerDataManager  implements IPlayerDataManager, ComponentWithName
      * @param permissionRegistry
      */
     public PlayerDataManager(final WorldDataManager worldDataManager, final PermissionRegistry permissionRegistry) {
-        DataManager.instance = this; // TODO: Let NoCheatPlus do this, DataManager returns an ILockable.
+        DataManager.instance = this; // NOTE: NoCheatPlus should handle this and return an ILockable.
         if (ServerVersion.isMinecraftVersionUnknown()) {
             // True hacks.
             BukkitVersion.init();
@@ -293,7 +289,7 @@ public class PlayerDataManager  implements IPlayerDataManager, ComponentWithName
             // Likely an older version without efficient mapping.
             playerMap = new PlayerMap(true);
         }
-        this.permissionRegistry = permissionRegistry; // TODO: World specific.
+        this.permissionRegistry = permissionRegistry; // NOTE: World specific handling pending.
         this.worldDataManager = worldDataManager;
         // (Call support.) 
         factoryRegistry.createAutoGroup(IDataOnReload.class);
@@ -323,13 +319,13 @@ public class PlayerDataManager  implements IPlayerDataManager, ComponentWithName
         final Iterator<Entry<UUID, Long>> iterator = entries.iterator();
         while (iterator.hasNext()) {
             final Entry<UUID, Long> entry = iterator.next();
-            // TODO: Multi stage expiration.
+            // NOTE: Multi stage expiration could be implemented.
             final long ts = entry.getValue();
             if (now - ts <= durExpireData) {
                 break;
             }
             final UUID playerId = entry.getKey();
-            // TODO: LEGACY handling: switch to UUIDs here for sure.
+            // NOTE: Use UUIDs here for legacy handling in the future.
             legacyPlayerDataExpirationRemovalByName(playerId, deleteData);
             bulkPlayerDataRemoval.add(playerId); // For bulk removal.
             iterator.remove();
@@ -344,14 +340,14 @@ public class PlayerDataManager  implements IPlayerDataManager, ComponentWithName
             final boolean deleteData) {
         final String playerName = DataManager.getPlayerName(playerId);
         if (playerName == null) {
-            // TODO: WARN
+            // NOTE: Should warn about missing player name.
             return;
         }
-        // TODO: Validity of name?
+        // NOTE: Consider validating the player name.
         if (deleteData) {
             final PlayerData pData = playerData.get(playerId);
             if (pData != null) {
-                pData.removeData(false); // TODO: staged ...
+                pData.removeData(false); // Staged removal planned.
             }
             clearComponentData(CheckType.ALL, playerName);
         }
@@ -373,7 +369,7 @@ public class PlayerDataManager  implements IPlayerDataManager, ComponentWithName
             doBulkPlayerDataRemoval();
             something = true;
         }
-        // TODO: Process rarePlayerTasks
+        // NOTE: Process rarePlayerTasks
         return something;
     }
 
@@ -402,10 +398,13 @@ public class PlayerDataManager  implements IPlayerDataManager, ComponentWithName
             while (it.hasNext()) {
                 final UUID playerId = it.next();
                 boolean skip = !lastLogout.containsKey(playerId);
-                // TODO: Also remove fake players, thus test for logged in too.
+                // NOTE: Consider removing fake players and testing for logged-in state.
                 /*
-                 * TODO: Multi stage removal: (1) non essential like permission
-                 * cache, (2) essential like set-back location, (3) all. In
+                 * NOTE: Multi stage removal could handle (1) non essential items
+                 * like permission cache, (2) essentials such as set-back location,
+                 * and (3) complete removal. This becomes complex once PlayerData
+                 * is used during asynchronous login; we might need parked data
+                 * when considering offline servers.
                  * addition things will get shifty, once we use PlayerData
                  * during asynchronous login - possibly we'll need parked data
                  * then, also considering offline servers.
@@ -448,14 +447,14 @@ public class PlayerDataManager  implements IPlayerDataManager, ComponentWithName
     public boolean removeData(final String playerName, CheckType checkType) {
 
         PlayerData pData = getPlayerData(playerName);
-        // TODO: Once working, use the most correct name from PlayerData.
+        // NOTE: Once working, use the most correct name from PlayerData.
         final UUID playerId = pData == null ? getUUID(playerName) : pData.getPlayerId();
         if (pData == null && playerId != null) {
             pData = playerData.get(playerId);
         }
         boolean somethingFound = pData != null || playerId != null;
 
-        // TODO: Method signature with UUID / (I)PlayerData ?
+        // NOTE: Method signature with UUID / (I)PlayerData ?
 
         if (checkType == null) {
             checkType = CheckType.ALL;
@@ -463,7 +462,7 @@ public class PlayerDataManager  implements IPlayerDataManager, ComponentWithName
 
         // Check extended registered components.
         /*
-         *  TODO: "System data" might not be wise to erase for online players.
+         *  NOTE: "System data" might not be wise to erase for online players.
          *  ICheckData vs IData (...), except if registered for per check 
          *  type removal.
          */
@@ -480,11 +479,11 @@ public class PlayerDataManager  implements IPlayerDataManager, ComponentWithName
                 if (hasSub) {
                     pData.removeSubCheckData(removalSpec.subCheckRemoval, removalSpec.checkTypes);
                 }
-                // TODO: Remove the PlayerData instance, if necessary?
+                // NOTE: Consider removing the PlayerData instance if needed.
             }
-            // TODO: Maintain a shouldBeOnline flag for fast skipping?
+            // NOTE: Maintain a shouldBeOnline flag for fast skipping?
             if (checkType == CheckType.ALL) {
-                // TODO: Fetch/use UUID early, and check validity of name.
+                // NOTE: Fetch or use UUID early and check validity of name.
                 if (playerId != null) {
                     bulkPlayerDataRemoval.add(playerId);
                 }
@@ -544,7 +543,7 @@ public class PlayerDataManager  implements IPlayerDataManager, ComponentWithName
      */
     @Override
     public void onDisable() {
-        // TODO: Process pending set backs etc. -> iterate playerData -> onDisable.
+        // NOTE: Process pending set backs etc. -> iterate playerData -> onDisable.
         clearData(CheckType.ALL);
         playerData.clear(); // Also clear for online players.
         iRemoveData.clear();
@@ -578,7 +577,7 @@ public class PlayerDataManager  implements IPlayerDataManager, ComponentWithName
      * @param player
      */
     private void removeOnlinePlayer(final Player player) {
-        // TODO: Consider to only remove the Player instance? Yes do so... and remove the mapping if the full data expires only.
+        // NOTE: Consider removing only the Player instance and keep the mapping unless full data expires.
         playerMap.remove(player);
     }
 
@@ -620,7 +619,7 @@ public class PlayerDataManager  implements IPlayerDataManager, ComponentWithName
         final PlayerData pData = getPlayerData(playerId);
         if (pData == null) {
             // Create an instance.
-            // TODO: Legacy server compatibility with world getting?
+            // NOTE: Legacy server compatibility with world retrieval?
             getPlayerData(player);
         }
         else {
@@ -681,7 +680,7 @@ public class PlayerDataManager  implements IPlayerDataManager, ComponentWithName
             pData.getGenericInstance(CombinedData.class).lastLogoutTime = timeNow;
         }
         else {
-            // TODO: put lastLogoutTime to OfflinePlayerData ?
+            // NOTE: Possibly put lastLogoutTime to OfflinePlayerData.
         }
         removeOnlinePlayer(player);
     }
@@ -703,10 +702,10 @@ public class PlayerDataManager  implements IPlayerDataManager, ComponentWithName
         durExpireData = config.getLong(ConfPaths.DATA_EXPIRATION_DURATION, 1, 1000000, 60) * 60000L; // in minutes
         deleteData = config.getBoolean(ConfPaths.DATA_EXPIRATION_DATA, true); // hidden.
         deleteHistory = config.getBoolean(ConfPaths.DATA_EXPIRATION_HISTORY);
-        // TODO: Per world permission registries: need world configs (...).
+        // NOTE: Per world permission registries require world configs.
         Set<RegisteredPermission> changedPermissions = null;
         try {
-            // TODO: Only update if changes are there - should have a config-path hash+size thing (+ setting).
+            // NOTE: Only update if changes are there - should have a config-path hash+size mechanism.
             changedPermissions = permissionRegistry.updateSettings(PermissionSettings.fromConfig(config, 
                     ConfPaths.PERMISSIONS_POLICY_DEFAULT, ConfPaths.PERMISSIONS_POLICY_RULES));
         }
@@ -744,10 +743,10 @@ public class PlayerDataManager  implements IPlayerDataManager, ComponentWithName
         for (final Player player : onlinePlayers) {
             final UUID id = player.getUniqueId();
             //          if (player.isOnline()) {
-            // TODO: Add a consistency check method !?
+            // NOTE: Add a consistency check method?
             if (!playerMap.hasPlayerInfo(id)) {
                 missing ++;
-                // TODO: Add the player [problem: messy NPC plugins?]?
+                // NOTE: Add the player [problem: messy NPC plugins]?
             }
             if (playerMap.storesPlayerInstances() && player != playerMap.getPlayer(id)) {
                 changed ++;
@@ -757,9 +756,9 @@ public class PlayerDataManager  implements IPlayerDataManager, ComponentWithName
             }
         }
 
-        // TODO: Consider checking lastLogout for too long gone players.
+        // NOTE: Consider checking lastLogout for too long gone players.
 
-        // TODO: Later the map size will not work, if we keep name/id mappings after logout. Other checking methods are possible.
+        // NOTE: Map size checks will fail if name/id mappings are kept after logout; other checks may be needed.
         final int storedSize = this.playerMap.size();
         if (missing != 0 || changed != 0 || onlinePlayers.length != storedSize) {
             foundInconsistencies ++;
@@ -769,7 +768,7 @@ public class PlayerDataManager  implements IPlayerDataManager, ComponentWithName
                     details.add("missing online players (" + missing + ")");
                 }
                 if (onlinePlayers.length != storedSize) {
-                    // TODO: Consider checking for not online players and remove them.
+                    // NOTE: Consider checking for not online players and remove them.
                     details.add("wrong number of online players (" + storedSize + " instead of " + onlinePlayers.length + ")");
                 }
                 if (changed != 0) {
@@ -796,7 +795,7 @@ public class PlayerDataManager  implements IPlayerDataManager, ComponentWithName
      * @return
      */
     boolean isFrequentPlayerTaskScheduled(final UUID playerId) {
-        // TODO : Efficient impl / optimized methods?
+        // NOTE: Efficient implementation or optimized methods?
         if (Bukkit.isPrimaryThread()) {
             return frequentPlayerTasks.containsPrimaryThread(playerId);
         }
@@ -815,7 +814,7 @@ public class PlayerDataManager  implements IPlayerDataManager, ComponentWithName
      * @return If something was removed.
      */
     public boolean clearComponentData(final CheckType checkType, final String PlayerName) {
-        // TODO: UUID.
+        // NOTE: Replace with UUID use where appropriate.
         boolean removed = false;
         for (final IRemoveData rmd : iRemoveData) {
             if (checkType == CheckType.ALL) {
@@ -843,7 +842,7 @@ public class PlayerDataManager  implements IPlayerDataManager, ComponentWithName
      * which implement this.
      */
     public void handleSystemTimeRanBackwards() {
-        // TODO: WorldDataManager should have an extra method and be called before this.
+        // NOTE: WorldDataManager should have an extra method and be called before this.
         // Collect data factories and clear execution history.
         for (final CheckType type : CheckTypeUtil.getWithDescendants(CheckType.ALL)) {
             final Map<String, ExecutionHistory> map = executionHistories.get(type);
@@ -861,7 +860,7 @@ public class PlayerDataManager  implements IPlayerDataManager, ComponentWithName
         }
         ViolationHistory.clear(CheckType.ALL);
         // PlayerData
-        // TODO: Register explicitly (adding IDataOnTimeRanBackwards)?
+        // NOTE: Consider registering explicitly (adding IDataOnTimeRanBackwards).
         Collection<Class<? extends IData>> dataTypes = factoryRegistry.getGroupedTypes(IData.class);
         for (final Entry<UUID, PlayerData> entry : playerData.iterable()){
             entry.getValue().handleTimeRanBackwards(dataTypes);
@@ -890,7 +889,7 @@ public class PlayerDataManager  implements IPlayerDataManager, ComponentWithName
         }
         else {
             // Creating this should be mostly harmless.
-            // TODO: Might want to lock still (same lock as used within the
+            // NOTE: Might want to lock still (same lock as used within the
             // playerData map).
             final PlayerData newData = new PlayerData(playerId, playerName,
                     permissionRegistry);
@@ -938,7 +937,7 @@ public class PlayerDataManager  implements IPlayerDataManager, ComponentWithName
 
     @Override
     public UUID getUUID(final String input) {
-        // TODO: Use player map.
+        // NOTE: Use player map when available.
         final Player player = getPlayer(input);
         if (player != null) {
             return player.getUniqueId();
@@ -987,7 +986,7 @@ public class PlayerDataManager  implements IPlayerDataManager, ComponentWithName
 
     @Override
     public <T> void removeGenericInstance(Class<T> registeredFor) {
-        // TODO: Really needs OfflinePlayerData for more frequent data removal.
+        // NOTE: Could use OfflinePlayerData for more frequent data removal.
         for (final Entry<UUID, PlayerData> entry : playerData.iterable()) {
             entry.getValue().removeGenericInstance(registeredFor);
         }
@@ -1007,10 +1006,10 @@ public class PlayerDataManager  implements IPlayerDataManager, ComponentWithName
                 if (hasSub) {
                     pData.removeSubCheckData(removalSpec.subCheckRemoval, removalSpec.checkTypes);
                 }
-                // TODO: Remove the PlayerData instance, if suitable?
+                // NOTE: Remove the PlayerData instance if suitable?
             }
         }
-        // TODO: IRemoveData - why register here at all ?
+        // NOTE: IRemoveData - why register here at all?
         for (final IRemoveData rmd : iRemoveData) {
             if (checkType == CheckType.ALL) {
                 // Not sure this is really good, though.
@@ -1030,7 +1029,7 @@ public class PlayerDataManager  implements IPlayerDataManager, ComponentWithName
             }
         }
         ViolationHistory.clear(checkType);
-        // TODO: PlayerData removal should have other mechanisms (stages).
+        // NOTE: PlayerData removal should have other mechanisms (stages).
         if (checkType == CheckType.ALL) {
             bulkPlayerDataRemoval.addAll(playerData.getKeys());
             doBulkPlayerDataRemoval(); // Only removes offline player data.
@@ -1076,7 +1075,7 @@ public class PlayerDataManager  implements IPlayerDataManager, ComponentWithName
      */
     public boolean removeExecutionHistory(final CheckType type, final String playerName) {
         boolean removed = false;
-        // TODO: design ...
+        // NOTE: design pending
         for (final CheckType refType : CheckTypeUtil.getWithDescendants(type)) {
             final Map<String, ExecutionHistory> map = executionHistories.get(refType);
             if (map != null && map.remove(playerName) != null) {

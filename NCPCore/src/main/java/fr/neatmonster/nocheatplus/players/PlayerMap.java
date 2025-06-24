@@ -34,7 +34,8 @@ import fr.neatmonster.nocheatplus.utilities.ReflectionUtil;
  */
 public final class PlayerMap {
 
-    // TODO: Remove, store in PlayerData (WeakHandle rather), perhaps keep some of the fetching logic.
+    // Mapping is kept here for now. A potential refactor might move this data
+    // into PlayerData (using weak references) while retaining the lookup logic.
 
     /**
      * Carry basic information about players.
@@ -65,13 +66,15 @@ public final class PlayerMap {
     private final boolean storePlayerInstances;
     private final boolean hasGetPlayer_UUID = ReflectionUtil.getMethod(Bukkit.class, "getPlayer", UUID.class) != null;
 
-    // TODO: Map types (copy on write, lazy erase, or just keep ordinary maps?)
+    // Currently simple hash maps are used.  Alternative implementations such as
+    // copy-on-write or lazy-erasing maps might be explored for concurrency.
     private Map<UUID, PlayerInfo> idInfoMap = new HashMap<UUID, PlayerMap.PlayerInfo>();
     private Map<String, PlayerInfo> exactNameInfoMap = new HashMap<String, PlayerMap.PlayerInfo>();
     private Map<String, PlayerInfo> lowerCaseNameInfoMap = new HashMap<String, PlayerMap.PlayerInfo>();
-    // TODO: Consider: Get players by prefix (primary thread only, e.g. for use with commands).
-    // TODO: get uuid/name methods?
-    // TODO: unlink Player references on remove for better gc?
+    // Possible future improvements:
+    //  * Fetch players by name prefix on the primary thread (useful for commands).
+    //  * Provide helper methods for UUID/name lookups.
+    //  * Explicitly unlink Player references on removal to help garbage collection.
 
 
     public PlayerMap(boolean storePlayerInstances) {
@@ -227,7 +230,8 @@ public final class PlayerMap {
     }
 
     public int size() {
-        // TODO: Consistency?
+        // Returns the number of tracked players. Future revisions might expose
+        // additional consistency checks.
         return idInfoMap.size();
     }
 
@@ -250,7 +254,8 @@ public final class PlayerMap {
     }
 
     private Player scanForPlayer(final UUID id) {
-        // TODO: Add a mapping for id->name for this case?
+        // Fallback scan if no cached entry exists.  In future a simple
+        // UUID-to-name mapping could avoid this iteration.
         for (final Player player : BridgeMisc.getOnlinePlayers()) {
             if (id.equals(player.getUniqueId())) {
                 return player;

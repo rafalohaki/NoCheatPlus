@@ -1505,6 +1505,13 @@ public class NoCheatPlus extends JavaPlugin implements NoCheatPlusAPI {
         return pDataMan;
     }
 
+    /**
+     * Delegates the registration of plugin components to the supplied
+     * {@link RegistrationContext}. This should be invoked during plugin
+     * initialization once all managers have been set up.
+     *
+     * @param context the context responsible for registering this plugin
+     */
     @Override
     public void register(RegistrationContext context) {
         // Perform the registration using the provided context.
