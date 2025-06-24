@@ -65,12 +65,31 @@ public class TestPluginLifecycle {
         DummyComponent b = new DummyComponent("B", calls);
         plugin.addComponent(a);
         plugin.addComponent(b);
+        // populate event registry and task fields to verify cleanup
+        Field regField = NoCheatPlus.class.getDeclaredField("eventRegistry");
+        regField.setAccessible(true);
+        Object registry = regField.get(plugin);
+        Field attachmentsField = registry.getClass().getSuperclass().getSuperclass()
+                .getDeclaredField("attachments");
+        attachmentsField.setAccessible(true);
+        ((java.util.Map<Object, java.util.Set<?>>) attachmentsField.get(registry))
+                .put(new Object(), new java.util.HashSet<>());
+        Field dataTaskField = NoCheatPlus.class.getDeclaredField("dataManTaskId");
+        dataTaskField.setAccessible(true);
+        dataTaskField.set(plugin, Integer.valueOf(1));
+        Field ccTaskField = NoCheatPlus.class.getDeclaredField("consistencyCheckerTaskId");
+        ccTaskField.setAccessible(true);
+        ccTaskField.set(plugin, Integer.valueOf(2));
+
         plugin.onDisable();
         assertEquals("B", calls.get(0));
         assertEquals("A", calls.get(1));
         assertTrue(getListeners().isEmpty());
         assertTrue(getDisableListeners().isEmpty());
         assertTrue(getAllComponents().isEmpty());
+        assertNull(dataTaskField.get(plugin));
+        assertNull(ccTaskField.get(plugin));
+        assertTrue(((java.util.Map<?, ?>) attachmentsField.get(registry)).isEmpty());
     }
 
     private static class DummyComponent implements Listener, IDisableListener {
