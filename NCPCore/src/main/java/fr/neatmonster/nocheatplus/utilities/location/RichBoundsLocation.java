@@ -1675,21 +1675,6 @@ public class RichBoundsLocation implements IGetBukkitLocation, IGetBlockPosition
         return LocUtil.hashCode(this);
     }
 
-    @Override
-    public boolean equals(final Object obj) {
-        if (obj == this) {
-            return true;
-        }
-        if (obj instanceof IGetLocationWithLook) {
-            final IGetLocationWithLook other = (IGetLocationWithLook) obj;
-            return getWorldName().equals(other.getWorldName())
-                    && other.getX() == getX() && other.getY() == getY()
-                    && other.getZ() == getZ() && other.getYaw() == getYaw()
-                    && other.getPitch() == getPitch();
-        }
-        return false;
-    }
-
     /* (non-Javadoc)
      * @see java.lang.Object#equals(java.lang.Object)
      */
