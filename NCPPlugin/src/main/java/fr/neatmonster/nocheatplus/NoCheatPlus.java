@@ -50,6 +50,8 @@ import org.bukkit.permissions.Permissible;
 import org.bukkit.permissions.Permission;
 import org.bukkit.plugin.PluginDescriptionFile;
 import org.bukkit.plugin.java.JavaPlugin;
+import org.bukkit.plugin.java.JavaPluginLoader;
+import java.io.File;
 import org.bukkit.scheduler.BukkitScheduler;
 
 import fr.neatmonster.nocheatplus.actions.ActionFactory;
@@ -152,6 +154,10 @@ import org.jetbrains.annotations.NotNull;
  * This is the main class of NoCheatPlus. The commands, events listeners and tasks are registered here.
  */
 public class NoCheatPlus extends JavaPlugin implements NoCheatPlusAPI {
+    protected NoCheatPlus(JavaPluginLoader loader, PluginDescriptionFile desc, File dataFolder, File file) {
+        super(loader, desc, dataFolder, file);
+    }
+
 
     private static final Object lockableAPIsecret = new Object();
     private static final ILockable lockableAPI = new BasicLockable(lockableAPIsecret, 
