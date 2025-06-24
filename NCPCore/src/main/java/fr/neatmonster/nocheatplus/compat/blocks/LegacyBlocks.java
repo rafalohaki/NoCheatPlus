@@ -401,10 +401,6 @@ public class LegacyBlocks {
 
         private int directionToValue(BlockFace face) {
             switch (face) {
-                default:
-                case UP:
-                case DOWN:
-                    return -1;
                 case NORTH:
                     return 2;
                 case SOUTH:
@@ -413,6 +409,10 @@ public class LegacyBlocks {
                     return 1;
                 case EAST:
                     return 3;
+                case UP:
+                case DOWN:
+                default:
+                    return -1;
             }
         }
 
