@@ -462,10 +462,74 @@ public class MovingListener extends CheckListener implements TickListener, IRemo
         ////////////////////////////////////////////////////
         // Early return checks (no full processing).      //
         ////////////////////////////////////////////////////
-        EarlyReturnDecision er = determineEarlyReturn(player, from, to, event, data, cc, pData);
-        final boolean earlyReturn = er.earlyReturn;
-        final String token = er.token;
-        newTo = er.newTo;
+        // Check illegal moves here anyway (!).
+        // Check if vehicle move logs correctly (fake).
+        final boolean earlyReturn;
+        final String token;
+        if (player.isInsideVehicle()) {
+            // No full processing for players in vehicles.
+            newTo = vehicleChecks.onPlayerMoveVehicle(player, from, to, data, pData);
+            earlyReturn = true;
+            token = "vehicle";
+        }
+        else if (data.lastVehicleType == EntityType.MINECART && specialMinecart
+            // The setback comes from VehicleChecks#onPlayerVehicleLeave
+            // Don't be confuse with data.getSetBack(from) here, the location "from" is used when the stored setback is null 
+            && to.distance(data.getSetBack(from)) < 3) {
+            earlyReturn = true;
+            token = "minecart-total";
+            data.lastVehicleType = null;
+            // Some changes were made in 1.19.4 make PlayerMoveEvent no longer fire while on Minecart
+            // So when the player leave the vehicle will make PlayerMoveEvent 
+            // work normal again and update the position so result in the location player start to ride minecart and location player left it
+        }
+        else if (data.vehicleLeave && to.distance(from) > 3) {
+        	earlyReturn = true;
+            token = "vehicle-leave-sb";
+            // Set-back for sure
+            newTo = data.getSetBack(from);
+            data.vehicleLeave = false;
+        }
+        else if (player.isDead()) {
+            // Ignore dead players.
+            data.sfHoverTicks = -1;
+            earlyReturn = true;
+            token = "dead";
+        }
+        else if (player.isSleeping()) {
+            // Ignore sleeping players.
+            data.sfHoverTicks = -1;
+            earlyReturn = true;
+            token = "sleeping";
+        }
+        else if (!from.getWorld().equals(to.getWorld())) {
+            // Keep hover ticks.
+            // Ignore changing worlds.
+            earlyReturn = true;
+            token = "worldchange";
+        }
+        else if (data.hasTeleported()) {
+            earlyReturn = handleTeleportedOnMove(player, event, data, cc, pData);
+            token = "awaitsetback";
+        }
+        else if (TrigUtil.isSamePos(from, to) && !data.lastMoveNoMove
+                // && ServerVersion.compareMinecraftVersion("1.17") >= 0
+                ) { 
+            //if (data.sfHoverTicks > 0) data.sfHoverTicks += hoverTicksStep;
+            earlyReturn = data.lastMoveNoMove = true;
+            token = "duplicate";
+            // Ignore 1.17+ duplicate position packets.
+            // Context: Mojang attempted to fix a bucket placement desync issue by re-sending the previous position on right clicking...
+            // On the server-side, this translates in a duplicate move which we need to ignore (i.e.: players can have 0 distance in air, MorePackets will trigger due to the extra packet if the button is pressed for long enough etc...)
+            // You would think that this would AT LEAST fix the issue, but it doesn't. However it surely does complicate things on our side.
+            // Thanks Mojang as always.
+            // Micro moves can be detected as duplicate !
+            // NOTE: on ground status does not seem to change
+        }
+        else {
+            earlyReturn = false;
+            token = null;
+        }
 
         // Reset duplicate move flag.
         if (!TrigUtil.isSamePos(from, to)) {
@@ -503,7 +567,53 @@ public class MovingListener extends CheckListener implements TickListener, IRemo
 
 
 
-        handleSplitMoves(player, from, to, event, debug, data, cc, pData);
+        //////////////////////////////////////////////////////////////
+        // Fire one or two moves here (Split move handling).        //
+        //////////////////////////////////////////////////////////////
+        // (newTo should be null here)
+        final PlayerMoveInfo moveInfo = aux.usePlayerMoveInfo();
+        final Location loc = player.getLocation(moveInfo.useLoc);
+        final PlayerMoveData lastMove = data.playerMoves.getFirstPastMove();
+        if (cc.loadChunksOnMove) MovingUtil.ensureChunksLoaded(player, from, to, lastMove, "move", cc, pData);
+        
+        // Ordinary: Fire move from -> to
+        // This was reported and supposedely fixed by the Spigot team, however asofold decided to keep this active anyway. No reason is given from the commit.
+        // @See: https://github.com/NoCheatPlus/NoCheatPlus/commit/7d2c1ce1f8b40fac554cdef8040576d9f88503ef
+        // @See: https://hub.spigotmc.org/jira/browse/SPIGOT-1646
+        if (
+                // Handling split moves has been disabled.
+                !cc.splitMoves ||
+                // The usual case: no micro move happened.
+                TrigUtil.isSamePos(from, loc)
+                // Special case or bug? Which version of MC/spigot?
+                || lastMove.valid && TrigUtil.isSamePos(loc, lastMove.from.getX(), lastMove.from.getY(), lastMove.from.getZ())
+                // On pistons pulling the player back: -1.15 yDistance for split move 1 (untracked position > 0.5 yDistance!).
+                // (Could also be other envelopes (0.9 velocity upwards), too tedious to research.)
+            ) {
+            // 0: Fire move from -> to
+            moveInfo.set(player, from, to, cc.yOnGround);
+            checkPlayerMove(player, from, to, 0, moveInfo, debug, data, cc, pData, event);
+        }
+        else {
+            // (Special case: Location has not been updated last moving event.)
+            // Split into two moves.
+            // 1. Process from -> loc.
+            if (debug) debug(player, "Split move 1 (from -> loc):");
+            moveInfo.set(player, from, loc, cc.yOnGround);
+            if (!checkPlayerMove(player, from, loc, 1, moveInfo, debug, data, cc, pData, event) && processingEvents.containsKey(player.getName())) {
+
+                // Between -> set data accordingly (compare: onPlayerMoveMonitor).
+                onMoveMonitorNotCancelled(player, from, loc, System.currentTimeMillis(), TickTask.getTick(), pData.getGenericInstance(CombinedData.class), data, cc, pData);
+                data.joinOrRespawn = false;
+                // 2. Process loc -> to.
+                if (debug) debug(player, "Split move 2 (loc -> to):");
+                moveInfo.set(player, loc, to, cc.yOnGround);
+                checkPlayerMove(player, loc, to, 2, moveInfo, debug, data, cc, pData, event);
+            }
+        }
+        // Cleanup.
+        data.joinOrRespawn = false;
+        aux.returnPlayerMoveInfo(moveInfo);
     }
 
 
@@ -517,7 +627,7 @@ public class MovingListener extends CheckListener implements TickListener, IRemo
      * 
      * @return
      */
-    private boolean handleTeleportedOnMove(final Player player, final PlayerMoveEvent event, final MovingData data,
+    private boolean handleTeleportedOnMove(final Player player, final PlayerMoveEvent event, final MovingData data, 
                                            final MovingConfig cc, final IPlayerData pData) {
 
         // This could also happen with a packet based set back such as with cancelling move events.
@@ -544,94 +654,6 @@ public class MovingListener extends CheckListener implements TickListener, IRemo
             // More to do?
             return false;
         }
-    }
-
-    private static record EarlyReturnDecision(boolean earlyReturn, Location newTo, String token) {}
-
-    private EarlyReturnDecision determineEarlyReturn(final Player player, final Location from, final Location to,
-                                                     final PlayerMoveEvent event, final MovingData data,
-                                                     final MovingConfig cc, final IPlayerData pData) {
-
-        Location newTo = null;
-        final String token;
-        final boolean earlyReturn;
-        if (player.isInsideVehicle()) {
-            newTo = vehicleChecks.onPlayerMoveVehicle(player, from, to, data, pData);
-            earlyReturn = true;
-            token = "vehicle";
-        }
-        else if (data.lastVehicleType == EntityType.MINECART && specialMinecart
-                && to.distance(data.getSetBack(from)) < 3) {
-            earlyReturn = true;
-            token = "minecart-total";
-            data.lastVehicleType = null;
-        }
-        else if (data.vehicleLeave && to.distance(from) > 3) {
-            earlyReturn = true;
-            token = "vehicle-leave-sb";
-            newTo = data.getSetBack(from);
-            data.vehicleLeave = false;
-        }
-        else if (player.isDead()) {
-            data.sfHoverTicks = -1;
-            earlyReturn = true;
-            token = "dead";
-        }
-        else if (player.isSleeping()) {
-            data.sfHoverTicks = -1;
-            earlyReturn = true;
-            token = "sleeping";
-        }
-        else if (!from.getWorld().equals(to.getWorld())) {
-            earlyReturn = true;
-            token = "worldchange";
-        }
-        else if (data.hasTeleported()) {
-            earlyReturn = handleTeleportedOnMove(player, event, data, cc, pData);
-            token = "awaitsetback";
-        }
-        else if (TrigUtil.isSamePos(from, to) && !data.lastMoveNoMove) {
-            earlyReturn = data.lastMoveNoMove = true;
-            token = "duplicate";
-        }
-        else {
-            earlyReturn = false;
-            token = null;
-        }
-        return new EarlyReturnDecision(earlyReturn, newTo, token);
-    }
-
-    private void handleSplitMoves(final Player player, final Location from, final Location to,
-                                  final PlayerMoveEvent event, final boolean debug,
-                                  final MovingData data, final MovingConfig cc, final IPlayerData pData) {
-
-        final PlayerMoveInfo moveInfo = aux.usePlayerMoveInfo();
-        final Location loc = player.getLocation(moveInfo.useLoc);
-        final PlayerMoveData lastMove = data.playerMoves.getFirstPastMove();
-        if (cc.loadChunksOnMove) {
-            MovingUtil.ensureChunksLoaded(player, from, to, lastMove, "move", cc, pData);
-        }
-
-        if (!cc.splitMoves || TrigUtil.isSamePos(from, loc)
-                || lastMove.valid && TrigUtil.isSamePos(loc, lastMove.from.getX(), lastMove.from.getY(), lastMove.from.getZ())) {
-            moveInfo.set(player, from, to, cc.yOnGround);
-            checkPlayerMove(player, from, to, 0, moveInfo, debug, data, cc, pData, event);
-        }
-        else {
-            if (debug) debug(player, "Split move 1 (from -> loc):");
-            moveInfo.set(player, from, loc, cc.yOnGround);
-            if (!checkPlayerMove(player, from, loc, 1, moveInfo, debug, data, cc, pData, event)
-                    && processingEvents.containsKey(player.getName())) {
-                onMoveMonitorNotCancelled(player, from, loc, System.currentTimeMillis(), TickTask.getTick(),
-                        pData.getGenericInstance(CombinedData.class), data, cc, pData);
-                data.joinOrRespawn = false;
-                if (debug) debug(player, "Split move 2 (loc -> to):");
-                moveInfo.set(player, loc, to, cc.yOnGround);
-                checkPlayerMove(player, loc, to, 2, moveInfo, debug, data, cc, pData, event);
-            }
-        }
-        data.joinOrRespawn = false;
-        aux.returnPlayerMoveInfo(moveInfo);
     }
 
 
@@ -2260,6 +2282,12 @@ public class MovingListener extends CheckListener implements TickListener, IRemo
         final IPlayerData pData = DataManager.getPlayerData(player);
         final MovingData data = pData.getGenericInstance(MovingData.class);
         final PlayerMoveData thisMove = data.playerMoves.getCurrentMove();
+        if (!pData.isCheckActive(CheckType.MOVING, player)) return;
+        if (player.isInsideVehicle()) {
+            // Ignore vehicles (noFallFallDistance will be inaccurate anyway).
+            data.clearNoFallData();
+            return;
+        }
         final MovingConfig cc = pData.getGenericInstance(MovingConfig.class);
         final PlayerMoveInfo moveInfo = aux.usePlayerMoveInfo();
         final double yOnGround = Math.max(cc.noFallyOnGround, cc.yOnGround);
@@ -2268,156 +2296,114 @@ public class MovingListener extends CheckListener implements TickListener, IRemo
         final PlayerLocation pLoc = moveInfo.from;
         pLoc.collectBlockFlags(yOnGround);
 
-        if (shouldSkipFallDamageCheck(player, event, pData, data, pLoc, cc, moveInfo)) {
+        if (event.isCancelled() || !MovingUtil.shouldCheckSurvivalFly(player, pLoc, moveInfo.to, data, cc, pData) 
+            || !noFall.isEnabled(player, pData)) {
+            data.clearNoFallData();
             useFallLoc.setWorld(null);
             aux.returnPlayerMoveInfo(moveInfo);
             return;
         }
-
         final boolean debug = pData.isDebugActive(CheckType.MOVING_NOFALL);
+        boolean allowReset = true;
         float fallDistance = player.getFallDistance();
         final float yDiff = (float) (data.noFallMaxY - loc.getY());
         final double damage = BridgeHealth.getRawDamage(event); // Raw damage.
         if (debug) debug(player, "Damage(FALL/PRE): " + damage + " / mc=" + player.getFallDistance() + " nf=" + data.noFallFallDistance + " yDiff=" + yDiff);
 
-        NoFallBypassResult result = handleNoFallBypass(player, event, data, thisMove, moveInfo, damage, yDiff, fallDistance, cc, pLoc, debug);
-        if (result.earlyExit) {
-            useFallLoc.setWorld(null);
-            aux.returnPlayerMoveInfo(moveInfo);
-            return;
-        }
-        fallDistance = result.fallDistance;
-        boolean allowReset = result.allowReset;
-        aux.returnPlayerMoveInfo(moveInfo);
-
-        adjustFallDamage(player, event, data, loc, fallDistance, yDiff, allowReset, damage, debug);
-        resetNoFallData(player, allowReset, data, cc, debug);
-
-        useFallLoc.setWorld(null);
-    }
-
-    /** Decide if fall damage checks should be skipped for the given event. */
-    private boolean shouldSkipFallDamageCheck(final Player player, final EntityDamageEvent event,
-                                              final IPlayerData pData, final MovingData data,
-                                              final PlayerLocation pLoc, final MovingConfig cc,
-                                              final PlayerMoveInfo moveInfo) {
-
-        if (!pData.isCheckActive(CheckType.MOVING, player)) {
-            return true;
-        }
-        if (player.isInsideVehicle()) {
-            data.clearNoFallData();
-            return true;
-        }
-        if (event.isCancelled() ||
-                !MovingUtil.shouldCheckSurvivalFly(player, pLoc, moveInfo.to, data, cc, pData) ||
-                !noFall.isEnabled(player, pData)) {
-            data.clearNoFallData();
-            return true;
-        }
-        return false;
-    }
-
-    /** Container for results of {@link #handleNoFallBypass}. */
-    private static class NoFallBypassResult {
-        final float fallDistance;
-        final boolean allowReset;
-        final boolean earlyExit;
-        NoFallBypassResult(float fallDistance, boolean allowReset, boolean earlyExit) {
-            this.fallDistance = fallDistance;
-            this.allowReset = allowReset;
-            this.earlyExit = earlyExit;
-        }
-    }
-
-    /**
-     * Handle NoFall bypass logic, possibly adjusting damage and returning early.
-     */
-    private NoFallBypassResult handleNoFallBypass(final Player player, final EntityDamageEvent event,
-                                                  final MovingData data, final PlayerMoveData thisMove,
-                                                  final PlayerMoveInfo moveInfo, final double damage,
-                                                  final float yDiff, final float fallDistance,
-                                                  final MovingConfig cc, final PlayerLocation pLoc,
-                                                  final boolean debug) {
-
-        float fDist = fallDistance;
-        boolean allowReset = true;
-
+        // NoFall bypass checks.
+        // data.noFallSkipAirCheck is used to skip checking in general, thus move into that block or not?
+        // Could consider skipping accumulated fall distance for NoFall in general as well.
         if (!data.noFallSkipAirCheck) {
+            
+            // Cheat: let Minecraft gather and deal fall damage.
             final float dataDist = Math.max(yDiff, data.noFallFallDistance);
             final double dataDamage = NoFall.getDamage(dataDist);
             if (damage > dataDamage + 0.5 || dataDamage <= 0.0) {
+
+                // Hot fix: allow fall damage in lava.
+                // Correctly model the half fall distance per in-lava move and taking fall damage in lava. 
+                // Also relate past y-distance(s) to the fall distance (mc).
+                // Original issue: https://github.com/NoCheatPlus/Issues/issues/439#issuecomment-299300421
                 final PlayerMoveData firstPastMove = data.playerMoves.getFirstPastMove();
                 if (pLoc.isOnGround() && pLoc.isInLava() && firstPastMove.toIsValid && firstPastMove.yDistance < 0.0) {
                     if (debug) debug(player, "NoFall/Damage: allow fall damage in lava (hotfix).");
-                }
-                else if (moveInfo.from.isOnClimbable()
+                } 
+                // Fix issues when gliding down vines with elytra.
+                // Checking for velocity does not work since sometimes it can be applied after this check runs
+                // Actually find out why NoFall is running at all when still gliding, rather.
+                else if (moveInfo.from.isOnClimbable() 
                         && (firstPastMove.modelFlying != null && firstPastMove.modelFlying.getVerticalAscendGliding()
-                            || firstPastMove.elytrafly || thisMove.modelFlying != null && thisMove.modelFlying.getVerticalAscendGliding()
-                            || thisMove.elytrafly)) {
+                        || firstPastMove.elytrafly || thisMove.modelFlying != null && thisMove.modelFlying.getVerticalAscendGliding()
+                        || thisMove.elytrafly)) {
                     if (debug) debug(player, "Ignore fakefall on climbable on elytra move");
                 }
+                // NOTE: Double violations are possible with the in-air check below.
+                // Differing sub checks, once cancel action...
                 else if (noFallVL(player, "fakefall", data, cc)) {
                     player.setFallDistance(dataDist);
                     if (dataDamage <= 0.0) {
+                        // Cancel the event.
                         event.setCancelled(true);
-                        return new NoFallBypassResult(fDist, allowReset, true);
-                    } else {
-                        if (debug) debug(player, "NoFall/Damage: override player fall distance and damage (" + fDist + " -> " + dataDist + ").");
-                        fDist = dataDist;
+                        useFallLoc.setWorld(null);
+                        aux.returnPlayerMoveInfo(moveInfo);
+                        return;
+                    }
+                    else {
+                        // Adjust and continue.
+                        if (debug) debug(player, "NoFall/Damage: override player fall distance and damage (" + fallDistance + " -> " + dataDist + ").");
+                        fallDistance = dataDist;
                         BridgeHealth.setRawDamage(event, dataDamage);
                     }
                 }
             }
-            data.noFallFallDistance += 1.0;
+            // Be sure not to lose that block.
+            // What is this and why is it right here?
+            // Answer: https://github.com/NoCheatPlus/NoCheatPlus/commit/50ebbb01fb3998f5e4ebba741ed6cbd318de00c5
+            data.noFallFallDistance += 1.0; 
+            // Account for liquid too?
+            // Cheat: set ground to true in-air. Cancel the event and restore fall distance. NoFall data will not be reset 
             if (!pLoc.isOnGround(1.0, 0.3, 0.1) && !pLoc.isResetCond() && !pLoc.isAboveLadder() && !pLoc.isAboveStairs()) {
                 if (noFallVL(player, "fakeground", data, cc) && data.hasSetBack()) {
                     allowReset = false;
                 }
             }
-            else {
-                data.vDistAcc.clear();
-            }
+            // Legitimate damage: clear accounting data.
+            // Why only reset in case of !data.noFallSkipAirCheck?
+            // Also reset in other cases (moved too quickly)?
+            else data.vDistAcc.clear();
         }
-        return new NoFallBypassResult(fDist, allowReset, false);
-    }
-
-    /** Adjust fall damage based on calculated values. */
-    private void adjustFallDamage(final Player player, final EntityDamageEvent event,
-                                  final MovingData data, final Location loc,
-                                  final float fallDistance, final float yDiff,
-                                  final boolean allowReset, final double damage,
-                                  final boolean debug) {
-
-        final double maxD = data.jumpAmplifier > 0.0
-                ? NoFall.getDamage((float) NoFall.getApplicableFallHeight(player, loc.getY(), data))
-                : NoFall.getDamage(Math.max(yDiff, Math.max(data.noFallFallDistance, fallDistance)))
-                        + (allowReset ? 0.0 : Magic.FALL_DAMAGE_DIST);
+        aux.returnPlayerMoveInfo(moveInfo);
+        // Fall-back check (skip with jump amplifier).
+        final double maxD = data.jumpAmplifier > 0.0 ? NoFall.getDamage((float) NoFall.getApplicableFallHeight(player, loc.getY(), data))
+                                                     : NoFall.getDamage(Math.max(yDiff, Math.max(data.noFallFallDistance, fallDistance))) + (allowReset ? 0.0 : Magic.FALL_DAMAGE_DIST);
         if (maxD > damage) {
-            double damageAfter = NoFall.calcDamagewithfeatherfalling(player,
-                    NoFall.calcReducedDamageByBlock(player, data, maxD),
-                    mcAccess.getHandle().dealFallDamageFiresAnEvent().decide());
-            BridgeHealth.setRawDamage(event, damageAfter);
-            if (debug) debug(player, "Adjust fall damage to: " + (damageAfter != maxD ? damageAfter : maxD));
+            // respect dealDamage ?
+            double damageafter = NoFall.calcDamagewithfeatherfalling(player, NoFall.calcReducedDamageByBlock(player, data, maxD), mcAccess.getHandle().dealFallDamageFiresAnEvent().decide());
+            BridgeHealth.setRawDamage(event, damageafter);
+            if (debug) debug(player, "Adjust fall damage to: " + (damageafter != maxD ? damageafter : maxD));
         }
-    }
 
-    /** Reset NoFall related data after damage has been processed. */
-    private void resetNoFallData(final Player player, final boolean allowReset,
-                                 final MovingData data, final MovingConfig cc,
-                                 final boolean debug) {
         if (allowReset) {
+            // Normal fall damage, reset data.
             data.clearNoFallData();
             if (debug) debug(player, "Reset NoFall data on fall damage.");
-        } else {
+        }
+        else {
+            // Minecraft/NCP bug or cheating.
+            // (Do not cancel the event, otherwise: "moved too quickly exploit".)
             if (cc.noFallViolationReset) {
                 data.clearNoFallData();
             }
+
+            // Add player to hover checks.
             if (cc.sfHoverCheck && data.sfHoverTicks < 0) {
                 data.sfHoverTicks = 0;
                 hoverTicks.add(player.getName());
             }
         }
+        // Entity fall-distance should be reset elsewhere.
+        // Cleanup.
+        useFallLoc.setWorld(null);
     }
 
 
@@ -2597,78 +2583,49 @@ public class MovingListener extends CheckListener implements TickListener, IRemo
         // Debug logout.
         if (pData.isDebugActive(checkType)) StaticLog.logInfo("Player " + player.getName() + " leaves at location: " + loc.toString());
 
-        if (player.isSleeping() || player.isDead() || BlockProperties.isPassable(loc)) {
-            useLeaveLoc.setWorld(null);
-            survivalFly.setReallySneaking(player, false);
-            noFall.onLeave(player, data, pData);
-            data.onPlayerLeave();
-            resetVehicleTasks(data);
-            return;
-        }
+        if (!player.isSleeping() && !player.isDead()) {
+            // Check for missed moves.
+            // Force-load chunks [log if (!)] ?
+            // Check only from the old versions, newer versions don't seem like a problem to account for
+            if (!BlockProperties.isPassable(loc) && !Bridge1_13.hasIsSwimming()) {
 
-        checkMissedMovesOnLeave(player, pData, data, loc);
-        useLeaveLoc.setWorld(null);
-        // Adjust data.
-        survivalFly.setReallySneaking(player, false);
-        noFall.onLeave(player, data, pData);
-        // Add a method for ordinary presence-change resetting (use in join + leave).
-        data.onPlayerLeave();
-        resetVehicleTasks(data);
-    }
+                final PlayerMoveData lastMove = data.playerMoves.getFirstPastMove();
+                final PlayerMoveData lastMove2 = data.playerMoves.getNumberOfPastMoves() > 1 ? data.playerMoves.getSecondPastMove() : null;
+                // Won't use lastMove.toIsValid to prevent players already failed some checks in last move
+                if (lastMove.valid) {
+                    Location refLoc = lastMove.toIsValid ? new Location(loc.getWorld(), lastMove.to.getX(), lastMove.to.getY(), lastMove.to.getZ()) 
+                                                           : new Location(loc.getWorld(), lastMove.from.getX(), lastMove.from.getY(), lastMove.from.getZ());
 
-    /**
-     * Check for missed moves and correct the player position if necessary.
-     */
-    private void checkMissedMovesOnLeave(final Player player, final IPlayerData pData,
-                                         final MovingData data, final Location loc) {
+                    // More likely lastmove location is same with left location, try to check for second lastmove  
+                    if (TrigUtil.isSamePos(loc, refLoc) && !lastMove.toIsValid && lastMove2 != null) {
+                        refLoc = lastMove2.toIsValid ? new Location(loc.getWorld(), lastMove2.to.getX(), lastMove2.to.getY(), lastMove2.to.getZ()) 
+                                                       : new Location(loc.getWorld(), lastMove2.from.getX(), lastMove2.from.getY(), lastMove2.from.getZ());
+                    }
+                    // Correct position by scan block up
+                    // what about try to phase upward not downward anymore?
+                    if (!BlockProperties.isPassable(refLoc) || refLoc.distanceSquared(loc) > 1.25) {
+                        double y = Math.ceil(loc.getY());
+                        refLoc = loc.clone();
+                        refLoc.setY(y);
+                        if (!BlockProperties.isPassable(refLoc)) refLoc = loc;
+                    }
+                    final double d = refLoc.distanceSquared(loc);
+                    if (d > 0.0) {
+                        // Consider to always set back here. Might skip on big distances.
+                        if (TrigUtil.manhattan(loc, refLoc) > 0 || BlockProperties.isPassable(refLoc)) {
 
-        // Check for missed moves.
-        // Force-load chunks [log if (!)] ?
-        // Check only from the old versions, newer versions don't seem like a problem to account for
-        if (!BlockProperties.isPassable(loc) && !Bridge1_13.hasIsSwimming()) {
-
-            final PlayerMoveData lastMove = data.playerMoves.getFirstPastMove();
-            final PlayerMoveData lastMove2 = data.playerMoves.getNumberOfPastMoves() > 1
-                    ? data.playerMoves.getSecondPastMove() : null;
-            // Won't use lastMove.toIsValid to prevent players already failed some checks in last move
-            if (lastMove.valid) {
-                Location refLoc = lastMove.toIsValid
-                        ? new Location(loc.getWorld(), lastMove.to.getX(), lastMove.to.getY(), lastMove.to.getZ())
-                        : new Location(loc.getWorld(), lastMove.from.getX(), lastMove.from.getY(), lastMove.from.getZ());
-
-                // More likely lastmove location is same with left location, try to check for second lastmove
-                if (TrigUtil.isSamePos(loc, refLoc) && !lastMove.toIsValid && lastMove2 != null) {
-                    refLoc = lastMove2.toIsValid
-                            ? new Location(loc.getWorld(), lastMove2.to.getX(), lastMove2.to.getY(), lastMove2.to.getZ())
-                            : new Location(loc.getWorld(), lastMove2.from.getX(), lastMove2.from.getY(), lastMove2.from.getZ());
-                }
-                // Correct position by scan block up
-                // what about try to phase upward not downward anymore?
-                if (!BlockProperties.isPassable(refLoc) || refLoc.distanceSquared(loc) > 1.25) {
-                    double y = Math.ceil(loc.getY());
-                    refLoc = loc.clone();
-                    refLoc.setY(y);
-                    if (!BlockProperties.isPassable(refLoc)) refLoc = loc;
-                }
-                final double d = refLoc.distanceSquared(loc);
-                if (d > 0.0) {
-                    // Consider to always set back here. Might skip on big distances.
-                    if (TrigUtil.manhattan(loc, refLoc) > 0 || BlockProperties.isPassable(refLoc)) {
-
-                        if (passable.isEnabled(player, pData)) {
-                            StaticLog.logWarning("Potential exploit: Player" + player.getName()
-                                    + " leaves, having moved into a block (not tracked by moving checks): "
-                                    + player.getWorld().getName() + " / " + DebugUtil.formatMove(refLoc, loc));
-                            // Actually trigger a passable violation (+tag).
-                            if (d > 1.25) {
-                                StaticLog.logWarning("SKIP set back for " + player.getName()
-                                        + ", because distance is too high (risk of false positives): " + d);
-                            } else {
-                                StaticLog.logInfo("Set back player " + player.getName() + ": "
-                                        + LocUtil.simpleFormat(refLoc));
-                                data.prepareSetBack(refLoc);
-                                if (!player.teleport(refLoc, BridgeMisc.TELEPORT_CAUSE_CORRECTION_OF_POSITION)) {
-                                    StaticLog.logWarning("FAILED to set back player " + player.getName());
+                            if (passable.isEnabled(player, pData)) {
+                                StaticLog.logWarning("Potential exploit: Player " + player.getName() + " leaves, having moved into a block (not tracked by moving checks): " + player.getWorld().getName() + " / " + DebugUtil.formatMove(refLoc, loc));
+                                // Actually trigger a passable violation (+tag).
+                                if (d > 1.25) {
+                                    StaticLog.logWarning("SKIP set back for " + player.getName() + ", because distance is too high (risk of false positives): " + d);
+                                }
+                                else {
+                                    StaticLog.logInfo("Set back player " + player.getName() + ": " + LocUtil.simpleFormat(refLoc));
+                                    data.prepareSetBack(refLoc);
+                                    if (!player.teleport(refLoc, BridgeMisc.TELEPORT_CAUSE_CORRECTION_OF_POSITION)) {
+                                        StaticLog.logWarning("FAILED to set back player " + player.getName());
+                                    }
                                 }
                             }
                         }
@@ -2676,10 +2633,12 @@ public class MovingListener extends CheckListener implements TickListener, IRemo
                 }
             }
         }
-    }
-
-    /** Reset scheduled vehicle tasks for the player. */
-    private void resetVehicleTasks(final MovingData data) {
+        useLeaveLoc.setWorld(null);
+        // Adjust data.
+        survivalFly.setReallySneaking(player, false);
+        noFall.onLeave(player, data, pData);
+        // Add a method for ordinary presence-change resetting (use in join + leave).
+        data.onPlayerLeave();
         if (Folia.isTaskScheduled(data.vehicleSetBackTaskId)) {
             // Reset the id, assume the task will still teleport the vehicle.
             // Should rather force teleport (needs storing the task + data).
@@ -2948,66 +2907,37 @@ public class MovingListener extends CheckListener implements TickListener, IRemo
      * @param to
      * @param mcAccess
      */
-    private void outputMoveDebug(final Player player, final PlayerLocation from, final PlayerLocation to,
+    private void outputMoveDebug(final Player player, final PlayerLocation from, final PlayerLocation to, 
             final double maxYOnGround, final MCAccess mcAccess) {
         final StringBuilder builder = new StringBuilder(250);
         final Location loc = player.getLocation();
         builder.append(CheckUtils.getLogMessagePrefix(player, checkType));
         builder.append("MOVE in world " + from.getWorld().getName() + ":\n");
         DebugUtil.addMove(from, to, loc, builder);
-        if (BuildParameters.debugLevel > 0) {
-            appendPlayerAttributeDetails(player, builder);
-        }
-
-        appendPotionEffectDetails(player, mcAccess, builder);
-        appendFlightInfo(player, builder);
-        // Print basic info first in order
-        NCPAPIProvider.getNoCheatPlusAPI().getLogManager().debug(Streams.TRACE_FILE, builder.toString());
-        // Extended info.
-        if (BuildParameters.debugLevel > 0) {
-            appendBlockFlagDetails(from, to, maxYOnGround, builder);
-            NCPAPIProvider.getNoCheatPlusAPI().getLogManager().debug(Streams.TRACE_FILE, builder.toString());
-        }
-    }
-
-    /**
-     * Append player attribute information such as walk speed or sprinting state.
-     *
-     * @param player the player to read data from
-     * @param builder the builder to append to
-     */
-    private void appendPlayerAttributeDetails(final Player player, final StringBuilder builder) {
-        try {
-            // Check backwards compatibility (1.4.2). Remove try-catch
-            builder.append("\n(walkspeed=" + player.getWalkSpeed() + " flyspeed=" + player.getFlySpeed() + ")");
-        } catch (Throwable t) {
-            // Ignore missing methods on older server versions.
-        }
-        if (player.isSprinting()) {
-            builder.append("(sprinting)");
-        }
-        if (player.isSneaking()) {
-            builder.append("(sneaking)");
-        }
-        if (player.isBlocking()) {
-            builder.append("(blocking)");
-        }
-        final Vector v = player.getVelocity();
-        if (v.lengthSquared() > 0.0) {
-            builder.append("(svel=" + v.getX() + "," + v.getY() + "," + v.getZ() + ")");
-        }
-    }
-
-    /**
-     * Append potion effect related information.
-     *
-     * @param player the player to read data from
-     * @param mcAccess the MCAccess instance to use
-     * @param builder the builder to append to
-     */
-    private void appendPotionEffectDetails(final Player player, final MCAccess mcAccess,
-            final StringBuilder builder) {
+        final double jump = mcAccess.getJumpAmplifier(player);
         final double speed = mcAccess.getFasterMovementAmplifier(player);
+        final double strider = BridgeEnchant.getDepthStriderLevel(player);
+        if (BuildParameters.debugLevel > 0) {
+            try {
+                // Check backwards compatibility (1.4.2). Remove try-catch
+                builder.append("\n(walkspeed=" + player.getWalkSpeed() + " flyspeed=" + player.getFlySpeed() + ")");
+            } catch (Throwable t) {
+                // Ignore missing methods on older server versions.
+            }
+            if (player.isSprinting()) {
+                builder.append("(sprinting)");
+            }
+            if (player.isSneaking()) {
+                builder.append("(sneaking)");
+            }
+            if (player.isBlocking()) {
+                builder.append("(blocking)");
+            }
+            final Vector v = player.getVelocity();
+            if (v.lengthSquared() > 0.0) {
+                builder.append("(svel=" + v.getX() + "," + v.getY() + "," + v.getZ() + ")");
+            }
+        }
         if (!Double.isInfinite(speed)) {
             builder.append("(e_speed=" + (speed + 1) + ")");
         }
@@ -3015,23 +2945,12 @@ public class MovingListener extends CheckListener implements TickListener, IRemo
         if (!Double.isInfinite(slow)) {
             builder.append("(e_slow=" + (slow + 1) + ")");
         }
-        final double jump = mcAccess.getJumpAmplifier(player);
         if (!Double.isInfinite(jump)) {
             builder.append("(e_jump=" + (jump + 1) + ")");
         }
-        final double strider = BridgeEnchant.getDepthStriderLevel(player);
         if (strider != 0) {
             builder.append("(e_depth_strider=" + strider + ")");
         }
-    }
-
-    /**
-     * Append information about flight or gliding states.
-     *
-     * @param player the player to read data from
-     * @param builder the builder to append to
-     */
-    private void appendFlightInfo(final Player player, final StringBuilder builder) {
         if (Bridge1_9.isGliding(player)) {
             builder.append("(gliding)");
         }
@@ -3041,45 +2960,39 @@ public class MovingListener extends CheckListener implements TickListener, IRemo
         if (player.isFlying()) {
             builder.append("(flying)");
         }
-    }
-
-    /**
-     * Collect and append block flag information for the given locations.
-     *
-     * @param from the starting location
-     * @param to the target location
-     * @param maxYOnGround the max y on ground value
-     * @param builder the builder to append to
-     */
-    private void appendBlockFlagDetails(final PlayerLocation from, final PlayerLocation to,
-            final double maxYOnGround, final StringBuilder builder) {
-        builder.setLength(0);
-        // Note: the block flags are for normal on-ground checking, not with yOnGrond set to 0.5.
-        from.collectBlockFlags(maxYOnGround);
-        if (from.getBlockFlags() != 0) {
-            builder.append("\nFrom flags: " + StringUtil.join(BlockFlags.getFlagNames(from.getBlockFlags()), "+"));
-        }
-        if (!BlockProperties.isAir(from.getTypeId())) {
-            DebugUtil.addBlockInfo(builder, from, "\nFrom");
-        }
-        if (!BlockProperties.isAir(from.getTypeIdBelow())) {
-            DebugUtil.addBlockBelowInfo(builder, from, "\nFrom");
-        }
-        if (!from.isOnGround() && from.isOnGround(0.5)) {
-            builder.append(" (ground within 0.5)");
-        }
-        to.collectBlockFlags(maxYOnGround);
-        if (to.getBlockFlags() != 0) {
-            builder.append("\nTo flags: " + StringUtil.join(BlockFlags.getFlagNames(to.getBlockFlags()), "+"));
-        }
-        if (!BlockProperties.isAir(to.getTypeId())) {
-            DebugUtil.addBlockInfo(builder, to, "\nTo");
-        }
-        if (!BlockProperties.isAir(to.getTypeIdBelow())) {
-            DebugUtil.addBlockBelowInfo(builder, to, "\nTo");
-        }
-        if (!to.isOnGround() && to.isOnGround(0.5)) {
-            builder.append(" (ground within 0.5)");
+        // Print basic info first in order
+        NCPAPIProvider.getNoCheatPlusAPI().getLogManager().debug(Streams.TRACE_FILE, builder.toString());
+        // Extended info.
+        if (BuildParameters.debugLevel > 0) {
+            builder.setLength(0);
+            // Note: the block flags are for normal on-ground checking, not with yOnGrond set to 0.5.
+            from.collectBlockFlags(maxYOnGround);
+            if (from.getBlockFlags() != 0) {
+                builder.append("\nFrom flags: " + StringUtil.join(BlockFlags.getFlagNames(from.getBlockFlags()), "+"));
+            }
+            if (!BlockProperties.isAir(from.getTypeId())) {
+                DebugUtil.addBlockInfo(builder, from, "\nFrom");
+            }
+            if (!BlockProperties.isAir(from.getTypeIdBelow())) {
+                DebugUtil.addBlockBelowInfo(builder, from, "\nFrom");
+            }
+            if (!from.isOnGround() && from.isOnGround(0.5)) {
+                builder.append(" (ground within 0.5)");
+            }
+            to.collectBlockFlags(maxYOnGround);
+            if (to.getBlockFlags() != 0) {
+                builder.append("\nTo flags: " + StringUtil.join(BlockFlags.getFlagNames(to.getBlockFlags()), "+"));
+            }
+            if (!BlockProperties.isAir(to.getTypeId())) {
+                DebugUtil.addBlockInfo(builder, to, "\nTo");
+            }
+            if (!BlockProperties.isAir(to.getTypeIdBelow())) {
+                DebugUtil.addBlockBelowInfo(builder, to, "\nTo");
+            }
+            if (!to.isOnGround() && to.isOnGround(0.5)) {
+                builder.append(" (ground within 0.5)");
+            }
+            NCPAPIProvider.getNoCheatPlusAPI().getLogManager().debug(Streams.TRACE_FILE, builder.toString());
         }
     }
 }
