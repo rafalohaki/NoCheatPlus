@@ -145,7 +145,9 @@ public class MaterialUtil {
                         builder.append('\n');
                     }
                 } catch (IllegalArgumentException e) {
+                    // Ignore issues accessing the field value.
                 } catch (IllegalAccessException e) {
+                    // Field not accessible, skip logging it.
                 }
             }
         }
