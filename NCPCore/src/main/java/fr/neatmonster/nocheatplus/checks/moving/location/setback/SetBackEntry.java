@@ -189,6 +189,22 @@ public class SetBackEntry implements IGetLocationWithLook, ISetLocationWithLook 
         return LocUtil.hashCode(this);
     }
 
+    @Override
+    public boolean equals(final Object obj) {
+        if (obj == this) {
+            return true;
+        }
+        if (obj instanceof IGetLocationWithLook) {
+            final IGetLocationWithLook other = (IGetLocationWithLook) obj;
+            return (worldName == null ? other.getWorldName() == null
+                    : worldName.equals(other.getWorldName()))
+                    && other.getX() == getX() && other.getY() == getY()
+                    && other.getZ() == getZ() && other.getYaw() == getYaw()
+                    && other.getPitch() == getPitch();
+        }
+        return false;
+    }
+
     // TODO: Equals !?
 
     @Override

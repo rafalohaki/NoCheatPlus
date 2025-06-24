@@ -224,6 +224,22 @@ public class LocationData implements IGetLocationWithLook {
     }
 
     @Override
+    public boolean equals(final Object obj) {
+        if (obj == this) {
+            return true;
+        }
+        if (obj instanceof IGetLocationWithLook) {
+            final IGetLocationWithLook other = (IGetLocationWithLook) obj;
+            return (worldName == null ? other.getWorldName() == null
+                    : worldName.equals(other.getWorldName()))
+                    && other.getX() == getX() && other.getY() == getY()
+                    && other.getZ() == getZ() && other.getYaw() == getYaw()
+                    && other.getPitch() == getPitch();
+        }
+        return false;
+    }
+
+    @Override
     public String toString() {
         return "LocationData(" + worldName + "/" + LocUtil.simpleFormat(this) + ")";
     }
