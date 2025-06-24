@@ -148,7 +148,7 @@ public class DefaultComponentFactory {
                 .minecraftVersionBetween("1.2.5", true, "1.9", false)
                 )) {
             protocolLibActivation.add(condition);
-        };
+        }
     }
 
     /**

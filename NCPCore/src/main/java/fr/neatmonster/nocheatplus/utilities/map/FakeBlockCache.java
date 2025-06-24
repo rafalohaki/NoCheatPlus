@@ -401,7 +401,7 @@ public class FakeBlockCache extends BlockCache {
                     }
                 }
                 else if (boundsPrefix != null && MapUtil.isFullBounds(bounds)) {
-                    builder.append(fbcName + ".set(" + x + ", " + y + ", " + z + ", " + id + ", " + data + ", " + fullBounds + ");");;
+                    builder.append(fbcName + ".set(" + x + ", " + y + ", " + z + ", " + id + ", " + data + ", " + fullBounds + ");");
                 }
                 else {
                     builder.append(fbcName + ".set(" + x + ", " + y + ", " + z + ", " + id + ", " + data + ", ");
