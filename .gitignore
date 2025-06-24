@@ -85,5 +85,6 @@ nbactions.xml
 nb-configuration.xml
 .nb-gradle/
 
+dummy/
 
 essa.patch
