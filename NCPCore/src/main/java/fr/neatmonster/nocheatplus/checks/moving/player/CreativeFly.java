@@ -372,118 +372,23 @@ public class CreativeFly extends Check {
                            final double yDistance, final boolean sprinting, final boolean flying, final PlayerMoveData thisMove, 
                            final PlayerMoveData lastMove, final long time, final ModelFlying model, final MovingData data, final MovingConfig cc) {
 
-        // Modifiers.
-        double fSpeed;
-        final boolean ripglide = Bridge1_13.isRiptiding(player) && Bridge1_9.isGlidingWithElytra(player);
-
-        if (model.getApplyModifiers()) {
-            final double speedModifier = mcAccess.getHandle().getFasterMovementAmplifier(player);
-            if (Double.isInfinite(speedModifier)) fSpeed = 1.0;
-            else fSpeed = 1.0 + 0.2 * (speedModifier + 1.0);
-    
-            if (flying) {
-                fSpeed *= data.flySpeed / Magic.DEFAULT_FLYSPEED;
-                if (sprinting) {
-                    fSpeed *= model.getHorizontalModSprint();
-                    tags.add("sprint");
-                }
-                tags.add("flying");
-            }
-            else {
-                // (Ignore sprinting here).
-                final double attrMod = attributeAccess.getHandle().getSpeedAttributeMultiplier(player);
-                if (attrMod != Double.MAX_VALUE) fSpeed *= attrMod;
-                fSpeed *= data.walkSpeed / Magic.DEFAULT_WALKSPEED;
-            }
-        }
-        else fSpeed = 1.0;
-        
-        // The horizontal limit is now set. 
+        // Base speed and horizontal limit.
+        double fSpeed = computeBaseSpeed(player, flying, sprinting, data, model);
         double limitH = model.getHorizontalModSpeed() / 100.0 * ModelFlying.HORIZONTAL_SPEED * fSpeed;
-        
-        // Do apply dolphinsgrace modifier
-        if (from.isInWater() || to.isInWater()) {
-            if (!Double.isInfinite(Bridge1_13.getDolphinGraceAmplifier(player))) {
-                limitH *= Magic.modDolphinsGrace;
-                tags.add("hdolphinsgrace");
-            }
-        }
 
-        // Moving on stairs with creativefly
-        if (Bridge1_9.hasElytra() && from.isAboveStairs() && to.isAboveStairs()) {
-            limitH = Math.max(limitH, 0.7 * fSpeed);
-        }
+        // Environment influences.
+        limitH = applyEnvironmentModifiers(from, to, limitH, model);
 
-        // "Ripglide" (riptiding+gliding phase): allow some additional speed increase
-        // Note that the ExtremeMove subcheck is skipped during such phases.
-        if (lastMove.toIsValid && ripglide && hDistance > limitH) {
-            limitH += 9.3;
-            tags.add("hripglide");
-        }
-        
-        // Special friction mechanic for levitation
-        if (lastMove.toIsValid && model.getScaleLevitationEffect() 
-            && (lastMove.hDistance + 0.005) * Magic.FRICTION_MEDIUM_AIR < lastMove.hDistance) {
-            limitH = Math.max((lastMove.hDistance + 0.005) * Magic.FRICTION_MEDIUM_AIR, limitH);
-            tags.add("hfrict_lev");
-        }
-        
-        // Special friction mechanic for riptiding 
-        // Observed: extreme/abrupt acceleration from the last hDistance: 
-        // one time hDistance around 3.01 with friction distance being at or slightly lower than last hDistance (0.51/0.52)
-        if (lastMove.toIsValid && model.getScaleRiptidingEffect() 
-            && lastMove.hDistance * Magic.FRICTION_MEDIUM_AIR <= lastMove.hDistance
-            && thisMove.hDistance > 3.0 && thisMove.hDistance < 3.9
-            && Bridge1_13.isRiptiding(player) && hDistance > limitH) {
-            limitH = Math.max((lastMove.hDistance + 2.9974) * Magic.FRICTION_MEDIUM_AIR, limitH);
-            tags.add("hfrict_ript");
-        }
+        // Friction and related special cases.
+        limitH = applySpecialFriction(player, thisMove, lastMove, limitH, model);
 
-        // Ordinary friction
-        // it doesn't really make much sense checking for friction as well...
-        if (lastMove.toIsValid && !ripglide) {
-            double frictionDist = lastMove.hDistance * Magic.FRICTION_MEDIUM_AIR;
-            limitH = Math.max(frictionDist, limitH);
-            tags.add("hfrict");
-        }
+        final double hDistanceActual = thisMove.hDistance;
 
         // Finally, determine how far the player went beyond the set limits.
-        double resultH = Math.max(0.0, hDistance - limitH);
+        double resultH = Math.max(0.0, hDistanceActual - limitH);
 
         if (model.getApplyModifiers()) {
-            data.bunnyhopDelay--;
-            if (!flying && resultH > 0 && resultH < 0.3) {
-                // 0: yDistance envelope
-                if (yDistance >= 0.0 &&
-                    (
-                        // 1: Normal jumping.
-                        yDistance > 0.0 
-                        && yDistance > LiftOffEnvelope.NORMAL.getMinJumpGain(data.jumpAmplifier) - Magic.GRAVITY_SPAN
-                        // 1: Too short with head obstructed.
-                        || thisMove.headObstructed || lastMove.toIsValid && lastMove.headObstructed && lastMove.yDistance <= 0.0
-                        // 1: Hop without y distance increase at moderate h-speed.
-                        //|| (cc.sfGroundHop || yDistance == 0.0 && !lastMove.touchedGroundWorkaround && !lastMove.from.onGround)
-                        //&& limitH > 0.0 && hDistance / limitH < 1.5
-                        //&& (hDistance / lastMove.hDistance < 1.35 
-                        //        || hDistance / limitH < 1.35)
-                    )
-                    // 0: Ground + jump phase conditions.
-                    && (data.sfJumpPhase <= 1 && (thisMove.touchedGroundWorkaround || 
-                        lastMove.touchedGround && !lastMove.bunnyHop))
-                    // 0: Don't allow bunny to run out of liquid.
-                    && (!from.isResetCond() && !to.isResetCond())
-                    ) {
-
-                    tags.add("bunnyhop");
-                    data.bunnyhopDelay = 9;
-                    thisMove.bunnyHop = true;
-                    resultH = 0.0;
-                }
-                else if (data.bunnyhopDelay <= 0) {
-                    resultH = 0.0;
-                    tags.add("bunnyhop");
-                }
-            }
+            resultH = handleBunnyHop(from, to, yDistance, flying, thisMove, lastMove, resultH, data);
         }
         return new double[] {limitH, resultH};
     }
@@ -1228,6 +1133,147 @@ public class CreativeFly extends Check {
     */
     private boolean isCollideWithHB(PlayerLocation from) {
         return (from.getBlockFlags() & BlockFlags.F_STICKY) != 0;
+    }
+
+    // --- Helper methods split from hDist -------------------------------------------------
+
+    /**
+     * Compute the base speed multiplier considering current modifiers.
+     *
+     * @param player the player
+     * @param flying whether the player is flying
+     * @param sprinting whether the player is sprinting
+     * @param data movement related data
+     * @param model movement model
+     * @return the base speed multiplier
+     */
+    private double computeBaseSpeed(Player player, boolean flying, boolean sprinting,
+            MovingData data, ModelFlying model) {
+        double fSpeed;
+        if (model.getApplyModifiers()) {
+            final double speedModifier = mcAccess.getHandle().getFasterMovementAmplifier(player);
+            if (Double.isInfinite(speedModifier)) fSpeed = 1.0;
+            else fSpeed = 1.0 + 0.2 * (speedModifier + 1.0);
+            if (flying) {
+                fSpeed *= data.flySpeed / Magic.DEFAULT_FLYSPEED;
+                if (sprinting) {
+                    fSpeed *= model.getHorizontalModSprint();
+                    tags.add("sprint");
+                }
+                tags.add("flying");
+            }
+            else {
+                final double attrMod = attributeAccess.getHandle().getSpeedAttributeMultiplier(player);
+                if (attrMod != Double.MAX_VALUE) fSpeed *= attrMod;
+                fSpeed *= data.walkSpeed / Magic.DEFAULT_WALKSPEED;
+            }
+        }
+        else {
+            fSpeed = 1.0;
+        }
+        return fSpeed;
+    }
+
+    /**
+     * Apply environment-based speed modifiers such as water or stairs.
+     *
+     * @param from the starting location
+     * @param to the destination location
+     * @param baseLimit current horizontal speed limit
+     * @param model the flying model in use
+     * @return the adjusted horizontal speed limit
+     */
+    private double applyEnvironmentModifiers(PlayerLocation from, PlayerLocation to,
+            double baseLimit, ModelFlying model) {
+        double limitH = baseLimit;
+        final Player player = from.getPlayer();
+        if (from.isInWater() || to.isInWater()) {
+            if (!Double.isInfinite(Bridge1_13.getDolphinGraceAmplifier(player))) {
+                limitH *= Magic.modDolphinsGrace;
+                tags.add("hdolphinsgrace");
+            }
+        }
+        if (Bridge1_9.hasElytra() && from.isAboveStairs() && to.isAboveStairs()) {
+            double fSpeed = baseLimit / (ModelFlying.HORIZONTAL_SPEED * model.getHorizontalModSpeed() / 100.0);
+            limitH = Math.max(limitH, 0.7 * fSpeed);
+        }
+        return limitH;
+    }
+
+    /**
+     * Apply friction related modifiers including riptide and levitation.
+     *
+     * @param player the player
+     * @param thisMove current move data
+     * @param lastMove last move data
+     * @param limitH current horizontal limit
+     * @param model model in use
+     * @return the adjusted limit
+     */
+    private double applySpecialFriction(Player player, PlayerMoveData thisMove,
+            PlayerMoveData lastMove, double limitH, ModelFlying model) {
+        final boolean ripglide = Bridge1_13.isRiptiding(player) && Bridge1_9.isGlidingWithElytra(player);
+        double hDistance = thisMove.hDistance;
+        if (lastMove.toIsValid && ripglide && hDistance > limitH) {
+            limitH += 9.3;
+            tags.add("hripglide");
+        }
+        if (lastMove.toIsValid && model.getScaleLevitationEffect()
+                && (lastMove.hDistance + 0.005) * Magic.FRICTION_MEDIUM_AIR < lastMove.hDistance) {
+            limitH = Math.max((lastMove.hDistance + 0.005) * Magic.FRICTION_MEDIUM_AIR, limitH);
+            tags.add("hfrict_lev");
+        }
+        if (lastMove.toIsValid && model.getScaleRiptidingEffect()
+                && lastMove.hDistance * Magic.FRICTION_MEDIUM_AIR <= lastMove.hDistance
+                && thisMove.hDistance > 3.0 && thisMove.hDistance < 3.9
+                && Bridge1_13.isRiptiding(player) && hDistance > limitH) {
+            limitH = Math.max((lastMove.hDistance + 2.9974) * Magic.FRICTION_MEDIUM_AIR, limitH);
+            tags.add("hfrict_ript");
+        }
+        if (lastMove.toIsValid && !ripglide) {
+            double frictionDist = lastMove.hDistance * Magic.FRICTION_MEDIUM_AIR;
+            limitH = Math.max(frictionDist, limitH);
+            tags.add("hfrict");
+        }
+        return limitH;
+    }
+
+    /**
+     * Handle bunny-hop acceleration detection and tagging.
+     *
+     * @param from starting location
+     * @param to destination location
+     * @param yDistance vertical distance moved
+     * @param flying whether flying is enabled
+     * @param thisMove current move data
+     * @param lastMove previous move data
+     * @param resultH the current exceed amount
+     * @param data movement data for the player
+     * @return possibly adjusted exceed amount
+     */
+    private double handleBunnyHop(PlayerLocation from, PlayerLocation to, double yDistance,
+            boolean flying, PlayerMoveData thisMove, PlayerMoveData lastMove, double resultH,
+            MovingData data) {
+        data.bunnyhopDelay--;
+        if (!flying && resultH > 0 && resultH < 0.3) {
+            if (yDistance >= 0.0 &&
+                    (yDistance > 0.0
+                            && yDistance > LiftOffEnvelope.NORMAL.getMinJumpGain(data.jumpAmplifier) - Magic.GRAVITY_SPAN
+                            || thisMove.headObstructed || lastMove.toIsValid && lastMove.headObstructed && lastMove.yDistance <= 0.0)
+                    && (data.sfJumpPhase <= 1 && (thisMove.touchedGroundWorkaround ||
+                            lastMove.touchedGround && !lastMove.bunnyHop))
+                    && (!from.isResetCond() && !to.isResetCond())) {
+                tags.add("bunnyhop");
+                data.bunnyhopDelay = 9;
+                thisMove.bunnyHop = true;
+                return 0.0;
+            }
+            else if (data.bunnyhopDelay <= 0) {
+                tags.add("bunnyhop");
+                return 0.0;
+            }
+        }
+        return resultH;
     }
 
 
