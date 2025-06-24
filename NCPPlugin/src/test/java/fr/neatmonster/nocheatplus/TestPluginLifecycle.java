@@ -1,5 +1,4 @@
-import fr.neatmonster.nocheatplus.PluginTests;
-import fr.neatmonster.nocheatplus.NoCheatPlus;
+package fr.neatmonster.nocheatplus;
 import fr.neatmonster.nocheatplus.components.registry.feature.IDisableListener;
 import org.bukkit.Server;
 import org.bukkit.event.Listener;
