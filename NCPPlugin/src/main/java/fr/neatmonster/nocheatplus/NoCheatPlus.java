@@ -653,29 +653,31 @@ public class NoCheatPlus extends JavaPlugin implements NoCheatPlusAPI {
      */
     @Override
     public void onDisable() {
-
-        // Set BukkitAudiences to null
         if(this.adventure != null) {
             this.adventure.close();
             this.adventure = null;
         }
 
+        stopTasks();
+        callDisableListeners();
+        cleanupRegistries();
+        shutdownLogging();
+    }
+
+    /** Cancel running tasks and reset TickTask. */
+    private void stopTasks() {
         final boolean verbose = ConfigManager.getConfigFile().getBoolean(ConfPaths.LOGGING_EXTENDED_STATUS);
 
-        // Remove listener references.
         if (verbose) {
             logManager.info(Streams.INIT, "Cleanup event registry (Bukkit)...");
         }
-        // Clear the event registry to prevent further listener registrations.
         eventRegistry.clear();
 
-        // Stop data-man task.
         if (Folia.isTaskScheduled(dataManTaskId)) {
             Folia.cancelTask(dataManTaskId);
             dataManTaskId = null;
         }
 
-        // Stop the tickTask.
         if (verbose) {
             logManager.info(Streams.INIT, "Stop TickTask...");
         }
@@ -683,28 +685,27 @@ public class NoCheatPlus extends JavaPlugin implements NoCheatPlusAPI {
         TickTask.purge();
         TickTask.cancel();
         TickTask.removeAllTickListeners();
-        // (Keep the tick task locked!)
 
-        // Stop consistency checking task.
         if (Folia.isTaskScheduled(consistencyCheckerTaskId)) {
             Folia.cancelTask(consistencyCheckerTaskId);
             consistencyCheckerTaskId = null;
         }
 
-        // Just to be sure nothing gets left out.
         if (verbose) {
             logManager.info(Streams.INIT, "Stop all remaining tasks...");
         }
         Folia.cancelTasks(this);
+    }
 
-        // DisableListener.onDisable (includes DataManager cleanup.)
+    /** Call all registered disable listeners. */
+    private void callDisableListeners() {
+        final boolean verbose = ConfigManager.getConfigFile().getBoolean(ConfPaths.LOGGING_EXTENDED_STATUS);
         if (verbose) {
             logManager.info(Streams.INIT, "onDisable calls (include DataManager cleanup)...");
         }
-        // Process disable listeners in reverse order so checks cleanup precedes data manager shutdown.
-        final ArrayList<IDisableListener> disableListeners = new ArrayList<IDisableListener>(this.disableListeners);
-        Collections.reverse(disableListeners);
-        for (final IDisableListener dl : disableListeners) {
+        final ArrayList<IDisableListener> disableList = new ArrayList<IDisableListener>(this.disableListeners);
+        Collections.reverse(disableList);
+        for (final IDisableListener dl : disableList) {
             try {
                 dl.onDisable();
             } catch (Throwable t) {
@@ -712,35 +713,30 @@ public class NoCheatPlus extends JavaPlugin implements NoCheatPlusAPI {
                 logManager.severe(Streams.INIT, t);
             }
         }
-        // (Component removal will clear the list, rather.)
+    }
 
-        // ExemptionManager cleanup.
+    /** Cleanup registries and internal mappings. */
+    private void cleanupRegistries() {
+        final boolean verbose = ConfigManager.getConfigFile().getBoolean(ConfPaths.LOGGING_EXTENDED_STATUS);
+
         if (verbose) {
             logManager.info(Streams.INIT, "Reset ExemptionManager...");
         }
         NCPExemptionManager.clear();
 
-        // Remove hooks.
         vlFrequencyHook.unregister();
         allViolationsHook.unregister();
         NCPHookManager.removeAllHooks();
 
-        // Write some debug/statistics.
         final Counters counters = getGenericInstance(Counters.class);
         if (counters != null) {
-            // Ensure we get this kind of information for the time being.
             if (verbose) {
-                logManager.info(Streams.INIT, counters.getMergedCountsString(true)); // Server logger needs info level.
+                logManager.info(Streams.INIT, counters.getMergedCountsString(true));
             } else {
                 logManager.debug(Streams.TRACE_FILE, counters.getMergedCountsString(true));
             }
         }
 
-        // Hooks:
-        // (Expect external plugins to unregister their hooks on their own.)
-        // (No native hooks present, yet.)
-
-        // Unregister all added components explicitly (reverse order).
         if (verbose) {
             logManager.info(Streams.INIT, "Unregister all registered components...");
         }
@@ -749,7 +745,6 @@ public class NoCheatPlus extends JavaPlugin implements NoCheatPlusAPI {
             removeComponent(components.get(i));
         }
 
-        // Cleanup BlockProperties.
         if (verbose) {
             logManager.info(Streams.INIT, "Cleanup BlockProperties...");
         }
@@ -758,40 +753,29 @@ public class NoCheatPlus extends JavaPlugin implements NoCheatPlusAPI {
         if (verbose) {
             logManager.info(Streams.INIT, "Cleanup some mappings...");
         }
-        // Remove IDisableListener instances.
-        disableListeners.clear(); // Just in case.
-        // Remove listeners.
+        disableListeners.clear();
         listeners.clear();
-        // Remove config listeners.
         notifyReload.clear();
-        // Sub registries.
         subRegistries.clear();
-        // Just in case: clear the subComponentHolders.
         subComponentholders.clear();
-        // Generic instances registry.
         genericInstanceRegistry.clear();
-        // Feature tags.
         featureTags.clear();
-        // BlockChangeTracker.
         if (blockChangeListener != null) {
             blockChangeListener.setEnabled(false);
-            blockChangeListener = null; // Only on disable.
+            blockChangeListener = null;
         }
         blockChangeTracker.clear();
-
-        // Restore changed commands.
-        //        if (verbose) LogUtil.logInfo("Undo command changes...");
-        //        undoCommandChanges();
-        // Clear command changes list (compatibility issues with NPCs, leads to recalculation of perms).
         changedCommands.clear();
 
-        // Cleanup the configuration manager.
         if (verbose) {
             logManager.info(Streams.INIT, "Cleanup ConfigManager...");
         }
         ConfigManager.cleanup();
+    }
 
-        // Cleanup file logger.
+    /** Shutdown the logger and print final messages. */
+    private void shutdownLogging() {
+        final boolean verbose = ConfigManager.getConfigFile().getBoolean(ConfPaths.LOGGING_EXTENDED_STATUS);
         if (verbose) {
             logManager.info(Streams.INIT, "Shutdown LogManager...");
         }
@@ -799,12 +783,11 @@ public class NoCheatPlus extends JavaPlugin implements NoCheatPlusAPI {
         StaticLog.setStreamID(Streams.INIT);
         logManager.shutdown();
 
-        // Tell the server administrator that we finished unloading NoCheatPlus.
         if (verbose) {
-            Bukkit.getLogger().info("[NoCheatPlus] All cleanup done."); // Bukkit logger.
+            Bukkit.getLogger().info("[NoCheatPlus] All cleanup done.");
         }
         final PluginDescriptionFile pdfFile = getDescription();
-        Bukkit.getLogger().info("[NoCheatPlus] Version " + pdfFile.getVersion() + " is disabled."); // Bukkit logger.
+        Bukkit.getLogger().info("[NoCheatPlus] Version " + pdfFile.getVersion() + " is disabled.");
     }
 
     /**
@@ -1528,6 +1511,13 @@ public class NoCheatPlus extends JavaPlugin implements NoCheatPlusAPI {
         return pDataMan;
     }
 
+    /**
+     * Delegates the registration of plugin components to the supplied
+     * {@link RegistrationContext}. This should be invoked during plugin
+     * initialization once all managers have been set up.
+     *
+     * @param context the context responsible for registering this plugin
+     */
     @Override
     public void register(RegistrationContext context) {
         // Perform the registration using the provided context.

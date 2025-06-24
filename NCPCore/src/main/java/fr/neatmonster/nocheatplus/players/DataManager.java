@@ -34,10 +34,11 @@ import fr.neatmonster.nocheatplus.checks.CheckType;
 public class DataManager {
 
     /*
-     * TODO: Detach (I)PlayerDataManager, DataManager remains (legacy?) static
-     * API... NCPStatic or so will be the "direct" static API, if at all.
+     * DataManager currently acts as a static facade to {@link PlayerDataManager}.
+     * A future refactoring might detach the underlying manager and replace this
+     * class with a dedicated static API.  Investigate whether data structures
+     * could share locks for efficiency.
      */
-    // TODO: Should/can some data structures share the same lock?
 
     static PlayerDataManager instance = null;
 
@@ -104,7 +105,8 @@ public class DataManager {
      * which implement this.
      */
     public static void handleSystemTimeRanBackwards() {
-        // TODO: Non static call from core plugin ?
+        // This is currently called through the static API. Refactoring may
+        // invoke the underlying manager directly from the core plugin.
         instance.handleSystemTimeRanBackwards();
     }
 
@@ -114,7 +116,8 @@ public class DataManager {
      * the data uses the same configuration for initialization which is
      * registered under the same check type.
      * 
-     * @TODO Explain the java-docs at some point.
+     * Further documentation will clarify how default debug flags are derived
+     * from the configuration in a future refactoring.
      */
     public static void restoreDefaultDebugFlags() {
         instance.restoreDefaultDebugFlags();
@@ -144,7 +147,8 @@ public class DataManager {
      * @return If something was removed.
      */
     public static boolean clearComponentData(final CheckType checkType, final String PlayerName) {
-        // TODO: UUID.
+        // This method still relies on player names. Refactoring should switch
+        // to UUID based lookups to avoid ambiguity.
         return instance.clearComponentData(checkType, PlayerName);
     }
 
