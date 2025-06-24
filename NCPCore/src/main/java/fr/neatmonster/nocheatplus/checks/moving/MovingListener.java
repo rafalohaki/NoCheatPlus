@@ -198,6 +198,14 @@ public class MovingListener extends CheckListener implements TickListener, IRemo
 
     private final int idMoveEvent = counters.registerKey("event.player.move");
 
+    /**
+     * From Minecraft 1.19.4 on, the server stops firing PlayerMoveEvents while
+     * riding a minecart (see issue #290). Upon leaving the cart a single move
+     * event covering the whole travelled distance triggers. This flag lets NCP
+     * apply extra checks for minecart exits and disables an old boat fix. It
+     * prevents huge setbacks when dismounting.  
+     * https://github.com/Updated-NoCheatPlus/NoCheatPlus/issues/290
+     */
     private final boolean specialMinecart = ServerVersion.compareMinecraftVersion("1.19.4") >= 0;
 
     @SuppressWarnings("unchecked")
