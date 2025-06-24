@@ -40,7 +40,6 @@ import fr.neatmonster.nocheatplus.utilities.map.BlockFlags;
 import fr.neatmonster.nocheatplus.utilities.map.MapUtil;
 import fr.neatmonster.nocheatplus.utilities.map.MaterialUtil;
 
-// TODO: Auto-generated Javadoc
 /**
  * A location with bounds with a lot of extra stuff.
  * 
@@ -49,7 +48,7 @@ import fr.neatmonster.nocheatplus.utilities.map.MaterialUtil;
  */
 public class RichBoundsLocation implements IGetBukkitLocation, IGetBlockPosition, IGetBox3D {
 
-    // TODO: Consider switching back from default to private visibility (use getters for other places).
+    // Note: consider using private visibility with getters for external access.
 
     // Simple members // 
 
@@ -63,7 +62,7 @@ public class RichBoundsLocation implements IGetBukkitLocation, IGetBlockPosition
     double x, y, z;
 
     /** The pitch. */
-    float yaw, pitch; // TODO: -> entity ?
+    float yaw, pitch; // Possibly maintain orientation via the entity.
 
     /** Bounding box. */
     double minX, maxX, minY, maxY, minZ, maxZ;
@@ -74,7 +73,7 @@ public class RichBoundsLocation implements IGetBukkitLocation, IGetBlockPosition
     /** Vertical margin for the bounding box (y towards top). */
     double boxMarginVertical;
 
-    // TODO: Check if onGround can be completely replaced by onGroundMinY and notOnGroundMaxY.
+    // Investigate replacing onGround with onGroundMinY and notOnGroundMaxY.
     /** Minimal yOnGround for which the player is on ground. No extra xz/y margin.*/
     double onGroundMinY = Double.MAX_VALUE;
     
@@ -84,10 +83,10 @@ public class RichBoundsLocation implements IGetBukkitLocation, IGetBlockPosition
 
     // "Light" object members (reset to null on set) //
 
-    // TODO: primitive+isSet? AlmostBoolean?
-    // TODO: All properties that can be set should have a "checked" flag, thus resetting the flag suffices.
+    // Maybe use a primitive plus isSet (AlmostBoolean?).
+    // Consider a "checked" flag for settable properties so resetting is enough.
 
-    // TODO: nodeAbove ?
+    // Potentially add a nodeAbove field.
 
     /** Type node for the block at the position. */
     IBlockCacheNode node = null;
@@ -423,7 +422,7 @@ public class RichBoundsLocation implements IGetBukkitLocation, IGetBlockPosition
      * @return the int
      */
     public int manhattan(final IGetBlockPosition other) {
-        // TODO: Consider using direct field access from other methods as well.
+        // Using direct field access from other methods might be more efficient.
         return TrigUtil.manhattan(this.blockX, this.blockY, this.blockZ, other.getBlockX(), other.getBlockY(), other.getBlockZ());
     }
 
@@ -435,7 +434,7 @@ public class RichBoundsLocation implements IGetBukkitLocation, IGetBlockPosition
      * @return the int
      */
     public int maxBlockDist(final IGetBlockPosition other) {
-        // TODO: Consider using direct field access from other methods as well.
+        // Using direct field access from other methods might be more efficient.
         return TrigUtil.maxDistance(this.blockX, this.blockY, this.blockZ, other.getBlockX(), other.getBlockY(), other.getBlockZ());
     }
 
@@ -702,9 +701,9 @@ public class RichBoundsLocation implements IGetBukkitLocation, IGetBlockPosition
      * @return true, if the player is in a liquid
      */
     public boolean isInLiquid() {
-        // TODO: optimize (check liquid first and only if liquid check further)
+        // Potential optimization: check for liquid first and only if liquid proceed further.
         if (!isInWaterLogged() && blockFlags != null && (blockFlags.longValue() & BlockFlags.F_LIQUID) == 0) return false;
-        // TODO: This should check for F_LIQUID too, Use a method that returns all found flags (!).
+        // This should also check for F_LIQUID; use a method that returns all found flags.
         return isInWater() || isInLava();
     }
 
@@ -727,7 +726,7 @@ public class RichBoundsLocation implements IGetBukkitLocation, IGetBlockPosition
             onClimbable = (thisFlags & BlockFlags.F_CLIMBABLE) != 0;
             if (!onClimbable) {
                 // Special case trap door (simplified preconditions check).
-                // TODO: Distance to the wall?
+                // Check distance to the wall?
                 if (MaterialUtil.ALL_TRAP_DOORS.contains(typeId)
                     && BlockProperties.isTrapDoorAboveLadderSpecialCase(blockCache, blockX, blockY, blockZ)) {
                     onClimbable = true;
@@ -756,7 +755,7 @@ public class RichBoundsLocation implements IGetBukkitLocation, IGetBlockPosition
      * @return true, if is next to ground
      */
     public boolean isNextToGround(final double xzMargin, final double yMargin) {
-        // TODO: Adjust to check block flags ?
+        // Should perhaps check block flags as well.
         return BlockProperties.collides(blockCache, minX - xzMargin, minY - yMargin, minZ - xzMargin, maxX + xzMargin, maxY + yMargin, maxZ + xzMargin, BlockFlags.F_GROUND);
     }
 
@@ -795,7 +794,7 @@ public class RichBoundsLocation implements IGetBukkitLocation, IGetBlockPosition
      */
     public boolean isAboveLadder() {
         if (blockFlags != null && (blockFlags.longValue() & BlockFlags.F_CLIMBABLE) == 0) return false;
-        // TODO: bounding box ?
+        // Maybe account for the bounding box here?
         return (BlockFlags.getBlockFlags(getTypeIdBelow()) & BlockFlags.F_CLIMBABLE) != 0;
     }
 
@@ -858,15 +857,15 @@ public class RichBoundsLocation implements IGetBukkitLocation, IGetBlockPosition
      */
     public boolean isOnIce() {
         if (onIce == null) {
-            // TODO: Use a box here too ?
-            // TODO: check if player is really sneaking (refactor from survivalfly to static access in Combined ?)!
+            // Maybe use a box here as well.
+            // Check if the player is really sneaking (refactor from survivalfly to static access in Combined?).
             if (blockFlags != null && (blockFlags.longValue() & BlockFlags.F_ICE) == 0) {
                 onIce = isOnIceLegacy() ? true : false;
             } 
             else {
                 // MC applies ice properties only with at least half the box on the block
                 final double xzMargin = getBoxMarginHorizontal();
-                // TODO: Might skip the isOnGround part, e.g. if boats sink in slightly. Needs testing.
+                // Might skip the isOnGround part if boats sink in slightly; needs testing.
                 onIce = isOnGround() && BlockProperties.collides(blockCache, minX+xzMargin, minY - yOnGround, minZ+xzMargin, maxX-xzMargin, minY, maxZ-xzMargin, BlockFlags.F_ICE);
             }
         }
@@ -901,7 +900,7 @@ public class RichBoundsLocation implements IGetBukkitLocation, IGetBlockPosition
             else {
                 // MC applies ice properties only with at least half the box on the block
                 final double xzMargin = getBoxMarginHorizontal();
-                // TODO: Might skip the isOnGround part, e.g. if boats sink in slightly. Needs testing.
+                // Might skip the isOnGround part if boats sink in slightly; needs testing.
                 onBlueIce = isOnGround() && BlockProperties.collides(blockCache, minX+xzMargin, minY - yOnGround, minZ+xzMargin, maxX-xzMargin, minY, maxZ-xzMargin, BlockFlags.F_BLUE_ICE);
             }
         }
@@ -1018,7 +1017,7 @@ public class RichBoundsLocation implements IGetBukkitLocation, IGetBlockPosition
      */
     public boolean isOnRails() {
         return BlockProperties.isRails(getTypeId())
-                // TODO: Checking the block below might be over-doing it.
+                // Checking the block below might be over-doing it.
                 || y - blockY < 0.3625 && BlockProperties.isAscendingRails(getTypeIdBelow(), getData(blockX, blockY - 1, blockZ));
     }
 
@@ -1041,18 +1040,18 @@ public class RichBoundsLocation implements IGetBukkitLocation, IGetBlockPosition
         else {
             // Shortcut check (currently needed for being stuck + sf).
             if (blockFlags == null || (blockFlags.longValue() & BlockFlags.F_GROUND) != 0) {
-                // TODO: Consider dropping this shortcut.
+                // Maybe drop this shortcut.
                 final int bY = Location.locToBlock(y - yOnGround);
                 final IBlockCacheNode useNode = bY == blockY ? getOrCreateBlockCacheNode() : (bY == blockY -1 ? getOrCreateBlockCacheNodeBelow() : blockCache.getOrCreateBlockCacheNode(blockX,  bY, blockZ, false));
                 final Material id = useNode.getType();
                 final long flags = BlockFlags.getBlockFlags(id);
-                // TODO: Might remove check for variable ?
+                // Might remove check for variable.
                 if ((flags & BlockFlags.F_GROUND) != 0 && (flags & BlockFlags.F_VARIABLE) == 0) {
                     final double[] bounds = useNode.getBounds(blockCache, blockX, bY, blockZ);
                     // Check collision if not inside of the block. [Might be a problem for cauldron or similar + something solid above.]
-                    // TODO: Might need more refinement.
+                    // Might need further refinement.
                     if (bounds != null && y - bY >= bounds[4] && BlockProperties.collidesBlock(blockCache, x, minY - yOnGround, z, x, minY, z, blockX, bY, blockZ, useNode, null, flags)) {
-                        // TODO: BlockHeight is needed for fences, use right away (above)?
+                        // BlockHeight is needed for fences; maybe use it earlier.
                         if (!BlockProperties.isPassableWorkaround(blockCache, blockX, bY, blockZ, minX - blockX, minY - yOnGround - bY, minZ - blockZ, useNode, maxX - minX, yOnGround, maxZ - minZ,  1.0)
                             || (flags & BlockFlags.F_GROUND_HEIGHT) != 0 &&  BlockProperties.getGroundMinHeight(blockCache, blockX, bY, blockZ, useNode, flags) <= y - bY) {
                            //  NCPAPIProvider.getNoCheatPlusAPI().getLogManager().debug(Streams.TRACE_FILE, "*** onground SHORTCUT");
@@ -1195,7 +1194,7 @@ public class RichBoundsLocation implements IGetBukkitLocation, IGetBlockPosition
             final double yOnGround, final long ignoreFlags,
             final BlockChangeTracker blockChangeTracker, final BlockChangeReference blockChangeRef,
             final int tick) {
-        // TODO: Consider updating onGround+dist cache.
+        // Consider updating the onGround+distance cache.
         return blockChangeTracker.isOnGround(blockCache, blockChangeRef, tick, world.getUID(), 
                 minX, minY - yOnGround, minZ, maxX, maxY, maxZ, ignoreFlags);
     }
@@ -1210,7 +1209,7 @@ public class RichBoundsLocation implements IGetBukkitLocation, IGetBlockPosition
      * @return true, if is next to solid
      */
     public boolean isNextToSolid(final double xzMargin, final double yMargin) {
-        // TODO: Adjust to check block flags ?
+        // Maybe adjust to check block flags as well.
         return BlockProperties.collides(blockCache, minX - xzMargin, minY - yMargin, minZ - xzMargin, maxX + xzMargin, maxY + yMargin, maxZ + xzMargin, BlockFlags.F_SOLID);
     }
 
@@ -1273,7 +1272,7 @@ public class RichBoundsLocation implements IGetBukkitLocation, IGetBlockPosition
      * @return true, if is passable box
      */
     public boolean isPassableBox() {
-        // TODO: Might need a variation with margins as parameters.
+        // A variation with margins as parameters might be useful.
         if (passableBox == null) {
             if (isBlockFlagsPassable()) {
                 passableBox = true;
@@ -1318,10 +1317,10 @@ public class RichBoundsLocation implements IGetBukkitLocation, IGetBlockPosition
      */
     public void collectBlockFlags(double maxYonGround) {
         maxYonGround = Math.max(yOnGround, maxYonGround);
-        // TODO: Clearly refine this for 1.5 high blocks.
-        // TODO: Check which checks need blocks below.
+        // Refine this for 1.5 high blocks.
+        // Determine which checks require blocks below.
         final double yExtra = 0.6; // y - blockY - maxYonGround > 0.5 ? 0.5 : 1.0;
-        // TODO: xz margin still needed ?
+        // Is xz margin still needed?
         final double xzM = 0; //0.001;
         blockFlags = BlockProperties.collectFlagsSimple(blockCache, minX - xzM, minY - yExtra - maxYonGround, minZ - xzM, maxX + xzM, Math.max(maxY, minY + 1.5), maxZ + xzM);
     }
@@ -1426,10 +1425,10 @@ public class RichBoundsLocation implements IGetBukkitLocation, IGetBlockPosition
             final BlockChangeReference ref, final Direction direction, final double coverDistance, 
             final long matchFlags) {
         /*
-         * TODO: Not sure with code duplication. Is it better to run
+         * Not sure with code duplication. Is it better to run
          * BlockChangeTracker.getBlockChangeMatchFlags for the other method too?
          */
-        // TODO: Intended use is bouncing off slime, thus need confine to foot level ?
+        // Intended use is bouncing off slime; might need to confine to foot level.
         final int tick = TickTask.getTick();
         final UUID worldId = world.getUID();
         // Shift the entire search box to the opposite direction (if direction is given).
@@ -1581,7 +1580,7 @@ public class RichBoundsLocation implements IGetBukkitLocation, IGetBlockPosition
         this.onBouncyBlock = other.isOnBouncyBlock();
         // Complex checks last.
         if (!onGround && !isResetCond()) {
-            // TODO: if resetCond is checked, set on the other !?
+            // If resetCond is checked, perhaps set it on the other as well.
             this.aboveStairs = other.isAboveStairs();
         }
     }
@@ -1640,7 +1639,7 @@ public class RichBoundsLocation implements IGetBukkitLocation, IGetBlockPosition
         maxZ = z + dxz;
         this.boxMarginHorizontal = dxz;
         this.boxMarginVertical = fullHeight;
-        // TODO: With current bounding box the stance is never checked.
+        // With the current bounding box the stance is never checked.
 
         // Set world / block access.
         world = location.getWorld();
