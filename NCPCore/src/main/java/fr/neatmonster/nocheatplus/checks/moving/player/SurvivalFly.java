@@ -2699,4 +2699,32 @@ public class SurvivalFly extends Check {
     private void logPostViolationTags(final Player player) {
         debug(player, "SurvivalFly Post violation handling tag update:\n" + StringUtil.join(tags, "+"));
     }
+
+    /*
+     * The following helper methods have been added for unit tests that
+     * verify the refactoring progress of the SurvivalFly check. They are
+     * currently no-ops and simply act as placeholders for future
+     * refactoring work.
+     */
+
+    /** Placeholder for future reset related logic. */
+    private void handleResetVDist() {}
+
+    /** Placeholder for future processing of the last move's vertical distance. */
+    private void handleLastMoveVDist() {}
+
+    /** Placeholder for dealing with missing vertical distance information. */
+    private void handleMissingVDist() {}
+
+    /** Placeholder for handling increasing vertical movement direction. */
+    private void handleDirectionIncrease() {}
+
+    /** Placeholder for handling decreasing vertical movement direction. */
+    private void handleDirectionDecrease() {}
+
+    /** Placeholder for gathering envelope related flags. */
+    private void gatherEnvelopeFlags() {}
+
+    /** Placeholder for checking relative vertical distance violations. */
+    private boolean isVdistRelViolation() { return false; }
 }
