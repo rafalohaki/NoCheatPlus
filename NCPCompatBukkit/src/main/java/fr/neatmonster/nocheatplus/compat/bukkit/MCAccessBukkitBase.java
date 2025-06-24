@@ -84,17 +84,10 @@ public class MCAccessBukkitBase implements MCAccess {
          */
         if (BlockFlags.hasAnyFlag(flags, BlockFlags.F_IGN_PASSABLE)) {
             // TODO: Blocks with min_height may actually be ok, if xz100 and some height are set.
-            if (BlockFlags.hasNoFlags(flags, 
-                    BlockFlags.F_GROUND_HEIGHT 
+            return !BlockFlags.hasNoFlags(flags,
+                    BlockFlags.F_GROUND_HEIGHT
                     | BlockFlags.F_GROUND
-                    | BlockFlags.F_SOLID)) {
-                // Explicitly passable.
-                return false;
-            }
-            else {
-                // Potentially itchy.
-                return true;
-            }
+                    | BlockFlags.F_SOLID);
         }
 
         long testFlags1 = (BlockFlags.F_SOLID | BlockFlags.F_XZ100);
