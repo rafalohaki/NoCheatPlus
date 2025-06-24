@@ -30,6 +30,7 @@ import fr.neatmonster.nocheatplus.compat.Bridge1_9;
 import fr.neatmonster.nocheatplus.components.location.IGetBox3D;
 import fr.neatmonster.nocheatplus.components.location.IGetBlockPosition;
 import fr.neatmonster.nocheatplus.components.location.IGetBukkitLocation;
+import fr.neatmonster.nocheatplus.components.location.IGetLocationWithLook;
 import fr.neatmonster.nocheatplus.components.location.IGetPosition;
 import fr.neatmonster.nocheatplus.utilities.TickTask;
 import fr.neatmonster.nocheatplus.utilities.collision.CollisionUtil;
@@ -1670,9 +1671,24 @@ public class RichBoundsLocation implements IGetBukkitLocation, IGetBlockPosition
     /* (non-Javadoc)
      * @see java.lang.Object#hashCode()
      */
-    @Override    
+    @Override
     public int hashCode() {
         return LocUtil.hashCode(this);
+    }
+
+    @Override
+    public boolean equals(final Object obj) {
+        if (obj == this) {
+            return true;
+        }
+        if (obj instanceof IGetLocationWithLook) {
+            final IGetLocationWithLook other = (IGetLocationWithLook) obj;
+            return getWorldName().equals(other.getWorldName())
+                    && other.getX() == getX() && other.getY() == getY()
+                    && other.getZ() == getZ() && other.getYaw() == getYaw()
+                    && other.getPitch() == getPitch();
+        }
+        return false;
     }
 
     /* (non-Javadoc)

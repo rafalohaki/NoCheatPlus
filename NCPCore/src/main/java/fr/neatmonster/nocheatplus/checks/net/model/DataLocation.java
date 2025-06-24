@@ -128,4 +128,18 @@ public class DataLocation implements IGetPositionWithLook {
         return LocUtil.hashCode(this);
     }
 
+    @Override
+    public boolean equals(final Object obj) {
+        if (obj == this) {
+            return true;
+        }
+        if (obj instanceof IGetPositionWithLook) {
+            final IGetPositionWithLook other = (IGetPositionWithLook) obj;
+            return other.getX() == getX() && other.getY() == getY()
+                    && other.getZ() == getZ() && other.getYaw() == getYaw()
+                    && other.getPitch() == getPitch();
+        }
+        return false;
+    }
+
 }
