@@ -95,13 +95,15 @@ def main():
     
     items = os.listdir(path)
     license = LICENSE
-    files_java = ResultCollector(lc_exts = (".java",), ignore_startswith = (license,))
+    files_java = ResultCollector(lc_exts=(".java",), ignore_startswith=(license,))
+    files_xml = ResultCollector(lc_exts=(".xml",), ignore_startswith=())
     for item in items:
         fp = os.path.join(path, item)
         if os.path.isdir(fp) and not os.path.islink(path) and item.startswith("NCP") or item == "NoCheatPlus":
             files_java.collect_filenames(fp)
-            # TODO: Also collect other contained file types (pom.xml, ...).
+            files_xml.collect_filenames(fp)
     print(".java: " + files_java.stats_str())
+    print(".xml: " + files_xml.stats_str())
     print("Update license:")
     for fp in files_java.collected_files:
         rp = os.path.relpath(fp, path)

@@ -35,6 +35,11 @@ public class TestBasicLockable {
         }
 
         @Override
+        public int hashCode() {
+            return 42;
+        }
+
+        @Override
         public boolean equals(Object obj) {
             return obj == this || this.equalsOther != null && this.equalsOther == obj;
         }

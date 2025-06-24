@@ -129,7 +129,7 @@ public class ChatConfig extends ACheckConfig {
 
         commandsLevel = config.getDouble(ConfPaths.CHAT_COMMANDS_LEVEL);
         commandsShortTermTicks = config.getInt(ConfPaths.CHAT_COMMANDS_SHORTTERM_TICKS);
-        commandsShortTermLevel = config.getDouble(ConfPaths.CHAT_COMMANDS_SHORTTERM_LEVEL);;
+        commandsShortTermLevel = config.getDouble(ConfPaths.CHAT_COMMANDS_SHORTTERM_LEVEL);
         commandsActions = config.getOptimizedActionList(ConfPaths.CHAT_COMMANDS_ACTIONS, Permissions.CHAT_COMMANDS);
 
         textGlobalCheck = config.getBoolean(ConfPaths.CHAT_TEXT_GL_CHECK, true);

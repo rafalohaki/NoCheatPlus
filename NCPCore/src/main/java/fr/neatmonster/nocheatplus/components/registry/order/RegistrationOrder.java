@@ -301,19 +301,14 @@ public class RegistrationOrder {
                                 return true;
                             }
                             else {
-                                if (
-                                        // order1 might be set to come after order2.
-                                        tag2 != null && tag2.matches(afterTag1) 
-                                        // Must proceed to check other entries with afterTag set.
+                                // order1 might be set to come after order2.
+                                // Must proceed to check other entries with afterTag set.
+                                // The other entry is not set to come after this one.
+                                return !(
+                                        tag2 != null && tag2.matches(afterTag1)
                                         || afterTag2 == null
                                         || tag1 == null
-                                        // The other entry is not set to come after this one.
-                                        || !tag1.matches(afterTag2)) {
-                                    return false;
-                                }
-                                else {
-                                    return true;
-                                }
+                                        || !tag1.matches(afterTag2));
                             }
                         }
                         else {
@@ -379,15 +374,13 @@ public class RegistrationOrder {
                                 // Order1 is sorted to the end of the region rather.
                                 return false;
                             }
-                            else {
-                                /*
-                                 * Prefer to have have set basePriority 0 first,
-                                 * assuming null basePriority to be interpreted
-                                 * as 'later registered', keeping the order of
-                                 * registration rather.
-                                 */
-                                return true;
-                            }
+                            /*
+                             * Prefer to have have set basePriority 0 first,
+                             * assuming null basePriority to be interpreted
+                             * as 'later registered', keeping the order of
+                             * registration rather.
+                             */
+                            return true;
                         }
                     }
                     else {
@@ -428,27 +421,15 @@ public class RegistrationOrder {
                                         // Greedy (could override afterTag2).
                                         return false;
                                     }
-                                    else if (tag1 != null && tag1.matches(afterTag2)) {
-                                        // order2 is set to come after order1.
-                                        return true;
-                                    }
-                                    else {
-                                        // order1 may be set to come after another entry that follows.
-                                        return false;
-                                    }
+                                    // order2 is set to come after order1?
+                                    return tag1 != null && tag1.matches(afterTag2);
                                 }
                             }
                         }
                         else {
                             // beforeTag1 is null, beforeTag2 not.
-                            if (afterTag2 != null && tag1 != null && tag1.matches(afterTag2)) {
-                                // order2 is set to come after order1,
-                                return true;
-                            }
-                            else {
-                                // beforeTag set rules otherwise.
-                                return false;
-                            }
+                            // beforeTag set rules otherwise.
+                            return afterTag2 != null && tag1 != null && tag1.matches(afterTag2);
                         }
                     }
                     else {
@@ -485,14 +466,8 @@ public class RegistrationOrder {
                                     return false;
                                 }
                                 else if (afterTag2 != null){
-                                    if (tag1 != null && tag1.matches(afterTag2)) {
-                                        // order2 is set to come after order1.
-                                        return true;
-                                    }
-                                    else {
-                                        // Rather keep checking.
-                                        return false;
-                                    }
+                                    // order2 is set to come after order1?
+                                    return tag1 != null && tag1.matches(afterTag2);
                                 }
                                 else {
                                     // afterTag1 is null, otherwise not matching, thus order1 comes behind.
