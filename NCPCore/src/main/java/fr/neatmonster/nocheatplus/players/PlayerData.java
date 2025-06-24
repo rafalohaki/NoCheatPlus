@@ -96,7 +96,6 @@ import fr.neatmonster.nocheatplus.worlds.WorldIdentifier;
  */
 public class PlayerData implements IPlayerData {
 
-    // TODO: IPlayerData for the more official API.
 
     /** Monitor player task load across all players (nanoseconds per server tick). */
     private static ActionFrequency taskLoad = new ActionFrequency(6, 7);
@@ -112,7 +111,6 @@ public class PlayerData implements IPlayerData {
     private static float heavyLoad = 500000f / (float) ticksMonitored;
 
     // Default tags.
-    // TODO: Move elsewhere (API?)
     public static final String TAG_NOTIFY_OFF = "notify_off";
     /** Optimistic player data creation. */
     public static final String TAG_OPTIMISTIC_CREATE = "optimistic_create";
@@ -125,25 +123,16 @@ public class PlayerData implements IPlayerData {
     //////////////
 
     /** Per player lock. */
-    /*
-     * TODO: Impact of using this everywhere is uncertain. For exemptions and
-     * permissions it'll be ok, because nodes get created once for most, but for
-     * permission updates (merge primary thread) and the like, it'll not be as
-     * certain.
-     */
+    /* Per player lock impact uncertain for all use cases. */
     private final Lock lock = new ReentrantLock();
 
     /** Not sure this is the future of extra properties. */
     private Set<String> tags = null;
 
-    /*
-     * TODO: Concept for updating names for UUIDs -> + OfflinePlayerData,
-     * uncertain when/how to access.
-     */
+    /* Handling for updating names for UUIDs is still subject to change. */
     /** Unique id of the player. */
     private final UUID playerId;
 
-    // TODO: Names could/should get updated. (In which case?)
     /** Exact case name of the player. */
     private String playerName;
     /** Lower case name of the player. */
@@ -154,18 +143,13 @@ public class PlayerData implements IPlayerData {
     /** The IWorldData instance of the current world (at least while online). */
     private IWorldData currentWorldData = null;
 
-    /*
-     * TODO: Flags/counters for (async-login,) login, join, 'online', kick, quit
-     * + shouldBeOnline(). 'online' means that some action has been recorded.
-     * Same/deduce: isFake(), as opposed to ExemptionSettings.isRegardedAsNPC().
-     */
+    /* Flags/counters for player online state may be added. */
 
     /** A reference for handling the permission cache with policies. */
     private final PermissionRegistry permissionRegistry;
 
     /** Permission cache. */
     private final HashMapLOW<Integer, PermissionNode> permissions = new HashMapLOW<Integer, PermissionNode>(lock, 35);
-    // TODO: a per entry typed variant (key - value relation)?
     private final InstanceMapLOW dataCache = new InstanceMapLOW(lock, 24);
 
     /** If is Bedrock Player. This is set if CompatNoCheatPlus is present. */
@@ -179,7 +163,7 @@ public class PlayerData implements IPlayerData {
     /** Possibly needed in future. */
     private final DualSet<RegisteredPermission> updatePermissionsLazy = new DualSet<RegisteredPermission>(lock);
 
-    /** TODO: Soon to add minimized offline data, so these kind of things don't impact as much. */
+    /** Minimized offline data may be added to reduce impact. */
     private final PlayerCheckTypeTree checkTypeTree = new PlayerCheckTypeTree(lock);
 
     /** Unregister the tasks once 0 count is reached. */
@@ -313,7 +297,7 @@ public class PlayerData implements IPlayerData {
                 || TickTask.getLag(msMonitored, true) > 1.1f;
                 updatePermissionsLazy.mergePrimaryThread();
                 final Iterator<RegisteredPermission> it = updatePermissionsLazy.iteratorPrimaryThread();
-                // TODO: Load balancing with other tasks ?
+                // Potentially balance with other tasks
                 while (it.hasNext()) {
                     hasPermission(it.next(), player);
                     it.remove();
@@ -382,10 +366,7 @@ public class PlayerData implements IPlayerData {
         }
         else {
             requestPermissionUpdate(registeredPermission);
-            /*
-             * TODO: UNCERTAIN: request related permission right away ? Inefficient in case of exemption.
-             * 
-             */
+            /* Requesting related permissions immediately might be inefficient. */
             return AlmostBoolean.MAYBE;
         }
     }
@@ -407,7 +388,7 @@ public class PlayerData implements IPlayerData {
                     break;
             }
         }
-        // TODO: Register explicitly or not? (+ auto register?)...
+        // Decide whether to register explicitly or rely on auto registration.
         for (final Class<? extends IData> type : dataTypes) {
             final IData obj = dataCache.get(type);
             if (obj != null && obj instanceof ICanHandleTimeRunningBackwards) {
@@ -494,7 +475,7 @@ public class PlayerData implements IPlayerData {
      * @param worldData
      */
     void updateCurrentWorld(final IWorldData worldData) {
-        // TODO: Consider storing last world too.
+        // Storing the last world may be useful here.
         if (currentWorldData != worldData) {
             currentWorldData = worldData;
             checkTypeTree.getNode(CheckType.ALL).updateDebug(worldData);
@@ -503,19 +484,18 @@ public class PlayerData implements IPlayerData {
 
     private void invalidateOffline() {
         final Iterator<Entry<Integer, PermissionNode>> it = permissions.iterator();
-        // TODO: More efficient: get unmodifiable collection from registry?
+        // Consider retrieving an unmodifiable collection from the registry
         while (it.hasNext()) {
             final PermissionNode node = it.next().getValue();
             final PermissionInfo info = node.getPermissionInfo();
             if (info.invalidationOffline() 
                     /*
-                     * TODO: world based should only be invalidated with world
-                     * changing. Therefore store the last world info
-                     * (UUID/name?) in PlayerData and use on login for
-                     * comparison.
+                     * World based permissions should only invalidate when the
+                     * world changes. Consider storing the last world info for
+                     * comparison on login.
                      */
                     || info.invalidationWorld()) {
-                // TODO: Really count leave as world change?
+                // Decide if leaving counts as a world change
                 node.invalidate();
             }
         }
@@ -533,9 +513,9 @@ public class PlayerData implements IPlayerData {
             final WorldDataManager worldDataManager, 
             final Collection<Class<? extends IDataOnWorldChange>> types) {
         updateCurrentWorld(newWorld, worldDataManager);
-        // TODO: Double-invalidation (previous policy and target world policy)
+        // Double-invalidation (previous policy and target world policy)
         final Iterator<Entry<Integer, PermissionNode>> it = permissions.iterator();
-        // TODO: More efficient: get unmodifiable collection from registry?
+        // Consider retrieving an unmodifiable collection from the registry
         while (it.hasNext()) {
             final PermissionNode node = it.next().getValue();
             final PermissionInfo info = node.getPermissionInfo();
@@ -577,7 +557,7 @@ public class PlayerData implements IPlayerData {
                     if (System.currentTimeMillis() - node.getLastFetch() < node.getFetchInterval()) {
                         return lastState.decide();
                     }
-                    // TODO: ALWAYS: Could still use cache within a check context.
+                    // ALWAYS: could still use cache within a check context.
                 default:
                     // Must fetch.
                     break;
@@ -586,8 +566,8 @@ public class PlayerData implements IPlayerData {
         // Permission not cached or needs to be updated with the PlayerTask.
         final AlmostBoolean fRes = fetchPermission(registeredPermission, player);
         if (fRes == AlmostBoolean.MAYBE) {
-            // TODO: Get default state from info or Bukkit. Might need lastState for asynchronous ... redesign.
-            return lastState.decide(); // TODO: Slight risk on left-over meant-temporary permissions.
+            // Default state might come from info or Bukkit; lastState may be needed for asynchronous usage.
+            return lastState.decide(); // Slight risk on leftover temporary permissions.
         }
         else {
             node.setState(fRes, System.currentTimeMillis());
@@ -624,7 +604,7 @@ public class PlayerData implements IPlayerData {
      * @param keepEssentialData
      */
     public void removeData(boolean keepEssentialData) {
-        // TODO: Interface / stages.
+        // Interface stages could be introduced here
         permissions.clear(); // Might keep login-related permissions. Implement a 'retain-xy' or 'essential' flag?
         updatePermissions.clearPrimaryThread();
         updatePermissionsLazy.clearPrimaryThread();
@@ -654,13 +634,13 @@ public class PlayerData implements IPlayerData {
     @Override
     public void exempt(final CheckType checkType) {
         checkTypeTree.exempt(checkType, ExemptionContext.LEGACY_NON_NESTED);
-        // TODO: Handlers?
+        // Handlers may be added here
     }
 
     @Override
     public void unexempt(final CheckType checkType) {
         checkTypeTree.unexemptAll(checkType, ExemptionContext.LEGACY_NON_NESTED);
-        // TODO: Handlers?
+        // Handlers may be added here
     }
 
     @Override
@@ -720,7 +700,7 @@ public class PlayerData implements IPlayerData {
     @Override
     public boolean isCheckActive(final CheckType checkType, final Player player,
             final IWorldData worldData) {
-        // TODO: Move the implementation of CheckUtils here (efficiency with exemption).
+        // The implementation of CheckUtils could be moved here for efficiency.
         return worldData.isCheckActive(checkType) 
                 && !hasBypass(checkType, player, worldData);
     }
@@ -740,9 +720,9 @@ public class PlayerData implements IPlayerData {
      */
     public boolean hasBypass(final CheckType checkType, final Player player, 
             final IWorldData worldData) {
-        // TODO: Expose or not.
+        // Determine whether to expose this method
         // Exemption check.
-        // TODO: More efficient implementation, ExemptionSettings per world in worldData.
+        // A more efficient implementation might use ExemptionSettings per world
         if (NCPExemptionManager.isExempted(player, checkType)) {
             return true;
         }
@@ -888,11 +868,8 @@ public class PlayerData implements IPlayerData {
         // 1. Check for cache (local).
         final Object res = dataCache.get(registeredFor);
         if (res == null) {
-            /*
-             * TODO: Consider storing null and check containsKey(registeredFor)
-             * here. On the other hand it's not intended to query non existent
-             * data (just yet).
-             */
+            /* Storing null and checking containsKey may be an alternative,
+             * though querying non-existent data is not expected yet. */
             return cacheMissGenericInstance(registeredFor);
         }
         else {
@@ -902,7 +879,7 @@ public class PlayerData implements IPlayerData {
 
     private <T> T cacheMissGenericInstance(final Class<T> registeredFor) {
         // 2. Check for registered factory (local)
-        // TODO: Might store PlayerDataManager here.
+        // Storing PlayerDataManager here might be useful
         T res = DataManager.getFromFactory(registeredFor, 
                 new PlayerFactoryArgument(this, getCurrentWorldDataSafe()));
         if (res != null) {
