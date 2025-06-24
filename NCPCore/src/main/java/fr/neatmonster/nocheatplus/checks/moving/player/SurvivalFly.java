@@ -1798,11 +1798,11 @@ public class SurvivalFly extends Check {
 
         if (InAirPhase && cc.survivalFlyAccountingV) {
             if (MovingUtil.isCollideWithHB(from, to, data) && thisMove.yDistance < 0.0 && thisMove.yDistance > -0.21) {
-                data.vDistAcc.clear();
+                handleResetVDist(data);
                 data.vDistAcc.add((float) -0.2033);
             }
             else if (ChangedYDir && lastMove.yDistance > 0.0) {
-                data.vDistAcc.clear();
+                handleResetVDist(data);
                 data.vDistAcc.add((float) yDistance);
             }
             else if (thisMove.verVelUsed == null && !(lastMove.from.inLiquid && Math.abs(yDistance) < 0.31
@@ -1815,7 +1815,7 @@ public class SurvivalFly extends Check {
                 }
             }
             else {
-                data.vDistAcc.clear();
+                handleResetVDist(data);
             }
         }
 
@@ -2196,6 +2196,20 @@ public class SurvivalFly extends Check {
             return new double[]{yDistance, 0.0};
         }
         return null;
+    }
+
+    /**
+     * Reset bookkeeping related to vertical distance checks. This method
+     * currently just clears the vertical distance accumulator but is kept
+     * for future refactoring and unit tests.
+     *
+     * @param data
+     *            moving data for the player
+     */
+    private void handleResetVDist(final MovingData data) {
+        if (data != null) {
+            data.clearAccounting();
+        }
     }
 
     private double[] calculateViolation(final Player player, final double yDistance, final double yDistAbs,
