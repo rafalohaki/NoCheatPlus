@@ -462,14 +462,8 @@ public class PathUtils {
     }
 
     public static boolean mayBeInConfig(final String path) {
-        if (deprecatedPrefixes.hasPrefix(path)) {
-            return false;
-        }
-        else if (movedPaths.containsKey(path)) {
-            return false;
-        } else {
-            return true;
-        }
+        return !deprecatedPrefixes.hasPrefix(path)
+                && !movedPaths.containsKey(path);
     }
 
 }
