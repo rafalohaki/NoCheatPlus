@@ -28,7 +28,7 @@ import fr.neatmonster.nocheatplus.config.PathUtils.WrapMoved;
 public abstract class ConfPaths {
 
     // Sub-paths that are used with different path prefixes potentially.
-    // TODO: These might better be in another class.
+    // These constants might belong in a separate class.
     public static final String SUB_ACTIVE                                = "active";
     public static final String SUB_ALLOWINSTANTBREAK                     = "allowinstantbreak";
     public static final String SUB_ASCEND                                = "ascend";
@@ -69,7 +69,7 @@ public abstract class ConfPaths {
      * NOTE: The configuration allows setLastChangeBuildNumber(path), however
      * some of these settings are still needed for that.
      */
-    @GlobalConfig // TODO: Per file versions should also be supported.
+    @GlobalConfig // Per file versions should also be supported.
     public static final String CONFIGVERSION                             = "configversion.";
     public static final String CONFIGVERSION_NOTIFY                      = CONFIGVERSION + "notify";
     public static final String CONFIGVERSION_NOTIFYMAXPATHS              = CONFIGVERSION + "notifymaxpaths";
@@ -481,7 +481,7 @@ public abstract class ConfPaths {
     
     private static final String FIGHT_CRITICAL                           = FIGHT + "critical.";
     public static final String  FIGHT_CRITICAL_CHECK                     = FIGHT_CRITICAL + SUB_ACTIVE;
-    // TODO: Deprecate or rename (->falldistancemin)?
+    // Consider deprecating or renaming (->falldistancemin)?
     public static final String  FIGHT_CRITICAL_FALLDISTANCE              = FIGHT_CRITICAL + "falldistance";
      public static final String  FIGHT_CRITICAL_FALLDISTLENIENCY         = FIGHT_CRITICAL + "falldistleniency";
     public static final String  FIGHT_CRITICAL_ACTIONS                   = FIGHT_CRITICAL + "actions";
@@ -608,7 +608,7 @@ public abstract class ConfPaths {
 
     private static final String INVENTORY_OPEN                           = INVENTORY + "open.";
     public static final  String INVENTORY_OPEN_CHECK                     = INVENTORY_OPEN + SUB_ACTIVE;
-    // TODO: close and cancelother on open-section-level are temporary.
+    // close and cancelother on open-section-level are temporary.
     public static final  String INVENTORY_OPEN_CLOSE                     = INVENTORY_OPEN + "close";
     public static final  String INVENTORY_OPEN_CANCELOTHER               = INVENTORY_OPEN + "cancelother";
     
@@ -654,7 +654,7 @@ public abstract class ConfPaths {
     public static final String  MOVING_NOFALL_CHECK                      = MOVING_NOFALL + SUB_ACTIVE;
     public static final String  MOVING_NOFALL_DEALDAMAGE                 = MOVING_NOFALL + "dealdamage";
     public static final String  MOVING_NOFALL_SKIPALLOWFLIGHT            = MOVING_NOFALL + "skipallowflight";
-    // TODO: A reset section (violation, teleport, vehicle) + @Moved.
+    // A reset section (violation, teleport, vehicle) + @Moved.
     public static final String  MOVING_NOFALL_RESETONVL                  = MOVING_NOFALL + "resetonviolation";
     public static final String  MOVING_NOFALL_RESETONTP                  = MOVING_NOFALL + "resetonteleport";
     public static final String  MOVING_NOFALL_RESETONVEHICLE             = MOVING_NOFALL + "resetonvehicle";
@@ -731,7 +731,7 @@ public abstract class ConfPaths {
     public static final String  MOVING_SPLITMOVES                           = MOVING + "splitmoves"; // Needs better categories...
     public static final String  MOVING_TEMPKICKILLEGAL                      = MOVING + "tempkickillegal";
     public static final String  MOVING_IGNORESTANCE                         = MOVING + "ignorestance";
-    // TODO: Might add a section for illegal move.
+    // Might add a section for illegal move.
     private static final String MOVING_LOADCHUNKS                           = MOVING + "loadchunks.";
     public static final String  MOVING_LOADCHUNKS_JOIN                      = MOVING_LOADCHUNKS + "join";
     public static final String  MOVING_LOADCHUNKS_MOVE                      = MOVING_LOADCHUNKS + "move";
@@ -773,7 +773,7 @@ public abstract class ConfPaths {
 
     private static final String NET_ATTACKFREQUENCY                         = NET + "attackfrequency.";
     public static final String  NET_ATTACKFREQUENCY_ACTIVE                  = NET_ATTACKFREQUENCY + SUB_ACTIVE;
-    // TODO: Generic config for seconds.
+    // Generic config for seconds.
     public static final String  NET_ATTACKFREQUENCY_SECONDS                 = NET_ATTACKFREQUENCY + "limitforseconds.";
     public static final String  NET_ATTACKFREQUENCY_SECONDS_HALF            = NET_ATTACKFREQUENCY_SECONDS + "half";
     public static final String  NET_ATTACKFREQUENCY_SECONDS_ONE             = NET_ATTACKFREQUENCY_SECONDS + "one";
@@ -791,7 +791,7 @@ public abstract class ConfPaths {
     @GlobalConfig
     public static final String  NET_FLYINGFREQUENCY_PACKETSPERSECOND        = NET_FLYINGFREQUENCY + "packetspersecond";
     public static final String  NET_FLYINGFREQUENCY_ACTIONS                 = NET_FLYINGFREQUENCY + "actions";
-    // TODO: Reduceredundant has been removed (implement or remove config).
+    // Reduceredundant has been removed (implement or remove config).
     private static final String NET_FLYINGFREQUENCY_REDUNDANT               = NET_FLYINGFREQUENCY + "reduceredundant.";
     public static final String  NET_FLYINGFREQUENCY_REDUNDANT_ACTIVE        = NET_FLYINGFREQUENCY_REDUNDANT + SUB_ACTIVE;
     @GlobalConfig
@@ -847,7 +847,7 @@ public abstract class ConfPaths {
     public static final String COMPATIBILITY_EXEMPTIONS_WILDCARD_NPC_METADATA_KEYS = COMPATIBILITY_EXEMPTIONS_WILDCARD_NPC_METADATA + "keys";
     public static final String COMPATIBILITY_EXEMPTIONS_REMOVE_JOIN      = COMPATIBILITY_EXEMPTIONS_REMOVE + "join";
     public static final String COMPATIBILITY_EXEMPTIONS_REMOVE_LEAVE     = COMPATIBILITY_EXEMPTIONS_REMOVE + "leave";
-    // TODO: remove: tick, check / remove metadata on tick/leave?.
+    // Consider removal: tick, check / remove metadata on tick/leave?
 
     public static final String COMPATIBILITY_SERVER                      = COMPATIBILITY + "server.";
     public static final String COMPATIBILITY_SERVER_CBDEDICATED          = COMPATIBILITY_SERVER + "cbdedicated.";
