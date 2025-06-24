@@ -41,16 +41,12 @@ def replace(item, repl_def):
     return item
 
 def copy_and_replace_content(full_src, full_dst, repl_content):
-    # Read.
-    f = open(full_src, "rb")
-    content = f.read() # .decode("utf-8")
-    f.close()
-    # TODO: Above leaks on errors (suggested use is command line).
+    """Copy a file while applying string replacements."""
+    with open(full_src, "rb") as f:
+        content = f.read()  # .decode("utf-8")
     content = replace(content, repl_content)
-    f = open(full_dst, "w")
-    f.write(content)
-    f.close()
-    # TODO: Above leaks on errors (suggested use is command line).
+    with open(full_dst, "w") as f:
+        f.write(content)
 
 def copy_and_replace(src_dir, dst_dir, repl_filename, repl_content, 
                      filter_filename = ("target", ), filter_ext = (".class",)):
@@ -101,7 +97,6 @@ def main_interactive(path):
         print("[ERROR] Source directory not found: " + src_dir)
         return False
     # Ask for replacement properties.
-    # TODO: Determine by version tag of MCAccess, or a specific comment in there (if left empty)?
     dst_name = input("Significant module name (after NCPCompat) excluding revision (e.g. _R1): ")
     if not dst_name.strip():
         print("[ERROR] Can't be empty.")
@@ -118,7 +113,6 @@ def main_interactive(path):
     # Create replacement definitions.
     repl_filename = [(src_name, dst_name_with_rev), (src_name.lower(), dst_name.lower() + (("_" + dst_rev) if dst_rev else ""))]
     repl_content = [
-        # TODO: DOESNT FUCKING WORK artifactId
         ("the development version (latest of the supported Minecraft versions)", dst_name_with_rev),
         ] + repl_filename + [
         ("<artifactId>ncpcompat" + dst_name.lower() + (("_" + dst_rev) if dst_rev else "") + "</artifactId>", "<artifactId>ncpcompat" + dst_name_with_rev.lower() + "</artifactId>"),
@@ -129,7 +123,6 @@ def main_interactive(path):
     Perhaps just create a text file with all typical entries for copy and paste.
     """
     try:
-        # TODO: May leak file descriptors :p.
         copy_and_replace(src_dir, dst_dir, repl_filename, repl_content)
         return True
     except:
