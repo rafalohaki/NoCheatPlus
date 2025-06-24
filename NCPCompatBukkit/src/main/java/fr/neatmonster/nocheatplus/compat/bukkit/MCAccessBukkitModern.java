@@ -144,8 +144,10 @@ public class MCAccessBukkitModern extends MCAccessBukkit {
             this.reflectLivingEntity = new ReflectLivingEntity(this.reflectBase, null, this.reflectDamageSource);
             // Can be null
             this.reflectDamageSources = new ReflectDamageSources(this.reflectBase, this.reflectDamageSource);
-        } 
-        catch (ClassNotFoundException ex) {}
+        }
+        catch (ClassNotFoundException ex) {
+            // Optional classes may not be present on older versions.
+        }
     }
 
     @Override

@@ -224,9 +224,15 @@ public class ReflectionUtil {
         try {
             return method.invoke(object);
         }
-        catch (IllegalAccessException e) {}
-        catch (IllegalArgumentException e) {}
-        catch (InvocationTargetException e) {}
+        catch (IllegalAccessException e) {
+            // Failed to access method reflectively.
+        }
+        catch (IllegalArgumentException e) {
+            // Arguments mismatch for reflective call.
+        }
+        catch (InvocationTargetException e) {
+            // Target method threw an exception.
+        }
         return null;
     }
 
@@ -242,9 +248,15 @@ public class ReflectionUtil {
         try {
             return method.invoke(object, arguments);
         }
-        catch (IllegalAccessException e) {}
-        catch (IllegalArgumentException e) {}
-        catch (InvocationTargetException e) {}
+        catch (IllegalAccessException e) {
+            // Failed to access method reflectively.
+        }
+        catch (IllegalArgumentException e) {
+            // Arguments mismatch for reflective call.
+        }
+        catch (InvocationTargetException e) {
+            // Target method threw an exception.
+        }
         return null;
     }
 
@@ -271,7 +283,9 @@ public class ReflectionUtil {
                 }
             }
         } catch (SecurityException e) {
+            // Access restrictions prevented retrieving the method.
         } catch (NoSuchMethodException e) {
+            // Method not found; ignore and return null.
         }
         return null;
     }
