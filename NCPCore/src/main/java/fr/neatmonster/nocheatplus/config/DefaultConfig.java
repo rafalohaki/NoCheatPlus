@@ -33,7 +33,7 @@ import fr.neatmonster.nocheatplus.compat.versions.ServerVersion;
  */
 public class DefaultConfig extends ConfigFile {
 
-    // TODO: Other version details ?
+    // Other version details may be added here.
 
     /**
      * Instantiates a new default configuration.
@@ -85,7 +85,7 @@ public class DefaultConfig extends ConfigFile {
                 "nocheatplus.notify :: INTERVAL:60, -world, -offline", // Not sure about this one.
                 "nocheatplus.admin.debug :: INTERVAL:10",
                 "nocheatplus.admin* :: ALWAYS",
-                // TODO: Command permissions are always checked anyway :p. Will be changed...
+                // NOTE: Command permissions are always checked; will be adjusted later.
                 "nocheatplus.command* :: ALWAYS",
                 "nocheatplus.bypass* :: ALWAYS",
                 "regex:^nocheatplus\\.checks\\..*\\.silent$ :: FALSE",
@@ -327,7 +327,7 @@ public class DefaultConfig extends ConfigFile {
         set(ConfPaths.FIGHT_ACTIVE, "default", 1144);
         // General
         set(ConfPaths.FIGHT_CANCELDEAD, true, 785);
-        // TODO: Using System.currentTimeMillis() for timestamp not server tick?
+        // Using System.currentTimeMillis() for timestamp, not server tick.
         set(ConfPaths.FIGHT_MAXLOOPLETENCYTICKS, 8, 1154);
         set(ConfPaths.FIGHT_TOOLCHANGEPENALTY, 0L, 1154); // Disabled for now, it interferes too much with pvp. 500L
         set(ConfPaths.FIGHT_PVP_KNOCKBACKVELOCITY, "default", 785);
@@ -358,7 +358,7 @@ public class DefaultConfig extends ConfigFile {
         set(ConfPaths.FIGHT_FASTHEAL_ACTIONS, "cancel vl>10 cancel log:fastheal:2:6:i vl>30 cancel log:fastheal:1:1:i vl>90 cancel log:fastheal:0:10:if cmdc:kickfastheal:0:10", 1154);
         // GodMode
         set(ConfPaths.FIGHT_GODMODE_CHECK, "default", 785);
-        set(ConfPaths.FIGHT_GODMODE_LAGMINAGE, 1100, 785); // TODO: ndt/2 => 500-600.
+        set(ConfPaths.FIGHT_GODMODE_LAGMINAGE, 1100, 785); // Suggested: ndt/2 => 500-600.
         set(ConfPaths.FIGHT_GODMODE_LAGMAXAGE, 5000, 785);
         set(ConfPaths.FIGHT_GODMODE_ACTIONS, "cancel vl>10 cancel log:godmode:0:5:icf cmdc:kickgod:0:5", 1154);
         // ImpHit
@@ -648,7 +648,7 @@ public class DefaultConfig extends ConfigFile {
         set(ConfPaths.NET_WRONGTURN_ACTIONS, "cancel log:wrongturn:0:15:icf cmdc:kickillegalrotations:0:10", 1154);
 
 
-        // TODO: An extra file might suit these.
+        // Note: an extra file might suit these strings.
         final String start = "&c[player]&7 failed &c[check]&7: ";
         final String end = " &7(&cVL[violations]&7)";
         final String tell = "ncp tell [player] &c&l(!)&7 ";
@@ -760,9 +760,8 @@ public class DefaultConfig extends ConfigFile {
         set(ConfPaths.COMPATIBILITY_BLOCKS + ConfPaths.SUB_BREAKINGTIME + ".IRON_BLOCK:PICKAXE:DIAMOND:12", 1139);
         set(ConfPaths.COMPATIBILITY_BLOCKS + ConfPaths.SUB_ALLOWINSTANTBREAK, new LinkedList<String>(), 785);
         set(ConfPaths.COMPATIBILITY_BLOCKS + ConfPaths.SUB_OVERRIDEFLAGS + "." + Material.SNOW.name().toLowerCase(), "default", 785);
-        // Make blocks ign_passable+ground_height.
+        // Make blocks ign_passable+ground_height. Add more block names here if needed.
         for (final String name : Collections.singletonList(
-                // TODO: 
                 "moving_piston"
                 )) {
             set(ConfPaths.COMPATIBILITY_BLOCKS + ConfPaths.SUB_OVERRIDEFLAGS + "." + name, "default+ign_passable+ground_height", 785);
