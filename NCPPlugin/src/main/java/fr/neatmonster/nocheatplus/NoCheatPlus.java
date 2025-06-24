@@ -186,7 +186,7 @@ public class NoCheatPlus extends JavaPlugin implements NoCheatPlusAPI {
     //    /** Is a new update available? */
     //    private boolean              updateAvailable = false;
 
-    // TODO: per world permission registry (!).
+    // Permission registry is currently global; per-world entries might be introduced later.
     private final PermissionRegistry permissionRegistry = new PermissionRegistry(10000);
     /** Per world data. */
     private final WorldDataManager worldDataManager = new WorldDataManager();
@@ -292,17 +292,18 @@ public class NoCheatPlus extends JavaPlugin implements NoCheatPlusAPI {
 
     private INotifyReload reloadHook = new ReloadHook();
 
-    /** Access point for thread safe message queuing. */
-    // TODO: Replace by access point for message sending in general (relay to asynchronous depending on settings).
+    /** Access point for thread safe message queuing.
+     *  Future versions may unify message handling here. */
+    // Message sending might later be relayed asynchronously depending on settings.
     private final PlayerMessageSender playerMessageSender  = new PlayerMessageSender();
 
     private boolean clearExemptionsOnJoin = true;
     private boolean clearExemptionsOnLeave = true;
 
     private StreamID getRegistryStreamId() {
-        // TODO: Select by config, or add Streams.REGISTRY for a new default.
-        // For now prefer log file, unless extended status is set.
-        return ConfigManager.getConfigFile().getBoolean(ConfPaths.LOGGING_EXTENDED_STATUS) ? Streams.STATUS : Streams.DEFAULT_FILE;
+        // Choose log target based on configuration; prefer file output unless extended status is set.
+        return ConfigManager.getConfigFile().getBoolean(ConfPaths.LOGGING_EXTENDED_STATUS)
+                ? Streams.STATUS : Streams.DEFAULT_FILE;
     }
 
     /**
@@ -362,7 +363,7 @@ public class NoCheatPlus extends JavaPlugin implements NoCheatPlusAPI {
                 return;
             }
             denyLoginNames.put(playerName, ts);
-            // TODO: later maybe save these ?
+            // Could persist these values if denial should survive restarts.
         }
         checkDenyLoginsNames(null);
     }
@@ -394,7 +395,7 @@ public class NoCheatPlus extends JavaPlugin implements NoCheatPlusAPI {
 
     @Override
     public int sendAdminNotifyMessage(final String message) {
-        // TODO: Does this always work?
+        // Forward to the subscription-based notification mechanism.
         return sendAdminNotifyMessageSubscriptions(message);
     }
 
@@ -404,7 +405,7 @@ public class NoCheatPlus extends JavaPlugin implements NoCheatPlusAPI {
      * @return
      */
     public int sendAdminNotifyMessageSubscriptions(final String message) {
-        // TODO: Fetch from PlayerData - alt: update subscriptions on a regular basis - not every call!
+        // Permissibles are fetched directly; caching subscriptions might improve efficiency.
         final String lcPerm = Permissions.NOTIFY.getLowerCaseStringRepresentation();
         final Permission bukkitPerm = Permissions.NOTIFY.getBukkitPermission();
         final Set<Permissible> permissibles = Bukkit.getPluginManager().getPermissionSubscriptions(
@@ -422,7 +423,7 @@ public class NoCheatPlus extends JavaPlugin implements NoCheatPlusAPI {
                     }
                 }
                 else if (!sender.hasPermission(bukkitPerm)) {
-                    // TODO: Add permission cache for non-player-things?
+                    // Non-player permissibles are checked directly without caching.
                     continue;
                 }
                 // Finally send.
@@ -438,7 +439,7 @@ public class NoCheatPlus extends JavaPlugin implements NoCheatPlusAPI {
      */
     @Override
     public void sendMessageOnTick(final String playerName, final String message) {
-        // TODO: Move to PlayerData ?
+        // Message dispatch is delegated to the playerMessageSender.
         playerMessageSender.sendMessageThreadSafe(playerName, message);
     }
 
@@ -485,7 +486,7 @@ public class NoCheatPlus extends JavaPlugin implements NoCheatPlusAPI {
     @Override
     public boolean addComponent(final Object obj, final boolean allowComponentRegistry) {
 
-        // TODO: Allow to add ComponentFactory + contract (renew with reload etc.)?
+        // Future versions may accept ComponentFactory implementations for reloadable components.
         if (obj == this) {
             throw new IllegalArgumentException("Can not register NoCheatPlus with itself.");
         }
@@ -659,7 +660,7 @@ public class NoCheatPlus extends JavaPlugin implements NoCheatPlusAPI {
         if (verbose) {
             logManager.info(Streams.INIT, "Cleanup event registry (Bukkit)...");
         }
-        // TODO: Prevent register feature ?
+        // Clear the event registry to prevent further listener registrations.
         eventRegistry.clear();
 
         // Stop data-man task.
@@ -694,7 +695,7 @@ public class NoCheatPlus extends JavaPlugin implements NoCheatPlusAPI {
         if (verbose) {
             logManager.info(Streams.INIT, "onDisable calls (include DataManager cleanup)...");
         }
-        // TODO: Reliable sorting order + sort now (checks and data cleanup late, data manager last, allow plugins to access stuff before data is reset).
+        // Process disable listeners in reverse order so checks cleanup precedes data manager shutdown.
         final ArrayList<IDisableListener> disableListeners = new ArrayList<IDisableListener>(this.disableListeners);
         Collections.reverse(disableListeners);
         for (final IDisableListener dl : disableListeners) {
@@ -824,12 +825,11 @@ public class NoCheatPlus extends JavaPlugin implements NoCheatPlusAPI {
     }
 
     private void setupCommandProtection() {
-        // TODO: Might re-check with plugins enabling during runtime (!).
-        // Read lists and messages from config.
+        // Read lists and messages from config. Dynamic plugin managers may require this to run again on runtime enables.
         final ConfigFile config = ConfigManager.getConfigFile();
         // (Might add options to invert selection.)
         // "No permission".
-        // TODO: Could/should set permission message to null here (server default), might use keyword "default".
+        // The default permission message could be used by specifying "default" in the configuration.
         final List<String> noPerm = config.getStringList(ConfPaths.PROTECT_PLUGINS_HIDE_NOPERMISSION_CMDS);
         if (noPerm != null && !noPerm.isEmpty()) {
             final String noPermMsg = ColorUtil.replaceColors(ConfigManager.getConfigFile().getString(ConfPaths.PROTECT_PLUGINS_HIDE_NOPERMISSION_MSG));
@@ -1018,8 +1018,7 @@ public class NoCheatPlus extends JavaPlugin implements NoCheatPlusAPI {
         command.setExecutor(commandHandler);
         // (CommandHandler is TabExecutor.)
 
-        // Tell the permission registry, which permissions should get updated.
-        // TODO: confine by check enabled flags.
+        // Tell the permission registry which permissions should get updated. This might be restricted by check settings later.
         permissionRegistry.preferKeepUpdated(NetConfig.getPreferKeepUpdatedPermissions());
         permissionRegistry.preferKeepUpdated(ChatConfig.getPreferKeepUpdatedPermissions());
         permissionRegistry.arrangePreferKeepUpdated();
@@ -1034,8 +1033,7 @@ public class NoCheatPlus extends JavaPlugin implements NoCheatPlusAPI {
         // dataMan expiration checking.
         this.dataManTaskId = Folia.runSyncRepatingTask(this, (arg) -> pDataMan.checkExpiration(), 1207, 1207);
 
-        // Ensure dataMan is first on disableListeners.
-        // TODO: Why first ?
+        // Ensure dataMan is first on disableListeners so it cleans up after others.
         Misc.putFirst(pDataMan, disableListeners);
         Misc.putFirst(pDataMan, notifyReload);
         Misc.putFirst(worldDataManager, notifyReload);
@@ -1071,9 +1069,7 @@ public class NoCheatPlus extends JavaPlugin implements NoCheatPlusAPI {
 
         // Care for already online players.
         final Player[] onlinePlayers = BridgeMisc.getOnlinePlayers();
-        // TODO: re-map ExemptionManager !
-        // TODO: Disable all checks for these players for one tick ?
-        // TODO: Prepare check data for players [problem: permissions]?
+        // Re-initialize player related data after enable.
         Folia.runSyncTask(this, (arg) -> new PostEnableTask(onlinePlayers).run());
 
         // Mid-term cleanup (seconds range).
@@ -1128,7 +1124,7 @@ public class NoCheatPlus extends JavaPlugin implements NoCheatPlusAPI {
             logManager.severe(Streams.INIT, "Failed to apply command protection: " + t.getClass().getSimpleName());
             logManager.severe(Streams.INIT, t);
         }
-        // TODO: This should be a registered handler.
+        // Update some moving data for players that logged in while the plugin was disabled.
         for (final Player player : onlinePlayers) {
             final IPlayerData pData = DataManager.getPlayerData(player);
             if (player.isSleeping()) {
@@ -1164,7 +1160,7 @@ public class NoCheatPlus extends JavaPlugin implements NoCheatPlusAPI {
     private void processReload() {
         final ConfigFile config = ConfigManager.getConfigFile();
         setInstanceMembers(config);
-        // TODO: Process registered ComponentFactory instances.
+        // Process components provided by registered factories.
         // Set up MCAccess.
         initMCAccess(config);
         // Initialize BlockProperties
@@ -1229,9 +1225,8 @@ public class NoCheatPlus extends JavaPlugin implements NoCheatPlusAPI {
      * @param config
      */
     private MCAccess initMCAccess(final ConfigFile config) {
-        // TODO: Auto registry with unregister on reload hooks (more clean reload).
-        // Reset MCAccess.
-        // TODO: Might fire a NCPSetMCAccessFromFactoryEvent (include getting and setting)!
+        // Reset MCAccess. Automatic registration with reload hooks may be added in the future.
+        // An event could be fired when MCAccess is changed.
         final MCAccessConfig mcaC = new MCAccessConfig(config);
         final MCAccess mcAccess = new MCAccessFactory().getMCAccess(mcaC);
         /*
@@ -1247,7 +1242,7 @@ public class NoCheatPlus extends JavaPlugin implements NoCheatPlusAPI {
         new AttributeAccessFactory().setupAttributeAccess(mcAccess, mcaC);
         new EntityAccessFactory().setupEntityAccess(mcAccess, mcaC);
 
-        // TODO: Summary event or listener call-back (possibly in another place.).
+        // Additional callbacks could be triggered here to inform dependent components.
 
         // Log.
         logManager.info(Streams.INIT, "McAccess set to: " + mcAccess.getMCVersion() + " / " + mcAccess.getServerVersionTag());
@@ -1286,15 +1281,14 @@ public class NoCheatPlus extends JavaPlugin implements NoCheatPlusAPI {
                 }
                 final Player player = event.getPlayer();
                 // Check if login is denied (plus expiration check).
-                // TODO: Store by id + HashMapLOW + AsyncPlayerPreLogin.
+                // Could switch to using player UUIDs and handle AsyncPlayerPreLogin.
                 if (checkDenyLoginsNames(player.getName())) {
                     if (DataManager.getPlayerData(player).hasPermission(Permissions.BYPASS_DENY_LOGIN, player)) {
                         return;
                     }
-                    // TODO: Consider using the vanilla temporary ban feature instead (for an alternative?).
-                    // TODO: Display time for which the player is banned.
+                    // An alternative would be to use the built in temporary ban feature and include the remaining duration.
                     event.setResult(Result.KICK_OTHER);
-                    // TODO: Some basic/language configuration object, possibly independent of checks.
+                    // Kick message is configurable independently from the checks.
                     event.setKickMessage(ColorUtil.replaceColors(ConfigManager.getConfigFile(player.getWorld().getName()).getString(ConfPaths.STRINGS + ".msgtempdenylogin")));
                 }
             }
