@@ -1024,7 +1024,8 @@ public class RichBoundsLocation implements IGetBukkitLocation, IGetBlockPosition
 
     /**
      * Checks if the thing is on ground, including entities such as Minecart, Boat.
-     * 
+     * Uses cached values and a shortcut check before falling back to the full block-based test.
+     *
      * @return true, if the player is on ground
      */
     public boolean isOnGround() {
@@ -1034,50 +1035,56 @@ public class RichBoundsLocation implements IGetBukkitLocation, IGetBlockPosition
         // Check cached values and simplifications.
         if (notOnGroundMaxY >= yOnGround) {
             onGround = false;
+            updateGroundCache(false);
+            return false;
         }
-        else if (onGroundMinY <= yOnGround) {
+        if (onGroundMinY <= yOnGround) {
             onGround = true;
+            updateGroundCache(true);
+            return true;
         }
-        else {
-            // Shortcut check (currently needed for being stuck + sf).
-            if (blockFlags == null || (blockFlags.longValue() & BlockFlags.F_GROUND) != 0) {
-                // TODO: Consider dropping this shortcut.
-                final int bY = Location.locToBlock(y - yOnGround);
-                final IBlockCacheNode useNode = bY == blockY ? getOrCreateBlockCacheNode() : (bY == blockY -1 ? getOrCreateBlockCacheNodeBelow() : blockCache.getOrCreateBlockCacheNode(blockX,  bY, blockZ, false));
-                final Material id = useNode.getType();
-                final long flags = BlockFlags.getBlockFlags(id);
-                // TODO: Might remove check for variable ?
-                if ((flags & BlockFlags.F_GROUND) != 0 && (flags & BlockFlags.F_VARIABLE) == 0) {
-                    final double[] bounds = useNode.getBounds(blockCache, blockX, bY, blockZ);
-                    // Check collision if not inside of the block. [Might be a problem for cauldron or similar + something solid above.]
-                    // TODO: Might need more refinement.
-                    if (bounds != null && y - bY >= bounds[4] && BlockProperties.collidesBlock(blockCache, x, minY - yOnGround, z, x, minY, z, blockX, bY, blockZ, useNode, null, flags)) {
-                        // TODO: BlockHeight is needed for fences, use right away (above)?
-                        if (!BlockProperties.isPassableWorkaround(blockCache, blockX, bY, blockZ, minX - blockX, minY - yOnGround - bY, minZ - blockZ, useNode, maxX - minX, yOnGround, maxZ - minZ,  1.0)
-                            || (flags & BlockFlags.F_GROUND_HEIGHT) != 0 &&  BlockProperties.getGroundMinHeight(blockCache, blockX, bY, blockZ, useNode, flags) <= y - bY) {
-                           //  NCPAPIProvider.getNoCheatPlusAPI().getLogManager().debug(Streams.TRACE_FILE, "*** onground SHORTCUT");
-                            onGround = true;
-                        }
+        onGround = groundShortcutCheck();
+        updateGroundCache(onGround);
+        return onGround;
+    }
+
+    /**
+     * Perform a shortcut on-ground check before using the full block-based check.
+     *
+     * @return true if the location is on ground
+     */
+    private boolean groundShortcutCheck() {
+        if (blockFlags == null || (blockFlags.longValue() & BlockFlags.F_GROUND) != 0) {
+            final int bY = Location.locToBlock(y - yOnGround);
+            final IBlockCacheNode useNode = bY == blockY ? getOrCreateBlockCacheNode() : (bY == blockY - 1 ? getOrCreateBlockCacheNodeBelow() : blockCache.getOrCreateBlockCacheNode(blockX, bY, blockZ, false));
+            final Material id = useNode.getType();
+            final long flags = BlockFlags.getBlockFlags(id);
+            if ((flags & BlockFlags.F_GROUND) != 0 && (flags & BlockFlags.F_VARIABLE) == 0) {
+                final double[] bounds = useNode.getBounds(blockCache, blockX, bY, blockZ);
+                if (bounds != null && y - bY >= bounds[4] && BlockProperties.collidesBlock(blockCache, x, minY - yOnGround, z, x, minY, z, blockX, bY, blockZ, useNode, null, flags)) {
+                    if (!BlockProperties.isPassableWorkaround(blockCache, blockX, bY, blockZ, minX - blockX, minY - yOnGround - bY, minZ - blockZ, useNode, maxX - minX, yOnGround, maxZ - minZ, 1.0)
+                            || (flags & BlockFlags.F_GROUND_HEIGHT) != 0 && BlockProperties.getGroundMinHeight(blockCache, blockX, bY, blockZ, useNode, flags) <= y - bY) {
+                        return true;
                     }
                 }
-                if (onGround == null) {
-                    //NCPAPIProvider.getNoCheatPlusAPI().getLogManager().debug(Streams.TRACE_FILE, "*** fetch onground std");
-                    // Full on-ground check (blocks).
-                    // Note: Might check for half-block height too (getTypeId), but that is much more seldom.
-                    onGround = BlockProperties.isOnGround(blockCache, minX, minY - yOnGround, minZ, maxX, minY, maxZ, 0L);
-                }
             }
-            else {
-                onGround = false;
-            }
+            return BlockProperties.isOnGround(blockCache, minX, minY - yOnGround, minZ, maxX, minY, maxZ, 0L);
         }
-        if (onGround) {
+        return false;
+    }
+
+    /**
+     * Update cached ground data after checking.
+     *
+     * @param result
+     *            the computed on-ground value
+     */
+    private void updateGroundCache(boolean result) {
+        if (result) {
             onGroundMinY = Math.min(onGroundMinY, yOnGround);
-        }
-        else {
+        } else {
             notOnGroundMaxY = Math.max(notOnGroundMaxY, yOnGround);
         }
-        return onGround;
     }
 
     public boolean adjustOnGround(boolean change) {
