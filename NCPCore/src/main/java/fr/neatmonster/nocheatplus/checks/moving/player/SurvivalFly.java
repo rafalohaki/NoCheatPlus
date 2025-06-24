@@ -95,6 +95,33 @@ public class SurvivalFly extends Check {
     private IGenericInstanceHandle<IAttributeAccess> attributeAccess = NCPAPIProvider.getNoCheatPlusAPI().getGenericInstanceHandle(IAttributeAccess.class);
     //private final Plugin plugin = Bukkit.getPluginManager().getPlugin("NoCheatPlus");
 
+    /** Context information used when calculating allowed horizontal movement. */
+    private static class HContext {
+        Player player;
+        PlayerMoveData thisMove;
+        MovingData data;
+        MovingConfig cc;
+        IPlayerData pData;
+        PlayerLocation from;
+        PlayerLocation to;
+        boolean checkPermissions;
+        boolean sprinting;
+
+        // State modified by helper methods
+        double hAllowedDistance;
+        double friction;
+        boolean useBaseModifiers;
+        boolean useBaseModifiersSprint;
+        boolean useSneakModifier;
+
+        PlayerMoveData lastMove;
+        PlayerMoveData pastMove2;
+        boolean sfDirty;
+        double modHoneyBlock;
+        double modStairs;
+        double modHopSprint;
+    }
+
     /**
      * Some note for mcbe compatibility:
      * - New step pattern 0.42-0.58-0.001 ?
@@ -1081,6 +1108,28 @@ public class SurvivalFly extends Check {
         boolean useSneakModifier          = false;
         if (thisMove.from.onIce) tags.add("hice");
 
+        HContext ctx = new HContext();
+        ctx.player = player;
+        ctx.thisMove = thisMove;
+        ctx.data = data;
+        ctx.cc = cc;
+        ctx.pData = pData;
+        ctx.from = from;
+        ctx.to = to;
+        ctx.checkPermissions = checkPermissions;
+        ctx.sprinting = sprinting;
+        ctx.hAllowedDistance = hAllowedDistance;
+        ctx.friction = friction;
+        ctx.useBaseModifiers = useBaseModifiers;
+        ctx.useBaseModifiersSprint = useBaseModifiersSprint;
+        ctx.useSneakModifier = useSneakModifier;
+        ctx.lastMove = lastMove;
+        ctx.pastMove2 = pastMove2;
+        ctx.sfDirty = sfDirty;
+        ctx.modHoneyBlock = modHoneyBlock;
+        ctx.modStairs = modStairs;
+        ctx.modHopSprint = modHopSprint;
+
 
         ////////////////////////////////////////////////////////////////////////
         // Set the allowed horizontal distance according to medium and status //
@@ -1156,22 +1205,19 @@ public class SurvivalFly extends Check {
         }
 
         // Honeyblock
-        else if (thisMove.from.onHoneyBlock) {
-            tags.add("hhoneyblock");
-            hAllowedDistance = modHoneyBlock * thisMove.walkSpeed * cc.survivalFlyWalkingSpeed / 100D;
-            useSneakModifier = true;
-            useBaseModifiers = true;
-            friction = 0.0; 
+        else if (handleHoneyBlock(ctx)) {
+            hAllowedDistance = ctx.hAllowedDistance;
+            useBaseModifiers = ctx.useBaseModifiers;
+            useSneakModifier = ctx.useSneakModifier;
+            friction = ctx.friction;
         }
 
         // Stairs
-        else if (thisMove.from.aboveStairs || thisMove.to.aboveStairs) {
-            tags.add("hstairs");
-            useBaseModifiers = true;
-            useSneakModifier = true;
-            hAllowedDistance = modStairs * thisMove.walkSpeed * cc.survivalFlyWalkingSpeed / 100D;
-            friction = 0.0;
-            if (!Double.isInfinite(mcAccess.getHandle().getFasterMovementAmplifier(player))) hAllowedDistance *= 0.88;
+        else if (handleStairs(ctx)) {
+            hAllowedDistance = ctx.hAllowedDistance;
+            useBaseModifiers = ctx.useBaseModifiers;
+            useSneakModifier = ctx.useSneakModifier;
+            friction = ctx.friction;
         }
 
         // NoSlow packet (detection, not a deterministic limit)
@@ -1202,117 +1248,12 @@ public class SurvivalFly extends Check {
             friction = 0.0;
         }
 
-        // In liquid
-        // Check all liquids (lava might demand even slower speed though).
-        else if (thisMove.from.inLiquid && thisMove.to.inLiquid) {
-            tags.add("hliquid");
-            // Moving close to the surface allows a higher speed (always use the lower modifier for lava)
-            final double modSwim = (from.isSubmerged(0.701) || thisMove.from.inLava) ? Magic.modSwim[0] : Magic.modSwim[3];
-            hAllowedDistance = Bridge1_13.isSwimming(player) ? Magic.modSwim[1] : modSwim * thisMove.walkSpeed * cc.survivalFlySwimmingSpeed / 100D;
-            useBaseModifiers = false;
-            useSneakModifier = true;
-            if (sfDirty) friction = 0.0;
-            // (Bubble streams are handled via velocity)
-            
-            // Account for all water-related enchants
-            if (thisMove.from.inWater || !thisMove.from.inLava) { 
-                final int StriderLevel = BridgeEnchant.getDepthStriderLevel(player);
-                if (StriderLevel > 0) {
-                    // Speed effect, attribute will affect to water movement whenever you has DepthStrider enchant.
-                    useBaseModifiers = true;
-                    useBaseModifiersSprint = true;
-                    hAllowedDistance *= Magic.modDepthStrider[StriderLevel];
-                    // Modifiers: Most speed seems to be reached on ground, but couldn't nail down.
-                }
-
-                if (!Double.isInfinite(Bridge1_13.getDolphinGraceAmplifier(player))) {
-                    hAllowedDistance *= Magic.modDolphinsGrace;
-                    if (StriderLevel > 1) hAllowedDistance *= 1.0 + 0.07 * StriderLevel;
-                }
-                
-                if (data.liqtick < 5 && lastMove.toIsValid) {
-                    if (!lastMove.from.inLiquid) {
-                        if (lastMove.hDistance * 0.92 > thisMove.hDistance) {
-                            hAllowedDistance = lastMove.hDistance * 0.92;
-                        }
-                    } 
-                    else if (lastMove.hAllowedDistance * 0.92 > thisMove.hDistance) {
-                        hAllowedDistance = lastMove.hAllowedDistance * 0.92;
-                    }
-                }
-
-                // Friction issues with waterlogged blocks on the first/second move.
-                if (from.isInWaterLogged() && data.insideMediumCount <= 1 // (Actually observed was 0)
-                    && !from.isSubmerged(0.75) && (!lastMove.from.inLiquid || !pastMove2.from.inLiquid)
-                    && !thisMove.headObstructed && BlockProperties.isAir(from.getTypeIdAbove())) {
-                    // Speed will keep increasing with each hop, roughly reaching walkSpeed levels (a bit less)
-                    if (Magic.XORonGround(thisMove) || Magic.XORonGround(lastMove)) {
-                        hAllowedDistance = thisMove.walkSpeed * data.lastFrictionHorizontal * cc.survivalFlySwimmingSpeed / 100D;
-                    }
-                }
-            }
-            
-            final int fromBlockData = from.getData(from.getBlockX(), from.getBlockY(), from.getBlockZ());
-            // NOTE: This happens without velocity (god mode on), but can occour with it as well, so keep this workaround.
-            if (BlockProperties.isAir(from.getTypeIdAbove()) && !thisMove.headObstructed && !from.isSubmerged(0.8)
-                && (data.insideMediumCount < 4 || data.liftOffEnvelope == LiftOffEnvelope.NORMAL)) {
-                
-                // Spriting/hopping on lava, briefly.
-                // See: https://www.mcpk.wiki/wiki/Version_Differences  (1.16 update)
-                // Mojang tweaked the bounding box in 1.13, then reverted back to the old bounding box in 1.16 (pre 1.13)
-                if (thisMove.from.inLava) {
-                    if (
-                        // 0: Allow walk speed for this one transition
-                        !lastMove.from.inLava || !pastMove2.from.inLava
-                        // 0: Another wildcard. Allow walk speed if lifting off from ground or landing on lower levels.
-                        || Magic.XORonGround(thisMove) && (fromBlockData == 0 || fromBlockData == 6)) { 
-                        hAllowedDistance = (sprinting ? Magic.modSprint : 1.0) * thisMove.walkSpeed * cc.survivalFlySwimmingSpeed / 100D;
-
-                        // Do add momentum ticks here.
-                        if (!thisMove.from.onGround && thisMove.to.onGround) {
-                            data.momentumTick = 6;
-                        }
-                    }
-                }
-            }
-        }
-
-        // Speed restriction for leaving a liquid.
-        else if (!sfDirty && (!checkPermissions || !pData.hasPermission(Permissions.MOVING_SURVIVALFLY_WATERWALK, player))
-                && (Magic.leavingLiquid(thisMove) || data.surfaceId == 1) && data.liftOffEnvelope.name().startsWith("LIMIT")
-                && !from.isInWaterLogged()) {
-            tags.add("hliquidexit");
-            final int StriderLevel = BridgeEnchant.getDepthStriderLevel(player);
-            hAllowedDistance = Bridge1_13.isSwimming(player) ? Magic.modSwim[1] : Magic.modSwim[0] * thisMove.walkSpeed * Magic.modSurface[0] * cc.survivalFlySwimmingSpeed / 100D;
-            useBaseModifiersSprint = false;
-            friction = 0.0;
-            // (Bubble streams are handled via velocity)
-
-            // Speed effect, attribute will affect to water movement whenever you have DepthStrider enchant.  
-            if (StriderLevel > 0 && data.surfaceId == 0) {
-               useBaseModifiers = true;
-               useBaseModifiersSprint = true;
-               friction = data.lastFrictionHorizontal;
-               hAllowedDistance *= Magic.modDepthStrider[StriderLevel];
-            }
-
-            if (!Double.isInfinite(Bridge1_13.getDolphinGraceAmplifier(player))) {
-                hAllowedDistance *= Magic.modDolphinsGrace;
-                if (StriderLevel > 1) hAllowedDistance *= 1.0 + 0.07 * StriderLevel;
-            }
-
-            if (data.surfaceId == 1) hAllowedDistance *= Magic.modSurface[1];
-            // This movement has left liquid, set the Id to keep enforcing the speed limit
-            data.surfaceId = 1;
-            final int blockData = from.getData(from.getBlockX(), from.getBlockY(), from.getBlockZ());
-            final int blockUnderData = from.getData(from.getBlockX(), from.getBlockY() - 1, from.getBlockZ());
-
-            // Reset the Id for these conditions.
-            if (blockData > 3 || blockUnderData > 3 || data.isdownstream) {
-                data.surfaceId = 0;
-                hAllowedDistance = thisMove.walkSpeed * cc.survivalFlySwimmingSpeed / 100D;
-                data.isdownstream = false;
-            }
+        else if (handleLiquids(ctx)) {
+            hAllowedDistance = ctx.hAllowedDistance;
+            useBaseModifiers = ctx.useBaseModifiers;
+            useBaseModifiersSprint = ctx.useBaseModifiersSprint;
+            useSneakModifier = ctx.useSneakModifier;
+            friction = ctx.friction;
         }
 
         // Sneaking
@@ -1512,8 +1453,123 @@ public class SurvivalFly extends Check {
      * @return
      */
     private double slownessSprintHack(final Player player, final double hAllowedDistance) {
-        // Simple: up to high levels they can stay close, with a couple of hops until max base speed. 
+        // Simple: up to high levels they can stay close, with a couple of hops until max base speed.
         return 0.29;
+    }
+
+    private boolean handleHoneyBlock(final HContext ctx) {
+        if (ctx.thisMove.from.onHoneyBlock) {
+            tags.add("hhoneyblock");
+            ctx.hAllowedDistance = ctx.modHoneyBlock * ctx.thisMove.walkSpeed * ctx.cc.survivalFlyWalkingSpeed / 100D;
+            ctx.useSneakModifier = true;
+            ctx.useBaseModifiers = true;
+            ctx.friction = 0.0;
+            return true;
+        }
+        return false;
+    }
+
+    private boolean handleStairs(final HContext ctx) {
+        if (ctx.thisMove.from.aboveStairs || ctx.thisMove.to.aboveStairs) {
+            tags.add("hstairs");
+            ctx.useBaseModifiers = true;
+            ctx.useSneakModifier = true;
+            ctx.hAllowedDistance = ctx.modStairs * ctx.thisMove.walkSpeed * ctx.cc.survivalFlyWalkingSpeed / 100D;
+            ctx.friction = 0.0;
+            if (!Double.isInfinite(mcAccess.getHandle().getFasterMovementAmplifier(ctx.player))) {
+                ctx.hAllowedDistance *= 0.88;
+            }
+            return true;
+        }
+        return false;
+    }
+
+    private boolean handleLiquids(final HContext ctx) {
+        if (ctx.thisMove.from.inLiquid && ctx.thisMove.to.inLiquid) {
+            tags.add("hliquid");
+            final double modSwim = (ctx.from.isSubmerged(0.701) || ctx.thisMove.from.inLava) ? Magic.modSwim[0] : Magic.modSwim[3];
+            ctx.hAllowedDistance = Bridge1_13.isSwimming(ctx.player) ? Magic.modSwim[1]
+                    : modSwim * ctx.thisMove.walkSpeed * ctx.cc.survivalFlySwimmingSpeed / 100D;
+            ctx.useBaseModifiers = false;
+            ctx.useSneakModifier = true;
+            if (ctx.sfDirty) ctx.friction = 0.0;
+            if (ctx.thisMove.from.inWater || !ctx.thisMove.from.inLava) {
+                final int strider = BridgeEnchant.getDepthStriderLevel(ctx.player);
+                if (strider > 0) {
+                    ctx.useBaseModifiers = true;
+                    ctx.useBaseModifiersSprint = true;
+                    ctx.hAllowedDistance *= Magic.modDepthStrider[strider];
+                }
+                if (!Double.isInfinite(Bridge1_13.getDolphinGraceAmplifier(ctx.player))) {
+                    ctx.hAllowedDistance *= Magic.modDolphinsGrace;
+                    if (strider > 1) ctx.hAllowedDistance *= 1.0 + 0.07 * strider;
+                }
+                if (ctx.data.liqtick < 5 && ctx.lastMove.toIsValid) {
+                    if (!ctx.lastMove.from.inLiquid) {
+                        if (ctx.lastMove.hDistance * 0.92 > ctx.thisMove.hDistance) {
+                            ctx.hAllowedDistance = ctx.lastMove.hDistance * 0.92;
+                        }
+                    }
+                    else if (ctx.lastMove.hAllowedDistance * 0.92 > ctx.thisMove.hDistance) {
+                        ctx.hAllowedDistance = ctx.lastMove.hAllowedDistance * 0.92;
+                    }
+                }
+                if (ctx.from.isInWaterLogged() && ctx.data.insideMediumCount <= 1
+                        && !ctx.from.isSubmerged(0.75) && (!ctx.lastMove.from.inLiquid || !ctx.pastMove2.from.inLiquid)
+                        && !ctx.thisMove.headObstructed && BlockProperties.isAir(ctx.from.getTypeIdAbove())) {
+                    if (Magic.XORonGround(ctx.thisMove) || Magic.XORonGround(ctx.lastMove)) {
+                        ctx.hAllowedDistance = ctx.thisMove.walkSpeed * ctx.data.lastFrictionHorizontal * ctx.cc.survivalFlySwimmingSpeed / 100D;
+                    }
+                }
+            }
+
+            final int fromBlockData = ctx.from.getData(ctx.from.getBlockX(), ctx.from.getBlockY(), ctx.from.getBlockZ());
+            if (BlockProperties.isAir(ctx.from.getTypeIdAbove()) && !ctx.thisMove.headObstructed && !ctx.from.isSubmerged(0.8)
+                    && (ctx.data.insideMediumCount < 4 || ctx.data.liftOffEnvelope == LiftOffEnvelope.NORMAL)) {
+                if (ctx.thisMove.from.inLava) {
+                    if (!ctx.lastMove.from.inLava || !ctx.pastMove2.from.inLava
+                            || Magic.XORonGround(ctx.thisMove) && (fromBlockData == 0 || fromBlockData == 6)) {
+                        ctx.hAllowedDistance = (ctx.sprinting ? Magic.modSprint : 1.0) * ctx.thisMove.walkSpeed * ctx.cc.survivalFlySwimmingSpeed / 100D;
+                        if (!ctx.thisMove.from.onGround && ctx.thisMove.to.onGround) {
+                            ctx.data.momentumTick = 6;
+                        }
+                    }
+                }
+            }
+            return true;
+        }
+
+        if (!ctx.sfDirty && (!ctx.checkPermissions || !ctx.pData.hasPermission(Permissions.MOVING_SURVIVALFLY_WATERWALK, ctx.player))
+                && (Magic.leavingLiquid(ctx.thisMove) || ctx.data.surfaceId == 1) && ctx.data.liftOffEnvelope.name().startsWith("LIMIT")
+                && !ctx.from.isInWaterLogged()) {
+            tags.add("hliquidexit");
+            final int strider = BridgeEnchant.getDepthStriderLevel(ctx.player);
+            ctx.hAllowedDistance = Bridge1_13.isSwimming(ctx.player) ? Magic.modSwim[1]
+                    : Magic.modSwim[0] * ctx.thisMove.walkSpeed * Magic.modSurface[0] * ctx.cc.survivalFlySwimmingSpeed / 100D;
+            ctx.useBaseModifiersSprint = false;
+            ctx.friction = 0.0;
+            if (strider > 0 && ctx.data.surfaceId == 0) {
+                ctx.useBaseModifiers = true;
+                ctx.useBaseModifiersSprint = true;
+                ctx.friction = ctx.data.lastFrictionHorizontal;
+                ctx.hAllowedDistance *= Magic.modDepthStrider[strider];
+            }
+            if (!Double.isInfinite(Bridge1_13.getDolphinGraceAmplifier(ctx.player))) {
+                ctx.hAllowedDistance *= Magic.modDolphinsGrace;
+                if (strider > 1) ctx.hAllowedDistance *= 1.0 + 0.07 * strider;
+            }
+            if (ctx.data.surfaceId == 1) ctx.hAllowedDistance *= Magic.modSurface[1];
+            ctx.data.surfaceId = 1;
+            final int blockData = ctx.from.getData(ctx.from.getBlockX(), ctx.from.getBlockY(), ctx.from.getBlockZ());
+            final int blockUnderData = ctx.from.getData(ctx.from.getBlockX(), ctx.from.getBlockY() - 1, ctx.from.getBlockZ());
+            if (blockData > 3 || blockUnderData > 3 || ctx.data.isdownstream) {
+                ctx.data.surfaceId = 0;
+                ctx.hAllowedDistance = ctx.thisMove.walkSpeed * ctx.cc.survivalFlySwimmingSpeed / 100D;
+                ctx.data.isdownstream = false;
+            }
+            return true;
+        }
+        return false;
     }
 
 
