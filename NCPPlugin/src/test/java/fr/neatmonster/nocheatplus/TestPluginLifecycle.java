@@ -76,7 +76,10 @@ public class TestPluginLifecycle {
     private static class DummyComponent implements Listener, IDisableListener {
         private final String name;
         private final List<String> log;
-        DummyComponent(String name, List<String> log) { this.name = name; this.log = log; }
+        DummyComponent(String name, List<String> log) {
+            this.name = name;
+            this.log = log;
+        }
         @Override
         public void onDisable() { log.add(name); }
     }
