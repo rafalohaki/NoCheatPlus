@@ -30,6 +30,7 @@ import fr.neatmonster.nocheatplus.compat.Bridge1_9;
 import fr.neatmonster.nocheatplus.components.location.IGetBox3D;
 import fr.neatmonster.nocheatplus.components.location.IGetBlockPosition;
 import fr.neatmonster.nocheatplus.components.location.IGetBukkitLocation;
+import fr.neatmonster.nocheatplus.components.location.IGetLocationWithLook;
 import fr.neatmonster.nocheatplus.components.location.IGetPosition;
 import fr.neatmonster.nocheatplus.utilities.TickTask;
 import fr.neatmonster.nocheatplus.utilities.collision.CollisionUtil;
@@ -1670,9 +1671,45 @@ public class RichBoundsLocation implements IGetBukkitLocation, IGetBlockPosition
     /* (non-Javadoc)
      * @see java.lang.Object#hashCode()
      */
-    @Override    
+    @Override
     public int hashCode() {
         return LocUtil.hashCode(this);
+    }
+
+    /* (non-Javadoc)
+     * @see java.lang.Object#equals(java.lang.Object)
+     */
+    @Override
+    public boolean equals(final Object obj) {
+        if (this == obj) {
+            return true;
+        }
+        if (obj == null) {
+            return false;
+        }
+        if (obj instanceof IGetLocationWithLook) {
+            final IGetLocationWithLook other = (IGetLocationWithLook) obj;
+            final String wnThis = world == null ? null : world.getName();
+            final String wnOther = other.getWorldName();
+            return (wnThis == null ? wnOther == null : wnThis.equals(wnOther))
+                    && x == other.getX()
+                    && y == other.getY()
+                    && z == other.getZ()
+                    && yaw == other.getYaw()
+                    && pitch == other.getPitch();
+        }
+        if (obj instanceof Location) {
+            final Location other = (Location) obj;
+            final String wnThis = world == null ? null : world.getName();
+            final String wnOther = other.getWorld() == null ? null : other.getWorld().getName();
+            return (wnThis == null ? wnOther == null : wnThis.equals(wnOther))
+                    && x == other.getX()
+                    && y == other.getY()
+                    && z == other.getZ()
+                    && yaw == other.getYaw()
+                    && pitch == other.getPitch();
+        }
+        return false;
     }
 
     /* (non-Javadoc)
