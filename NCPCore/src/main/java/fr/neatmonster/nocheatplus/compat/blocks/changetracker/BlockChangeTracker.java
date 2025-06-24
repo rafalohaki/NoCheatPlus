@@ -46,6 +46,7 @@ import fr.neatmonster.nocheatplus.utilities.map.BlockCache.IBlockCacheNode;
 import fr.neatmonster.nocheatplus.utilities.map.BlockProperties;
 import fr.neatmonster.nocheatplus.utilities.map.BlockFlags;
 import fr.neatmonster.nocheatplus.utilities.map.MapUtil;
+import fr.neatmonster.nocheatplus.utilities.ds.map.CoordHash;
 
 /**
  * Keep track of block changes, to allow mitigation of false positives. Think of
@@ -118,16 +119,16 @@ public class BlockChangeTracker {
     }
 
     public static class WorldNode {
-        // TODO: private + access methods.
+        // Fields should be private with accessor methods.
         /*
-         * TODO: A coarse rectangle or cuboid based approach, Allowing fast
-         * exclusion check for moves (needs access methods for everything then).
+         * A coarse rectangle or cuboid based approach would allow fast
+         * exclusion checks for moves (needs access methods for everything then).
          * Could merge with the per-block map, similar to WorldGuard.
          */
         /*
-         * TODO: Consider a filter mechanism for player activity by chunks or
-         * chunk sections (some margin, only add if activity, let expire by
-         * tick). Only add blocks if players could reach the location.
+         * Consider a filter mechanism for player activity by chunks or chunk
+         * sections (some margin, only add if activity, let expire by tick).
+         * Only add blocks if players could reach the location.
          */
 
         /**
@@ -191,7 +192,7 @@ public class BlockChangeTracker {
      */
     public static class BlockChangeEntry {
 
-        // TODO: Might implement IBlockPosition.
+        // Might implement IBlockPosition.
 
         public final long id;
         public final int tick, x, y, z;
@@ -217,7 +218,7 @@ public class BlockChangeTracker {
          *            State of the block before changes may have happened. Pass
          *            null to ignore.
          */
-        public BlockChangeEntry(long id,  int tick, int x, int y, int z, 
+        public BlockChangeEntry(long id,  int tick, int x, int y, int z,
                 Direction direction, IBlockCacheNode previousState) {
             this.id = id;
             this.tick = tick;
@@ -226,6 +227,17 @@ public class BlockChangeTracker {
             this.z = z;
             this.direction = direction;
             this.previousState = previousState;
+        }
+
+        @Override
+        public int hashCode() {
+            int h = (int) (id ^ (id >>> 32));
+            h ^= tick;
+            h ^= CoordHash.hashCode3DPrimes(x, y, z);
+            if (direction != null) {
+                h ^= direction.hashCode();
+            }
+            return h;
         }
 
         @Override
@@ -297,7 +309,7 @@ public class BlockChangeTracker {
     /** Size at which entries get skipped, per world node. */
     private int worldNodeSkipSize = 500;
 
-    private int activityResolution = 32; // TODO: getter/setter/config.
+    private int activityResolution = 32; // consider getter/setter or config.
 
     /**
      * Store the WorldNode instances by UUID, containing the block change
@@ -314,8 +326,8 @@ public class BlockChangeTracker {
     private final OnGroundReference onGroundReference = new OnGroundReference();
 
     /*
-     * TODO: Consider tracking regions of player activity (chunk sections, with
-     * a margin around the player) and filter.
+     * Consider tracking regions of player activity (chunk sections with a
+     * margin around the player) and filter.
      */
 
     /**
@@ -330,11 +342,11 @@ public class BlockChangeTracker {
      *            direction (!) are added.
      */
     public void addPistonBlocks(final Block pistonBlock, final BlockFace blockFace, final List<Block> movedBlocks) {
-        checkProcessBlocks(); // TODO: Remove, once sure, that processing never ever generates an exception.
+        checkProcessBlocks(); // Remove once confident that processing never generates an exception.
         final int tick = TickTask.getTick();
         final World world = pistonBlock.getWorld();
         final WorldNode worldNode = getOrCreateWorldNode(world, tick);
-        final long changeId = getNewChangeId(tick, false); // TODO: Could set preferKeep.
+        final long changeId = getNewChangeId(tick, false); // Could set preferKeep.
         // Avoid duplicates by adding to a set.
         if (pistonBlock != null) {
             processBlocks.add(pistonBlock);
@@ -371,12 +383,12 @@ public class BlockChangeTracker {
      */
     private void addPistonBlock(final long changeId, final int tick, final WorldNode worldNode, 
             final int x, final int y, final int z, final BlockFace blockFace, final BlockCache blockCache) {
-        // TODO: A filter for regions of player activity.
-        // TODO: Test which ones can actually move a player (/how).
+        // Possible filter for regions of player activity.
+        // Test which ones can actually move a player (/how).
         // Add this block.
         addBlockChange(changeId, tick, worldNode, x, y, z, Direction.getDirection(blockFace), 
                 blockCache.getOrCreateBlockCacheNode(x, y, z, true));
-        //DebugUtil.debug("Piston: " + Direction.getDirection(blockFace) + " " + x + "," + y +"," + z + " / " + blockCache.getTypeId(x, y, z)); // TODO: REMOVE
+        //DebugUtil.debug("Piston: " + Direction.getDirection(blockFace) + " " + x + "," + y +"," + z + " / " + blockCache.getTypeId(x, y, z)); // debug
     }
 
     /**
@@ -408,7 +420,7 @@ public class BlockChangeTracker {
         if (blocks == null || blocks.isEmpty()) {
             return;
         }
-        checkProcessBlocks(); // TODO: Remove, once sure, that processing never ever generates an exception.
+        checkProcessBlocks(); // Remove once confident that processing never generates an exception.
         // Collect non null blocks first, set world.
         World world = null;
         for (final Block block : blocks) {
@@ -426,7 +438,7 @@ public class BlockChangeTracker {
         // Add blocks.
         final int tick = TickTask.getTick();
         final WorldNode worldNode = getOrCreateWorldNode(world, tick);
-        final long changeId = getNewChangeId(tick, false); // TODO: Could set preferKeep.
+        final long changeId = getNewChangeId(tick, false); // Could set preferKeep.
         // Process queued blocks.
         final BlockCache blockCache = blockCacheHandle.getHandle();
         blockCache.setAccess(world); // Assume all users always clean up after use :).
@@ -536,7 +548,7 @@ public class BlockChangeTracker {
         }
         final List<BlockChangeEntry> entries = worldNode.blocks.get(x, y, z);
         if (entries == null
-                || entries.isEmpty() // TODO: debug/error.
+                || entries.isEmpty() // debug/error
                 ) {
             return 0;
         }
@@ -579,11 +591,11 @@ public class BlockChangeTracker {
     private WorldNode getOrCreateWorldNode(final UUID worldId, final int tick) {
         WorldNode worldNode = worldMap.get(worldId);
         if (worldNode == null) {
-            // TODO: With activity tracking this should be a return.
+            // With activity tracking this should be a return.
             worldNode = new WorldNode(worldId);
             worldMap.put(worldId, worldNode);
         }
-        // TODO: (else) With activity tracking still check if lastActivityTick is too old (lazily expire entire worlds).
+        // With activity tracking still check if lastActivityTick is too old (lazily expire entire worlds).
         return worldNode;
     }
 
@@ -619,7 +631,7 @@ public class BlockChangeTracker {
                     lastEntry.nextEntryTick = tick;
                 }
             }
-            // TODO: Other redundancy checks / simplifications for often changing states?
+            // Additional redundancy checks or simplifications for often changing states?
         }
         if (entries == null) {
             entries = new LinkedList<BlockChangeTracker.BlockChangeEntry>();
@@ -629,7 +641,7 @@ public class BlockChangeTracker {
         activityNode.count ++;
         worldNode.size ++;
         worldNode.lastChangeTick = tick;
-        //DebugUtil.debug("Add block change: " + x + "," + y + "," + z + " " + direction + " " + changeId); // TODO: REMOVE
+        //DebugUtil.debug("Add block change: " + x + "," + y + "," + z + " " + direction + " " + changeId); // debug
     }
 
     /**
@@ -711,7 +723,7 @@ public class BlockChangeTracker {
                     }
                 }
                 if (worldNode.size <= 0) {
-                    // TODO: With activity tracking, nodes get removed based on last activity only.
+                    // With activity tracking, nodes get removed based on last activity only.
                     it.remove();
                 }
             }
@@ -743,7 +755,7 @@ public class BlockChangeTracker {
         if (worldNode == null) {
             return null;
         }
-        // TODO: Might add some policy (start at age, oldest first, newest first).
+        // Might add some policy (start at age, oldest first, newest first).
         final LinkedList<BlockChangeEntry> entries = getValidBlockChangeEntries(tick, worldNode, x, y, z);
         if (entries != null) {
             for (final BlockChangeEntry entry : entries) {
@@ -785,7 +797,7 @@ public class BlockChangeTracker {
         if (worldNode == null) {
             return null;
         }
-        // TODO: Might add some policy (start at age, oldest first, newest first).
+        // Might add some policy (start at age, oldest first, newest first).
         final LinkedList<BlockChangeEntry> entries = getValidBlockChangeEntries(tick, worldNode, x, y, z);
         if (entries != null) {
             for (final BlockChangeEntry entry : entries) {
@@ -827,7 +839,7 @@ public class BlockChangeTracker {
             final double maxX, final double maxY, final double maxZ, 
             final long ignoreFlags) {
         // (The method has been put here for efficiency. Alternative: put specific stuff into OnGroundReference.)
-        // TODO: Keep the outer iteration code in line with BlockProperties.isOnGround.
+        // Keep the outer iteration code in line with BlockProperties.isOnGround.
         final WorldNode worldNode = getValidWorldNode(tick, worldId);
         if (worldNode == null) {
             return false;
@@ -899,7 +911,7 @@ public class BlockChangeTracker {
             if (worldNode.lastChangeTick < tick - expirationAgeTicks) {
                 worldNode.clear();
                 worldMap.remove(worldNode.worldId);
-                //DebugUtil.debug("EXPIRE WORLD"); // TODO: REMOVE
+                //DebugUtil.debug("EXPIRE WORLD"); // debug
                 return null;
             }
             else {
@@ -921,7 +933,7 @@ public class BlockChangeTracker {
      */
     private LinkedList<BlockChangeEntry> getValidBlockChangeEntries(final int tick, final WorldNode worldNode, 
             final int x, final int y, final int z) {
-        // TODO: Consider return ListIterator (wind 1 backwards with an entry fetched).
+        // Consider returning a ListIterator (wind one step backwards after fetching an entry).
         final int expireOlderThanTick = tick - expirationAgeTicks;
         // Check individual entries.
         final LinkedList<BlockChangeEntry> entries = worldNode.blocks.get(x, y, z);
@@ -955,7 +967,7 @@ public class BlockChangeTracker {
             return null;
         }
         else {
-            // TODO: ERROR
+            // Should not happen
             return entries;
         }
     }
@@ -1091,7 +1103,8 @@ public class BlockChangeTracker {
             return false;
         }
         /*
-         *  TODO: After all a better data structure would allow an almost direct return (despite most of the time iterating one chunk).
+         *  A better data structure would allow an almost direct return
+         *  (despite most of the time iterating one chunk).
          */
         for (int x = minX / activityResolution; x <= maxX / activityResolution; x++) {
             for (int z = minZ / activityResolution; z <= maxZ / activityResolution; z++) {
@@ -1138,8 +1151,8 @@ public class BlockChangeTracker {
 
     public void updateBlockCacheHandle() {
         final IGenericInstanceHandle<BlockCache> newHandle = NCPAPIProvider.getNoCheatPlusAPI().getGenericInstanceHandle(BlockCache.class);
-        // TODO: Doesn't make much sense to disable, until reference counting is fixed/implemented.
-        if (this.blockCacheHandle != null 
+        // Disabling might not make sense until reference counting is implemented.
+        if (this.blockCacheHandle != null
                 && this.blockCacheHandle != newHandle) {
             this.blockCacheHandle.disableHandle();
         }
