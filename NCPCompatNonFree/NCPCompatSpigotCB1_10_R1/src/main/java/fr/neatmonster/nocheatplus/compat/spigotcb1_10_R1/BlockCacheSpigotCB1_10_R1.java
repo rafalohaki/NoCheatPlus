@@ -71,13 +71,13 @@ public class BlockCacheSpigotCB1_10_R1 extends BlockCache {
         final int id = mat.getId();
         final net.minecraft.server.v1_10_R1.Block block = net.minecraft.server.v1_10_R1.Block.getById(id);
         if (block == null) {
-            // TODO: Convention for null blocks -> full ?
+            // Convention for null blocks -> full ?
             return null;
         }
         final double[] shape = LegacyBlocks.getShape(this, mat, x, y, z, false);
         if (shape != null) return shape;
         final BlockPosition pos = new BlockPosition(x, y, z);
-        // TODO: Deprecation warning below (reason / substitute?).
+        // Deprecation warning below (reason / substitute?).
         @SuppressWarnings("deprecation")
         final AxisAlignedBB bb = block.a(world.getType(pos), world, pos);
         if (bb == null) {
@@ -91,7 +91,7 @@ public class BlockCacheSpigotCB1_10_R1 extends BlockCache {
     @Override
     public boolean standsOnEntity(final Entity entity, final double minX, final double minY, final double minZ, final double maxX, final double maxY, final double maxZ){
         try{
-            // TODO: Find some simplification!
+            // Find some simplification!
 
             final net.minecraft.server.v1_10_R1.Entity mcEntity  = ((CraftEntity) entity).getHandle();
 
