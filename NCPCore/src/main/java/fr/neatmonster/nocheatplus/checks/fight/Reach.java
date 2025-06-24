@@ -100,9 +100,13 @@ public class Reach extends Check {
         // TODO: Make a little more accurate by counting in the actual bounding box.
         final double pY = pLoc.getY() + player.getEyeHeight();
         final double dY = dRef.getY();
-        if (pY <= dY); // Keep the foot level y.
-        else if (pY >= dY + height) dRef.setY(dY + height); // Highest ref y.
-        else dRef.setY(pY); // Level with damaged.
+        if (pY <= dY) {
+            // Keep the foot level y.
+        } else if (pY >= dY + height) {
+            dRef.setY(dY + height); // Highest ref y.
+        } else {
+            dRef.setY(pY); // Level with damaged.
+        }
 
         final Vector pRel = dRef.toVector().subtract(pLoc.toVector().setY(pY)); // TODO: Run calculations on numbers only :p.
         // Distance is calculated from eye location to center of targeted. If the player is further away from their target

@@ -111,7 +111,7 @@ public abstract class CheckTypeTree<N extends CheckTypeTreeNode<N>> {
             public N newNode(CheckType checkType, N parent) {
                 return CheckTypeTree.this.newNode(checkType, parent, this);
             }
-        };
+        }
         // Create explosion.
         rootNode = newNode(CheckType.ALL, null, new DefaultFactory());
         // Create mapping for explosion.
