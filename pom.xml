@@ -27,6 +27,10 @@
     <properties>
         <project.build.sourceEncoding>UTF-8</project.build.sourceEncoding>
         <maven.build.timestamp.format>yyyy_MM_dd-HH_mm</maven.build.timestamp.format>
+        <!-- Static analysis should not fail the build by default -->
+        <checkstyle.failOnViolation>false</checkstyle.failOnViolation>
+        <pmd.failOnViolation>false</pmd.failOnViolation>
+        <spotbugs.failOnError>false</spotbugs.failOnError>
     </properties>
 
     <!-- Default modules -->
@@ -92,22 +96,39 @@
                     <groupId>org.apache.maven.plugins</groupId>
                     <artifactId>maven-checkstyle-plugin</artifactId>
                     <version>3.3.0</version>
+                    <configuration>
+                        <failOnViolation>${checkstyle.failOnViolation}</failOnViolation>
+                        <configLocation>google_checks.xml</configLocation>
+                    </configuration>
                 </plugin>
                 <plugin>
                     <groupId>org.apache.maven.plugins</groupId>
                     <artifactId>maven-pmd-plugin</artifactId>
                     <version>3.21.0</version>
+                    <configuration>
+                        <failOnViolation>${pmd.failOnViolation}</failOnViolation>
+                    </configuration>
                 </plugin>
                 <plugin>
                     <groupId>com.github.spotbugs</groupId>
                     <artifactId>spotbugs-maven-plugin</artifactId>
                     <version>4.7.3.0</version>
                     <configuration>
-                        <skip>true</skip>
+                        <failOnError>${spotbugs.failOnError}</failOnError>
                     </configuration>
                 </plugin>
             </plugins>
         </pluginManagement>
+        <plugins>
+            <plugin>
+                <groupId>org.apache.maven.plugins</groupId>
+                <artifactId>maven-checkstyle-plugin</artifactId>
+            </plugin>
+            <plugin>
+                <groupId>org.apache.maven.plugins</groupId>
+                <artifactId>maven-pmd-plugin</artifactId>
+            </plugin>
+        </plugins>
     </build>
 
 </project>
