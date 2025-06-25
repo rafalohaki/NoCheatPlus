@@ -132,120 +132,161 @@ public class LostGround {
      * @param cc
      * @return
      */
-    private static boolean lostGroundAscend(final Player player, final PlayerLocation from, final PlayerLocation to, final double hDistance, final double yDistance, 
+    private static boolean lostGroundAscend(final Player player, final PlayerLocation from, final PlayerLocation to, final double hDistance, final double yDistance,
                                             final boolean sprinting, final PlayerMoveData lastMove, final MovingData data, final MovingConfig cc, final Collection<String> tags) {
 
+        if (!validateAscendArgs(player, from, to, lastMove, data, cc)) {
+            return false;
+        }
+
         final PlayerMoveData thisMove = data.playerMoves.getCurrentMove();
-        // Micro lost ground, appears when respawn or using lanterns
-        // hDistance is to confine; needs testing
+
+        if (checkMicroLostGround(player, from, hDistance, thisMove, data, tags)) {
+            return true;
+        }
+
+        final double setBackYDistance = from.getY() - data.getSetBackY();
+
+        if (yDistance <= cc.sfStepHeight && hDistance <= 1.5 && !from.isResetCond()) { // hDistance is arbitrary, just to confine.
+            if (handleStepHeightAscend(player, from, to, hDistance, yDistance, lastMove, data, cc, tags, thisMove, setBackYDistance)) {
+                return true;
+            }
+        }
+
+        return false;
+    }
+
+    private static boolean validateAscendArgs(final Player player, final PlayerLocation from, final PlayerLocation to,
+                                              final PlayerMoveData lastMove, final MovingData data, final MovingConfig cc) {
+        return player != null && from != null && to != null && lastMove != null && data != null && cc != null;
+    }
+
+    private static boolean checkMicroLostGround(final Player player, final PlayerLocation from, final double hDistance,
+                                                final PlayerMoveData thisMove, final MovingData data, final Collection<String> tags) {
         if (hDistance <= 0.03 && from.isOnGround(0.03)) {
             return applyLostGround(player, from, true, thisMove , data, "micro", tags);
         }
-        final double setBackYDistance = from.getY() - data.getSetBackY();
+        return false;
+    }
 
-        // Step height related.
-        if (yDistance <= cc.sfStepHeight && hDistance <= 1.5 && !from.isResetCond()) { // hDistance is arbitrary, just to confine.
+    private static boolean handleStepHeightAscend(final Player player, final PlayerLocation from, final PlayerLocation to,
+                                                  final double hDistance, final double yDistance, final PlayerMoveData lastMove,
+                                                  final MovingData data, final MovingConfig cc, final Collection<String> tags,
+                                                  final PlayerMoveData thisMove, final double setBackYDistance) {
 
-            final double setBackYMargin = data.liftOffEnvelope.getMaxJumpHeight(data.jumpAmplifier) - setBackYDistance;
-            if (setBackYMargin >= 0.0) {
-                // Half block step up (definitive).
-                if (to.isOnGround() && setBackYMargin >= yDistance && hDistance <= thisMove.hAllowedDistanceBase * 2.2) {
-                    if (lastMove.yDistance < 0.0 || yDistance <= cc.sfStepHeight && from.isOnGround(cc.sfStepHeight - yDistance)) {
-                        return applyLostGround(player, from, true, thisMove, data, "step", tags);
-                    }
-                }
-
-                // Check for sprint-jumping on fences with trapdoors above (missing trapdoor's edge touch on server-side, player lands directly onto the fence)
-                // This is rather a false negative: NCP's collision differs from MC's; NCP won't detect this specific collision while MC does.
-                if (setBackYDistance > 1.0 && setBackYDistance <= 1.5 
-                    && setBackYMargin < 0.6 && data.getBunnyhopDelay() > 0
-                    && yDistance > from.getyOnGround() && lastMove.yDistance <= Magic.GRAVITY_MAX
-                    && yDistance < Magic.GRAVITY_MIN) {
-                    
-                    to.collectBlockFlags();
-                    // (Doesn't seem to be a problem with carpets)
-                    if ((to.getBlockFlags() & BlockFlags.F_ATTACHED_LOW2_SNEW) != 0
-                        && (to.getBlockFlags() & BlockFlags.F_HEIGHT150) != 0) {
-                        
-                        // Missing the trapdoor by 0.003
-                        if (to.isOnGround(0.003, 0.0, 0.0)) {
-                            // Setbacksafe: matter of taste.
-                            // With false, in case of a cheating attempt, the player will be setbacked on the ground instead of the trapdoor.
-                            return applyLostGround(player, from, false, thisMove, data, "trapfence", tags);
-                        }
-                    }
-                }
-
-                // Noob tower (moving up placing blocks underneath). Since 1.9 a player jumps off with 0.4 speed but ground within 0.42.
-                // Should confine by actually having placed a block nearby.
-                // Jump phase can be 6/7 - confine by typical max jump phase.
-                final double maxJumpGain = data.liftOffEnvelope.getMaxJumpGain(data.jumpAmplifier);
-                if (
-                        maxJumpGain > yDistance 
-                        && (
-                                // Typical: distance to ground + yDistance roughly covers maxJumpGain.
-                                yDistance > 0.0
-                                && lastMove.yDistance < 0.0 // Rather -0.15 or so.
-                                && Math.abs(lastMove.yDistance) + Magic.GRAVITY_MAX + yDistance > cc.yOnGround + maxJumpGain 
-                                && from.isOnGround(0.025)
-                                /*
-                                 * Rather rare: Come to rest above the block.
-                                 * Multiple 0-dist moves with looking packets.
-                                 * Not sure this happens with hdist > 0 at all.
-                                 */
-                                || lastMove.yDistance == 0.0
-                                && noobTowerStillCommon(to, yDistance)
-                                )
-                        ) {
-                    // Ensure set back is slightly lower, if still on ground.
-                    // setBackSafe: false to prevent a lowjump due to the setback reset.
-                    return applyLostGround(player, from, false, thisMove, data, "nbtwr", tags);
-                }
+        final double setBackYMargin = data.liftOffEnvelope.getMaxJumpHeight(data.jumpAmplifier) - setBackYDistance;
+        if (setBackYMargin >= 0.0) {
+            if (checkHalfStep(player, from, to, hDistance, yDistance, lastMove, data, cc, tags, thisMove, setBackYMargin)) {
+                return true;
             }
+            if (checkTrapFenceJump(player, from, to, yDistance, lastMove, data, tags, setBackYDistance, setBackYMargin, thisMove)) {
+                return true;
+            }
+            if (checkNoobTower(player, from, to, yDistance, lastMove, data, cc, tags, thisMove)) {
+                return true;
+            }
+        }
 
-            // Could step up (but might move to another direction, potentially).
-            if (lastMove.yDistance < 0.0) { 
-                // Generic could step.
-                // Margin might be confined depending on side and moving direction.
-                if (from.isOnGround(1.0) 
-                    && BlockProperties.isOnGroundShuffled(to.getBlockCache(), from.getX(), from.getY() + cc.sfStepHeight, from.getZ(), to.getX(), to.getY(), to.getZ(), 0.1 + from.getBoxMarginHorizontal(), to.getyOnGround(), 0.0)) {
-                    return applyLostGround(player, from, false, thisMove, data, "couldstep", tags);
-                }
+        if (lastMove.yDistance < 0.0) {
+            if (checkCouldStep(player, from, to, data, cc, tags, thisMove)) {
+                return true;
+            }
+            if (checkEdgeCases(player, from, to, hDistance, yDistance, lastMove, data, tags)) {
+                return true;
+            }
+        }
 
-                // Close by ground miss (client side blocks y move, but allows h move fully/mostly, missing the edge on server side).
-                // Possibly confine by more criteria.
-                if (!to.isOnGround()) { // Note that there may be cases with "to" on ground.
-                    // (Use covered area to last from.)
-                    if (lostGroundEdgeAsc(player, from.getBlockCache(), from.getWorld(), from.getX(), from.getY(), from.getZ(), from.getBoxMarginHorizontal(), from.getyOnGround(), lastMove, data, "asc1", tags, from.getMCAccess())) {
-                        return true;
-                    }
+        return false;
+    }
 
-                    // Special cases: similar to couldstep, with 0 y-distance but slightly above any ground nearby (no micro move!).
-                    if (yDistance == 0.0 && lastMove.yDistance <= -0.1515 && (hDistance <= lastMove.hDistance * 1.1)) {
-                        // Confining in x/z direction in general should detect if collided in that direction (then skip the x/z dist <= last time).
-                        // Code duplication with edgeasc7 below.
-                        /*
-                         * xzMargin 0.15: equipped end portal frame (observed
-                         * and supposedly fixed on MC 1.12.2) - might use an
-                         * even lower tolerance value here, once there is time
-                         * to testing this.
-                         */
-                        final double xzMargin = lastMove.yDistance <= -0.23 ? 0.3 : 0.15;
-                        if (lostGroundEdgeAsc(player, from.getBlockCache(), to.getWorld(), to.getX(), to.getY(), 
-                                              to.getZ(), from.getX(), from.getY(), from.getZ(), 
-                                              hDistance, to.getBoxMarginHorizontal(), xzMargin, 
-                                              data, "asc5", tags, from.getMCAccess())) {
-                            return true;
-                        }
-                    }
-                    else if (from.isOnGround(from.getyOnGround(), 0.0625, 0.0)) {
-                        // (Minimal margin.)
-                        return applyLostGround(player, from, false, thisMove, data, "edgeasc2", tags); // Maybe true ?
-                    }
+    private static boolean checkHalfStep(final Player player, final PlayerLocation from, final PlayerLocation to,
+                                         final double hDistance, final double yDistance, final PlayerMoveData lastMove,
+                                         final MovingData data, final MovingConfig cc, final Collection<String> tags,
+                                         final PlayerMoveData thisMove, final double setBackYMargin) {
+        if (to.isOnGround() && setBackYMargin >= yDistance && hDistance <= thisMove.hAllowedDistanceBase * 2.2) {
+            if (lastMove.yDistance < 0.0 || yDistance <= cc.sfStepHeight && from.isOnGround(cc.sfStepHeight - yDistance)) {
+                return applyLostGround(player, from, true, thisMove, data, "step", tags);
+            }
+        }
+        return false;
+    }
+
+    private static boolean checkTrapFenceJump(final Player player, final PlayerLocation from, final PlayerLocation to,
+                                              final double yDistance, final PlayerMoveData lastMove, final MovingData data,
+                                              final Collection<String> tags, final double setBackYDistance,
+                                              final double setBackYMargin, final PlayerMoveData thisMove) {
+
+        if (setBackYDistance > 1.0 && setBackYDistance <= 1.5
+            && setBackYMargin < 0.6 && data.getBunnyhopDelay() > 0
+            && yDistance > from.getyOnGround() && lastMove.yDistance <= Magic.GRAVITY_MAX
+            && yDistance < Magic.GRAVITY_MIN) {
+
+            to.collectBlockFlags();
+            if ((to.getBlockFlags() & BlockFlags.F_ATTACHED_LOW2_SNEW) != 0
+                && (to.getBlockFlags() & BlockFlags.F_HEIGHT150) != 0) {
+
+                if (to.isOnGround(0.003, 0.0, 0.0)) {
+                    return applyLostGround(player, from, false, thisMove, data, "trapfence", tags);
                 }
             }
         }
-        // Nothing found.
+        return false;
+    }
+
+    private static boolean checkNoobTower(final Player player, final PlayerLocation from, final PlayerLocation to,
+                                          final double yDistance, final PlayerMoveData lastMove, final MovingData data,
+                                          final MovingConfig cc, final Collection<String> tags,
+                                          final PlayerMoveData thisMove) {
+
+        final double maxJumpGain = data.liftOffEnvelope.getMaxJumpGain(data.jumpAmplifier);
+        if (maxJumpGain > yDistance
+                && (yDistance > 0.0
+                    && lastMove.yDistance < 0.0
+                    && Math.abs(lastMove.yDistance) + Magic.GRAVITY_MAX + yDistance > cc.yOnGround + maxJumpGain
+                    && from.isOnGround(0.025)
+                    || lastMove.yDistance == 0.0 && noobTowerStillCommon(to, yDistance))) {
+
+            return applyLostGround(player, from, false, thisMove, data, "nbtwr", tags);
+        }
+        return false;
+    }
+
+    private static boolean checkCouldStep(final Player player, final PlayerLocation from, final PlayerLocation to,
+                                          final MovingData data, final MovingConfig cc, final Collection<String> tags,
+                                          final PlayerMoveData thisMove) {
+
+        if (from.isOnGround(1.0)
+            && BlockProperties.isOnGroundShuffled(to.getBlockCache(), from.getX(), from.getY() + cc.sfStepHeight, from.getZ(),
+                                                 to.getX(), to.getY(), to.getZ(), 0.1 + from.getBoxMarginHorizontal(),
+                                                 to.getyOnGround(), 0.0)) {
+            return applyLostGround(player, from, false, thisMove, data, "couldstep", tags);
+        }
+        return false;
+    }
+
+    private static boolean checkEdgeCases(final Player player, final PlayerLocation from, final PlayerLocation to,
+                                          final double hDistance, final double yDistance, final PlayerMoveData lastMove,
+                                          final MovingData data, final Collection<String> tags) {
+
+        if (!to.isOnGround()) {
+            if (lostGroundEdgeAsc(player, from.getBlockCache(), from.getWorld(), from.getX(), from.getY(), from.getZ(),
+                                  from.getBoxMarginHorizontal(), from.getyOnGround(), lastMove, data, "asc1", tags, from.getMCAccess())) {
+                return true;
+            }
+
+            if (yDistance == 0.0 && lastMove.yDistance <= -0.1515 && (hDistance <= lastMove.hDistance * 1.1)) {
+                final double xzMargin = lastMove.yDistance <= -0.23 ? 0.3 : 0.15;
+                if (lostGroundEdgeAsc(player, from.getBlockCache(), to.getWorld(), to.getX(), to.getY(),
+                                      to.getZ(), from.getX(), from.getY(), from.getZ(),
+                                      hDistance, to.getBoxMarginHorizontal(), xzMargin,
+                                      data, "asc5", tags, from.getMCAccess())) {
+                    return true;
+                }
+            } else if (from.isOnGround(from.getyOnGround(), 0.0625, 0.0)) {
+                return applyLostGround(player, from, false, data.playerMoves.getCurrentMove(), data, "edgeasc2", tags);
+            }
+        }
+
         return false;
     }
 
