@@ -22,8 +22,8 @@ package fr.neatmonster.nocheatplus.checks.moving.velocity;
  */
 public class UnusedTracker {
 
-    // TODO: Using ticks for timing of these entries is problematic, should there be an extra sequence counter?
-    // TODO: If the player is moving roughly at the speed of stored velocity anyway, things get foggy by default.
+    // Using ticks for timing may be problematic; consider adding a sequence counter.
+    // If the player is already moving at stored velocity, results can be less precise.
 
     /** Tick of the last time the direction had been blocked. */
     private int lastBlocked = 0;
@@ -33,7 +33,7 @@ public class UnusedTracker {
      */
     private int lastNotBlockedStart = 0;
 
-    // TODO: Some random / minimal data.
+    // Simple counters used for diagnostics.
     private int resultUpdateCount = 0;
     private int resultViolationCount = 0;
     /** Absolute amount. */
