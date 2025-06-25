@@ -260,7 +260,7 @@ public class FightListener extends CheckListener implements JoinLeaveListener{
      * @param directionEnabled
      * @return If to cancel (true) or not (false).
      */
-    private boolean locationTraceChecks(final Player player, final Location loc, 
+    private boolean locationTraceChecks(final Player player, final Location loc,
                                         final FightData data, final FightConfig cc, final IPlayerData pData,
                                         final Entity damaged, final boolean damagedIsFake,
                                         final Location damagedLoc, LocationTrace damagedTrace, 
@@ -281,47 +281,13 @@ public class FightListener extends CheckListener implements JoinLeaveListener{
         // Iterating direction, which, static/dynamic choice.
         final Iterator<ITraceEntry> traceIt = damagedTrace.maxAgeIterator(traceOldest);
         boolean cancelled = false;
-        /** No tick with all checks passed */
-        boolean violation = true; 
-        /** Passed individually for some tick */
-        boolean reachPassed = !reachEnabled; 
-        /** Passed individually for some tick */
-        boolean directionPassed = !directionEnabled; 
-        // Maintain a latency estimate + max diff and invalidate completely (i.e. iterate from latest NEXT time)], or just max latency.
-        // Consider a max-distance to "now", for fast invalidation.
-        long latencyEstimate = -1;
-        ITraceEntry successEntry = null;
 
-        while (traceIt.hasNext()) {
-            final ITraceEntry entry = traceIt.next();
-            // Simplistic just check both until end or hit.
-            // Other default distances/tolerances.
-            boolean thisPassed = true;
-            if (reachEnabled) {
-                if (reach.loopCheck(player, loc, damaged, entry, reachContext, data, cc)) {
-                    thisPassed = false;
-                }
-                else {
-                    reachPassed = true;
-                }
-            }
-            // Efficiency: don't check at all, if strict and !thisPassed.
-            if (directionEnabled && (reachPassed || !directionPassed)) {
-                if (direction.loopCheck(player, loc, damaged, entry, directionContext, data, cc)) {
-                    thisPassed = false;
-                }
-                else {
-                    directionPassed = true;
-                }
-            }
-            if (thisPassed) {
-                // Log/set estimated latency.
-                violation = false;
-                latencyEstimate = now - entry.getTime();
-                successEntry = entry;
-                break;
-            }
-        }
+        final TraceResult result = evaluateTraceEntries(player, loc, damaged, traceIt,
+                reachContext, directionContext, data, cc, reachEnabled, directionEnabled, now);
+
+        final boolean violation = result.violation;
+        final long latencyEstimate = result.latencyEstimate;
+        final ITraceEntry successEntry = result.successEntry;
 
         // How to treat mixed state: violation && reachPassed && directionPassed [current: use min violation // thinkable: silent cancel, if actions have cancel (!)]
         // Adapt according to strictness settings?
@@ -344,6 +310,58 @@ public class FightListener extends CheckListener implements JoinLeaveListener{
             debug(player, "Latency estimate: " + latencyEstimate + " ms."); // FCFS rather, at present.
         }
         return cancelled;
+    }
+
+    private static final class TraceResult {
+        final boolean violation;
+        final long latencyEstimate;
+        final ITraceEntry successEntry;
+
+        TraceResult(final boolean violation, final long latencyEstimate, final ITraceEntry successEntry) {
+            this.violation = violation;
+            this.latencyEstimate = latencyEstimate;
+            this.successEntry = successEntry;
+        }
+    }
+
+    private TraceResult evaluateTraceEntries(final Player player, final Location loc, final Entity damaged,
+                                             final Iterator<ITraceEntry> traceIt, final ReachContext reachContext,
+                                             final DirectionContext directionContext, final FightData data,
+                                             final FightConfig cc, final boolean reachEnabled,
+                                             final boolean directionEnabled, final long now) {
+
+        boolean violation = true;
+        boolean reachPassed = !reachEnabled;
+        boolean directionPassed = !directionEnabled;
+        long latencyEstimate = -1;
+        ITraceEntry successEntry = null;
+
+        while (traceIt.hasNext()) {
+            final ITraceEntry entry = traceIt.next();
+            boolean thisPassed = true;
+            if (reachEnabled) {
+                if (reach.loopCheck(player, loc, damaged, entry, reachContext, data, cc)) {
+                    thisPassed = false;
+                } else {
+                    reachPassed = true;
+                }
+            }
+            if (directionEnabled && (reachPassed || !directionPassed)) {
+                if (direction.loopCheck(player, loc, damaged, entry, directionContext, data, cc)) {
+                    thisPassed = false;
+                } else {
+                    directionPassed = true;
+                }
+            }
+            if (thisPassed) {
+                violation = false;
+                latencyEstimate = now - entry.getTime();
+                successEntry = entry;
+                break;
+            }
+        }
+
+        return new TraceResult(violation, latencyEstimate, successEntry);
     }
 
     /**
