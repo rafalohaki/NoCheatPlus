@@ -675,12 +675,12 @@ public class MovingListener extends CheckListener implements TickListener, IRemo
 
         Location newTo = null;
         final PlayerMoveData thisMove = data.playerMoves.getCurrentMove();
-        final double xDistance = to.getX() - from.getX();
-        final double zDistance = to.getZ() - from.getZ();
         final String playerName = player.getName(); // Could switch to UUID here (needs more changes).
         final long time = System.currentTimeMillis();
         final PlayerMoveData lastMove = data.playerMoves.getFirstPastMove();
         data.resetTeleported();
+        // Horizontal distances are calculated on-demand in dedicated handlers
+        // (e.g. checkPastStateHorizontalPush).
 
         debugOutput(player, moveInfo, cc, debug);
         
