@@ -368,70 +368,11 @@ public class SurvivalFly extends Check {
         /////////////////////////////////////
         // Vertical move                  ///
         /////////////////////////////////////
-        double vAllowedDistance = 0, vDistanceAboveLimit = 0;
-
-        // Wild-card: allow step height from ground to ground, if not on/in a medium already.
-        if (yDistance >= 0.0 && yDistance <= cc.sfStepHeight
-            && toOnGround && fromOnGround && !from.isResetCond()) {
-            vAllowedDistance = cc.sfStepHeight;
-            thisMove.allowstep = true;
-            tags.add("groundstep");
-        }
-        // Powder snow (1.17+)
-        else if (from.isInPowderSnow()) {
-            final double[] resultSnow = vDistPowderSnow(yDistance, from, to, cc, data, player);
-            vAllowedDistance = resultSnow[0];
-            vDistanceAboveLimit = resultSnow[1];
-        }
-        // Climbable blocks
-        // NOTE: this check needs to be before isInWeb, because this can lead to false positive
-        else if (from.isOnClimbable()) {
-            final double[] resultClimbable = vDistClimbable(player, from, to, fromOnGround, toOnGround, thisMove, lastMove, yDistance, data);
-            vAllowedDistance = resultClimbable[0];
-            vDistanceAboveLimit = resultClimbable[1];
-        }
-        // Webs
-        else if (from.isInWeb()) {
-            final double[] resultWeb = vDistWeb(player, thisMove, toOnGround, hDistanceAboveLimit, now, data, cc, from);
-            vAllowedDistance = resultWeb[0];
-            vDistanceAboveLimit = resultWeb[1];
-        }
-        // Berry bush (1.15+)
-        else if (from.isInBerryBush()){
-            final double[] resultBush = vDistBush(player, thisMove, toOnGround, hDistanceAboveLimit, now, data, cc, from, fromOnGround);
-            vAllowedDistance = resultBush[0];
-            vDistanceAboveLimit = resultBush[1];
-        }
-        // HoneyBlock (1.14+)
-        else if (from.isOnHoneyBlock()) {
-            vAllowedDistance = data.liftOffEnvelope.getMaxJumpGain(data.jumpAmplifier);
-            if (data.getOrUseVerticalVelocity(thisMove.yDistance) == null) {
-                vDistanceAboveLimit = yDistance - vAllowedDistance;
-                if (vDistanceAboveLimit > 0.0) {
-                    tags.add("honeyasc");
-                }
-            }
-        }
-        // In liquid
-        else if (from.isInLiquid()) {
-            final double[] resultLiquid = vDistLiquid(thisMove, from, to, toOnGround, yDistance, lastMove, data, player, cc);
-            vAllowedDistance = resultLiquid[0];
-            vDistanceAboveLimit = resultLiquid[1];
-
-            // The friction jump phase has to be set externally.
-            if (vDistanceAboveLimit <= 0.0 && yDistance > 0.0
-                && Math.abs(yDistance) > Magic.swimBaseSpeedV(Bridge1_13.isSwimming(player))) {
-                data.setFrictionJumpPhase();
-            }
-        }
-        // Fallback to in-air checks
-        else {
-            final double[] resultAir = vDistAir(now, player, from, fromOnGround, resetFrom,
-                                                to, toOnGround, resetTo, hDistanceAboveLimit, yDistance,
-                                                multiMoveCount, lastMove, data, cc, pData);
-            vAllowedDistance = resultAir[0];
-            vDistanceAboveLimit = resultAir[1];
-        }
+        final double[] vResult = computeVerticalMovement(player, from, to,
+                thisMove, lastMove, fromOnGround, toOnGround, resetFrom, resetTo,
+                yDistance, hDistanceAboveLimit, now, multiMoveCount, data, cc, pData);
+        double vAllowedDistance = vResult[0];
+        double vDistanceAboveLimit = vResult[1];
 
 
 
@@ -875,6 +816,89 @@ public class SurvivalFly extends Check {
             }
         }
         return hDistanceAboveLimit;
+    }
+
+
+    /**
+     * Compute allowances and violations for vertical movement.
+     *
+     * @return array containing the allowed distance and the distance above the limit
+     */
+    private double[] computeVerticalMovement(final Player player, final PlayerLocation from,
+                                             final PlayerLocation to, final PlayerMoveData thisMove,
+                                             final PlayerMoveData lastMove, final boolean fromOnGround,
+                                             final boolean toOnGround, final boolean resetFrom,
+                                             final boolean resetTo, final double yDistance,
+                                             final double hDistanceAboveLimit, final long now,
+                                             final int multiMoveCount, final MovingData data,
+                                             final MovingConfig cc, final IPlayerData pData) {
+
+        if (!validateMoveInputs(player, from, to, "computeVerticalMovement") ||
+                thisMove == null || lastMove == null || data == null || cc == null || pData == null) {
+            return new double[]{0.0, 0.0};
+        }
+
+        double vAllowedDistance = 0.0;
+        double vDistanceAboveLimit = 0.0;
+
+        if (yDistance >= 0.0 && yDistance <= cc.sfStepHeight
+                && toOnGround && fromOnGround && !from.isResetCond()) {
+            vAllowedDistance = cc.sfStepHeight;
+            thisMove.allowstep = true;
+            tags.add("groundstep");
+        }
+        else if (from.isInPowderSnow()) {
+            final double[] resultSnow = vDistPowderSnow(yDistance, from, to, cc, data, player);
+            vAllowedDistance = resultSnow[0];
+            vDistanceAboveLimit = resultSnow[1];
+        }
+        else if (from.isOnClimbable()) {
+            final double[] resultClimbable = vDistClimbable(player, from, to, fromOnGround, toOnGround,
+                    thisMove, lastMove, yDistance, data);
+            vAllowedDistance = resultClimbable[0];
+            vDistanceAboveLimit = resultClimbable[1];
+        }
+        else if (from.isInWeb()) {
+            final double[] resultWeb = vDistWeb(player, thisMove, toOnGround, hDistanceAboveLimit,
+                    now, data, cc, from);
+            vAllowedDistance = resultWeb[0];
+            vDistanceAboveLimit = resultWeb[1];
+        }
+        else if (from.isInBerryBush()) {
+            final double[] resultBush = vDistBush(player, thisMove, toOnGround, hDistanceAboveLimit,
+                    now, data, cc, from, fromOnGround);
+            vAllowedDistance = resultBush[0];
+            vDistanceAboveLimit = resultBush[1];
+        }
+        else if (from.isOnHoneyBlock()) {
+            vAllowedDistance = data.liftOffEnvelope.getMaxJumpGain(data.jumpAmplifier);
+            if (data.getOrUseVerticalVelocity(thisMove.yDistance) == null) {
+                vDistanceAboveLimit = yDistance - vAllowedDistance;
+                if (vDistanceAboveLimit > 0.0) {
+                    tags.add("honeyasc");
+                }
+            }
+        }
+        else if (from.isInLiquid()) {
+            final double[] resultLiquid = vDistLiquid(thisMove, from, to, toOnGround, yDistance,
+                    lastMove, data, player, cc);
+            vAllowedDistance = resultLiquid[0];
+            vDistanceAboveLimit = resultLiquid[1];
+
+            if (vDistanceAboveLimit <= 0.0 && yDistance > 0.0
+                    && Math.abs(yDistance) > Magic.swimBaseSpeedV(Bridge1_13.isSwimming(player))) {
+                data.setFrictionJumpPhase();
+            }
+        }
+        else {
+            final double[] resultAir = vDistAir(now, player, from, fromOnGround, resetFrom,
+                    to, toOnGround, resetTo, hDistanceAboveLimit, yDistance,
+                    multiMoveCount, lastMove, data, cc, pData);
+            vAllowedDistance = resultAir[0];
+            vDistanceAboveLimit = resultAir[1];
+        }
+
+        return new double[]{vAllowedDistance, vDistanceAboveLimit};
     }
 
 
