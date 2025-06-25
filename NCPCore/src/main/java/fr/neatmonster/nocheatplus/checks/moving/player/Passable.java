@@ -41,9 +41,9 @@ public class Passable extends Check {
 
     /** TESTING RATHER. */
 
-    // TODO: Configuration.
-    // TODO: Test cases.
-    // TODO: Should keep an eye on passable vs. on-ground, when checking with reduced margins.
+    // NOTE: Configuration.
+    // NOTE: Test cases.
+    // NOTE: Should keep an eye on passable vs. on-ground, when checking with reduced margins.
     // rt_xzFactor = 1.0; // Problems: Doors, fences.
     //private static double rt_xzFactor = 0.99999999999;
     // rt_heightFactor = 1.0; // Since 10.2 (at some point) passable FP with 2-high ceiling.
@@ -57,7 +57,7 @@ public class Passable extends Check {
      * @return
      */
     public static boolean isPassable(Location from, Location to) {
-        // TODO ... alternate axes ? Currently only used in a simple check (y-axis only).
+        // NOTE ... alternate axes ? Currently only used in a simple check (y-axis only).
         return BlockProperties.isPassableAxisWise(from, to);
     }
 
@@ -66,7 +66,7 @@ public class Passable extends Check {
 
     public Passable() {
         super(CheckType.MOVING_PASSABLE);
-        // TODO: Configurable maxSteps?
+        // NOTE: Configurable maxSteps?
         rayTracing.setMaxSteps(60);
         blockTracker = NCPAPIProvider.getNoCheatPlusAPI().getBlockChangeTracker();
     }
@@ -85,7 +85,7 @@ public class Passable extends Check {
 
         final boolean debug = pData.isDebugActive(type);
 
-        // TODO: Distinguish feet vs. box.
+        // NOTE: Distinguish feet vs. box.
 
         // Block distances (sum, max) for from-to (not for loc!).
         final int manhattan = from.manhattan(to);
@@ -157,7 +157,7 @@ public class Passable extends Check {
         setNormalMargins(rayTracing, from, cc);
         rayTracing.set(from, to);
         rayTracing.setIgnoreInitiallyColliding(true);
-        if (useBlockChangeTracker) { // TODO: Extra flag for 'any' block changes.
+        if (useBlockChangeTracker) { // NOTE: Extra flag for 'any' block changes.
             rayTracing.setBlockChangeTracker(blockTracker, data.blockChangeRef, tick, from.getWorld().getUID());
         }
         //rayTracing.setCutOppositeDirectionMargin(true);
@@ -202,7 +202,7 @@ public class Passable extends Check {
             final int manhattan, final boolean debug,
             String tags, final MovingData data, final MovingConfig cc) {
 
-        // TODO: Might need the workaround for fences.
+        // NOTE: Might need the workaround for fences.
 
         return actualViolation(player, from, to, tags, debug, data, cc);
     }
@@ -216,10 +216,10 @@ public class Passable extends Check {
         // Prefer the set back location from the data.
         if (data.hasSetBack()) {
             /*
-             * TODO: Harmonize with MovingUtil.getApplicableSetBackLocation
+             * NOTE: Harmonize with MovingUtil.getApplicableSetBackLocation
              * (somehow include the desired set back type / loc / context).
-             */
-            setBackLoc = data.getSetBack(to); // TODO
+              */
+            setBackLoc = data.getSetBack(to); // NOTE
             if (debug) {
                 debug(player, "Using set back location for passable.");
             }
@@ -237,7 +237,7 @@ public class Passable extends Check {
             }
         }
         if (executeActions(vd).willCancel()) {
-            // TODO: Consider another set back position for this, also keeping track of players moving around in blocks.
+            // NOTE: Consider another set back position for this, also keeping track of players moving around in blocks.
             final Location newTo;
             if (setBackLoc != null) {
                 // Ensure the given location is cloned.
@@ -273,7 +273,7 @@ public class Passable extends Check {
         else if (rayTracing.getStepsDone() >= rayTracing.getMaxSteps()) {
             debug(player, "Raytracing max steps exceeded (" + tag + "): "+ rayTracing.getCollidingAxis());
         }
-        // TODO: Detect having used past block changes and log or set a tag.
+        // NOTE: Detect having used past block changes and log or set a tag.
     }
 
 }
