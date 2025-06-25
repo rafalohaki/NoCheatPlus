@@ -154,7 +154,7 @@ public class NoCheatPlusCommand extends BaseCommand {
             return false;
         }
 
-        // TODO: Fetch from PlayerData or not...
+        // Note: might fetch from PlayerData instead.
         if (sender.hasPermission(Permissions.FILTER_COMMAND_NOCHEATPLUS.getBukkitPermission())){
             // Check sub-commands.
             if (args.length > 0){
@@ -177,7 +177,7 @@ public class NoCheatPlusCommand extends BaseCommand {
         final ConfigFile config = ConfigManager.getConfigFile();
         if (config.getBoolean(ConfPaths.PROTECT_PLUGINS_HIDE_ACTIVE)){
             // Prevent the NCP usage printout:
-            // TODO: GetColoredString
+            // Note: GetColoredString could be used here
             sender.sendMessage(ColorUtil.replaceColors(config.getString(ConfPaths.PROTECT_PLUGINS_HIDE_NOCOMMAND_MSG)));
             return true; 
         }
@@ -212,7 +212,7 @@ public class NoCheatPlusCommand extends BaseCommand {
     //	@Override
     //	public List<String> onTabComplete(CommandSender sender, Command command, String alias, String[] args)
     //	{
-    //		// TODO: TabComplete check ?
+    //		// NOTE: TabComplete check ?
     //		if (args.length == 0 || args.length == 1 && args[0].trim().isEmpty()){
     //			// Add labels without aliases.
     //			return getTabMatches(sender, rootLabels, "");
