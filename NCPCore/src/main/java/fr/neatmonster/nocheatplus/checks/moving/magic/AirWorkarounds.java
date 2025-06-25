@@ -411,83 +411,106 @@ public class AirWorkarounds {
      * @param data
      * @return
      */
-    private static boolean oddFriction(final double yDistance, final double yDistDiffEx, final PlayerMoveData lastMove, final MovingData data, final PlayerLocation from) {
+    private static boolean oddFriction(final double yDistance, final double yDistDiffEx,
+                                       final PlayerMoveData lastMove, final MovingData data,
+                                       final PlayerLocation from) {
 
-        // Use past move data for two moves.
         final PlayerMoveData pastMove1 = data.playerMoves.getSecondPastMove();
-        final boolean LiquidEnvelope = (data.liftOffEnvelope == LiftOffEnvelope.LIMIT_LIQUID || data.liftOffEnvelope == LiftOffEnvelope.LIMIT_NEAR_GROUND || data.liftOffEnvelope == LiftOffEnvelope.LIMIT_SURFACE);
+        final boolean liquidEnvelope = data.liftOffEnvelope == LiftOffEnvelope.LIMIT_LIQUID
+                || data.liftOffEnvelope == LiftOffEnvelope.LIMIT_NEAR_GROUND
+                || data.liftOffEnvelope == LiftOffEnvelope.LIMIT_SURFACE;
+
         if (!lastMove.to.extraPropertiesValid || !pastMove1.toIsValid || !pastMove1.to.extraPropertiesValid) {
             return false;
         }
 
         final PlayerMoveData thisMove = data.playerMoves.getCurrentMove();
-        return 
-                // 0: First move into air, moving out of liquid.
-                // (These should probably be oddLiquid cases, might pull pastMove1 to vDistAir later.)
-                LiquidEnvelope && data.sfJumpPhase == 1 && Magic.inAir(thisMove)
+        return firstMoveOutOfLiquid(liquidEnvelope, yDistance, yDistDiffEx, lastMove, pastMove1, thisMove, data)
+                || oddNormalEnvelope(yDistance, lastMove, pastMove1, thisMove, data)
+                || exitingBerryBush(yDistance, lastMove, thisMove, data);
+    }
+
+    private static boolean firstMoveOutOfLiquid(final boolean liquidEnvelope, final double yDistance,
+                                                final double yDistDiffEx, final PlayerMoveData lastMove,
+                                                final PlayerMoveData pastMove1, final PlayerMoveData thisMove,
+                                                final MovingData data) {
+        if (!liquidEnvelope || data.sfJumpPhase != 1 || !Magic.inAir(thisMove)) {
+            return false;
+        }
+
+        final boolean towardsAscending = pastMove1.yDistance > lastMove.yDistance - Magic.GRAVITY_MAX
+                && lastMove.yDistance > yDistance + Magic.GRAVITY_MAX
+                && lastMove.yDistance > 0.0
                 && (
-                        // 1: Towards ascending rather.
-                        pastMove1.yDistance > lastMove.yDistance - Magic.GRAVITY_MAX
-                        && lastMove.yDistance > yDistance + Magic.GRAVITY_MAX && lastMove.yDistance > 0.0 // Positive speed; may require > 1.0.
-                        && (
-                                // 2: Odd speed decrease bumping into a block sideways somehow, having moved through water.
-                                yDistDiffEx < 0.0 && Magic.splashMove(lastMove, pastMove1)
+                        yDistDiffEx < 0.0 && Magic.splashMove(lastMove, pastMove1)
                                 && (
-                                        // 3: Odd too high decrease, after middle move being within friction envelope.
                                         yDistance > lastMove.yDistance / 5.0
-                                        && data.ws.use(WRPT.W_M_SF_ODDFRICTION_1)
-                                        // 3: Two times about the same decrease (e.g. near 1.0), ending up near zero distance.
-                                        || yDistance > -Magic.GRAVITY_MAX 
-                                        && Math.abs(pastMove1.yDistance - lastMove.yDistance - (lastMove.yDistance - thisMove.yDistance)) < Magic.GRAVITY_MAX
-                                        && data.ws.use(WRPT.W_M_SF_ODDFRICTION_2)
+                                                && data.ws.use(WRPT.W_M_SF_ODDFRICTION_1)
+                                        || yDistance > -Magic.GRAVITY_MAX
+                                                && Math.abs(pastMove1.yDistance - lastMove.yDistance
+                                                - (lastMove.yDistance - thisMove.yDistance)) < Magic.GRAVITY_MAX
+                                                && data.ws.use(WRPT.W_M_SF_ODDFRICTION_2)
                                 )
-                                // 2: Almost keep speed (gravity only), moving out of lava with (high) velocity.
-                                // (Needs jump phase == 1, to confine decrease from pastMove1 to lastMove.)
-                                || Magic.inLiquid(pastMove1) && pastMove1.from.inLava
-                                && Magic.leavingLiquid(lastMove) && lastMove.yDistance > 4.0 * Magic.GRAVITY_MAX
-                                && yDistance < lastMove.yDistance - Magic.GRAVITY_MAX 
+                        || Magic.inLiquid(pastMove1) && pastMove1.from.inLava
+                                && Magic.leavingLiquid(lastMove)
+                                && lastMove.yDistance > 4.0 * Magic.GRAVITY_MAX
+                                && yDistance < lastMove.yDistance - Magic.GRAVITY_MAX
                                 && yDistance > lastMove.yDistance - 2.0 * Magic.GRAVITY_MAX
                                 && Math.abs(lastMove.yDistance - pastMove1.yDistance) > 4.0 * Magic.GRAVITY_MAX
                                 && data.ws.use(WRPT.W_M_SF_ODDFRICTION_3)
-                        )
-                        // 1: Less 'strict' speed increase, descending rather.
-                        || pastMove1.yDistance < 0.0
-                        && lastMove.yDistance - Magic.GRAVITY_MAX < yDistance && yDistance < 0.7 * lastMove.yDistance // Actual speed decrease due to water.
-                        && Math.abs(pastMove1.yDistance + lastMove.yDistance) > 2.5
-                        && (
-                            Magic.splashMove(lastMove, pastMove1) && pastMove1.yDistance > lastMove.yDistance // (Actually splashMove or aw-ww-wa-aa)
-                            // Allow more decrease if moving through more solid water.
-                            || Magic.inLiquid(pastMove1) && Magic.leavingLiquid(lastMove) && pastMove1.yDistance *.7 > lastMove.yDistance
-                        )
-                        && data.ws.use(WRPT.W_M_SF_ODDFRICTION_4)
-                        // 1: Strong decrease after rough keeping speed (hold space bar, with velocity, descending).
-                        || yDistance < -0.5 // Arbitrary, actually observed was around 2.
-                        && pastMove1.yDistance < yDistance && lastMove.yDistance < yDistance
-                        && Math.abs(pastMove1.yDistance - lastMove.yDistance) < Magic.GRAVITY_ODD
-                        && yDistance < lastMove.yDistance * 0.67 && yDistance > lastMove.yDistance * data.lastFrictionVertical - Magic.GRAVITY_MIN
-                        && (Magic.splashMoveNonStrict(lastMove, pastMove1) || Magic.inLiquid(pastMove1) && Magic.leavingLiquid(lastMove))
-                        && data.ws.use(WRPT.W_M_SF_ODDFRICTION_5)
-                )
-                // 0: Odd normal envelope set.
-                || data.liftOffEnvelope == LiftOffEnvelope.NORMAL && data.sfJumpPhase == 1 && Magic.inAir(thisMove) 
+                );
+
+        final boolean lessStrictIncrease = pastMove1.yDistance < 0.0
+                && lastMove.yDistance - Magic.GRAVITY_MAX < yDistance && yDistance < 0.7 * lastMove.yDistance
+                && Math.abs(pastMove1.yDistance + lastMove.yDistance) > 2.5
                 && (
-                    //                                && data.isVelocityJumpPhase()
-                    // 1: Velocity very fast into water above.
-                    (Magic.splashMoveNonStrict(lastMove, pastMove1) || Magic.inLiquid(pastMove1) && Magic.leavingLiquid(lastMove))
-                    && yDistance < lastMove.yDistance - Magic.GRAVITY_MAX 
-                    && yDistance > lastMove.yDistance - 2.0 * Magic.GRAVITY_MAX
-                    && (
-                        Math.abs(lastMove.yDistance - pastMove1.yDistance) > 4.0 * Magic.GRAVITY_MAX
-                        || pastMove1.yDistance > 3.0 && lastMove.yDistance > 3.0 && Math.abs(lastMove.yDistance - pastMove1.yDistance) < 2.0 * Magic.GRAVITY_MAX
-                    ) 
-                    && data.ws.use(WRPT.W_M_SF_ODDFRICTION_6)
+                        Magic.splashMove(lastMove, pastMove1) && pastMove1.yDistance > lastMove.yDistance
+                                || Magic.inLiquid(pastMove1) && Magic.leavingLiquid(lastMove)
+                                && pastMove1.yDistance * .7 > lastMove.yDistance
                 )
-                // 0: Exiting a berry bush (this move in air but with bush friction)
-                // [Still needed, likely wrong bounding box]
-                || lastMove.from.inBerryBush && !thisMove.from.inBerryBush && data.liftOffEnvelope == LiftOffEnvelope.BERRY_JUMP
-                && yDistance < -Magic.GRAVITY_MIN && yDistance > Magic.bushSpeedDescend && lastMove.from.extraPropertiesValid
-                && data.ws.use(WRPT.W_M_SF_ODDFRICTION_7)
-            ;
+                && data.ws.use(WRPT.W_M_SF_ODDFRICTION_4);
+
+        final boolean strongDecrease = yDistance < -0.5
+                && pastMove1.yDistance < yDistance && lastMove.yDistance < yDistance
+                && Math.abs(pastMove1.yDistance - lastMove.yDistance) < Magic.GRAVITY_ODD
+                && yDistance < lastMove.yDistance * 0.67
+                && yDistance > lastMove.yDistance * data.lastFrictionVertical - Magic.GRAVITY_MIN
+                && (Magic.splashMoveNonStrict(lastMove, pastMove1)
+                        || Magic.inLiquid(pastMove1) && Magic.leavingLiquid(lastMove))
+                && data.ws.use(WRPT.W_M_SF_ODDFRICTION_5);
+
+        return towardsAscending || lessStrictIncrease || strongDecrease;
+    }
+
+    private static boolean oddNormalEnvelope(final double yDistance, final PlayerMoveData lastMove,
+                                             final PlayerMoveData pastMove1, final PlayerMoveData thisMove,
+                                             final MovingData data) {
+        if (data.liftOffEnvelope != LiftOffEnvelope.NORMAL || data.sfJumpPhase != 1 || !Magic.inAir(thisMove)) {
+            return false;
+        }
+
+        final boolean velocityIntoWater = (Magic.splashMoveNonStrict(lastMove, pastMove1)
+                || Magic.inLiquid(pastMove1) && Magic.leavingLiquid(lastMove))
+                && yDistance < lastMove.yDistance - Magic.GRAVITY_MAX
+                && yDistance > lastMove.yDistance - 2.0 * Magic.GRAVITY_MAX
+                && (
+                        Math.abs(lastMove.yDistance - pastMove1.yDistance) > 4.0 * Magic.GRAVITY_MAX
+                                || pastMove1.yDistance > 3.0 && lastMove.yDistance > 3.0
+                                && Math.abs(lastMove.yDistance - pastMove1.yDistance) < 2.0 * Magic.GRAVITY_MAX
+                )
+                && data.ws.use(WRPT.W_M_SF_ODDFRICTION_6);
+
+        return velocityIntoWater;
+    }
+
+    private static boolean exitingBerryBush(final double yDistance, final PlayerMoveData lastMove,
+                                            final PlayerMoveData thisMove, final MovingData data) {
+        return lastMove.from.inBerryBush && !thisMove.from.inBerryBush
+                && data.liftOffEnvelope == LiftOffEnvelope.BERRY_JUMP
+                && yDistance < -Magic.GRAVITY_MIN
+                && yDistance > Magic.bushSpeedDescend
+                && lastMove.from.extraPropertiesValid
+                && data.ws.use(WRPT.W_M_SF_ODDFRICTION_7);
     }
 
 
@@ -514,45 +537,64 @@ public class AirWorkarounds {
      * @param resetFrom
      * @return  
      */
-    public static boolean fastFallExemptions(final double yDistance, final double yDistDiffEx, 
+    public static boolean fastFallExemptions(final double yDistance, final double yDistDiffEx,
                                              final PlayerMoveData lastMove, final MovingData data,
                                              final PlayerLocation from, final PlayerLocation to,
                                              final long now, final boolean strictVdistRel, final double yDistChange,
                                              final boolean resetTo, final boolean fromOnGround, final boolean toOnGround,
-                                             final double maxJumpGain, final Player player, 
+                                             final double maxJumpGain, final Player player,
                                              final PlayerMoveData thisMove, final boolean resetFrom) {
 
-        if (data.fireworksBoostDuration > 0 && data.keepfrictiontick < 0 
+        if (data.fireworksBoostDuration > 0 && data.keepfrictiontick < 0
             && lastMove.toIsValid && yDistance - lastMove.yDistance > -0.7) {
             data.keepfrictiontick = 0;
             return true;
-            // Early return: transition from CreativeFly to SurvivalFly having been in a gliding phase.
         }
-            
-        return 
 
-                // 0: Moving onto ground allows a shorter move. 1
-                (resetTo && (yDistDiffEx > -Magic.GRAVITY_SPAN || !fromOnGround && !thisMove.touchedGround && yDistChange >= 0.0))
-                && data.ws.use(WRPT.W_M_SF_FASTFALL_2)
-                // 0: Mirrored case for yDistance > vAllowedDistance, hitting ground. 2
-                || yDistance > lastMove.yDistance - Magic.GRAVITY_MAX - Magic.GRAVITY_SPAN && (resetTo || thisMove.touchedGround)
-                // && thisMove.setBackYDistance <= 0.0 // Only allow the move if the player had actually been falling
-                && data.ws.use(WRPT.W_M_SF_FASTFALL_3)
-                // 0: Stairs and other cases moving off ground or ground-to-ground. 3
-                || (resetFrom && yDistance >= -0.5 && (yDistance > -0.31 || (resetTo || to.isAboveStairs()) && (lastMove.yDistance < 0.0)))
-                && data.ws.use(WRPT.W_M_SF_FASTFALL_4)
-                // 0: Head was blocked, thus faster decrease than expected.
-                || yDistance <= 0.0 && yDistance > -Magic.GRAVITY_MAX - Magic.GRAVITY_SPAN 
+        return movingOntoGround(yDistDiffEx, yDistChange, resetTo, fromOnGround, thisMove, data)
+                || mirroredGroundHit(yDistance, lastMove, resetTo, thisMove, data)
+                || stairsGroundTransition(yDistance, resetFrom, resetTo, to, lastMove, data)
+                || headBlockedDecrease(yDistance, thisMove, lastMove, data)
+                || breakingBlockBelow(yDistance, lastMove, data);
+    }
+
+    private static boolean movingOntoGround(final double yDistDiffEx, final double yDistChange,
+                                            final boolean resetTo, final boolean fromOnGround,
+                                            final PlayerMoveData thisMove, final MovingData data) {
+        return resetTo
+                && (yDistDiffEx > -Magic.GRAVITY_SPAN || !fromOnGround && !thisMove.touchedGround && yDistChange >= 0.0)
+                && data.ws.use(WRPT.W_M_SF_FASTFALL_2);
+    }
+
+    private static boolean mirroredGroundHit(final double yDistance, final PlayerMoveData lastMove,
+                                             final boolean resetTo, final PlayerMoveData thisMove,
+                                             final MovingData data) {
+        return yDistance > lastMove.yDistance - Magic.GRAVITY_MAX - Magic.GRAVITY_SPAN
+                && (resetTo || thisMove.touchedGround)
+                && data.ws.use(WRPT.W_M_SF_FASTFALL_3);
+    }
+
+    private static boolean stairsGroundTransition(final double yDistance, final boolean resetFrom,
+                                                  final boolean resetTo, final PlayerLocation to,
+                                                  final PlayerMoveData lastMove, final MovingData data) {
+        return resetFrom && yDistance >= -0.5
+                && (yDistance > -0.31 || (resetTo || to.isAboveStairs()) && lastMove.yDistance < 0.0)
+                && data.ws.use(WRPT.W_M_SF_FASTFALL_4);
+    }
+
+    private static boolean headBlockedDecrease(final double yDistance, final PlayerMoveData thisMove,
+                                               final PlayerMoveData lastMove, final MovingData data) {
+        return yDistance <= 0.0 && yDistance > -Magic.GRAVITY_MAX - Magic.GRAVITY_SPAN
                 && (thisMove.headObstructed || lastMove.toIsValid && lastMove.headObstructed && lastMove.yDistance >= 0.0)
-                && data.ws.use(WRPT.W_M_SF_FASTFALL_5)
-                // 1.13+ specific: breaking a block below too fast.
-                || Bridge1_13.hasIsSwimming() // && lastMove.touchedGround
-                && (
-                    data.sfJumpPhase == 3 && lastMove.yDistance < -0.139 && yDistance > -0.1 && yDistance < 0.005
-                   || yDistance < -0.288 && yDistance > -0.32 && lastMove.yDistance > -0.1 && lastMove.yDistance < 0.005
-                ) 
-                && data.ws.use(WRPT.W_M_SF_FASTFALL_6)
-        ;
+                && data.ws.use(WRPT.W_M_SF_FASTFALL_5);
+    }
+
+    private static boolean breakingBlockBelow(final double yDistance, final PlayerMoveData lastMove,
+                                              final MovingData data) {
+        return Bridge1_13.hasIsSwimming()
+                && ((data.sfJumpPhase == 3 && lastMove.yDistance < -0.139 && yDistance > -0.1 && yDistance < 0.005)
+                || (yDistance < -0.288 && yDistance > -0.32 && lastMove.yDistance > -0.1 && lastMove.yDistance < 0.005))
+                && data.ws.use(WRPT.W_M_SF_FASTFALL_6);
     }
 
 
