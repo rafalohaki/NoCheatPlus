@@ -142,46 +142,34 @@ public class ReflectionUtil {
         // A dedicated helper might exist for this operation.
         final Class<?> objClass = obj.getClass();
         final Class<?> argClass = arg.getClass();
-        // Collect methods that might work.
-        Method methodFound = null;
-        boolean denyObject = false;
-        for (final Method method : objClass.getDeclaredMethods()){
-            if (method.getName().equals(methodName)){
+        Method candidate = null;
+        Method objectMethod = null;
+        for (final Method method : objClass.getDeclaredMethods()) {
+            if (method.getName().equals(methodName)) {
                 final Class<?>[] parameterTypes = method.getParameterTypes();
-                if (parameterTypes.length == 1 ){
-                    // Prevent using Object as argument if there exists a method with a specialized argument.
-                    if (parameterTypes[0] != Object.class && !parameterTypes[0].isAssignableFrom(argClass)){
-                        denyObject = true;
+                if (parameterTypes.length == 1) {
+                    if (parameterTypes[0] == Object.class) {
+                        objectMethod = method;
                     }
-                    // Override the found method if none found yet and assignment is
-                    // possible, or if it has a specialized argument of an already
-                    // found one.
-                    if ((methodFound == null && parameterTypes[0].isAssignableFrom(argClass)
-                            || methodFound != null
-                                    && methodFound.getParameterTypes()[0].isAssignableFrom(parameterTypes[0]))){
-                        methodFound = method;
+                    if (parameterTypes[0].isAssignableFrom(argClass)) {
+                        if (candidate == null || candidate.getParameterTypes()[0].isAssignableFrom(parameterTypes[0])) {
+                            candidate = method;
+                        }
                     }
                 }
             }
         }
-        if (denyObject && methodFound.getParameterTypes()[0] == Object.class) {
-            LOG.warning("Object argument denied while a specialized method exists.");
-            return null;
-        } else if (methodFound != null
-                && methodFound.getParameterTypes()[0].isAssignableFrom(argClass)) {
+        final Method target = candidate != null ? candidate : objectMethod;
+        if (target != null) {
             try {
-                final Object res = methodFound.invoke(obj, arg);
-                return res;
+                return target.invoke(obj, arg);
             } catch (Throwable t) {
-                LOG.log(Level.WARNING,
-                        "Failed invoking method " + methodName + " on " + objClass,
-                        t);
+                LOG.log(Level.WARNING, "Failed invoking method " + methodName + " on " + objClass, t);
                 return null;
             }
-        } else {
-            LOG.warning("Method " + methodName + " not found for class " + objClass);
-            return null;
         }
+        LOG.warning("Method " + methodName + " not found for class " + objClass);
+        return null;
     }
 
     /**
