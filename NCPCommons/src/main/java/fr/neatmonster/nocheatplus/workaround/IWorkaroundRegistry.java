@@ -232,7 +232,7 @@ public interface IWorkaroundRegistry {
      * 
      * @param bluePrints
      */
-    public void setWorkaroundBluePrint(IWorkaround...bluePrints);
+    void setWorkaroundBluePrint(IWorkaround...bluePrints);
 
     /**
      * Specify what workaround ids belong to a certain group. Workarounds can be
@@ -241,7 +241,7 @@ public interface IWorkaroundRegistry {
      * @param groupId
      * @param workaroundIds
      */
-    public void setGroup(String groupId, Collection<String> workaroundIds);
+    void setGroup(String groupId, Collection<String> workaroundIds);
 
     /**
      * Specify what workaround ids belong to a certain group. Workarounds can be
@@ -251,7 +251,7 @@ public interface IWorkaroundRegistry {
      * @param bluePrints
      *            The ids are used, must exist.
      */
-    public void setGroup(String groupId, IWorkaround... bluePrints);
+    void setGroup(String groupId, IWorkaround... bluePrints);
 
     /**
      * Define which workarounds and which groups belong to the WorkaroundSet of
@@ -261,7 +261,7 @@ public interface IWorkaroundRegistry {
      * @param bluePrintIds
      * @param groupIds
      */
-    public void setWorkaroundSetByIds(String workaroundSetId, Collection<String> bluePrintIds, String... groupIds);
+    void setWorkaroundSetByIds(String workaroundSetId, Collection<String> bluePrintIds, String... groupIds);
 
     /**
      * Retrieve a pre-set WorkaroundSet instance with new Workaround instances
@@ -270,7 +270,7 @@ public interface IWorkaroundRegistry {
      * @param workaroundSetId
      * @return
      */
-    public WorkaroundSet getWorkaroundSet(String workaroundSetId);
+    WorkaroundSet getWorkaroundSet(String workaroundSetId);
 
     /**
      * Get a registered global IAcceptDenyCounter instance, if registered.
@@ -279,7 +279,7 @@ public interface IWorkaroundRegistry {
      * @return The registered IAcceptDenyCounter instance, or null if none is
      *         registered for the given id.
      */
-    public IAcceptDenyCounter getGlobalCounter(String id);
+    IAcceptDenyCounter getGlobalCounter(String id);
 
     /**
      * Get a registered global IAcceptDenyCounter instance, create if not
@@ -288,7 +288,7 @@ public interface IWorkaroundRegistry {
      * @param id
      * @return
      */
-    public IAcceptDenyCounter createGlobalCounter(String id);
+    IAcceptDenyCounter createGlobalCounter(String id);
 
     /**
      * Retrieve a new instance, ready for use, attached to a global counter of
@@ -302,7 +302,7 @@ public interface IWorkaroundRegistry {
      * @throws IllegalArgumentException
      *             If either of id or workaroundClass is not possible to use.
      */
-    public <C extends IWorkaround> C getWorkaround(String id, Class<C> workaroundClass);
+    <C extends IWorkaround> C getWorkaround(String id, Class<C> workaroundClass);
 
     /**
      * Retrieve a new instance, ready for use, attached to a global counter of
@@ -313,7 +313,7 @@ public interface IWorkaroundRegistry {
      * @throws IllegalArgumentException
      *             If either of id or workaroundClass is not possible to use.
      */
-    public IWorkaround getWorkaround(String id);
+    IWorkaround getWorkaround(String id);
 
     /**
      * Retrieve an unmodifiable map for all registered global counters. The
@@ -321,7 +321,7 @@ public interface IWorkaroundRegistry {
      * 
      * @return
      */
-    public Map<String, IAcceptDenyCounter> getGlobalCounters();
+    Map<String, IAcceptDenyCounter> getGlobalCounters();
 
     /**
      * Convenience to get the internally registered id.
@@ -331,7 +331,7 @@ public interface IWorkaroundRegistry {
      * @throws IllegalArgumentException
      *             If an id is not registered for a given workaround.
      */
-    public String getCheckedWorkaroundId(String workaroundId);
+    String getCheckedWorkaroundId(String workaroundId);
 
     /**
      * Convenience method to get a set of ids, testing if bluePrints exist.
@@ -342,6 +342,6 @@ public interface IWorkaroundRegistry {
      * @throws IllegalArgumentException
      *             If an id is not registered for a given workaround.
      */
-    public Set<String> getCheckedIdSet(Collection<? extends IWorkaround> workarounds); // UH.
+    Set<String> getCheckedIdSet(Collection<? extends IWorkaround> workarounds); // UH.
 
 }

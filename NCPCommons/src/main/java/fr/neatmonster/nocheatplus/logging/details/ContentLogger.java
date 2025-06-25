@@ -25,6 +25,6 @@ import java.util.logging.Level;
 public interface ContentLogger <C> {
     
     // TODO: Not sure about generics.
-    public void log(Level level, C content);
+    void log(Level level, C content);
     
 }

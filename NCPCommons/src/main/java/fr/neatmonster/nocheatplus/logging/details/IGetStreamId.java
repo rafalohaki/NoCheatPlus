@@ -25,6 +25,6 @@ import fr.neatmonster.nocheatplus.logging.StreamID;
  */
 public interface IGetStreamId {
 
-    public StreamID getStreamId();
+    StreamID getStreamId();
 
 }

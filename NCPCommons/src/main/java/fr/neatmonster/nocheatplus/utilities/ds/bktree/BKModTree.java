@@ -137,9 +137,9 @@ public abstract class BKModTree<V, N extends Node<V, N>, L extends LookupEntry<V
 		}
 	}
 	
-	public static interface NodeFactory<V, N extends Node<V, N>>{
-		public N newNode(V value, N parent);
-	}
+        public static interface NodeFactory<V, N extends Node<V, N>>{
+                N newNode(V value, N parent);
+        }
 	
 	/**
 	 * Result of a lookup.
@@ -170,9 +170,9 @@ public abstract class BKModTree<V, N extends Node<V, N>, L extends LookupEntry<V
 		}
 	}
 	
-	public static interface LookupEntryFactory<V, N extends Node<V, N>, L extends LookupEntry<V, N>>{
-		public L newLookupEntry(Collection<N> nodes, N match, int distance, boolean isNew);
-	}
+        public static interface LookupEntryFactory<V, N extends Node<V, N>, L extends LookupEntry<V, N>>{
+                L newLookupEntry(Collection<N> nodes, N match, int distance, boolean isNew);
+        }
 
 	protected final NodeFactory<V, N> nodeFactory;
 	
