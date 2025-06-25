@@ -160,7 +160,7 @@ public abstract class AbstractBlockDirectionCheck<D extends ICheckData, C extend
 
         if (face != null && !isInteractable(loc, Location.locToBlock(y), block, face)) distance = 1.0;          
 
-        // TODO: Consider a protected field with a tolerance value.
+        // NOTE: Consider a protected field with a tolerance value.
         if (distance != Double.MAX_VALUE) {
             distance = Math.sqrt(distance);
             if (pData.isDebugActive(type)) {
@@ -170,7 +170,7 @@ public abstract class AbstractBlockDirectionCheck<D extends ICheckData, C extend
             // Add the overall violation level of the check.
             final double vl = addVL(player, distance, data, cc);
 
-            // TODO: Set distance parameter.
+            // NOTE: Set distance parameter.
 
             // Execute whatever actions are associated with this check and the violation level and find out if we should
             // cancel the event.
@@ -201,7 +201,7 @@ public abstract class AbstractBlockDirectionCheck<D extends ICheckData, C extend
             final int blockX, final int blockY, final int blockZ) {
         useLoc.setYaw(yaw);
         useLoc.setPitch(pitch);
-        final Vector dir = useLoc.getDirection(); // TODO: More efficient.
+        final Vector dir = useLoc.getDirection(); // Possibly optimize for efficiency.
         final double dirX = dir.getX();
         final double dirY = dir.getY();
         final double dirZ = dir.getZ();

@@ -130,9 +130,9 @@ public class GenericLogAction extends ActionWithParameters<ViolationData, Action
 
     @Override
     public void execute(final ViolationData violationData) {
-        // TODO: Consider permission caching or removing the feature? [Besides, check earlier?]
+        // Consider permission caching or removing the feature. [Besides, check earlier?]
         final RegisteredPermission permissionSilent = violationData.getPermissionSilent();
-        // TODO: Store PlayerData in ViolationData ? Must query cache here.
+        // Storing PlayerData in ViolationData might remove this cache query.
         if (permissionSilent != null 
                 && DataManager.getPlayerData(violationData.player).hasPermission(permissionSilent, violationData.player)) {
             return;
