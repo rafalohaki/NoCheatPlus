@@ -113,210 +113,38 @@ public class Text extends Check implements INotifyReload {
             final ChatConfig cc, final ChatData data, final IPlayerData pData,
             boolean isMainThread, final boolean alreadyCancelled) {
 
-        // Test captcha.
-        // Consider skipping captcha for "handleaschat" commands
-        if (captcha.shouldCheckCaptcha(player, cc, data, pData)) {
-            captcha.checkCaptcha(player, message, cc, data, isMainThread);
-            return true;
-        } else if (alreadyCancelled) {
-            // Skip checking.
+        if (handleCaptcha(player, message, captcha, cc, data, pData, isMainThread, alreadyCancelled)) {
             return true;
         }
 
-        // Take time once:
         final long time = System.currentTimeMillis();
-
         final String lcMessage = message.trim().toLowerCase();
 
-        boolean cancel = false;
-
         final boolean debug = pData.isDebugActive(type);
-
-        final List<String> debugParts;
+        final List<String> debugParts = debug ? new LinkedList<String>() : null;
         if (debug) {
-            debugParts = new LinkedList<String>();
             debugParts.add("Message (length=" + message.length()+"): ");
         }
-        else debugParts = null;
 
-        // Update the frequency interval weights.
         data.chatFrequency.update(time);
 
-        // Score for this message (violation score).
-        float score = 0;
-
-        final MessageLetterCount letterCounts = new MessageLetterCount(message);
-
-        final int msgLen = message.length();
-
-        // (Following: random/made up criteria.)
-
-        // Tests are missing for the methods using wordlists and fake chat
-
-        // Full message processing. ------------
-
-        // Upper case.
-        if (letterCounts.fullCount.upperCase > msgLen / 3) {
-            // Possibly process chunks of roughly 48 letters for this check
-            final float wUpperCase = 0.6f * letterCounts.fullCount.getUpperCaseRatio();
-            score += wUpperCase  * cc.textMessageUpperCase;
-        }
-
-        // Letters vs. word length.
-        if (msgLen > 4) {
-            final float fullRep = letterCounts.fullCount.getLetterCountRatio();
-            // Long messages: very small and very big are bad !
-            /*
-             * 128 is a quick attempt to allow one long message on
-             * Minecraft 1.11.
-             */
-            final float wRepetition = (float) Math.min(msgLen, 128) / 15.0f * Math.abs(0.5f - fullRep);
-            score += wRepetition * cc.textMessageLetterCount;
-
-            // Number of words vs. length of message
-            final float fnWords = (float) letterCounts.words.length / (float) msgLen;
-            if (fnWords > 0.75f) { // balance or make configurable?
-                score += fnWords  * cc.textMessagePartition;
-            }
-        }
-
-        final CombinedData cData = pData.getGenericInstance(CombinedData.class);
-        final long timeout = 8000; // could be set dynamically in data
-        // Repetition of last message.
-        if (cc.textMsgRepeatSelf != 0f && time - data.chatLastTime < timeout) {
-            if (StringUtil.isSimilar(lcMessage, data.chatLastMessage, 0.8f)) {
-                final float timeWeight = (float) (timeout - (time - data.chatLastTime)) / (float) timeout; 
-                score += cc.textMsgRepeatSelf * timeWeight;
-            }
-        }
-        // Repetition of last global message.
-        if (cc.textMsgRepeatGlobal != 0f && time - lastGlobalTime < timeout) {
-            if (StringUtil.isSimilar(lcMessage, lastGlobalMessage, 0.8f)) {
-                final float timeWeight = (float) (timeout - (time - lastGlobalTime)) / (float) timeout; 
-                score += cc.textMsgRepeatGlobal * timeWeight;
-            }
-        }
-        // Repetition of last cancelled message.
-        if (cc.textMsgRepeatCancel != 0f && time - lastCancelledTime < timeout) {
-            if (StringUtil.isSimilar(lcMessage, lastCancelledMessage, 0.8f)) {
-                final float timeWeight = (float) (timeout - (time - lastCancelledTime)) / (float) timeout; 
-                score += cc.textMsgRepeatCancel * timeWeight;
-            }
-        }
-        // Chat quickly after join.
-        if (cc.textMsgAfterJoin != 0f && time - cData.lastJoinTime < timeout) {
-            final float timeWeight = (float) (timeout - (time - cData.lastJoinTime)) / (float) timeout;
-            score += cc.textMsgAfterJoin * timeWeight; 
-        }
-        // Chat without moving.
-        if (cc.textMsgNoMoving != 0f && time - cData.lastMoveTime > timeout) {
-            score += cc.textMsgNoMoving;
-        }
-
-        // Per word checks. -------------------
-        float wWords = 0.0f;
-        final float avwLen = (float) msgLen / (float) letterCounts.words.length; 
-        for (final WordLetterCount word: letterCounts.words) {
-            float wWord = 0.0f;
-            final int wLen = word.word.length();
-            // Evaluate ratio of used letters versus the word length
-
-            // Length of word vs. av. word length.
-            final float fLenAv = Math.abs(avwLen - (float) wLen) / avwLen;
-            wWord += fLenAv * cc.textMessageLengthAv;
-
-            // Length of word vs. message length;
-            final float fLenMsg = (float) wLen / (float) msgLen;
-            wWord += fLenMsg * cc.textMessageLengthMsg;
-
-            // Not letter:
-            float notLetter = word.getNotLetterRatio();
-            notLetter *= notLetter;
-            wWord += notLetter * cc.textMessageNoLetter;
-
-            wWord *= wWord; // quadratic weighting, should be configurable
-            wWords += wWord;
-        }
-        wWords /= (float) letterCounts.words.length;
-        score += wWords;
+        final ScoreResult scoreResult = calculateScore(message, lcMessage, time, cc, data, pData, debug, debugParts);
+        float score = scoreResult.score;
+        final MessageLetterCount letterCounts = scoreResult.letterCounts;
 
         if (debug && score > 0f) {
             debugParts.add("Simple score: " + StringUtil.fdec3.format(score));
         }
 
-        // Engine:
-        // Synchronization could be more fine grained
-        float wEngine = 0f;
-        final Map<String, Float> engMap;
-        synchronized (engine) {
-            engMap = engine.process(letterCounts, player.getName(), cc, data);
-            // Synchronization could be more fine grained here as well
-            // Choose between add, max or other combination methods
-            for (final  Float res : engMap.values()) {
-                if (cc.textEngineMaximum) {
-                    wEngine = Math.max(wEngine, res.floatValue());
-                }
-                else {
-                    wEngine += res.floatValue();
-                }
-            }
-        }
+        EngineResult engineResult = invokeEngine(letterCounts, player, cc, data);
+        float wEngine = engineResult.weight;
+        final Map<String, Float> engMap = engineResult.engMap;
         score += wEngine;
 
-        // Wrapping it up. --------------------
-        // Add weight to frequency counts.
-        final float normalScore = Math.max(cc.textFreqNormMin, score);
-        data.chatFrequency.add(time, normalScore);
-        final float accumulated = cc.textFreqNormWeight * data.chatFrequency.score(cc.textFreqNormFactor);
-        final boolean normalViolation = accumulated > cc.textFreqNormLevel;
-
-        final float shortTermScore = Math.max(cc.textFreqShortTermMin, score);
-        data.chatShortTermFrequency.add(time, shortTermScore);
-        // Consider a very short-term bucket or handle it indirectly
-        final float shortTermAccumulated = cc.textFreqShortTermWeight * data.chatShortTermFrequency.score(cc.textFreqShortTermFactor);
-        final boolean shortTermViolation = shortTermAccumulated > cc.textFreqShortTermLevel;
-
-        if (normalViolation || shortTermViolation) {
-            lastCancelledMessage = lcMessage;
-            lastCancelledTime = time;
-
-            final double added;
-            if (shortTermViolation) {
-                added = (shortTermAccumulated - cc.textFreqShortTermLevel)/ 3.0;
-            } else {
-                added = (accumulated - cc.textFreqNormLevel) / 10.0; 
-            }
-            data.textVL += added;
-
-            if (captcha.shouldStartCaptcha(player, cc, data, pData)) {
-                captcha.sendNewCaptcha(player, cc, data);
-                cancel = true;
-            }
-            else{
-                if (shortTermViolation) {
-                    if (executeActions(player, data.textVL, added, cc.textFreqShortTermActions).willCancel()) {
-                        cancel = true;
-                    }
-                }
-                else if (normalViolation) {
-                    if (executeActions(player, data.textVL, added, cc.textFreqNormActions).willCancel()) {
-                        cancel = true;
-                    }
-                }
-            }
-        }
-        else if (cc.chatWarningCheck && time - data.chatWarningTime > cc.chatWarningTimeout && (100f * accumulated / cc.textFreqNormLevel > cc.chatWarningLevel || 100f * shortTermAccumulated / cc.textFreqShortTermLevel > cc.chatWarningLevel)) {
-            NCPAPIProvider.getNoCheatPlusAPI().sendMessageOnTick(player.getName(), ColorUtil.replaceColors(cc.chatWarningMessage));
-            data.chatWarningTime = time;
-        }
-        else {
-            data.textVL *= 0.95;
-            if (cc.textAllowVLReset && normalScore < 2.0f * cc.textFreqNormWeight && shortTermScore < 2.0f * cc.textFreqShortTermWeight) {
-                // Reset the VL.
-                // Consider elaborating on reset conditions, e.g. halve the value after a timeout
-                data.textVL = 0.0;
-            }
-        }
+        final EvalResult evalResult = evaluateFrequencyAndViolations(player, captcha, cc, data, pData, lcMessage, time, score);
+        boolean cancel = evalResult.cancel;
+        float accumulated = evalResult.accumulated;
+        float shortTermAccumulated = evalResult.shortTermAccumulated;
 
         if (debug) {
             final List<String> keys = new LinkedList<String>(engMap.keySet());
@@ -341,6 +169,186 @@ public class Text extends Check implements INotifyReload {
         lastGlobalTime = data.chatLastTime = time;
 
         return cancel;
+    }
+
+    private boolean handleCaptcha(final Player player, final String message, final ICaptcha captcha,
+            final ChatConfig cc, final ChatData data, final IPlayerData pData,
+            boolean isMainThread, final boolean alreadyCancelled) {
+        if (captcha.shouldCheckCaptcha(player, cc, data, pData)) {
+            captcha.checkCaptcha(player, message, cc, data, isMainThread);
+            return true;
+        }
+        return alreadyCancelled;
+    }
+
+    private static final class ScoreResult {
+        final float score;
+        final MessageLetterCount letterCounts;
+        ScoreResult(float score, MessageLetterCount letterCounts) {
+            this.score = score;
+            this.letterCounts = letterCounts;
+        }
+    }
+
+    private ScoreResult calculateScore(final String message, final String lcMessage, final long time,
+            final ChatConfig cc, final ChatData data, final IPlayerData pData,
+            final boolean debug, final List<String> debugParts) {
+        float score = 0f;
+        final MessageLetterCount letterCounts = new MessageLetterCount(message);
+        final int msgLen = message.length();
+
+        if (letterCounts.fullCount.upperCase > msgLen / 3) {
+            final float wUpperCase = 0.6f * letterCounts.fullCount.getUpperCaseRatio();
+            score += wUpperCase  * cc.textMessageUpperCase;
+        }
+
+        if (msgLen > 4) {
+            final float fullRep = letterCounts.fullCount.getLetterCountRatio();
+            final float wRepetition = (float) Math.min(msgLen, 128) / 15.0f * Math.abs(0.5f - fullRep);
+            score += wRepetition * cc.textMessageLetterCount;
+
+            final float fnWords = (float) letterCounts.words.length / (float) msgLen;
+            if (fnWords > 0.75f) {
+                score += fnWords  * cc.textMessagePartition;
+            }
+        }
+
+        final CombinedData cData = pData.getGenericInstance(CombinedData.class);
+        final long timeout = 8000;
+        if (cc.textMsgRepeatSelf != 0f && time - data.chatLastTime < timeout) {
+            if (StringUtil.isSimilar(lcMessage, data.chatLastMessage, 0.8f)) {
+                final float timeWeight = (float) (timeout - (time - data.chatLastTime)) / (float) timeout;
+                score += cc.textMsgRepeatSelf * timeWeight;
+            }
+        }
+        if (cc.textMsgRepeatGlobal != 0f && time - lastGlobalTime < timeout) {
+            if (StringUtil.isSimilar(lcMessage, lastGlobalMessage, 0.8f)) {
+                final float timeWeight = (float) (timeout - (time - lastGlobalTime)) / (float) timeout;
+                score += cc.textMsgRepeatGlobal * timeWeight;
+            }
+        }
+        if (cc.textMsgRepeatCancel != 0f && time - lastCancelledTime < timeout) {
+            if (StringUtil.isSimilar(lcMessage, lastCancelledMessage, 0.8f)) {
+                final float timeWeight = (float) (timeout - (time - lastCancelledTime)) / (float) timeout;
+                score += cc.textMsgRepeatCancel * timeWeight;
+            }
+        }
+        if (cc.textMsgAfterJoin != 0f && time - cData.lastJoinTime < timeout) {
+            final float timeWeight = (float) (timeout - (time - cData.lastJoinTime)) / (float) timeout;
+            score += cc.textMsgAfterJoin * timeWeight;
+        }
+        if (cc.textMsgNoMoving != 0f && time - cData.lastMoveTime > timeout) {
+            score += cc.textMsgNoMoving;
+        }
+
+        float wWords = 0.0f;
+        final float avwLen = (float) msgLen / (float) letterCounts.words.length;
+        for (final WordLetterCount word: letterCounts.words) {
+            float wWord = 0.0f;
+            final int wLen = word.word.length();
+            final float fLenAv = Math.abs(avwLen - (float) wLen) / avwLen;
+            wWord += fLenAv * cc.textMessageLengthAv;
+            final float fLenMsg = (float) wLen / (float) msgLen;
+            wWord += fLenMsg * cc.textMessageLengthMsg;
+            float notLetter = word.getNotLetterRatio();
+            notLetter *= notLetter;
+            wWord += notLetter * cc.textMessageNoLetter;
+            wWord *= wWord;
+            wWords += wWord;
+        }
+        wWords /= (float) letterCounts.words.length;
+        score += wWords;
+
+        return new ScoreResult(score, letterCounts);
+    }
+
+    private static final class EngineResult {
+        final float weight;
+        final Map<String, Float> engMap;
+        EngineResult(float weight, Map<String, Float> engMap) {
+            this.weight = weight;
+            this.engMap = engMap;
+        }
+    }
+
+    private EngineResult invokeEngine(final MessageLetterCount letterCounts, final Player player,
+            final ChatConfig cc, final ChatData data) {
+        float wEngine = 0f;
+        final Map<String, Float> engMap;
+        synchronized (engine) {
+            engMap = engine.process(letterCounts, player.getName(), cc, data);
+            for (final Float res : engMap.values()) {
+                if (cc.textEngineMaximum) {
+                    wEngine = Math.max(wEngine, res.floatValue());
+                } else {
+                    wEngine += res.floatValue();
+                }
+            }
+        }
+        return new EngineResult(wEngine, engMap);
+    }
+
+    private static final class EvalResult {
+        final boolean cancel;
+        final float accumulated;
+        final float shortTermAccumulated;
+        EvalResult(boolean cancel, float accumulated, float shortTermAccumulated) {
+            this.cancel = cancel;
+            this.accumulated = accumulated;
+            this.shortTermAccumulated = shortTermAccumulated;
+        }
+    }
+
+    private EvalResult evaluateFrequencyAndViolations(final Player player, final ICaptcha captcha,
+            final ChatConfig cc, final ChatData data, final IPlayerData pData, final String lcMessage,
+            final long time, final float score) {
+        float normalScore = Math.max(cc.textFreqNormMin, score);
+        data.chatFrequency.add(time, normalScore);
+        float accumulated = cc.textFreqNormWeight * data.chatFrequency.score(cc.textFreqNormFactor);
+        boolean normalViolation = accumulated > cc.textFreqNormLevel;
+
+        float shortTermScore = Math.max(cc.textFreqShortTermMin, score);
+        data.chatShortTermFrequency.add(time, shortTermScore);
+        float shortTermAccumulated = cc.textFreqShortTermWeight * data.chatShortTermFrequency.score(cc.textFreqShortTermFactor);
+        boolean shortTermViolation = shortTermAccumulated > cc.textFreqShortTermLevel;
+
+        boolean cancel = false;
+        if (normalViolation || shortTermViolation) {
+            lastCancelledMessage = lcMessage;
+            lastCancelledTime = time;
+
+            final double added = shortTermViolation ? (shortTermAccumulated - cc.textFreqShortTermLevel) / 3.0
+                    : (accumulated - cc.textFreqNormLevel) / 10.0;
+            data.textVL += added;
+
+            if (captcha.shouldStartCaptcha(player, cc, data, pData)) {
+                captcha.sendNewCaptcha(player, cc, data);
+                cancel = true;
+            } else {
+                if (shortTermViolation) {
+                    if (executeActions(player, data.textVL, added, cc.textFreqShortTermActions).willCancel()) {
+                        cancel = true;
+                    }
+                } else if (normalViolation) {
+                    if (executeActions(player, data.textVL, added, cc.textFreqNormActions).willCancel()) {
+                        cancel = true;
+                    }
+                }
+            }
+        } else if (cc.chatWarningCheck && time - data.chatWarningTime > cc.chatWarningTimeout
+                && (100f * accumulated / cc.textFreqNormLevel > cc.chatWarningLevel
+                        || 100f * shortTermAccumulated / cc.textFreqShortTermLevel > cc.chatWarningLevel)) {
+            NCPAPIProvider.getNoCheatPlusAPI().sendMessageOnTick(player.getName(),
+                    ColorUtil.replaceColors(cc.chatWarningMessage));
+            data.chatWarningTime = time;
+        } else {
+            data.textVL *= 0.95;
+            if (cc.textAllowVLReset && normalScore < 2.0f * cc.textFreqNormWeight
+                    && shortTermScore < 2.0f * cc.textFreqShortTermWeight) {
+                data.textVL = 0.0;
+            }
+        }
+        return new EvalResult(cancel, accumulated, shortTermAccumulated);
     }
 
 }
