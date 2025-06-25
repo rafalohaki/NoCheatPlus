@@ -217,7 +217,7 @@ public abstract class AbstractCommand<A> implements TabExecutor{
      * @return
      */
     public boolean testPermission(CommandSender sender, Command command, String alias, String args[]){
-        // TODO: Relay to PlayerData or not (...).
+        // Relaying to PlayerData might be implemented here if needed.
         return permission == null || sender.hasPermission(permission.getBukkitPermission());
     }
 
