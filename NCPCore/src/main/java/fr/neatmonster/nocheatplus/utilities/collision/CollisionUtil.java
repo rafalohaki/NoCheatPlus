@@ -815,35 +815,36 @@ public class CollisionUtil {
         if (addPriorityNeighbors(neighbors, currentBlock, stepX, stepY, stepZ, ctx)) {
             return neighbors;
         }
-        
+
         final double dYM = TrigUtil.manhattan(currentBlock.getX(), currentBlock.getY() + stepY, currentBlock.getZ(), eyeX, eyeY, eyeZ);
         final double dZM = TrigUtil.manhattan(currentBlock.getX(), currentBlock.getY(), currentBlock.getZ() + stepZ, eyeX, eyeY, eyeZ);
         final double dXM = TrigUtil.manhattan(currentBlock.getX() + stepX, currentBlock.getY(), currentBlock.getZ(), eyeX, eyeY, eyeZ);
-        
-        // Is this one correct?
-        if (dYM <= dXM && dYM <= dZM && Math.abs(direction.getY()) >= 0.5) {
-            if (ctx.allowY) neighbors.add(new BlockCoord(currentBlock.getX(), currentBlock.getY() + stepY, currentBlock.getZ()));
-            // Do sort priority of XZ in case Y not possible
-            if (dXM < dZM) {
-                if (ctx.allowX) neighbors.add(new BlockCoord(currentBlock.getX() + stepX, currentBlock.getY(), currentBlock.getZ()));
-                if (ctx.allowZ) neighbors.add(new BlockCoord(currentBlock.getX(), currentBlock.getY(), currentBlock.getZ() + stepZ));
-            } else {
-                if (ctx.allowZ) neighbors.add(new BlockCoord(currentBlock.getX(), currentBlock.getY(), currentBlock.getZ() + stepZ));
-                if (ctx.allowX) neighbors.add(new BlockCoord(currentBlock.getX() + stepX, currentBlock.getY(), currentBlock.getZ()));
-            }
-            return neighbors;
-        }
 
-        if (dXM < dZM) {
-            if (ctx.allowX) neighbors.add(new BlockCoord(currentBlock.getX() + stepX, currentBlock.getY(), currentBlock.getZ()));
-            if (ctx.allowZ) neighbors.add(new BlockCoord(currentBlock.getX(), currentBlock.getY(), currentBlock.getZ() + stepZ));
-            if (ctx.allowY) neighbors.add(new BlockCoord(currentBlock.getX(), currentBlock.getY() + stepY, currentBlock.getZ()));
-        } else {
-            if (ctx.allowZ) neighbors.add(new BlockCoord(currentBlock.getX(), currentBlock.getY(), currentBlock.getZ() + stepZ));
-            if (ctx.allowX) neighbors.add(new BlockCoord(currentBlock.getX() + stepX, currentBlock.getY(), currentBlock.getZ()));
-            if (ctx.allowY) neighbors.add(new BlockCoord(currentBlock.getX(), currentBlock.getY() + stepY, currentBlock.getZ()));
-        }
+        boolean prioritizeY = shouldPrioritizeY(direction.getY(), dXM, dYM, dZM);
+        boolean xFirst = dXM < dZM;
+
+        addNeighborsInOrder(neighbors, currentBlock, stepX, stepY, stepZ, ctx, prioritizeY, xFirst);
         return neighbors;
+    }
+
+    private static boolean shouldPrioritizeY(double dirY, double dXM, double dYM, double dZM) {
+        return dYM <= dXM && dYM <= dZM && Math.abs(dirY) >= 0.5;
+    }
+
+    private static void addNeighborsInOrder(List<BlockCoord> neighbors, BlockCoord block, int stepX, int stepY, int stepZ, AxisContext ctx, boolean yFirst, boolean xFirst) {
+        if (yFirst && ctx.allowY) {
+            neighbors.add(new BlockCoord(block.getX(), block.getY() + stepY, block.getZ()));
+        }
+        if (xFirst) {
+            if (ctx.allowX) neighbors.add(new BlockCoord(block.getX() + stepX, block.getY(), block.getZ()));
+            if (ctx.allowZ) neighbors.add(new BlockCoord(block.getX(), block.getY(), block.getZ() + stepZ));
+        } else {
+            if (ctx.allowZ) neighbors.add(new BlockCoord(block.getX(), block.getY(), block.getZ() + stepZ));
+            if (ctx.allowX) neighbors.add(new BlockCoord(block.getX() + stepX, block.getY(), block.getZ()));
+        }
+        if (!yFirst && ctx.allowY) {
+            neighbors.add(new BlockCoord(block.getX(), block.getY() + stepY, block.getZ()));
+        }
     }
 
     private static double getFilledSpace(double sA, double eA, double sB, double eB) {
