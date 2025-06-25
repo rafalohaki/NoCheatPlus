@@ -96,8 +96,8 @@ public class Reach extends Check {
         double centertoedge = 0.0;
         if (cc.reachPrecision) centertoedge = getinset(pLoc, dRef, width / 2, 0.0);
 
-        // Refine y position.
-        // TODO: Make a little more accurate by counting in the actual bounding box.
+        // Refine y position. This could be made more accurate by counting in
+        // the actual bounding box.
         final double pY = pLoc.getY() + player.getEyeHeight();
         final double dY = dRef.getY();
         if (pY <= dY) {
@@ -108,7 +108,9 @@ public class Reach extends Check {
             dRef.setY(pY); // Level with damaged.
         }
 
-        final Vector pRel = dRef.toVector().subtract(pLoc.toVector().setY(pY)); // TODO: Run calculations on numbers only :p.
+        // Ideally calculations should use simple numbers only to avoid object
+        // creation.
+        final Vector pRel = dRef.toVector().subtract(pLoc.toVector().setY(pY));
         // Distance is calculated from eye location to center of targeted. If the player is further away from their target
         // than allowed, the difference will be assigned to "distance".
         final double lenpRel = pRel.length() - centertoedge;
@@ -221,12 +223,13 @@ public class Reach extends Check {
         
         // Distance is calculated from eye location to center of targeted. If the player is further away from their target
         // than allowed, the difference will be assigned to "distance".
-        // TODO: Run check on squared distances (quite easy to change to stored boundary-sq values).
+        // Checking on squared distances would be more efficient and could use
+        // stored boundary-squared values.
         final double lenpRel = TrigUtil.distance(dRef.getX(), y, dRef.getZ(), pLoc.getX(), context.pY, pLoc.getZ()) - centertoedge;
         double violation = lenpRel - context.distanceLimit;
 
         if (violation > 0 || lenpRel - context.distanceLimit * data.reachMod > 0){
-            // TODO: The silent cancel parts should be sen as "no violation" ?
+            // NOTE: The silent cancel parts might be seen as "no violation".
             // Set minimum violation in context
             context.minViolation = Math.min(context.minViolation, lenpRel);
             cancel = true;
@@ -275,7 +278,8 @@ public class Reach extends Check {
             //        "fight.reach", pData)){
             //    cancel = true;
             //}
-            // TODO: New improbable weight calculations so that weight is not inverse to config weight
+            // Future improvement: adjust improbable weight calculations so that
+            // the weight is not inverse to the configured value
             if (cc.reachImprobableWeight > 0.0f) {
                 if (!cc.reachImprobableFeedOnly && Improbable.check(player, (float) violation / cc.reachImprobableWeight, System.currentTimeMillis(), "fight.reach", pData)) {
                     cancel = true;
@@ -320,7 +324,7 @@ public class Reach extends Check {
         }
 
         if (pData.isDebugActive(type) && pData.hasPermission(Permissions.ADMINISTRATION_DEBUG, player)){
-            // TODO: Height: remember successful ITraceEntry
+            // Potential enhancement: remember the successful ITraceEntry for height
             player.sendMessage("NC+: Attack/reach " + damaged.getType()+ (traceEntry == null ? "" : (" height=" + traceEntry.getBoxMarginVertical())) + " dist=" + StringUtil.fdec3.format(lenpRel) +" @" + StringUtil.fdec3.format(data.reachMod));
         }
 
@@ -365,7 +369,8 @@ public class Reach extends Check {
             double angle = TrigUtil.angle(vec1, vec2);
             // Require < 45deg, if not 90deg-angel
             if (angle > Math.PI / 4) angle = Math.PI / 2 - angle;
-            if (angle >= 0.0 && angle <= Math.PI / 4) { // TODO: Dose this one necessary?
+            // Evaluate if this condition is actually required
+            if (angle >= 0.0 && angle <= Math.PI / 4) {
                 return damagedBoxMarginHorizontal / Math.cos(angle);
             }
         }
