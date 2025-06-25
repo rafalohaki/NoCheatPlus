@@ -43,8 +43,8 @@ import fr.neatmonster.nocheatplus.utilities.location.RichBoundsLocation;
  */
 public class LocationTrace {
 
-    // TODO: Using System.currentTimeMillis() for timestamp not server tick?
-    // TODO: Find out reason it is not recording right location for combat checks!
+    // Using System.currentTimeMillis() for timestamp not server tick?
+    // Investigate why it is not recording right location for combat checks.
     public static interface ITraceEntry extends IGetPosition {
 
         public double getBoxMarginHorizontal();
@@ -67,7 +67,7 @@ public class LocationTrace {
 
     public static class TraceEntry implements ITraceEntry {
 
-        // TODO: Consider using a simple base implementation for IGetSetPosiotion.
+        // Consider using a simple base implementation for IGetSetPosition.
 
         /** We keep it open, if ticks or ms are used. */
         private long time;
@@ -174,7 +174,7 @@ public class LocationTrace {
             this.nextIsNext = nextIsNext;
             next = first;
             if (!hasNext()) {
-                // TODO: Consider IllegalStateException?
+                // Consider IllegalStateException?
                 throw new IllegalArgumentException("Empty iterators are not allowed.");
             }
         }
@@ -247,7 +247,7 @@ public class LocationTrace {
     public final void addEntry(final long time, final double x, final double y, final double z,
             final double boxMarginHorizontal, final double boxMarginVertical) {
         if (size > 0) {
-            // TODO: Might update box to bigger or remove margins ?
+            // Might update box to bigger or remove margins.
             if (x == firstEntry.x && y == firstEntry.y && z == firstEntry.z
                     && boxMarginHorizontal == firstEntry.boxMarginHorizontal
                     && boxMarginVertical == firstEntry.boxMarginVertical) {
@@ -264,7 +264,7 @@ public class LocationTrace {
             returnToPool(lastEntry);
         }
         // Remove too old entries.
-        // TODO: Call externally rather or only call every so and so time?
+        // Call externally rather or only call every so often.
         checkMaxAge(time);
     }
 
@@ -297,7 +297,7 @@ public class LocationTrace {
      *            The time now.
      */
     public void checkMaxAge(final long time) {
-        // TODO: Visibility to private? [can set to null or reset on logout]
+        // Visibility to private? [can set to null or reset on logout]
         // Ensure we have entries to expire at all.
         if (time - lastEntry.time < maxAge || size == 1) {
             return;
