@@ -101,7 +101,7 @@ public class ReflectBlock implements IReflectBlock {
                     reflectIBlockData.nmsClass, reflectIBlockAccess.nmsClass, reflectBlockPosition.nmsClass);
             if (nmsFetchAABB != null 
                     && nmsFetchAABB.getReturnType() == reflectAxisAlignedBB.nmsClass
-                    && nmsFetchAABB.isAnnotationPresent(Deprecated.class) // TODO: Why deprecated?
+                    && nmsFetchAABB.isAnnotationPresent(Deprecated.class) // Deprecated in newer versions of the API.
                     ) {
                 return nmsFetchAABB;
             }
@@ -112,7 +112,7 @@ public class ReflectBlock implements IReflectBlock {
                     reflectIBlockData.nmsClass, reflectIBlockAccess.nmsClass, reflectBlockPosition.nmsClass);
             if (nmsFetchAABB != null 
                     && nmsFetchAABB.getReturnType() == reflectAxisAlignedBB.nmsClass
-                    && nmsFetchAABB.isAnnotationPresent(Deprecated.class) // TODO: Why deprecated?
+                    && nmsFetchAABB.isAnnotationPresent(Deprecated.class) // Deprecated in newer versions of the API.
                     ) {
                 return nmsFetchAABB;
             }
