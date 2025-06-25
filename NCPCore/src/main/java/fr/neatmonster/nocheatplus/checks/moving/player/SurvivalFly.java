@@ -2381,59 +2381,71 @@ public class SurvivalFly extends Check {
                                       double hAllowedDistance, double hDistanceAboveLimit, final boolean sprinting,
                                       final PlayerMoveData thisMove, final MovingData data,
                                       final MovingConfig cc, final IPlayerData pData) {
-        if (cc.survivalFlyResetItem && hDistanceAboveLimit > 0.0 && data.sfHorizontalBuffer <= 0.5
-                && tags.contains("usingitem")) {
+        if (shouldAttemptItemReset(cc, hDistanceAboveLimit, data)) {
             tags.add("itemreset");
-            // Handle through nms
-            if (mcAccess.getHandle().resetActiveItem(player)) {
-                data.isUsingItem = false;
-                pData.requestUpdateInventory();
-            }
-            // Off hand (non nms)
-            else if (Bridge1_9.hasGetItemInOffHand() && data.offHandUse) {
-                ItemStack stack = Bridge1_9.getItemInOffHand(player);
-                if (stack != null) {
-                    if (ServerIsAtLeast1_13) {
-                        if (player.isHandRaised()) {
-                            // Does nothing
-                        }
-                        // False positive
-                        else data.isUsingItem = false;
-                    }
-                    else {
-                        player.getInventory().setItemInOffHand(stack);
-                        data.isUsingItem = false;
-                    }
+            if (tryResetActiveItem(player, data, pData)
+                    || tryResetOffHand(player, data)
+                    || tryResetMainHand(player, data)) {
+                if (!data.isUsingItem) {
+                    hAllowedDistance = setAllowedhDist(new AllowedDistanceContext(player, sprinting, thisMove,
+                            data, cc, pData, from, to, true));
+                    hDistanceAboveLimit = thisMove.hDistance - hAllowedDistance;
                 }
-            }
-            // Main hand (non nms)
-            else if (!data.offHandUse) {
-                ItemStack stack = Bridge1_9.getItemInMainHand(player);
-                if (ServerIsAtLeast1_13) {
-                    if (player.isHandRaised()) {
-                        //data.olditemslot = player.getInventory().getHeldItemSlot();
-                        //if (stack != null) player.setCooldown(stack.getType(), 10);
-                        //player.getInventory().setHeldItemSlot((data.olditemslot + 1) % 9);
-                        //data.changeslot = true;
-                        // Does nothing
-                    }
-                    // False positive
-                    else data.isUsingItem = false;
-                }
-                else {
-                    if (stack != null) {
-                        Bridge1_9.setItemInMainHand(player, stack);
-                    }
-                }
-                data.isUsingItem = false;
-            }
-            if (!data.isUsingItem) {
-                hAllowedDistance = setAllowedhDist(new AllowedDistanceContext(player, sprinting, thisMove,
-                        data, cc, pData, from, to, true));
-                hDistanceAboveLimit = thisMove.hDistance - hAllowedDistance;
             }
         }
         return new double[]{hAllowedDistance, hDistanceAboveLimit};
+    }
+
+    private boolean shouldAttemptItemReset(final MovingConfig cc, final double hDistanceAboveLimit,
+                                           final MovingData data) {
+        return cc.survivalFlyResetItem && hDistanceAboveLimit > 0.0 && data.sfHorizontalBuffer <= 0.5
+                && tags.contains("usingitem");
+    }
+
+    private boolean tryResetActiveItem(final Player player, final MovingData data, final IPlayerData pData) {
+        if (player != null && mcAccess.getHandle().resetActiveItem(player)) {
+            data.isUsingItem = false;
+            pData.requestUpdateInventory();
+            return true;
+        }
+        return false;
+    }
+
+    private boolean tryResetOffHand(final Player player, final MovingData data) {
+        if (player == null || !Bridge1_9.hasGetItemInOffHand() || !data.offHandUse) {
+            return false;
+        }
+        final ItemStack stack = Bridge1_9.getItemInOffHand(player);
+        if (stack == null) {
+            return false;
+        }
+        if (ServerIsAtLeast1_13) {
+            if (!player.isHandRaised()) {
+                data.isUsingItem = false;
+            }
+        } else {
+            player.getInventory().setItemInOffHand(stack);
+            data.isUsingItem = false;
+        }
+        return !data.isUsingItem;
+    }
+
+    private boolean tryResetMainHand(final Player player, final MovingData data) {
+        if (player == null || data.offHandUse) {
+            return false;
+        }
+        final ItemStack stack = Bridge1_9.getItemInMainHand(player);
+        if (ServerIsAtLeast1_13) {
+            if (!player.isHandRaised()) {
+                data.isUsingItem = false;
+            }
+        } else if (stack != null) {
+            Bridge1_9.setItemInMainHand(player, stack);
+            data.isUsingItem = false;
+        } else {
+            data.isUsingItem = false;
+        }
+        return true;
     }
 
     /** Step 2 and 5: Apply bunny hop adjustments. */
