@@ -70,13 +70,69 @@ public class MovingData extends ACheckData implements IDataOnRemoveSubCheckData,
     //////////////////////////////////////////////
     // Violation levels                         //
     //////////////////////////////////////////////
-    public double creativeFlyVL = 0.0;
-    public double morePacketsVL = 0.0;
-    public double noFallVL = 0.0;
-    public double survivalFlyVL = 0.0;
+    private double creativeFlyVL = 0.0;
+    private double morePacketsVL = 0.0;
+    private double noFallVL = 0.0;
+    private double survivalFlyVL = 0.0;
     public double vehicleMorePacketsVL = 0.0;
     public double vehicleEnvelopeVL = 0.0;
     public double passableVL = 0.0;
+
+    public double getCreativeFlyVL() {
+        return creativeFlyVL;
+    }
+
+    public void setCreativeFlyVL(final double value) {
+        creativeFlyVL = value;
+    }
+
+    public void addCreativeFlyVL(final double delta) {
+        creativeFlyVL += delta;
+    }
+
+    public void multiplyCreativeFlyVL(final double factor) {
+        creativeFlyVL *= factor;
+    }
+
+    public double getMorePacketsVL() {
+        return morePacketsVL;
+    }
+
+    public void setMorePacketsVL(final double value) {
+        morePacketsVL = value;
+    }
+
+    public void addMorePacketsVL(final double delta) {
+        morePacketsVL += delta;
+    }
+
+    public double getNoFallVL() {
+        return noFallVL;
+    }
+
+    public void setNoFallVL(final double value) {
+        noFallVL = value;
+    }
+
+    public void addNoFallVL(final double delta) {
+        noFallVL += delta;
+    }
+
+    public double getSurvivalFlyVL() {
+        return survivalFlyVL;
+    }
+
+    public void setSurvivalFlyVL(final double value) {
+        survivalFlyVL = value;
+    }
+
+    public void addSurvivalFlyVL(final double delta) {
+        survivalFlyVL += delta;
+    }
+
+    public void multiplySurvivalFlyVL(final double factor) {
+        survivalFlyVL *= factor;
+    }
 
 
 
@@ -1551,24 +1607,24 @@ public class MovingData extends ACheckData implements IDataOnRemoveSubCheckData,
                  * stay as long as the player is online).
                  */
                 case MOVING_SURVIVALFLY:
-                    survivalFlyVL = 0;
+                    setSurvivalFlyVL(0);
                     clearFlyData(); // Verify which fields should remain
                     resetSetBack(); // Ensure compatibility with other plugins
                     wasInBed = false;
                     // Consider additional cleanup
                     break;
                 case MOVING_CREATIVEFLY:
-                    creativeFlyVL = 0;
+                    setCreativeFlyVL(0);
                     clearFlyData(); // Verify which fields should remain
                     resetSetBack(); // Ensure compatibility with other plugins
                     // Consider additional cleanup
                     break;
                 case MOVING_NOFALL:
-                    noFallVL = 0;
+                    setNoFallVL(0);
                     clearNoFallData();
                     break;
                 case MOVING_MOREPACKETS:
-                    morePacketsVL = 0;
+                    setMorePacketsVL(0);
                     clearPlayerMorePacketsData();
                     morePacketsSetback = null;
                     morePacketsSetBackResetTime = 0;

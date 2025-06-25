@@ -90,7 +90,7 @@ public class ViolationFrequencyHook implements NCPHook, IFirst {
 
             final int lastviolationmove = data.getPlayerMoveCount() - data.sfVLMoveCount;
             if (lastviolationmove <= config.movecount) {
-                data.survivalFlyVL += config.morevls;
+                data.addSurvivalFlyVL(config.morevls);
                 if (config.debug) {
                     builder.append("SurvivalFly: ");
                     builder.append("VL=" + StringUtil.fdec1.format(info.getTotalVl()));

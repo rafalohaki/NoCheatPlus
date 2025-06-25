@@ -79,13 +79,13 @@ public final class ExtremeMoveHandler {
         if (thisMove.flyCheck == CheckType.MOVING_SURVIVALFLY) {
             check = survivalFly;
             actions = cc.survivalFlyActions;
-            data.survivalFlyVL += violation;
-            vL = data.survivalFlyVL;
+            data.addSurvivalFlyVL(violation);
+            vL = data.getSurvivalFlyVL();
         } else {
             check = creativeFly;
             actions = cc.creativeFlyActions;
-            data.creativeFlyVL += violation;
-            vL = data.creativeFlyVL;
+            data.addCreativeFlyVL(violation);
+            vL = data.getCreativeFlyVL();
         }
         final ViolationData vd = new ViolationData(check, player, vL, violation, actions);
         if (vd.needsParameters()) {

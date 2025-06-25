@@ -487,7 +487,7 @@ public class SurvivalFly extends Check {
                     && lastMove.toIsValid
                     && lastMove.yDistance < -Magic.GRAVITY_MIN
                     && thisMove.yDistance - lastMove.yDistance < -Magic.GRAVITY_MIN)) {
-            data.survivalFlyVL *= 0.95;
+            data.multiplySurvivalFlyVL(0.95);
             if (hDistanceAboveLimit < 0.0 && result <= 0.0 && !isSamePos && data.sfHorizontalBuffer < cc.hBufMax
                     && !data.sfLowJump) {
                 hBufRegain(hDistance, Math.min(0.2, Math.abs(hDistanceAboveLimit)), data, cc);
@@ -569,8 +569,8 @@ public class SurvivalFly extends Check {
         if (!data.wasInBed) {
             // Violation ...
             tags.add("bedfly");
-            data.survivalFlyVL += 100D;
-            final ViolationData vd = new ViolationData(this, player, data.survivalFlyVL, 100D, cc.survivalFlyActions);
+            data.addSurvivalFlyVL(100D);
+            final ViolationData vd = new ViolationData(this, player, data.getSurvivalFlyVL(), 100D, cc.survivalFlyActions);
             if (vd.needsParameters()) vd.setParameter(ParameterName.TAGS, StringUtil.join(tags, "+"));
             cancel = executeActions(vd).willCancel();
         }
@@ -3204,9 +3204,9 @@ public class SurvivalFly extends Check {
                                     final MovingData data, final MovingConfig cc){
 
         // Increment violation level.
-        if (Double.isInfinite(data.survivalFlyVL)) data.survivalFlyVL = 0;
-        data.survivalFlyVL += result;
-        final ViolationData vd = new ViolationData(this, player, data.survivalFlyVL, result, cc.survivalFlyActions);
+        if (Double.isInfinite(data.getSurvivalFlyVL())) data.setSurvivalFlyVL(0);
+        data.addSurvivalFlyVL(result);
+        final ViolationData vd = new ViolationData(this, player, data.getSurvivalFlyVL(), result, cc.survivalFlyActions);
         if (vd.needsParameters()) {
             vd.setParameter(ParameterName.LOCATION_FROM, String.format(Locale.US, "%.2f, %.2f, %.2f", from.getX(), from.getY(), from.getZ()));
             vd.setParameter(ParameterName.LOCATION_TO, String.format(Locale.US, "%.2f, %.2f, %.2f", to.getX(), to.getY(), to.getZ()));
@@ -3241,12 +3241,12 @@ public class SurvivalFly extends Check {
         if (!validateMoveInputs(player, loc, loc, "handleHoverViolation") || cc == null || data == null) {
             return;
         }
-        if (Double.isInfinite(data.survivalFlyVL)) data.survivalFlyVL = 0;
-        data.survivalFlyVL += cc.sfHoverViolation;
+        if (Double.isInfinite(data.getSurvivalFlyVL())) data.setSurvivalFlyVL(0);
+        data.addSurvivalFlyVL(cc.sfHoverViolation);
 
         data.sfVLMoveCount = data.getPlayerMoveCount();
         data.sfVLInAir = true;
-        final ViolationData vd = new ViolationData(this, player, data.survivalFlyVL, cc.sfHoverViolation, cc.survivalFlyActions);
+        final ViolationData vd = new ViolationData(this, player, data.getSurvivalFlyVL(), cc.sfHoverViolation, cc.survivalFlyActions);
         if (vd.needsParameters()) {
             vd.setParameter(ParameterName.LOCATION_FROM, String.format(Locale.US, "%.2f, %.2f, %.2f", loc.getX(), loc.getY(), loc.getZ()));
             vd.setParameter(ParameterName.LOCATION_TO, "(HOVER)");

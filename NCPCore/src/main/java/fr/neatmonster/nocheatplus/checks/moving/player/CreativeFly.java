@@ -403,8 +403,8 @@ public class CreativeFly extends Check {
         Location setBack = null;
 
         if (result > 0.0) {
-            data.creativeFlyVL += result;
-            final ViolationData vd = new ViolationData(this, player, data.creativeFlyVL, result,
+            data.addCreativeFlyVL(result);
+            final ViolationData vd = new ViolationData(this, player, data.getCreativeFlyVL(), result,
                     cc.creativeFlyActions);
             if (vd.needsParameters()) {
                 vd.setParameter(ParameterName.LOCATION_FROM, String.format(Locale.US, "%.2f, %.2f, %.2f",
@@ -431,7 +431,7 @@ public class CreativeFly extends Check {
                 }
             }
             if (setBack == null) {
-                data.creativeFlyVL *= 0.97;
+                data.multiplyCreativeFlyVL(0.97);
             }
         }
         return setBack;

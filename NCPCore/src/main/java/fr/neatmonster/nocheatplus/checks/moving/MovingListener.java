@@ -2613,8 +2613,8 @@ public class MovingListener extends CheckListener implements TickListener, IRemo
 
     private final boolean noFallVL(final Player player, final String tag, final MovingData data, final MovingConfig cc) {
 
-        data.noFallVL += 1.0;
-        final ViolationData vd = new ViolationData(noFall, player, data.noFallVL, 1.0, cc.noFallActions);
+        data.addNoFallVL(1.0);
+        final ViolationData vd = new ViolationData(noFall, player, data.getNoFallVL(), 1.0, cc.noFallActions);
         if (tag != null) vd.setParameter(ParameterName.TAGS, tag);
         return noFall.executeActions(vd).willCancel();
     }

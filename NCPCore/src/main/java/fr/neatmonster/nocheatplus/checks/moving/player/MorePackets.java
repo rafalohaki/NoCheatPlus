@@ -93,10 +93,10 @@ public class MorePackets extends Check {
         // Process violation result.
         if (violation > 0.0) {
             // Increment violation level.
-            data.morePacketsVL = violation; // Accumulate somehow [e.g. always += 1, decrease with continuous moving without violation]?
+            data.setMorePacketsVL(violation); // Accumulate somehow [e.g. always += 1, decrease with continuous moving without violation]?
 
             // Violation handling.
-            final ViolationData vd = new ViolationData(this, player, data.morePacketsVL, violation, cc.morePacketsActions);
+            final ViolationData vd = new ViolationData(this, player, data.getMorePacketsVL(), violation, cc.morePacketsActions);
             if (debug || vd.needsParameters()) {
                 vd.setParameter(ParameterName.PACKETS, Integer.toString(new Double(violation).intValue()));
                 vd.setParameter(ParameterName.TAGS, StringUtil.join(tags, "+"));
