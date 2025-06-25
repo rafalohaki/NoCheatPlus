@@ -131,12 +131,14 @@ public abstract class DualCollection<T, C extends Collection<T>> {
      */
     public boolean addAsynchronous(T element) {
         lock.lock();
-        if (asynchronousCollection == null) {
-            asynchronousCollection = newCollection();
+        try {
+            if (asynchronousCollection == null) {
+                asynchronousCollection = newCollection();
+            }
+            return asynchronousCollection.add(element);
+        } finally {
+            lock.unlock();
         }
-        final boolean res = asynchronousCollection.add(element);
-        lock.unlock();
-        return res;
     }
 
     /**
@@ -152,12 +154,14 @@ public abstract class DualCollection<T, C extends Collection<T>> {
         }
         else {
             lock.lock();
-            if (asynchronousCollection == null) {
-                asynchronousCollection = newCollection();
+            try {
+                if (asynchronousCollection == null) {
+                    asynchronousCollection = newCollection();
+                }
+                return asynchronousCollection.addAll(elements);
+            } finally {
+                lock.unlock();
             }
-            final boolean res = asynchronousCollection.addAll(elements);
-            lock.unlock();
-            return res;
         }
     }
 
@@ -176,10 +180,12 @@ public abstract class DualCollection<T, C extends Collection<T>> {
         }
         else {
             lock.lock();
-            // (Could be set to null within the primary thread.)
-            final boolean res = asynchronousCollection != null && asynchronousCollection.contains(element);
-            lock.unlock();
-            return res;
+            try {
+                // (Could be set to null within the primary thread.)
+                return asynchronousCollection != null && asynchronousCollection.contains(element);
+            } finally {
+                lock.unlock();
+            }
         }
     }
 
@@ -198,9 +204,12 @@ public abstract class DualCollection<T, C extends Collection<T>> {
     public void mergePrimaryThread() {
         if (asynchronousCollection != null) { // Opportunistic.
             lock.lock();
-            // (Can only be set to null within the primary thread.)
-            internalMergePrimaryThreadNoLock();
-            lock.unlock();
+            try {
+                // (Can only be set to null within the primary thread.)
+                internalMergePrimaryThreadNoLock();
+            } finally {
+                lock.unlock();
+            }
         }
     }
 

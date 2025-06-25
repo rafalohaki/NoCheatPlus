@@ -322,11 +322,14 @@ public class PlayerCheckTypeTree extends CheckTypeTree<PlayerCheckTypeTreeNode>{
 
     private void exemptAsynchronous(final PlayerCheckTypeTreeNode node, final ExemptionContext context) {
         lock.lock();
-        visitWithDescendants(node, node1 -> {
-            node1.exemptAsynchronous(context);
-            return true;
-        });
-        lock.unlock();
+        try {
+            visitWithDescendants(node, node1 -> {
+                node1.exemptAsynchronous(context);
+                return true;
+            });
+        } finally {
+            lock.unlock();
+        }
     }
 
     public void unexempt(final CheckType checkType, final ExemptionContext context) {
@@ -351,11 +354,14 @@ public class PlayerCheckTypeTree extends CheckTypeTree<PlayerCheckTypeTreeNode>{
 
     private void unexemptAsynchronous(final PlayerCheckTypeTreeNode node, final ExemptionContext context) {
         lock.lock();
-        visitWithDescendants(node, node1 -> {
-            node1.unexemptAsynchronous(context);
-            return true;
-        });
-        lock.unlock();
+        try {
+            visitWithDescendants(node, node1 -> {
+                node1.unexemptAsynchronous(context);
+                return true;
+            });
+        } finally {
+            lock.unlock();
+        }
     }
 
     public void unexemptAll(final CheckType checkType, final ExemptionContext context) {
@@ -380,11 +386,14 @@ public class PlayerCheckTypeTree extends CheckTypeTree<PlayerCheckTypeTreeNode>{
 
     private void unexemptAllAsynchronous(final PlayerCheckTypeTreeNode node, final ExemptionContext context) {
         lock.lock();
-        visitWithDescendants(node, node1 -> {
-            node1.unexemptAllAsynchronous(context);
-            return true;
-        });
-        lock.unlock();
+        try {
+            visitWithDescendants(node, node1 -> {
+                node1.unexemptAllAsynchronous(context);
+                return true;
+            });
+        } finally {
+            lock.unlock();
+        }
     }
 
     public boolean isExempted(final CheckType checkType, final ExemptionContext context) {
@@ -405,11 +414,12 @@ public class PlayerCheckTypeTree extends CheckTypeTree<PlayerCheckTypeTreeNode>{
     }
 
     private boolean isExemptedAsynchronous(final PlayerCheckTypeTreeNode node, final ExemptionContext context) {
-        final boolean res;
         lock.lock();
-        res = node.isExemptedPrimaryThread(context);
-        lock.unlock();
-        return res;
+        try {
+            return node.isExemptedPrimaryThread(context);
+        } finally {
+            lock.unlock();
+        }
     }
 
     /**
@@ -431,11 +441,14 @@ public class PlayerCheckTypeTree extends CheckTypeTree<PlayerCheckTypeTreeNode>{
             throw new IllegalArgumentException("Invalid check type.");
         }
         lock.lock();
-        visitWithDescendants(node, node1 -> {
-            node1.clearAllExemptions();
-            return true;
-        });
-        lock.unlock();
+        try {
+            visitWithDescendants(node, node1 -> {
+                node1.clearAllExemptions();
+                return true;
+            });
+        } finally {
+            lock.unlock();
+        }
     }
 
 

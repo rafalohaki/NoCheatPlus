@@ -98,23 +98,29 @@ public class RichFactoryRegistry<A> extends RichTypeSetRegistry implements IRich
     public <T> void registerFactory(final Class<T> registerFor,
             final IFactoryOne<A, T> factory) {
         lock.lock();
-        factoryRegistry.registerFactory(registerFor, factory);
-        for (final Class<?> groupType: autoGroups) {
-            if (groupType.isAssignableFrom(registerFor)) {
-                addToGroups(registerFor, (Class<? super T>) groupType);
+        try {
+            factoryRegistry.registerFactory(registerFor, factory);
+            for (final Class<?> groupType: autoGroups) {
+                if (groupType.isAssignableFrom(registerFor)) {
+                    addToGroups(registerFor, (Class<? super T>) groupType);
+                }
             }
+        } finally {
+            lock.unlock();
         }
-        lock.unlock();
     }
 
     @Override
     public <G> void createAutoGroup(final Class<G> groupType) {
         lock.lock();
-        createGroup(groupType);
-        final Set<Class<?>> autoGroups = new LinkedHashSet<Class<?>>(this.autoGroups);
-        autoGroups.add(groupType);
-        this.autoGroups = autoGroups;
-        lock.unlock();
+        try {
+            createGroup(groupType);
+            final Set<Class<?>> autoGroups = new LinkedHashSet<Class<?>>(this.autoGroups);
+            autoGroups.add(groupType);
+            this.autoGroups = autoGroups;
+        } finally {
+            lock.unlock();
+        }
     }
 
 }

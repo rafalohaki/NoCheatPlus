@@ -111,9 +111,12 @@ public class TeleportQueue {
      */
     public void onTeleportEvent(final double x, final double y, final double z, final float yaw, final float pitch) {
         lock.lock();
-        lastAck = null;
-        expectOutgoing = new DataLocation(x, y, z, yaw, pitch);
-        lock.unlock();
+        try {
+            lastAck = null;
+            expectOutgoing = new DataLocation(x, y, z, yaw, pitch);
+        } finally {
+            lock.unlock();
+        }
     }
 
     /**

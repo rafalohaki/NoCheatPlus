@@ -94,17 +94,18 @@ public class PermissionRegistry {
      */
     public void addRegisteredPermission(final RegisteredPermission registeredPermission) {
         lock.lock();
-        if (infosString.containsKey(registeredPermission.getLowerCaseStringRepresentation())) {
+        try {
+            if (infosString.containsKey(registeredPermission.getLowerCaseStringRepresentation())) {
+                throw new AlreadyRegisteredException("String representation already registered: "
+                        + registeredPermission.getLowerCaseStringRepresentation());
+            }
+            if (infosInt.containsKey(registeredPermission.getId())) {
+                throw new AlreadyRegisteredException("Id already registered: " + registeredPermission.getId());
+            }
+            internalPut(registeredPermission);
+        } finally {
             lock.unlock();
-            throw new AlreadyRegisteredException("String representation already registered: " 
-                    + registeredPermission.getLowerCaseStringRepresentation());
         }
-        if (infosInt.containsKey(registeredPermission.getId())) {
-            lock.unlock();
-            throw new AlreadyRegisteredException("Id already registered: " + registeredPermission.getId());
-        }
-        internalPut(registeredPermission);
-        lock.unlock();
     }
 
     /**
@@ -139,22 +140,17 @@ public class PermissionRegistry {
         PermissionInfo info = infosString.get(RegisteredPermission.toLowerCaseStringRepresentation(stringRepresentation));
         if (info == null) {
             lock.lock();
-            // Must check again (asynchronicity).
-            info = infosString.get(RegisteredPermission.toLowerCaseStringRepresentation(stringRepresentation));
-            if (info != null) {
-                lock.unlock();
-                return info;
-            }
-            final RegisteredPermission registeredPermission;
             try {
-                registeredPermission = new RegisteredPermission(nextId, stringRepresentation);
-            }
-            catch (NullPointerException e) {
+                // Must check again (asynchronicity).
+                info = infosString.get(RegisteredPermission.toLowerCaseStringRepresentation(stringRepresentation));
+                if (info != null) {
+                    return info;
+                }
+                final RegisteredPermission registeredPermission = new RegisteredPermission(nextId, stringRepresentation);
+                info = internalPut(registeredPermission);
+            } finally {
                 lock.unlock();
-                throw e;
             }
-            info = internalPut(registeredPermission);
-            lock.unlock();
         }
         return info;
     }
@@ -173,9 +169,12 @@ public class PermissionRegistry {
     public Set<RegisteredPermission> updateSettings(final PermissionSettings settings) {
         final Set<RegisteredPermission> changed = new LinkedHashSet<RegisteredPermission>();
         // Ensure outdated policies don't get applied from here on.
-        lock.lock(); 
-        this.settings = settings;
-        lock.unlock();
+        lock.lock();
+        try {
+            this.settings = settings;
+        } finally {
+            lock.unlock();
+        }
         // Since we can't know rule changes at this stage, all have to be updated.
         // (Lazy iteration, we'll hit all previously registered ones. Asynchronous registration shouldn't happen anyway.)
         final Iterator<Entry<Integer, PermissionInfo>> it = infosInt.iterator();
