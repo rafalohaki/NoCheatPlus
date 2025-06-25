@@ -17,6 +17,7 @@ package fr.neatmonster.nocheatplus.checks.moving.player;
 import java.util.LinkedList;
 import java.util.List;
 import java.util.Locale;
+import java.util.Arrays;
 
 import org.bukkit.GameMode;
 import org.bukkit.Location;
@@ -73,6 +74,8 @@ public class CreativeFly extends Check {
     private final List<String> tags = new LinkedList<String>();
     private final BlockChangeTracker blockChangeTracker;
     private IGenericInstanceHandle<IAttributeAccess> attributeAccess = NCPAPIProvider.getNoCheatPlusAPI().getGenericInstanceHandle(IAttributeAccess.class);
+    /** Default result for invalid elytra handling parameters. */
+    private static final double[] INVALID_ELYTRA_RESULT = new double[] {Double.NaN, Double.NaN};
 
 
    /**
@@ -536,16 +539,15 @@ public class CreativeFly extends Check {
      *
      * @author xaw3ep
      */
+    private boolean invalidElytraArgs(final Player player, final PlayerLocation from, final PlayerLocation to, final MovingConfig cc) {
+        return player == null || from == null || to == null || !shouldProcessElytra(player, cc);
+    }
+
     private double[] hackElytraH(final Player player, final PlayerLocation from, final PlayerLocation to, final double hDistance,
                                  final double yDistance, final PlayerMoveData thisMove, final PlayerMoveData lastMove,
                                  final boolean lostGround, final MovingData data, final MovingConfig cc, final boolean debug) {
-
-        if (player == null || from == null || to == null) {
-            return new double[] {0.0, 0.0};
-        }
-
-        if (!shouldProcessElytra(player, cc)) {
-            return new double[] {0.0, 0.0};
+        if (invalidElytraArgs(player, from, to, cc)) {
+            return Arrays.copyOf(INVALID_ELYTRA_RESULT, 2);
         }
 
         /* Known false positives:
