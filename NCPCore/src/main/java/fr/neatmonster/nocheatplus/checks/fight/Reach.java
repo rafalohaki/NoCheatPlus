@@ -47,6 +47,12 @@ public class Reach extends Check {
     /** The maximum distance allowed to interact with an entity in creative mode. */
     public static final double CREATIVE_DISTANCE = 6D;
 
+    /** Lag threshold used to skip violations during heavy server lag. */
+    private static final float LAG_THRESHOLD = 1.5f;
+
+    /** Divisor used when feeding improbable data for silent cancels. */
+    private static final float IMPROBABLE_FEED_DIVISOR = 4f;
+
 
     /** Additum for distance, based on entity. */
     private static double getDistMod(final Entity damaged) {
@@ -57,6 +63,93 @@ public class Reach extends Check {
             return 1.5D;
         }
         else return 0;
+    }
+
+    /**
+     * Check if the server is currently lagging significantly.
+     *
+     * @return {@code true} if lag exceeds {@link #LAG_THRESHOLD}
+     */
+    private static boolean isLagging() {
+        return TickTask.getLag(1000, true) >= LAG_THRESHOLD;
+    }
+
+    /**
+     * Calculate the distance from the player's eye location to the reference
+     * point, applying precision settings and Y adjustments.
+     *
+     * @param player
+     *            attacker
+     * @param pLoc
+     *            attacker location
+     * @param dRef
+     *            target reference (modified in-place)
+     * @param width
+     *            target width
+     * @param height
+     *            target height
+     * @param cc
+     *            fight configuration
+     * @return the distance between attacker and target reference
+     */
+    private double calculateReachDistance(final Player player, final Location pLoc,
+                                          final Location dRef, final double width,
+                                          final double height, final FightConfig cc) {
+
+        final double pY = pLoc.getY() + player.getEyeHeight();
+        final double dY = dRef.getY();
+
+        if (pY >= dY + height) {
+            dRef.setY(dY + height);
+        }
+        else if (pY > dY) {
+            dRef.setY(pY);
+        }
+
+        double centerToEdge = 0.0;
+        if (cc.reachPrecision) {
+            centerToEdge = getinset(pLoc, dRef, width / 2, 0.0);
+        }
+
+        return TrigUtil.distance(dRef.getX(), dRef.getY(), dRef.getZ(),
+                pLoc.getX(), pY, pLoc.getZ()) - centerToEdge;
+    }
+
+    private boolean handleViolation(final Player player, final double lenpRel,
+                                    final double violation, final FightData data,
+                                    final FightConfig cc, final IPlayerData pData) {
+        boolean cancel = false;
+        if (!isLagging()) {
+            data.reachVL += violation;
+            final ViolationData vd = new ViolationData(this, player, data.reachVL,
+                    violation, cc.reachActions);
+            vd.setParameter(ParameterName.REACH_DISTANCE,
+                    StringUtil.fdec3.format(lenpRel));
+            cancel = executeActions(vd).willCancel();
+        }
+
+        if (Improbable.check(player, (float) violation / 2f,
+                System.currentTimeMillis(), "fight.reach", pData)) {
+            cancel = true;
+        }
+
+        if (cancel && cc.reachPenalty > 0) {
+            data.attackPenalty.applyPenalty(cc.reachPenalty);
+        }
+
+        return cancel;
+    }
+
+    private boolean handleSilentViolation(final Player player, final double lenpRel,
+                                          final double distanceLimit, final double reachMod,
+                                          final FightConfig cc, final FightData data) {
+        if (cc.reachPenalty > 0) {
+            data.attackPenalty.applyPenalty(cc.reachPenalty / 2);
+        }
+        Improbable.feed(player,
+                (float) (lenpRel - distanceLimit * reachMod) / IMPROBABLE_FEED_DIVISOR,
+                System.currentTimeMillis());
+        return true;
     }
 
 
@@ -77,75 +170,37 @@ public class Reach extends Check {
      *            the damaged
      * @return true, if successful
      */
-    public boolean check(final Player player, final Location pLoc, 
-                         final Entity damaged, final boolean damagedIsFake, final Location dRef, 
+    public boolean check(final Player player, final Location pLoc,
+                         final Entity damaged, final boolean damagedIsFake, final Location dRef,
                          final FightData data, final FightConfig cc, final IPlayerData pData) {
 
+        if (player == null || pLoc == null || damaged == null || dRef == null) {
+            return false;
+        }
+
         boolean cancel = false;
-        // The maximum distance allowed to interact with an entity in survival mode.
-        final double SURVIVAL_DISTANCE = cc.reachSurvivalDistance; 
-        // Amount which can be reduced by reach adaption.
-        final double DYNAMIC_RANGE = cc.reachReduceDistance; 
-        // Adaption amount for dynamic range.
-        final double DYNAMIC_STEP = cc.reachReduceStep / SURVIVAL_DISTANCE; 
-        final double distanceLimit = player.getGameMode() == GameMode.CREATIVE ? CREATIVE_DISTANCE : SURVIVAL_DISTANCE + getDistMod(damaged);
+        final double SURVIVAL_DISTANCE = cc.reachSurvivalDistance;
+        final double DYNAMIC_RANGE = cc.reachReduceDistance;
+        final double DYNAMIC_STEP = cc.reachReduceStep / SURVIVAL_DISTANCE;
+        final double distanceLimit = player.getGameMode() == GameMode.CREATIVE
+                ? CREATIVE_DISTANCE : SURVIVAL_DISTANCE + getDistMod(damaged);
         final double distanceMin = (distanceLimit - DYNAMIC_RANGE) / distanceLimit;
-        final double height = damagedIsFake ? (damaged instanceof LivingEntity ? ((LivingEntity) damaged).getEyeHeight() : 1.75) : mcAccess.getHandle().getHeight(damaged);
+        final double height = damagedIsFake
+                ? (damaged instanceof LivingEntity ? ((LivingEntity) damaged).getEyeHeight() : 1.75)
+                : mcAccess.getHandle().getHeight(damaged);
         final double width = damagedIsFake ? 0.6 : mcAccess.getHandle().getWidth(damaged);
 
-        double centertoedge = 0.0;
-        if (cc.reachPrecision) centertoedge = getinset(pLoc, dRef, width / 2, 0.0);
-
-        // Refine y position. This could be made more accurate by counting in
-        // the actual bounding box.
-        final double pY = pLoc.getY() + player.getEyeHeight();
-        final double dY = dRef.getY();
-        if (pY <= dY) {
-            // Keep the foot level y.
-        } else if (pY >= dY + height) {
-            dRef.setY(dY + height); // Highest ref y.
-        } else {
-            dRef.setY(pY); // Level with damaged.
-        }
-
-        // Ideally calculations should use simple numbers only to avoid object
-        // creation.
-        final Vector pRel = dRef.toVector().subtract(pLoc.toVector().setY(pY));
-        // Distance is calculated from eye location to center of targeted. If the player is further away from their target
-        // than allowed, the difference will be assigned to "distance".
-        final double lenpRel = pRel.length() - centertoedge;
-        double violation = lenpRel - distanceLimit;
-        final double reachMod = data.reachMod; 
-
+        final double lenpRel = calculateReachDistance(player, pLoc, dRef, width, height, cc);
+        final double violation = lenpRel - distanceLimit;
+        final double reachMod = data.reachMod;
 
         if (violation > 0) {
-            if (TickTask.getLag(1000, true) < 1.5f){ // Do not increase the vl in case of server lag (1.5 is a magic value)
-                data.reachVL += violation;
-                final ViolationData vd = new ViolationData(this, player, data.reachVL, violation, cc.reachActions);
-                vd.setParameter(ParameterName.REACH_DISTANCE, StringUtil.fdec3.format(lenpRel));
-                // Execute whatever actions are associated with this check and the violation level and find out if we should
-                // cancel the event.
-                cancel = executeActions(vd).willCancel();
-            }
-
-            if (Improbable.check(player, (float) violation / 2f, System.currentTimeMillis(), "fight.reach", pData)){
-                cancel = true;
-            }
-
-            if (cancel && cc.reachPenalty > 0){
-                // Apply an attack penalty time.
-                data.attackPenalty.applyPenalty(cc.reachPenalty);
-            }
+            cancel = handleViolation(player, lenpRel, violation, data, cc, pData);
+        } else if (lenpRel - distanceLimit * reachMod > 0) {
+            cancel = handleSilentViolation(player, lenpRel, distanceLimit, reachMod, cc, data);
+        } else {
+            data.reachVL *= 0.8D;
         }
-        else if (lenpRel - distanceLimit * reachMod > 0){
-            // Silent cancel.
-            if (cc.reachPenalty > 0) {
-                data.attackPenalty.applyPenalty(cc.reachPenalty / 2);
-            }
-            cancel = true;
-            Improbable.feed(player, (float) (lenpRel - distanceLimit * reachMod) / 4f, System.currentTimeMillis());
-        }
-        else data.reachVL *= 0.8D; // Player passed the check, reward them.
             
 
         if (!cc.reachReduce){
