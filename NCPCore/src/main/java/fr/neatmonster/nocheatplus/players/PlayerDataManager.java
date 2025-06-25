@@ -654,7 +654,10 @@ public class PlayerDataManager  implements IPlayerDataManager, ComponentWithName
             if (pData == null) {
                 // Create an instance.
                 // NOTE: Legacy server compatibility with world retrieval?
-                pData = getPlayerData(player);
+                final PlayerData createdData = getPlayerData(player);
+                if (createdData != null) {
+                    createdData.removeTag(PlayerData.TAG_OPTIMISTIC_CREATE);
+                }
             } else {
                 // Consistency check.
                 final String playerName = pData.getPlayerName();
@@ -663,8 +666,6 @@ public class PlayerDataManager  implements IPlayerDataManager, ComponentWithName
                 }
                 // Update world.
                 pData.updateCurrentWorld(worldDataManager.getWorldData(player.getWorld()));
-            }
-            if (pData != null) {
                 pData.removeTag(PlayerData.TAG_OPTIMISTIC_CREATE);
             }
         }
