@@ -70,7 +70,7 @@ public class MovingData extends ACheckData implements IDataOnRemoveSubCheckData,
     //////////////////////////////////////////////
     // Violation levels                         //
     //////////////////////////////////////////////
-    public double creativeFlyVL = 0.0;
+    private double creativeFlyVL = 0.0;
     public double morePacketsVL = 0.0;
     public double noFallVL = 0.0;
     public double survivalFlyVL = 0.0;
@@ -96,7 +96,7 @@ public class MovingData extends ACheckData implements IDataOnRemoveSubCheckData,
      */
     public int keepfrictiontick = 0;
     /** Countdown for ending a bunnyfly phase(= phase after bunnyhop). 10(max) represents a bunnyhop, 9-1 represent the tick at which this bunnfly phase currently is. */
-    public int bunnyhopDelay;
+    private int bunnyhopDelay;
     /** bunnyHopDelay phase before applying a LostGround case (set in SurvivalFly.bunnyHop()) */ 
     public int lastbunnyhopDelay = 0;
     /** Ticks after landing on ground (InAir->Ground). Mainly used in SurvivalFly. */
@@ -1527,6 +1527,42 @@ public class MovingData extends ACheckData implements IDataOnRemoveSubCheckData,
             morePacketsSetBackResetTime = 0;
             setBackResetTime = 0;
         }
+    }
+
+    /**
+     * Get the current bunnyhop delay.
+     *
+     * @return the bunnyhop delay
+     */
+    public int getBunnyhopDelay() {
+        return bunnyhopDelay;
+    }
+
+    /**
+     * Set the bunnyhop delay.
+     *
+     * @param bunnyhopDelay the new bunnyhop delay
+     */
+    public void setBunnyhopDelay(final int bunnyhopDelay) {
+        this.bunnyhopDelay = bunnyhopDelay;
+    }
+
+    /**
+     * Get the creative fly violation level.
+     *
+     * @return the creative fly violation level
+     */
+    public double getCreativeFlyVL() {
+        return creativeFlyVL;
+    }
+
+    /**
+     * Set the creative fly violation level.
+     *
+     * @param creativeFlyVL the new violation level
+     */
+    public void setCreativeFlyVL(final double creativeFlyVL) {
+        this.creativeFlyVL = creativeFlyVL;
     }
 
 

@@ -1619,7 +1619,7 @@ public class MovingListener extends CheckListener implements TickListener, IRemo
         final PlayerMoveData lastMove = data.playerMoves.getFirstPastMove();
         final double amount = guessVelocityAmount(player, data.playerMoves.getCurrentMove(), lastMove, data, cc);
         data.clearActiveHorVel(); // Clear active velocity due to adding actual speed here.
-        data.bunnyhopDelay = 0; // Remove bunny hop due to add velocity 
+        data.setBunnyhopDelay(0); // Remove bunny hop due to add velocity
         if (amount > 0.0) data.addHorizontalVelocity(new AccountEntry(tick, amount, cc.velocityActivationCounter, MovingData.getHorVelValCount(amount)));
         data.addVerticalVelocity(new SimpleEntry(lastMove.yDistance, cc.velocityActivationCounter));
         data.addVerticalVelocity(new SimpleEntry(0.0, cc.velocityActivationCounter));

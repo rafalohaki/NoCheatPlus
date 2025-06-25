@@ -199,6 +199,6 @@ public class TestCreativeFlyHDist {
         double[] res = invokeHdist(cf,p,from,to,thisMove.hDistance,1.0,false,false,thisMove,lastMove,model,data);
         assertEquals(0.6, res[0], 1e-6);
         assertEquals(0.0, res[1], 1e-6);
-        assertEquals(9, data.bunnyhopDelay);
+        assertEquals(9, data.getBunnyhopDelay());
     }
 }

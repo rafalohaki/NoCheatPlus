@@ -403,8 +403,8 @@ public class CreativeFly extends Check {
         Location setBack = null;
 
         if (result > 0.0) {
-            data.creativeFlyVL += result;
-            final ViolationData vd = new ViolationData(this, player, data.creativeFlyVL, result,
+            data.setCreativeFlyVL(data.getCreativeFlyVL() + result);
+            final ViolationData vd = new ViolationData(this, player, data.getCreativeFlyVL(), result,
                     cc.creativeFlyActions);
             if (vd.needsParameters()) {
                 vd.setParameter(ParameterName.LOCATION_FROM, String.format(Locale.US, "%.2f, %.2f, %.2f",
@@ -431,7 +431,7 @@ public class CreativeFly extends Check {
                 }
             }
             if (setBack == null) {
-                data.creativeFlyVL *= 0.97;
+                data.setCreativeFlyVL(data.getCreativeFlyVL() * 0.97);
             }
         }
         return setBack;
@@ -1655,7 +1655,7 @@ public class CreativeFly extends Check {
     private double handleBunnyHop(PlayerLocation from, PlayerLocation to, double yDistance,
             boolean flying, PlayerMoveData thisMove, PlayerMoveData lastMove, double resultH,
             MovingData data) {
-        data.bunnyhopDelay--;
+        data.setBunnyhopDelay(data.getBunnyhopDelay() - 1);
         if (!flying && resultH > 0 && resultH < 0.3) {
             if (yDistance >= 0.0 &&
                     (yDistance > 0.0
@@ -1665,11 +1665,11 @@ public class CreativeFly extends Check {
                             lastMove.touchedGround && !lastMove.bunnyHop))
                     && (!from.isResetCond() && !to.isResetCond())) {
                 tags.add("bunnyhop");
-                data.bunnyhopDelay = 9;
+                data.setBunnyhopDelay(9);
                 thisMove.bunnyHop = true;
                 return 0.0;
             }
-            else if (data.bunnyhopDelay <= 0) {
+            else if (data.getBunnyhopDelay() <= 0) {
                 tags.add("bunnyhop");
                 return 0.0;
             }

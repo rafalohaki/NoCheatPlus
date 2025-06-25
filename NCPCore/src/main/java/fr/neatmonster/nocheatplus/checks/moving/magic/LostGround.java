@@ -158,7 +158,7 @@ public class LostGround {
                 // Check for sprint-jumping on fences with trapdoors above (missing trapdoor's edge touch on server-side, player lands directly onto the fence)
                 // This is rather a false negative: NCP's collision differs from MC's; NCP won't detect this specific collision while MC does.
                 if (setBackYDistance > 1.0 && setBackYDistance <= 1.5 
-                    && setBackYMargin < 0.6 && data.bunnyhopDelay > 0 
+                    && setBackYMargin < 0.6 && data.getBunnyhopDelay() > 0
                     && yDistance > from.getyOnGround() && lastMove.yDistance <= Magic.GRAVITY_MAX
                     && yDistance < Magic.GRAVITY_MIN) {
                     
