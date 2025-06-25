@@ -514,9 +514,12 @@ public class HashMapLOW <K, V> {
      */
     public void clear() {
         lock.lock();
-        buckets = newBuckets(targetSize);
-        size = 0;
-        lock.unlock();
+        try {
+            buckets = newBuckets(targetSize);
+            size = 0;
+        } finally {
+            lock.unlock();
+        }
     }
 
     /**
@@ -554,21 +557,24 @@ public class HashMapLOW <K, V> {
     private final V put(final K key, final V value, final boolean ifAbsent) {
         final int hashCode = getHashCode(key);
         lock.lock();
-        final int index = getBucketIndex(hashCode, buckets.length);
-        LHMBucket<K, V> bucket = buckets[index];
-        if (bucket == null) {
-            bucket = new LHMBucket<K, V>();
-            buckets[index] = bucket;
-        }
-        V oldValue = bucket.put(hashCode, key, value, ifAbsent);
-        if (oldValue == null) {
-            size ++;
-            if (size > (int) (loadFactor * (float) buckets.length)) {
-                resize();
+        try {
+            final int index = getBucketIndex(hashCode, buckets.length);
+            LHMBucket<K, V> bucket = buckets[index];
+            if (bucket == null) {
+                bucket = new LHMBucket<K, V>();
+                buckets[index] = bucket;
             }
+            V oldValue = bucket.put(hashCode, key, value, ifAbsent);
+            if (oldValue == null) {
+                size ++;
+                if (size > (int) (loadFactor * (float) buckets.length)) {
+                    resize();
+                }
+            }
+            return oldValue;
+        } finally {
+            lock.unlock();
         }
-        lock.unlock();
-        return oldValue;
     }
 
     /**
@@ -580,10 +586,13 @@ public class HashMapLOW <K, V> {
     public V remove(final K key) {
         final int hashCode = getHashCode(key);
         lock.lock();
-        final V value = removeUnderLock(hashCode, key);
-        // Shrink if necessary (not implemented).
-        lock.unlock();
-        return value;
+        try {
+            final V value = removeUnderLock(hashCode, key);
+            // Shrink if necessary (not implemented).
+            return value;
+        } finally {
+            lock.unlock();
+        }
     }
 
     /**
@@ -617,11 +626,14 @@ public class HashMapLOW <K, V> {
      */
     public void remove(final Collection<K> keys) {
         lock.lock();
-        for (final K key : keys) {
-            final int hashCode = getHashCode(key);
-            removeUnderLock(hashCode, key);
+        try {
+            for (final K key : keys) {
+                final int hashCode = getHashCode(key);
+                removeUnderLock(hashCode, key);
+            }
+        } finally {
+            lock.unlock();
         }
-        lock.unlock();
     }
 
     /**
@@ -651,9 +663,11 @@ public class HashMapLOW <K, V> {
      */
     public V getLocked(final K key) {
         lock.lock();
-        final V value = get(key);
-        lock.unlock();
-        return value;
+        try {
+            return get(key);
+        } finally {
+            lock.unlock();
+        }
     }
 
     /**
@@ -684,9 +698,11 @@ public class HashMapLOW <K, V> {
      */
     public boolean containsKeyLocked(final K key) {
         lock.lock();
-        final boolean res = containsKey(key);
-        lock.unlock();
-        return res;
+        try {
+            return containsKey(key);
+        } finally {
+            lock.unlock();
+        }
     }
 
     /**
