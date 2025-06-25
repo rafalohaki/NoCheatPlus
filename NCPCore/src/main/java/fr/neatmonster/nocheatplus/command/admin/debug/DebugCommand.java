@@ -24,7 +24,6 @@ public class DebugCommand extends BaseCommand {
     public DebugCommand(JavaPlugin access) {
         super(access, "debug", Permissions.COMMAND_DEBUG);
         addSubCommands(new DebugPlayerCommand(access));
-        // TODO: Sub command check, plus check type, plus -(-)off switch
     }
 
 }
