@@ -18,10 +18,10 @@ import fr.neatmonster.nocheatplus.utilities.map.BlockCache;
 
 public interface ShapeModel<W> {
 
-    // TODO: Rather fill in all into node directly (data as well), avoid redundant casting etc.
-    // TODO: Best route passable workaround through here too (base on a flag), + getGroundMinHeight?.
+    // Consider populating nodes directly with data to avoid redundant casting.
+    // Passable-route handling might occur here based on a flag; see getGroundMinHeight.
 
-    // TODO: Refine +- might have BukkitBlockCacheNode etc.
+    // Further refinement may introduce a BukkitBlockCacheNode implementation.
     public double[] getShape(BlockCache blockCache, W world, int x, int y, int z);
 
     /**

@@ -30,7 +30,7 @@ import java.util.concurrent.locks.Lock;
 public class InstanceMapLOW {
 
     /*
-     * TODO: Optimized implementation possible (performance/JIT)? Buckets and
+     * Optimized implementation possible (performance/JIT)? Buckets and
      * entries could support the type relation.
      */
     private final HashMapLOW<Class<?>, Object> map;

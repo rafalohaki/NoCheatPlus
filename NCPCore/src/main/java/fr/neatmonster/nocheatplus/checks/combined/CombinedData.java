@@ -45,7 +45,6 @@ public class CombinedData extends ACheckData implements IDataOnRemoveSubCheckDat
     public final ActionFrequency improbableCount = new ActionFrequency(20, 3000);
 
     // General data
-    // TODO: -> PlayerData (-> OfflinePlayerData)
     public String lastWorld = "";
     public long lastJoinTime;
     public long lastLogoutTime;
@@ -56,13 +55,12 @@ public class CombinedData extends ACheckData implements IDataOnRemoveSubCheckDat
         for (final CheckType checkType : checkTypes)
         {
             switch(checkType) {
-                // TODO: case COMBINED:
                 case COMBINED_IMPROBABLE:
                     improbableVL = 0;
-                    improbableCount.clear(System.currentTimeMillis()); // TODO: Document there, which to use.
+                    improbableCount.clear(System.currentTimeMillis());
                     break;
                 case COMBINED_YAWRATE:
-                    yawFreq.clear(System.currentTimeMillis()); // TODO: Document there, which to use.
+                    yawFreq.clear(System.currentTimeMillis());
                     break;
                 case COMBINED_MUNCHHAUSEN:
                     munchHausenVL = 0;
