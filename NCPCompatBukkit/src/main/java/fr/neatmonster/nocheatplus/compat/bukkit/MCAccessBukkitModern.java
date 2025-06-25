@@ -148,6 +148,9 @@ public class MCAccessBukkitModern extends MCAccessBukkit {
         catch (ClassNotFoundException ex) {
             // Optional classes may not be present on older versions.
         }
+        catch (RuntimeException ex) {
+            // Optional classes may not be present on older versions.
+        }
     }
 
     @Override

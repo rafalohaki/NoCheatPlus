@@ -24,8 +24,12 @@ public class ReflectBlockPosition {
 
     public final Constructor<?> new_nmsBlockPosition;
 
-    public ReflectBlockPosition(ReflectBase base) throws ClassNotFoundException {
-        nmsClass = Class.forName(base.nmsPackageName + ".BlockPosition");
+    public ReflectBlockPosition(ReflectBase base) {
+        try {
+            nmsClass = Class.forName(base.nmsPackageName + ".BlockPosition");
+        } catch (ClassNotFoundException ex) {
+            throw new RuntimeException(ex);
+        }
         new_nmsBlockPosition = ReflectionUtil.getConstructor(nmsClass, int.class, int.class, int.class);
     }
 

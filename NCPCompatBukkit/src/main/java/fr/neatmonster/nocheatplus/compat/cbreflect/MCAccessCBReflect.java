@@ -40,7 +40,7 @@ public class MCAccessCBReflect extends MCAccessBukkit {
     /** We know for sure that dealFallDamage will fire a damage event. */
     protected final boolean dealFallDamageFiresAnEvent;  
 
-    public MCAccessCBReflect() throws ReflectFailureException {
+    public MCAccessCBReflect() {
         // Add unavailable stuff to features / missing (TBD).
         helper = new ReflectHelper();
         // Version Envelope tests (1.4.5-R1.0 ... 1.8.x is considered to be ok).

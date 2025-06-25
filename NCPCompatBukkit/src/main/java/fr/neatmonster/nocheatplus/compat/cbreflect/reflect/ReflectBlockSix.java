@@ -73,9 +73,14 @@ public class ReflectBlockSix implements IReflectBlock {
     public final Method nmsGetMinZ;
     public final Method nmsGetMaxZ;
 
-    public ReflectBlockSix(ReflectBase base, ReflectBlockPosition reflectBlockPosition) throws ClassNotFoundException {
+    public ReflectBlockSix(ReflectBase base, ReflectBlockPosition reflectBlockPosition) {
         this.reflectBlockPosition = reflectBlockPosition;
-        final Class<?> clazz = Class.forName(base.nmsPackageName + ".Block");
+        final Class<?> clazz;
+        try {
+            clazz = Class.forName(base.nmsPackageName + ".Block");
+        } catch (ClassNotFoundException ex) {
+            throw new ReflectFailureException();
+        }
         // byID (static)
         nmsGetById = ReflectionUtil.getMethod(clazz, "getById", int.class);
 
@@ -87,7 +92,12 @@ public class ReflectBlockSix implements IReflectBlock {
         nmsGetMaterial = ReflectionUtil.getMethodNoArgs(clazz, "getMaterial");
         // updateShape
         Method method = null;
-        Class<?> clazzIBlockAccess = Class.forName(base.nmsPackageName + ".IBlockAccess");
+        Class<?> clazzIBlockAccess;
+        try {
+            clazzIBlockAccess = Class.forName(base.nmsPackageName + ".IBlockAccess");
+        } catch (ClassNotFoundException ex) {
+            throw new ReflectFailureException();
+        }
         if (reflectBlockPosition != null) {
             method = ReflectionUtil.getMethod(clazz, "updateShape", clazzIBlockAccess, reflectBlockPosition.nmsClass);
         }

@@ -78,7 +78,7 @@ public class ReflectHelper {
 
     private final double[] tempBounds = new double[6];
 
-    public ReflectHelper() throws ReflectFailureException {
+    public ReflectHelper() {
         // Optionally store one instance of ReflectFailureException.
         // Possibly allow some more methods to be optional.
         try {
@@ -94,9 +94,8 @@ public class ReflectHelper {
             ReflectBlockPosition reflectBlockPosition = null;
             try {
                 reflectBlockPosition = new ReflectBlockPosition(this.reflectBase);
-            }
-            catch (ClassNotFoundException ex) {
-                // ignore - BlockPosition class not available
+            } catch (RuntimeException ex) {
+                // BlockPosition class not available
             }
             this.reflectBlockPosition = reflectBlockPosition;
             this.reflectMaterial = new ReflectMaterial(this.reflectBase);
