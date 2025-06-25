@@ -45,7 +45,6 @@ public class NetConfig extends ACheckConfig {
     };
 
     public static RegisteredPermission[] getPreferKeepUpdatedPermissions() {
-        // TODO: Individual checks might want to register these, or just on permission checking.
         return preferKeepUpdatedPermissions;
     }
 
@@ -86,7 +85,6 @@ public class NetConfig extends ACheckConfig {
     public final boolean supersededFlyingCancelWaiting;
 
     public NetConfig(final IWorldData worldData) {
-        // TODO: These permissions should have default policies.
         super(worldData);
         final ConfigFile config = worldData.getRawConfiguration();
 
@@ -112,7 +110,6 @@ public class NetConfig extends ACheckConfig {
         keepAliveFrequencyStartupDelay = config.getInt(ConfPaths.NET_KEEPALIVEFREQUENCY_SECONDS) * 1000;
 
         if (ServerVersion.compareMinecraftVersion("1.9") >= 0) {
-            // TODO: Disable packet frequency or activate 'pessimistically'.
             /** Note: Disable check should use
              *    NCPAPIProvider#getNoCheatPlusAPI()#getWorldDataManager()#overrideCheckActivation()
              *  to actually disable from all worlds. 
