@@ -138,7 +138,7 @@ public class CollideRayVsAABB implements ICollideRayVsAABB {
      * @param tMaxZ
      */
     private void findNearestPoint(final double... timeValues) {
-        // TODO: Squared vs. Manhattan vs. maxAxis.
+        // Evaluate distance metrics: squared, Manhattan, or maxAxis.
         // Update squared distance to 'actual'.
         closestDistanceSquared = CollisionUtil.getSquaredDistAABB(this.startX, this.startY, this.startZ, 
                 minX, minY, minZ, maxX, maxY, maxZ);

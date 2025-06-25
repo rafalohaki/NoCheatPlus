@@ -38,7 +38,7 @@ import fr.neatmonster.nocheatplus.utilities.map.BlockProperties;
  *
  */
 public class MultiClientProtocolBlockShapePatch extends AbstractBlockPropertiesPatch {
-    // TODO: Later just dump these into the generic registry (on activation), let BlockProperties fetch.
+    // Later these could be placed into the generic registry on activation and then fetched via BlockProperties.
 
     public MultiClientProtocolBlockShapePatch() {
         activation
@@ -47,7 +47,7 @@ public class MultiClientProtocolBlockShapePatch extends AbstractBlockPropertiesP
         .setConditionsAND()
         .notUnitTest()
         .condition(ActivationUtil.getMultiProtocolSupportPluginActivation())
-        // TODO: Other/More ?
+        // Additional conditions may be added here.
         ;
     }
 

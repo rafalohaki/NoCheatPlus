@@ -316,7 +316,7 @@ public class TestCoordMap {
             assertSize(map, 0);
         }
 
-        // TODO: test / account for identical keys.
+        // Pending: account for identical keys.
 
         // ? random sequence of actions ?
     }
@@ -459,7 +459,7 @@ public class TestCoordMap {
         testIterationOrder(map, halfCoords, 2);
 
 
-        // TODO: Some random mixtures.
+        // Potentially add tests with random combinations of operations.
 
     }
 

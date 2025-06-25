@@ -30,7 +30,7 @@ import fr.neatmonster.nocheatplus.utilities.location.LocUtil;
  */
 public class SetBackEntry implements IGetLocationWithLook, ISetLocationWithLook {
 
-    // TODO: Support a hash for locations (can't be Location.hashCode()).
+    // Could support a custom hash for locations (can't use Location.hashCode()).
 
     private String worldName;
     private double x, y, z;
@@ -48,7 +48,7 @@ public class SetBackEntry implements IGetLocationWithLook, ISetLocationWithLook 
         return set(loc.getWorldName(), loc.getX(), loc.getY(), loc.getZ(), loc.getYaw(), loc.getPitch(), time, msTime);
     }
 
-    // TODO: @throws
+    // Consider documenting the exceptions thrown
     public SetBackEntry set(final String worldName, final double x, final double y, final double z, final float yaw, final float pitch, final int time, final long msTime) {
         if (worldName == null) {
             throw new NullPointerException("World name must not be null.");
@@ -205,7 +205,6 @@ public class SetBackEntry implements IGetLocationWithLook, ISetLocationWithLook 
         return false;
     }
 
-    // TODO: Equals !?
 
     @Override
     public String toString() {

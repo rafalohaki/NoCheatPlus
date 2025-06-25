@@ -77,14 +77,13 @@ public class NetData extends ACheckData {
      * Detect teleport-ACK packets, consistency check to only use outgoing
      * position if there has been a PlayerTeleportEvent for it.
      */
-    public final TeleportQueue teleportQueue = new TeleportQueue(); // TODO: Consider using one lock per data instance and pass here.
+    public final TeleportQueue teleportQueue = new TeleportQueue();
 
     /**
      * Store past flying packet locations for reference (lock for
      * synchronization). Mainly meant for access to flying packets from the
      * primary thread. Latest packet is first.
      */
-    // TODO: Might extend to synchronize with moving events.
     private final LinkedList<DataPacketFlying> flyingQueue = new LinkedList<DataPacketFlying>();
     /** Maximum amount of packets to store. */
     private final int flyingQueueMaxSize = 15;
@@ -155,9 +154,8 @@ public class NetData extends ACheckData {
     public DataPacketFlying[] copyFlyingQueue() {
         lock.lock();
         /*
-         * TODO: Add a method to synchronize with the current position at the
-         * same time ? Packet inversion is acute on 1.11.2 (dig is processed
-         * before flying).
+         * Packet inversion is acute on 1.11.2 (dig is processed
+         * before flying). Synchronizing with the current position might be added.
          */
         final DataPacketFlying[] out = flyingQueue.toArray(new DataPacketFlying[flyingQueue.size()]);
         lock.unlock();
@@ -193,7 +191,7 @@ public class NetData extends ACheckData {
      */
     public void handleSystemTimeRanBackwards() {
         final long now = System.currentTimeMillis();
-        teleportQueue.clear(); // Can't handle timeouts. TODO: Might still keep.
+        teleportQueue.clear(); // Can't handle timeouts.
         lastKeepAliveTime = Math.min(lastKeepAliveTime, now);
         flyingFrequencyTimeNotOnGround = Math.min(flyingFrequencyTimeNotOnGround, now);
         flyingFrequencyTimeOnGround = Math.min(flyingFrequencyTimeOnGround, now);

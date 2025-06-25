@@ -53,7 +53,7 @@ public class ExemptCommand extends BaseCommand {
             c1 = c2 = c3 = c4 = c5 = c6 = c7 = "";
         }
 
-        // TODO: Reduce copy and paste by introducing some super class.
+        // Consider introducing a super class to reduce copy and paste.
         if (args.length < 2) {
             sender.sendMessage((sender instanceof Player ? TAG : CTAG) + "Please specify a player to exempt.");
             return true;

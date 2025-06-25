@@ -69,7 +69,7 @@ public class Fight extends BaseAdapter{
         final StructureModifier<Float> floats = packet.getFloat();
 
         if (floats.size() != 4) {
-            // TODO : Warning
+            // Ignore packets with unexpected float count
             return;
         }
 
@@ -94,7 +94,7 @@ public class Fight extends BaseAdapter{
         
      //   final Player player = event.getPlayer();
      //   final FightData data = DataManager.getGenericInstance(player, FightData.class);
-        // TODO: Count temporary player as well?
+        // Consider counting temporary players as well
      //   if (event.isPlayerTemporary()) return;
      //   if (event.getPacketType() != PacketType.Play.Client.ARM_ANIMATION) {
             //data.noSwingPacket = false;

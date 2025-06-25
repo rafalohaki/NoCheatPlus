@@ -73,7 +73,7 @@ public class VehicleMorePackets extends Check {
 
         if (setBack != null || Folia.isTaskScheduled(data.vehicleSetBackTaskId)){
             // Short version !
-            // TODO: This is bad. Needs to check if still scheduled (a BukkitTask thing) and just skip.
+            // Needs to check if still scheduled (a BukkitTask thing) and just skip.
             return data.vehicleSetBacks.getValidMidTermEntry();
         }
 

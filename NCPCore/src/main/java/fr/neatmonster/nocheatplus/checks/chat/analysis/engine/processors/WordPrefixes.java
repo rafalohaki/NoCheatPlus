@@ -61,7 +61,8 @@ public class WordPrefixes extends DigestedWords{
 	public void start(final MessageLetterCount message) {
 		// This allows adding up to maximum messge length more characters,
 		//  	but also allows to set size of nodes exactly.
-		// TODO: Some better method  than blunt clear (extra LinkedHashSet/LRU?).
+                // Improvement idea: use a better method than a blunt clear,
+                // possibly a LinkedHashSet or LRU strategy.
 		if (added > maxAdd || System.currentTimeMillis() - lastAdd > durExpire){
 			tree.clear();
 			added = 0;

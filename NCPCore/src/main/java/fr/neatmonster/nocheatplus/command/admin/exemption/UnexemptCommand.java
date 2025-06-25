@@ -54,7 +54,7 @@ public class UnexemptCommand extends BaseCommand {
             c1 = c2 = c3 = c4 = c5 = c6 = c7 = "";
         }
 
-        // TODO: Reduce copy and paste by introducing some super class.
+        // Consider introducing a super class to reduce copy and paste.
         if (args.length < 2) {
             sender.sendMessage((sender instanceof Player ? TAG : CTAG) + "Please specify a player to unexempt.");
             return true;
@@ -77,7 +77,7 @@ public class UnexemptCommand extends BaseCommand {
         else checkType = CheckType.ALL;
         if (playerName.equals("*")){
             // Unexempt all.
-            // TODO: might care to find players only ?
+            // Unexempt all known players and stored entries.
             NCPExemptionManager.clear();
             sender.sendMessage((sender instanceof Player ? TAG : CTAG) + "Removed exemptions for all players for checks: " + c3 +""+ checkType);
             return true;

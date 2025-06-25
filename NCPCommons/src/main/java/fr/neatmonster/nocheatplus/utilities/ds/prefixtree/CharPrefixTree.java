@@ -132,7 +132,6 @@ public class CharPrefixTree<N extends CharNode<N>, L extends CharLookupEntry<N>>
      * @return
      */
     public boolean hasPrefixWords(final String input) {
-        // TODO build this in in a more general way (super classes + stop symbol)!
         final L result = lookup(input, false);
         if (!result.hasPrefix) return false;
         if (input.length() == result.depth) return true;

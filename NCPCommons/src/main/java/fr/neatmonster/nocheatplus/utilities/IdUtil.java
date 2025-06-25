@@ -16,7 +16,7 @@ package fr.neatmonster.nocheatplus.utilities;
 
 import java.util.UUID;
 
-// TODO: Auto-generated Javadoc
+// Auto-generated Javadoc
 /**
  * Utility for UUIDs, player names.
  * 
@@ -65,12 +65,12 @@ public class IdUtil {
 	 * @return the uuid
 	 */
 	public static UUID UUIDFromString(final String input) {
-		// TODO: Add unit tests.
+                // Add unit tests.
 		final int len = input.length();
 		if (len == 36) {
 			return UUID.fromString(input);
 		} else if (len == 32) {
-			// TODO: Might better translate to longs right away !?
+                        // It might be better to translate to longs right away.
 			// Fill in '-'
 			char[] chars = input.toCharArray();
 			char[] newChars = new char[36];

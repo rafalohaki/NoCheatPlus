@@ -45,7 +45,7 @@ public class BanCommand extends BaseCommand {
         if (!demandConsoleCommandSender(sender)) {
             return true;
         }
-        // TODO: Consider supporting vanilla syntax or removing this command :p.
+        // This command might later support vanilla syntax or be removed entirely.
 
         // Args contains "ban" as first arg.
         if (args.length == 1) {

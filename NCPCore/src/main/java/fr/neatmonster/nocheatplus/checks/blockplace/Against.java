@@ -67,7 +67,7 @@ public class Against extends Check {
                          final BlockPlaceData data, final BlockPlaceConfig cc, final IPlayerData pData) {
         
         boolean violation = false;
-        final BlockInteractData bIData = pData.getGenericInstance(BlockInteractData.class); // TODO: pass as argument.
+        final BlockInteractData bIData = pData.getGenericInstance(BlockInteractData.class); // Should eventually be passed as argument.
         /** 
          * Do not use this to check for cheating: Bukkit will return the placed material if the placement is not possible.
          * i.e.: Attempting to place dirt against air will return DIRT, not air as against type.
@@ -81,7 +81,7 @@ public class Against extends Check {
         }
 
         if (bIData.isConsumedCheck(this.type) && !bIData.isPassedCheck(this.type)) {
-            // TODO: Awareness of repeated violation probably is to be implemented below somewhere.
+            // Implement awareness of repeated violation here in the future.
             violation = true;
             if (pData.isDebugActive(this.type)) {
                 debug(player, "Cancel due to block having been consumed by this check.");

@@ -29,7 +29,7 @@ import fr.neatmonster.nocheatplus.permissions.RegisteredPermission;
 
 public abstract class AbstractActionFactory <D extends ActionData, L extends AbstractActionList<D, L>>{
 
-    // TODO: static ?
+    // Consider making this static if initialization requirements allow
     protected static final Map<String, Object> lib = new HashMap<String, Object>();
     protected final ActionListFactory<D, L> listFactory;
 

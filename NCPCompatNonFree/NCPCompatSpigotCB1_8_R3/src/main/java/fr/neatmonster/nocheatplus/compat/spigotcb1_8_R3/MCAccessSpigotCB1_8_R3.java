@@ -142,7 +142,8 @@ public class MCAccessSpigotCB1_8_R3 implements MCAccess {
         if (entityPlayer.dead) {
             return AlmostBoolean.NO;
         }
-        // TODO: Does this need a method call for the "real" box? Might be no problem during moving events, though.
+        // Consider whether calling a method for the "real" bounding box is required.
+        // It should not cause issues during moving events.
         final AxisAlignedBB box = entityPlayer.getBoundingBox();
         if (LocUtil.isBadCoordinate(box.a, box.b, box.c, box.d, box.e, box.f)) {
             return AlmostBoolean.YES;

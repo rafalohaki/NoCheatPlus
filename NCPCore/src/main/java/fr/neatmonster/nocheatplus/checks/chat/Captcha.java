@@ -106,13 +106,13 @@ public class Captcha extends Check implements ICaptcha{
 
     @Override
     public boolean shouldStartCaptcha(Player player, ChatConfig cc, ChatData data, IPlayerData pData) {
-        // TODO: Only call if IWorldData.isCheckActive(CHAT_CAPTCHA) has returned true?
+        // Assumes IWorldData.isCheckActive(CHAT_CAPTCHA) has returned true
         return !data.captchaStarted && pData.isCheckActive(CheckType.CHAT_CAPTCHA, player);
     }
 
     @Override
     public boolean shouldCheckCaptcha(Player player, ChatConfig cc, ChatData data, IPlayerData pData) {
-        // TODO: Only call if IWorldData.isCheckActive(CHAT_CAPTCHA) has returned true?
+        // Assumes IWorldData.isCheckActive(CHAT_CAPTCHA) has returned true
         return data.captchaStarted  && pData.isCheckActive(CheckType.CHAT_CAPTCHA, player);
     }
 

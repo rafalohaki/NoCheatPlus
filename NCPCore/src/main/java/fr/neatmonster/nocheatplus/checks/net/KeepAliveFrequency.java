@@ -14,24 +14,30 @@
  */
 package fr.neatmonster.nocheatplus.checks.net;
 
+import java.util.Map;
+import java.util.UUID;
+import java.util.concurrent.ConcurrentHashMap;
+
 import org.bukkit.entity.Player;
 import org.bukkit.event.EventHandler;
 import org.bukkit.event.Listener;
 import org.bukkit.event.player.PlayerJoinEvent;
+import org.bukkit.event.player.PlayerQuitEvent;
 
 import fr.neatmonster.nocheatplus.checks.Check;
 import fr.neatmonster.nocheatplus.checks.CheckType;
-import fr.neatmonster.nocheatplus.players.DataManager;
 import fr.neatmonster.nocheatplus.players.IPlayerData;
-import fr.neatmonster.nocheatplus.utilities.TickTask;
 
 public class KeepAliveFrequency extends Check implements Listener {
 
     public KeepAliveFrequency() {
         super(CheckType.NET_KEEPALIVEFREQUENCY);
     }
-    
-    long timeJoin;
+
+    /**
+     * Join timestamps per player for delaying checks after login.
+     */
+    private final Map<UUID, Long> joinTimes = new ConcurrentHashMap<>();
 
     /**
      * Checks hasBypass on violation only.
@@ -44,23 +50,45 @@ public class KeepAliveFrequency extends Check implements Listener {
     public boolean check(final Player player, final long time, final NetData data, final NetConfig cc, final IPlayerData pData) {
         data.keepAliveFreq.add(time, 1f);
         final float first = data.keepAliveFreq.bucketScore(0);
-	final long now = System.currentTimeMillis();
-    	
-    	if (now - timeJoin < cc.keepAliveFrequencyStartupDelay) return false;
-        if (first > 1f) {
-            // Trigger a violation.
+        final long now = time;
+
+        boolean cancel = false;
+        if (!isJoinDelayActive(player, now, cc.keepAliveFrequencyStartupDelay) && first > 1f) {
             final double vl = Math.max(first - 1f, data.keepAliveFreq.score(1f) - data.keepAliveFreq.numberOfBuckets());
-            if (executeActions(player, vl, 1.0, cc.keepAliveFrequencyActions).willCancel()) {
-                return true;
-            }
+            cancel = executeActions(player, vl, 1.0, cc.keepAliveFrequencyActions).willCancel();
         }
-        return false;
+        return cancel;
     }
-    // Event listener probably shouldn't be used here, but I don't think it will be
-    // needed to make another class just for this.
     @EventHandler
     public void playerJoin(PlayerJoinEvent e) {
-    timeJoin = System.currentTimeMillis();
+        final Player player = e.getPlayer();
+        if (player != null) {
+            joinTimes.put(player.getUniqueId(), System.currentTimeMillis());
+        }
+    }
+
+    @EventHandler
+    public void playerQuit(PlayerQuitEvent e) {
+        final Player player = e.getPlayer();
+        if (player != null) {
+            joinTimes.remove(player.getUniqueId());
+        }
+    }
+
+    /**
+     * Check if join delay is still active for the player.
+     *
+     * @param player The player to check for.
+     * @param now    The current system time in milliseconds.
+     * @param delay  The configured delay after join.
+     * @return True if join delay is active, false otherwise.
+     */
+    private boolean isJoinDelayActive(Player player, long now, long delay) {
+        if (player == null) {
+            return false;
+        }
+        final Long joinTime = joinTimes.get(player.getUniqueId());
+        return joinTime != null && now - joinTime < delay;
     }
 
 }

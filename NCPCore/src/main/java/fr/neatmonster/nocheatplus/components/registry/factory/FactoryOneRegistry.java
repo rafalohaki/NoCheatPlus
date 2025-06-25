@@ -40,7 +40,7 @@ public class FactoryOneRegistry<A> implements IFactoryOneRegistry<A> {
     public FactoryOneRegistry(Lock lock, IPrimaryThreadContextTester primaryThreadContextTester) {
         this.lock = lock;
         this.primaryThreadContextTester = primaryThreadContextTester;
-        // TODO: RegisteredItemStore can't do classes -> need RegisteredClassStore (...).
+        // RegisteredItemStore can't do classes -> need RegisteredClassStore (...).
         factories = new HashMapLOW<Class<?>, IFactoryOne<A,?>>(lock, 30);
     }
 
@@ -73,7 +73,7 @@ public class FactoryOneRegistry<A> implements IFactoryOneRegistry<A> {
                 instance = factory.getNewInstance(arg);
             }
             catch (Exception e) {
-                // TODO: Exception type to throw.
+                // Specify exception type to throw.
                 throw new RuntimeException(e);
             }
             //finally {

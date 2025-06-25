@@ -85,12 +85,18 @@ public class ServerVersion {
         if (server == null) {
             return null;
         }
-        try {
-            return (String) ReflectionUtil.invokeMethodNoArgs(server, "getVersion", String.class);
+        for (String method : new String[]{"getVersion", "getServerVersion"}) {
+            try {
+                final Object result = ReflectionUtil.invokeMethodNoArgs(server, method, String.class);
+                if (result instanceof String) {
+                    return (String) result;
+                }
+            }
+            catch (Throwable ignore) {
+                // Continue with next method name.
+            }
         }
-        catch (Throwable t) {
-            return null;
-        }
+        return null;
     }
 
     /**
@@ -132,7 +138,7 @@ public class ServerVersion {
                 GenericVersion.parseVersionDelimiters(lcServerVersion, "mcpc-plus-", "-"),
                 GenericVersion.parseVersionDelimiters(lcServerVersion, "git-bukkit-", "-r"),
                 GenericVersion.parseVersionDelimiters(lcServerVersion, "", "-r"),
-                // TODO: Other server mods + custom builds !?.
+                // Other server mods and custom builds can be added here.
         }) {
             if (candidate != null) {
                 return candidate;
