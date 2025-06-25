@@ -136,7 +136,7 @@ public class Activation implements IDescriptiveActivation {
     }
 
     public Activation neutralDescription(String neutralDescription) {
-        // TODO: Another interface to combine description with activation (e.g. IFeature)?
+        // Another interface might combine description with activation (e.g. IFeature)
         this.neutralDescription = neutralDescription;
         return this;
     }
@@ -424,12 +424,11 @@ public class Activation implements IDescriptiveActivation {
         return this;
     }
 
-    // TODO: server version not contains (+ignore case).
-    // TODO: Might use testing methods for parts: meetsServerVersionRequirements(), more complicated...
+    // Potential extension: server version not contains a value, ignoring case
+    // Testing methods like meetsServerVersionRequirements() could handle more complex cases
     /*
-     * TODO: Consider a getter for filtered conditions, e.g. if configuration
-     * overrides something, alternatively provide an optional condition that is
-     * checking the configuration (?).
+     * Consider a getter for filtered conditions, for instance if the configuration
+     * overrides something, or provide an optional condition that checks the configuration.
      */
 
 }

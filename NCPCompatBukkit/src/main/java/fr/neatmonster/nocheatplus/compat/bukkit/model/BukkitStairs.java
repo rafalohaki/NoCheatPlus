@@ -137,7 +137,7 @@ public class BukkitStairs implements BukkitShapeModel {
         }
     }
 
-    // TODO: Poorly designed, Will recode better version later
+    // Current implementation may be improved in a future revision
     private double[] merge(double[] bounds, double[] octet) {
         double[] res = bounds;
         final double minX = octet[0];
