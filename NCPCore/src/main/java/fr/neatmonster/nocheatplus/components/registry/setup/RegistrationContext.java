@@ -51,11 +51,11 @@ import fr.neatmonster.nocheatplus.components.registry.setup.instance.RegisterIns
 public class RegistrationContext implements IDoRegister {
 
     /*
-     * / TODO: ILockable <-> tie to instantiation by global registry, tie sub
+     * Note: ILockable <-> tie to instantiation by global registry, tie sub
      * objects to this.
      */
 
-    // TODO: Base some things rather on ICheckConfig, ICheckData ?
+    // Consider basing some things on ICheckConfig and ICheckData.
 
     /**
      * General type of registration, in terms of how often / when it's tried to
@@ -90,7 +90,7 @@ public class RegistrationContext implements IDoRegister {
     // Instance
     //////////////////////////////
 
-    // TODO: Put a global registry in control of instantiation, add id(s) / tags.
+    // Put a global registry in control of instantiation, add id(s) / tags.
 
     private final List<IDoRegister> registerItems = new LinkedList<IDoRegister>();
 
@@ -177,12 +177,12 @@ public class RegistrationContext implements IDoRegister {
 
     @Override
     public void doRegister() {
-        // TODO: ILockable, ...
-        // TODO: Exception handling.
+        // Consider enforcing ILockable or similar mechanism.
+        // Exception handling can be added if needed.
         for (IDoRegister item : registerItems) {
             item.doRegister();
         }
-        // TODO: (Capability to roll back?)
+        // Possible capability to roll back.
     }
 
 }
