@@ -62,141 +62,141 @@ public class MovingConfig extends ACheckConfig {
 
     // INSTANCE
 
-    public final boolean    ignoreCreative;
-    public final boolean    ignoreAllowFlight;
+    public boolean    ignoreCreative;
+    public boolean    ignoreAllowFlight;
 
-    private final Map<GameMode, ModelFlying> flyingModelGameMode = new HashMap<GameMode, ModelFlying>();
-    private final ModelFlying flyingModelElytra;
-    private final ModelFlying flyingModelLevitation;
-    private final ModelFlying flyingModelSlowfalling;
-    private final ModelFlying flyingModelRiptiding;
-    public final ActionList creativeFlyActions;
+    private Map<GameMode, ModelFlying> flyingModelGameMode = new HashMap<GameMode, ModelFlying>();
+    private ModelFlying flyingModelElytra;
+    private ModelFlying flyingModelLevitation;
+    private ModelFlying flyingModelSlowfalling;
+    private ModelFlying flyingModelRiptiding;
+    public ActionList creativeFlyActions;
 
     /** Assumed number of packets per second under ideal conditions. */
-    public final float      morePacketsEPSIdeal;
+    public float      morePacketsEPSIdeal;
     /** The maximum number of packets per second that we accept. */
-    public final float      morePacketsEPSMax;
-    public final int        morePacketsEPSBuckets;
-    public final float		morePacketsBurstPackets;
-    public final double		morePacketsBurstDirect;
-    public final double		morePacketsBurstEPM;
-    public final int        morePacketsSetBackAge;
-    public final ActionList morePacketsActions;
+    public float      morePacketsEPSMax;
+    public int        morePacketsEPSBuckets;
+    public float		morePacketsBurstPackets;
+    public double		morePacketsBurstDirect;
+    public double		morePacketsBurstEPM;
+    public int        morePacketsSetBackAge;
+    public ActionList morePacketsActions;
 
     /**
      * Deal damage instead of Minecraft, whenever a player is judged to be on
      * ground.
      */
-    public final boolean    noFallDealDamage;
-    public final boolean    noFallSkipAllowFlight;
+    public boolean    noFallDealDamage;
+    public boolean    noFallSkipAllowFlight;
     /**
      * Reset data on violation, i.e. a player taking fall damage without being
      * on ground.
      */
-    public final boolean    noFallViolationReset;
+    public boolean    noFallViolationReset;
     /** Reset data on tp. */
-    public final boolean 	noFallTpReset;
+    public boolean 	noFallTpReset;
     /** Reset if in vehicle. */
-    public final boolean noFallVehicleReset;
+    public boolean noFallVehicleReset;
     /** Reset fd to 0  if on ground (dealdamage only). */
-    public final boolean noFallAntiCriticals;
-    public final ActionList noFallActions;
+    public boolean noFallAntiCriticals;
+    public ActionList noFallActions;
 
     // PassableAccuracy: also use if ray-tracing is not used
-    public final ActionList passableActions;
-    public final double     passableHorizontalMargins;
-    public final double     passableVerticalMargins;
-    public final boolean    passableUntrackedTeleportCheck;
-    public final boolean    passableUntrackedCommandCheck;
-    public final boolean    passableUntrackedCommandTryTeleport;
-    public final SimpleCharPrefixTree passableUntrackedCommandPrefixes = new SimpleCharPrefixTree();
+    public ActionList passableActions;
+    public double     passableHorizontalMargins;
+    public double     passableVerticalMargins;
+    public boolean    passableUntrackedTeleportCheck;
+    public boolean    passableUntrackedCommandCheck;
+    public boolean    passableUntrackedCommandTryTeleport;
+    public SimpleCharPrefixTree passableUntrackedCommandPrefixes = new SimpleCharPrefixTree();
 
-    public final int        survivalFlyBlockingSpeed;
-    public final int        survivalFlySneakingSpeed;
-    public final int        survivalFlySpeedingSpeed;
-    public final int        survivalFlySprintingSpeed;
-    public final int        survivalFlySwimmingSpeed;
-    public final int        survivalFlyWalkingSpeed;
-    public final boolean    sfSlownessSprintHack;
+    public int        survivalFlyBlockingSpeed;
+    public int        survivalFlySneakingSpeed;
+    public int        survivalFlySpeedingSpeed;
+    public int        survivalFlySprintingSpeed;
+    public int        survivalFlySwimmingSpeed;
+    public int        survivalFlyWalkingSpeed;
+    public boolean    sfSlownessSprintHack;
     /**
      * If true, will allow moderate bunny hop without lift off. Applies for
      * normal speed on 1.6.4 and probably below.
      */
-    public final boolean    sfGroundHop;
-    public final double     sfStepHeight;
-    public final boolean    survivalFlyAccountingH;
-    public final boolean    survivalFlyAccountingV;
-    public final boolean    survivalFlyAccountingStep;
-    public final boolean    survivalFlyResetItem;
+    public boolean    sfGroundHop;
+    public double     sfStepHeight;
+    public boolean    survivalFlyAccountingH;
+    public boolean    survivalFlyAccountingV;
+    public boolean    survivalFlyAccountingStep;
+    public boolean    survivalFlyResetItem;
     // Leniency settings.
     /** Horizontal buffer (rather sf), after failure leniency. */
-    public final double     hBufMax;
-    public final long       survivalFlyVLFreezeCount;
-    public final boolean    survivalFlyVLFreezeInAir;
+    public double     hBufMax;
+    public long       survivalFlyVLFreezeCount;
+    public boolean    survivalFlyVLFreezeInAir;
     // Set back policy.
-    public final boolean    sfSetBackPolicyVoid;
-    public final boolean    sfSetBackPolicyFallDamage;
-    public final ActionList survivalFlyActions;
+    public boolean    sfSetBackPolicyVoid;
+    public boolean    sfSetBackPolicyFallDamage;
+    public ActionList survivalFlyActions;
 
-    public final boolean 	sfHoverCheck; // Placeholder for potential sub check
-    public final int 		sfHoverTicks;
-    public final int		sfHoverLoginTicks;
-    public final boolean    sfHoverFallDamage;
-    public final double		sfHoverViolation;
+    public boolean 	sfHoverCheck; // Placeholder for potential sub check
+    public int 		sfHoverTicks;
+    public int		sfHoverLoginTicks;
+    public boolean    sfHoverFallDamage;
+    public double		sfHoverViolation;
 
     // Special tolerance values:
     /**
      * Number of moving packets until which a velocity entry must be activated,
      * in order to not be removed.
      */
-    public final int		velocityActivationCounter;
+    public int		velocityActivationCounter;
     /** Server ticks until invalidating queues velocity. */
-    public final int		velocityActivationTicks;
-    public final boolean	velocityStrictInvalidation;
-    public final double     noFallyOnGround;
-    public final double     yOnGround;
+    public int		velocityActivationTicks;
+    public boolean	velocityStrictInvalidation;
+    public double     noFallyOnGround;
+    public double     yOnGround;
 
     // General things.
     /**
      * If to allow splitting moves, due to player.getLocation reflecting
      * something else than from/to.
      */
-    public final boolean splitMoves;
-    public final boolean ignoreStance;
-    public final boolean tempKickIllegal;
-    public final boolean loadChunksOnJoin;
-    public final boolean loadChunksOnMove;
-    public final boolean loadChunksOnTeleport;
-    public final boolean loadChunksOnWorldChange;
-    public final long sprintingGrace;
-    public final boolean assumeSprint;
-    public final int speedGrace;
-    public final boolean enforceLocation;
-    public final boolean trackBlockMove;
-    public final PlayerSetBackMethod playerSetBackMethod;
-    public final boolean resetFwOnground;
-    public final boolean elytraStrict;
+    public boolean splitMoves;
+    public boolean ignoreStance;
+    public boolean tempKickIllegal;
+    public boolean loadChunksOnJoin;
+    public boolean loadChunksOnMove;
+    public boolean loadChunksOnTeleport;
+    public boolean loadChunksOnWorldChange;
+    public long sprintingGrace;
+    public boolean assumeSprint;
+    public int speedGrace;
+    public boolean enforceLocation;
+    public boolean trackBlockMove;
+    public PlayerSetBackMethod playerSetBackMethod;
+    public boolean resetFwOnground;
+    public boolean elytraStrict;
 
     // Vehicles
-    public final boolean vehicleEnforceLocation;
-    public final boolean vehiclePreventDestroyOwn;
-    public final boolean scheduleVehicleSetBacks;
-    public final boolean schedulevehicleSetPassenger;
+    public boolean vehicleEnforceLocation;
+    public boolean vehiclePreventDestroyOwn;
+    public boolean scheduleVehicleSetBacks;
+    public boolean schedulevehicleSetPassenger;
 
-    public final Set<EntityType> ignoredVehicles = new HashSet<EntityType>();
+    public Set<EntityType> ignoredVehicles = new HashSet<EntityType>();
 
-    public final ActionList vehicleMorePacketsActions;
+    public ActionList vehicleMorePacketsActions;
 
-    public final HashMap<EntityType, Double> vehicleEnvelopeHorizontalSpeedCap = new HashMap<EntityType, Double>();
-    public final ActionList vehicleEnvelopeActions;
+    public HashMap<EntityType, Double> vehicleEnvelopeHorizontalSpeedCap = new HashMap<EntityType, Double>();
+    public ActionList vehicleEnvelopeActions;
 
     // Trace
-    public final int traceMaxAge;
-    public final int traceMaxSize;
+    public int traceMaxAge;
+    public int traceMaxSize;
 
     // Messages.
-    public final String msgKickIllegalMove;
-    public final String msgKickIllegalVehicleMove;
+    public String msgKickIllegalMove;
+    public String msgKickIllegalVehicleMove;
 
     /**
      * Instantiates a new moving configuration.
@@ -211,177 +211,15 @@ public class MovingConfig extends ACheckConfig {
         ignoreCreative = config.getBoolean(ConfPaths.MOVING_CREATIVEFLY_IGNORECREATIVE);
         ignoreAllowFlight = config.getBoolean(ConfPaths.MOVING_CREATIVEFLY_IGNOREALLOWFLIGHT);
 
-        final ModelFlying defaultModel = new ModelFlying("gamemode.creative", config, ConfPaths.MOVING_CREATIVEFLY_MODEL + "creative.", new ModelFlying().lock());
-        for (final GameMode gameMode : GameMode.values()) {
-            flyingModelGameMode.put(gameMode, new ModelFlying("gamemode." + gameMode.name().toLowerCase(), config, 
-                    ConfPaths.MOVING_CREATIVEFLY_MODEL + (gameMode.name().toLowerCase()) + ".", defaultModel).lock());
-        }
-        flyingModelLevitation = new ModelFlying(ID_POTION_LEVITATION, config, ConfPaths.MOVING_CREATIVEFLY_MODEL + "levitation.", 
-                                                new ModelFlying(null, defaultModel).scaleLevitationEffect(true).lock());
-
-        flyingModelSlowfalling = new ModelFlying(ID_POTION_SLOWFALLING, config, ConfPaths.MOVING_CREATIVEFLY_MODEL + "slowfalling.", 
-                                                new ModelFlying(null, defaultModel).scaleSlowfallingEffect(true).lock());
-
-        flyingModelRiptiding = new ModelFlying(ID_EFFECT_RIPTIDING, config, ConfPaths.MOVING_CREATIVEFLY_MODEL + "riptiding.", 
-                                               new ModelFlying(null, defaultModel).scaleRiptidingEffect(true).lock());
-
-        flyingModelElytra = new ModelFlying(ID_JETPACK_ELYTRA, config, ConfPaths.MOVING_CREATIVEFLY_MODEL + "elytra.", 
-                                            new ModelFlying(null, defaultModel).verticalAscendGliding(true).lock());
-
-        resetFwOnground = config.getBoolean(ConfPaths.MOVING_CREATIVEFLY_EYTRA_FWRESET);
-        elytraStrict = config.getBoolean(ConfPaths.MOVING_CREATIVEFLY_EYTRA_STRICT);
-        creativeFlyActions = config.getOptimizedActionList(ConfPaths.MOVING_CREATIVEFLY_ACTIONS, Permissions.MOVING_CREATIVEFLY);
-
-        morePacketsEPSIdeal = config.getInt(ConfPaths.MOVING_MOREPACKETS_EPSIDEAL);
-        morePacketsEPSMax = Math.max(morePacketsEPSIdeal, config.getInt(ConfPaths.MOVING_MOREPACKETS_EPSMAX));
-        morePacketsEPSBuckets = 2 * Math.max(1, Math.min(60, config.getInt(ConfPaths.MOVING_MOREPACKETS_SECONDS)));
-        morePacketsBurstPackets = config.getInt(ConfPaths.MOVING_MOREPACKETS_BURST_EPM);
-        morePacketsBurstDirect = config.getInt(ConfPaths.MOVING_MOREPACKETS_BURST_DIRECT);
-        morePacketsBurstEPM = config.getInt(ConfPaths.MOVING_MOREPACKETS_BURST_EPM);
-        morePacketsSetBackAge = config.getInt(ConfPaths.MOVING_MOREPACKETS_SETBACKAGE);
-        morePacketsActions = config.getOptimizedActionList(ConfPaths.MOVING_MOREPACKETS_ACTIONS, Permissions.MOVING_MOREPACKETS);
-
-        noFallDealDamage = config.getBoolean(ConfPaths.MOVING_NOFALL_DEALDAMAGE);
-        noFallSkipAllowFlight = config.getBoolean(ConfPaths.MOVING_NOFALL_SKIPALLOWFLIGHT);
-        noFallViolationReset = config.getBoolean(ConfPaths.MOVING_NOFALL_RESETONVL);
-        noFallTpReset = config.getBoolean(ConfPaths.MOVING_NOFALL_RESETONTP);
-        noFallVehicleReset = config.getBoolean(ConfPaths.MOVING_NOFALL_RESETONVEHICLE);
-        noFallAntiCriticals = config.getBoolean(ConfPaths.MOVING_NOFALL_ANTICRITICALS);
-        noFallActions = config.getOptimizedActionList(ConfPaths.MOVING_NOFALL_ACTIONS, Permissions.MOVING_NOFALL);
-
-        passableActions = config.getOptimizedActionList(ConfPaths.MOVING_PASSABLE_ACTIONS, Permissions.MOVING_PASSABLE);
-        passableHorizontalMargins = config.getDouble(ConfPaths.MOVING_PASSABLE_RT_XZ_FACTOR, 0.1, 1.0, 0.999999);
-        passableVerticalMargins = config.getDouble(ConfPaths.MOVING_PASSABLE_RT_Y_FACTOR, 0.1, 1.0, 0.999999);
-        passableUntrackedTeleportCheck = config.getBoolean(ConfPaths.MOVING_PASSABLE_UNTRACKED_TELEPORT_ACTIVE);
-        passableUntrackedCommandCheck = config.getBoolean(ConfPaths.MOVING_PASSABLE_UNTRACKED_CMD_ACTIVE);
-        passableUntrackedCommandTryTeleport = config.getBoolean(ConfPaths.MOVING_PASSABLE_UNTRACKED_CMD_TRYTELEPORT);
-        CommandUtil.feedCommands(passableUntrackedCommandPrefixes, config, ConfPaths.MOVING_PASSABLE_UNTRACKED_CMD_PREFIXES, true);
-
-        // Default values are specified here because this settings aren't showed by default into the configuration file.
-        survivalFlyBlockingSpeed = config.getInt(ConfPaths.MOVING_SURVIVALFLY_BLOCKINGSPEED, 100);
-        survivalFlySneakingSpeed = config.getInt(ConfPaths.MOVING_SURVIVALFLY_SNEAKINGSPEED, 100);
-        survivalFlySpeedingSpeed = config.getInt(ConfPaths.MOVING_SURVIVALFLY_SPEEDINGSPEED, 200);
-        survivalFlySprintingSpeed = config.getInt(ConfPaths.MOVING_SURVIVALFLY_SPRINTINGSPEED, 100);
-        survivalFlySwimmingSpeed = config.getInt(ConfPaths.MOVING_SURVIVALFLY_SWIMMINGSPEED, 100);
-        survivalFlyWalkingSpeed = config.getInt(ConfPaths.MOVING_SURVIVALFLY_WALKINGSPEED, 100);
-        sfSlownessSprintHack = config.getAlmostBoolean(ConfPaths.MOVING_SURVIVALFLY_SLOWNESSSPRINTHACK, AlmostBoolean.MAYBE).decideOptimistically();
-        sfGroundHop = config.getBoolean(ConfPaths.MOVING_SURVIVALFLY_GROUNDHOP, ServerVersion.compareMinecraftVersion("1.7") == -1);
-        survivalFlyAccountingH = config.getBoolean(ConfPaths.MOVING_SURVIVALFLY_EXTENDED_HACC);
-        survivalFlyAccountingV = config.getBoolean(ConfPaths.MOVING_SURVIVALFLY_EXTENDED_VACC);
-        survivalFlyAccountingStep = config.getBoolean(ConfPaths.MOVING_SURVIVALFLY_EXTENDED_STEP);
-        survivalFlyResetItem = config.getBoolean(ConfPaths.MOVING_SURVIVALFLY_EXTENDED_RESETITEM);
-        sfSetBackPolicyFallDamage = config.getBoolean(ConfPaths.MOVING_SURVIVALFLY_SETBACKPOLICY_FALLDAMAGE);
-        sfSetBackPolicyVoid = config.getBoolean(ConfPaths.MOVING_SURVIVALFLY_SETBACKPOLICY_VOIDTOVOID);
-        final double sfStepHeight = config.getDouble(ConfPaths.MOVING_SURVIVALFLY_STEPHEIGHT, Double.MAX_VALUE);
-        if (sfStepHeight == Double.MAX_VALUE) {
-            final String ref;
-            if (Bukkit.getVersion().toLowerCase().contains("spigot")) {
-                // Assume 1.8 clients being supported.
-                ref = "1.7.10";
-            } else {
-                ref = "1.8";
-            }
-            this.sfStepHeight = ServerVersion.select(ref, 0.5, 0.6, 0.6, 0.5).doubleValue();
-        } else {
-            this.sfStepHeight = sfStepHeight;
-        }
-        hBufMax = config.getDouble(ConfPaths.MOVING_SURVIVALFLY_LENIENCY_HBUFMAX);
-        survivalFlyVLFreezeCount = config.getInt(ConfPaths.MOVING_SURVIVALFLY_LENIENCY_FREEZECOUNT);
-        survivalFlyVLFreezeInAir = config.getBoolean(ConfPaths.MOVING_SURVIVALFLY_LENIENCY_FREEZEINAIR);
-        survivalFlyActions = config.getOptimizedActionList(ConfPaths.MOVING_SURVIVALFLY_ACTIONS, Permissions.MOVING_SURVIVALFLY);
-
-        sfHoverCheck = config.getBoolean(ConfPaths.MOVING_SURVIVALFLY_HOVER_CHECK);
-        sfHoverTicks = config.getInt(ConfPaths.MOVING_SURVIVALFLY_HOVER_TICKS);
-        sfHoverLoginTicks = Math.max(0, config.getInt(ConfPaths.MOVING_SURVIVALFLY_HOVER_LOGINTICKS));
-        sfHoverFallDamage = config.getBoolean(ConfPaths.MOVING_SURVIVALFLY_HOVER_FALLDAMAGE);
-        sfHoverViolation = config.getDouble(ConfPaths.MOVING_SURVIVALFLY_HOVER_SFVIOLATION);
-
-        velocityActivationCounter = config.getInt(ConfPaths.MOVING_VELOCITY_ACTIVATIONCOUNTER);
-        velocityActivationTicks = config.getInt(ConfPaths.MOVING_VELOCITY_ACTIVATIONTICKS);
-        velocityStrictInvalidation = config.getBoolean(ConfPaths.MOVING_VELOCITY_STRICTINVALIDATION);
-        yOnGround = config.getDouble(ConfPaths.MOVING_YONGROUND, Magic.Y_ON_GROUND_MIN, Magic.Y_ON_GROUND_MAX, Magic.Y_ON_GROUND_DEFAULT); // sqrt(1/256), see: NetServerHandler.
-        noFallyOnGround = config.getDouble(ConfPaths.MOVING_NOFALL_YONGROUND, Magic.Y_ON_GROUND_MIN, Magic.Y_ON_GROUND_MAX, yOnGround);
-
-        AlmostBoolean refSplitMoves = config.getAlmostBoolean(ConfPaths.MOVING_SPLITMOVES, AlmostBoolean.MAYBE);
-        //splitMoves = refSplitMoves == AlmostBoolean.MAYBE ? ServerVersion.compareMinecraftVersion("1.9") == -1 : refSplitMoves.decide();
-        splitMoves = refSplitMoves.decideOptimistically();
-        // Ignore the stance once the server is confirmed to catch such cases.
-        AlmostBoolean refIgnoreStance = config.getAlmostBoolean(ConfPaths.MOVING_IGNORESTANCE, AlmostBoolean.MAYBE);
-        ignoreStance = refIgnoreStance == AlmostBoolean.MAYBE ? ServerVersion.compareMinecraftVersion("1.8") >= 0 : refIgnoreStance.decide();
-        tempKickIllegal = config.getBoolean(ConfPaths.MOVING_TEMPKICKILLEGAL);
-        loadChunksOnJoin = config.getBoolean(ConfPaths.MOVING_LOADCHUNKS_JOIN);
-        loadChunksOnMove = config.getBoolean(ConfPaths.MOVING_LOADCHUNKS_MOVE);
-        loadChunksOnTeleport = config.getBoolean(ConfPaths.MOVING_LOADCHUNKS_TELEPORT);
-        loadChunksOnWorldChange = config.getBoolean(ConfPaths.MOVING_LOADCHUNKS_WORLDCHANGE);
-        sprintingGrace = Math.max(0L, (long) (config.getDouble(ConfPaths.MOVING_SPRINTINGGRACE) * 1000.0)); // Config: seconds.
-        assumeSprint = config.getBoolean(ConfPaths.MOVING_ASSUMESPRINT);
-        speedGrace = Math.max(0, (int) Math.round(config.getDouble(ConfPaths.MOVING_SPEEDGRACE) * 20.0)); // Config: seconds
-        AlmostBoolean ref = config.getAlmostBoolean(ConfPaths.MOVING_ENFORCELOCATION, AlmostBoolean.MAYBE);
-        if (ref == AlmostBoolean.MAYBE) {
-            enforceLocation = Bugs.shouldEnforceLocation();
-        } else {
-            enforceLocation = ref.decide();
-        }
-        // Consider renaming overall flag to trackBlockChanges and creating a sub-config.
-        trackBlockMove = config.getBoolean(ConfPaths.COMPATIBILITY_BLOCKS_CHANGETRACKER_ACTIVE) 
-                && (config.getBoolean(ConfPaths.COMPATIBILITY_BLOCKS_CHANGETRACKER_PISTONS
-                        // Consider adding other activation flags.
-                        ));
-        final PlayerSetBackMethod playerSetBackMethod = PlayerSetBackMethod.fromString(
-                "extern.fromconfig", config.getString(ConfPaths.MOVING_SETBACK_METHOD));
-        if (playerSetBackMethod.doesThisMakeSense()) {
-            // (Might info/warn if legacy is used without setTo and without SCHEDULE and similar?)
-            this.playerSetBackMethod = playerSetBackMethod;
-        }
-        else if (ServerVersion.compareMinecraftVersion("1.9") < 0) {
-            this.playerSetBackMethod = PlayerSetBackMethod.LEGACY;
-        }
-        else {
-            // Latest.
-            this.playerSetBackMethod = PlayerSetBackMethod.MODERN;
-        }
-
-        traceMaxAge = config.getInt(ConfPaths.MOVING_TRACE_MAXAGE, 30);
-        traceMaxSize = config.getInt(ConfPaths.MOVING_TRACE_MAXSIZE, 30);
-
-        ref = config.getAlmostBoolean(ConfPaths.MOVING_VEHICLE_ENFORCELOCATION, AlmostBoolean.MAYBE);
-        vehicleEnforceLocation = ref.decideOptimistically(); // Currently rather enabled.
-        vehiclePreventDestroyOwn = config.getBoolean(ConfPaths.MOVING_VEHICLE_PREVENTDESTROYOWN);
-        scheduleVehicleSetBacks = config.getAlmostBoolean(ConfPaths.MOVING_VEHICLE_SCHEDULESETBACKS, AlmostBoolean.MAYBE).decide();
-        vehicleMorePacketsActions = config.getOptimizedActionList(ConfPaths.MOVING_VEHICLE_MOREPACKETS_ACTIONS, Permissions.MOVING_MOREPACKETS);
-        schedulevehicleSetPassenger = config.getAlmostBoolean(ConfPaths.MOVING_VEHICLE_DELAYADDPASSENGER, AlmostBoolean.MAYBE).decideOptimistically();
-        ref = config.getAlmostBoolean(ConfPaths.MOVING_VEHICLE_ENVELOPE_ACTIVE, AlmostBoolean.MAYBE);
-        if (ServerVersion.compareMinecraftVersion("1.9") < 0) {
-            worldData.overrideCheckActivation(CheckType.MOVING_VEHICLE_ENVELOPE, 
-                    AlmostBoolean.NO, OverrideType.PERMANENT, true);
-        }
-        config.readDoubleValuesForEntityTypes(ConfPaths.MOVING_VEHICLE_ENVELOPE_HSPEEDCAP, vehicleEnvelopeHorizontalSpeedCap, 4.0, true);
-        vehicleEnvelopeActions = config.getOptimizedActionList(ConfPaths.MOVING_VEHICLE_ENVELOPE_ACTIONS, Permissions.MOVING_VEHICLE_ENVELOPE);
-        // Ignored vehicle types (ignore mostly, no checks run).
-        List<String> types;
-        if (config.get(ConfPaths.MOVING_VEHICLE_IGNOREDVEHICLES) == null) { // Hidden setting for now.
-            // Use defaults.
-            types = Arrays.asList("arrow", "spectral_arrow", "tipped_arrow");
-        }
-        else {
-            types = config.getStringList(ConfPaths.MOVING_VEHICLE_IGNOREDVEHICLES);
-        }
-        for (String stype : types) {
-            try {
-                EntityType type = EntityType.valueOf(stype.toUpperCase());
-                if (type != null) {
-                    ignoredVehicles.add(type);
-                }
-            }
-            catch (IllegalArgumentException e) {
-                // ignore - unknown vehicle type
-            }
-        }
-
-
-        // Messages.
-        msgKickIllegalMove = ColorUtil.replaceColors(config.getString(ConfPaths.MOVING_MESSAGE_ILLEGALPLAYERMOVE));
-        msgKickIllegalVehicleMove = ColorUtil.replaceColors(config.getString(ConfPaths.MOVING_MESSAGE_ILLEGALVEHICLEMOVE));
+        loadCreativeFlyModels(config);
+        loadMorePacketsSettings(config);
+        loadNoFallSettings(config);
+        loadPassableSettings(config);
+        loadSurvivalFlySettings(config);
+        loadVelocitySettings(config);
+        loadGeneralSettings(config, worldData);
+        loadVehicleSettings(config, worldData);
+        loadMessageSettings(config);
     }
 
 
@@ -446,6 +284,198 @@ public class MovingConfig extends ACheckConfig {
         }
         // Default by game mode.
         return modelGameMode;
+    }
+
+    private void loadCreativeFlyModels(final ConfigFile config) {
+        final ModelFlying defaultModel = new ModelFlying("gamemode.creative", config,
+                ConfPaths.MOVING_CREATIVEFLY_MODEL + "creative.", new ModelFlying().lock());
+        for (final GameMode gameMode : GameMode.values()) {
+            flyingModelGameMode.put(gameMode, new ModelFlying("gamemode." + gameMode.name().toLowerCase(), config,
+                    ConfPaths.MOVING_CREATIVEFLY_MODEL + gameMode.name().toLowerCase() + ".", defaultModel).lock());
+        }
+        flyingModelLevitation = new ModelFlying(ID_POTION_LEVITATION, config,
+                ConfPaths.MOVING_CREATIVEFLY_MODEL + "levitation.",
+                new ModelFlying(null, defaultModel).scaleLevitationEffect(true).lock());
+        flyingModelSlowfalling = new ModelFlying(ID_POTION_SLOWFALLING, config,
+                ConfPaths.MOVING_CREATIVEFLY_MODEL + "slowfalling.",
+                new ModelFlying(null, defaultModel).scaleSlowfallingEffect(true).lock());
+        flyingModelRiptiding = new ModelFlying(ID_EFFECT_RIPTIDING, config,
+                ConfPaths.MOVING_CREATIVEFLY_MODEL + "riptiding.",
+                new ModelFlying(null, defaultModel).scaleRiptidingEffect(true).lock());
+        flyingModelElytra = new ModelFlying(ID_JETPACK_ELYTRA, config,
+                ConfPaths.MOVING_CREATIVEFLY_MODEL + "elytra.",
+                new ModelFlying(null, defaultModel).verticalAscendGliding(true).lock());
+
+        resetFwOnground = config.getBoolean(ConfPaths.MOVING_CREATIVEFLY_EYTRA_FWRESET);
+        elytraStrict = config.getBoolean(ConfPaths.MOVING_CREATIVEFLY_EYTRA_STRICT);
+        creativeFlyActions = config.getOptimizedActionList(ConfPaths.MOVING_CREATIVEFLY_ACTIONS,
+                Permissions.MOVING_CREATIVEFLY);
+    }
+
+    private void loadMorePacketsSettings(final ConfigFile config) {
+        morePacketsEPSIdeal = config.getInt(ConfPaths.MOVING_MOREPACKETS_EPSIDEAL);
+        morePacketsEPSMax = Math.max(morePacketsEPSIdeal, config.getInt(ConfPaths.MOVING_MOREPACKETS_EPSMAX));
+        morePacketsEPSBuckets = 2 * Math.max(1, Math.min(60, config.getInt(ConfPaths.MOVING_MOREPACKETS_SECONDS)));
+        morePacketsBurstPackets = config.getInt(ConfPaths.MOVING_MOREPACKETS_BURST_EPM);
+        morePacketsBurstDirect = config.getInt(ConfPaths.MOVING_MOREPACKETS_BURST_DIRECT);
+        morePacketsBurstEPM = config.getInt(ConfPaths.MOVING_MOREPACKETS_BURST_EPM);
+        morePacketsSetBackAge = config.getInt(ConfPaths.MOVING_MOREPACKETS_SETBACKAGE);
+        morePacketsActions = config.getOptimizedActionList(ConfPaths.MOVING_MOREPACKETS_ACTIONS,
+                Permissions.MOVING_MOREPACKETS);
+    }
+
+    private void loadNoFallSettings(final ConfigFile config) {
+        noFallDealDamage = config.getBoolean(ConfPaths.MOVING_NOFALL_DEALDAMAGE);
+        noFallSkipAllowFlight = config.getBoolean(ConfPaths.MOVING_NOFALL_SKIPALLOWFLIGHT);
+        noFallViolationReset = config.getBoolean(ConfPaths.MOVING_NOFALL_RESETONVL);
+        noFallTpReset = config.getBoolean(ConfPaths.MOVING_NOFALL_RESETONTP);
+        noFallVehicleReset = config.getBoolean(ConfPaths.MOVING_NOFALL_RESETONVEHICLE);
+        noFallAntiCriticals = config.getBoolean(ConfPaths.MOVING_NOFALL_ANTICRITICALS);
+        noFallActions = config.getOptimizedActionList(ConfPaths.MOVING_NOFALL_ACTIONS,
+                Permissions.MOVING_NOFALL);
+    }
+
+    private void loadPassableSettings(final ConfigFile config) {
+        passableActions = config.getOptimizedActionList(ConfPaths.MOVING_PASSABLE_ACTIONS,
+                Permissions.MOVING_PASSABLE);
+        passableHorizontalMargins = config.getDouble(ConfPaths.MOVING_PASSABLE_RT_XZ_FACTOR, 0.1, 1.0, 0.999999);
+        passableVerticalMargins = config.getDouble(ConfPaths.MOVING_PASSABLE_RT_Y_FACTOR, 0.1, 1.0, 0.999999);
+        passableUntrackedTeleportCheck = config.getBoolean(ConfPaths.MOVING_PASSABLE_UNTRACKED_TELEPORT_ACTIVE);
+        passableUntrackedCommandCheck = config.getBoolean(ConfPaths.MOVING_PASSABLE_UNTRACKED_CMD_ACTIVE);
+        passableUntrackedCommandTryTeleport = config.getBoolean(ConfPaths.MOVING_PASSABLE_UNTRACKED_CMD_TRYTELEPORT);
+        CommandUtil.feedCommands(passableUntrackedCommandPrefixes, config,
+                ConfPaths.MOVING_PASSABLE_UNTRACKED_CMD_PREFIXES, true);
+    }
+
+    private void loadSurvivalFlySettings(final ConfigFile config) {
+        // Default values are specified here because this settings aren't showed by default into the configuration file.
+        survivalFlyBlockingSpeed = config.getInt(ConfPaths.MOVING_SURVIVALFLY_BLOCKINGSPEED, 100);
+        survivalFlySneakingSpeed = config.getInt(ConfPaths.MOVING_SURVIVALFLY_SNEAKINGSPEED, 100);
+        survivalFlySpeedingSpeed = config.getInt(ConfPaths.MOVING_SURVIVALFLY_SPEEDINGSPEED, 200);
+        survivalFlySprintingSpeed = config.getInt(ConfPaths.MOVING_SURVIVALFLY_SPRINTINGSPEED, 100);
+        survivalFlySwimmingSpeed = config.getInt(ConfPaths.MOVING_SURVIVALFLY_SWIMMINGSPEED, 100);
+        survivalFlyWalkingSpeed = config.getInt(ConfPaths.MOVING_SURVIVALFLY_WALKINGSPEED, 100);
+        sfSlownessSprintHack = config.getAlmostBoolean(ConfPaths.MOVING_SURVIVALFLY_SLOWNESSSPRINTHACK,
+                AlmostBoolean.MAYBE).decideOptimistically();
+        sfGroundHop = config.getBoolean(ConfPaths.MOVING_SURVIVALFLY_GROUNDHOP,
+                ServerVersion.compareMinecraftVersion("1.7") == -1);
+        survivalFlyAccountingH = config.getBoolean(ConfPaths.MOVING_SURVIVALFLY_EXTENDED_HACC);
+        survivalFlyAccountingV = config.getBoolean(ConfPaths.MOVING_SURVIVALFLY_EXTENDED_VACC);
+        survivalFlyAccountingStep = config.getBoolean(ConfPaths.MOVING_SURVIVALFLY_EXTENDED_STEP);
+        survivalFlyResetItem = config.getBoolean(ConfPaths.MOVING_SURVIVALFLY_EXTENDED_RESETITEM);
+        sfSetBackPolicyFallDamage = config.getBoolean(ConfPaths.MOVING_SURVIVALFLY_SETBACKPOLICY_FALLDAMAGE);
+        sfSetBackPolicyVoid = config.getBoolean(ConfPaths.MOVING_SURVIVALFLY_SETBACKPOLICY_VOIDTOVOID);
+        final double sfStepHeight = config.getDouble(ConfPaths.MOVING_SURVIVALFLY_STEPHEIGHT, Double.MAX_VALUE);
+        if (sfStepHeight == Double.MAX_VALUE) {
+            final String ref;
+            if (Bukkit.getVersion().toLowerCase().contains("spigot")) {
+                ref = "1.7.10";
+            } else {
+                ref = "1.8";
+            }
+            this.sfStepHeight = ServerVersion.select(ref, 0.5, 0.6, 0.6, 0.5).doubleValue();
+        } else {
+            this.sfStepHeight = sfStepHeight;
+        }
+        hBufMax = config.getDouble(ConfPaths.MOVING_SURVIVALFLY_LENIENCY_HBUFMAX);
+        survivalFlyVLFreezeCount = config.getInt(ConfPaths.MOVING_SURVIVALFLY_LENIENCY_FREEZECOUNT);
+        survivalFlyVLFreezeInAir = config.getBoolean(ConfPaths.MOVING_SURVIVALFLY_LENIENCY_FREEZEINAIR);
+        survivalFlyActions = config.getOptimizedActionList(ConfPaths.MOVING_SURVIVALFLY_ACTIONS,
+                Permissions.MOVING_SURVIVALFLY);
+
+        sfHoverCheck = config.getBoolean(ConfPaths.MOVING_SURVIVALFLY_HOVER_CHECK);
+        sfHoverTicks = config.getInt(ConfPaths.MOVING_SURVIVALFLY_HOVER_TICKS);
+        sfHoverLoginTicks = Math.max(0, config.getInt(ConfPaths.MOVING_SURVIVALFLY_HOVER_LOGINTICKS));
+        sfHoverFallDamage = config.getBoolean(ConfPaths.MOVING_SURVIVALFLY_HOVER_FALLDAMAGE);
+        sfHoverViolation = config.getDouble(ConfPaths.MOVING_SURVIVALFLY_HOVER_SFVIOLATION);
+    }
+
+    private void loadVelocitySettings(final ConfigFile config) {
+        velocityActivationCounter = config.getInt(ConfPaths.MOVING_VELOCITY_ACTIVATIONCOUNTER);
+        velocityActivationTicks = config.getInt(ConfPaths.MOVING_VELOCITY_ACTIVATIONTICKS);
+        velocityStrictInvalidation = config.getBoolean(ConfPaths.MOVING_VELOCITY_STRICTINVALIDATION);
+        yOnGround = config.getDouble(ConfPaths.MOVING_YONGROUND, Magic.Y_ON_GROUND_MIN, Magic.Y_ON_GROUND_MAX,
+                Magic.Y_ON_GROUND_DEFAULT);
+        noFallyOnGround = config.getDouble(ConfPaths.MOVING_NOFALL_YONGROUND, Magic.Y_ON_GROUND_MIN,
+                Magic.Y_ON_GROUND_MAX, yOnGround);
+    }
+
+    private void loadGeneralSettings(final ConfigFile config, final IWorldData worldData) {
+        AlmostBoolean refSplitMoves = config.getAlmostBoolean(ConfPaths.MOVING_SPLITMOVES, AlmostBoolean.MAYBE);
+        splitMoves = refSplitMoves.decideOptimistically();
+        AlmostBoolean refIgnoreStance = config.getAlmostBoolean(ConfPaths.MOVING_IGNORESTANCE, AlmostBoolean.MAYBE);
+        ignoreStance = refIgnoreStance == AlmostBoolean.MAYBE
+                ? ServerVersion.compareMinecraftVersion("1.8") >= 0
+                : refIgnoreStance.decide();
+        tempKickIllegal = config.getBoolean(ConfPaths.MOVING_TEMPKICKILLEGAL);
+        loadChunksOnJoin = config.getBoolean(ConfPaths.MOVING_LOADCHUNKS_JOIN);
+        loadChunksOnMove = config.getBoolean(ConfPaths.MOVING_LOADCHUNKS_MOVE);
+        loadChunksOnTeleport = config.getBoolean(ConfPaths.MOVING_LOADCHUNKS_TELEPORT);
+        loadChunksOnWorldChange = config.getBoolean(ConfPaths.MOVING_LOADCHUNKS_WORLDCHANGE);
+        sprintingGrace = Math.max(0L, (long) (config.getDouble(ConfPaths.MOVING_SPRINTINGGRACE) * 1000.0));
+        assumeSprint = config.getBoolean(ConfPaths.MOVING_ASSUMESPRINT);
+        speedGrace = Math.max(0, (int) Math.round(config.getDouble(ConfPaths.MOVING_SPEEDGRACE) * 20.0));
+        AlmostBoolean ref = config.getAlmostBoolean(ConfPaths.MOVING_ENFORCELOCATION, AlmostBoolean.MAYBE);
+        if (ref == AlmostBoolean.MAYBE) {
+            enforceLocation = Bugs.shouldEnforceLocation();
+        } else {
+            enforceLocation = ref.decide();
+        }
+        trackBlockMove = config.getBoolean(ConfPaths.COMPATIBILITY_BLOCKS_CHANGETRACKER_ACTIVE)
+                && (config.getBoolean(ConfPaths.COMPATIBILITY_BLOCKS_CHANGETRACKER_PISTONS));
+        final PlayerSetBackMethod playerSetBackMethod = PlayerSetBackMethod.fromString(
+                "extern.fromconfig", config.getString(ConfPaths.MOVING_SETBACK_METHOD));
+        if (playerSetBackMethod.doesThisMakeSense()) {
+            this.playerSetBackMethod = playerSetBackMethod;
+        } else if (ServerVersion.compareMinecraftVersion("1.9") < 0) {
+            this.playerSetBackMethod = PlayerSetBackMethod.LEGACY;
+        } else {
+            this.playerSetBackMethod = PlayerSetBackMethod.MODERN;
+        }
+        traceMaxAge = config.getInt(ConfPaths.MOVING_TRACE_MAXAGE, 30);
+        traceMaxSize = config.getInt(ConfPaths.MOVING_TRACE_MAXSIZE, 30);
+    }
+
+    private void loadVehicleSettings(final ConfigFile config, final IWorldData worldData) {
+        AlmostBoolean ref = config.getAlmostBoolean(ConfPaths.MOVING_VEHICLE_ENFORCELOCATION, AlmostBoolean.MAYBE);
+        vehicleEnforceLocation = ref.decideOptimistically();
+        vehiclePreventDestroyOwn = config.getBoolean(ConfPaths.MOVING_VEHICLE_PREVENTDESTROYOWN);
+        scheduleVehicleSetBacks = config.getAlmostBoolean(ConfPaths.MOVING_VEHICLE_SCHEDULESETBACKS,
+                AlmostBoolean.MAYBE).decide();
+        vehicleMorePacketsActions = config.getOptimizedActionList(ConfPaths.MOVING_VEHICLE_MOREPACKETS_ACTIONS,
+                Permissions.MOVING_MOREPACKETS);
+        schedulevehicleSetPassenger = config.getAlmostBoolean(ConfPaths.MOVING_VEHICLE_DELAYADDPASSENGER,
+                AlmostBoolean.MAYBE).decideOptimistically();
+        ref = config.getAlmostBoolean(ConfPaths.MOVING_VEHICLE_ENVELOPE_ACTIVE, AlmostBoolean.MAYBE);
+        if (ServerVersion.compareMinecraftVersion("1.9") < 0) {
+            worldData.overrideCheckActivation(CheckType.MOVING_VEHICLE_ENVELOPE,
+                    AlmostBoolean.NO, OverrideType.PERMANENT, true);
+        }
+        config.readDoubleValuesForEntityTypes(ConfPaths.MOVING_VEHICLE_ENVELOPE_HSPEEDCAP,
+                vehicleEnvelopeHorizontalSpeedCap, 4.0, true);
+        vehicleEnvelopeActions = config.getOptimizedActionList(ConfPaths.MOVING_VEHICLE_ENVELOPE_ACTIONS,
+                Permissions.MOVING_VEHICLE_ENVELOPE);
+        List<String> types;
+        if (config.get(ConfPaths.MOVING_VEHICLE_IGNOREDVEHICLES) == null) {
+            types = Arrays.asList("arrow", "spectral_arrow", "tipped_arrow");
+        } else {
+            types = config.getStringList(ConfPaths.MOVING_VEHICLE_IGNOREDVEHICLES);
+        }
+        for (String stype : types) {
+            try {
+                EntityType type = EntityType.valueOf(stype.toUpperCase());
+                if (type != null) {
+                    ignoredVehicles.add(type);
+                }
+            } catch (IllegalArgumentException e) {
+                // ignore - unknown vehicle type
+            }
+        }
+    }
+
+    private void loadMessageSettings(final ConfigFile config) {
+        msgKickIllegalMove = ColorUtil.replaceColors(config.getString(ConfPaths.MOVING_MESSAGE_ILLEGALPLAYERMOVE));
+        msgKickIllegalVehicleMove = ColorUtil.replaceColors(config.getString(ConfPaths.MOVING_MESSAGE_ILLEGALVEHICLEMOVE));
     }
 
 }
