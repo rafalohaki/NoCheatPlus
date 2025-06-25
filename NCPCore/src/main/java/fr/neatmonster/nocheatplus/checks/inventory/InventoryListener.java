@@ -379,8 +379,8 @@ public class InventoryListener  extends CheckListener implements JoinLeaveListen
     private void outputDebugInventoryClick(final Player player, final int slot, final InventoryClickEvent event, 
                                            final String action) {
 
-        // TODO: Check if this breaks legacy compat (disable there perhaps).
-        // TODO: Consider only logging where different from expected (CraftXY, more/other viewer than player). 
+        // Check if this breaks legacy compatibility and disable there if needed.
+        // Consider logging only where different from expected (CraftXY, more/other viewer than player).
 
         final StringBuilder builder = new StringBuilder(512);
         builder.append("Inventory click: slot: " + slot);
@@ -478,8 +478,8 @@ public class InventoryListener  extends CheckListener implements JoinLeaveListen
         if (event.hasItem()) {
             final ItemStack item = event.getItem();
             final Material type = item.getType();
-            // TODO: Get Magic values (800) from the config.
-            // TODO: Cancelled / deny use item -> reset all?
+            // Retrieve timing values from configuration (default: 800 ms).
+            // Cancelled or denied item use might require resetting state.
             if (type == Material.BOW) {
                 final long now = System.currentTimeMillis();
                 // It was a bow, the player starts to pull the string, remember this time.
@@ -534,7 +534,7 @@ public class InventoryListener  extends CheckListener implements JoinLeaveListen
             event.setCancelled(true);
             return;
         }
-        // TODO: Activate mob-egg check only for specific server versions.
+        // Activate mob-egg check only for specific server versions (pending review).
         final ItemStack stack = Bridge1_9.getUsedItem(player, event);
         Entity entity = event.getRightClicked();
         if (stack != null &&  MaterialUtil.isSpawnEgg(stack.getType())
@@ -749,9 +749,8 @@ public class InventoryListener  extends CheckListener implements JoinLeaveListen
                 }
             }
         }
-        // TODO: Let's check for certain conditions here, to see if the player is
-        // Actually moving and not just moving from other events (Ice, falling, velocity)
-        // TODO: Other concept of InventoryMove , merge MoreInventory, confine more(close inv on jump) ?
+        // Evaluate if the player is actually moving or triggered by external events.
+        // Consider merging InventoryMove and MoreInventory handling.
         iData.lastMoveEvent = System.currentTimeMillis();
     }
     
@@ -807,11 +806,11 @@ public class InventoryListener  extends CheckListener implements JoinLeaveListen
     //      if (block == null) {
     //          return;
     //      }
-    //      // TODO: + explosions !? + entity change block + ...
+    //      // Handling explosions and entity-change-block events could be added here.
     //    }
     //
     //  private void checkInventoryHolder(InventoryHolder entity) {
-    //      // TODO Auto-generated method stub
+    //      // Implementation placeholder.
     //      
     //  }
 

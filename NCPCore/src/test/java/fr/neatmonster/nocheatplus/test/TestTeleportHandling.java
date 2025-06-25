@@ -30,6 +30,8 @@ import java.lang.reflect.Field;
 import java.lang.reflect.InvocationHandler;
 import java.lang.reflect.Method;
 import java.lang.reflect.Proxy;
+import java.util.HashMap;
+import java.util.UUID;
 
 import static org.junit.Assert.*;
 
@@ -77,7 +79,7 @@ public class TestTeleportHandling {
         Object pdm = u.allocateInstance(PlayerDataManager.class);
         Field eh = PlayerDataManager.class.getDeclaredField("executionHistories");
         eh.setAccessible(true);
-        eh.set(pdm, new java.util.HashMap<>());
+        eh.set(pdm, new HashMap<>());
         Field dm = DataManager.class.getDeclaredField("instance");
         dm.setAccessible(true);
         dm.set(null, pdm);
@@ -136,7 +138,7 @@ public class TestTeleportHandling {
         @Override public PlayerData getPlayerData(Player player, boolean create) { return pData; }
         @Override public PlayerData getPlayerData(Player player) { return pData; }
         @Override public PlayerData getPlayerData(String playerName) { return pData; }
-        @Override public PlayerData getPlayerData(java.util.UUID id) { return pData; }
+        @Override public PlayerData getPlayerData(UUID id) { return pData; }
     }
 
     private static DummyPlayerDataManager createDataMan(PlayerData data, sun.misc.Unsafe u) throws Exception {

@@ -20,7 +20,21 @@ public final class VelocityProcessor {
     private VelocityProcessor() {}
 
     /**
-     * Recalculate explosion velocity and apply bubble column launch effects.
+     * Apply queued velocity effects for the current move.
+     *
+     * <p>The method expects to be called on the main thread with valid move
+     * data and player state. It updates the {@link MovingData} instance by
+     * applying any pending explosion or bubble column launch velocities.</p>
+     *
+     * @param player the player
+     * @param thisMove data for the current move
+     * @param lastMove data for the previous move
+     * @param data player specific moving data
+     * @param cc moving configuration
+     * @param tick current server tick
+     * @param checkSf whether to consider special fluid effects
+     * @param debug true if debug output is allowed
+     * @param pFrom server backed player location
      */
     public static void handleVelocity(Player player, PlayerMoveData thisMove,
             PlayerMoveData lastMove, MovingData data, MovingConfig cc, int tick,
@@ -34,6 +48,20 @@ public final class VelocityProcessor {
         }
     }
 
+    /**
+     * Apply stored explosion velocity components to a player.
+     *
+     * <p>The method clears the temporary explosion velocity fields in
+     * {@link MovingData} after transferring them to active velocity entries.
+     * It should be invoked on the main thread with non-null parameters.</p>
+     *
+     * @param player the player
+     * @param lastMove previous move data
+     * @param data player specific moving data
+     * @param cc moving configuration
+     * @param tick current server tick
+     * @param debug true if debug output is allowed
+     */
     private static void applyExplosionVelocity(Player player, PlayerMoveData lastMove, MovingData data,
             MovingConfig cc, int tick, boolean debug) {
         data.shouldApplyExplosionVelocity = false;
@@ -71,6 +99,20 @@ public final class VelocityProcessor {
         data.explosionVelAxisZ = 0.0;
     }
 
+    /**
+     * Handle bubble column launch adjustments.
+     *
+     * <p>The method inspects recent move data to add vertical and horizontal
+     * velocity when a player is propelled by a bubble column. It modifies the
+     * provided {@link MovingData} and should run on the main thread.</p>
+     *
+     * @param player the player
+     * @param thisMove data for the current move
+     * @param lastMove data for the previous move
+     * @param data player specific moving data
+     * @param tick current server tick
+     * @param pFrom server backed player location
+     */
     private static void applyBubbleColumnLaunch(Player player, PlayerMoveData thisMove, PlayerMoveData lastMove,
             MovingData data, int tick, PlayerLocation pFrom) {
         if (!thisMove.from.inBubbleStream && lastMove.from.inBubbleStream
