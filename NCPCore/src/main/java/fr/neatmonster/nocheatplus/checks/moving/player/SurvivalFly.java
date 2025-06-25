@@ -96,6 +96,16 @@ public class SurvivalFly extends Check {
     //private final Plugin plugin = Bukkit.getPluginManager().getPlugin("NoCheatPlus");
 
     /**
+     * Helper structure for passing around state for allowed distance
+     * calculations.
+     */
+    private static record AllowedDistanceContext(Player player, boolean sprinting,
+            PlayerMoveData thisMove, MovingData data,
+            MovingConfig cc, IPlayerData pData, PlayerLocation from,
+            PlayerLocation to, boolean checkPermissions) {
+    }
+
+    /**
      * Some note for mcbe compatibility:
      * - New step pattern 0.42-0.58-0.001 ?
      * - Maximum step height 0.75 ?
@@ -280,7 +290,8 @@ public class SurvivalFly extends Check {
         if (HasHorizontalDistance) {
             final double attrMod = attributeAccess.getHandle().getSpeedAttributeMultiplier(player);
             // Set the allowed distance and determine the distance above limit
-            hAllowedDistance = setAllowedhDist(player, sprinting, thisMove, data, cc, pData, from, to, true);
+            hAllowedDistance = setAllowedhDist(new AllowedDistanceContext(player, sprinting, thisMove,
+                    data, cc, pData, from, to, true));
             hDistanceAboveLimit = hDistance - hAllowedDistance;
             // The player went beyond the allowed limit, execute the after failure checks.
             if (hDistanceAboveLimit > 0.0) {
@@ -1037,6 +1048,27 @@ public class SurvivalFly extends Check {
     }
 
 
+    private static boolean isMovingBackwards(final PlayerMoveData move, final PlayerLocation from) {
+        return TrigUtil.isMovingBackwards(
+                move.to.getX() - move.from.getX(),
+                move.to.getZ() - move.from.getZ(),
+                LocUtil.correctYaw(from.getYaw()));
+    }
+
+    private static boolean isBlockingOrUsing(final Player player, final MovingData data) {
+        return data.isUsingItem || player.isBlocking();
+    }
+
+    private static double calcModStairs(final boolean isMovingBackwards, final PlayerMoveData move) {
+        return isMovingBackwards ? 1.0 : move.yDistance == 0.5 ? 1.85 : 1.325;
+    }
+
+    private static double calcModHopSprint(final MovingData data, final PlayerMoveData move, final PlayerLocation to) {
+        return data.momentumTick < 3 ? Magic.modHopTick
+                : Magic.jumpedUpSlope(data, to, 13) && move.hDistance > move.walkSpeed ? Magic.modSlope
+                : Magic.modSprint;
+    }
+
     /**
      * Set hAllowedDistanceBase and hAllowedDistance in thisMove. Not exact,
      * check permissions as far as necessary, if flag is set to check them.
@@ -1051,10 +1083,16 @@ public class SurvivalFly extends Check {
      *            Only set to true after having failed with it set to false.
      * @return Allowed distance.
      */
-    private double setAllowedhDist(final Player player, final boolean sprinting,
-                                   final PlayerMoveData thisMove, final MovingData data,
-                                   final MovingConfig cc, final IPlayerData pData, final PlayerLocation from,
-                                   final PlayerLocation to, final boolean checkPermissions) {
+    private double setAllowedhDist(final AllowedDistanceContext ctx) {
+        final Player player = ctx.player();
+        final boolean sprinting = ctx.sprinting();
+        final PlayerMoveData thisMove = ctx.thisMove();
+        final MovingData data = ctx.data();
+        final MovingConfig cc = ctx.cc();
+        final IPlayerData pData = ctx.pData();
+        final PlayerLocation from = ctx.from();
+        final PlayerLocation to = ctx.to();
+        final boolean checkPermissions = ctx.checkPermissions();
 
         //       - Web before liquid, because web speed can apply in water as well (same with berry bushes, despite not being able to place them underwater but you never know what plugins can do...)
         //       - Powder snow in water -> Check what movement takes precedence.
@@ -1064,15 +1102,15 @@ public class SurvivalFly extends Check {
         //       - Bunnyhoping right into a berry bush
         //       - Swimming -> not swimming transitions
         //       - Thinkable: don't immediately restrict speed but slowly reduce speed with each event, until max speed is reached, like the current item use limit.
-        final boolean isMovingBackwards   = TrigUtil.isMovingBackwards(thisMove.to.getX()-thisMove.from.getX(), thisMove.to.getZ()-thisMove.from.getZ(), LocUtil.correctYaw(from.getYaw()));
+        final boolean isMovingBackwards   = isMovingBackwards(thisMove, from);
         final boolean actuallySneaking    = player.isSneaking() && reallySneaking.contains(player.getName());
-        final boolean isBlockingOrUsing   = data.isUsingItem || player.isBlocking();
+        final boolean isBlockingOrUsing   = isBlockingOrUsing(player, data);
         final PlayerMoveData lastMove     = data.playerMoves.getFirstPastMove();
         final PlayerMoveData pastMove2    = data.playerMoves.getSecondPastMove();
         final long now                    = System.currentTimeMillis();
         final double modHoneyBlock        = Magic.modSoulSand * (thisMove.to.onGround ? 0.8 : 1.75);
-        final double modStairs            = isMovingBackwards ? 1.0 : thisMove.yDistance == 0.5 ? 1.85 : 1.325;
-        final double modHopSprint         = (data.momentumTick < 3 ? Magic.modHopTick : Magic.jumpedUpSlope(data, to, 13) && thisMove.hDistance > thisMove.walkSpeed ? Magic.modSlope : Magic.modSprint);
+        final double modStairs            = calcModStairs(isMovingBackwards, thisMove);
+        final double modHopSprint         = calcModHopSprint(data, thisMove, to);
         final boolean sfDirty             = data.isVelocityJumpPhase();
         double hAllowedDistance           = 0.0;
         double friction                   = data.lastFrictionHorizontal; // Friction to use with this move.
@@ -1985,7 +2023,8 @@ public class SurvivalFly extends Check {
                 data.isUsingItem = false;
             }
             if (!data.isUsingItem) {
-                hAllowedDistance = setAllowedhDist(player, sprinting, thisMove, data, cc, pData, from, to, true);
+                hAllowedDistance = setAllowedhDist(new AllowedDistanceContext(player, sprinting, thisMove,
+                        data, cc, pData, from, to, true));
                 hDistanceAboveLimit = thisMove.hDistance - hAllowedDistance;
             }
         }
