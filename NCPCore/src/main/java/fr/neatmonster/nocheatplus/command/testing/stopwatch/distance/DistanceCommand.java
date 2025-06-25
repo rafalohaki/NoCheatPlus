@@ -42,7 +42,9 @@ public class DistanceCommand  extends AbstractCommand<StopWatchRegistry> {
         }
         try {
             distance = Double.parseDouble(args[2]);
-        } catch (NumberFormatException e) {}
+        } catch (NumberFormatException e) {
+            // ignore - leave distance null
+        }
         if (distance == null || distance.isNaN() || distance.isInfinite() || distance.doubleValue() < 0.0) {
             sender.sendMessage(TAG + "Bad distance: " + ChatColor.RED +""+ args[2] + ChatColor.GRAY);
             return true;

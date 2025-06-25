@@ -352,8 +352,12 @@ public class BlockFlags {
                         nameFlagMap.put(name, value);
                         nameFlagMap.put(name.substring(2), value);
                     } 
-                    catch (IllegalArgumentException e) {} 
-                    catch (IllegalAccessException e) {}
+                    catch (IllegalArgumentException e) {
+                        // ignore - unexpected flag definition issue
+                    }
+                    catch (IllegalAccessException e) {
+                        // ignore - field not accessible via reflection
+                    }
                 }
             }
         }
@@ -365,8 +369,10 @@ public class BlockFlags {
                 // Let's not fail hard here.
                 StaticLog.logWarning("Attempt to set flag for a non-block: " + material);
             }
-        } 
-        catch (Exception e) {}
+        }
+        catch (Exception e) {
+            // ignore - material not present
+        }
         blockFlags.put(material, blockFlags.get(material) | addFlag);
     }
 
@@ -376,8 +382,10 @@ public class BlockFlags {
                 // Let's not fail hard here.
                 StaticLog.logWarning("Attempt to mask flag for a non-block: " + material);
             }
-        } 
-        catch (Exception e) {}
+        }
+        catch (Exception e) {
+            // ignore - material not present
+        }
         blockFlags.put(material, blockFlags.get(material) & addFlag);
     }
 
@@ -452,7 +460,9 @@ public class BlockFlags {
         try {
             final Long altFlag = Long.parseLong(input);
             return altFlag;
-        } catch (NumberFormatException e) {}
+        } catch (NumberFormatException e) {
+            // ignore - not a numeric flag value
+        }
         // TODO: This very exception type?
         throw new InputMismatchException();
     }
@@ -493,8 +503,10 @@ public class BlockFlags {
                 // Let's not fail hard here.
                 StaticLog.logWarning("Attempt to set flags for a non-block: " + blockType);
             }
-        } 
-        catch (Exception e) {}
+        }
+        catch (Exception e) {
+            // ignore - material not present
+        }
         blockFlags.put(blockType, flags);
     }
 
