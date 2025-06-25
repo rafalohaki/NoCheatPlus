@@ -68,8 +68,8 @@ public class FastBreak extends Check {
         final long expectedBreakingTime = Math.max(0, Math.round((double) BlockProperties.getBreakingDuration(blockType, player) * (double) cc.fastBreakModSurvival / 100D));
 
         final long elapsedTime;
-        // TODO: Concept for unbreakable blocks? Context: extreme VL.
-        // TODO: Should it be breakingTime instead of 0 for inconsistencies?
+        // Concept for unbreakable blocks? Context: extreme VL.
+        // Should it be breakingTime instead of 0 for inconsistencies?
         if (cc.fastBreakStrict) {
             // Counting interact...break.
             elapsedTime = (data.fastBreakBreakTime > data.fastBreakfirstDamage) ? 0 : now - data.fastBreakfirstDamage;
@@ -82,11 +82,11 @@ public class FastBreak extends Check {
         // Check if the time used time is lower than expected.
         if (isInstaBreak.decideOptimistically()) {
             // Ignore those for now.
-            // TODO: Find out why this was commented out long ago a) did not fix mcMMO b) exploits.
-            // TODO: Maybe adjust time to min(time, SOMETHING) for MAYBE/YES.
+            // Find out why this was commented out long ago a) did not fix mcMMO b) exploits.
+            // Maybe adjust time to min(time, SOMETHING) for MAYBE/YES.
         }
         else if (elapsedTime < 0) {
-            // Ignore it. TODO: ?
+            // Ignore it for now.
         }
         else if (elapsedTime + cc.fastBreakDelay < expectedBreakingTime) {
             // lag or cheat or Minecraft.
@@ -104,7 +104,7 @@ public class FastBreak extends Check {
 
                         // Only raise a violation, if the total penalty score exceeds the contention duration (for lag, delay).
                         if (data.fastBreakPenalties.score(cc.fastBreakBucketFactor) > cc.fastBreakGrace) {
-                            // TODO: maybe add one absolute penalty time for big amounts to stop breaking until then
+                            // Potential improvement: add one absolute penalty time for big amounts to stop breaking until then
                             final double vlAdded = (double) missingTime / 1000.0;
                             data.fastBreakVL += vlAdded;
                             final ViolationData vd = new ViolationData(this, player, data.fastBreakVL, vlAdded, cc.fastBreakActions);
@@ -121,7 +121,7 @@ public class FastBreak extends Check {
             data.fastBreakVL *= 0.9D;
         }
 
-        // TODO: Rework to use (then hopefully completed) BlockBreakKey.
+        // Rework to use (then hopefully completed) BlockBreakKey.
         if (pData.isDebugActive(type)) {
             detailDebugStats(player, isInstaBreak, blockType, 
                     elapsedTime, expectedBreakingTime, data, pData);
@@ -140,7 +140,7 @@ public class FastBreak extends Check {
             final BlockBreakData data, final IPlayerData pData) {
         if (pData.hasPermission(Permissions.ADMINISTRATION_DEBUG, player)) {
             // General stats:
-            // TODO: Replace stats by new system (BlockBreakKey once complete), commands to inspect / auto-config.
+            // Replace stats by new system (BlockBreakKey once complete), commands to inspect / auto-config.
             data.setStats();
             data.stats.addStats(data.stats.getId(blockType+ "/u", true), elapsedTime);
             data.stats.addStats(data.stats.getId(blockType + "/r", true), expectedBreakingTime);
