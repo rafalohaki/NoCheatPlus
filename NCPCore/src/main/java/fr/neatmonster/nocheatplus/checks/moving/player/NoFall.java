@@ -426,9 +426,14 @@ public class NoFall extends Check {
      *            The set back y from lift-off. If not present:
      *            Double.NEGATIVE_INFINITY.
      */
-    public void check(final Player player, final PlayerLocation pFrom, final PlayerLocation pTo, 
+    public void check(final Player player, final PlayerLocation pFrom, final PlayerLocation pTo,
                       final double previousSetBackY,
                       final MovingData data, final MovingConfig cc, final IPlayerData pData) {
+
+        if (player == null || pFrom == null || pTo == null || data == null
+                || cc == null || pData == null) {
+            return;
+        }
 
         final boolean debug = pData.isDebugActive(type);
         final PlayerMoveData thisMove = data.playerMoves.getCurrentMove();
@@ -467,37 +472,8 @@ public class NoFall extends Check {
 
         final double minY = Math.min(fromY, toY);
 
-        if (fromReset) {
-            // Just reset.
-            data.clearNoFallData();
-            // Ensure very big/strange moves don't yield violations.
-            if (toY - fromY <= -Magic.FALL_DAMAGE_DIST) {
-                data.noFallSkipAirCheck = true;
-            }
-        }
-        else if (fromOnGround || !toOnGround && thisMove.touchedGround) {
-            // Check if to deal damage (fall back damage check).
-            touchDown(player, minY, previousSetBackY, data, cc, pData); // Includes the current y-distance on descend!
-            // Ensure very big/strange moves don't yield violations.
-            if (toY - fromY <= -Magic.FALL_DAMAGE_DIST) {
-                data.noFallSkipAirCheck = true;
-            }
-        }
-        else if (toReset) {
-            // Just reset.
-            data.clearNoFallData();
-        }
-        else if (toOnGround) {
-            // Check if to deal damage.
-            if (yDiff < 0) {
-                // In this case the player has traveled further: add the difference.
-                data.noFallFallDistance -= yDiff;
-            }
-            touchDown(player, minY, previousSetBackY, data, cc, pData);
-        }
-        else {
-            // Ensure fall distance is correct, or "anyway"?
-        }
+        handleGroundTransitions(player, previousSetBackY, data, cc, pData, thisMove,
+                fromReset, toReset, fromOnGround, toOnGround, yDiff, minY, fromY, toY);
 
         // Set reference y for nofall (always).
         /*
@@ -511,27 +487,8 @@ public class NoFall extends Check {
         final float mcFallDistance = player.getFallDistance(); // Note: it has to be fetched here.
         // SKIP: data.noFallFallDistance = Math.max(mcFallDistance, data.noFallFallDistance);
 
-        // Add y distance.
-        if (!toReset && !toOnGround && yDiff < 0) {
-            data.noFallFallDistance -= yDiff;
-        }
-        else if (cc.noFallAntiCriticals && (toReset || toOnGround || (fromReset || fromOnGround || thisMove.touchedGround) && yDiff >= 0)) {
-            final double max = Math.max(data.noFallFallDistance, mcFallDistance);
-            if (max > 0.0 && max < 0.75) { // (Ensure this does not conflict with deal-damage set to false.) 
-
-                if (debug) {
-                    debug(player, "NoFall: Reset fall distance (anticriticals): mc=" + mcFallDistance +" / nf=" + data.noFallFallDistance);
-                }
-
-                if (data.noFallFallDistance > 0) {
-                    data.noFallFallDistance = 0;
-                }
-                
-                if (mcFallDistance > 0f) {
-                    player.setFallDistance(0f);
-                }
-            }
-        }
+        updateFallDistanceAfterMove(player, mcFallDistance, data, cc, thisMove,
+                fromReset, toReset, fromOnGround, toOnGround, yDiff, debug);
 
         if (debug) {
             debug(player, "NoFall: mc=" + mcFallDistance +" / nf=" + data.noFallFallDistance + (oldNFDist < data.noFallFallDistance ? " (+" + (data.noFallFallDistance - oldNFDist) + ")" : "") + " | ymax=" + data.noFallMaxY);
@@ -539,9 +496,70 @@ public class NoFall extends Check {
 
     }
 
+    private void handleGroundTransitions(final Player player, final double previousSetBackY,
+            final MovingData data, final MovingConfig cc, final IPlayerData pData,
+            final PlayerMoveData thisMove, final boolean fromReset, final boolean toReset,
+            final boolean fromOnGround, final boolean toOnGround, final double yDiff,
+            final double minY, final double fromY, final double toY) {
+
+        if (fromReset) {
+            data.clearNoFallData();
+            if (isLargeFall(toY - fromY)) {
+                data.noFallSkipAirCheck = true;
+            }
+        } else if (fromOnGround || (!toOnGround && thisMove.touchedGround)) {
+            touchDown(player, minY, previousSetBackY, data, cc, pData);
+            if (isLargeFall(toY - fromY)) {
+                data.noFallSkipAirCheck = true;
+            }
+        } else if (toReset) {
+            data.clearNoFallData();
+        } else if (toOnGround) {
+            if (yDiff < 0) {
+                data.noFallFallDistance -= yDiff;
+            }
+            touchDown(player, minY, previousSetBackY, data, cc, pData);
+        }
+    }
+
+    private void updateFallDistanceAfterMove(final Player player, final float mcFallDistance,
+            final MovingData data, final MovingConfig cc, final PlayerMoveData thisMove,
+            final boolean fromReset, final boolean toReset, final boolean fromOnGround,
+            final boolean toOnGround, final double yDiff, final boolean debug) {
+
+        if (!toReset && !toOnGround && yDiff < 0) {
+            data.noFallFallDistance -= yDiff;
+        } else if (cc.noFallAntiCriticals && shouldResetAntiCriticals(fromReset, toReset,
+                fromOnGround, toOnGround, thisMove.touchedGround, yDiff)) {
+            final double max = Math.max(data.noFallFallDistance, mcFallDistance);
+            if (max > 0.0 && max < 0.75) {
+                if (debug) {
+                    debug(player, "NoFall: Reset fall distance (anticriticals): mc="
+                            + mcFallDistance + " / nf=" + data.noFallFallDistance);
+                }
+                if (data.noFallFallDistance > 0) {
+                    data.noFallFallDistance = 0;
+                }
+                if (mcFallDistance > 0f) {
+                    player.setFallDistance(0f);
+                }
+            }
+        }
+    }
+
+    private boolean isLargeFall(final double diff) {
+        return diff <= -Magic.FALL_DAMAGE_DIST;
+    }
+
+    private boolean shouldResetAntiCriticals(final boolean fromReset, final boolean toReset,
+            final boolean fromOnGround, final boolean toOnGround, final boolean touchedGround,
+            final double yDiff) {
+        return toReset || toOnGround || (fromReset || fromOnGround || touchedGround) && yDiff >= 0;
+    }
+
     /**
      * Called during check.
-     * 
+     *
      * @param player
      * @param minY
      * @param previousSetBackY
