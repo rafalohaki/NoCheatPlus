@@ -15,6 +15,7 @@
 package fr.neatmonster.nocheatplus.compat.bukkit;
 
 import java.lang.reflect.Method;
+import java.util.Collection;
 import java.util.HashMap;
 import java.util.Map;
 
@@ -35,7 +36,6 @@ import fr.neatmonster.nocheatplus.utilities.ReflectionUtil;
 import fr.neatmonster.nocheatplus.utilities.map.BlockCache;
 import fr.neatmonster.nocheatplus.utilities.map.BlockFlags;
 import fr.neatmonster.nocheatplus.utilities.map.BlockProperties;
-import fr.neatmonster.nocheatplus.utilities.map.BlockFlags;
 import fr.neatmonster.nocheatplus.utilities.map.MaterialUtil;
 
 public class MCAccessBukkitModern extends MCAccessBukkit {
@@ -209,14 +209,10 @@ public class MCAccessBukkitModern extends MCAccessBukkit {
         }
 
         // Candle
-        for (Material mat : MaterialUtil.ALL_CANDLES) {
-            addModel(mat, MODEL_AUTO_FETCH);
-        }
+        registerCandles();
 
         // Amethyst
-        for (Material mat : MaterialUtil.AMETHYST) {
-            addModel(mat, MODEL_AUTO_FETCH);
-        }
+        registerAmethyst();
 
         // new flower, and others
         for (Material mat : BridgeMaterial.getAllBlocks(
@@ -445,10 +441,7 @@ public class MCAccessBukkitModern extends MCAccessBukkit {
         }
         
         // Walls.
-        for (Material mat : MaterialUtil.ALL_WALLS) {
-            BlockFlags.setBlockFlags(mat, BlockFlags.SOLID_GROUND | BlockFlags.F_VARIABLE);
-            addModel(mat, MODEL_THICK_FENCE2);
-        }
+        registerWalls();
 
         // Lectern.
         Material mt = BridgeMaterial.getBlock("lectern");
@@ -507,6 +500,27 @@ public class MCAccessBukkitModern extends MCAccessBukkit {
             }
         }
         super.setupBlockProperties(worldConfigProvider);
+    }
+
+    private void addModels(Collection<Material> materials, BukkitShapeModel model) {
+        for (Material mat : materials) {
+            addModel(mat, model);
+        }
+    }
+
+    private void registerCandles() {
+        addModels(MaterialUtil.ALL_CANDLES, MODEL_AUTO_FETCH);
+    }
+
+    private void registerAmethyst() {
+        addModels(MaterialUtil.AMETHYST, MODEL_AUTO_FETCH);
+    }
+
+    private void registerWalls() {
+        for (Material mat : MaterialUtil.ALL_WALLS) {
+            BlockFlags.setBlockFlags(mat, BlockFlags.SOLID_GROUND | BlockFlags.F_VARIABLE);
+            addModel(mat, MODEL_THICK_FENCE2);
+        }
     }
 
     private Object getHandle(Player player) {
