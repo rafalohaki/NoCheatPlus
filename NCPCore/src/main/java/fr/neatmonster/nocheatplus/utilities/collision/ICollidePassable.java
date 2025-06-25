@@ -29,7 +29,6 @@ import fr.neatmonster.nocheatplus.utilities.map.BlockCache;
  *
  */
 public interface ICollidePassable extends ICollideBlocks, ISetMargins {
-    // TODO: Add a super interface (+ asbtract impl.) for BlockCache based stuff including BlockChangeTracker.
 
     public void setBlockCache(BlockCache blockCache);
     public BlockCache getBlockCache();

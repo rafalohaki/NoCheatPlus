@@ -26,7 +26,6 @@ import fr.neatmonster.nocheatplus.checks.CheckType;
  *
  */
 public interface IRichTypeSetRegistry {
-    // TODO: package name?
 
     /**
      * Get all data types extending 'registeredFor', that have been explicitly
@@ -49,8 +48,6 @@ public interface IRichTypeSetRegistry {
      */
     public <T> Collection<Class<? extends T>> getGroupedTypes(
             Class<T> groupType, CheckType checkType);
-
-    // TODO: getFactoryTypes -> registered factory return types ?
 
     /**
      * Register types for a group type.
