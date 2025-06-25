@@ -88,6 +88,7 @@ import fr.neatmonster.nocheatplus.checks.moving.util.MovingUtil;
 import fr.neatmonster.nocheatplus.checks.moving.util.bounce.BounceType;
 import fr.neatmonster.nocheatplus.checks.moving.util.bounce.BounceUtil;
 import fr.neatmonster.nocheatplus.checks.moving.helper.MoveCheckContext;
+import fr.neatmonster.nocheatplus.checks.moving.helper.ExtremeMoveHandler;
 import fr.neatmonster.nocheatplus.checks.moving.helper.VelocityAdjustment;
 import fr.neatmonster.nocheatplus.checks.moving.vehicle.VehicleChecks;
 import fr.neatmonster.nocheatplus.checks.moving.velocity.AccountEntry;
@@ -1475,95 +1476,15 @@ public class MovingListener extends CheckListener implements TickListener, IRemo
      * @return
      */
     @SuppressWarnings("unused")
-    private Location checkExtremeMove(final Player player, final PlayerLocation from, final PlayerLocation to, 
+    private Location checkExtremeMove(final Player player, final PlayerLocation from, final PlayerLocation to,
                                       final MovingData data, final MovingConfig cc) {
-
-        // Find out why only CreativeFly does actually trigger.
-        // Recent Minecraft versions allow a lot of unhealthy moves. Observed so far:
-        // - Riptide + gliding (+ firework !?)
-        // - Really high levitation levels
-        // - Bouncing while riptiding
-        // (- High jump amplifiers might be a problem as well)
-        // One could also let Extreme_move block this stuff anyway, reason being: 
-        // 1) we cannot support vanilla Minecraft features to arbitrary depths.
-        // 2) Why would one let players perform such moves anyway (which is usually bad news for server-sided chunk loading)? 
-        // [In fact, even Mojang attempted to mitigate this: https://www.minecraft.net/en-us/article/new-world-generation-java-available-testing]
-        // Thinkble: configurable option to block such moves (cc.blockUnealthyMove / cc.blockLegitExtremeMoves)
-
+        if (player == null || data == null) {
+            return null;
+        }
         final PlayerMoveData thisMove = data.playerMoves.getCurrentMove();
-        final PlayerMoveData lastMove = data.playerMoves.getFirstPastMove(); 
-        final boolean riptideBounce = Bridge1_13.isRiptiding(player) && data.verticalBounce != null 
-                                      && thisMove.yDistance < 8.0 && thisMove.yDistance > Magic.EXTREME_MOVE_DIST_HORIZONTAL; // At least ensure that cheaters cannot go any higher than a legit player.
-        final boolean ripglide = Bridge1_9.isGlidingWithElytra(player) && Bridge1_13.isRiptiding(player) && thisMove.yDistance > Magic.EXTREME_MOVE_DIST_VERTICAL * 1.7;
-        final boolean levitationHighLevel = !Double.isInfinite(Bridge1_9.getLevitationAmplifier(player)) && Bridge1_9.getLevitationAmplifier(player) >= 89 && Bridge1_9.getLevitationAmplifier(player) <= 127;
-        // Latency effects.
-        double violation = 0.0; // h + v violation (full move).
-        // Vertical move.
-        final boolean allowVerticalVelocity = false; // Configurable
-        if (Math.abs(thisMove.yDistance) > Magic.EXTREME_MOVE_DIST_VERTICAL * (Bridge1_13.isRiptiding(player) ? 1.7 : 1.0)) {
-            // Exclude valid moves first.
-            // About 3.9 seems to be the positive maximum for velocity use in survival mode, regardless jump effect.
-            // About -1.85 seems to be the negative maximum for velocity use in survival mode. Falling can result in slightly less than -3.
-            if (lastMove.toIsValid && Math.abs(thisMove.yDistance) < Math.abs(lastMove.yDistance)
-                && (thisMove.yDistance > 0.0 && lastMove.yDistance > 0.0 || thisMove.yDistance < 0.0 && lastMove.yDistance < 0.0) 
-                || allowVerticalVelocity && data.getOrUseVerticalVelocity(thisMove.yDistance) != null
-                || riptideBounce || ripglide || levitationHighLevel) {
-                // Speed decreased or velocity is present.
-            }
-            else violation += thisMove.yDistance; // Could subtract lastMove.yDistance.
-        }
-
-        // Horizontal move.
-        if (thisMove.hDistance > Magic.EXTREME_MOVE_DIST_HORIZONTAL) {
-            // Exclude valid moves first.
-            // Attributes might allow unhealthy moves as well.
-            // Observed maximum use so far: 5.515
-            // Velocity flag too (if combined with configurable distances)?
-            final double amount = thisMove.hDistance - data.getHorizontalFreedom(); // Will change with model change.
-            if (amount < 0.0 || lastMove.toIsValid && thisMove.hDistance - lastMove.hDistance <= 0.0 
-                || data.useHorizontalVelocity(amount) >= amount) {
-                // Speed decreased or velocity is present.
-            }
-            else violation += thisMove.hDistance; // Could subtract lastMove.hDistance.
-        }
-
-        if (violation > 0.0) {
-            // Ensure a set back location is present.
-            if (!data.hasSetBack()) data.setSetBack(from);
-            // Process violation as sub check of the appropriate fly check.
-            violation *= 100.0;
-            final Check check;
-            final ActionList actions;
-            final double vL;
-
-            if (thisMove.flyCheck == CheckType.MOVING_SURVIVALFLY) {
-                check = survivalFly;
-                actions = cc.survivalFlyActions;
-                data.survivalFlyVL += violation;
-                vL = data.survivalFlyVL;
-            }
-            else {
-                check = creativeFly;
-                actions = cc.creativeFlyActions;
-                data.creativeFlyVL += violation;
-                vL = data.creativeFlyVL;
-            }
-            final ViolationData vd = new ViolationData(check, player, vL, violation, actions);
-            // Reduce copy and paste (method to fill in locations, once using exact coords and latering default actions).
-            if (vd.needsParameters()) {
-                vd.setParameter(ParameterName.LOCATION_FROM, String.format(Locale.US, "%.2f, %.2f, %.2f", from.getX(), from.getY(), from.getZ()));
-                vd.setParameter(ParameterName.LOCATION_TO, String.format(Locale.US, "%.2f, %.2f, %.2f", to.getX(), to.getY(), to.getZ()));
-                vd.setParameter(ParameterName.DISTANCE, String.format(Locale.US, "%.2f", TrigUtil.distance(from, to)));
-                vd.setParameter(ParameterName.TAGS, "EXTREME_MOVE");
-            }
-            // Some resetting is done in MovingListener.
-            if (check.executeActions(vd).willCancel()) {
-                // Set back + view direction of to (more smooth).
-                return MovingUtil.getApplicableSetBackLocation(player, to.getYaw(), to.getPitch(), from, data, cc);
-            }
-        }
-        // No cancel intended.
-        return null;
+        final PlayerMoveData lastMove = data.playerMoves.getFirstPastMove();
+        final MoveCheckContext ctx = new MoveCheckContext(player, thisMove, lastMove, data);
+        return ExtremeMoveHandler.handleExtremeMove(ctx, from, to, cc, survivalFly, creativeFly);
     }
 
 
