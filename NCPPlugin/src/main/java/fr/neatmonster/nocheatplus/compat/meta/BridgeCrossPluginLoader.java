@@ -4,6 +4,8 @@ import java.util.Optional;
 
 import fr.neatmonster.nocheatplus.compat.cbreflect.reflect.ReflectBase;
 import fr.neatmonster.nocheatplus.compat.cbreflect.reflect.ReflectHelper.ReflectFailureException;
+import fr.neatmonster.nocheatplus.NCPAPIProvider;
+import fr.neatmonster.nocheatplus.logging.Streams;
 
 /**
  * Factory class for creating {@link BridgeCrossPlugin} instances in a
@@ -29,8 +31,10 @@ public final class BridgeCrossPluginLoader {
         try {
             return Optional.of(new ReflectBase());
         } catch (ReflectFailureException e) {
+            NCPAPIProvider.getNoCheatPlusAPI().getLogManager().debug(Streams.STATUS, e);
             return Optional.empty();
         } catch (RuntimeException e) {
+            NCPAPIProvider.getNoCheatPlusAPI().getLogManager().debug(Streams.STATUS, e);
             return Optional.empty();
         }
     }
