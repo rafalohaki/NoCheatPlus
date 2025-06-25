@@ -143,36 +143,49 @@ public class TestRegistrationOrder {
             RegistrationOrder order = fetcher.getRegistrationOrder(item);
             Integer basePriority = order.getBasePriority();
             if (basePriority == null) {
-                if (maxPriority == null) {
-                    if (order.getBeforeTag() == null && order.getAfterTag() != null) {
-                        nullShouldFollow = true;
-                        // Assume the pair-comparison would catch wrongly sorted null entries on occasion.
-                    }
-                } else {
-                    handleNullPriorityAfterFirst(order, nullShouldFollow);
-                    if (maxPriority > 0) {
-                        nullShouldFollow = true;
-                    } else if (maxPriority == 0 && order.getBeforeTag() != null) {
-                        fail("Invalid null-basePriority entry within 0-basePriority region: beforeTag is set.");
-                    }
-                }
+                nullShouldFollow = verifyNullPriority(maxPriority, nullShouldFollow, order);
             } else {
-                if (nullShouldFollow) {
-                    fail("Invalid mixture of priority null/set after 0-basePriority region.");
-                } else if (priorityContained && basePriority < 0 && lastPriority == null) {
-                    fail("Invalid mixture of priority null/set before 0-basePriority region.");
-                }
-                if (maxPriority == null) {
-                    maxPriority = basePriority;
-                } else if (basePriority < maxPriority) {
-                    fail("Order by priority broken.");
-                } else {
-                    maxPriority = basePriority;
-                }
+                verifyNonNullPriority(basePriority, maxPriority, nullShouldFollow, priorityContained, lastPriority);
+                maxPriority = updateMaxPriority(basePriority, maxPriority);
                 priorityContained = true; // Remember to be able to exclude cases.
             }
             lastPriority = basePriority;
         }
+    }
+
+    private boolean verifyNullPriority(Integer maxPriority, boolean nullShouldFollow, RegistrationOrder order) {
+        if (maxPriority == null) {
+            if (order.getBeforeTag() == null && order.getAfterTag() != null) {
+                return true;
+            }
+        } else {
+            handleNullPriorityAfterFirst(order, nullShouldFollow);
+            if (maxPriority > 0) {
+                return true;
+            } else if (maxPriority == 0 && order.getBeforeTag() != null) {
+                fail("Invalid null-basePriority entry within 0-basePriority region: beforeTag is set.");
+            }
+        }
+        return nullShouldFollow;
+    }
+
+    private void verifyNonNullPriority(Integer basePriority, Integer maxPriority, boolean nullShouldFollow,
+            boolean priorityContained, Integer lastPriority) {
+        if (nullShouldFollow) {
+            fail("Invalid mixture of priority null/set after 0-basePriority region.");
+        } else if (priorityContained && basePriority < 0 && lastPriority == null) {
+            fail("Invalid mixture of priority null/set before 0-basePriority region.");
+        }
+        if (maxPriority != null && basePriority < maxPriority) {
+            fail("Order by priority broken.");
+        }
+    }
+
+    private Integer updateMaxPriority(Integer basePriority, Integer currentMax) {
+        if (currentMax == null || basePriority >= currentMax) {
+            return basePriority;
+        }
+        return currentMax;
     }
 
     private void handleNullPriorityAfterFirst(RegistrationOrder order, boolean nullShouldFollow) {
