@@ -73,14 +73,16 @@ public class Folia {
     }
 
     /**
-     * Run a repeating task, either with bukkit scheduler or folia scheduler
+     * Run a repeating task using the Bukkit or Folia scheduler.
+     *
      * @param plugin Plugin to assign for
-     * @param run Consumer that accepts an object or null, for Folia or Paper/Spigot respectively
+     * @param run Consumer that accepts an object or {@code null}, for Folia or Paper/Spigot respectively
      * @param delay Delay in ticks
      * @param period Period in ticks
-     * @return An int represent for task id when running on Paper/Spigot or a ScheduledTask when running on Folia or null if can't schedule
+     * @return An {@link Integer} task id when running on Paper/Spigot, a {@code ScheduledTask}
+     *         when running on Folia or {@code null} if scheduling failed
      */
-    public static Object runSyncRepatingTask(Plugin plugin, Consumer<Object> run, long delay, long period) {
+    public static Object runSyncRepeatingTask(Plugin plugin, Consumer<Object> run, long delay, long period) {
         if (!isFoliaServer) {
             return Bukkit.getScheduler().scheduleSyncRepeatingTask(plugin, () -> run.accept(null), delay, period);
         }
@@ -100,6 +102,14 @@ public class Folia {
             e.printStackTrace();
         }
         return null;
+    }
+
+    /**
+     * @deprecated Use {@link #runSyncRepeatingTask(Plugin, Consumer, long, long)} instead.
+     */
+    @Deprecated
+    public static Object runSyncRepatingTask(Plugin plugin, Consumer<Object> run, long delay, long period) {
+        return runSyncRepeatingTask(plugin, run, delay, period);
     }
 
     /**

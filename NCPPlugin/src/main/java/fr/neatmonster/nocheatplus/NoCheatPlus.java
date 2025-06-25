@@ -1020,7 +1020,7 @@ public class NoCheatPlus extends JavaPlugin implements NoCheatPlusAPI {
         TickTask.start(this);
 
         // dataMan expiration checking.
-        this.dataManTaskId = Folia.runSyncRepatingTask(this, (arg) -> pDataMan.checkExpiration(), 1207, 1207);
+        this.dataManTaskId = Folia.runSyncRepeatingTask(this, (arg) -> pDataMan.checkExpiration(), 1207, 1207);
 
         // Ensure dataMan is first on disableListeners so it cleans up after others.
         Misc.putFirst(pDataMan, disableListeners);
@@ -1062,7 +1062,7 @@ public class NoCheatPlus extends JavaPlugin implements NoCheatPlusAPI {
         Folia.runSyncTask(this, (arg) -> new PostEnableTask(onlinePlayers).run());
 
         // Mid-term cleanup (seconds range).
-        Folia.runSyncRepatingTask(this, (arg) -> midTermCleanup(), 83, 83);
+        Folia.runSyncRepeatingTask(this, (arg) -> midTermCleanup(), 83, 83);
 
         // Set StaticLog to more efficient output.
         StaticLog.setStreamID(Streams.STATUS);
@@ -1381,7 +1381,7 @@ public class NoCheatPlus extends JavaPlugin implements NoCheatPlusAPI {
         }
         // Schedule task in seconds.
         final long delay = 20L * config.getInt(ConfPaths.DATA_CONSISTENCYCHECKS_INTERVAL, 1, 3600, 10);
-        consistencyCheckerTaskId = Folia.runSyncRepatingTask(this, (arg) -> runConsistencyChecks(), delay, delay);
+        consistencyCheckerTaskId = Folia.runSyncRepeatingTask(this, (arg) -> runConsistencyChecks(), delay, delay);
     }
 
     /**
