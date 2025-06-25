@@ -38,7 +38,7 @@ public abstract class MonotonicAbstractClock implements MonotonicClock {
     
     @Override
     public long clock() {
-    	// TODO: Add feature to detect running too fast and correction as well.
+        // Potential improvement: detect the clock running too fast and apply corrective measures.
         final long fetch = fetchClock();
         final long diff = fetch - this.lastFetch;
         if (diff > 0) {

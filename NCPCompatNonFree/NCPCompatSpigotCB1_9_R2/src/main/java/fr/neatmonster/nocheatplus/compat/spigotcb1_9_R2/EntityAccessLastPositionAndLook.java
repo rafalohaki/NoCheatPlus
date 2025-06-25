@@ -35,7 +35,7 @@ public class EntityAccessLastPositionAndLook implements IEntityAccessLastPositio
 
     @Override
     public void getPositionAndLook(final Entity entity, final ISetPositionWithLook location) {
-        // TODO: Error handling / conventions.
+        // Pending: implement proper error handling according to conventions.
         final net.minecraft.server.v1_9_R2.Entity nmsEntity = ((CraftEntity) entity).getHandle();
         location.setX(nmsEntity.lastX);
         location.setY(nmsEntity.lastY);

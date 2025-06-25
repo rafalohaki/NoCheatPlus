@@ -46,7 +46,7 @@ public class PenaltyAction<D extends ActionData, L extends AbstractActionList<D,
     private final PenaltyNode rootNode;
     private final String penaltyId;
 
-    // TODO: executesAlways +- making sense.
+    // Indicates whether this action always executes regardless of delay or repeat settings.
 
     /**
      * 
