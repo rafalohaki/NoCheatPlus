@@ -34,7 +34,7 @@ public abstract class StopWatch {
     protected String clockDetails = "";
 
     public StopWatch(Player player) {
-        this.start = System.currentTimeMillis(); // TODO: Monotonic ?
+        this.start = System.currentTimeMillis(); // Consider using monotonic timer
         this.player = player;
     }
 

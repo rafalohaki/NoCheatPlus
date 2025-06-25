@@ -38,7 +38,7 @@ import fr.neatmonster.nocheatplus.components.registry.feature.IRegisterAsGeneric
  */
 public class AuxMoving implements IRegisterAsGenericInstance {
 
-    // TODO: Move more non-static stuff here.
+    // Move more non-static functionality here.
 
     /**
      * Unused instances.<br>
