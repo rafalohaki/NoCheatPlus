@@ -2830,83 +2830,89 @@ public class BlockProperties {
      *            the path prefix
      */
     public static void applyConfig(final RawConfigFile config, final String pathPrefix) {
+        loadBreakingTimeOverrides(config, pathPrefix);
+        loadInstantBreakList(config, pathPrefix);
+        loadOverrideFlags(config, pathPrefix);
+        minWorldY = config.getInt(pathPrefix + ConfPaths.SUB_BLOCKCACHE_WORLD_MINY);
+    }
 
-        // Breaking time overrides for specific side conditions.
+    private static void loadBreakingTimeOverrides(final RawConfigFile config, final String pathPrefix) {
         ConfigurationSection section = config.getConfigurationSection(pathPrefix + ConfPaths.SUB_BREAKINGTIME);
-        if (section != null) {
-            for (final String input : section.getKeys(false)) {
-                try {
-                    BlockProperties.setBreakingTimeOverride(new BlockBreakKey().fromString(input.trim()),
-                            section.getLong(input));
-                }
-                catch (Exception e) {
-                    StaticLog.logWarning("Bad breaking time override (" + pathPrefix + ConfPaths.SUB_BREAKINGTIME + "): " + input);
-                    StaticLog.logWarning(e);
-                }
+        if (section == null) {
+            return;
+        }
+        for (final String input : section.getKeys(false)) {
+            try {
+                BlockProperties.setBreakingTimeOverride(new BlockBreakKey().fromString(input.trim()),
+                        section.getLong(input));
+            }
+            catch (Exception e) {
+                StaticLog.logWarning("Bad breaking time override (" + pathPrefix + ConfPaths.SUB_BREAKINGTIME + "): " + input);
+                StaticLog.logWarning(e);
             }
         }
+    }
 
-        // Allow instant breaking.
+    private static void loadInstantBreakList(final RawConfigFile config, final String pathPrefix) {
         for (final String input : config.getStringList(pathPrefix + ConfPaths.SUB_ALLOWINSTANTBREAK)) {
             final Material id = RawConfigFile.parseMaterial(input);
             if (id == null) {
                 StaticLog.logWarning("Bad block id (" + pathPrefix + ConfPaths.SUB_ALLOWINSTANTBREAK + "): " + input);
-            }
-            else {
+            } else {
                 setBlockProps(id, instantType);
             }
         }
+    }
 
-        // Override block flags.
-        section = config.getConfigurationSection(pathPrefix + ConfPaths.SUB_OVERRIDEFLAGS);
-        if (section != null) {
-            final Map<String, Object> entries = section.getValues(false);
-            boolean hasErrors = false;
-            for (final Entry<String, Object> entry : entries.entrySet()) {
-                final String key = entry.getKey();
-                final Material id = RawConfigFile.parseMaterial(key);
-                if (id == null) {
-                    StaticLog.logWarning("Bad block id (" + pathPrefix + ConfPaths.SUB_OVERRIDEFLAGS + "): " + key);
-                    continue;
-                }
-                final Object obj = entry.getValue();
-                if (!(obj instanceof String)) {
-                    StaticLog.logWarning("Bad flags at " + pathPrefix + ConfPaths.SUB_OVERRIDEFLAGS + " for key: " + key);
-                    hasErrors = true;
-                    continue;
-                }
-                final Collection<String> split = StringUtil.split((String) obj, ' ', ',', '/', '|', '+', ';', '\t');
-                long flags = 0;
-                boolean error = false;
-                for (String input : split) {
-                    input = input.trim();
-                    if (input.isEmpty()) {
-                        continue;
-                    }
-                    else if (input.equalsIgnoreCase("default")) {
-                        flags |= BlockFlags.getBlockFlags(id);
-                        continue;
-                    }
-                    try {
-                        flags |= BlockFlags.parseFlag(input);
-                    } 
-                    catch(InputMismatchException e) {
-                        StaticLog.logWarning("Bad flag at " + pathPrefix + ConfPaths.SUB_OVERRIDEFLAGS + " for key " + key + " (skip setting flags for this block): " + input);
-                        error = true;
-                        hasErrors = true;
-                        break;
-                    }
-                }
-                if (error) {
-                    continue;
-                }
-                BlockFlags.setBlockFlags(id, flags);
-            }
-            if (hasErrors) {
-                StaticLog.logInfo("Overriding block-flags was not entirely successful, all available flags: \n" + StringUtil.join(BlockFlags.flagNameMap.values(), "|"));
-            }
+    private static void loadOverrideFlags(final RawConfigFile config, final String pathPrefix) {
+        ConfigurationSection section = config.getConfigurationSection(pathPrefix + ConfPaths.SUB_OVERRIDEFLAGS);
+        if (section == null) {
+            return;
         }
-        minWorldY = config.getInt(pathPrefix + ConfPaths.SUB_BLOCKCACHE_WORLD_MINY); 
+        final Map<String, Object> entries = section.getValues(false);
+        boolean hasErrors = false;
+        for (final Entry<String, Object> entry : entries.entrySet()) {
+            final String key = entry.getKey();
+            final Material id = RawConfigFile.parseMaterial(key);
+            if (id == null) {
+                StaticLog.logWarning("Bad block id (" + pathPrefix + ConfPaths.SUB_OVERRIDEFLAGS + "): " + key);
+                continue;
+            }
+            final Object obj = entry.getValue();
+            if (!(obj instanceof String)) {
+                StaticLog.logWarning("Bad flags at " + pathPrefix + ConfPaths.SUB_OVERRIDEFLAGS + " for key: " + key);
+                hasErrors = true;
+                continue;
+            }
+            final Collection<String> split = StringUtil.split((String) obj, ' ', ',', '/', '|', '+', ';', '\t');
+            long flags = 0;
+            boolean error = false;
+            for (String input : split) {
+                input = input.trim();
+                if (input.isEmpty()) {
+                    continue;
+                } else if (input.equalsIgnoreCase("default")) {
+                    flags |= BlockFlags.getBlockFlags(id);
+                    continue;
+                }
+                try {
+                    flags |= BlockFlags.parseFlag(input);
+                }
+                catch(InputMismatchException e) {
+                    StaticLog.logWarning("Bad flag at " + pathPrefix + ConfPaths.SUB_OVERRIDEFLAGS + " for key " + key + " (skip setting flags for this block): " + input);
+                    error = true;
+                    hasErrors = true;
+                    break;
+                }
+            }
+            if (error) {
+                continue;
+            }
+            BlockFlags.setBlockFlags(id, flags);
+        }
+        if (hasErrors) {
+            StaticLog.logInfo("Overriding block-flags was not entirely successful, all available flags: \n" + StringUtil.join(BlockFlags.flagNameMap.values(), "|"));
+        }
     }
 
     /**
