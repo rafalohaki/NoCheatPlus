@@ -192,120 +192,120 @@ public class MovingFlying extends BaseAdapter {
     }
 
     private void onFlyingPacket(final PacketEvent event) {
-        final boolean primaryThread = Bukkit.isPrimaryThread(); 
+        final boolean primaryThread = Bukkit.isPrimaryThread();
+        trackAsync(primaryThread, event);
+
+        final long time = System.currentTimeMillis();
+        final Player player = event.getPlayer();
+        if (player == null) {
+            handleNullPlayer(event, primaryThread);
+            return;
+        }
+
+        final IPlayerData pData = DataManager.getPlayerDataSafe(player);
+        final NetData data = pData.getGenericInstance(NetData.class);
+        data.lastKeepAliveTime = time;
+        if (!pData.getCurrentWorldDataSafe().isCheckActive(CheckType.NET_FLYINGFREQUENCY)) {
+            return;
+        }
+
+        final NetConfig cc = pData.getGenericInstance(NetConfig.class);
+        final DataPacketFlying packetData = interpretPacket(event, time);
+
+        boolean cancel = false;
+        boolean skipFlyingFrequency = false;
+        if (packetData != null) {
+            final int result = processPacketData(event, player, pData, data, cc, packetData);
+            if (event.isCancelled()) {
+                if (pData.isDebugActive(this.checkType)) {
+                    debug(player, packetData.toString() + " CANCEL");
+                }
+                return;
+            }
+            cancel = (result & RESULT_CANCEL) != 0;
+            skipFlyingFrequency = (result & RESULT_SKIP_FLY) != 0;
+        }
+
+        if (!cancel && shouldCancelFrequency(player, pData, packetData, time, data, cc, skipFlyingFrequency)) {
+            cancel = true;
+        }
+
+        if (!cancel && shouldCancelMoving(player, pData, packetData, data, cc, skipFlyingFrequency)) {
+            cancel = true;
+        }
+
+        if (cancel) {
+            event.setCancelled(true);
+        }
+
+        if (pData.isDebugActive(this.checkType)) {
+            debug(player, (packetData == null ? "(Incompatible data)" : packetData.toString()) + (event.isCancelled() ? " CANCEL" : ""));
+        }
+    }
+
+    private void trackAsync(final boolean primaryThread, final PacketEvent event) {
         counters.add(idFlying, 1, primaryThread);
         if (event.isAsync() == primaryThread) {
             counters.add(ProtocolLibComponent.idInconsistentIsAsync, 1, primaryThread);
         }
         if (!primaryThread) {
-            // Count all asynchronous events extra.
             counters.addSynchronized(idAsyncFlying, 1);
         }
-        final long time =  System.currentTimeMillis();
-        final Player player = event.getPlayer();
-        if (player == null) {
-            counters.add(ProtocolLibComponent.idNullPlayer, 1, primaryThread);
+    }
+
+    private void handleNullPlayer(final PacketEvent event, final boolean primaryThread) {
+        counters.add(ProtocolLibComponent.idNullPlayer, 1, primaryThread);
+        event.setCancelled(true);
+    }
+
+    private boolean shouldCancelFrequency(final Player player, final IPlayerData pData, final DataPacketFlying packetData,
+            final long time, final NetData data, final NetConfig cc, final boolean skip) {
+        return !skip && !pData.hasBypass(CheckType.NET_FLYINGFREQUENCY, player)
+                && flyingFrequency.check(player, packetData, time, data, cc, pData);
+    }
+
+    private boolean shouldCancelMoving(final Player player, final IPlayerData pData, final DataPacketFlying packetData,
+            final NetData data, final NetConfig cc, final boolean skip) {
+        return !skip && !pData.hasBypass(CheckType.NET_MOVING, player)
+                && moving.check(player, packetData, data, cc, pData, plugin);
+    }
+
+    private static final int RESULT_CANCEL = 1;
+    private static final int RESULT_SKIP_FLY = 2;
+
+    private int processPacketData(final PacketEvent event, final Player player, final IPlayerData pData,
+            final NetData data, final NetConfig cc, final DataPacketFlying packetData) {
+        if (isInvalidContent(packetData)) {
             event.setCancelled(true);
-            return;
+            return RESULT_CANCEL;
         }
 
-        final IPlayerData pData = DataManager.getPlayerDataSafe(player);
-        // Always update last received time.
-        final NetData data = pData.getGenericInstance(NetData.class);
-        data.lastKeepAliveTime = time; // Update without much of a contract.
-        final IWorldData worldData = pData.getCurrentWorldDataSafe();
-        if (!worldData.isCheckActive(CheckType.NET_FLYINGFREQUENCY)) {
-            return;
-        }
-
-        final NetConfig cc = pData.getGenericInstance(NetConfig.class);
-        boolean cancel = false;
-        // Interpret the packet content.
-        final DataPacketFlying packetData = interpretPacket(event, time);
-
-        // Early return tests, if the packet can be interpreted.
-        boolean skipFlyingFrequency = false;
-        if (packetData != null) {
-            // Prevent processing packets with obviously malicious content.
-            if (isInvalidContent(packetData)) {
-                event.setCancelled(true);
+        int result = 0;
+        switch (data.teleportQueue.processAck(packetData)) {
+            case WAITING:
                 if (pData.isDebugActive(this.checkType)) {
-                    debug(player, "Incoming packet, cancel due to malicious content: " + packetData);
+                    debug(player, "Incoming packet, still waiting for ACK on outgoing position.");
                 }
-                return;
-            }
-
-            switch(data.teleportQueue.processAck(packetData)) {
-                case WAITING: {
-                    if (pData.isDebugActive(this.checkType)) {
-                        debug(player, "Incoming packet, still waiting for ACK on outgoing position.");
-                    }
-                    if (confirmTeleportType != null && cc.supersededFlyingCancelWaiting) {
-                        // Don't add to the flying queue for now (assumed invalid).
-                        final AckReference ackReference = data.teleportQueue.getLastAckReference();
-                        if (ackReference.lastOutgoingId != Integer.MIN_VALUE
-                                && ackReference.lastOutgoingId != ackReference.maxConfirmedId) {
-                            // Still waiting for a 'confirm teleport' packet. More or less safe to cancel this out.
-                            /*
-                             * The actual issue with this, apart from potential
-                             * freezing, also concerns gameplay experience in
-                             * case of minor set backs, which also could be
-                             * caused by the server, e.g. with 'moved wrongly' or
-                             * setting players outside of blocks. In this case the
-                             * moves sent before teleport ack would still be valid
-                             * after the teleport, because distances are small.
-                             * The actual solution should still be to a) not have
-                             * false positives b) somehow get rid all the
-                             * position-correction teleporting the server does,
-                             * for the cases a plugin can handle.
-                             */
-                            cancel = true;
-                        }
-                    }
-                    break;
-                }
-                case ACK: {
-                    // Skip processing ACK packets, no cancel.
-                    skipFlyingFrequency = true;
-                    if (pData.isDebugActive(this.checkType)) {
-                        debug(player, "Incoming packet, interpret as ACK for outgoing position.");
+                if (confirmTeleportType != null && cc.supersededFlyingCancelWaiting) {
+                    final AckReference ackReference = data.teleportQueue.getLastAckReference();
+                    if (ackReference.lastOutgoingId != Integer.MIN_VALUE
+                            && ackReference.lastOutgoingId != ackReference.maxConfirmedId) {
+                        result |= RESULT_CANCEL;
                     }
                 }
-                default: {
-                    // Continue.
-                    data.addFlyingQueue(packetData);
+                break;
+            case ACK:
+                result |= RESULT_SKIP_FLY;
+                if (pData.isDebugActive(this.checkType)) {
+                    debug(player, "Incoming packet, interpret as ACK for outgoing position.");
                 }
-            }
-            // Add as valid packet (exclude invalid coordinates etc. for now).
-            validContent.add(packetData.getSimplifiedContentType());
+                //$FALL-THROUGH$
+            default:
+                data.addFlyingQueue(packetData);
+                break;
         }
-
-        // Actual packet frequency check.
-        if (!cancel && !skipFlyingFrequency
-            && !pData.hasBypass(CheckType.NET_FLYINGFREQUENCY, player)
-            && flyingFrequency.check(player, packetData, time, data, cc, pData)) {
-            cancel = true;
-        }
-        
-        // More packet checks.
-        if (!cancel && !pData.hasBypass(CheckType.NET_MOVING, player) && !skipFlyingFrequency
-            && moving.check(player, packetData, data, cc, pData, plugin)) {
-            cancel = true;
-        }
-
-        // Cancel redundant packets, when frequency is high anyway.
-        //        if (!cancel && primaryThread && packetData != null && cc.flyingFrequencyRedundantActive && checkRedundantPackets(player, packetData, allScore, time, data, cc)) {
-        //            event.setCancelled(true);
-        //        }
-
-        // Process cancel and debug log.
-        if (cancel) {
-            event.setCancelled(true);
-        }
-        
-        if (pData.isDebugActive(this.checkType)) {
-            debug(player, (packetData == null ? "(Incompatible data)" : packetData.toString()) + (event.isCancelled() ? " CANCEL" : ""));
-        }
+        validContent.add(packetData.getSimplifiedContentType());
+        return result;
     }
 
 
