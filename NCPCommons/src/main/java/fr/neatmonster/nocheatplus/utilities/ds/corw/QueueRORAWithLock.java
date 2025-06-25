@@ -89,7 +89,7 @@ public class QueueRORAWithLock<E> implements IQueueRORA<E> {
 
     @Override
     public int size() {
-        // TODO: Could maintain an int, simply.
+        // Could maintain a separate integer for tracking size.
         lock.lock();
         final int size = elements.size();
         lock.unlock();

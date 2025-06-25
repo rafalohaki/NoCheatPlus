@@ -26,7 +26,7 @@ public class LogOptions {
      *
      */
     public static enum CallContext {
-        // TODO: Consider making this a general enum for call contexts (API wrappers, player data etc. too?).
+        // Consider making this a general enum for call contexts (API wrappers, player data etc. too?).
         // Primary as long as it exists...
         /** Only execute directly in the primary thread, for other threads use a task to execute within the primary thread. */
         PRIMARY_THREAD_DIRECT,
@@ -46,7 +46,7 @@ public class LogOptions {
         // CUSTOM_THREAD_DIRECT|TASK // Needs a variable (Thread, methods to sync into a specific thread would have to be registered in LogManager).
         ;
 
-        // TODO: Can distinguish further: Call from where, log from where directly, schedule from where (allow to skip certain contexts).
+        // Distinction possible: call from where, log from where directly, schedule from where (allow to skip certain contexts).
     }
 
     public final String name;
@@ -59,7 +59,7 @@ public class LogOptions {
     public LogOptions(String name, CallContext callContext) {
         this.name = name;
         this.callContext = callContext;
-        // TODO: shutdown policy (clear, log), rather with per-world threads.
+        // Idea: shutdown policy (clear, log), rather with per-world threads.
     }
 
 }

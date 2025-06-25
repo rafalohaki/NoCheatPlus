@@ -19,9 +19,8 @@ import java.util.logging.Level;
 
 public class FileLoggerAdapter extends FileLogger implements ContentLogger<String> {
 
-    // TODO: Store path/file either here or on FileLogger.
-
-    // TODO: Do store the string path (directory / direct file path), to reference correctly.
+    // Store path/file either here or on FileLogger.
+    // Keep the string path (directory or direct file path) to reference correctly.
 
     private final String prefix;
 
@@ -45,7 +44,7 @@ public class FileLoggerAdapter extends FileLogger implements ContentLogger<Strin
 
     @Override
     public void log(Level level, String content) {
-        // TODO: Check loggerisInoperable() ?
+        // Possibly check loggerIsInoperable() ?
         logger.log(level, prefix == null ? content : (prefix + content));
     }
 

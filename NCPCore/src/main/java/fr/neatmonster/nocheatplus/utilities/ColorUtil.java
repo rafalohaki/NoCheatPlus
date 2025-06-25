@@ -16,7 +16,7 @@ package fr.neatmonster.nocheatplus.utilities;
 
 import org.bukkit.ChatColor;
 
-// TODO: Auto-generated Javadoc
+// Auto-generated Javadoc
 /**
  * More and less color. Methods couls also in StringUtil, but that is in NCPCommons without Bukkit dependency.
  * @author mc_dev
@@ -38,7 +38,7 @@ public class ColorUtil {
 		if (text == null || text.length() <= 1) return text;
 		final char[] chars = text.toCharArray();
 		// First find a begin index at all.
-		// TODO: Consider removing the normal color char as well (!).
+                // Consider removing the normal color char as well (!).
 		int srcIndex = 0; // SourceIndex
 		do{
 			if (chars[srcIndex] == '&' && allColorChars.indexOf(chars[srcIndex + 1]) > -1){
