@@ -79,9 +79,9 @@ public abstract class CheckNodeWithDebug<N extends CheckNodeWithDebug<N>> extend
         return debug;
     }
 
-    // TODO: Visibility of methods -> public but not expose via interface or protected.
+    // Visibility of methods: public but not exposed via interface or protected.
 
-    // TODO: @Override
+    // Method overrides a parent implementation
     @SuppressWarnings("unchecked")
     protected void overrideDebug(
             final AlmostBoolean active, 
@@ -90,7 +90,7 @@ public abstract class CheckNodeWithDebug<N extends CheckNodeWithDebug<N>> extend
         override(active, overrideType, overrideChildren, accessDebug);
     }
 
-    // TODO: @Override
+    // Method overrides a parent implementation
     @SuppressWarnings("unchecked")
     protected void updateDebug(
             final ConfigFile rawConfiguration, 
@@ -98,13 +98,13 @@ public abstract class CheckNodeWithDebug<N extends CheckNodeWithDebug<N>> extend
         update(rawConfiguration, forceUpdateChildren, accessDebug);
     }
 
-    // TODO: @Override
+    // Method overrides a parent implementation
     @SuppressWarnings("unchecked")
     protected void updateDebug(
             final boolean forceUpdateChildren) {
         update(forceUpdateChildren, accessDebug);
     }
 
-    // TODO: resetDebug(...) 
+    // Placeholder for resetDebug(...)
 
 }
