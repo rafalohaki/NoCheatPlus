@@ -119,8 +119,8 @@ def main_interactive(path):
         ]
     # Run.
     """
-    TODO: Factory entries. Adapt build profiles. 
-    Perhaps just create a text file with all typical entries for copy and paste.
+    Future enhancement: supply factory entries and adapt build profiles. A text
+    file with common entries could simplify copy and paste operations.
     """
     try:
         copy_and_replace(src_dir, dst_dir, repl_filename, repl_content)
