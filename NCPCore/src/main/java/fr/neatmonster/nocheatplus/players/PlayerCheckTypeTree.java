@@ -56,7 +56,7 @@ public class PlayerCheckTypeTree extends CheckTypeTree<PlayerCheckTypeTreeNode>{
      */
     static class PlayerCheckTypeTreeNode extends CheckNodeWithDebug<PlayerCheckTypeTreeNode> implements IBaseCheckNode {
 
-        // TODO: Compactify flags?
+        // Consider compactifying flags.
 
         /**
          * Explicitly exempted by API call (cumulative flag), excludes checking for
@@ -73,7 +73,7 @@ public class PlayerCheckTypeTree extends CheckTypeTree<PlayerCheckTypeTreeNode>{
          * Exemption contexts that apply here. Lazily allocate.
          */
         /*
-         * TODO: Consider a ParallelList (access independently without need for
+         * Consider a ParallelList (access independently without need for
          * mergePrimaryThread, or extend DualList by appropriate methods).
          */
         private List<ExemptionContext> exemptionsPrimaryThread = null;
@@ -129,7 +129,7 @@ public class PlayerCheckTypeTree extends CheckTypeTree<PlayerCheckTypeTreeNode>{
             if (exemptionsAsynchronous != null) {
                 exemptionsAsynchronous.remove(context);
                 if (exemptionsAsynchronous.isEmpty()) {
-                    // TODO: Have a counter to delay resetting?
+                    // Consider having a counter to delay resetting.
                     exemptedAsynchronous = false;
                     exemptionsAsynchronous = null;
                 }
@@ -140,7 +140,7 @@ public class PlayerCheckTypeTree extends CheckTypeTree<PlayerCheckTypeTreeNode>{
             if (exemptionsPrimaryThread != null) {
                 exemptionsPrimaryThread.remove(context);
                 if (exemptionsPrimaryThread.isEmpty()) {
-                    // TODO: Have a counter to delay resetting?
+                    // Consider having a counter to delay resetting.
                     exemptedPrimaryThread = false;
                     exemptionsPrimaryThread = null;
                 }
@@ -156,7 +156,7 @@ public class PlayerCheckTypeTree extends CheckTypeTree<PlayerCheckTypeTreeNode>{
             if (exemptionsAsynchronous != null) {
                 exemptionsAsynchronous.removeAll(Collections.singleton(context));
                 if (exemptionsAsynchronous.isEmpty()) {
-                    // TODO: Have a counter to delay resetting?
+                    // Consider having a counter to delay resetting.
                     exemptedAsynchronous = false;
                     exemptionsAsynchronous = null;
                 }
@@ -167,7 +167,7 @@ public class PlayerCheckTypeTree extends CheckTypeTree<PlayerCheckTypeTreeNode>{
             if (exemptionsPrimaryThread != null) {
                 exemptionsPrimaryThread.removeAll(Collections.singleton(context));
                 if (exemptionsPrimaryThread.isEmpty()) {
-                    // TODO: Have a counter to delay resetting?
+                    // Consider having a counter to delay resetting.
                     exemptedPrimaryThread = false;
                     exemptionsPrimaryThread = null;
                 }
@@ -216,7 +216,7 @@ public class PlayerCheckTypeTree extends CheckTypeTree<PlayerCheckTypeTreeNode>{
         private void setDebugNoUpdate(final IWorldData worldData) {
             final IWorldCheckNode worldNode = worldData.getCheckNode(getCheckType());
             // Just adjust recursively.
-            // TODO: Simplicity of interface: hard set to the resulting value.
+            // Simplicity of interface: hard set to the resulting value.
             configDebug.setValue(worldNode.isDebugActive(), worldNode.getOverrideTypeDebug());
             for (final PlayerCheckTypeTreeNode node : getChildren()) {
                 node.updateDebug(worldData);
@@ -251,10 +251,10 @@ public class PlayerCheckTypeTree extends CheckTypeTree<PlayerCheckTypeTreeNode>{
         private void resetDebugNoUpdate(IWorldData worldData) {
             final IWorldCheckNode worldNode = worldData.getCheckNode(getCheckType());
             // Just adjust recursively.
-            // TODO: Simplicity of interface: hard set to the resulting value.
+            // Simplicity of interface: hard set to the resulting value.
             /*
-             * TODO: Itchy/modeling: A permanent override for a player gets
-             * reset by a permanent override for a world.
+             * Note: A permanent override for a player gets reset by a
+             * permanent override for a world.
              */
             configDebug.resetValue(worldNode.isDebugActive(), worldNode.getOverrideTypeDebug());
             for (final PlayerCheckTypeTreeNode node : getChildren()) {
