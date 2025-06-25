@@ -38,6 +38,8 @@ import fr.neatmonster.nocheatplus.compat.Bridge1_13;
 import fr.neatmonster.nocheatplus.compat.Bridge1_9;
 import fr.neatmonster.nocheatplus.compat.BridgeHealth;
 import fr.neatmonster.nocheatplus.compat.BridgeMisc;
+import fr.neatmonster.nocheatplus.checks.moving.helper.CheckContext;
+import fr.neatmonster.nocheatplus.checks.moving.helper.ElytraBoostHandler;
 import fr.neatmonster.nocheatplus.components.NoCheatPlusAPI;
 import fr.neatmonster.nocheatplus.components.data.ICheckData;
 import fr.neatmonster.nocheatplus.components.data.IData;
@@ -364,26 +366,22 @@ public class BlockInteractListener extends CheckListener {
         //        }
         if (
                 (
-                        event.getAction() == Action.RIGHT_CLICK_AIR 
+                        event.getAction() == Action.RIGHT_CLICK_AIR
                         // Water doesn't happen, block typically is null.
-                        //                        || event.getAction() == Action.RIGHT_CLICK_BLOCK 
+                        //                        || event.getAction() == Action.RIGHT_CLICK_BLOCK
                         //                        && block != null && BlockProperties.isLiquid(block.getType())
                         // TODO: web ?
                         )
                 && event.isCancelled() && event.useItemInHand() != Result.DENY) {
             final ItemStack stack = Bridge1_9.getUsedItem(player, event);
-            if (stack != null && BridgeMisc.maybeElytraBoost(player, stack.getType())) {
-                final int power = BridgeMisc.getFireworksPower(stack);
-                final MovingData mData = pData.getGenericInstance(MovingData.class);
-                final int ticks = Math.max((1 + power) * 20, 30);
-                mData.fireworksBoostDuration = ticks;
-                mData.fireworksBoostTickNeedCheck = ticks - 1;
-                // Expiration tick: not general latency, rather a minimum margin for sudden congestion.
-                mData.fireworksBoostTickExpire = TickTask.getTick() + ticks;
-                // TODO: Invalidation mechanics: by tick/time well ?
-                // TODO: Implement using it in CreativeFly.
-                if (pData.isDebugActive(CheckType.MOVING)) {
-                    debug(player, "Elytra boost (power " + power + "): " + stack);
+            if (stack != null) {
+                final CheckContext ctx = new CheckContext(player,
+                        pData.getGenericInstance(MovingData.class));
+                final boolean boosted = ElytraBoostHandler.handleBoost(ctx, stack,
+                        TickTask.getTick());
+                if (boosted && pData.isDebugActive(CheckType.MOVING)) {
+                    debug(player, "Elytra boost (power " +
+                            BridgeMisc.getFireworksPower(stack) + "): " + stack);
                 }
             }
         }
