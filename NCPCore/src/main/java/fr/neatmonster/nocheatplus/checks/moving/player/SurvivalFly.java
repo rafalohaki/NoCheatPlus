@@ -105,6 +105,19 @@ public class SurvivalFly extends Check {
             PlayerLocation to, boolean checkPermissions) {
     }
 
+    /** Validate player movement parameters and log if invalid. */
+    private boolean validateMoveInputs(final Player player, final PlayerLocation from,
+                                       final PlayerLocation to, final String method) {
+        if (player == null || from == null || to == null) {
+            NCPAPIProvider.getNoCheatPlusAPI().getLogManager().warning(
+                    Streams.STATUS,
+                    CheckUtils.getLogMessagePrefix(player, type)
+                            + method + ": null arguments.");
+            return false;
+        }
+        return true;
+    }
+
     /**
      * Some note for mcbe compatibility:
      * - New step pattern 0.42-0.58-0.001 ?
@@ -143,6 +156,10 @@ public class SurvivalFly extends Check {
                           final int multiMoveCount,
                           final MovingData data, final MovingConfig cc, final IPlayerData pData,
                           final int tick, final long now, final boolean useBlockChangeTracker) {
+
+        if (!validateMoveInputs(player, from, to, "check") || data == null || cc == null || pData == null) {
+            return null;
+        }
 
         tags.clear();
         // Shortcuts:
@@ -685,6 +702,10 @@ public class SurvivalFly extends Check {
      * @return If to prevent action (use the set back location of survivalfly).
      */
     public boolean checkBed(final Player player, final IPlayerData pData, final MovingConfig cc, final MovingData data) {
+        if (player == null || pData == null || cc == null || data == null) {
+            validateMoveInputs(player, null, null, "checkBed");
+            return false;
+        }
 
         boolean cancel = false;
         // Check if the player had been in bed at all.
@@ -1049,6 +1070,9 @@ public class SurvivalFly extends Check {
 
 
     private static boolean isMovingBackwards(final PlayerMoveData move, final PlayerLocation from) {
+        if (move == null || from == null) {
+            return false;
+        }
         return TrigUtil.isMovingBackwards(
                 move.to.getX() - move.from.getX(),
                 move.to.getZ() - move.from.getZ(),
@@ -1056,14 +1080,23 @@ public class SurvivalFly extends Check {
     }
 
     private static boolean isBlockingOrUsing(final Player player, final MovingData data) {
+        if (player == null || data == null) {
+            return false;
+        }
         return data.isUsingItem || player.isBlocking();
     }
 
     private static double calcModStairs(final boolean isMovingBackwards, final PlayerMoveData move) {
+        if (move == null) {
+            return isMovingBackwards ? 1.0 : 1.325;
+        }
         return isMovingBackwards ? 1.0 : move.yDistance == 0.5 ? 1.85 : 1.325;
     }
 
     private static double calcModHopSprint(final MovingData data, final PlayerMoveData move, final PlayerLocation to) {
+        if (data == null || move == null || to == null) {
+            return Magic.modSprint;
+        }
         return data.momentumTick < 3 ? Magic.modHopTick
                 : Magic.jumpedUpSlope(data, to, 13) && move.hDistance > move.walkSpeed ? Magic.modSlope
                 : Magic.modSprint;
@@ -1093,6 +1126,10 @@ public class SurvivalFly extends Check {
         final PlayerLocation from = ctx.from();
         final PlayerLocation to = ctx.to();
         final boolean checkPermissions = ctx.checkPermissions();
+
+        if (!validateMoveInputs(player, from, to, "setAllowedhDist")) {
+            return 0.0;
+        }
 
         //       - Web before liquid, because web speed can apply in water as well (same with berry bushes, despite not being able to place them underwater but you never know what plugins can do...)
         //       - Powder snow in water -> Check what movement takes precedence.
@@ -1561,6 +1598,10 @@ public class SurvivalFly extends Check {
      * @return
      */
     public boolean isReallySneaking(final Player player) {
+        if (player == null) {
+            validateMoveInputs(null, null, null, "isReallySneaking");
+            return false;
+        }
         return reallySneaking.contains(player.getName());
     }
 
@@ -2570,6 +2611,9 @@ public class SurvivalFly extends Check {
      * @param data
      */
     public final void handleHoverViolation(final Player player, final PlayerLocation loc, final MovingConfig cc, final MovingData data) {
+        if (!validateMoveInputs(player, loc, loc, "handleHoverViolation") || cc == null || data == null) {
+            return;
+        }
         if (Double.isInfinite(data.survivalFlyVL)) data.survivalFlyVL = 0;
         data.survivalFlyVL += cc.sfHoverViolation;
 
@@ -2606,8 +2650,16 @@ public class SurvivalFly extends Check {
      * @param sneaking
      */
     public void setReallySneaking(final Player player, final boolean sneaking) {
-        if (sneaking) reallySneaking.add(player.getName());
-        else reallySneaking.remove(player.getName());
+        if (player == null) {
+            validateMoveInputs(null, null, null, "setReallySneaking");
+            return;
+        }
+        if (sneaking) {
+            reallySneaking.add(player.getName());
+        }
+        else {
+            reallySneaking.remove(player.getName());
+        }
     }
 
 
