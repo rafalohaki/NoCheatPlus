@@ -1572,8 +1572,9 @@ public class SurvivalFly extends Check {
         if (st == null || player == null || move == null || cc == null || from == null) {
             return;
         }
-        final double modSwim = (from.isSubmerged(0.701) || move.from.inLava) ? Magic.modSwim[0] : Magic.modSwim[3];
-        st.allowed = Bridge1_13.isSwimming(player) ? Magic.modSwim[1]
+        final double[] swimMods = Magic.getModSwim();
+        final double modSwim = (from.isSubmerged(0.701) || move.from.inLava) ? swimMods[0] : swimMods[3];
+        st.allowed = Bridge1_13.isSwimming(player) ? swimMods[1]
                 : modSwim * move.walkSpeed * cc.survivalFlySwimmingSpeed / 100D;
         st.useBaseModifiers = false;
         st.useSneakModifier = true;
@@ -1606,7 +1607,7 @@ public class SurvivalFly extends Check {
         if (strider > 0) {
             st.useBaseModifiers = true;
             st.useBaseModifiersSprint = true;
-            st.allowed *= Magic.modDepthStrider[strider];
+            st.allowed *= Magic.getModDepthStrider()[strider];
         }
     }
 
@@ -1715,8 +1716,10 @@ public class SurvivalFly extends Check {
 
     private void initLiquidExitState(final DistanceState st, final PlayerMoveData move, final MovingConfig cc,
             final Player player) {
-        st.allowed = Bridge1_13.isSwimming(player) ? Magic.modSwim[1]
-                : Magic.modSwim[0] * move.walkSpeed * Magic.modSurface[0] * cc.survivalFlySwimmingSpeed / 100D;
+        final double[] swimMods = Magic.getModSwim();
+        final double[] surfaceMods = Magic.getModSurface();
+        st.allowed = Bridge1_13.isSwimming(player) ? swimMods[1]
+                : swimMods[0] * move.walkSpeed * surfaceMods[0] * cc.survivalFlySwimmingSpeed / 100D;
         st.useBaseModifiersSprint = false;
         st.friction = 0.0;
     }
@@ -1726,7 +1729,7 @@ public class SurvivalFly extends Check {
             st.useBaseModifiers = true;
             st.useBaseModifiersSprint = true;
             st.friction = data.lastFrictionHorizontal;
-            st.allowed *= Magic.modDepthStrider[strider];
+            st.allowed *= Magic.getModDepthStrider()[strider];
         }
     }
 
@@ -1742,7 +1745,7 @@ public class SurvivalFly extends Check {
     private void adjustSurfaceExit(final DistanceState st, final MovingData data, final PlayerLocation from,
             final PlayerMoveData move, final MovingConfig cc) {
         if (data.surfaceId == 1) {
-            st.allowed *= Magic.modSurface[1];
+            st.allowed *= Magic.getModSurface()[1];
         }
         data.surfaceId = 1;
         final int blockData = from.getData(from.getBlockX(), from.getBlockY(), from.getBlockZ());
@@ -2012,7 +2015,8 @@ public class SurvivalFly extends Check {
             return hAllowedDistance;
         }
 
-        if (move.downStream && move.hDistance > move.walkSpeed * Magic.modSwim[0]
+        final double[] swimMods = Magic.getModSwim();
+        if (move.downStream && move.hDistance > move.walkSpeed * swimMods[0]
                 && move.from.inLiquid) {
             hAllowedDistance *= Magic.modDownStream;
         }

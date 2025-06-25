@@ -74,14 +74,14 @@ public class Magic {
     public static final double modHopTick           = 0.25415D / WALK_SPEED; // (OK)
     public static final double modSprint            = 0.27D / WALK_SPEED; // (OK)
     public static final double modSlope             = 0.3069D / WALK_SPEED; // (OK)
-    public static final double[] modSurface         = new double [] {0.23426D / WALK_SPEED, 0.29835D / WALK_SPEED};
+    private static final double[] MOD_SURFACE = new double[] {0.23426D / WALK_SPEED, 0.29835D / WALK_SPEED};
     public static final double modCollision         = 0.3006D / WALK_SPEED; // Test
     public static final double modSoulSpeed         = 0.3094D / WALK_SPEED; // Test
     public static final double modIce               = 0.5525D / WALK_SPEED; // (OK)
     public static final double modDolphinsGrace     = 0.9945D / WALK_SPEED; // Adjust
     // Observed around 2021/11: 0.115 for whatever reason now flags even with legacy clients. It wasn't a problem before but it is now. Very fun game indeed.
     // (OK)
-    public static final double[] modSwim            = new double[] {
+    private static final double[] MOD_SWIM = new double[] {
             // Horizontal AND vertical with body fully in water
             0.115D / WALK_SPEED,  
             // Horizontal swimming only, 1.13 (Do not multiply with thisMove.walkSpeed)
@@ -90,13 +90,25 @@ public class Magic {
             0.3D / WALK_SPEED, 
             // Horizontal with body out of water (surface level)
             0.146D / WALK_SPEED,}; 
-    public static final double modDownStream        = 0.19D / (WALK_SPEED * modSwim[0]);
-    public static final double[] modDepthStrider    = new double[] {
+    public static final double modDownStream        = 0.19D / (WALK_SPEED * MOD_SWIM[0]);
+    private static final double[] MOD_DEPTH_STRIDER = new double[] {
             1.0,
-            0.1645 / modSwim[0] / WALK_SPEED,
-            0.1995 / modSwim[0] / WALK_SPEED,
-            1.0 / modSwim[0], // Results in walkspeed.
+            0.1645 / MOD_SWIM[0] / WALK_SPEED,
+            0.1995 / MOD_SWIM[0] / WALK_SPEED,
+            1.0 / MOD_SWIM[0], // Results in walkspeed.
     };
+
+    public static double[] getModSurface() {
+        return MOD_SURFACE.clone();
+    }
+
+    public static double[] getModSwim() {
+        return MOD_SWIM.clone();
+    }
+
+    public static double[] getModDepthStrider() {
+        return MOD_DEPTH_STRIDER.clone();
+    }
     /**
      * Somewhat arbitrary horizontal speed gain maximum for advance glide phase.
      */
@@ -166,7 +178,8 @@ public class Magic {
      */
     public static double swimBaseSpeedV(boolean isSwimming) {
         // Check if this has to be the dynamic walk speed (refactoring)
-        return isSwimming ? WALK_SPEED * modSwim[2] + 0.1 : WALK_SPEED * modSwim[0] + 0.07; // 0.244
+        double[] swimMods = getModSwim();
+        return isSwimming ? WALK_SPEED * swimMods[2] + 0.1 : WALK_SPEED * swimMods[0] + 0.07; // 0.244
     }
 
     /**

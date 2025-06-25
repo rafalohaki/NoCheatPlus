@@ -249,11 +249,11 @@ public class PermissionRegistry {
     }
 
     public RegisteredPermission[] getPreferKeepUpdatedWorld() {
-        return preferKeepUpdatedWorld;
+        return preferKeepUpdatedWorld.clone();
     }
 
     public RegisteredPermission[] getPreferKeepUpdatedOffline() {
-        return preferKeepUpdatedOffline;
+        return preferKeepUpdatedOffline.clone();
     }
 
 }
