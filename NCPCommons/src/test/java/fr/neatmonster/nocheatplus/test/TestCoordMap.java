@@ -366,7 +366,6 @@ public class TestCoordMap {
 
     }
 
-
     @Test
     public void testLinkedCoordHashMap() {
 
@@ -375,8 +374,8 @@ public class TestCoordMap {
         final int n = suggestedSamples; // Number of coordinates.
         final int max = 800; // Coordinate maximum.
 
-        // Preparecoordinates.
-        int [][] coords = getUniqueRandomCoords(n, max, random);
+        // Prepare coordinates.
+        int[][] coords = getUniqueRandomCoords(n, max, random);
         LinkedCoordHashMap<Integer> map = new LinkedCoordHashMap<Integer>(1, 0.75f);
 
         // Use a map with these coordinates.
@@ -385,7 +384,24 @@ public class TestCoordMap {
         // Initial iteration order.
         testIterationOrder(map, coords, 1);
 
-        // Re-put, moving to end.
+        reInsertMoveToEnd(map, coords);
+        reInsertMoveToFront(map, coords);
+
+        verifyCleared(map);
+
+        // New map with all coordinates.
+        fillMap(map, coords);
+        int[][] halfCoords = computeHalfCoords(coords);
+
+        removeEverySecond(map, coords, halfCoords);
+
+        iteratorRemoveEverySecond(map, coords, halfCoords);
+
+        // Potentially add tests with random combinations of operations.
+
+    }
+
+    private void reInsertMoveToEnd(LinkedCoordHashMap<Integer> map, int[][] coords) {
         for (int i = 0; i < coords.length; i++) {
             map.put(coords[i][0], coords[i][1], coords[i][2], i, MoveOrder.END);
             testLast(map, coords[i], i);
@@ -394,8 +410,9 @@ public class TestCoordMap {
             fail("Map different size than coords.");
         }
         testIterationOrder(map, coords, 1);
+    }
 
-        // Re-put, moving to front.
+    private void reInsertMoveToFront(LinkedCoordHashMap<Integer> map, int[][] coords) {
         for (int i = coords.length - 1; i >= 0; i--) {
             map.put(coords[i][0], coords[i][1], coords[i][2], i, MoveOrder.FRONT);
             testFirst(map, coords[i], i);
@@ -404,8 +421,9 @@ public class TestCoordMap {
             fail("Map different size than coords.");
         }
         testIterationOrder(map, coords, 1);
+    }
 
-        // Map.clear
+    private void verifyCleared(LinkedCoordHashMap<Integer> map) {
         map.clear();
         if (map.size() != 0) {
             fail("Expect map size to be 0 after clear.");
@@ -416,29 +434,32 @@ public class TestCoordMap {
         if (map.iterator(true).hasNext()) {
             fail("Expect no last element on iteration after clear.");
         }
+    }
 
-        // New map with all coordinates.
-        fillMap(map, coords);
-        // Half the coordinates.
-        int[][] halfCoords = new int[n / 2][3];
-        for (int i = 0; i < n / 2; i++) {
+    private int[][] computeHalfCoords(int[][] coords) {
+        int[][] halfCoords = new int[coords.length / 2][3];
+        for (int i = 0; i < halfCoords.length; i++) {
             for (int j = 0; j < 3; j++) {
                 halfCoords[i][j] = coords[i * 2][j];
             }
         }
-        // Test remove every second entry.
-        for (int i = 0; i < n / 2; i++) {
+        return halfCoords;
+    }
+
+    private void removeEverySecond(LinkedCoordHashMap<Integer> map, int[][] coords, int[][] halfCoords) {
+        for (int i = 0; i < halfCoords.length; i++) {
             map.remove(coords[i * 2 + 1][0], coords[i * 2 + 1][1], coords[i * 2 + 1][2]);
             if (map.contains(coords[i * 2 + 1][0], coords[i * 2 + 1][1], coords[i * 2 + 1][2])) {
                 fail("Expect removed entries not to be contained in the map.");
             }
         }
-        if (map.size() != n / 2) {
-            fail("Map size should be halfed after removing every second element (" + map.size() + " instead of " + n / 2 + ").");
+        if (map.size() != halfCoords.length) {
+            fail("Map size should be halfed after removing every second element(" + map.size() + " instead of " + halfCoords.length + ").");
         }
         testIterationOrder(map, halfCoords, 2);
+    }
 
-        // Test iterator.remove every second entry.
+    private void iteratorRemoveEverySecond(LinkedCoordHashMap<Integer> map, int[][] coords, int[][] halfCoords) {
         map.clear();
         fillMap(map, coords);
         int i = 0;
@@ -451,17 +472,14 @@ public class TestCoordMap {
                     fail("Expect entries removed by iterator not to be in the map.");
                 }
             }
-            i ++;
+            i++;
         }
-        if (map.size() != n / 2) {
-            fail("Map size should be halfed after removing every second element with an iterator (" + map.size() + " instead of " + n / 2 + ").");
+        if (map.size() != halfCoords.length) {
+            fail("Map size should be halfed after removing every second element with an iterator (" + map.size() + " instead of " + halfCoords.length + ").");
         }
         testIterationOrder(map, halfCoords, 2);
-
-
-        // Potentially add tests with random combinations of operations.
-
     }
+
 
     private void testIterationOrder(LinkedCoordHashMap<Integer> map, int[][] coords, int multiplyId) {
         // Test if the order of iteration is correct (!).
