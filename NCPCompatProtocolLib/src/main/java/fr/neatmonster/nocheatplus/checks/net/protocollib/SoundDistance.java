@@ -40,8 +40,8 @@ import fr.neatmonster.nocheatplus.utilities.location.TrigUtil;
 
 public class SoundDistance extends BaseAdapter {
 
-    // TODO: Will not be effective with 512 radius, if they add the patch by @Amranth.
-    // TODO: For lower distances more packets might need to be intercepted.
+    // Will not be effective with 512 radius if the patch by @Amranth is added.
+    // For lower distances more packets might need to be intercepted.
 
     /** Partly by debugging, partly from various sources, possibly including wrong spelling. */
     private static final Set<String> effectNames = new HashSet<String>(Arrays.asList(

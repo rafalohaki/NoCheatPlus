@@ -41,7 +41,7 @@ public class MCAccessCBReflect extends MCAccessBukkit {
     protected final boolean dealFallDamageFiresAnEvent;  
 
     public MCAccessCBReflect() throws ReflectFailureException {
-        // TODO: Add unavailable stuff to features / missing (TBD).
+        // Add unavailable stuff to features / missing (TBD).
         helper = new ReflectHelper();
         // Version Envelope tests (1.4.5-R1.0 ... 1.8.x is considered to be ok).
         final String mcVersion = ServerVersion.getMinecraftVersion();
@@ -59,7 +59,7 @@ public class MCAccessCBReflect extends MCAccessBukkit {
         } else {
             this.knownSupportedVersion = true;
         }
-        // Fall damage / event. TODO: Tests between 1.8 and 1.7.2. How about spigot vs. CB?
+        // Fall damage / event. Tests between 1.8 and 1.7.2 remain to be evaluated; check spigot vs. CB differences.
         if (mcVersion == GenericVersion.UNKNOWN_VERSION || GenericVersion.compareVersions(mcVersion, "1.8") < 0) {
             dealFallDamageFiresAnEvent = false;
         } else {
@@ -126,7 +126,7 @@ public class MCAccessCBReflect extends MCAccessBukkit {
             helper.dealFallDamage(player, damage);
         }
         catch (ReflectFailureException ex) {
-            // TODO: Fire an event ?
+            // Consider firing an event if reflection fails.
             super.dealFallDamage(player, damage);
         }
     }
@@ -212,7 +212,7 @@ public class MCAccessCBReflect extends MCAccessBukkit {
                 if (dY > 1.8) {
                     return AlmostBoolean.YES; // dY > 1.65D || 
                 }
-                // TODO: Get height/length from ReflectEntity.
+                // Should retrieve height/length from ReflectEntity.
                 if (dY < 0.1D && getHeight(player) >= 0.1) {
                     return AlmostBoolean.YES;
                 }

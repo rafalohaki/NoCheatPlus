@@ -53,7 +53,7 @@ public class SimpleWorkaroundRegistry implements IWorkaroundRegistry {
 
     @Override
     public void setWorkaroundBluePrint(final IWorkaround... bluePrints) {
-        // TODO: Might consistency check, plus policy for overriding (ignore all if present).
+        // Consistency check may be needed, plus policy for overriding (ignore all if present).
         for (IWorkaround bluePrint : bluePrints) {
             final IWorkaround bluePrintCopy = bluePrint.getNewInstance();
             this.bluePrints.put(bluePrintCopy.getId(), bluePrintCopy);

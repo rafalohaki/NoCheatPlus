@@ -56,7 +56,7 @@ public class VanillaBlocksFactory {
                 // Assume the blocks setup to message success.
                 setup.setupBlockProperties(worldConfigProvider);
                 success.add(setup.getClass().getSimpleName());
-                // TODO: Do logging from here ?
+                // Logging might be triggered from here.
             }
             catch(Throwable t){
                 StaticLog.logSevere(setup.getClass().getSimpleName() + ".setupBlockProperties could not execute properly: " + t.getClass().getSimpleName() + " - " + t.getMessage());

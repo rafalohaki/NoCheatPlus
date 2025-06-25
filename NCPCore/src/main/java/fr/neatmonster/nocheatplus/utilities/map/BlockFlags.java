@@ -182,7 +182,7 @@ public class BlockFlags {
     /** Fence gate style with 0x04 being fully passable. */
     public static final long F_PASSABLE_X4                  = f_flag();
 
-    /** Like slime block: bounce back 25% of fall height without taking fall damage [TODO: Check/adjust]. */
+    /** Like slime block: bounce back 25% of fall height without taking fall damage. Note: values might need adjustment. */
     public static final long F_BOUNCE25                     = f_flag();
     
     /** Like the honey block: fall damage is / 5 when landing on this block. Also allows player to stick to its sides with slower falling speed. */
@@ -334,8 +334,8 @@ public class BlockFlags {
     /** Full bounds and solid (+ground). */
     public static final long FULLY_SOLID_BOUNDS             = FULL_BOUNDS | SOLID_GROUND;
 
-    // TODO: Convenience constants combining all height / minheight flags
-    // TODO: When flags are out, switch to per-block classes :p.
+    // NOTE: Convenience constants combining all height / minheight flags could be added.
+    // NOTE: When flags are out, switch to per-block classes.
 
     static {
         // Use reflection to get a flag -> name mapping and vice versa.
@@ -463,7 +463,7 @@ public class BlockFlags {
         } catch (NumberFormatException e) {
             // ignore - not a numeric flag value
         }
-        // TODO: This very exception type?
+        // NOTE: Revisit if this is the appropriate exception type.
         throw new InputMismatchException();
     }
 

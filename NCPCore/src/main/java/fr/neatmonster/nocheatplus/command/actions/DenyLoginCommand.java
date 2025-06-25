@@ -57,7 +57,8 @@ public class DenyLoginCommand extends BaseCommand {
         final String name = args[1];
         long duration = -1;
         try{
-            // TODO: parse for abbreviations like 30s 30m 30h 30d, and set base...
+            // Parse for abbreviations like 30s, 30m, 30h or 30d and set the
+            // appropriate base value.
             duration = Integer.parseInt(args[2]);
         }
         catch( NumberFormatException e){

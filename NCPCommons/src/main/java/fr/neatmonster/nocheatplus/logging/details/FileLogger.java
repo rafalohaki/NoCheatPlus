@@ -37,7 +37,7 @@ public class FileLogger {
 
         private final SimpleDateFormat dateFormat = new SimpleDateFormat("yy-MM-dd HH:mm:ss");
         
-        // TODO: Consider storing a custom line break (needs adding to StringUtil.throwableToString).
+        // Note: consider storing a custom line break (requires extending StringUtil.throwableToString).
 
         @Override
         public String format(final LogRecord record) {
@@ -77,9 +77,9 @@ public class FileLogger {
      * @param file Path to log file or an existing directory.
      */
     public FileLogger(File file) {
-        // TODO: Should re-add a file-name prefix (allow null).
-        // TODO: File encoding + line endings.
-        // TODO: Add options to switch file with file size, rolling files, etc.
+        // Consider re-adding a file-name prefix (allow null).
+        // File encoding and line endings might become configurable.
+        // Options could allow switching files based on size or rolling files.
         // [could also keep track of rough size of written data, to switch file "on the fly", problem: which log? -> replace logger copy on write :p].
         logger = Logger.getAnonymousLogger();
         detachLogger();

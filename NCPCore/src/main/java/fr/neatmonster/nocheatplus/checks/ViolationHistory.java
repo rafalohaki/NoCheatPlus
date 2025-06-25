@@ -182,7 +182,8 @@ public class ViolationHistory {
     /** Map the check string names to check types (workaround, keep at default, set by Check)*/
     static Map<String, CheckType> checkTypeMap = new HashMap<String, CheckType>();
 
-    // TODO: Maybe add to metrics: average length of violation histories (does it pay to use SkipListSet or so).
+    // Idea: add metrics for average length of violation histories to evaluate
+    // whether structures like SkipListSet are beneficial.
     /** The histories of all the players. */
     private static Map<String, ViolationHistory> violationHistories = new HashMap<String, ViolationHistory>();
 

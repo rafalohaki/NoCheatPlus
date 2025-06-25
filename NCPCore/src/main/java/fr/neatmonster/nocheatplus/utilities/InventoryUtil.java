@@ -36,7 +36,6 @@ import fr.neatmonster.nocheatplus.players.DataManager;
 import fr.neatmonster.nocheatplus.players.IPlayerData;
 import fr.neatmonster.nocheatplus.checks.inventory.InventoryData;
 
-// TODO: Auto-generated Javadoc
 /**
  * Auxiliary/convenience methods for inventories.
  * @author asofold

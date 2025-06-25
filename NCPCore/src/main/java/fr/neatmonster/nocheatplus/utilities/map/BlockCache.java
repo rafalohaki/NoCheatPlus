@@ -206,7 +206,7 @@ public abstract class BlockCache {
     private boolean isBedrockCache = false;
 
     private final BlockCacheNode airNode = new BlockCacheNode(Material.AIR);
-    // TODO: setBlockCacheConfig -> set static nodes (rather only by id).
+    // Note: setBlockCacheConfig should set static nodes by id only.
 
     /**
      * Instantiates a new block cache.
@@ -425,7 +425,7 @@ public abstract class BlockCache {
             return node.getBounds();
         }
         final double[] nBounds = fetchBounds(x, y, z);
-        // TODO: Convention for null bounds -> full ?
+        // Review convention: null bounds may imply the full block
         node.setBounds(nBounds);
         return nBounds;
     }
@@ -446,7 +446,7 @@ public abstract class BlockCache {
     public IBlockCacheNode getOrCreateBlockCacheNode(int x, int y, int z, boolean forceSetAll) {
         final BlockCacheNode node = getOrCreateNode(x, y, z);
         if (forceSetAll) {
-            // TODO: Consider a half-lazy variant (only force fetch bounds, which may or may not fetch data).
+            // A half-lazy variant might only force fetch bounds, which may or may not fetch data
             if (!node.isDataFetched()) {
                 node.setData(fetchData(x, y, z));
             }

@@ -48,7 +48,7 @@ public class RawConfigFile  extends YamlConfiguration {
     public static Material parseMaterial(String content) {
         content = content.trim().toUpperCase();
         try {
-            // TODO: Custom lookup (both vanilla and Bukkit/Spigot).
+            // Custom lookup may be added for both vanilla and Bukkit/Spigot
             return Material.matchMaterial(prepareMatchMaterial(content));
         }
         catch (Exception e) {
@@ -226,7 +226,7 @@ public class RawConfigFile  extends YamlConfiguration {
                 // Ignore.
             }
             else {
-                // TODO: Validate values further.
+                // Additional validation of values may be necessary
                 EntityType type = null;
                 try {
                     type = EntityType.valueOf(ucKey);
@@ -235,7 +235,7 @@ public class RawConfigFile  extends YamlConfiguration {
                     // ignore - not a valid entity type
                 }
                 if (type == null) {
-                    // TODO: Log once per file only (needs new framework)?
+                    // Should log once per file only (might require new framework)
                     NCPAPIProvider.getNoCheatPlusAPI().getLogManager().warning(Streams.STATUS, "Bad entity type at '" + path + "': " + key);
                 }
                 else {
@@ -250,8 +250,8 @@ public class RawConfigFile  extends YamlConfiguration {
      */
     @Override
     public String saveToString() {
-        // Some reflection wizardly to avoid having a lot of linebreaks in the yaml file, and get a "footer" into the file.
-        // TODO: Interesting, but review this: still necessary/useful in CB-1.4 ?.
+        // Some reflection wizardry avoids many linebreaks in the yaml file and adds a footer
+        // Review if this is still necessary or useful in CB-1.4
         try {
             Field op;
             op = YamlConfiguration.class.getDeclaredField("yamlOptions");

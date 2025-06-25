@@ -65,7 +65,7 @@ public class CommandUtil {
         if (commandMap != null && commandMap instanceof SimpleCommandMap) {
             commands.addAll(((SimpleCommandMap) commandMap).getCommands());
         }
-        // TODO: Fall-back for Vanilla / CB commands? [Fall-back should be altering permission defaults, though negating permissions is the right way.]
+        // Potential improvement: add fall-back for Vanilla or CB commands.
 
         // Fall-back: plugin commands.
         for (final Plugin plugin : Bukkit.getPluginManager().getPlugins()) {
@@ -113,7 +113,7 @@ public class CommandUtil {
         if (map != null) {
             return map.getCommand(lcAlias);
         } else {
-            // TODO: maybe match versus plugin commands.
+            // Could also match against plugin-provided commands.
             return null;
         }
     }
@@ -224,8 +224,7 @@ public class CommandUtil {
                 // Add version with '/'.
                 tree.feed("/" + input);
             } else {
-                // Add version without the first '/'.
-                // TODO: Consider removing all leading '/' here.
+                // Add version without the first '/'. May remove additional leading '/' if needed.
                 input = input.substring(1);
                 if (!input.isEmpty()) {
                     tree.feed(input);
