@@ -235,22 +235,52 @@ public class VehicleEnvelope extends Check {
      * @param multiplier
      *
      */
-    private double getHDistCapBoats(final VehicleMoveData thisMove, final MovingData data, final double multiplier, final double globalcap) {
-        if(thisMove.from.onBlueIce && !thisMove.to.onBlueIce){ //workaround for when the boat leaves icy places
-            data.boatIceVelocityTicks = 20;
+    private double getHDistCapBoats(final VehicleMoveData thisMove, final MovingData data,
+                                    final double multiplier, final double globalcap) {
+        updateBoatIceVelocityTicks(thisMove, data);
+
+        final double terrainMultiplier = calcBoatTerrainMultiplier(thisMove, data, multiplier);
+        if (!Double.isNaN(terrainMultiplier)) {
+            return terrainMultiplier;
         }
-        else if (thisMove.from.onIce && !thisMove.to.onIce){
+
+        return multiplier == 1.0 ? globalcap : multiplier;
+    }
+
+    /**
+     * Update {@link MovingData#boatIceVelocityTicks} based on leaving ice blocks.
+     */
+    private void updateBoatIceVelocityTicks(final VehicleMoveData move, final MovingData data) {
+        if (move.from.onBlueIce && !move.to.onBlueIce) { // workaround for when the boat leaves icy places
+            data.boatIceVelocityTicks = 20;
+        } else if (move.from.onIce && !move.to.onIce) {
             data.boatIceVelocityTicks = 10;
         }
-        if (thisMove.from.onBlueIce || thisMove.to.onBlueIce) return multiplier * 4.1;
-        if (thisMove.from.onIce || thisMove.to.onIce) return multiplier * 2.3;
-        if(data.boatIceVelocityTicks-- > 0){ // allow high speed for a moment
-            if (data.boatIceVelocityTicks > 10) return multiplier * 4.1;
+    }
+
+    /**
+     * Calculate the multiplier influenced by the surface the boat moves on.
+     *
+     * @return A computed multiplier or {@link Double#NaN} if none applies.
+     */
+    private double calcBoatTerrainMultiplier(final VehicleMoveData move, final MovingData data,
+                                             final double multiplier) {
+        if (move.from.onBlueIce || move.to.onBlueIce) {
+            return multiplier * 4.1;
+        }
+        if (move.from.onIce || move.to.onIce) {
             return multiplier * 2.3;
         }
-        if ((thisMove.from.onGround && !thisMove.from.inWater) || thisMove.to.onGround && !thisMove.to.inWater) return multiplier * 0.4;
-        if (thisMove.from.inWater || thisMove.to.inWater) return multiplier * 0.5;
-        return multiplier == 1.0 ? globalcap : multiplier;
+        if (data.boatIceVelocityTicks-- > 0) { // allow high speed for a moment
+            return multiplier * (data.boatIceVelocityTicks > 10 ? 4.1 : 2.3);
+        }
+        if ((move.from.onGround && !move.from.inWater) || (move.to.onGround && !move.to.inWater)) {
+            return multiplier * 0.4;
+        }
+        if (move.from.inWater || move.to.inWater) {
+            return multiplier * 0.5;
+        }
+        return Double.NaN;
     }
 
   /**
