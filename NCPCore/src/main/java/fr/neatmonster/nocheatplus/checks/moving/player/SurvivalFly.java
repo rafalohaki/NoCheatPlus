@@ -1385,23 +1385,38 @@ public class SurvivalFly extends Check {
             return null;
         }
 
-        if (thisMove.from.inLiquid && thisMove.to.inLiquid) {
-            tags.add("hliquid");
-            final double modSwim = (from.isSubmerged(0.701) || thisMove.from.inLava) ? Magic.modSwim[0]
-                    : Magic.modSwim[3];
-            double allowed = Bridge1_13.isSwimming(player) ? Magic.modSwim[1]
-                    : modSwim * thisMove.walkSpeed * cc.survivalFlySwimmingSpeed / 100D;
-            boolean base = false;
-            boolean baseSprint = false;
-            boolean sneak = true;
-            double friction = sfDirty ? 0.0 : data.lastFrictionHorizontal;
+        HSpeedResult result = handleInLiquid(player, thisMove, lastMove, pastMove2, data, cc,
+                from, to, sfDirty, sprinting);
+        if (result != null) {
+            return result;
+        }
 
-            if (thisMove.from.inWater || !thisMove.from.inLava) {
-                final int strider = BridgeEnchant.getDepthStriderLevel(player);
-                if (strider > 0) {
-                    allowed *= Magic.modDepthStrider[strider];
-                    base = true;
-                    baseSprint = true;
+        return handleLiquidExit(player, thisMove, data, cc, pData, from, checkPermissions, sfDirty);
+    }
+
+    private HSpeedResult handleInLiquid(final Player player, final PlayerMoveData thisMove,
+            final PlayerMoveData lastMove, final PlayerMoveData pastMove2, final MovingData data,
+            final MovingConfig cc, final PlayerLocation from, final PlayerLocation to,
+            final boolean sfDirty, final boolean sprinting) {
+        if (!thisMove.from.inLiquid || !thisMove.to.inLiquid) {
+            return null;
+        }
+        tags.add("hliquid");
+        final double modSwim = (from.isSubmerged(0.701) || thisMove.from.inLava) ? Magic.modSwim[0]
+                : Magic.modSwim[3];
+        double allowed = Bridge1_13.isSwimming(player) ? Magic.modSwim[1]
+                : modSwim * thisMove.walkSpeed * cc.survivalFlySwimmingSpeed / 100D;
+        boolean base = false;
+        boolean baseSprint = false;
+        boolean sneak = true;
+        double friction = sfDirty ? 0.0 : data.lastFrictionHorizontal;
+
+        if (thisMove.from.inWater || !thisMove.from.inLava) {
+            final int strider = BridgeEnchant.getDepthStriderLevel(player);
+            if (strider > 0) {
+                allowed *= Magic.modDepthStrider[strider];
+                base = true;
+                baseSprint = true;
                 }
 
                 if (!Double.isInfinite(Bridge1_13.getDolphinGraceAmplifier(player))) {
@@ -1429,70 +1444,73 @@ public class SurvivalFly extends Check {
                                 / 100D;
                     }
                 }
-            }
+        }
 
-            final int fromBlockData = from.getData(from.getBlockX(), from.getBlockY(), from.getBlockZ());
-            if (BlockProperties.isAir(from.getTypeIdAbove()) && !thisMove.headObstructed && !from.isSubmerged(0.8)
-                    && (data.insideMediumCount < 4 || data.liftOffEnvelope == LiftOffEnvelope.NORMAL)) {
-                if (thisMove.from.inLava) {
-                    if (!lastMove.from.inLava || !pastMove2.from.inLava
-                            || Magic.XORonGround(thisMove) && (fromBlockData == 0 || fromBlockData == 6)) {
-                        allowed = (sprinting ? Magic.modSprint : 1.0) * thisMove.walkSpeed
-                                * cc.survivalFlySwimmingSpeed / 100D;
-                        if (!thisMove.from.onGround && thisMove.to.onGround) {
-                            data.momentumTick = 6;
-                        }
+        final int fromBlockData = from.getData(from.getBlockX(), from.getBlockY(), from.getBlockZ());
+        if (BlockProperties.isAir(from.getTypeIdAbove()) && !thisMove.headObstructed && !from.isSubmerged(0.8)
+                && (data.insideMediumCount < 4 || data.liftOffEnvelope == LiftOffEnvelope.NORMAL)) {
+            if (thisMove.from.inLava) {
+                if (!lastMove.from.inLava || !pastMove2.from.inLava
+                        || Magic.XORonGround(thisMove) && (fromBlockData == 0 || fromBlockData == 6)) {
+                    allowed = (sprinting ? Magic.modSprint : 1.0) * thisMove.walkSpeed
+                            * cc.survivalFlySwimmingSpeed / 100D;
+                    if (!thisMove.from.onGround && thisMove.to.onGround) {
+                        data.momentumTick = 6;
                     }
                 }
             }
-
-            return new HSpeedResult(allowed, base, baseSprint, sneak, friction);
         }
 
-        if (!sfDirty && (!checkPermissions || !pData.hasPermission(Permissions.MOVING_SURVIVALFLY_WATERWALK, player))
-                && (Magic.leavingLiquid(thisMove) || data.surfaceId == 1)
-                && data.liftOffEnvelope.name().startsWith("LIMIT") && !from.isInWaterLogged()) {
-            tags.add("hliquidexit");
-            final int strider = BridgeEnchant.getDepthStriderLevel(player);
-            double allowed = Bridge1_13.isSwimming(player) ? Magic.modSwim[1]
-                    : Magic.modSwim[0] * thisMove.walkSpeed * Magic.modSurface[0] * cc.survivalFlySwimmingSpeed
-                            / 100D;
-            boolean base = false;
-            boolean baseSprint = false;
-            double friction = 0.0;
+        return new HSpeedResult(allowed, base, baseSprint, sneak, friction);
+    }
 
-            if (strider > 0 && data.surfaceId == 0) {
-                allowed *= Magic.modDepthStrider[strider];
-                base = true;
-                baseSprint = true;
-                friction = data.lastFrictionHorizontal;
-            }
-
-            if (!Double.isInfinite(Bridge1_13.getDolphinGraceAmplifier(player))) {
-                allowed *= Magic.modDolphinsGrace;
-                if (strider > 1) {
-                    allowed *= 1.0 + 0.07 * strider;
-                }
-            }
-
-            if (data.surfaceId == 1) {
-                allowed *= Magic.modSurface[1];
-            }
-
-            data.surfaceId = 1;
-            final int blockData = from.getData(from.getBlockX(), from.getBlockY(), from.getBlockZ());
-            final int blockUnderData = from.getData(from.getBlockX(), from.getBlockY() - 1, from.getBlockZ());
-
-            if (blockData > 3 || blockUnderData > 3 || data.isdownstream) {
-                data.surfaceId = 0;
-                allowed = thisMove.walkSpeed * cc.survivalFlySwimmingSpeed / 100D;
-                data.isdownstream = false;
-            }
-
-            return new HSpeedResult(allowed, base, baseSprint, true, friction);
+    private HSpeedResult handleLiquidExit(final Player player, final PlayerMoveData thisMove,
+            final MovingData data, final MovingConfig cc, final IPlayerData pData,
+            final PlayerLocation from, final boolean checkPermissions, final boolean sfDirty) {
+        if (sfDirty || (checkPermissions && pData.hasPermission(Permissions.MOVING_SURVIVALFLY_WATERWALK, player))
+                || (!Magic.leavingLiquid(thisMove) && data.surfaceId != 1)
+                || !data.liftOffEnvelope.name().startsWith("LIMIT") || from.isInWaterLogged()) {
+            return null;
         }
 
-        return null;
+        tags.add("hliquidexit");
+        final int strider = BridgeEnchant.getDepthStriderLevel(player);
+        double allowed = Bridge1_13.isSwimming(player) ? Magic.modSwim[1]
+                : Magic.modSwim[0] * thisMove.walkSpeed * Magic.modSurface[0] * cc.survivalFlySwimmingSpeed
+                        / 100D;
+        boolean base = false;
+        boolean baseSprint = false;
+        double friction = 0.0;
+
+        if (strider > 0 && data.surfaceId == 0) {
+            allowed *= Magic.modDepthStrider[strider];
+            base = true;
+            baseSprint = true;
+            friction = data.lastFrictionHorizontal;
+        }
+
+        if (!Double.isInfinite(Bridge1_13.getDolphinGraceAmplifier(player))) {
+            allowed *= Magic.modDolphinsGrace;
+            if (strider > 1) {
+                allowed *= 1.0 + 0.07 * strider;
+            }
+        }
+
+        if (data.surfaceId == 1) {
+            allowed *= Magic.modSurface[1];
+        }
+
+        data.surfaceId = 1;
+        final int blockData = from.getData(from.getBlockX(), from.getBlockY(), from.getBlockZ());
+        final int blockUnderData = from.getData(from.getBlockX(), from.getBlockY() - 1, from.getBlockZ());
+
+        if (blockData > 3 || blockUnderData > 3 || data.isdownstream) {
+            data.surfaceId = 0;
+            allowed = thisMove.walkSpeed * cc.survivalFlySwimmingSpeed / 100D;
+            data.isdownstream = false;
+        }
+
+        return new HSpeedResult(allowed, base, baseSprint, true, friction);
     }
 
     private double applyBaseModifiers(final Player player, final boolean sprinting, final MovingData data,
