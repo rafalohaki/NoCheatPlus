@@ -27,12 +27,12 @@ import fr.neatmonster.nocheatplus.utilities.location.RichBoundsLocation;
  *
  */
 public class BlockChangeReference {
-    // TODO: IBlockChangeReference ?
+    // NOTE: consider implementing an IBlockChangeReference interface
 
     /*
-     * TODO: public BlockChangeEntry firstUsedEntry = null; // Would the
-     * span suffice? Consider using span + timing or just the span during
-     * one check covering multiple blocks.
+     * Possible alternative: public BlockChangeEntry firstUsedEntry = null;
+     * Would the span suffice? Consider using span + timing or just the
+     * span during one check covering multiple blocks.
      */
 
     /** First used (oldest) entry during checking. */
@@ -45,7 +45,7 @@ public class BlockChangeReference {
      * checking, update with updateFinal.
      */
     public BlockChangeEntry lastUsedEntry = null;
-    // TODO: Consider to store the tick of when lastUsedEntry had been used, to allow invalidation.
+    // Consider storing the tick of when lastUsedEntry had been used, to allow invalidation.
 
     /**
      * Indicate if the timing of the last entry is still regarded as valid.
@@ -63,25 +63,25 @@ public class BlockChangeReference {
      */
     public boolean canUpdateWith(final BlockChangeEntry entry) {
         // Formerly: return this.lastUsedEntry == null || entry.id > this.lastUsedEntry.id || entry.id == this.lastUsedEntry.id && valid;
-        // TODO: Consider: Allow the same tick if id is higher. (order of ids doesn't really help too much though)
-        // TODO: Consider: A tick-tolerance value [needs storing the tick of setting/altering].
-        // TODO: Consider keeping a map/set of used entries + allow reuse depending on context.
+        // Consider allowing the same tick if the id is higher (order of ids doesn't help much though).
+        // Consider a tick-tolerance value (would need storing the tick of setting/altering).
+        // Consider keeping a map/set of used entries and allow reuse depending on context.
         /*
-         * TODO: Alternative context def.: Hard invalidation via lastUsedEntry
+         * Possible alternative context definition: hard invalidation via lastUsedEntry
          * and soft invalidation via TBA span. E.g. hard for on ground and
          * passable, soft for push/pull.
          */
-        // TODO: There'll be a span of validity, perhaps.
+        // There might be a span of validity.
         /*
          * Using ticks seems more appropriate, as ids are not necessarily
          * ordered in a relevant way, if they reference the same tick. Even
          * one tick may be too narrow.
          */
 
-        // TODO: ONCE STUFF WORKS: reinstate invalidation and boil it down to something useful.
+        // Once the rest works, reinstate invalidation and boil it down to something useful.
 
         //return this.lastUsedEntry == null || entry.tick > this.lastUsedEntry.tick || entry.tick == this.lastUsedEntry.tick && valid;
-        return true; // TODO: TEST
+        return true; // temporary testing behavior
     }
 
     /**
@@ -112,9 +112,9 @@ public class BlockChangeReference {
         if (firstSpanEntry == null) {
             return;
         }
-        // TODO: Consider a span margin, for which we set last used to first span.
+        // Consider a span margin, for which we set last used to first span.
         /*
-         * TODO: What with latest entries, that stay valid until half round
+         * Question: What with latest entries that stay valid until half round
          * trip time? Should perhaps keep validity also if entries are the
          * latest ones, needs updating in span already - can/should do
          * without bounds?
