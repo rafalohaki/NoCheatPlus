@@ -1362,7 +1362,7 @@ public class SurvivalFly extends Check {
                 allowed *= 2.3;
             }
             tags.add("hsnow");
-            return new HSpeedResult(allowed, true, true, true, 0.0);
+            return new HSpeedResult(allowed, true, false, true, 0.0);
         }
         if (thisMove.from.inBerryBush) {
             double allowed = Magic.modBush * thisMove.walkSpeed * cc.survivalFlyWalkingSpeed / 100D;
@@ -1371,7 +1371,7 @@ public class SurvivalFly extends Check {
                 allowed *= 2.3;
             }
             tags.add("hbush");
-            return new HSpeedResult(allowed, true, true, true, 0.0);
+            return new HSpeedResult(allowed, true, false, true, 0.0);
         }
         return null;
     }
@@ -1392,7 +1392,7 @@ public class SurvivalFly extends Check {
             double allowed = Bridge1_13.isSwimming(player) ? Magic.modSwim[1]
                     : modSwim * thisMove.walkSpeed * cc.survivalFlySwimmingSpeed / 100D;
             boolean base = false;
-            boolean baseSprint = true;
+            boolean baseSprint = false;
             boolean sneak = true;
             double friction = sfDirty ? 0.0 : data.lastFrictionHorizontal;
 
@@ -1401,6 +1401,7 @@ public class SurvivalFly extends Check {
                 if (strider > 0) {
                     allowed *= Magic.modDepthStrider[strider];
                     base = true;
+                    baseSprint = true;
                 }
 
                 if (!Double.isInfinite(Bridge1_13.getDolphinGraceAmplifier(player))) {
