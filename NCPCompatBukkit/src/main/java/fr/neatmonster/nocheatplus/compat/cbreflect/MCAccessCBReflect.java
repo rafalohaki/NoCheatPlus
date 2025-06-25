@@ -204,6 +204,9 @@ public class MCAccessCBReflect extends MCAccessBukkit {
         }
         try {
             final double[] bounds = helper.getBoundsTemp(player);
+            if (bounds == null) {
+                return AlmostBoolean.MAYBE;
+            }
             if (LocUtil.isBadCoordinate(bounds)) {
                 return AlmostBoolean.YES;
             }
@@ -219,9 +222,6 @@ public class MCAccessCBReflect extends MCAccessBukkit {
             }
         }
         catch (ReflectFailureException e) {
-            // Ignore.
-        }
-        catch (NullPointerException ne) {
             // Ignore.
         }
         return AlmostBoolean.MAYBE;
