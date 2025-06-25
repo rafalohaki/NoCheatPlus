@@ -21,7 +21,7 @@ public class BlocksMC1_14 implements BlockPropertiesSetup{
     @SuppressWarnings("deprecation")
     @Override
     public void setupBlockProperties(WorldConfigProvider<?> worldConfigProvider) {
-        // TODO: Clean up the mess
+        // This section should be refactored for clarity.
 
         BlockFlags.addFlags("VINE", BlockFlags.F_CLIMBUPABLE);
         final BlockProperties.BlockProps instant = BlockProperties.instantType;

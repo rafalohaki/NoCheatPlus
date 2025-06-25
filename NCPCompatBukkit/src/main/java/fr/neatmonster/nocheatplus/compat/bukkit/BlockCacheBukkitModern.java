@@ -64,9 +64,9 @@ public class BlockCacheBukkitModern extends BlockCacheBukkit {
     public double[] fetchBounds(int x, int y, int z) {
         // minX, minY, minZ, maxX, maxY, maxZ
 
-        // TODO: Fetch what's possible to fetch/guess (...).
+        // Attempt to fetch or guess as much information as possible.
 
-        // TODO: Consider to store the last used block/stuff within BlockCacheBukkit already.
+        // Storing the last used block within BlockCacheBukkit might improve performance.
         //final Block block = world.getBlockAt(x, y, z);
         //final BlockState state = block.getState();
         //final MaterialData materialData = state.getData();
@@ -90,7 +90,7 @@ public class BlockCacheBukkitModern extends BlockCacheBukkit {
     @Override
     public boolean standsOnEntity(final Entity entity, final double minX, final double minY, final double minZ, final double maxX, final double maxY, final double maxZ){
         try{
-            // TODO: Probably check vehicle ids too before doing this ?
+            // Vehicle IDs may need to be checked before performing this action.
             for (final Entity vehicle : entity.getNearbyEntities(0.1, 2.0, 0.1)){
                 final EntityType type = vehicle.getType();
                 if (!MaterialUtil.isBoat(type) && type != EntityType.SHULKER){ //  && !(vehicle instanceof Minecart)) 
@@ -99,7 +99,7 @@ public class BlockCacheBukkitModern extends BlockCacheBukkit {
                 final double vehicleY = vehicle.getLocation(useLoc).getY() + vehicle.getHeight();
                 final double entityY = entity.getLocation(useLoc).getY();
                 useLoc.setWorld(null);
-                // TODO: A "better" estimate is possible, though some more tolerance would be good.
+                // A more accurate estimate may be implemented, though some more tolerance would help.
                 return vehicleY < entityY + 0.1 && Math.abs(vehicleY - entityY) < 0.7;
             }		
         }
