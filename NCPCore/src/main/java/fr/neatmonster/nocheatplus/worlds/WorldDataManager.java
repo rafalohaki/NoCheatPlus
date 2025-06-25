@@ -107,21 +107,21 @@ public class WorldDataManager implements IWorldDataManager, INotifyReload {
         }
     }
 
-    // TODO: debug flags like activation?
-    // TODO: Factory registration.
+    // Debug flags like activation?
+    // Placeholder for factory registration.
 
     /** Global access lock for this registry. Also used for ConfigFile editing. */
     private final Lock lock = new ReentrantLock();
 
     /** Lower case name to WorldData map. */
-    // TODO: ID-name pairs / mappings?
+    // Consider ID-name pairs or mappings.
     private final HashMapLOW<String, WorldData> worldDataMap = new HashMapLOW<String, WorldData>(lock, 10);
     private Map<String, ConfigFile> rawConfigurations = new HashMap<String, ConfigFile>(); // COW
     private final RichFactoryRegistry<WorldFactoryArgument> factoryRegistry = new RichFactoryRegistry<WorldFactoryArgument>(lock);
 
     private final MiniListener<?>[] miniListeners = new MiniListener<?>[] {
         /*
-         * TODO: Constants in a class 'ListenerTags', plus a plan
+         * Idea: constants in a class 'ListenerTags', plus a plan
          * (system.data.player.nocheatplus, system.nocheatplus.data ??,
          * nocheatplus.system.data.player...). (RegistryTags for other?).
          */
@@ -137,8 +137,8 @@ public class WorldDataManager implements IWorldDataManager, INotifyReload {
 
 
     public WorldDataManager() {
-        // TODO: ILockable
-        // TODO: Create a default node with some basic settings.
+        // Consider implementing ILockable.
+        // Create a default node with some basic settings if needed.
         createDefaultWorldData();
         // (Call support.) 
         factoryRegistry.createAutoGroup(IDataOnReload.class);
@@ -187,7 +187,7 @@ public class WorldDataManager implements IWorldDataManager, INotifyReload {
     }
 
     private WorldData internalGetDefaultWorldData() {
-        // TODO: Store the instance extra to the map.
+        // Optionally store the instance separately within the map.
         return worldDataMap.get(null);
     }
 
@@ -232,7 +232,7 @@ public class WorldDataManager implements IWorldDataManager, INotifyReload {
      * @param rawWorldConfigs
      */
     public void applyConfiguration(final Map<String, ConfigFile> rawWorldConfigs) {
-        // TODO: ILockable
+        // Consider using ILockable
         /*
          * Minimal locking is used, to prevent deadlocks, in case WorldData
          * instances will hold individual locks.
@@ -260,7 +260,7 @@ public class WorldDataManager implements IWorldDataManager, INotifyReload {
             }
         }
         // Update all that are not contained and don't point to the default configuration.
-        // TODO: Consider deleting world nodes, unless the world is actually loaded.
+        // Consider deleting world nodes unless the world is actually loaded.
         for (final Entry<String, WorldData> entry : worldDataMap.iterable()) {
             final String worldName = entry.getKey();
             if (worldName != null 
@@ -300,7 +300,7 @@ public class WorldDataManager implements IWorldDataManager, INotifyReload {
 
     @Override
     public void updateAllWorldData() {
-        // TODO: ILockable / move to an access object ?
+        // ILockable or an access object might be used
         lock.lock();
         final WorldData defaultWorldData = internalGetDefaultWorldData();
         defaultWorldData.update();
@@ -325,7 +325,7 @@ public class WorldDataManager implements IWorldDataManager, INotifyReload {
     private WorldData updateWorldData(final String worldName, 
             final ConfigFile rawConfiguration) {
         final WorldData defaultWorldData = internalGetDefaultWorldData();
-        lock.lock(); // TODO: Might lock outside (pro/con).
+        lock.lock(); // Locking here might be moved outside (pros and cons).
         final String lcName = worldName == null ? null : worldName.toLowerCase();
         WorldData data = worldDataMap.get(lcName);
         boolean skipUpdate = false;
@@ -351,7 +351,7 @@ public class WorldDataManager implements IWorldDataManager, INotifyReload {
         final IWorldData defaultWorldData = getDefaultWorldData();
         defaultWorldData.overrideCheckActivation(checkType, active, overrideType, overrideChildren);
         // Override flags.
-        // TODO: If possible, skip derived from default, since default data is done first.
+        // If possible, skip derived from default, since default data is done first.
         for (final Entry<String, WorldData> entry : worldDataMap.iterable()) {
             final IWorldData worldData = entry.getValue();
             if (worldData != defaultWorldData) {
@@ -472,7 +472,7 @@ public class WorldDataManager implements IWorldDataManager, INotifyReload {
         final World world = event.getWorld();
         final WorldData worldData = worldDataMap.get(world.getName().toLowerCase());
         worldData.onWorldUnload(event.getWorld(), types);
-        // TODO: Minimize, clear cache / remove ?
+        // Consider minimizing the cache or removing it
     }
 
     @Override
