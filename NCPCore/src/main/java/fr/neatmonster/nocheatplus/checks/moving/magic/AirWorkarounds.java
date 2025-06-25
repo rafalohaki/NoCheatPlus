@@ -631,68 +631,96 @@ public class AirWorkarounds {
      * @param resetTo
      * @return 
      */
-    public static boolean outOfEnvelopeExemptions(final double yDistance, final double yDistDiffEx, 
+    public static boolean outOfEnvelopeExemptions(final double yDistance, final double yDistDiffEx,
                                                   final PlayerMoveData lastMove, final MovingData data,
                                                   final PlayerLocation from, final PlayerLocation to,
-                                                  final long now, final double yDistChange, 
+                                                  final long now, final double yDistChange,
                                                   final double maxJumpGain, final Player player,
                                                   final PlayerMoveData thisMove, final boolean resetTo) {
 
         if (!lastMove.toIsValid) {
-            return false;
             // Skip everything if last move is invalid
+            return false;
         }
 
-        if (yDistance > 0.0 && lastMove.yDistance < 0.0 
-            && AirWorkarounds.oddBounce(to, yDistance, lastMove, data)
-            && data.ws.use(WRPT.W_M_SF_SLIME_JP_2X0)) {
+        if (isSlimeBounce(yDistance, lastMove, data, to)) {
+            return true;
+        }
+
+        if (handleFrictionTransition(yDistance, lastMove, data)) {
+            // Transition from CreativeFly to SurvivalFly having been in a gliding phase
+            return true;
+        }
+
+        return groundCollisionWorkaround(from, to, yDistance, yDistChange, lastMove, data)
+                || specialJump(yDistDiffEx, to, maxJumpGain, yDistance, lastMove, data)
+                || noobTower(yDistDiffEx, yDistance, maxJumpGain, thisMove, lastMove, data)
+                || breakingBlockSwimming(yDistance, lastMove, data);
+    }
+
+    private static boolean isSlimeBounce(final double yDistance, final PlayerMoveData lastMove,
+                                         final MovingData data, final PlayerLocation to) {
+        if (yDistance > 0.0 && lastMove.yDistance < 0.0
+                && AirWorkarounds.oddBounce(to, yDistance, lastMove, data)
+                && data.ws.use(WRPT.W_M_SF_SLIME_JP_2X0)) {
             data.setFrictionJumpPhase();
-            return true;
             // Odd slime bounce: set friction and return.
-        }
-
-        if (data.keepfrictiontick < 0) {
-            if (lastMove.toIsValid) {
-                if (yDistance < 0.4 && lastMove.yDistance == yDistance) {
-                    data.keepfrictiontick = 0;
-                    data.setFrictionJumpPhase();
-                }
-            } 
-            else data.keepfrictiontick = 0;
             return true;
-            // Early return: transition from CreativeFly to SurvivalFly having been in a gliding phase.
         }
+        return false;
+    }
 
-        return
-                
-                // 0: Pretty coarse workaround, should instead do a proper modeling for from.getDistanceToGround.
-                // (OR loc... needs different model, distanceToGround, proper set back, moveHitGround)
-                yDistance < 0.0 && lastMove.yDistance < 0.0 && yDistChange > -Magic.GRAVITY_MAX
-                && (
-                    from.isOnGround(Math.abs(yDistance) + 0.001) 
-                    || BlockProperties.isLiquid(to.getTypeId(to.getBlockX(), Location.locToBlock(to.getY() - 0.5), to.getBlockZ()))
-                )
-                && data.ws.use(WRPT.W_M_SF_OUT_OF_ENVELOPE_1)
-                // 0: Special jump (water/edges/assume-ground), too small decrease.
-                || yDistDiffEx < Magic.GRAVITY_MIN / 2.0 && data.sfJumpPhase == 1 
+    private static boolean handleFrictionTransition(final double yDistance, final PlayerMoveData lastMove,
+                                                    final MovingData data) {
+        if (data.keepfrictiontick < 0) {
+            if (lastMove.toIsValid && yDistance < 0.4 && lastMove.yDistance == yDistance) {
+                data.keepfrictiontick = 0;
+                data.setFrictionJumpPhase();
+            } else if (!lastMove.toIsValid) {
+                data.keepfrictiontick = 0;
+            }
+            return true;
+        }
+        return false;
+    }
+
+    private static boolean groundCollisionWorkaround(final PlayerLocation from, final PlayerLocation to,
+                                                     final double yDistance, final double yDistChange,
+                                                     final PlayerMoveData lastMove, final MovingData data) {
+        return yDistance < 0.0 && lastMove.yDistance < 0.0 && yDistChange > -Magic.GRAVITY_MAX
+                && (from.isOnGround(Math.abs(yDistance) + 0.001)
+                || BlockProperties.isLiquid(to.getTypeId(to.getBlockX(), Location.locToBlock(to.getY() - 0.5),
+                        to.getBlockZ())))
+                && data.ws.use(WRPT.W_M_SF_OUT_OF_ENVELOPE_1);
+    }
+
+    private static boolean specialJump(final double yDistDiffEx, final PlayerLocation to, final double maxJumpGain,
+                                       final double yDistance, final PlayerMoveData lastMove, final MovingData data) {
+        return yDistDiffEx < Magic.GRAVITY_MIN / 2.0 && data.sfJumpPhase == 1
                 && to.getY() - data.getSetBackY() <= data.liftOffEnvelope.getMaxJumpHeight(data.jumpAmplifier)
-                && lastMove.yDistance <= maxJumpGain && yDistance > -Magic.GRAVITY_MAX && yDistance < lastMove.yDistance
+                && lastMove.yDistance <= maxJumpGain && yDistance > -Magic.GRAVITY_MAX
+                && yDistance < lastMove.yDistance
                 && lastMove.yDistance - yDistance > Magic.GRAVITY_ODD / 3.0
-                && data.ws.use(WRPT.W_M_SF_OUT_OF_ENVELOPE_2) 
-                // 0: On (noob) tower up, the second move has a higher distance than expected, because the first had been starting slightly above the top.
-                || yDistDiffEx < Magic.Y_ON_GROUND_DEFAULT && Magic.noobJumpsOffTower(yDistance, maxJumpGain, thisMove, lastMove, data)
-                && data.ws.use(WRPT.W_M_SF_OUT_OF_ENVELOPE_3)
-                // 0: 1.13+ specific: breaking a block below too fast.
-                || Bridge1_13.hasIsSwimming() 
-                && (
-                    data.sfJumpPhase == 7 && yDistance < -0.02 && yDistance > -0.2
-                    || data.sfJumpPhase == 3 
-                    && lastMove.yDistance < -0.139 && yDistance > -0.1 && yDistance < 0.005
-                    || yDistance < -0.288 && yDistance > -0.32 
-                    && lastMove.yDistance > -0.1 && lastMove.yDistance < 0.005
-                )
-                && data.ws.use(WRPT.W_M_SF_OUT_OF_ENVELOPE_4)
-        ;
+                && data.ws.use(WRPT.W_M_SF_OUT_OF_ENVELOPE_2);
+    }
+
+    private static boolean noobTower(final double yDistDiffEx, final double yDistance, final double maxJumpGain,
+                                     final PlayerMoveData thisMove, final PlayerMoveData lastMove,
+                                     final MovingData data) {
+        return yDistDiffEx < Magic.Y_ON_GROUND_DEFAULT
+                && Magic.noobJumpsOffTower(yDistance, maxJumpGain, thisMove, lastMove, data)
+                && data.ws.use(WRPT.W_M_SF_OUT_OF_ENVELOPE_3);
+    }
+
+    private static boolean breakingBlockSwimming(final double yDistance, final PlayerMoveData lastMove,
+                                                 final MovingData data) {
+        return Bridge1_13.hasIsSwimming()
+                && ((data.sfJumpPhase == 7 && yDistance < -0.02 && yDistance > -0.2)
+                || (data.sfJumpPhase == 3 && lastMove.yDistance < -0.139 && yDistance > -0.1
+                && yDistance < 0.005)
+                || (yDistance < -0.288 && yDistance > -0.32 && lastMove.yDistance > -0.1
+                && lastMove.yDistance < 0.005))
+                && data.ws.use(WRPT.W_M_SF_OUT_OF_ENVELOPE_4);
     }
     
 
