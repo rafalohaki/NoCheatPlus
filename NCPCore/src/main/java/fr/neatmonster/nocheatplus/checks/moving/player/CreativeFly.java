@@ -1176,52 +1176,99 @@ public class CreativeFly extends Check {
     * @param cc
     * @author xaw3ep
     */
-    private void workaroundSwitchingModel(final Player player, final PlayerMoveData thisMove, final PlayerMoveData lastMove, 
+    private void workaroundSwitchingModel(final Player player, final PlayerMoveData thisMove, final PlayerMoveData lastMove,
                                           final ModelFlying model, final MovingData data, final MovingConfig cc, final boolean debug) {
 
-        if (lastMove.toIsValid && lastMove.modelFlying != thisMove.modelFlying) {
-
-            // Other modelflying -> levitation
-            if (model.getScaleLevitationEffect()) {
-                final double amount = lastMove.hAllowedDistance > 0.0 ? lastMove.hAllowedDistance : lastMove.hDistance;
-                if (thisMove.touchedGround) data.addHorizontalVelocity(new AccountEntry(amount, 2, MovingData.getHorVelValCount(amount)));
-                if (debug) debug(player, lastMove.modelFlying.getId().toString() + " -> potion.levitation: add velocity");
-                return;
-            }
-
-            // Gliding -> Other modelflying
-            if (lastMove.modelFlying != null && lastMove.modelFlying.getVerticalAscendGliding()) {
-                final double amount = guessVelocityAmount(player, thisMove, lastMove, data);
-                if (thisMove.touchedGround || model.getId().equals("gamemode.creative")) {
-                    data.addHorizontalVelocity(new AccountEntry(amount, 3, MovingData.getHorVelValCount(amount)));
-                    if (debug) debug(player, "Jetpack.elytra -> " + (thisMove.touchedGround ? "touchedGround" : "gamemode.creative") + ": add velocity");
-                }
-
-                if (model.getId().equals("gamemode.creative")) {
-                    data.addVerticalVelocity(new SimpleEntry(0.0, 2));
-                    if (debug) debug(player, "Jetpack.elytra -> gamemode.creative: add velocity");
-                }
-                return;
-            }
-            // A ripglide phase has ended, smoothen the transition.
-            if (lastMove.modelFlying != null && lastMove.modelFlying.getScaleRiptidingEffect() && thisMove.modelFlying.getVerticalAscendGliding()) {
-
-                final double amount = guessVelocityAmount(player, thisMove, lastMove, data);
-                if (!thisMove.from.onGround && !thisMove.to.onGround) {
-                    data.addVerticalVelocity(new SimpleEntry(thisMove.yDistance, cc.velocityActivationCounter));
-                    data.addVerticalVelocity(new SimpleEntry(0.0, cc.velocityActivationCounter));
-                    data.addHorizontalVelocity(new AccountEntry(amount, 4, MovingData.getHorVelValCount(amount)));
-                    if (debug) debug(player, "Effect.riptiding -> Jetpack.elytra: add velocity");
-                }
-                return;
-            }
+        if (player == null || thisMove == null || lastMove == null || model == null || data == null || cc == null) {
+            return;
         }
 
+        boolean handled = false;
+        if (lastMove.toIsValid && lastMove.modelFlying != thisMove.modelFlying) {
+            handled = handleModelChange(player, thisMove, lastMove, model, data, cc, debug);
+        }
+
+        if (!handled) {
+            handleQuickModelSwitch(player, thisMove, lastMove, model, data, debug);
+        }
+    }
+
+    private boolean handleModelChange(final Player player, final PlayerMoveData thisMove,
+                                      final PlayerMoveData lastMove, final ModelFlying model,
+                                      final MovingData data, final MovingConfig cc, final boolean debug) {
+        return applyLevitationVelocity(player, thisMove, lastMove, model, data, debug)
+            || applyGlideTransition(player, thisMove, lastMove, model, data, debug)
+            || applyRiptideTransition(player, thisMove, lastMove, model, data, cc, debug);
+    }
+
+    private boolean applyLevitationVelocity(final Player player, final PlayerMoveData thisMove,
+                                            final PlayerMoveData lastMove, final ModelFlying model,
+                                            final MovingData data, final boolean debug) {
+        if (!model.getScaleLevitationEffect()) {
+            return false;
+        }
+        final double amount = lastMove.hAllowedDistance > 0.0 ? lastMove.hAllowedDistance : lastMove.hDistance;
+        if (thisMove.touchedGround) {
+            data.addHorizontalVelocity(new AccountEntry(amount, 2, MovingData.getHorVelValCount(amount)));
+        }
+        if (debug && lastMove.modelFlying != null) {
+            debug(player, lastMove.modelFlying.getId().toString() + " -> potion.levitation: add velocity");
+        }
+        return true;
+    }
+
+    private boolean applyGlideTransition(final Player player, final PlayerMoveData thisMove,
+                                         final PlayerMoveData lastMove, final ModelFlying model,
+                                         final MovingData data, final boolean debug) {
+        if (lastMove.modelFlying == null || !lastMove.modelFlying.getVerticalAscendGliding()) {
+            return false;
+        }
+        final double amount = guessVelocityAmount(player, thisMove, lastMove, data);
+        if (thisMove.touchedGround || "gamemode.creative".equals(model.getId())) {
+            data.addHorizontalVelocity(new AccountEntry(amount, 3, MovingData.getHorVelValCount(amount)));
+            if (debug) {
+                debug(player, "Jetpack.elytra -> " + (thisMove.touchedGround ? "touchedGround" : "gamemode.creative") + ": add velocity");
+            }
+        }
+        if ("gamemode.creative".equals(model.getId())) {
+            data.addVerticalVelocity(new SimpleEntry(0.0, 2));
+            if (debug) {
+                debug(player, "Jetpack.elytra -> gamemode.creative: add velocity");
+            }
+        }
+        return true;
+    }
+
+    private boolean applyRiptideTransition(final Player player, final PlayerMoveData thisMove,
+                                           final PlayerMoveData lastMove, final ModelFlying model,
+                                           final MovingData data, final MovingConfig cc, final boolean debug) {
+        if (lastMove.modelFlying == null || !lastMove.modelFlying.getScaleRiptidingEffect()
+                || thisMove.modelFlying == null || !thisMove.modelFlying.getVerticalAscendGliding()) {
+            return false;
+        }
+        final double amount = guessVelocityAmount(player, thisMove, lastMove, data);
+        if (thisMove.from != null && thisMove.to != null && !thisMove.from.onGround && !thisMove.to.onGround) {
+            data.addVerticalVelocity(new SimpleEntry(thisMove.yDistance, cc.velocityActivationCounter));
+            data.addVerticalVelocity(new SimpleEntry(0.0, cc.velocityActivationCounter));
+            data.addHorizontalVelocity(new AccountEntry(amount, 4, MovingData.getHorVelValCount(amount)));
+            if (debug) {
+                debug(player, "Effect.riptiding -> Jetpack.elytra: add velocity");
+            }
+        }
+        return true;
+    }
+
+    private void handleQuickModelSwitch(final Player player, final PlayerMoveData thisMove,
+                                        final PlayerMoveData lastMove, final ModelFlying model,
+                                        final MovingData data, final boolean debug) {
         final PlayerMoveData secondPastMove = data.playerMoves.getSecondPastMove();
-        // Quick change between models, reset friction, invalid
         if (secondPastMove.modelFlying != null && lastMove.modelFlying != null
-            && secondPastMove.modelFlying == model && model != lastMove.modelFlying) {
-            if (debug) debug(player, "Invalidate this move on too fast model switch: " + (secondPastMove.modelFlying.getId().toString() + " -> " + lastMove.modelFlying.getId().toString() + " -> " + model.getId().toString()));
+                && secondPastMove.modelFlying == model && model != lastMove.modelFlying) {
+            if (debug) {
+                debug(player, "Invalidate this move on too fast model switch: "
+                        + (secondPastMove.modelFlying.getId().toString() + " -> "
+                        + lastMove.modelFlying.getId().toString() + " -> " + model.getId().toString()));
+            }
             thisMove.invalidate();
         }
     }
