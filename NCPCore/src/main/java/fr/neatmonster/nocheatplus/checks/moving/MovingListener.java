@@ -1916,79 +1916,40 @@ public class MovingListener extends CheckListener implements TickListener, IRemo
     public void onPlayerTeleportLowest(final PlayerTeleportEvent event) {
 
         final Player player = event.getPlayer();
-        // Prevent further moving processing for nested events.
-        processingEvents.remove(player.getName());
-        // Various early return conditions.
-        if (event.isCancelled()) return;
-
-        final TeleportCause cause = event.getCause();
-        switch(cause) {
-            case COMMAND:
-            case ENDER_PEARL:
-                break;
-            default:
-                return;
-        }
-        final IPlayerData pData = DataManager.getPlayerData(player);
-        final boolean debug = pData.isDebugActive(checkType);
-        if (!pData.isCheckActive(CheckType.MOVING, player)) return;
-        final MovingData data = pData.getGenericInstance(MovingData.class);
-        final Location to = event.getTo();
-
-        if (to == null) {
-            // Better cancel this one.
-            if (!event.isCancelled()) {
-                if (debug) debugTeleportMessage(player, event, "Cancel event, that has no target location (to) set.");
-                event.setCancelled(true);
-            }
+        if (player == null) {
+            event.setCancelled(true);
             return;
         }
 
-        if (data.hasTeleported()) {
-            // More lenient: accept the position.
-            if (data.isTeleportedPosition(to))  return;
-            else {
-                if (debug) debugTeleportMessage(player, event, "Prevent teleport, due to a scheduled set back: ", to);
-                event.setCancelled(true);
-                return;
-            }
+        // Prevent further moving processing for nested events.
+        processingEvents.remove(player.getName());
+
+        if (!shouldProcessTeleport(event)) {
+            return;
         }
 
-        // Run checks.
-        final MovingConfig cc = pData.getGenericInstance(MovingConfig.class);
-        boolean cancel = false;
-        // Ender pearl into blocks.
-        if (cause == TeleportCause.ENDER_PEARL) {
-            if (pData.getGenericInstance(CombinedConfig.class).enderPearlCheck && !BlockProperties.isPassable(to) && 
-                    blockChangeTracker.getBlockChangeEntry(null, TickTask.getTick(), to.getWorld().getUID(), to.getBlockX(), to.getBlockY(), to.getBlockZ(), null) == null) { // || !BlockProperties.isOnGroundOrResetCond(player, to, 1.0)) {
-                // Not check on-ground: Check the second throw.
-                // Bounding box check or onGround as replacement?
-                cancel = true;
-            }
+        final IPlayerData pData = DataManager.getPlayerData(player);
+        if (!isMovingCheckActive(pData, player)) {
+            return;
         }
-        // Teleport to untracked locations.
-        else if (cause == TeleportCause.COMMAND) { // TeleportCause.PLUGIN?
-            // Attempt to prevent teleporting to players inside of blocks at untracked coordinates.
-            if (cc.passableUntrackedTeleportCheck) {
-                if (cc.loadChunksOnTeleport) MovingUtil.ensureChunksLoaded(player, to, "teleport", data, cc, pData);
-                if (cc.passableUntrackedTeleportCheck && MovingUtil.shouldCheckUntrackedLocation(player, to, pData)) {
-                    final Location newTo = MovingUtil.checkUntrackedLocation(to);
-                    if (newTo != null) {
-                        // Adjust the teleport to go to the last tracked to-location of the other player.
-                        event.setTo(newTo);
-                        // Consider console, consider debug.
-                        NCPAPIProvider.getNoCheatPlusAPI().getLogManager().warning(Streams.TRACE_FILE, player.getName() + " correct untracked teleport destination (" + to + " corrected to " + newTo + ").");
-                    }
-                }
-            }
-        }
-        // (Here event.setTo might've been called, unless cancel is set.)
 
-        // Handle cancel.
-        if (cancel) {
-            // NCP actively prevents this teleport.
+        final boolean debug = pData.isDebugActive(checkType);
+        final MovingData data = pData.getGenericInstance(MovingData.class);
+        final Location to = event.getTo();
+
+        if (handleInvalidTarget(event, player, to, debug)) {
+            return;
+        }
+
+        if (handleScheduledTeleport(data, event, player, to, debug)) {
+            return;
+        }
+
+        if (evaluateTeleport(event, player, to, pData, data)) {
             event.setCancelled(true);
-            if (debug) debug(player, "TP " + cause + " (cancel): " + to);
+            if (debug) {
+                debug(player, "TP " + event.getCause() + " (cancel): " + to);
+            }
         }
     }
 
@@ -2271,6 +2232,103 @@ public class MovingListener extends CheckListener implements TickListener, IRemo
         }
         else {
             data.crossWorldFrom = null;
+        }
+    }
+
+    /** Decide if the teleport event should be processed at all. */
+    private boolean shouldProcessTeleport(final PlayerTeleportEvent event) {
+        if (event == null || event.isCancelled()) {
+            return false;
+        }
+        final TeleportCause cause = event.getCause();
+        return cause == TeleportCause.COMMAND || cause == TeleportCause.ENDER_PEARL;
+    }
+
+    /** Check if moving checks are enabled for the player. */
+    private boolean isMovingCheckActive(final IPlayerData pData, final Player player) {
+        return pData != null && pData.isCheckActive(CheckType.MOVING, player);
+    }
+
+    /** Handle missing or invalid target locations. */
+    private boolean handleInvalidTarget(final PlayerTeleportEvent event, final Player player,
+                                        final Location to, final boolean debug) {
+        if (to == null || to.getWorld() == null) {
+            if (!event.isCancelled()) {
+                if (debug) {
+                    debugTeleportMessage(player, event, "Cancel event, that has no target location (to) set.");
+                }
+                event.setCancelled(true);
+            }
+            return true;
+        }
+        return false;
+    }
+
+    /**
+     * Handle teleport events when a set back is pending.
+     *
+     * @return true if processing should stop.
+     */
+    private boolean handleScheduledTeleport(final MovingData data, final PlayerTeleportEvent event,
+                                            final Player player, final Location to, final boolean debug) {
+        if (!data.hasTeleported()) {
+            return false;
+        }
+        if (data.isTeleportedPosition(to)) {
+            return true;
+        }
+        if (debug) {
+            debugTeleportMessage(player, event, "Prevent teleport, due to a scheduled set back: ", to);
+        }
+        event.setCancelled(true);
+        return true;
+    }
+
+    /**
+     * Apply teleport related checks. Returns true to cancel the event.
+     */
+    private boolean evaluateTeleport(final PlayerTeleportEvent event, final Player player, final Location to,
+                                     final IPlayerData pData, final MovingData data) {
+        final TeleportCause cause = event.getCause();
+        final MovingConfig cc = pData.getGenericInstance(MovingConfig.class);
+
+        if (cause == TeleportCause.ENDER_PEARL) {
+            return isBlockedEnderPearl(to, pData);
+        }
+
+        if (cause == TeleportCause.COMMAND) {
+            adjustUntrackedLocation(event, player, to, cc, pData, data);
+        }
+        return false;
+    }
+
+    /** Detect ender pearls used into solid blocks. */
+    private boolean isBlockedEnderPearl(final Location to, final IPlayerData pData) {
+        if (to == null || to.getWorld() == null) {
+            return false;
+        }
+        return pData.getGenericInstance(CombinedConfig.class).enderPearlCheck
+                && !BlockProperties.isPassable(to)
+                && blockChangeTracker.getBlockChangeEntry(null, TickTask.getTick(), to.getWorld().getUID(),
+                        to.getBlockX(), to.getBlockY(), to.getBlockZ(), null) == null;
+    }
+
+    /** Adjust untracked teleport destinations if necessary. */
+    private void adjustUntrackedLocation(final PlayerTeleportEvent event, final Player player, final Location to,
+                                         final MovingConfig cc, final IPlayerData pData, final MovingData data) {
+        if (!cc.passableUntrackedTeleportCheck) {
+            return;
+        }
+        if (cc.loadChunksOnTeleport) {
+            MovingUtil.ensureChunksLoaded(player, to, "teleport", data, cc, pData);
+        }
+        if (MovingUtil.shouldCheckUntrackedLocation(player, to, pData)) {
+            final Location newTo = MovingUtil.checkUntrackedLocation(to);
+            if (newTo != null) {
+                event.setTo(newTo);
+                NCPAPIProvider.getNoCheatPlusAPI().getLogManager().warning(Streams.TRACE_FILE,
+                        player.getName() + " correct untracked teleport destination (" + to + " corrected to " + newTo + ").");
+            }
         }
     }
 
