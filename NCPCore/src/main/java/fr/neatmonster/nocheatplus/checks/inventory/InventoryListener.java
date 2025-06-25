@@ -222,96 +222,38 @@ public class InventoryListener  extends CheckListener implements JoinLeaveListen
         if (!(event.getWhoClicked() instanceof Player)) {
             return;
         }
-        final long now = System.currentTimeMillis();
-        final HumanEntity entity = event.getWhoClicked();
-        if (!(entity instanceof Player)) {
+        final Player player = (Player) event.getWhoClicked();
+        if (player == null) {
             return;
         }
-        final Player player = (Player) entity;
         final IPlayerData pData = DataManager.getPlayerData(player);
+        if (pData == null || !pData.isCheckActive(CheckType.INVENTORY, player)) {
+            return;
+        }
 
-        if (!pData.isCheckActive(CheckType.INVENTORY, player)) return;
-
+        final long now = System.currentTimeMillis();
         final InventoryData data = pData.getGenericInstance(InventoryData.class);
         final int slot = event.getSlot();
         final String inventoryAction = hasInventoryAction ? event.getAction().name() : null;
+
         if (pData.isDebugActive(checkType)) {
             outputDebugInventoryClick(player, slot, event, inventoryAction);
         }
-        if (slot == InventoryView.OUTSIDE || slot < 0) {
-            data.lastClickTime = now;
-            // Update this one only if the inventory was closed previously (or was forcibly closed)
-            // otherwise keep the first click time
-            // Can't use lastClickTime since it's used by checks.
-            if (data.firstClickTime == 0) {
-                data.firstClickTime = now;
-            }
+
+        if (isOutsideSlot(slot)) {
+            handleOutsideSlot(data, now);
             return;
         }
 
         final ItemStack cursor = event.getCursor();
         final ItemStack clicked = event.getCurrentItem();
-        boolean cancel = false;
-        // Illegal enchantment checks.
-        try {
-            if (Items.checkIllegalEnchantments(player, clicked, pData)) {
-                cancel = true;
-                counters.addPrimaryThread(idIllegalItem, 1);
-            }
-        }
-        catch (final ArrayIndexOutOfBoundsException e) {
-            // Hotfix (CB) for out-of-range slot on some CraftBukkit versions.
-        }
-        try {
-            if (!cancel && Items.checkIllegalEnchantments(player, cursor, pData)) {
-                cancel = true;
-                counters.addPrimaryThread(idIllegalItem, 1);
-            }
-        }
-        catch (final ArrayIndexOutOfBoundsException e) {
-            // Hotfix (CB) for out-of-range slot on some CraftBukkit versions.
-        }
+        boolean cancel = checkIllegalEnchantments(player, clicked, cursor, pData);
 
-        // Fast inventory manipulation check.
-        if (fastClick.isEnabled(player, pData)) {
+        cancel |= handleFastClick(event, player, now, slot, cursor, clicked, inventoryAction, data, pData);
 
-            final InventoryConfig cc = pData.getGenericInstance(InventoryConfig.class);
-            if (!((event.getView().getType().equals(InventoryType.CREATIVE) || player.getGameMode() == GameMode.CREATIVE) && cc.fastClickSpareCreative)) {
-                boolean check = true;
-                try {
-                    check = !cc.inventoryExemptions.contains(ChatColor.stripColor(event.getView().getTitle()));
-                }
-                catch (final IllegalStateException e) {
-                    check = true; //...
-                }
-                
-                // Check for too quick interactions first.
-                if (check && InventoryUtil.isContainterInventory(event.getInventory().getType())
-                    && fastClick.fastClickChest(player, data, cc)) {
-                    cancel = true;
-                    keepCancel = true;
-                }
-                // Then check for too fast inventory clicking
-                if (check && fastClick.check(player, now, event.getView(), slot, cursor, clicked, event.isShiftClick(), 
-                                            inventoryAction, data, cc, pData)) {  
-                    cancel = true;
-                }
-            }
-        }
-        
-        // Inventory Move check
-        if (invMove.isEnabled(player, pData) 
-            && invMove.check(player, data, pData, pData.getGenericInstance(InventoryConfig.class), event.getSlotType())) {
-            cancel = true;
-        }
-        
-        // Always update the last time we received an inventory click.
-        data.lastClickTime = now;
-        // We received an inventory click and the inventory was closed previously (no click registered). Get the time at which this click was performed.
-        // (Assume the inventory stays open until we receive an inventory close event (or other events), which will reset the time)
-        if (data.firstClickTime == 0) {
-            data.firstClickTime = now;
-        }
+        cancel |= handleInventoryMove(event, player, data, pData);
+
+        updateClickTimes(data, now);
 
         if (cancel || keepCancel) {
             event.setCancelled(true);
@@ -429,6 +371,86 @@ public class InventoryListener  extends CheckListener implements JoinLeaveListen
             builder.append(name);
             builder.append("/");
             builder.append(inventory.getClass().getName());
+        }
+    }
+
+    private boolean isOutsideSlot(final int slot) {
+        return slot == InventoryView.OUTSIDE || slot < 0;
+    }
+
+    private void handleOutsideSlot(final InventoryData data, final long now) {
+        if (data == null) {
+            return;
+        }
+        data.lastClickTime = now;
+        if (data.firstClickTime == 0) {
+            data.firstClickTime = now;
+        }
+    }
+
+    private boolean checkIllegalEnchantments(final Player player, final ItemStack clicked,
+            final ItemStack cursor, final IPlayerData pData) {
+        boolean cancel = false;
+        try {
+            if (Items.checkIllegalEnchantments(player, clicked, pData)) {
+                cancel = true;
+                counters.addPrimaryThread(idIllegalItem, 1);
+            }
+        } catch (ArrayIndexOutOfBoundsException ignore) {
+            // ignore
+        }
+        try {
+            if (!cancel && Items.checkIllegalEnchantments(player, cursor, pData)) {
+                cancel = true;
+                counters.addPrimaryThread(idIllegalItem, 1);
+            }
+        } catch (ArrayIndexOutOfBoundsException ignore) {
+            // ignore
+        }
+        return cancel;
+    }
+
+    private boolean handleFastClick(final InventoryClickEvent event, final Player player, final long now,
+            final int slot, final ItemStack cursor, final ItemStack clicked, final String action,
+            final InventoryData data, final IPlayerData pData) {
+        if (!fastClick.isEnabled(player, pData)) {
+            return false;
+        }
+        final InventoryConfig cc = pData.getGenericInstance(InventoryConfig.class);
+        if ((event.getView().getType().equals(InventoryType.CREATIVE) || player.getGameMode() == GameMode.CREATIVE)
+                && cc.fastClickSpareCreative) {
+            return false;
+        }
+        boolean check = true;
+        try {
+            check = !cc.inventoryExemptions.contains(ChatColor.stripColor(event.getView().getTitle()));
+        } catch (IllegalStateException ignore) {
+            check = true;
+        }
+        boolean cancel = false;
+        if (check && InventoryUtil.isContainterInventory(event.getInventory().getType())
+                && fastClick.fastClickChest(player, data, cc)) {
+            cancel = true;
+            keepCancel = true;
+        }
+        if (check && fastClick.check(player, now, event.getView(), slot, cursor, clicked, event.isShiftClick(),
+                action, data, cc, pData)) {
+            cancel = true;
+        }
+        return cancel;
+    }
+
+    private boolean handleInventoryMove(final InventoryClickEvent event, final Player player,
+            final InventoryData data, final IPlayerData pData) {
+        return invMove.isEnabled(player, pData)
+            && invMove.check(player, data, pData, pData.getGenericInstance(InventoryConfig.class),
+                    event.getSlotType());
+    }
+
+    private void updateClickTimes(final InventoryData data, final long now) {
+        data.lastClickTime = now;
+        if (data.firstClickTime == 0) {
+            data.firstClickTime = now;
         }
     }
 
