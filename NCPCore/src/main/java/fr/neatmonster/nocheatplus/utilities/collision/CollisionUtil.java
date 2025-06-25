@@ -733,41 +733,12 @@ public class CollisionUtil {
      */ 
     public static List<BlockCoord> getNeighborsInDirection(BlockCoord currentBlock, Vector direction, double eyeX, double eyeY, double eyeZ, RichAxisData axisData) {
         List<BlockCoord> neighbors = new ArrayList<>();
-        int stepY = direction.getY() > 0 ? 1 : (direction.getY() < 0 ? -1 : 0);
-        int stepX = direction.getX() > 0 ? 1 : (direction.getX() < 0 ? -1 : 0);
-        int stepZ = direction.getZ() > 0 ? 1 : (direction.getZ() < 0 ? -1 : 0);
-        Axis priorityAxis = Axis.NONE;
-        Direction excludeDir = Direction.NONE;
-        boolean allowX = true;
-        boolean allowY = true;
-        boolean allowZ = true;
-        if (axisData != null) {
-            priorityAxis = axisData.priority;
-            excludeDir = axisData.exclude;
-            axisData.priority = Axis.NONE;
-            axisData.exclude = Direction.NONE;
-            allowX = !(excludeDir == Direction.X_NEG && stepX < 0 || excludeDir == Direction.X_POS && stepX > 0);
-            allowY = !(excludeDir == Direction.Y_NEG && stepY < 0 || excludeDir == Direction.Y_POS && stepY > 0);
-            allowZ = !(excludeDir == Direction.Z_NEG && stepZ < 0 || excludeDir == Direction.Z_POS && stepZ > 0);
-        }
-        switch (priorityAxis) {
-            case X_AXIS:
-                neighbors.add(new BlockCoord(currentBlock.getX() + stepX, currentBlock.getY(), currentBlock.getZ()));
-                if (allowZ) neighbors.add(new BlockCoord(currentBlock.getX(), currentBlock.getY(), currentBlock.getZ() + stepZ));
-                if (allowY) neighbors.add(new BlockCoord(currentBlock.getX(), currentBlock.getY() + stepY, currentBlock.getZ()));
-                return neighbors;
-            case Y_AXIS:
-                neighbors.add(new BlockCoord(currentBlock.getX(), currentBlock.getY() + stepY, currentBlock.getZ()));
-                if (allowX) neighbors.add(new BlockCoord(currentBlock.getX() + stepX, currentBlock.getY(), currentBlock.getZ()));
-                if (allowZ) neighbors.add(new BlockCoord(currentBlock.getX(), currentBlock.getY(), currentBlock.getZ() + stepZ));
-                return neighbors;
-            case Z_AXIS:
-                neighbors.add(new BlockCoord(currentBlock.getX(), currentBlock.getY(), currentBlock.getZ() + stepZ));
-                if (allowX) neighbors.add(new BlockCoord(currentBlock.getX() + stepX, currentBlock.getY(), currentBlock.getZ()));
-                if (allowY) neighbors.add(new BlockCoord(currentBlock.getX(), currentBlock.getY() + stepY, currentBlock.getZ()));
-                return neighbors;
-            default:
-                break;
+        int stepY = getStep(direction.getY());
+        int stepX = getStep(direction.getX());
+        int stepZ = getStep(direction.getZ());
+        AxisContext ctx = prepareAxisContext(axisData, stepX, stepY, stepZ);
+        if (addPriorityNeighbors(neighbors, currentBlock, stepX, stepY, stepZ, ctx)) {
+            return neighbors;
         }
         
         final double dYM = TrigUtil.manhattan(currentBlock.getX(), currentBlock.getY() + stepY, currentBlock.getZ(), eyeX, eyeY, eyeZ);
@@ -776,32 +747,79 @@ public class CollisionUtil {
         
         // Is this one correct?
         if (dYM <= dXM && dYM <= dZM && Math.abs(direction.getY()) >= 0.5) {
-            if (allowY) neighbors.add(new BlockCoord(currentBlock.getX(), currentBlock.getY() + stepY, currentBlock.getZ()));
+            if (ctx.allowY) neighbors.add(new BlockCoord(currentBlock.getX(), currentBlock.getY() + stepY, currentBlock.getZ()));
             // Do sort priority of XZ in case Y not possible
             if (dXM < dZM) {
-                if (allowX) neighbors.add(new BlockCoord(currentBlock.getX() + stepX, currentBlock.getY(), currentBlock.getZ()));
-                if (allowZ) neighbors.add(new BlockCoord(currentBlock.getX(), currentBlock.getY(), currentBlock.getZ() + stepZ));
+                if (ctx.allowX) neighbors.add(new BlockCoord(currentBlock.getX() + stepX, currentBlock.getY(), currentBlock.getZ()));
+                if (ctx.allowZ) neighbors.add(new BlockCoord(currentBlock.getX(), currentBlock.getY(), currentBlock.getZ() + stepZ));
             } else {
-                if (allowZ) neighbors.add(new BlockCoord(currentBlock.getX(), currentBlock.getY(), currentBlock.getZ() + stepZ));
-                if (allowX) neighbors.add(new BlockCoord(currentBlock.getX() + stepX, currentBlock.getY(), currentBlock.getZ()));
+                if (ctx.allowZ) neighbors.add(new BlockCoord(currentBlock.getX(), currentBlock.getY(), currentBlock.getZ() + stepZ));
+                if (ctx.allowX) neighbors.add(new BlockCoord(currentBlock.getX() + stepX, currentBlock.getY(), currentBlock.getZ()));
             }
             return neighbors;
         }
 
         if (dXM < dZM) {
-            if (allowX) neighbors.add(new BlockCoord(currentBlock.getX() + stepX, currentBlock.getY(), currentBlock.getZ()));
-            if (allowZ) neighbors.add(new BlockCoord(currentBlock.getX(), currentBlock.getY(), currentBlock.getZ() + stepZ));
-            if (allowY) neighbors.add(new BlockCoord(currentBlock.getX(), currentBlock.getY() + stepY, currentBlock.getZ()));
+            if (ctx.allowX) neighbors.add(new BlockCoord(currentBlock.getX() + stepX, currentBlock.getY(), currentBlock.getZ()));
+            if (ctx.allowZ) neighbors.add(new BlockCoord(currentBlock.getX(), currentBlock.getY(), currentBlock.getZ() + stepZ));
+            if (ctx.allowY) neighbors.add(new BlockCoord(currentBlock.getX(), currentBlock.getY() + stepY, currentBlock.getZ()));
         } else {
-            if (allowZ) neighbors.add(new BlockCoord(currentBlock.getX(), currentBlock.getY(), currentBlock.getZ() + stepZ));
-            if (allowX) neighbors.add(new BlockCoord(currentBlock.getX() + stepX, currentBlock.getY(), currentBlock.getZ()));
-            if (allowY) neighbors.add(new BlockCoord(currentBlock.getX(), currentBlock.getY() + stepY, currentBlock.getZ()));
+            if (ctx.allowZ) neighbors.add(new BlockCoord(currentBlock.getX(), currentBlock.getY(), currentBlock.getZ() + stepZ));
+            if (ctx.allowX) neighbors.add(new BlockCoord(currentBlock.getX() + stepX, currentBlock.getY(), currentBlock.getZ()));
+            if (ctx.allowY) neighbors.add(new BlockCoord(currentBlock.getX(), currentBlock.getY() + stepY, currentBlock.getZ()));
         }
         return neighbors;
     }
 
     private static double getFilledSpace(double sA, double eA, double sB, double eB) {
         return (eA-sA) + (eB-sB) - Math.max(0, Math.min(eA, eB) - Math.max(sA, sB));
+    }
+
+    private static int getStep(double value) {
+        return value > 0 ? 1 : value < 0 ? -1 : 0;
+    }
+
+    private static AxisContext prepareAxisContext(RichAxisData axisData, int stepX, int stepY, int stepZ) {
+        AxisContext ctx = new AxisContext();
+        if (axisData != null) {
+            ctx.priorityAxis = axisData.priority;
+            Direction exclude = axisData.exclude;
+            axisData.priority = Axis.NONE;
+            axisData.exclude = Direction.NONE;
+            ctx.allowX = !(exclude == Direction.X_NEG && stepX < 0 || exclude == Direction.X_POS && stepX > 0);
+            ctx.allowY = !(exclude == Direction.Y_NEG && stepY < 0 || exclude == Direction.Y_POS && stepY > 0);
+            ctx.allowZ = !(exclude == Direction.Z_NEG && stepZ < 0 || exclude == Direction.Z_POS && stepZ > 0);
+        }
+        return ctx;
+    }
+
+    private static boolean addPriorityNeighbors(List<BlockCoord> neighbors, BlockCoord block, int stepX, int stepY, int stepZ, AxisContext ctx) {
+        switch (ctx.priorityAxis) {
+            case X_AXIS:
+                neighbors.add(new BlockCoord(block.getX() + stepX, block.getY(), block.getZ()));
+                if (ctx.allowZ) neighbors.add(new BlockCoord(block.getX(), block.getY(), block.getZ() + stepZ));
+                if (ctx.allowY) neighbors.add(new BlockCoord(block.getX(), block.getY() + stepY, block.getZ()));
+                return true;
+            case Y_AXIS:
+                neighbors.add(new BlockCoord(block.getX(), block.getY() + stepY, block.getZ()));
+                if (ctx.allowX) neighbors.add(new BlockCoord(block.getX() + stepX, block.getY(), block.getZ()));
+                if (ctx.allowZ) neighbors.add(new BlockCoord(block.getX(), block.getY(), block.getZ() + stepZ));
+                return true;
+            case Z_AXIS:
+                neighbors.add(new BlockCoord(block.getX(), block.getY(), block.getZ() + stepZ));
+                if (ctx.allowX) neighbors.add(new BlockCoord(block.getX() + stepX, block.getY(), block.getZ()));
+                if (ctx.allowY) neighbors.add(new BlockCoord(block.getX(), block.getY() + stepY, block.getZ()));
+                return true;
+            default:
+                return false;
+        }
+    }
+
+    private static class AxisContext {
+        Axis priorityAxis = Axis.NONE;
+        boolean allowX = true;
+        boolean allowY = true;
+        boolean allowZ = true;
     }
     
     private static boolean rangeContains(double lBMin, double nBMin, double lBMax, double nBMax) {
