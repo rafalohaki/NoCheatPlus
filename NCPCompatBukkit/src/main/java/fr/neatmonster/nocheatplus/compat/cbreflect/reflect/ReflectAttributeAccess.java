@@ -70,7 +70,7 @@ public class ReflectAttributeAccess implements IAttributeAccess {
             // Base value.
             Method method = ReflectionUtil.getMethodNoArgs(clazz, "b", double.class);
             if (method == null) {
-                // TODO: Consider to search (as long as only two exist).
+                // Consider searching for the method while only two exist.
                 method = ReflectionUtil.getMethodNoArgs(clazz, "getBaseValue", double.class);
                 if (method == null) {
                     method = ReflectionUtil.getMethodNoArgs(clazz, "getBase", double.class);
@@ -80,12 +80,12 @@ public class ReflectAttributeAccess implements IAttributeAccess {
             // Value (final value).
             method = ReflectionUtil.getMethodNoArgs(clazz, "getValue", double.class);
             if (method == null) {
-                // TODO: Consider to search (as long as only two exist).
+                // Consider searching for the method while only two exist.
                 method = ReflectionUtil.getMethodNoArgs(clazz, "e", double.class); // 1.6.1
             }
             nmsGetValue = method;
             // Get AttributeModifier.
-            // TODO: If name changes: scan.
+            // Scan for the method if the name changes.
             method = ReflectionUtil.getMethod(clazz, "a", UUID.class);
             if (method == null) {
                 method = ReflectionUtil.getMethod(clazz, "getAttributeModifier", UUID.class);
@@ -109,7 +109,7 @@ public class ReflectAttributeAccess implements IAttributeAccess {
 
         public ReflectAttributeModifier(ReflectBase base) throws ClassNotFoundException {
             Class<?> clazz = Class.forName(base.nmsPackageName + ".AttributeModifier");
-            // TODO: Scan in a more future proof way.
+            // Scan in a more future proof way if needed.
             nmsGetOperation = ReflectionUtil.getMethodNoArgs(clazz, "c", int.class);
             nmsGetValue = ReflectionUtil.getMethodNoArgs(clazz, "d", double.class);
             if (nmsGetOperation == null || nmsGetValue == null) {
@@ -119,7 +119,7 @@ public class ReflectAttributeAccess implements IAttributeAccess {
 
     }
 
-    // TODO: Register each and every one of these as generic instances and fetch from there.
+    // Register each of these as generic instances and fetch from there.
     private final ReflectGenericAttributes reflectGenericAttributes;
     private final ReflectAttributeInstance reflectAttributeInstance;
     private final ReflectAttributeModifier reflectAttributeModifier;
