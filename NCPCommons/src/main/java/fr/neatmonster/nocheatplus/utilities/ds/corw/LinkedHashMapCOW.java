@@ -104,7 +104,7 @@ public class LinkedHashMapCOW<K, V> implements Map<K, V> {
      * Unmodifiable version of the EntrySet. Entry.setValue might be possible, but dangerous :p
      */
     @Override
-    public Set<java.util.Map.Entry<K, V>> entrySet() {
+    public Set<Map.Entry<K, V>> entrySet() {
         return Collections.unmodifiableSet(map.entrySet());
     }
 

@@ -16,7 +16,9 @@ import java.lang.reflect.Field;
 import java.lang.reflect.InvocationHandler;
 import java.lang.reflect.Proxy;
 import java.util.ArrayList;
+import java.util.HashSet;
 import java.util.List;
+import java.util.Map;
 import java.util.Set;
 import java.util.logging.Logger;
 
@@ -71,8 +73,8 @@ public class TestPluginLifecycle {
         Field attachmentsField = registry.getClass().getSuperclass().getSuperclass()
                 .getDeclaredField("attachments");
         attachmentsField.setAccessible(true);
-        ((java.util.Map<Object, java.util.Set<?>>) attachmentsField.get(registry))
-                .put(new Object(), new java.util.HashSet<>());
+        ((Map<Object, Set<?>>) attachmentsField.get(registry))
+                .put(new Object(), new HashSet<>());
         Field dataTaskField = NoCheatPlus.class.getDeclaredField("dataManTaskId");
         dataTaskField.setAccessible(true);
         dataTaskField.set(plugin, Integer.valueOf(1));
@@ -88,7 +90,7 @@ public class TestPluginLifecycle {
         assertTrue(getAllComponents().isEmpty());
         assertNull(dataTaskField.get(plugin));
         assertNull(ccTaskField.get(plugin));
-        assertTrue(((java.util.Map<?, ?>) attachmentsField.get(registry)).isEmpty());
+        assertTrue(((Map<?, ?>) attachmentsField.get(registry)).isEmpty());
     }
 
     private static class DummyComponent implements Listener, IDisableListener {
