@@ -51,7 +51,9 @@ public class RawConfigFile  extends YamlConfiguration {
             // TODO: Custom lookup (both vanilla and Bukkit/Spigot).
             return Material.matchMaterial(prepareMatchMaterial(content));
         }
-        catch (Exception e) {}
+        catch (Exception e) {
+            // ignore - invalid material name
+        }
         return null;
     }
 
@@ -229,7 +231,9 @@ public class RawConfigFile  extends YamlConfiguration {
                 try {
                     type = EntityType.valueOf(ucKey);
                 }
-                catch (IllegalArgumentException e) {}
+                catch (IllegalArgumentException e) {
+                    // ignore - not a valid entity type
+                }
                 if (type == null) {
                     // TODO: Log once per file only (needs new framework)?
                     NCPAPIProvider.getNoCheatPlusAPI().getLogManager().warning(Streams.STATUS, "Bad entity type at '" + path + "': " + key);
@@ -254,7 +258,9 @@ public class RawConfigFile  extends YamlConfiguration {
             op.setAccessible(true);
             final DumperOptions options = (DumperOptions) op.get(this);
             options.setWidth(200);
-        } catch (final Exception e) {}
+        } catch (final Exception e) {
+            // ignore - use default yaml formatting
+        }
 
         return super.saveToString();
     }

@@ -188,7 +188,9 @@ public class DefaultComponentFactory {
             available.add(new HotFixFallingBlockPortalEnter());
             NCPAPIProvider.getNoCheatPlusAPI().addFeatureTags("checks", Arrays.asList(HotFixFallingBlockPortalEnter.class.getSimpleName()));
         }
-        catch (RuntimeException e) {}
+        catch (RuntimeException e) {
+            // ignore - server does not have the falling block portal issue
+        }
 
         // ProtocolLib dependencies.
         if (protocolLibPresent.isAvailable()) {

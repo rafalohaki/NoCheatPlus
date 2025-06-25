@@ -124,7 +124,7 @@ public class MCAccessBukkitBase implements MCAccess {
         try{
             return (CommandMap) ReflectionUtil.invokeMethodNoArgs(Bukkit.getServer(), "getCommandMap");
         } catch (Throwable t) {
-            // Nasty.
+            // ignore - server does not expose a CommandMap
             return null;
         }
     }
@@ -265,7 +265,7 @@ public class MCAccessBukkitBase implements MCAccess {
                     break;
             }
         } catch (Throwable t) {
-            StaticLog.logDebug(t);
+            // ignore - entity width information not accessible
         }
         // Default entity width.
         return 0.6f;

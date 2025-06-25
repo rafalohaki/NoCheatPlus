@@ -70,7 +70,9 @@ public class MultiClientProtocolBlockShapePatch extends AbstractBlockPropertiesP
             BlockFlags.addFlags("HONEY_BLOCK", BlockFlags.F_MIN_HEIGHT16_15 | BlockFlags.F_HEIGHT100 | BlockFlags.F_GROUND_HEIGHT);
             done.add("honey_block");
         }
-        catch (Throwable t) {}
+        catch (Throwable t) {
+            // ignore - honey block not available
+        }
 
 
         try {
@@ -79,7 +81,9 @@ public class MultiClientProtocolBlockShapePatch extends AbstractBlockPropertiesP
             }
             done.add("shulker_box");
         }
-        catch (Throwable t) {}
+        catch (Throwable t) {
+            // ignore - shulker boxes not present
+        }
 
         StaticLog.logInfo("Applied block patches for multi client protocol support: " + StringUtil.join(done, ", "));
     }
