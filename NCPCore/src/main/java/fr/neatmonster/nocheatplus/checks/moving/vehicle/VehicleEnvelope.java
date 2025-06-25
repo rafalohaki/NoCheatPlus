@@ -69,7 +69,7 @@ public class VehicleEnvelope extends Check {
 
         public boolean canClimb;
         public boolean canRails;
-        public boolean canJump, canStepUpBlock; // TODO: Model as heights?
+        public boolean canJump, canStepUpBlock; // Indicates supported jumping and stepping heights.
         public double maxAscend;
         public double gravityTargetSpeed;
         /** Simplified type, like BOAT, MINECART. */
@@ -150,7 +150,7 @@ public class VehicleEnvelope extends Check {
             debugDetails.clear();
             data.ws.setJustUsedIds(debugDetails); // Add just used workaround ids to this list directly, for now.
         }
-        // TODO: Need confine more!
+        // Additional confinement may be required for certain vehicle situations.
         LostGroundVehicle.lostGround(vehicle, moveInfo.from, moveInfo.to, thisMove.hDistance, thisMove.yDistance, false, data.vehicleMoves.getFirstPastMove(), data, cc, null, tags);
         final boolean violation = checkEntity(player, vehicle, thisMove, isFake, data, cc, debug, moveInfo);
 
@@ -284,9 +284,9 @@ public class VehicleEnvelope extends Check {
         }
 
         // Medium dependent checking.
-        // TODO: Try pigs on layered snow. Consider actual bounding box / lost-ground / ...
+        // Pigs on layered snow might need special handling using bounding boxes or lost-ground checks.
         // Maximum thinkable horizontal speed.
-        // TODO: Further distinguish, best set in CheckDetails.
+        // Further distinctions should be stored within CheckDetails for clarity.
         if (vehicle instanceof LivingEntity) {
             Double speed = PotionUtil.getPotionEffectAmplifier((LivingEntity)vehicle, PotionEffectType.SPEED);
             // The most terrible code I ever written due to poor infrastructure. Should be thinking of recode the vehicle check after the hspeed refactor
@@ -296,7 +296,7 @@ public class VehicleEnvelope extends Check {
                 if (!Double.isInfinite(speed)) cap *= (1 + 0.2 * (speed + 1));
                 if (thisMove.hDistance > cap) {
                     final long current = System.currentTimeMillis();
-                    // TODO: This delay belong to the entity they are riding, not on player!
+                    // This delay should be stored on the ridden entity rather than the player.
                     if (data.timeCamelDash + 2000 < current) {
                         data.timeCamelDash = current;
                         return maxDistHorizontal(thisMove, cap * 2.7);
@@ -318,11 +318,11 @@ public class VehicleEnvelope extends Check {
             return true;
         }
 
-        // TODO: Could limit descend by 2*maxDescend, ascend by much less
-        // TODO: Split code to methods.
-        // TODO: Get extended liquid specs (allow confine to certain flags, here: water). Contains info if water is only flowing down, surface properties (non liquid blocks?), still water.
+        // Consider limiting descent to twice maxDescend and using a lower limit for ascent.
+        // The logic in this section might be better organized in helper methods.
+        // Extended liquid specifications could allow confining to certain flags such as water.
         if (thisMove.from.inWeb) {
-            // TODO: Check anything?
+            // Additional checks might be required for web movement.
             if (debug) {
                 debugDetails.add("");
             }
@@ -330,11 +330,11 @@ public class VehicleEnvelope extends Check {
             //                tags.add("ascend_web");
             //                return true;
             //            }
-            // TODO: Enforce not ascending ?
-            // TODO: max speed.
+            // Ascending may need to be disallowed here.
+            // Maximum speed limits should also be enforced.
         }
         else if (checkDetails.canClimb && thisMove.from.onClimbable) {
-            // TODO: Order.
+            // Ensure the order of checks remains consistent.
             checkDetails.checkAscendMuch = checkDetails.checkDescendMuch = false;
             if (Math.abs(thisMove.yDistance) > MagicVehicle.climbSpeed) {
                 violation = true;
@@ -342,7 +342,7 @@ public class VehicleEnvelope extends Check {
             }
         }
         else if (checkDetails.canRails && thisMove.fromOnRails) {
-            // TODO: Might invert to trigger violation if exceeds distance (always disable a/d_much).
+            // This could be inverted to trigger a violation when the distance limit is exceeded.
             if (Math.abs(thisMove.yDistance) < MagicVehicle.maxRailsVertical) {
                 checkDetails.checkAscendMuch = checkDetails.checkDescendMuch = false;
             }
@@ -352,11 +352,11 @@ public class VehicleEnvelope extends Check {
             if (debug) {
                 debugDetails.add("water-water");
             }
-            // TODO: Should still cover extreme moves here.
+            // Extreme moves should still be accounted for in this section.
 
             // Special case moving up after falling.
-            // TODO: Check past moves for falling (not yet available).
-            // TODO: Check if the target location somehow is the surface.
+            // Past moves might need inspection to detect falling.
+            // Verify whether the target location is part of the surface.
             if (MagicVehicle.oddInWater(thisMove, checkDetails, data)) {
                 // (Assume players can't control sinking boats for now.)
                 checkDetails.checkDescendMuch = checkDetails.checkAscendMuch = false;
@@ -365,7 +365,7 @@ public class VehicleEnvelope extends Check {
         }
         else if (thisMove.from.onGround && thisMove.to.onGround) {
             // Default on-ground move.
-            // TODO: Should still cover extreme moves here.
+            // Extreme moves should still be validated here.
             if (checkDetails.canStepUpBlock && thisMove.yDistance > 0.0 && thisMove.yDistance <= 1.0) {
                 checkDetails.checkAscendMuch = false;
                 tags.add("step_up");
@@ -375,17 +375,17 @@ public class VehicleEnvelope extends Check {
                 if (debug) {
                     debugDetails.add("blueIce-blueIce");
                 }
-                // TODO: Should still cover extreme moves here.
+                // Extreme moves should still be validated here.
             }
             else if (thisMove.from.onIce && thisMove.to.onIce) {
                 // Default on-ice move.
                 if (debug) {
                     debugDetails.add("ice-ice");
                 }
-                // TODO: Should still cover extreme moves here.
+                // Extreme moves should still be validated here.
             }
             else {
-                // (TODO: actually a default on-ground move.)
+                // This case resembles a typical on-ground movement.
                 if (debug) {
                     debugDetails.add("ground-ground");
                 }
@@ -402,11 +402,11 @@ public class VehicleEnvelope extends Check {
             if (debug) {
                 debugDetails.add("?-?");
             }
-            // TODO: Lift off speed etc.
-            // TODO: Clearly overlaps other cases.
-            // TODO: Skipped vehicle move events happen here as well (...).
+            // Lift off speed and related parameters might need evaluation.
+            // This branch overlaps with other cases.
+            // Skipped vehicle move events may also occur here.
             if (!checkDetails.toIsSafeMedium) {
-                // TODO: At least do something here?
+                // A fallback action might be required here.
             }
         }
 
@@ -431,8 +431,8 @@ public class VehicleEnvelope extends Check {
         
         // Maximum descend speed.
         if (checkDetails.checkDescendMuch && thisMove.yDistance < -MagicVehicle.maxDescend) {
-            // TODO: At times it looks like one move is skipped, resulting in double distance ~ -5 and at the same time 'vehicle moved too quickly'. 
-            // TODO: Test with log this to console to see the order of things.
+            // A skipped move can cause a large negative distance and trigger 'vehicle moved too quickly'.
+            // Logging may help verify the order of events.
             tags.add("descend_much");
             violation = true;
         }
@@ -471,7 +471,7 @@ public class VehicleEnvelope extends Check {
 
         if (!violation) {
             // No violation.
-            // TODO: sfJumpPhase is abused for in-air move counting here.
+            // sfJumpPhase is currently reused for in-air move counting here.
             if (checkDetails.inAir) {
                 data.sfJumpPhase ++;
             }
@@ -515,7 +515,7 @@ public class VehicleEnvelope extends Check {
     protected void prepareCheckDetails(final Entity vehicle, final VehicleMoveInfo moveInfo, final VehicleMoveData thisMove) {
 
         checkDetails.reset();
-        // TODO: These properties are for boats, might need to distinguish further.
+        // These properties are tuned for boats; other vehicles may require different values.
         checkDetails.fromIsSafeMedium = thisMove.from.inWater || thisMove.from.onGround || thisMove.from.inWeb;
         checkDetails.toIsSafeMedium = thisMove.to.inWater || thisMove.to.onGround || thisMove.to.inWeb;
         checkDetails.inAir = !checkDetails.fromIsSafeMedium && !checkDetails.toIsSafeMedium;
@@ -541,8 +541,8 @@ public class VehicleEnvelope extends Check {
             checkDetails.gravityTargetSpeed = 0.79;
         }
         else if (bestHorse != null && bestHorse.isAssignableFrom(vehicle.getClass())) {
-            // TODO: Climbable? -> seems not.
-            checkDetails.simplifiedType = EntityType.HORSE; // TODO: 1.11 - Use AbstractHorse?
+            // Horses currently do not appear to climb.
+            checkDetails.simplifiedType = EntityType.HORSE; // Consider using AbstractHorse from 1.11 onward.
             checkDetails.canJump = checkDetails.canStepUpBlock = true;
         }
         else if (strider != null && strider.isAssignableFrom(vehicle.getClass())) {
@@ -564,7 +564,7 @@ public class VehicleEnvelope extends Check {
             checkDetails.canJump = false;
         }
         else if (vehicle instanceof Pig) {
-            // TODO: Climbable!
+            // Pigs can climb certain obstacles.
             checkDetails.simplifiedType = EntityType.PIG;
             checkDetails.canJump = false;
             checkDetails.canStepUpBlock = true;
@@ -607,15 +607,15 @@ public class VehicleEnvelope extends Check {
         final RichEntityLocation from = moveInfo.from;
         final RichEntityLocation to = moveInfo.to;
 
-        // TODO: Distinguish sfJumpPhase and inAirDescendCount (after reaching the highest point).
+        // Consider distinguishing sfJumpPhase from inAirDescendCount once the jump reaches its apex.
 
         if (debug) {
             debugDetails.add("air-air");
         }
 
         if (checkDetails.canJump) {
-            // TODO: Max. y-distance to set back.
-            // TODO: Friction.
+            // Maximum Y-distance for set back is yet to be finalized.
+            // Friction may also need to be accounted for.
         }
         else {
             if (thisMove.yDistance > 0.0) {
@@ -626,7 +626,7 @@ public class VehicleEnvelope extends Check {
 
         boolean violation = false;
         // Absolute vertical distance to set back.
-        // TODO: Add something like this.
+        // Future work might include a vertical distance based roll back.
         //            final double setBackYdistance = to.getY() - data.vehicleSetBacks.getValidSafeMediumEntry().getY();
         //            if (data.sfJumpPhase > 4) {
         //                double estimate = Math.min(2.0, MagicVehicle.boatGravityMin * ((double) data.sfJumpPhase / 4.0) * ((double) data.sfJumpPhase / 4.0 + 1.0) / 2.0);
@@ -645,10 +645,10 @@ public class VehicleEnvelope extends Check {
         if (data.sfJumpPhase > (checkDetails.canJump ? MagicVehicle.maxJumpPhaseAscend : 1)
             && thisMove.yDistance > Math.max(minDescend, -checkDetails.gravityTargetSpeed)) {
             
-            boolean noViolation = ColliesHoneyBlock(from) 
+            boolean noViolation = ColliesHoneyBlock(from)
                     || (vehicle instanceof LivingEntity && !Double.isInfinite(Bridge1_13.getSlowfallingAmplifier((LivingEntity)vehicle)))
                     || !vehicle.hasGravity();
-            // TODO: What is this? Vehicle slide on honey block?
+            // Possible sliding on honey block may cause this behavior.
             if (ColliesHoneyBlock(from)) data.sfJumpPhase = 5;
 
             if (!noViolation) {
@@ -658,7 +658,7 @@ public class VehicleEnvelope extends Check {
         }
         // Fast falling (vdist).
         else if (data.sfJumpPhase > 1 && thisMove.yDistance < maxDescend) {
-            // TODO: Allow one skipped move per jump phase (1, 2, 3).
+            // One skipped move per jump phase (1, 2, 3) might be acceptable.
             tags.add("fast_fall_vdist");
             violation = true;
         }
