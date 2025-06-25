@@ -483,8 +483,8 @@ public class TrigUtil {
      *            the z2
      * @return the double
      */
-    public static double manhattan(final double x1,final double  z1, final double x2, final double z2){
-        return manhattan(Location.locToBlock(x1), Location.locToBlock(z1), Location.locToBlock(x2), Location.locToBlock(z2));
+    public static double manhattan(final double x1, final double z1, final double x2, final double z2) {
+        return Math.abs(x1 - x2) + Math.abs(z1 - z2);
     }
 
     /**
