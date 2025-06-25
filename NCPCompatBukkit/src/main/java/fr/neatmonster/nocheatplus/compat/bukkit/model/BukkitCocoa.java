@@ -39,8 +39,8 @@ public class BukkitCocoa implements BukkitShapeModel {
         final BlockState state = block.getState();
         final BlockData blockData = state.getBlockData();
 
-        if (blockData instanceof Cocoa && blockData instanceof Directional) {
-        	BlockFace face = ((Directional) blockData).getFacing();
+        if (blockData instanceof Cocoa) {
+                BlockFace face = ((Directional) blockData).getFacing();
             final Cocoa cocoa = (Cocoa) blockData;
             switch (cocoa.getAge()) {
                 case 0: // .625 .4375 .0625 max: .375 .75 .3125
