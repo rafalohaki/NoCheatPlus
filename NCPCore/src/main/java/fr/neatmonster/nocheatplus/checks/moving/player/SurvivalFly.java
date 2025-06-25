@@ -1667,72 +1667,104 @@ public class SurvivalFly extends Check {
             final PlayerLocation to, final boolean toOnGround, final boolean resetTo, final double yDistance,
             final PlayerMoveData lastMove, final PlayerMoveData thisMove, final MovingData data,
             final MovingConfig cc, final double maxJumpGain, final double jumpGainMargin) {
-
         double vAllowedDistance;
         boolean strictVdistRel;
 
-        if (lastMove.toIsValid && Magic.fallingEnvelope(yDistance, lastMove.yDistance, data.lastFrictionVertical, 0.0)) {
+        if (isFallingEnvelope(lastMove, yDistance, data)) {
             vAllowedDistance = lastMove.yDistance * data.lastFrictionVertical - Magic.GRAVITY_MIN;
             strictVdistRel = true;
-        }
-        else if (resetFrom || thisMove.touchedGroundWorkaround) {
-            if (toOnGround) {
-                if (yDistance > cc.sfStepHeight && yDistance - cc.sfStepHeight < 0.00000003
-                        && to.isOnGroundDueToStandingOnAnEntity()) {
-                    vAllowedDistance = yDistance;
-                }
-                else {
-                    vAllowedDistance = Math.max(cc.sfStepHeight, maxJumpGain + jumpGainMargin);
-                    thisMove.allowstep = true;
-                    thisMove.allowjump = true;
-                }
-            }
-            else {
-                if (yDistance < 0.0 || yDistance > cc.sfStepHeight || !tags.contains("lostground_couldstep")) {
-                    vAllowedDistance = maxJumpGain + jumpGainMargin;
-                    thisMove.allowjump = true;
-                }
-                else vAllowedDistance = yDistance;
-            }
+        } else if (resetFrom || thisMove.touchedGroundWorkaround) {
+            vAllowedDistance = handleResetFrom(to, toOnGround, yDistance, thisMove, cc, maxJumpGain, jumpGainMargin);
             strictVdistRel = false;
-        }
-        else if (lastMove.toIsValid) {
-            if (lastMove.yDistance >= -Math.max(Magic.GRAVITY_MAX / 2.0, 1.3 * Math.abs(yDistance))
-                    && lastMove.yDistance <= 0.0
-                    && (lastMove.touchedGround || lastMove.to.extraPropertiesValid && lastMove.to.resetCond)) {
-                if (resetTo) {
-                    vAllowedDistance = cc.sfStepHeight;
-                    thisMove.allowstep = true;
-                }
-                else {
-                    vAllowedDistance = maxJumpGain + jumpGainMargin;
-                    thisMove.allowjump = true;
-                }
-                strictVdistRel = false;
-            }
-            else {
-                vAllowedDistance = lastMove.yDistance * data.lastFrictionVertical - Magic.GRAVITY_ODD;
-                strictVdistRel = true;
-            }
-        }
-        else {
-            tags.add(lastMove.valid ? "data_reset" : "data_missing");
-            if (thisMove.yDistance > -(Magic.GRAVITY_MAX + Magic.GRAVITY_SPAN) && yDistance < 0.0) {
-                vAllowedDistance = yDistance;
-            }
-            else if (thisMove.from.onGround || (lastMove.valid && lastMove.to.onGround)) {
-                vAllowedDistance = maxJumpGain + jumpGainMargin;
-                if (lastMove.to.onGround && vAllowedDistance < 0.1) vAllowedDistance = maxJumpGain + jumpGainMargin;
-                if (thisMove.to.onGround) vAllowedDistance = Math.max(cc.sfStepHeight, vAllowedDistance);
-            }
-            else if (Magic.skipPaper(thisMove, lastMove, data)) {
-                vAllowedDistance = Magic.PAPER_DIST;
-                tags.add("skip_paper");
-            }
-            else vAllowedDistance = 0.0;
+        } else if (lastMove.toIsValid) {
+            double[] result = handleLastMoveValid(lastMove, thisMove, yDistance, resetTo, data,
+                    cc, maxJumpGain, jumpGainMargin);
+            vAllowedDistance = result[0];
+            strictVdistRel = result[1] == 1.0;
+        } else {
+            vAllowedDistance = handleMissingData(thisMove, lastMove, yDistance, data, cc, maxJumpGain,
+                    jumpGainMargin);
             strictVdistRel = false;
         }
         return new double[]{vAllowedDistance, strictVdistRel ? 1.0 : 0.0};
+    }
+
+    private boolean isFallingEnvelope(final PlayerMoveData lastMove, final double yDistance,
+                                      final MovingData data) {
+        return lastMove.toIsValid
+                && Magic.fallingEnvelope(yDistance, lastMove.yDistance, data.lastFrictionVertical, 0.0);
+    }
+
+    private double handleResetFrom(final PlayerLocation to, final boolean toOnGround, final double yDistance,
+                                   final PlayerMoveData thisMove, final MovingConfig cc,
+                                   final double maxJumpGain, final double jumpGainMargin) {
+        double result;
+        if (toOnGround) {
+            if (yDistance > cc.sfStepHeight && yDistance - cc.sfStepHeight < 0.00000003
+                    && to.isOnGroundDueToStandingOnAnEntity()) {
+                result = yDistance;
+            } else {
+                result = Math.max(cc.sfStepHeight, maxJumpGain + jumpGainMargin);
+                thisMove.allowstep = true;
+                thisMove.allowjump = true;
+            }
+        } else {
+            if (yDistance < 0.0 || yDistance > cc.sfStepHeight || !tags.contains("lostground_couldstep")) {
+                result = maxJumpGain + jumpGainMargin;
+                thisMove.allowjump = true;
+            } else {
+                result = yDistance;
+            }
+        }
+        return result;
+    }
+
+    private double[] handleLastMoveValid(final PlayerMoveData lastMove, final PlayerMoveData thisMove,
+                                         final double yDistance, final boolean resetTo, final MovingData data,
+                                         final MovingConfig cc, final double maxJumpGain,
+                                         final double jumpGainMargin) {
+        double allowed;
+        boolean strict;
+        if (lastMove.yDistance >= -Math.max(Magic.GRAVITY_MAX / 2.0, 1.3 * Math.abs(yDistance))
+                && lastMove.yDistance <= 0.0
+                && (lastMove.touchedGround || lastMove.to.extraPropertiesValid && lastMove.to.resetCond)) {
+            if (resetTo) {
+                allowed = cc.sfStepHeight;
+                thisMove.allowstep = true;
+            } else {
+                allowed = maxJumpGain + jumpGainMargin;
+                thisMove.allowjump = true;
+            }
+            strict = false;
+        } else {
+            allowed = lastMove.yDistance * data.lastFrictionVertical - Magic.GRAVITY_ODD;
+            strict = true;
+        }
+        return new double[]{allowed, strict ? 1.0 : 0.0};
+    }
+
+    private double handleMissingData(final PlayerMoveData thisMove, final PlayerMoveData lastMove,
+                                     final double yDistance, final MovingData data, final MovingConfig cc,
+                                     final double maxJumpGain, final double jumpGainMargin) {
+        double allowed;
+        tags.add(lastMove.valid ? "data_reset" : "data_missing");
+        if (thisMove.yDistance > -(Magic.GRAVITY_MAX + Magic.GRAVITY_SPAN) && yDistance < 0.0) {
+            allowed = yDistance;
+        } else if (thisMove.from.onGround || (lastMove.valid && lastMove.to.onGround)) {
+            allowed = maxJumpGain + jumpGainMargin;
+            if (lastMove.to.onGround && allowed < 0.1) {
+                allowed = maxJumpGain + jumpGainMargin;
+            }
+            if (thisMove.to.onGround) {
+                allowed = Math.max(cc.sfStepHeight, allowed);
+            }
+        } else if (Magic.skipPaper(thisMove, lastMove, data)) {
+            allowed = Magic.PAPER_DIST;
+            tags.add("skip_paper");
+        } else {
+            allowed = 0.0;
+        }
+        return allowed;
     }
 
     private double[] applyEnvelopeVelocityExemptions(final long now, final Player player,
