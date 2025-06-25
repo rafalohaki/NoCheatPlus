@@ -23,6 +23,13 @@ import fr.neatmonster.nocheatplus.compat.cbreflect.reflect.ReflectHelper;
 import fr.neatmonster.nocheatplus.compat.cbreflect.reflect.ReflectHelper.ReflectFailureException;
 import fr.neatmonster.nocheatplus.utilities.map.BlockCache;
 
+/**
+ * Block cache using CraftBukkit reflection to obtain additional block data.
+ *
+ * <p>The supplied {@link ReflectHelper} instance must not be modified after it
+ * is passed to this class. Changing the helper can invalidate cached reflection
+ * references and lead to unpredictable results.</p>
+ */
 public class BlockCacheCBReflect extends BlockCacheBukkit {
 
     // NOTE: Unsure if reflection can outperform the Bukkit API; experimentation may be needed.
@@ -31,6 +38,15 @@ public class BlockCacheCBReflect extends BlockCacheBukkit {
 
     protected Object nmsWorld = null;
 
+    /**
+     * Create a new instance using the given helper and world.
+     *
+     * @param reflectHelper
+     *            helper for reflection access; must not be modified after
+     *            passing it here
+     * @param world
+     *            initial world to access
+     */
     public BlockCacheCBReflect(ReflectHelper reflectHelper, World world) {
         super(world);
         this.helper = reflectHelper;
