@@ -71,15 +71,15 @@ public class Items extends Check{
         }
         final Material type = stack.getType();
         // Fastest checks first.
-        // Configuration options might allow enabling or disabling this check.
+        // Configuration should allow enabling or disabling this check.
         if (type == Material.WRITTEN_BOOK){
             final Map<Enchantment, Integer> enchantments = stack.getEnchantments();
             if (enchantments != null && !enchantments.isEmpty() && pData.isCheckActive(instance.type, player)){
-                // Sub checks or additional permissions might be introduced later.
+                // Might differentiate sub checks or add extra permissions later.
                 for (final Enchantment ench : new HashSet<Enchantment>(enchantments.keySet())){
                     stack.removeEnchantment(ench);
                 }
-                // Apply configured actions here if necessary.
+                // Placeholder for future actions.
                 return true;
             }
         }
