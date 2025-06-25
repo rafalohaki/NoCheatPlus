@@ -41,19 +41,6 @@ public class UnexemptCommand extends BaseCommand {
     @Override
     public boolean onCommand(CommandSender sender, Command command, String label, String[] args) {
 
-        final String c1, c2, c3, c4, c5, c6, c7;
-        if (sender instanceof Player) {
-            c1 = ChatColor.GRAY.toString();
-            c2 = ChatColor.BOLD.toString();
-            c3 = ChatColor.RED.toString();
-            c4 = ChatColor.ITALIC.toString();
-            c5 = ChatColor.GOLD.toString();
-            c6 = ChatColor.WHITE.toString();
-            c7 = ChatColor.YELLOW.toString();
-        } else {
-            c1 = c2 = c3 = c4 = c5 = c6 = c7 = "";
-        }
-
         // Consider introducing a super class to reduce copy and paste.
         if (args.length < 2) {
             sender.sendMessage((sender instanceof Player ? TAG : CTAG) + "Please specify a player to unexempt.");
@@ -63,39 +50,22 @@ public class UnexemptCommand extends BaseCommand {
             sender.sendMessage((sender instanceof Player ? TAG : CTAG) + "Too many arguments. Command usage: /ncp unexempt (playername) (checktype).");
             return true;
         }
-        String playerName = args[1];
-        final CheckType checkType;
-        if (args.length == 3){
-            try{
-                checkType = CheckType.valueOf(args[2].toUpperCase().replace('-', '_').replace('.', '_'));
-            } catch (Exception e){
-                sender.sendMessage((sender instanceof Player ? TAG : CTAG) + "Could not interpret: " + c3 +""+ args[2]);
-                sender.sendMessage((sender instanceof Player ? TAG : CTAG) + "Check type should be one of: " + c3 +""+ StringUtil.join(Arrays.asList(CheckType.values()), c6 + ", " + c3));
-                return true;
-            }
-        }
-        else checkType = CheckType.ALL;
-        if (playerName.equals("*")){
-            // Unexempt all.
-            // Unexempt all known players and stored entries.
-            NCPExemptionManager.clear();
-            sender.sendMessage((sender instanceof Player ? TAG : CTAG) + "Removed exemptions for all players for checks: " + c3 +""+ checkType);
+        final CheckType checkType = parseCheckType(args.length > 2 ? args[2] : null, sender);
+        if (checkType == null) {
             return true;
         }
-        // Find player.
-        final Player player = DataManager.getPlayer(playerName);
-        final UUID id;
-        if (player != null) {
-            playerName = player.getName();
-            id = player.getUniqueId();
-        } else {
-            id = DataManager.getUUID(playerName);
+
+        final String targetName = args[1];
+        if ("*".equals(targetName)) {
+            unexemptAll(checkType, sender);
+            return true;
         }
-        if (id == null) {
-            sender.sendMessage((sender instanceof Player ? TAG : CTAG) + "Not an online player nor a UUID: " + c3 +""+ playerName);
-        } else {
-            NCPExemptionManager.unexempt(id, checkType);
-            sender.sendMessage((sender instanceof Player ? TAG : CTAG) + "Remove exemptions for " + c3 +""+ playerName + c1 + " for checks: " + c3 +""+ checkType);
+
+        final UUID id = resolveTargetId(targetName, sender);
+        if (id != null) {
+            final Player player = DataManager.getPlayer(targetName);
+            final String name = player != null ? player.getName() : targetName;
+            unexemptPlayer(id, name, checkType, sender);
         }
         return true;
     }
@@ -113,9 +83,51 @@ public class UnexemptCommand extends BaseCommand {
      */
     @Override
     public boolean testPermission(CommandSender sender, Command command, String alias, String[] args) {
-        return super.testPermission(sender, command, alias, args) 
-                || args.length >= 2 && args[1].trim().equalsIgnoreCase(sender.getName()) 
+        return super.testPermission(sender, command, alias, args)
+                || args.length >= 2 && args[1].trim().equalsIgnoreCase(sender.getName())
                 && sender.hasPermission(Permissions.COMMAND_UNEXEMPT_SELF.getBukkitPermission());
+    }
+
+    private CheckType parseCheckType(String input, CommandSender sender) {
+        if (input == null) {
+            return CheckType.ALL;
+        }
+        try {
+            return CheckType.valueOf(input.toUpperCase().replace('-', '_').replace('.', '_'));
+        } catch (Exception e) {
+            final boolean player = sender instanceof Player;
+            final String tag = player ? TAG : CTAG;
+            final String c3 = player ? ChatColor.RED.toString() : "";
+            final String c6 = player ? ChatColor.WHITE.toString() : "";
+            sender.sendMessage(tag + "Could not interpret: " + c3 + input);
+            sender.sendMessage(tag + "Check type should be one of: " + c3 + StringUtil.join(Arrays.asList(CheckType.values()), c6 + ", " + c3));
+            return null;
+        }
+    }
+
+    private UUID resolveTargetId(String name, CommandSender sender) {
+        final Player player = DataManager.getPlayer(name);
+        if (player != null) {
+            return player.getUniqueId();
+        }
+        return DataManager.getUUID(name);
+    }
+
+    private void unexemptAll(CheckType type, CommandSender sender) {
+        NCPExemptionManager.clear();
+        final boolean player = sender instanceof Player;
+        final String tag = player ? TAG : CTAG;
+        final String c3 = player ? ChatColor.RED.toString() : "";
+        sender.sendMessage(tag + "Removed exemptions for all players for checks: " + c3 + type);
+    }
+
+    private void unexemptPlayer(UUID id, String playerName, CheckType type, CommandSender sender) {
+        NCPExemptionManager.unexempt(id, type);
+        final boolean player = sender instanceof Player;
+        final String tag = player ? TAG : CTAG;
+        final String c1 = player ? ChatColor.GRAY.toString() : "";
+        final String c3 = player ? ChatColor.RED.toString() : "";
+        sender.sendMessage(tag + "Removed exemptions for " + c3 + playerName + c1 + " for checks: " + c3 + type);
     }
 
 }
