@@ -221,7 +221,6 @@ public class FastClick extends Check {
                 && clickedMat == data.fastClickLastClicked
                 && view.getType() == InventoryType.CRAFTING
                 // && InventoryUtil.couldHaveInventoryOpen(player)
-                // TODO: Distinguish if the inventory is really open.
                 ) {
             return 0.6f;
         }
