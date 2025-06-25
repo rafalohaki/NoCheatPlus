@@ -40,8 +40,8 @@ import fr.neatmonster.nocheatplus.utilities.StringUtil;
  */
 public class ReflectHelper {
 
-    // TODO: Many possible exceptions are not yet caught (...).
-    // TODO: Some places: should actually try-catch and fail() instead of default values and null return values.
+    // Many possible exceptions are not yet caught.
+    // In some places we should actually try-catch and fail() instead of using default values or returning null.
 
     /** Failure to use / apply [ / setup ? ]. */
     public static class ReflectFailureException extends RuntimeException {
@@ -59,7 +59,7 @@ public class ReflectHelper {
             super(ex);
         }
 
-        // TODO: Might add a sub-error enum/code/thing support.
+        // Might add a sub-error enum or additional code support.
 
     }
 
@@ -79,8 +79,8 @@ public class ReflectHelper {
     private final double[] tempBounds = new double[6];
 
     public ReflectHelper() throws ReflectFailureException {
-        // TODO: Store one instance of ReflectFailureException?
-        // TODO: Allow some more to not work?
+        // Optionally store one instance of ReflectFailureException.
+        // Possibly allow some more methods to be optional.
         try {
             this.reflectBase = new ReflectBase();
             ReflectAxisAlignedBB reflectAxisAlignedBB = null;
@@ -142,7 +142,7 @@ public class ReflectHelper {
                 }
                 else if (rootField.getName().startsWith("reflect")) {
                     Class<?> clazz = obj.getClass();
-                    // TODO: Skip attributes silently before 1.6.1 (and not unknown version).
+                    // Consider skipping attributes silently before 1.6.1, but not for unknown versions.
                     for (Field field : clazz.getFields()) {
                         if (field.isAnnotationPresent(MostlyHarmless.class)) {
                             continue;
@@ -175,7 +175,7 @@ public class ReflectHelper {
     }
 
     public Object getHandle(Player player) {
-        // TODO: CraftPlayer check (isAssignableFrom)?
+        // Maybe check for CraftPlayer with isAssignableFrom.
         if (this.reflectPlayer.obcGetHandle == null) {
             fail();
         }
@@ -383,7 +383,7 @@ public class ReflectHelper {
 
     public double getHeight(final Entity entity) {
         float floatHeight = -16f;
-        final Object handle = reflectEntity.getHandle(entity); // TODO: Distinguish classes (living vs not)?
+        final Object handle = reflectEntity.getHandle(entity); // Potentially distinguish between living and non-living classes.
         double height;
         if (handle == null) {
             fail();
@@ -395,7 +395,7 @@ public class ReflectHelper {
             floatHeight = Math.max(ReflectionUtil.getFloat(reflectEntity.nmsHeight, handle, floatHeight), floatHeight);
         }
         height = (double) floatHeight;
-        // TODO: Consider dropping the box for performance?
+        // Consider dropping the box for performance.
         if (reflectAxisAlignedBB != null && reflectEntity.nmsGetBoundingBox != null) {
             final Object box = ReflectionUtil.invokeMethodNoArgs(reflectEntity.nmsGetBoundingBox, handle);
             if (box != null) {
@@ -455,7 +455,7 @@ public class ReflectHelper {
      *             On failure to fetch bounds.
      */
     public double[] getBounds(final Entity entity, final double[] bounds) {
-        // TODO: Also fetch for legacy versions?
+        // Possibly fetch for legacy versions as well.
         if (reflectAxisAlignedBB == null || reflectEntity == null) {
             fail();
         }
