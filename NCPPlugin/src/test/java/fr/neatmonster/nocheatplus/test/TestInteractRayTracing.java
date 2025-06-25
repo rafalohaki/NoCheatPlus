@@ -39,7 +39,7 @@ public class TestInteractRayTracing {
         }
     }
 
-    // TODO: Blunt copy and paste from TestPassableRayTracing, add something that makes sense.
+    // NOTE: Copied from TestPassableRayTracing and might need further adjustments.
 
     public TestInteractRayTracing() {
         StaticLog.setUseLogManager(false);
@@ -84,11 +84,11 @@ public class TestInteractRayTracing {
                 bc.set(x, 69, z, Material.STONE);
             }
         }
-        // TODO: Make work with strict set to false.
+        // This should also work with strict set to false.
         //InteractRayTracing rt = new InteractRayTracing(true);
         InteractRayTracing rt = new InteractRayTracing(false);
         rt.setBlockCache(bc);
-        // TODO: More Directions, also just behind the corner.
+        // Additional directions, including those just behind the corner, could be tested.
         double[][] setups = new double[][] {
                 // Slightly off the middle (11, y, 11)
                 {11.4, 70.0, 10.4, 10.6, 70.0, 11.4},
@@ -108,10 +108,10 @@ public class TestInteractRayTracing {
         bc.walls(0, 65, 0, 16, 67, 0, Material.STONE);
         // Ground using full blocks (roughly 16 margin to each side).
         bc.fill(-16, 64, -16, 32, 64, 16, Material.STONE);
-        // TODO: Test chest like bounds for target blocks.
+        // Should also test chest-like bounds for target blocks.
         InteractRayTracing rt = new InteractRayTracing(false);
         rt.setBlockCache(bc);
-        // TODO: More cases, head inside block itself, angles, ...
+        // More cases, such as the head inside the block or angled rays, should be covered.
         double[][] noCollision = new double[][] {
                 {8.5, 66.75, 1.2  ,  8.5, 65.8, 1.0},
                 {8.5, 66.75, 1.2  ,  8.5, 70.0, 0.9},
@@ -128,12 +128,12 @@ public class TestInteractRayTracing {
 
     @Test
     public void testRoom() {
-        // TODO: Test for differing middle points (negative to positive range, random, selected rays).
+        // Consider differing middle points (negative to positive range, random values, selected rays).
         FakeBlockCache bc = new FakeBlockCache();
         bc.room(-1, 64, -1, 1, 66, 1, Material.STONE);
         // Note that reversed checks are slightly different with the centered version, but start + end blocks are air anyway.
         double[] middle = new double[] {0.5, 65.5, 0.5}; // Free spot.
-        // TODO: Must work with strict set to false.
+        // Make sure this works with strict set to false.
         CenteredInteractRayTracing rt = new CenteredInteractRayTracing(false, 0, 65, 0);
         //CenteredInteractRayTracing rt = new CenteredInteractRayTracing(true, 0, 65, 0);
         rt.setBlockCache(bc);
