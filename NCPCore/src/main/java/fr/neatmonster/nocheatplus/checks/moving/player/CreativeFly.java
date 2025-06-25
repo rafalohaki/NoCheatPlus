@@ -55,6 +55,8 @@ import fr.neatmonster.nocheatplus.utilities.location.PlayerLocation;
 import fr.neatmonster.nocheatplus.utilities.location.TrigUtil;
 import fr.neatmonster.nocheatplus.utilities.map.BlockProperties;
 import fr.neatmonster.nocheatplus.utilities.map.BlockFlags;
+import fr.neatmonster.nocheatplus.checks.moving.helper.MoveCheckContext;
+import fr.neatmonster.nocheatplus.checks.moving.helper.VelocityAdjustment;
 
 
 /**
@@ -1161,7 +1163,17 @@ public class CreativeFly extends Check {
         return defaultAmount;
     }
     
-    public static double[] guessElytraVelocityAmount(final Player player, final PlayerMoveData thisMove, final PlayerMoveData lastMove, final MovingData data) {
+    /**
+     * Estimate allowed velocity adjustments for Elytra gliding.
+     *
+     * @param context movement context containing player and move data
+     * @return horizontal and vertical velocity adjustments
+     */
+    public static VelocityAdjustment guessElytraVelocityAmount(final MoveCheckContext context) {
+        final Player player = context.player();
+        final PlayerMoveData thisMove = context.thisMove();
+        final PlayerMoveData lastMove = context.lastMove();
+        final MovingData data = context.data();
         final Location useLoc = new Location(null, 0, 0, 0);
         useLoc.setYaw(thisMove.to.getYaw());
         useLoc.setPitch(thisMove.to.getPitch());
@@ -1213,7 +1225,7 @@ public class CreativeFly extends Check {
                     thisMove.yDistance : lastMove.toIsValid ? lastMove.yDistance : 0;
             if (Math.round(data.fireworksBoostTickNeedCheck / 4) > data.fireworksBoostDuration 
                 && thisMove.hDistance < Math.sqrt(x*x + z*z)) {
-                return new double[] {Math.sqrt(x*x + z*z), allowedElytraYDistance};
+                return new VelocityAdjustment(Math.sqrt(x*x + z*z), allowedElytraYDistance);
             }
 
             x *= 0.99;
@@ -1222,14 +1234,14 @@ public class CreativeFly extends Check {
             z += lookvec.getZ() * 0.1D + (lookvec.getZ() * 1.5D - z) * 0.5D;
 
             if (thisMove.hDistance < lastMove.hAllowedDistance * 0.994) {
-                return new double[] {lastMove.hAllowedDistance * 0.994, allowedElytraYDistance};
+                return new VelocityAdjustment(lastMove.hAllowedDistance * 0.994, allowedElytraYDistance);
             } 
             else allowedElytraHDistance += 0.2;
         }
 
         // Adjust false
         allowedElytraHDistance += Math.sqrt(x*x + z*z) + 0.1;
-        return new double[] {allowedElytraHDistance, allowedElytraYDistance};
+        return new VelocityAdjustment(allowedElytraHDistance, allowedElytraYDistance);
     }
 
 

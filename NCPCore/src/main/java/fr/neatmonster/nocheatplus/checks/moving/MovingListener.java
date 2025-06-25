@@ -87,6 +87,8 @@ import fr.neatmonster.nocheatplus.checks.moving.util.AuxMoving;
 import fr.neatmonster.nocheatplus.checks.moving.util.MovingUtil;
 import fr.neatmonster.nocheatplus.checks.moving.util.bounce.BounceType;
 import fr.neatmonster.nocheatplus.checks.moving.util.bounce.BounceUtil;
+import fr.neatmonster.nocheatplus.checks.moving.helper.MoveCheckContext;
+import fr.neatmonster.nocheatplus.checks.moving.helper.VelocityAdjustment;
 import fr.neatmonster.nocheatplus.checks.moving.vehicle.VehicleChecks;
 import fr.neatmonster.nocheatplus.checks.moving.velocity.AccountEntry;
 import fr.neatmonster.nocheatplus.checks.moving.velocity.SimpleEntry;
@@ -1521,12 +1523,13 @@ public class MovingListener extends CheckListener implements TickListener, IRemo
         // Test for exceptions.
         if (Bridge1_9.isWearingElytra(player) && lastMove.modelFlying != null && lastMove.modelFlying.getId().equals(MovingConfig.ID_JETPACK_ELYTRA)) {
             // Still elytra move, not forcing CreativeFly check, just pass the res to velocity
-            final double[] res = CreativeFly.guessElytraVelocityAmount(player, thisMove, lastMove, data);
+            final MoveCheckContext ctx = new MoveCheckContext(player, thisMove, lastMove, data);
+            final VelocityAdjustment res = CreativeFly.guessElytraVelocityAmount(ctx);
             //data.addVerticalVelocity(new SimpleEntry(lastMove.yDistance < -0.1034 ? (lastMove.yDistance * Magic.FRICTION_MEDIUM_AIR + 0.1034) 
             //                                        : lastMove.yDistance, cc.velocityActivationCounter));
             data.keepfrictiontick = -15;
-            data.addVerticalVelocity(new SimpleEntry(res[1], cc.velocityActivationCounter));
-            return res[0];
+            data.addVerticalVelocity(new SimpleEntry(res.vertical(), cc.velocityActivationCounter));
+            return res.horizontal();
             //if (thisMove.hDistance > defaultAmount) {
                 // Allowing the same speed won't always work on elytra (still increasing, differing modeling on client side with motXYZ).
                 // (Doesn't seem to be overly effective.)
