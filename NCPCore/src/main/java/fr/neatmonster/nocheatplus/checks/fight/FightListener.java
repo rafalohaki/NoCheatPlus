@@ -670,83 +670,105 @@ public class FightListener extends CheckListener implements JoinLeaveListener{
      * @param damagedData
      * @param event
      */
-    private void onEntityDamageByEntity(final Entity damaged, final Player damagedPlayer, 
-                                        final boolean damagedIsDead, final boolean damagedIsFake, 
+    private void onEntityDamageByEntity(final Entity damaged, final Player damagedPlayer,
+                                        final boolean damagedIsDead, final boolean damagedIsFake,
                                         final FightData damagedData, final EntityDamageByEntityEvent event,
                                         final IPenaltyList penaltyList) {
 
         final Entity damager = event.getDamager();
         final int tick = TickTask.getTick();
-        if (damagedPlayer != null && !damagedIsDead) {
-            // check once more when to set this (!) in terms of order.
-            damagedData.damageTakenByEntityTick = tick;
-            // Legacy workaround: Before thorns damage cause existed (orchid).
-            // Disable efficiently, if the damage cause exists.
-            // Remove workaround anyway, if the issue only exists on a minor CB version.
-            if (BridgeEnchant.hasThorns(damagedPlayer)) {
-                // Remember the id of the attacker to allow counter damage.
-                damagedData.thornsId = damager.getEntityId();
-            }
-            else damagedData.thornsId = Integer.MIN_VALUE;
-        }
+
+        updateDamagedPlayerData(damagedPlayer, damagedIsDead, damagedData, damager, tick);
 
         final DamageCause damageCause = event.getCause();
-        final Player player = damager instanceof Player ? (Player) damager : null;
-        Player attacker = player;
-        // deobfuscate.
+        final Player attacker = resolveAttacker(damager);
+        final IPlayerData attackerPData = attacker == null ? null : DataManager.getPlayerData(attacker);
+        final FightData attackerData = attackerPData == null ? null : attackerPData.getGenericInstance(FightData.class);
+
+        if (attacker != null) {
+            handleAttackerPreChecks(attacker, attackerPData);
+        }
+
+        final boolean skip = attackerData != null && recordExplosionDamage(damaged, damageCause, attackerData, tick);
+
+        if (!skip && attacker != null && damageCause == DamageCause.ENTITY_ATTACK) {
+            processEntityAttack(event, (Player) damager, damaged, damagedIsFake, tick,
+                               attackerData, attackerPData, penaltyList);
+        }
+    }
+
+    private void updateDamagedPlayerData(final Player damagedPlayer, final boolean damagedIsDead,
+                                         final FightData damagedData, final Entity damager,
+                                         final int tick) {
+        if (damagedPlayer == null || damagedIsDead) {
+            return;
+        }
+        damagedData.damageTakenByEntityTick = tick;
+        if (BridgeEnchant.hasThorns(damagedPlayer)) {
+            damagedData.thornsId = damager.getEntityId();
+        } else {
+            damagedData.thornsId = Integer.MIN_VALUE;
+        }
+    }
+
+    private Player resolveAttacker(final Entity damager) {
+        if (damager instanceof Player) {
+            return (Player) damager;
+        }
         if (damager instanceof TNTPrimed) {
             final Entity source = ((TNTPrimed) damager).getSource();
             if (source instanceof Player) {
-                attacker = (Player) source;
+                return (Player) source;
             }
         }
+        return null;
+    }
 
-        final FightData attackerData;
-        final IPlayerData attackerPData = attacker == null ? null : DataManager.getPlayerData(attacker);
-        if (attacker != null) {
+    private void handleAttackerPreChecks(final Player attacker, final IPlayerData pData) {
+        if (pData != null && pData.isDebugActive(checkType)) {
+            UnusedVelocity.checkUnusedVelocity(attacker, CheckType.FIGHT, pData);
+        }
+    }
 
-            attackerData = attackerPData.getGenericInstance(FightData.class);
-            // TEST: Check unused velocity for the attacker. (Needs more efficient pre condition checks.)
+    private boolean recordExplosionDamage(final Entity damaged, final DamageCause damageCause,
+                                          final FightData attackerData, final int tick) {
+        if (attackerData == null) {
+            return false;
+        }
+        if (damageCause == DamageCause.BLOCK_EXPLOSION || damageCause == DamageCause.ENTITY_EXPLOSION) {
+            attackerData.lastExplosionEntityId = damaged.getEntityId();
+            attackerData.lastExplosionDamageTick = tick;
+            return true;
+        }
+        return false;
+    }
+
+    private void processEntityAttack(final EntityDamageByEntityEvent event, final Player player,
+                                     final Entity damaged, final boolean damagedIsFake, final int tick,
+                                     final FightData attackerData, final IPlayerData attackerPData,
+                                     final IPenaltyList penaltyList) {
+        if (attackerData == null || attackerPData == null) {
+            return;
+        }
+        if (damaged.getEntityId() == attackerData.lastExplosionEntityId
+                && tick == attackerData.lastExplosionDamageTick) {
+            attackerData.lastExplosionDamageTick = -1;
+            attackerData.lastExplosionEntityId = Integer.MAX_VALUE;
+            return;
+        }
+        if (MovingUtil.hasScheduledPlayerSetBack(player)) {
             if (attackerPData.isDebugActive(checkType)) {
-                // Pass result to further checks for reference?
-                // attackerData.debug flag.
-                // Fake players likely have unused velocity, just clear unused?
-                UnusedVelocity.checkUnusedVelocity(attacker, CheckType.FIGHT, attackerPData);
+                debug(player, "Prevent melee attack, due to a scheduled set back.");
             }
-            // Workaround for subsequent melee damage eventsfor explosions. Legacy or not, need a KB.
-            if (damageCause == DamageCause.BLOCK_EXPLOSION  || damageCause == DamageCause.ENTITY_EXPLOSION) {
-                // NOTE: Pigs don't have data.
-                attackerData.lastExplosionEntityId = damaged.getEntityId();
-                attackerData.lastExplosionDamageTick = tick;
-                return;
-            }
+            event.setCancelled(true);
+            return;
         }
-        else attackerData = null;
-        
-        if (player != null) {
-            // Actual fight checks.
-            if (damageCause == DamageCause.ENTITY_ATTACK) {
-                // Might/should skip the damage comparison, though checking on lowest priority.
-                if (damaged.getEntityId() == attackerData.lastExplosionEntityId && tick == attackerData.lastExplosionDamageTick) {
-                    attackerData.lastExplosionDamageTick = -1;
-                    attackerData.lastExplosionEntityId = Integer.MAX_VALUE;
-                }
-                // Prevent attacking if a set back is scheduled.
-                else if (MovingUtil.hasScheduledPlayerSetBack(player)) {
-                    if (attackerPData.isDebugActive(checkType)) {
-                        // Use fight data flag for efficiency.
-                        debug(attacker, "Prevent melee attack, due to a scheduled set back.");
-                    }
-                    event.setCancelled(true);
-                }
-                // Ordinary melee damage handling.
-                else if (handleNormalDamage(player, !crossPlugin.getHandle().isNativePlayer(player),
-                                            damaged, damagedIsFake, BridgeHealth.getOriginalDamage(event), 
-                                            BridgeHealth.getFinalDamage(event), tick, attackerData, 
-                                            attackerPData, penaltyList)) {
-                    event.setCancelled(true);
-                }
-            }
+
+        if (handleNormalDamage(player, !crossPlugin.getHandle().isNativePlayer(player),
+                               damaged, damagedIsFake, BridgeHealth.getOriginalDamage(event),
+                               BridgeHealth.getFinalDamage(event), tick, attackerData,
+                               attackerPData, penaltyList)) {
+            event.setCancelled(true);
         }
     }
 
