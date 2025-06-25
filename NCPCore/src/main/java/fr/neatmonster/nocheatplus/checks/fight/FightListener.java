@@ -172,188 +172,179 @@ public class FightListener extends CheckListener implements JoinLeaveListener{
      */
     private boolean handleNormalDamage(final Player player, final boolean attackerIsFake,
                                        final Entity damaged, final boolean damagedIsFake,
-                                       final double originalDamage, final double finalDamage, 
+                                       final double originalDamage, final double finalDamage,
                                        final int tick, final FightData data, final IPlayerData pData,
                                        final IPenaltyList penaltyList) {
+
+        if (player == null || damaged == null) {
+            return false;
+        }
+
+        if (Items.checkIllegalEnchantmentsAllHands(player, pData)) {
+            return true;
+        }
 
         final FightConfig cc = pData.getGenericInstance(FightConfig.class);
         final MovingConfig mCc = pData.getGenericInstance(MovingConfig.class);
         final MovingData mData = pData.getGenericInstance(MovingData.class);
-
-        // Hotfix attempt for enchanted books.
-        // maybe a generalized version for the future...
-        // Illegal enchantments hotfix check.
-        if (Items.checkIllegalEnchantmentsAllHands(player, pData)) {
-            return true;
-        }
 
         boolean cancelled = false;
         final boolean debug = pData.isDebugActive(checkType);
         final String worldName = player.getWorld().getName();
         final long now = System.currentTimeMillis();
         final boolean worldChanged = !worldName.equals(data.lastWorld);
-        final Location loc =  player.getLocation(useLoc1);
+        final Location loc = player.getLocation(useLoc1);
         final Location damagedLoc = damaged.getLocation(useLoc2);
 
         final TargetMoveInfo moveInfo = computeTargetMoveInfo(data, damagedLoc, tick, worldChanged);
-        final double targetMove = moveInfo.targetMove;
-        final int tickAge = moveInfo.tickAge;
-        final long msAge = moveInfo.msAge;
         final double normalizedMove = moveInfo.normalizedMove;
 
-        // calculate factor for dists: ticks * 50 * lag
-        // dist < width => skip some checks (direction, ..)
-
-        final LocationTrace damagedTrace;
         final Player damagedPlayer;
+        final LocationTrace damagedTrace;
         if (damaged instanceof Player) {
             damagedPlayer = (Player) damaged;
-    
-            // Log.
             if (debug && DataManager.getPlayerData(damagedPlayer).hasPermission(Permissions.ADMINISTRATION_DEBUG, damagedPlayer)) {
                 damagedPlayer.sendMessage("Attacked by " + player.getName() + ": inv=" + mcAccess.getHandle().getInvulnerableTicks(damagedPlayer) + " ndt=" + damagedPlayer.getNoDamageTicks());
             }
-            // Check for self hit exploits (mind that projectiles are excluded from this.)
             if (selfHit.isEnabled(player, pData) && selfHit.check(player, damagedPlayer, data, cc)) {
                 cancelled = true;
             }
-            // Get+update the damaged players.
-            // Problem with NPCs: data stays (not a big problem).
-            // (This is done even if the event has already been cancelled, to keep track, if the player is on a horse.)
             damagedTrace = DataManager.getPlayerData(damagedPlayer).getGenericInstance(MovingData.class)
-                           .updateTrace(damagedPlayer, damagedLoc, tick, damagedIsFake ? null : mcAccess.getHandle()); //.getTrace(damagedPlayer);
-        }
-        else {
-            damagedPlayer = null; // This is a temporary workaround.
-            // Use a fake trace.
-            // Provide for entities too? E.g. one per player, or a fully fledged bookkeeping thing (EntityData).
-            //final MovingConfig mcc = MovingConfig.getConfig(damagedLoc.getWorld().getName());
-            damagedTrace = null; //new LocationTrace(mcc.traceSize, mcc.traceMergeDist);
-            //damagedTrace.addEntry(tick, damagedLoc.getX(), damagedLoc.getY(), damagedLoc.getZ());
+                    .updateTrace(damagedPlayer, damagedLoc, tick, damagedIsFake ? null : mcAccess.getHandle());
+        } else {
+            damagedPlayer = null;
+            damagedTrace = null;
         }
 
-        // Log generic properties of this attack.
         if (debug) {
             debug(player, "Attacks " + (damagedPlayer == null ? ("entity " + damaged.getType()) : ("player" + damagedPlayer.getName())) + " damage=" + (finalDamage == originalDamage ? finalDamage : (originalDamage + "/" + finalDamage)));
         }
 
-        // Can't fight dead.
-        if (cc.cancelDead) {
-            if (damaged.isDead()) {
+        cancelled |= checkCancelDead(player, damaged, data, cc);
+        cancelled |= checkSweepAndThorns(player, damaged, originalDamage, tick, data, loc, debug);
+        cancelled |= runChecks(player, damaged, damagedIsFake, cc, mCc, pData, data, mData, penaltyList,
+                               loc, damagedLoc, tick, now, debug, worldName, worldChanged, normalizedMove,
+                               damagedTrace);
+
+        updateAttackData(data, worldName, tick, damagedLoc);
+
+        if (!cancelled) {
+            checkLostSprint(player, loc, damagedLoc, now, mData, mCc, pData, debug);
+            if (data.attackPenalty.isPenalty(now)) {
                 cancelled = true;
-            }
-            // Only allow damaging others if taken damage this tick.
-            if (player.isDead() && data.damageTakenByEntityTick != TickTask.getTick()) {
-                cancelled = true;
+                if (debug) {
+                    debug(player, "~ attack penalty.");
+                }
             }
         }
 
-        // LEGACY: 1.9: sweep attack.
+        useLoc1.setWorld(null);
+        useLoc2.setWorld(null);
+        return cancelled;
+    }
+
+    private boolean checkCancelDead(final Player player, final Entity damaged, final FightData data,
+                                    final FightConfig cc) {
+        if (!cc.cancelDead) {
+            return false;
+        }
+        if (damaged.isDead()) {
+            return true;
+        }
+        return player.isDead() && data.damageTakenByEntityTick != TickTask.getTick();
+    }
+
+    private boolean checkSweepAndThorns(final Player player, final Entity damaged, final double originalDamage,
+                                        final int tick, final FightData data, final Location loc,
+                                        final boolean debug) {
+
         if (BridgeHealth.DAMAGE_SWEEP == null) {
-            // Account for charge/meter thing?
             final int locHashCode = LocUtil.hashCode(loc);
             if (originalDamage == 1.0) {
-                // Might be a sweep attack.
                 if (tick == data.sweepTick && locHashCode == data.sweepLocationHashCode) {
-                    // Might limit the amount of 'too far off' sweep hits, possibly silent cancel for low frequency.
-                    // Could further guard by checking equality of loc to last location.
                     if (debug) {
                         debug(player, "(Assume sweep attack follow up damage.)");
                     }
-                    return cancelled;
+                    return true;
                 }
-            }
-            else {
-                // More side conditions for a sweep attack.
+            } else {
                 data.sweepTick = tick;
                 data.sweepLocationHashCode = locHashCode;
             }
         }
 
-        // LEGACY: thorns.
-        if (BridgeHealth.DAMAGE_THORNS == null && originalDamage <= 4.0 && tick == data.damageTakenByEntityTick 
-            && data.thornsId != Integer.MIN_VALUE && data.thornsId == damaged.getEntityId()) {
-            // Don't handle further, but do respect selfhit/canceldead.
-            // Remove soon, at least version-dependent.
+        if (BridgeHealth.DAMAGE_THORNS == null && originalDamage <= 4.0 && tick == data.damageTakenByEntityTick
+                && data.thornsId != Integer.MIN_VALUE && data.thornsId == damaged.getEntityId()) {
             data.thornsId = Integer.MIN_VALUE;
-            return cancelled;
+            return true;
         }
-        else data.thornsId = Integer.MIN_VALUE;
 
+        data.thornsId = Integer.MIN_VALUE;
+        return false;
+    }
 
+    private boolean runChecks(final Player player, final Entity damaged, final boolean damagedIsFake,
+                              final FightConfig cc, final MovingConfig mCc, final IPlayerData pData,
+                              final FightData data, final MovingData mData, final IPenaltyList penaltyList,
+                              final Location loc, final Location damagedLoc, final int tick, final long now,
+                              final boolean debug, final String worldName, final boolean worldChanged,
+                              final double normalizedMove, final LocationTrace damagedTrace) {
 
-        // Run through the main checks.
-        // Consider to always check improbable (first?). At least if config.always or speed or net.attackfrequency are enabled.
-        if (!cancelled && speed.isEnabled(player, pData)) {
+        boolean cancelled = false;
+
+        if (speed.isEnabled(player, pData)) {
             if (speed.check(player, now, data, cc, pData)) {
                 cancelled = true;
-
-                // Still feed the improbable.
                 if (data.speedVL > 50) {
-                	if (cc.speedImprobableWeight > 0.0f) {
-                        // Do check only for higher speeds.
-                    	if (!cc.speedImprobableFeedOnly) {
-                            Improbable.check(player, cc.speedImprobableWeight, now, "fight.speed", pData);
-                        }
+                    if (cc.speedImprobableWeight > 0.0f && !cc.speedImprobableFeedOnly) {
+                        Improbable.check(player, cc.speedImprobableWeight, now, "fight.speed", pData);
                     }
-                }
-                // Only feed for lower speeds.
-                else if (cc.speedImprobableWeight > 0.0f) {
+                } else if (cc.speedImprobableWeight > 0.0f) {
                     Improbable.feed(player, cc.speedImprobableWeight, now);
                 }
-            }
-            // Feed improbable in case of ok-moves too.
-            // consider only feeding if attacking with higher average speed (!)
-            else if (normalizedMove > 2.0) { 
-                if (cc.speedImprobableWeight > 0.0f) {
-                    if (!cc.speedImprobableFeedOnly && Improbable.check(player, cc.speedImprobableWeight, now, "fight.speed", pData)) {
-                        cancelled = true;
-                    }
+            } else if (normalizedMove > 2.0 && cc.speedImprobableWeight > 0.0f) {
+                if (!cc.speedImprobableFeedOnly && Improbable.check(player, cc.speedImprobableWeight, now, "fight.speed", pData)) {
+                    cancelled = true;
                 }
             }
         }
 
-        if (!cancelled && critical.isEnabled(player, pData) 
-            && critical.check(player, loc, data, cc, pData, penaltyList)) {
+        if (!cancelled && critical.isEnabled(player, pData)
+                && critical.check(player, loc, data, cc, pData, penaltyList)) {
             cancelled = true;
         }
 
-        if (!cancelled && mData.timeRiptiding + 3000 < now 
-            && noSwing.isEnabled(player, pData) 
-            && noSwing.check(player, data, cc)) {
+        if (!cancelled && mData.timeRiptiding + 3000 < now
+                && noSwing.isEnabled(player, pData)
+                && noSwing.check(player, data, cc)) {
             cancelled = true;
         }
 
         if (!cancelled && impossibleHit.isEnabled(player, pData)) {
-            if (impossibleHit.check(player, data, cc, pData, mCc.survivalFlyResetItem && mcAccess.getHandle().resetActiveItem(player))) {
+            if (impossibleHit.check(player, data, cc, pData,
+                    mCc.survivalFlyResetItem && mcAccess.getHandle().resetActiveItem(player))) {
                 cancelled = true;
-
-                // Still feed the Improbable
                 if (cc.impossibleHitImprobableWeight > 0.0f) {
                     Improbable.feed(player, cc.impossibleHitImprobableWeight, System.currentTimeMillis());
                 }
             }
         }
-        
-        if (!cancelled && visible.isEnabled(player, pData)) {
-            if (visible.check(player, loc, damaged, damagedIsFake, damagedLoc, data, cc)) cancelled = true;
+
+        if (!cancelled && visible.isEnabled(player, pData)
+                && visible.check(player, loc, damaged, damagedIsFake, damagedLoc, data, cc)) {
+            cancelled = true;
         }
 
-        // Checks that use the LocationTrace instance of the attacked entity/player.
-        // To be replaced by Fight.HitBox
         if (!cancelled) {
-
-            final boolean isDamagedPlayer = damaged instanceof Player; // Disable reach check for non-player since the low accuracy
+            final boolean isDamagedPlayer = damaged instanceof Player;
             final boolean reachEnabled = reach.isEnabled(player, pData) && isDamagedPlayer;
             final boolean directionEnabled = direction.isEnabled(player, pData) && mData.timeRiptiding + 3000 < now;
             if (reachEnabled || directionEnabled) {
                 if (damagedTrace != null) {
-                    cancelled = locationTraceChecks(player, loc, data, cc, pData, 
-                                                    damaged, damagedIsFake, damagedLoc, damagedTrace, tick, now, debug,
-                                                    reachEnabled, directionEnabled);
-                }
-                // Still use the classic methods for non-players. 
-                else {
+                    cancelled = locationTraceChecks(player, loc, data, cc, pData,
+                            damaged, damagedIsFake, damagedLoc, damagedTrace, tick, now, debug,
+                            reachEnabled, directionEnabled);
+                } else {
                     if (reachEnabled && reach.check(player, loc, damaged, damagedIsFake, damagedLoc, data, cc, pData)) {
                         cancelled = true;
                     }
@@ -364,23 +355,11 @@ public class FightListener extends CheckListener implements JoinLeaveListener{
             }
         }
 
-        // Check angle with allowed window.
-        // The "fast turning" checks are checked in any case because they accumulate data.
-        // Improbable yaw changing: Moving events might be missing up to a ten degrees change.
-        // Actual angle needs to be related to the best matching trace element(s) (loop checks).
-        // Work into this somehow attacking the same aim and/or similar aim position (not cancel then).
-        // Revise, use own trace.
-        // Should we drop this check? Reasons being:
-        //       1) It doesn't do much at all against killauras or even multiauras;
-        //       2) Throws a lot of false positives with mob grinders and with ping-poing hitting players;
-        //       3) Switchspeed and yaw changes are already monitored by Yawrate... (Redundancy);
-        if (angle.isEnabled(player, pData)) {
-            if (Combined.checkYawRate(player, loc.getYaw(), now, worldName, 
-                 pData.isCheckActive(CheckType.COMBINED_YAWRATE, player), pData)) {
-                // (Check or just feed).
+        if (!cancelled && angle.isEnabled(player, pData)) {
+            if (Combined.checkYawRate(player, loc.getYaw(), now, worldName,
+                    pData.isCheckActive(CheckType.COMBINED_YAWRATE, player), pData)) {
                 cancelled = true;
             }
-            // Angle check.
             if (angle.check(player, loc, damaged, worldChanged, data, cc, pData)) {
                 if (!cancelled && debug) {
                     debug(player, "FIGHT_ANGLE cancel without yawrate cancel.");
@@ -389,37 +368,16 @@ public class FightListener extends CheckListener implements JoinLeaveListener{
             }
         }
 
-        // Set values.
+        return cancelled;
+    }
+
+    private void updateAttackData(final FightData data, final String worldName, final int tick,
+                                  final Location damagedLoc) {
         data.lastWorld = worldName;
         data.lastAttackTick = tick;
         data.lastAttackedX = damagedLoc.getX();
         data.lastAttackedY = damagedLoc.getY();
         data.lastAttackedZ = damagedLoc.getZ();
-        //    	data.lastAttackedDist = targetDist;
-
-        // Care for the "lost sprint problem": sprint resets, client moves as if still...
-        // If this is just in-air, model with friction, so this can be removed.
-        // Use stored distance calculation same as reach check?
-        // For pvp: make use of "player was there" heuristic later on.
-        // Confine further with simple pre-conditions.
-        // Evaluate if moving traces can help here.
-        if (!cancelled) {
-            checkLostSprint(player, loc, damagedLoc, now, mData, mCc, pData, debug);
-        }
-
-        // Generic attacking penalty.
-        // (Cancel after sprinting hacks, because of potential fp).
-        if (!cancelled && data.attackPenalty.isPenalty(now)) {
-            cancelled = true;
-            if (debug) {
-                debug(player, "~ attack penalty.");
-            }
-        }
-
-        // Cleanup.
-        useLoc1.setWorld(null);
-        useLoc2.setWorld(null);
-        return cancelled;
     }
 
     /**
