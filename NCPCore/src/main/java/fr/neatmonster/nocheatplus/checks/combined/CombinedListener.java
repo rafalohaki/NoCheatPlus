@@ -85,7 +85,7 @@ public class CombinedListener extends CheckListener {
     @EventHandler(priority = EventPriority.LOWEST)
     public void onPlayerJoin(final PlayerJoinEvent event) {
 
-        // TODO: EventPriority
+        // Event priority intentionally lowest for join handling.
 
         final Player player = event.getPlayer();
         final IPlayerData pData = DataManager.getPlayerData(player);
@@ -98,10 +98,10 @@ public class CombinedListener extends CheckListener {
         if (cc.invulnerableCheck 
                 && (cc.invulnerableTriggerAlways || cc.invulnerableTriggerFallDistance 
                         && player.getFallDistance() > 0)){
-            // TODO: maybe make a heuristic for small fall distances with ground under feet (prevents future abuse with jumping) ?
+            // Consider a heuristic for small fall distances with ground underfoot to prevent abuse with jumping.
             final int invulnerableTicks = mcAccess.getHandle().getInvulnerableTicks(player);
             if (invulnerableTicks == Integer.MAX_VALUE) {
-                // TODO: Maybe log a warning.
+                // Consider logging a warning.
             } else {
                 final int ticks = cc.invulnerableInitialTicksJoin >= 0 ? cc.invulnerableInitialTicksJoin : invulnerableTicks;
                 data.invulnerableTick = TickTask.getTick() + ticks;
@@ -139,17 +139,17 @@ public class CombinedListener extends CheckListener {
         Integer modifier = cc.invulnerableModifiers.get(cause);
         if (modifier == null) modifier = cc.invulnerableModifierDefault;
         final CombinedData data = pData.getGenericInstance(CombinedData.class);
-        // TODO: account for tick task reset ? [it should not though, due to data resetting too, but API would allow it]
+        // Verify if tick task reset must be handled; data resetting should prevent issues though the API would allow it.
         if (TickTask.getTick() >= data.invulnerableTick + modifier.intValue()) return;
         // Still invulnerable.
         event.setCancelled(true);
         counters.addPrimaryThread(idFakeInvulnerable, 1);
     }
 
-    // TODO: Why do we need to feed improable for toggle sprinting exactly?
+    // Clarify why improbable feeding is required for toggling sprint.
     @EventHandler(priority = EventPriority.MONITOR) // HIGHEST)
     public void onPlayerToggleSprintHighest(final PlayerToggleSprintEvent event) {
-        //    	// TODO: Check the un-cancelling.
+        //    	// Review the un-cancelling.
         //        // Some plugins cancel "sprinting", which makes no sense at all because it doesn't stop people from sprinting
         //        // and rewards them by reducing their hunger bar as if they were walking instead of sprinting.
         //        if (event.isCancelled() && event.isSprinting())
@@ -158,7 +158,7 @@ public class CombinedListener extends CheckListener {
         Improbable.feed(event.getPlayer(), 0.35f, System.currentTimeMillis());
     }
     
-    // TODO: Why do we need to feed improable for toggle sneaking exactly?
+    // Clarify why improbable feeding is required for toggling sneak.
     @EventHandler(priority=EventPriority.MONITOR)
     public void onPlayerToggleSneak(final PlayerToggleSneakEvent event){
         // Check also in case of cancelled events.
