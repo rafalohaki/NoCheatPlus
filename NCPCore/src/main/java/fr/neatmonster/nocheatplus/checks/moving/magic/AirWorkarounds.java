@@ -45,8 +45,6 @@ public class AirWorkarounds {
 
     // ONGOING: Tighten/Review all workarounds: some of them date back to the pre past-move-tracking framework period. They're likely too generic by now.
     // OBSERVED: Review all "landing-on-ground-allows-a-shoter-move" workarounds. They can be exploited for 1-block step cheats.
-    // TODO: Review stairs workarounds due to the new shape rework
-    // TODO: Review venvHacks,at least cobwebs. (Still needed?)
     /**
      * REMOVED AND TESTED: 
      *  
@@ -73,7 +71,6 @@ public class AirWorkarounds {
 
     /**
      * Workarounds for exiting cobwebs and jumping on slime.
-     * TODO: Get rid of the cobweb workaround and adjust bounding box size to check with rather.
      * 
      * @param from
      * @param to
@@ -190,9 +187,6 @@ public class AirWorkarounds {
                                      final boolean resetTo, final PlayerMoveData thisMove, final PlayerMoveData lastMove, 
                                      final MovingData data, final boolean resetFrom, final PlayerLocation from) {
 
-        // TODO: Relate jump phase to last/second-last move fromWasReset (needs keeping that data in classes).
-        // TODO: And distinguish where JP=2 is ok?
-        // TODO: Most are medium transitions with the possibility to keep/alter friction or even speed on 1st/2nd move (counting in the transition).
         final boolean LiquidEnvelope = (data.liftOffEnvelope == LiftOffEnvelope.LIMIT_LIQUID || data.liftOffEnvelope == LiftOffEnvelope.LIMIT_NEAR_GROUND || data.liftOffEnvelope == LiftOffEnvelope.LIMIT_SURFACE);
         final int blockdata = from.getData(from.getBlockX(), from.getBlockY(), from.getBlockZ());
         if (data.sfJumpPhase != 1 && data.sfJumpPhase != 2) {
@@ -203,8 +197,6 @@ public class AirWorkarounds {
                 yDistDiffEx < 0.0 
                 && (
                     // 1: Friction issues (bad).
-                    // TODO: Velocity jump phase isn't exact on that account, but shouldn't hurt.
-                    // TODO: Liquid-bound or not?
                     (LiquidEnvelope || data.isVelocityJumpPhase())
                     && (   
                         Magic.fallingEnvelope(yDistance, lastMove.yDistance, data.lastFrictionVertical, Magic.GRAVITY_ODD / 2.0)
@@ -219,7 +211,7 @@ public class AirWorkarounds {
                 || data.liftOffEnvelope == LiftOffEnvelope.LIMIT_LIQUID 
                 && data.sfJumpPhase == 1 && lastMove.toIsValid && yDistDiffEx <= 0.0
                 && lastMove.from.inLiquid && !(lastMove.to.extraPropertiesValid && lastMove.to.inLiquid)
-                && !resetFrom && resetTo // TODO: There might be other cases (possibly wrong bounding box).
+                && !resetFrom && resetTo // Possibly more cases due to bounding box issues.
                 && lastMove.yDistance > 0.0 && lastMove.yDistance < 0.5 * Magic.GRAVITY_ODD
                 && yDistance < 0.0 && Math.abs(Math.abs(yDistance) - lastMove.yDistance) < Magic.GRAVITY_SPAN / 2.0
                 && data.ws.use(WRPT.W_M_SF_ODDLIQUID_3)
@@ -227,7 +219,6 @@ public class AirWorkarounds {
                 || LiquidEnvelope
                 && (
                         // 1: Jump or decrease falling speed after a small gain (could be bounding box?).
-                        // TODO: Water-bound or not?
                         yDistDiffEx > 0.0 && yDistance > lastMove.yDistance && yDistance < 0.84 * maxJumpGain
                         && lastMove.yDistance >= -Magic.GRAVITY_MAX - Magic.GRAVITY_MIN 
                         && lastMove.yDistance < Magic.GRAVITY_MAX + Magic.GRAVITY_SPAN
@@ -237,9 +228,6 @@ public class AirWorkarounds {
                         && yDistDiffEx < Magic.GRAVITY_MAX + Magic.GRAVITY_ODD
                         && data.ws.use(WRPT.W_M_SF_ODDLIQUID_5)
                         // 1: Odd decrease of speed as if still in water, moving out of water (downwards).
-                        // TODO: data.lastFrictionVertical might not catch it (jump phase 0 -> next = air).
-                        // TODO: Could not reproduce since first time (use DebugUtil.debug(String, boolean)).
-                        // TODO: Due to the TODO above, we could consider dropping this one.
                         || lastMove.yDistance < -2.0 * Magic.GRAVITY_MAX && data.sfJumpPhase == 1 
                         && yDistance < -Magic.GRAVITY_MAX && yDistance > lastMove.yDistance 
                         && Math.abs(yDistance - lastMove.yDistance * data.lastFrictionVertical) < Magic.GRAVITY_MAX 
@@ -255,7 +243,6 @@ public class AirWorkarounds {
                         * Excluding NO_JUMP(webs), UNKNOWN and NORMAL, these were likely intended for liquid only.
                         */
                         // 1: Wild-card allow half gravity near 0 yDistance.
-                        // TODO: Check for removal of included cases elsewhere.
                         || !(LiquidEnvelope && (Math.abs(yDistance) > data.liftOffEnvelope.getMaxJumpGain(0.0) || blockdata > 3)) 
                         && lastMove.yDistance > -10.0 * Magic.GRAVITY_ODD / 2.0 && lastMove.yDistance < 10.0 * Magic.GRAVITY_ODD
                         && yDistance < lastMove.yDistance - Magic.GRAVITY_MIN / 2.0 && yDistance > lastMove.yDistance - Magic.GRAVITY_MAX
@@ -335,15 +322,11 @@ public class AirWorkarounds {
                         || lastMove.yDistance > Magic.GRAVITY_ODD / 2.0 && lastMove.yDistance < Magic.GRAVITY_MIN && yDistance == 0.0
                         && data.ws.use(WRPT.W_M_SF_ODDGRAVITY_2)
                         // 1: yDist inversion near 0 (almost). 
-                        // TODO: This actually happens near liquid, but NORMAL env!?
-                        // TODO: Find out if this inversion actually happens with normal envelope... Should be rare, if so (confine to one time use until reset condition then)
                         // lastYDist < Gravity max + min happens with dirty phase (slimes),. previously: max + span
-                        // TODO: Can all cases be reduced to change sign with max. neg. gain of max + span ?
                         || lastMove.yDistance <= Magic.GRAVITY_MAX + Magic.GRAVITY_MIN && lastMove.yDistance > Magic.GRAVITY_ODD
                         && yDistance < Magic.GRAVITY_ODD && yDistance > -2.0 * Magic.GRAVITY_MAX - Magic.GRAVITY_ODD / 2.0
                         && data.ws.use(WRPT.W_M_SF_ODDGRAVITY_3)
                         // 1: Head is obstructed. 
-                        // TODO: Cover this in a more generic way elsewhere (<= friction envelope + obstructed).
                         || lastMove.yDistance >= 0.0 && yDistance < Magic.GRAVITY_ODD
                         && (thisMove.headObstructed || lastMove.headObstructed)
                         && data.ws.use(WRPT.W_M_SF_ODDGRAVITY_4)
@@ -378,7 +361,7 @@ public class AirWorkarounds {
                         || lastMove.yDistance < -0.204 && yDistance > -0.26
                         && yDistChange > -Magic.GRAVITY_MIN && yDistChange < -Magic.GRAVITY_ODD / 4.0
                         && data.ws.use(WRPT.W_M_SF_ODDGRAVITY_VEL_2)
-                        // 1: Lot's of decrease near zero TODO: merge later.
+                        // 1: Lot's of decrease near zero, to be merged later.
                         || lastMove.yDistance < -Magic.GRAVITY_ODD && lastMove.yDistance > -Magic.GRAVITY_MIN
                         && yDistance > -2.0 * Magic.GRAVITY_MAX - 2.0 * Magic.GRAVITY_MIN && yDistance < -Magic.GRAVITY_MAX
                         && data.ws.use(WRPT.W_M_SF_ODDGRAVITY_VEL_3)
@@ -387,7 +370,6 @@ public class AirWorkarounds {
                         && lastMove.yDistance < 0.5 && lastMove.yDistance > 0.4
                         && data.ws.use(WRPT.W_M_SF_ODDGRAVITY_VEL_4)
                         // 1: Small decrease after high edge.
-                        // TODO: Consider min <-> span, generic.
                         || lastMove.yDistance == 0.0 && yDistance > -Magic.GRAVITY_MIN && yDistance < -Magic.GRAVITY_ODD
                         && data.ws.use(WRPT.W_M_SF_ODDGRAVITY_VEL_5)
                         // 1: Too small but decent decrease moving up, marginal violation.
@@ -404,14 +386,12 @@ public class AirWorkarounds {
                         && data.ws.use(WRPT.W_M_SF_ODDGRAVITY_SETBACK)
                 )
                 // 0: Jump-effect-specific
-                // TODO: Which level?
                 || data.jumpAmplifier > 0 && lastMove.yDistance < Magic.GRAVITY_MAX + Magic.GRAVITY_MIN / 2.0 
                 && lastMove.yDistance > -2.0 * Magic.GRAVITY_MAX - 0.5 * Magic.GRAVITY_MIN
                 && yDistance > -2.0 * Magic.GRAVITY_MAX - 2.0 * Magic.GRAVITY_MIN && yDistance < Magic.GRAVITY_MIN
                 && yDistChange < -Magic.GRAVITY_SPAN && data.liftOffEnvelope == LiftOffEnvelope.NORMAL // Skip for other envelopes.
                 && data.ws.use(WRPT.W_M_SF_ODDGRAVITY_JUMPEFFECT)
                 // 0: Another near 0 yDistance case.
-                // TODO: Inaugurate into some more generic envelope.
                 || lastMove.yDistance > -Magic.GRAVITY_MAX && lastMove.yDistance < Magic.GRAVITY_MIN 
                 && !(lastMove.touchedGround || lastMove.to.extraPropertiesValid && lastMove.to.onGroundOrResetCond)
                 && yDistance < lastMove.yDistance - Magic.GRAVITY_MIN / 2.0 
@@ -448,7 +428,7 @@ public class AirWorkarounds {
                 && (
                         // 1: Towards ascending rather.
                         pastMove1.yDistance > lastMove.yDistance - Magic.GRAVITY_MAX
-                        && lastMove.yDistance > yDistance + Magic.GRAVITY_MAX && lastMove.yDistance > 0.0 // Positive speed. TODO: rather > 1.0 (!).
+                        && lastMove.yDistance > yDistance + Magic.GRAVITY_MAX && lastMove.yDistance > 0.0 // Positive speed; may require > 1.0.
                         && (
                                 // 2: Odd speed decrease bumping into a block sideways somehow, having moved through water.
                                 yDistDiffEx < 0.0 && Magic.splashMove(lastMove, pastMove1)
@@ -463,8 +443,6 @@ public class AirWorkarounds {
                                 )
                                 // 2: Almost keep speed (gravity only), moving out of lava with (high) velocity.
                                 // (Needs jump phase == 1, to confine decrease from pastMove1 to lastMove.)
-                                // TODO: Never seems to apply.
-                                // TODO: Might explicitly demand (lava) friction decrease from pastMove1 to lastMove.
                                 || Magic.inLiquid(pastMove1) && pastMove1.from.inLava
                                 && Magic.leavingLiquid(lastMove) && lastMove.yDistance > 4.0 * Magic.GRAVITY_MAX
                                 && yDistance < lastMove.yDistance - Magic.GRAVITY_MAX 
@@ -557,12 +535,10 @@ public class AirWorkarounds {
                 (resetTo && (yDistDiffEx > -Magic.GRAVITY_SPAN || !fromOnGround && !thisMove.touchedGround && yDistChange >= 0.0))
                 && data.ws.use(WRPT.W_M_SF_FASTFALL_2)
                 // 0: Mirrored case for yDistance > vAllowedDistance, hitting ground. 2
-                // TODO: Needs more efficient structure.
                 || yDistance > lastMove.yDistance - Magic.GRAVITY_MAX - Magic.GRAVITY_SPAN && (resetTo || thisMove.touchedGround)
                 // && thisMove.setBackYDistance <= 0.0 // Only allow the move if the player had actually been falling
                 && data.ws.use(WRPT.W_M_SF_FASTFALL_3)
                 // 0: Stairs and other cases moving off ground or ground-to-ground. 3
-                // TODO: Margins !?
                 || (resetFrom && yDistance >= -0.5 && (yDistance > -0.31 || (resetTo || to.isAboveStairs()) && (lastMove.yDistance < 0.0)))
                 && data.ws.use(WRPT.W_M_SF_FASTFALL_4)
                 // 0: Head was blocked, thus faster decrease than expected.
@@ -570,7 +546,6 @@ public class AirWorkarounds {
                 && (thisMove.headObstructed || lastMove.toIsValid && lastMove.headObstructed && lastMove.yDistance >= 0.0)
                 && data.ws.use(WRPT.W_M_SF_FASTFALL_5)
                 // 1.13+ specific: breaking a block below too fast.
-                // TODO: Confine by ground conditions
                 || Bridge1_13.hasIsSwimming() // && lastMove.touchedGround
                 && (
                     data.sfJumpPhase == 3 && lastMove.yDistance < -0.139 && yDistance > -0.1 && yDistance < 0.005
@@ -616,11 +591,9 @@ public class AirWorkarounds {
 
         return 
                 // 0: Allow jumping less high, unless within "strict envelope". 4
-                // TODO: Extreme anti-jump effects, perhaps.
                 (!strictVdistRel || Math.abs(yDistDiffEx) <= Magic.GRAVITY_SPAN || vAllowedDistance <= 0.2)
                 && data.ws.use(WRPT.W_M_SF_SHORTMOVE_1)
                 // 0: Too strong decrease with velocity.
-                // TODO: Observed when moving off water, might be confined by that.
                 || yDistance > 0.0 && lastMove.toIsValid && lastMove.yDistance > yDistance
                 && lastMove.yDistance - yDistance <= lastMove.yDistance / (lastMove.from.inLiquid ? 1.76 : 4.0)
                 && data.isVelocityJumpPhase()
@@ -694,8 +667,6 @@ public class AirWorkarounds {
                 
                 // 0: Pretty coarse workaround, should instead do a proper modeling for from.getDistanceToGround.
                 // (OR loc... needs different model, distanceToGround, proper set back, moveHitGround)
-                // TODO: Slightly too short move onto the same level as snow (0.75), but into air (yDistance > -0.5).
-                // TODO: Better on-ground model (adapt to actual client code).
                 yDistance < 0.0 && lastMove.yDistance < 0.0 && yDistChange > -Magic.GRAVITY_MAX
                 && (
                     from.isOnGround(Math.abs(yDistance) + 0.001) 
@@ -712,7 +683,6 @@ public class AirWorkarounds {
                 || yDistDiffEx < Magic.Y_ON_GROUND_DEFAULT && Magic.noobJumpsOffTower(yDistance, maxJumpGain, thisMove, lastMove, data)
                 && data.ws.use(WRPT.W_M_SF_OUT_OF_ENVELOPE_3)
                 // 0: 1.13+ specific: breaking a block below too fast.
-                // TODO: Confine more.
                 || Bridge1_13.hasIsSwimming() 
                 && (
                     data.sfJumpPhase == 7 && yDistance < -0.02 && yDistance > -0.2
@@ -755,7 +725,6 @@ public class AirWorkarounds {
                 (fromOnGround || thisMove.touchedGroundWorkaround || lastMove.touchedGround
                 && toOnGround && yDistance <= cc.sfStepHeight)
                 // 0: Teleport to in-air (PaperSpigot 1.7.10).
-                // TODO: Legacy, could drop it at this point...
                 || Magic.skipPaper(thisMove, lastMove, data)
                 // 0: Bunnyhop into a 1-block wide waterfall to reduce vertical water friction -> ascend in water -> leave waterfall 
                 // -> have two, in-air ascending air phases -> double VdistSB violation due to a too high jump, since speed wasn't reduced by enough when in water.
@@ -796,7 +765,6 @@ public class AirWorkarounds {
                 yDistance <= 0.0 && (resetTo || thisMove.touchedGround) 
                 && data.ws.use(WRPT.W_M_SF_OUT_OF_ENVELOPE_NODATA1)
                 // 0: Pre 1.17 bug.
-                // TODO: Possibly confine by further criteria ?
                 || to.isHeadObstructed() && yDistance > 0.0 && yDistance < 1.2 
                 && from.getTypeId().toString().endsWith("SHULKER_BOX")
                 && data.ws.use(WRPT.W_M_SF_OUT_OF_ENVELOPE_NODATA2)
@@ -830,7 +798,6 @@ public class AirWorkarounds {
             return false;
             // Skip everything if last move is invalid
         }
-        // TODO: Cleanup/reduce signature (accept thisMove.yDistance etc.).
         if (AirWorkarounds.oddLiquid(yDistance, yDistDiffEx, maxJumpGain, resetTo, thisMove, lastMove, data, resetFrom, from)) {
             // Jump after leaving the liquid near ground.
             return true;
