@@ -85,12 +85,18 @@ public class ServerVersion {
         if (server == null) {
             return null;
         }
-        try {
-            return (String) ReflectionUtil.invokeMethodNoArgs(server, "getVersion", String.class);
+        for (String method : new String[]{"getVersion", "getServerVersion"}) {
+            try {
+                final Object result = ReflectionUtil.invokeMethodNoArgs(server, method, String.class);
+                if (result instanceof String) {
+                    return (String) result;
+                }
+            }
+            catch (Throwable ignore) {
+                // Continue with next method name.
+            }
         }
-        catch (Throwable t) {
-            return null;
-        }
+        return null;
     }
 
     /**
