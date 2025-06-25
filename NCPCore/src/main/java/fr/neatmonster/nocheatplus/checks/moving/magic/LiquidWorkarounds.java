@@ -48,9 +48,9 @@ public class LiquidWorkarounds {
         final PlayerMoveData pastMove1 = data.playerMoves.getSecondPastMove();
 
         if (yDistance >= 0.0) {
-            // TODO: liftOffEnvelope: refine conditions (general) , should be near water level.
-            // TODO: 1.5 high blocks ?
-            // TODO: Conditions seem warped.
+            // Note: liftOffEnvelope conditions might need refinement near water level.
+            // Note: 1.5 high blocks ?
+            // Note: Conditions seem warped.
             if (yDistance <= 0.5) {
 
                 // Decrease more than difference to baseSpeed.
@@ -67,8 +67,8 @@ public class LiquidWorkarounds {
                 if (!(data.liftOffEnvelope == LiftOffEnvelope.LIMIT_LIQUID && Double.isInfinite(Bridge1_13.getDolphinGraceAmplifier(from.getPlayer()))) 
                     && (
                         yDistance <= data.liftOffEnvelope.getMaxJumpGain(data.jumpAmplifier) 
-                        && !BlockProperties.isLiquid(from.getTypeIdAbove()) 
-                        || !to.isInLiquid() // TODO: impossible !?
+                        && !BlockProperties.isLiquid(from.getTypeIdAbove())
+                        || !to.isInLiquid() // Possibly impossible !?
                         || (thisMove.to.onGround || lastMove.toIsValid && lastMove.yDistance - yDistance >= 0.010 || to.isAboveStairs())
                     )) {
 
@@ -128,7 +128,7 @@ public class LiquidWorkarounds {
         // Otherwise, only if last move is available.
         else if (lastMove.toIsValid) {
             
-            // TODO: Are all these cases really for descending?
+            // Question: Are all these cases really for descending?
             // Falling into water, mid-speed (second move after diving in).
             if (yDistance > -0.9 && yDistance < lastMove.yDistance 
                 && Math.abs(yDistance - lastMove.yDistance) <= Magic.GRAVITY_MAX + Magic.GRAVITY_MIN 
@@ -156,8 +156,8 @@ public class LiquidWorkarounds {
             // In-water rough near-0-inversion from allowed speed to a negative amount, little more than allowed (magic -0.2 roughly).
             else if (lastMove.yDistance >= Magic.GRAVITY_MAX / 10.0 && lastMove.yDistance <= Magic.GRAVITY_MAX + Magic.GRAVITY_MIN / 2.0
                     && yDistance < 0.0 && yDistance > -2.0 * Magic.GRAVITY_MAX - Magic.GRAVITY_MIN / 2.0
-                    && to.isInLiquid() // TODO: Might skip the liquid check, though.
-                    && lastMove.from.inLiquid && lastMove.to.extraPropertiesValid && lastMove.to.inLiquid // TODO: in water only?
+                    && to.isInLiquid() // Might skip the liquid check, though.
+                    && lastMove.from.inLiquid && lastMove.to.extraPropertiesValid && lastMove.to.inLiquid // in water only?
                     ) {
                 return yDistance;
             }
@@ -180,7 +180,7 @@ public class LiquidWorkarounds {
                 return yDistance;
             }
         }
-        // TODO: Also DOWNSTREAM !?
+        // Note: Also DOWNSTREAM !?
         return null;
     }
 }
