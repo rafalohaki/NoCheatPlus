@@ -119,12 +119,14 @@ public class ReflectHelper {
             this.reflectMaterial = new ReflectMaterial(this.reflectBase);
             this.reflectWorld = new ReflectWorld(reflectBase, reflectMaterial, reflectBlockPosition);
             ReflectBlock reflectBlockLatest = null;
-            try {
-                reflectBlockLatest = new ReflectBlock(this.reflectBase, this.reflectBlockPosition,
-                        reflectMaterial, reflectWorld);
-            }
-            catch (Throwable t) {
-                // ignore - using ReflectBlockSix fallback
+            if (this.reflectBlockPosition != null) {
+                try {
+                    reflectBlockLatest = new ReflectBlock(this.reflectBase, this.reflectBlockPosition,
+                            reflectMaterial, reflectWorld);
+                }
+                catch (Throwable t) {
+                    // ignore - using ReflectBlockSix fallback
+                }
             }
             if (reflectBlockLatest == null) {
                 // More lenient constructor.
