@@ -138,7 +138,7 @@ public class ServerVersion {
                 GenericVersion.parseVersionDelimiters(lcServerVersion, "mcpc-plus-", "-"),
                 GenericVersion.parseVersionDelimiters(lcServerVersion, "git-bukkit-", "-r"),
                 GenericVersion.parseVersionDelimiters(lcServerVersion, "", "-r"),
-                // TODO: Other server mods + custom builds !?.
+                // Other server mods and custom builds can be added here.
         }) {
             if (candidate != null) {
                 return candidate;

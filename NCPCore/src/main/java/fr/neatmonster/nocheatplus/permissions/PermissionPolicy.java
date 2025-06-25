@@ -20,7 +20,7 @@ import fr.neatmonster.nocheatplus.utilities.StringUtil;
 
 public class PermissionPolicy {
 
-    // TODO: Consider IPermissionPolicy with read only access.
+    // Consider IPermissionPolicy with read-only access.
 
     /**
      * The default fetching policy for a permission entry. Note that further
@@ -262,7 +262,7 @@ public class PermissionPolicy {
     public boolean isPolicyEquivalent(final PermissionPolicy other) {
         return fetchingPolicy == other.fetchingPolicy 
                 && (fetchingPolicy != FetchingPolicy.INTERVAL || fetchingInterval == other.fetchingInterval)
-                // TODO: Flags: might ignore offline, in case world is set - doesn't seem right, though.
+                // Note: flags might ignore offline status when a world is set; this might not be correct.
                 && invalidationFlags == other.invalidationFlags;
     }
 
