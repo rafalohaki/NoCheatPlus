@@ -32,10 +32,10 @@ public class DataPacketFlying extends DataLocation {
         POS_LOOK;
     }
 
-    // TODO: Use MAX_VALUE for not set doubles/floats?
-    // TODO: Consider private + access methods.
-    // TODO: Consider AlmostBoolean for fault tolerance ?
-    // TODO: hashCode + equals.
+    // Consider using MAX_VALUE for unset doubles/floats.
+    // Access methods might be preferable over direct field access.
+    // AlmostBoolean could offer additional fault tolerance.
+    // hashCode and equals may be implemented.
 
     public final boolean onGround;
     public final boolean hasPos;
