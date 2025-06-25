@@ -36,6 +36,7 @@ import fr.neatmonster.nocheatplus.compat.BridgeEntityType;
 import fr.neatmonster.nocheatplus.compat.BridgeHealth;
 import fr.neatmonster.nocheatplus.compat.BridgePotionEffect;
 import fr.neatmonster.nocheatplus.compat.MCAccess;
+import fr.neatmonster.nocheatplus.logging.StaticLog;
 import fr.neatmonster.nocheatplus.utilities.PotionUtil;
 import fr.neatmonster.nocheatplus.utilities.ReflectionUtil;
 import fr.neatmonster.nocheatplus.utilities.map.BlockCache;

@@ -29,6 +29,7 @@ import fr.neatmonster.nocheatplus.compat.AlmostBoolean;
 import fr.neatmonster.nocheatplus.config.ConfPaths;
 import fr.neatmonster.nocheatplus.config.ConfigManager;
 import fr.neatmonster.nocheatplus.logging.Streams;
+import fr.neatmonster.nocheatplus.logging.StaticLog;
 import fr.neatmonster.nocheatplus.utilities.ReflectionUtil;
 import fr.neatmonster.nocheatplus.utilities.StringUtil;
 
