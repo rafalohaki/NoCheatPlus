@@ -26,9 +26,9 @@ import java.util.concurrent.ThreadLocalRandom;
  */
 public class PenaltyNode {
 
-    // TODO: Might switch to float for probability or not?
+    // Might switch to float for probability or not.
 
-    // TODO: Might add a parsing method (recursive).
+    // Might add a parsing method (recursive).
 
     /** The probability for this node to apply. */
     public final double probability;
@@ -104,8 +104,8 @@ public class PenaltyNode {
     protected void add(final IPenaltyList results) {
         if (penalty != null) {
             /*
-             * TODO: Consider abortOnApply taking effect here (typically this is
-             * a leaf, if penalty is not null, but that isn't enforced yet).
+             * Note: abortOnApply might also take effect here. Typically this is
+             * a leaf if penalty is not null, but that is not enforced yet.
              */
             penalty.addToPenaltyList(results);
         }
@@ -128,7 +128,7 @@ public class PenaltyNode {
         double floor = 0.0;
         for (final PenaltyNode childNode : childNodes) {
             final double nextFloor = floor + childNode.probability;
-            // TODO: Configurable catch-all amount.
+            // Configurable catch-all amount might be added.
             if (nextFloor >= ref || nextFloor >= 0.999) {
                 childNode.add(results);
                 return;

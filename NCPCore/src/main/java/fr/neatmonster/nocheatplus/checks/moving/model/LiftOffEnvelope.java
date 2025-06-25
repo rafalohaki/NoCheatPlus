@@ -24,14 +24,15 @@ public enum LiftOffEnvelope {
     /** Normal in-air lift off without any restrictions/specialties. */
     NORMAL(0.42, 1.35, 1.15, 6, true),
     /** Weak or no limit moving off liquid near ground. */
-    LIMIT_NEAR_GROUND(0.42, 1.35, 1.15, 6, false), // TODO: 0.385 / not jump on top of 1 high wall from water.
+    // 0.385 / not jump on top of 1 high wall from water.
+    LIMIT_NEAR_GROUND(0.42, 1.35, 1.15, 6, false),
     /** Simple calm water surface. */
     LIMIT_LIQUID(0.1, 0.27, 0.1, 3, false),
     /** Moving off water, having two in-air moves. Rather meant for 1.13+ clients but not necessarily */
     //LIMIT_SURFACE(0.1, 0.372, 0.1, 2, false),
     LIMIT_SURFACE(0.1, 1.16, 0.1, 4, false),
     //    /** Flowing water / strong(-est) limit. */
-    //    LIMIT_LIQUID_STRONG(...), // TODO
+    //    LIMIT_LIQUID_STRONG(...), // placeholder for stronger liquid limits
     /** No jumping at all (web). */
     NO_JUMP(0.0, 0.0, 0.0, 0, false),
     /** Like NO_JUMP, just to distinguish from being in web. */
@@ -131,7 +132,7 @@ public enum LiftOffEnvelope {
             // Note: The jumpAmplifier value is one higher than the MC level.
             if (jumpAmplifier < 10.0) {
                 // Classic.
-                // TODO: Can be confined more.
+                // This bound could be confined more precisely.
                 return maxJumpHeight + 0.6 + jumpAmplifier - 1.0;
             }
             else if (jumpAmplifier < 19){
@@ -142,7 +143,8 @@ public enum LiftOffEnvelope {
                 // Quadratic, with some amount of gravity counted in.
                 return 0.6 + (jumpAmplifier + 3.2) * (jumpAmplifier + 3.2) / 16.0 - (jumpAmplifier * (jumpAmplifier - 1.0) / 2.0) * (0.0625 / 2.0);
             }
-        } // TODO: < 0.0 ?
+        }
+        // Negative jump amplifiers are not handled.
         else {
             return maxJumpHeight;
         }
@@ -158,7 +160,8 @@ public enum LiftOffEnvelope {
     public int getMaxJumpPhase(double jumpAmplifier) {
         if (jumpEffectApplies && jumpAmplifier > 0.0) {
             return (int) Math.round((0.5 + jumpAmplifier) * (double) maxJumpPhase);
-        } // TODO: < 0.0 ?
+        }
+        // Negative jump amplifiers are not handled.
         else {
             return maxJumpPhase;
         }
