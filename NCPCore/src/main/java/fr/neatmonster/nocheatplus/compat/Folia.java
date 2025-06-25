@@ -16,7 +16,6 @@ package fr.neatmonster.nocheatplus.compat;
 
 import java.lang.reflect.Method;
 import java.util.concurrent.CompletableFuture;
-import java.util.concurrent.Executors;
 import java.util.function.Consumer;
 
 import org.bukkit.Bukkit;
@@ -28,7 +27,6 @@ import fr.neatmonster.nocheatplus.utilities.ReflectionUtil;
 import fr.neatmonster.nocheatplus.NCPAPIProvider;
 import fr.neatmonster.nocheatplus.logging.LogManager;
 import fr.neatmonster.nocheatplus.logging.Streams;
-import fr.neatmonster.nocheatplus.utilities.StringUtil;
 
 import org.bukkit.entity.Entity;
 import org.bukkit.event.player.PlayerTeleportEvent.TeleportCause;
@@ -48,31 +46,42 @@ public class Folia {
     }
 
     /**
-     * Run an async task, either with bukkit scheduler or Java
-     * @param plugin Plugin to assign for
-     * @param run Consumer that accepts an object or null, for Folia or Paper/Spigot respectively
-     * @return An int represent for task id when running on Paper/Spigot or Thread when on Folia or null if can't schedule
+     * Run an asynchronous task. Execution is always performed via the Bukkit or
+     * Folia scheduler.
+     *
+     * @param plugin plugin to assign for
+     * @param run consumer that accepts an object or {@code null}, for Folia or
+     *            Paper/Spigot respectively
+     * @return the scheduled task object or {@code null} if scheduling fails
      */
     public static Object runAsyncTask(Plugin plugin, Consumer<Object> run) {
         if (!isFoliaServer) {
-            return Bukkit.getScheduler().runTaskAsynchronously(plugin, () -> run.accept(null)).getTaskId();
+            return Bukkit.getScheduler().runTaskAsynchronously(plugin,
+                    () -> run.accept(null)).getTaskId();
         }
         //try {
-        //    Method getSchedulerMethod = ReflectionUtil.getMethodNoArgs(Server.class, "getAsyncScheduler", AsyncScheduler);
+        //    Method getSchedulerMethod =
+        //            ReflectionUtil.getMethodNoArgs(Server.class, "getAsyncScheduler", AsyncScheduler);
         //    Object asyncScheduler = getSchedulerMethod.invoke(Bukkit.getServer());
-
+        //
         //    Class<?> schedulerClass = asyncScheduler.getClass();
         //    Method executeMethod = schedulerClass.getMethod("runNow", Plugin.class, Consumer.class);
-
+        //
         //    Object taskInfo = executeMethod.invoke(asyncScheduler, plugin, run);
         //    return taskInfo;
         //}
         //catch (Exception e) {
             // Second attempt, should be happened during onDisable calling from BukkitLogNodeDispatcher
-            Thread thread = Executors.defaultThreadFactory().newThread(() -> run.accept(null));
-            if (thread == null) return null;
-            thread.start();
-            return thread;
+            try {
+                return Bukkit.getScheduler().runTaskAsynchronously(plugin,
+                        () -> run.accept(null));
+            } catch (Exception ex) {
+                LogManager logManager = NCPAPIProvider.getNoCheatPlusAPI().getLogManager();
+                logManager.warning(Streams.STATUS,
+                        "Failed to schedule async task: " + ex.getClass().getSimpleName());
+                logManager.warning(Streams.STATUS, ex);
+            }
+            return null;
         //}
     }
 
