@@ -23,6 +23,8 @@ import fr.neatmonster.nocheatplus.compat.cbreflect.reflect.ReflectBase;
 import fr.neatmonster.nocheatplus.compat.cbreflect.reflect.ReflectHelper.ReflectFailureException;
 import fr.neatmonster.nocheatplus.components.registry.feature.IPostRegisterRunnable;
 import fr.neatmonster.nocheatplus.utilities.ReflectionUtil;
+import fr.neatmonster.nocheatplus.utilities.DefensiveReflection;
+import fr.neatmonster.nocheatplus.compat.meta.BridgeCrossPluginLoader;
 
 /**
  * Utility to probe for cross-plugin issues, such as Player delegates.
@@ -39,21 +41,14 @@ public class BridgeCrossPlugin implements IBridgeCrossPlugin, IPostRegisterRunna
     private final Class<?> entityClass;
 
     public BridgeCrossPlugin() {
-        ReflectBase reflectBase = null;
-        try {
-            reflectBase = new ReflectBase();
-        }
-        catch (ReflectFailureException e2) {
-            // ignore - reflection helper not available
-        }
-        catch (RuntimeException e1) {
-            // ignore - reflection helper not available (includes NPE)
-        }
+        this(BridgeCrossPluginLoader.createReflectBase().orElse(null));
+    }
+
+    public BridgeCrossPlugin(final ReflectBase reflectBase) {
         if (reflectBase != null) {
             this.playerClass = getEntityClass(reflectBase, "Player");
             this.entityClass = getEntityClass(reflectBase, "Entity", "");
-        }
-        else {
+        } else {
             this.playerClass = null;
             this.entityClass = null;
         }
@@ -67,12 +62,13 @@ public class BridgeCrossPlugin implements IBridgeCrossPlugin, IPostRegisterRunna
         if (reflectBase.nmsPackageName == null || reflectBase.obcPackageName == null) {
             return null;
         }
-        Class<?> obcPlayer = ReflectionUtil.getClass(reflectBase.obcPackageName + ".entity.Craft" + obcSuffix);
-        Class<?> nmsPlayer = ReflectionUtil.getClass(reflectBase.nmsPackageName + ".Entity" + nmsSuffix);
+        Class<?> obcPlayer = DefensiveReflection.getClassOptional(
+                reflectBase.obcPackageName + ".entity.Craft" + obcSuffix).orElse(null);
+        Class<?> nmsPlayer = DefensiveReflection.getClassOptional(
+                reflectBase.nmsPackageName + ".Entity" + nmsSuffix).orElse(null);
         if (obcPlayer == null || nmsPlayer == null) {
             return null;
-        }
-        else {
+        } else {
             return obcPlayer;
         }
     }
