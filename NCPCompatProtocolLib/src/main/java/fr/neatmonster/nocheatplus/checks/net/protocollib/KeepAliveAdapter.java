@@ -77,9 +77,11 @@ public class KeepAliveAdapter extends BaseAdapter {
         final NetConfig cc = pData.getGenericInstance(NetConfig.class);
 
         // Run check(s).
-        // Consider matching against outgoing keep alive requests.
-        // Future: model actual packet sequences (flying vs. keep alive vs. request/ping).
-        // Integration with god-mode check or trigger reset could be improved.
+        // Consider matching incoming keep alive responses against outgoing
+        // requests.
+        // Model actual packet sequences better (flying vs. keep alive vs.
+        // request/ping).
+        // Better integrate with the god-mode check / trigger reset ndt.
         if (frequencyCheck.isEnabled(player, pData) 
                 && frequencyCheck.check(player, time, data, cc, pData)) {
             event.setCancelled(true);
@@ -88,7 +90,7 @@ public class KeepAliveAdapter extends BaseAdapter {
 
     @Override
     public void onPacketSending(PacketEvent event) {
-        // Could detect unsolicited keep alive packets and allow cancellation.
+        // Maybe detect if a keep alive wasn't requested and allow cancelling.
     }
 
 }

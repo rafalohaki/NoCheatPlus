@@ -84,7 +84,7 @@ public abstract class CheckTypeTree<N extends CheckTypeTreeNode<N>> {
 
     public static interface Visitor<N extends CheckTypeTreeNode<N>> {
         /*
-         * TODO: Not so sure this really is far reaching, due to performance
+         * Note: not so sure this really is far reaching, due to performance
          * questions: With concurrent access, a stored instance doesn't do, so
          * we'll keep checking for the primary thread and either use the stored
          * one or create new ones. Thinkable direction could be to use stored

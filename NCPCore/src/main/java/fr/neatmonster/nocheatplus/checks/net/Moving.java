@@ -81,7 +81,7 @@ public class Moving extends Check {
         boolean cancel = false;
         // Early return tests, for the case the player has teleported somewhere/respawned/joined too recently.
         final long now = System.currentTimeMillis();
-        // TODO: This still triggers on join if chunk isn't loaded and the player is sinking...
+        // NOTE: can still trigger on join if chunk isn't loaded and the player is sinking
         if (now - timeJoin < 20000 || now - timeTeleport < 5000 || now - timeRespawn < 5000 || !player.isOnline()) {
             return false;
         }
