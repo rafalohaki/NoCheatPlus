@@ -1262,78 +1262,89 @@ public class CreativeFly extends Check {
      * @return horizontal and vertical velocity adjustments
      */
     public static VelocityAdjustment guessElytraVelocityAmount(final MoveCheckContext context) {
+        if (context == null) {
+            return new VelocityAdjustment(0.0, 0.0);
+        }
+
         final Player player = context.player();
         final PlayerMoveData thisMove = context.thisMove();
         final PlayerMoveData lastMove = context.lastMove();
         final MovingData data = context.data();
+
+        if (player == null || thisMove == null || lastMove == null || data == null) {
+            return new VelocityAdjustment(0.0, 0.0);
+        }
+
         final Location useLoc = new Location(null, 0, 0, 0);
         useLoc.setYaw(thisMove.to.getYaw());
         useLoc.setPitch(thisMove.to.getPitch());
-        final double speed = Bridge1_13.getSlowfallingAmplifier(player) >= 0.0 ? 0.01 : 0.08;
-        double allowedElytraYDistance = 0.0;
-        double allowedElytraHDistance = 0.0;
-        final double lastHdist = lastMove.toIsValid ? lastMove.hDistance : 0.0;
         final Vector lookvec = useLoc.getDirection();
         final float radPitch = (float) Math.toRadians(thisMove.to.getPitch());
-        allowedElytraYDistance = lastMove.elytrafly ? lastMove.yAllowedDistance : lastMove.toIsValid ? lastMove.yDistance : 0.0;
-        if (Math.abs(allowedElytraYDistance) < 0.003D) allowedElytraYDistance = 0.0D;
         final double xzlength = Math.sqrt(lookvec.getX() * lookvec.getX() + lookvec.getZ() * lookvec.getZ());
-        double f4 = Math.cos(radPitch);
-        f4 = f4 * f4;
 
-        allowedElytraYDistance += speed * (-1.0D + f4 * 0.75D);
+        final double speed = getSlowFallingSpeed(player);
+        double allowedElytraYDistance = computeAllowedYDistance(lastMove);
+        double allowedElytraHDistance = 0.0;
+        final double lastHdist = lastMove.toIsValid ? lastMove.hDistance : 0.0;
+        double pitchFactor = Math.cos(radPitch);
+        pitchFactor *= pitchFactor;
+
+        allowedElytraYDistance += speed * (-1.0D + pitchFactor * 0.75D);
         double x = lastMove.to.getX() - lastMove.from.getX();
         double z = lastMove.to.getZ() - lastMove.from.getZ();
-        
+
         if (allowedElytraYDistance < 0.0D && xzlength > 0.0) {
-            final double d = allowedElytraYDistance * -0.1 * f4;
+            final double d = allowedElytraYDistance * -0.1 * pitchFactor;
             x += lookvec.getX() * d / xzlength;
             z += lookvec.getZ() * d / xzlength;
             allowedElytraYDistance += d;
         }
-        
-        // Look up
+
         if (radPitch < 0.0F) {
-            // For compatibility
             if (thisMove.to.getPitch() == -90f
                 && isNear(thisMove.yDistance, allowedElytraYDistance * Magic.FRICTION_MEDIUM_ELYTRA_AIR, 0.01)) {
                 allowedElytraHDistance += 0.01;
-            }
-            else if (xzlength > 0.0) {
+            } else if (xzlength > 0.0) {
                 final double d = lastHdist * -Math.sin(radPitch) * 0.04;
                 x -= lookvec.getX() * d / xzlength;
                 z -= lookvec.getZ() * d / xzlength;
                 allowedElytraYDistance += d * 3.2;
-            } 
+            }
         }
 
         if (xzlength > 0.0) {
             x += (lookvec.getX() / xzlength * lastHdist - x) * 0.1D;
             z += (lookvec.getZ() / xzlength * lastHdist - z) * 0.1D;
         }
-        
+
+        double resultHDistance = Double.NaN;
+
         if (data.fireworksBoostDuration > 0) {
             allowedElytraYDistance = Math.abs(thisMove.yDistance) < 2.0 ?
                     thisMove.yDistance : lastMove.toIsValid ? lastMove.yDistance : 0;
-            if (Math.round(data.fireworksBoostTickNeedCheck / 4) > data.fireworksBoostDuration 
-                && thisMove.hDistance < Math.sqrt(x*x + z*z)) {
-                return new VelocityAdjustment(Math.sqrt(x*x + z*z), allowedElytraYDistance);
+            if (Math.round(data.fireworksBoostTickNeedCheck / 4) > data.fireworksBoostDuration
+                && thisMove.hDistance < Math.sqrt(x * x + z * z)) {
+                resultHDistance = Math.sqrt(x * x + z * z);
+            } else {
+                x *= 0.99;
+                z *= 0.99;
+                x += lookvec.getX() * 0.1D + (lookvec.getX() * 1.5D - x) * 0.5D;
+                z += lookvec.getZ() * 0.1D + (lookvec.getZ() * 1.5D - z) * 0.5D;
+
+                if (thisMove.hDistance < lastMove.hAllowedDistance * 0.994) {
+                    resultHDistance = lastMove.hAllowedDistance * 0.994;
+                } else {
+                    allowedElytraHDistance += 0.2;
+                }
             }
-
-            x *= 0.99;
-            z *= 0.99;
-            x += lookvec.getX() * 0.1D + (lookvec.getX() * 1.5D - x) * 0.5D;
-            z += lookvec.getZ() * 0.1D + (lookvec.getZ() * 1.5D - z) * 0.5D;
-
-            if (thisMove.hDistance < lastMove.hAllowedDistance * 0.994) {
-                return new VelocityAdjustment(lastMove.hAllowedDistance * 0.994, allowedElytraYDistance);
-            } 
-            else allowedElytraHDistance += 0.2;
         }
 
-        // Adjust false
-        allowedElytraHDistance += Math.sqrt(x*x + z*z) + 0.1;
-        return new VelocityAdjustment(allowedElytraHDistance, allowedElytraYDistance);
+        if (Double.isNaN(resultHDistance)) {
+            allowedElytraHDistance += Math.sqrt(x * x + z * z) + 0.1;
+            resultHDistance = allowedElytraHDistance;
+        }
+
+        return new VelocityAdjustment(resultHDistance, allowedElytraYDistance);
     }
 
 
@@ -1343,6 +1354,23 @@ public class CreativeFly extends Check {
     */
     private boolean isCollideWithHB(PlayerLocation from) {
         return (from.getBlockFlags() & BlockFlags.F_STICKY) != 0;
+    }
+
+    private static double computeAllowedYDistance(PlayerMoveData lastMove) {
+        if (lastMove == null) return 0.0;
+        double allowed = lastMove.elytrafly ? lastMove.yAllowedDistance
+                : lastMove.toIsValid ? lastMove.yDistance : 0.0;
+        if (Math.abs(allowed) < 0.003D) {
+            allowed = 0.0D;
+        }
+        return allowed;
+    }
+
+    private static double getSlowFallingSpeed(Player player) {
+        if (player == null) {
+            return 0.08;
+        }
+        return Bridge1_13.getSlowfallingAmplifier(player) >= 0.0 ? 0.01 : 0.08;
     }
 
     // --- Helper methods split from hDist -------------------------------------------------
