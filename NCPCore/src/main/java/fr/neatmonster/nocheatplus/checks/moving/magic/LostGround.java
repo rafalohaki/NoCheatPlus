@@ -62,9 +62,9 @@ public class LostGround {
                                      final double hDistance, final double yDistance, final boolean sprinting, 
                                      final PlayerMoveData lastMove, final MovingData data, final MovingConfig cc, 
                                      final BlockChangeTracker blockChangeTracker, final Collection<String> tags) {
-        // TODO: Regroup with appropriate conditions (toOnGround first?).
-        // TODO: Some workarounds allow step height (0.6 on MC 1.8).
-        // TODO: yDistance limit does not seem to be appropriate.
+        // Consider regrouping conditions with toOnGround first.
+        // Some workarounds allow step height (0.6 on MC 1.8).
+        // The current yDistance limit might not be appropriate.
         // Temporary let it here
         data.snowFix = (from.getBlockFlags() & BlockFlags.F_HEIGHT_8_INC) != 0;
         if (yDistance >= -0.7 && yDistance <= Math.max(cc.sfStepHeight, LiftOffEnvelope.NORMAL.getMaxJumpGain(data.jumpAmplifier) + 0.174)) {
@@ -87,7 +87,7 @@ public class LostGround {
         else if (yDistance < -0.7) {
 
             // Clearly descending.
-            // TODO: Might want to remove this one.
+            // Candidate for removal in future revisions.
             if (lastMove.toIsValid && hDistance <= 0.5) {
                 if (lostGroundFastDescend(player, from, to, hDistance, yDistance, sprinting, lastMove, data, cc, tags)) {
                     return true;
@@ -107,11 +107,11 @@ public class LostGround {
     private static boolean lostGroundPastState(final Player player, final PlayerLocation from, final PlayerLocation to, 
                                                final MovingData data, final MovingConfig cc, final BlockChangeTracker blockChangeTracker, 
                                                final Collection<String> tags) {
-        // TODO: Heuristics.
-        // TODO: full y-move at from-xz (!).
+        // Requires additional heuristics.
+        // Consider performing a full y-move at from-xz.
         final int tick = TickTask.getTick();
         if (from.isOnGroundOpportune(cc.yOnGround, 0L, blockChangeTracker, data.blockChangeRef, tick)) {
-            // TODO: Not sure with setBackSafe here (could set back a hundred blocks on parkour).
+            // Unsure if setBackSafe is appropriate here; it could move players far on parkour.
             return applyLostGround(player, from, false, data.playerMoves.getCurrentMove(), data, "past", tags);
         }
         return false;
@@ -136,8 +136,8 @@ public class LostGround {
                                             final boolean sprinting, final PlayerMoveData lastMove, final MovingData data, final MovingConfig cc, final Collection<String> tags) {
 
         final PlayerMoveData thisMove = data.playerMoves.getCurrentMove();
-        // Micro lost ground, appear when respawn, lantern
-        // TODO: hDistance is to confine, need to test
+        // Micro lost ground, appears when respawn or using lanterns
+        // hDistance is to confine; needs testing
         if (hDistance <= 0.03 && from.isOnGround(0.03)) {
             return applyLostGround(player, from, true, thisMove , data, "micro", tags);
         }
@@ -176,9 +176,9 @@ public class LostGround {
                     }
                 }
 
-                // Noob tower (moving up placing blocks underneath). Rather since 1.9: player jumps off with 0.4 speed but ground within 0.42.
-                // TODO: Confine by actually having placed a block nearby.
-                // TODO: Jump phase can be 6/7 - also confine by typical max jump phase (!)
+                // Noob tower (moving up placing blocks underneath). Since 1.9 a player jumps off with 0.4 speed but ground within 0.42.
+                // Should confine by actually having placed a block nearby.
+                // Jump phase can be 6/7 - confine by typical max jump phase.
                 final double maxJumpGain = data.liftOffEnvelope.getMaxJumpGain(data.jumpAmplifier);
                 if (
                         maxJumpGain > yDistance 
@@ -197,7 +197,7 @@ public class LostGround {
                                 && noobTowerStillCommon(to, yDistance)
                                 )
                         ) {
-                    // TODO: Ensure set back is slightly lower, if still on ground.
+                    // Ensure set back is slightly lower, if still on ground.
                     // setBackSafe: false to prevent a lowjump due to the setback reset.
                     return applyLostGround(player, from, false, thisMove, data, "nbtwr", tags);
                 }
@@ -206,7 +206,7 @@ public class LostGround {
             // Could step up (but might move to another direction, potentially).
             if (lastMove.yDistance < 0.0) { 
                 // Generic could step.
-                // TODO: Possibly confine margin depending on side, moving direction (see client code).
+                // Margin might be confined depending on side and moving direction.
                 if (from.isOnGround(1.0) 
                     && BlockProperties.isOnGroundShuffled(to.getBlockCache(), from.getX(), from.getY() + cc.sfStepHeight, from.getZ(), to.getX(), to.getY(), to.getZ(), 0.1 + from.getBoxMarginHorizontal(), to.getyOnGround(), 0.0)) {
                     return applyLostGround(player, from, false, thisMove, data, "couldstep", tags);
@@ -214,7 +214,7 @@ public class LostGround {
 
                 // Close by ground miss (client side blocks y move, but allows h move fully/mostly, missing the edge on server side).
                 // Possibly confine by more criteria.
-                if (!to.isOnGround()) { // TODO: Note, that there may be cases with to on ground (!).
+                if (!to.isOnGround()) { // Note that there may be cases with "to" on ground.
                     // (Use covered area to last from.)
                     if (lostGroundEdgeAsc(player, from.getBlockCache(), from.getWorld(), from.getX(), from.getY(), from.getZ(), from.getBoxMarginHorizontal(), from.getyOnGround(), lastMove, data, "asc1", tags, from.getMCAccess())) {
                         return true;
@@ -222,8 +222,8 @@ public class LostGround {
 
                     // Special cases: similar to couldstep, with 0 y-distance but slightly above any ground nearby (no micro move!).
                     if (yDistance == 0.0 && lastMove.yDistance <= -0.1515 && (hDistance <= lastMove.hDistance * 1.1)) {
-                        // TODO: Confining in x/z direction in general: should detect if collided in that direction (then skip the x/z dist <= last time).
-                        // TODO: Code duplication with edgeasc7 below.
+                        // Confining in x/z direction in general should detect if collided in that direction (then skip the x/z dist <= last time).
+                        // Code duplication with edgeasc7 below.
                         /*
                          * xzMargin 0.15: equipped end portal frame (observed
                          * and supposedly fixed on MC 1.12.2) - might use an
@@ -259,7 +259,7 @@ public class LostGround {
      * @return
      */
     private static boolean noobTowerStillCommon(final PlayerLocation to, final double yDistance) {
-        // TODO: Block recently placed underneath (xz box with 0.025 down, Direction.NONE).
+        // Evaluate if a block was recently placed underneath (xz box with 0.025 down, Direction.NONE).
         return yDistance < 0.025 && to.getY() - to.getBlockY() < 0.025
                && to.isOnGround(0.025, Bridge1_17.hasLeatherBootsOn(to.getPlayer()) ? 0 : BlockFlags.F_POWDERSNOW);
     }
@@ -286,7 +286,7 @@ public class LostGround {
                                           final Collection<String> tags) {
 
         if (lastMove.yDistance <= -0.23 && lastMove.hDistance > 0.0 && lastMove.yDistance < -0.3) {
-            // TODO: Code duplication with edgeasc5 above.
+            // Duplicated logic with edgeasc5 above.
             if (lostGroundEdgeAsc(player, from.getBlockCache(), to.getWorld(), to.getX(), to.getY(), to.getZ(), from.getX(), from.getY(), from.getZ(), hDistance, to.getBoxMarginHorizontal(), 0.3, data, "asc7", tags, from.getMCAccess())) {
                 return true;
             }
@@ -294,7 +294,7 @@ public class LostGround {
         else if ((lastMove.yDistance == 0.0 && lastMove.touchedGround || lastMove.yDistance < 0.0)
                 && data.liftOffEnvelope.getMaxJumpGain(data.jumpAmplifier) > yDistance
                 && noobTowerStillCommon(to, yDistance)) {
-            // TODO: Ensure set back is slightly lower, if still on ground.
+            // Ensure set back is slightly lower, if still on ground.
             final PlayerMoveData thisMove = data.playerMoves.getCurrentMove();
             // setBackSafe: false to prevent a lowjump due to the setback reset.
             return applyLostGround(player, from, false, thisMove, data, "nbtwr", tags);
@@ -372,7 +372,7 @@ public class LostGround {
             fMin = Math.min(fMin, hDistance2 / Math.abs(z2));
         }
 
-        // TODO: Further / more precise ?
+        // Could be extended to be more precise.
         // Third: calculate end points.
         x2 = fMin * x2 + x1;
         z2 = fMin * z2 + z1;
@@ -380,7 +380,7 @@ public class LostGround {
         // Finally test for ground.
         // (We don't add another xz-margin here, as the move should cover ground.)
         if (BlockProperties.isOnGroundShuffled(blockCache, x1, y1, z1, x2, y1 + (data.snowFix ? 0.125 : 0.0), z2, boxMarginHorizontal + (data.snowFix ? 0.1 : 0.0), yOnGround, 0.0)) {
-            // TODO: data.fromY for set back is not correct, but currently it is more safe (needs instead: maintain a "distance to ground").
+            // data.fromY for set back is not correct, but currently it is more safe; ideally maintain a "distance to ground".
             return applyLostGround(player, new Location(world, x2, y2, z2), true, data.playerMoves.getCurrentMove(), data, "edge" + tag, tags, mcAccess);
         } 
         else {
@@ -406,8 +406,8 @@ public class LostGround {
      * @return
      */
     private static boolean lostGroundDescend(final Player player, final PlayerLocation from, final PlayerLocation to, final double hDistance, final double yDistance, final boolean sprinting, final PlayerMoveData lastMove, final MovingData data, final MovingConfig cc, final Collection<String> tags) {
-        // TODO: re-organize for faster exclusions (hDistance, yDistance).
-        // TODO: more strict conditions 
+        // Reorganize for faster exclusions based on hDistance and yDistance.
+        // Conditions could be made more strict.
         final PlayerMoveData thisMove = data.playerMoves.getCurrentMove();
         final double setBackYDistance = to.getY() - data.getSetBackY();
         final double setBackYMargin = setBackYDistance - LiftOffEnvelope.NORMAL.getMaxJumpHeight(data.jumpAmplifier);
@@ -416,13 +416,13 @@ public class LostGround {
         // Note: checking loc should make sense, rather if loc is higher than from?
         if (yDistance < 0.0 && !to.isOnGround() && from.isOnGround(from.getY() - to.getY() + 0.001)) {
             // Test for passability of the entire box, roughly from feet downwards.
-            // TODO: Efficiency with Location instances.
-            // TODO: Full bounds check (!).
+            // Efficiency with Location instances could be improved.
+            // Full bounds check might be necessary.
             final Location ref = from.getLocation();
             ref.setY(to.getY());
-            // TODO: passable test is obsolete with PassableAxisTracing.
+            // Passable test is obsolete with PassableAxisTracing.
             if (Passable.isPassable(from.getLocation(), ref)) {
-                // TODO: Needs new model (store detailed on-ground properties).
+                // Needs new model (store detailed on-ground properties).
                 return applyLostGround(player, from, false, thisMove, data, "vcollide", tags);
             }
         }
@@ -435,7 +435,7 @@ public class LostGround {
                    
             // Check for sprinting down blocks etc.
             if (lastMove.yDistance <= yDistance && setBackYDistance < 0 && !to.isOnGround()) {
-                // TODO: setbackydist: <= - 1.0 or similar
+                // Consider using setbackYDist <= -1.0 or similar.
                 // NOTE: Doesn't seem to be relevant with speed potions.
                 if (from.isOnGround(0.6, 0.4, 0.0, 0L)) {
                     // Temporary "fix". (Not so temporary. It's been 6 years... :))
@@ -450,7 +450,7 @@ public class LostGround {
                 && setBackYDistance > 1.0 && setBackYDistance < Math.max(0.0, 1.5 + 0.2 * data.jumpAmplifier) 
                 && !to.isOnGround()) {
                 
-                // TODO: confine by block types ?
+                // Possibly confine by block types.
                 if (from.isOnGround(0.25, 0.4, 0, 0L)) {
                     return applyLostGround(player, from, false, thisMove, data, "ministep", tags); // Maybe set to false to prevent setback resetting at the step point, which will cause a lowjump.
                 }
@@ -459,7 +459,7 @@ public class LostGround {
 
         // Lost ground while falling onto/over edges of blocks.
         if (yDistance < 0 && hDistance <= 1.5 && lastMove.yDistance < 0.0 && yDistance > lastMove.yDistance && !to.isOnGround()) {
-            // TODO: yDistance <= 0 might be better.
+            // yDistance <= 0 might be better.
             if (from.isOnGround(0.5, 0.2, 0) || to.isOnGround(0.5, Math.min(0.2, 0.01 + hDistance), Math.min(0.1, 0.01 + -yDistance))) {
                 return applyLostGround(player, from, true, thisMove, data, "edgedesc", tags);
             }
@@ -486,14 +486,14 @@ public class LostGround {
      * @return
      */
     private static boolean lostGroundFastDescend(final Player player, final PlayerLocation from, final PlayerLocation to, final double hDistance, final double yDistance, final boolean sprinting, final PlayerMoveData lastMove, final MovingData data, final MovingConfig cc, final Collection<String> tags) {
-        // TODO: re-organize for faster exclusions (hDistance, yDistance).
-        // TODO: more strict conditions 
+        // Reorganize for faster exclusions based on hDistance and yDistance.
+        // More strict conditions might be needed.
         // Lost ground while falling onto/over edges of blocks.
         if (yDistance > lastMove.yDistance && !to.isOnGround()) {
-            // TODO: yDistance <= 0 might be better.
-            // TODO: stairs ?
-            // TODO: Can it be safe to only check to with raised margin ? [in fact should be checked from higher yMin down]
-            // TODO: Interpolation method (from to)?
+            // yDistance <= 0 might be better.
+            // Evaluate handling of stairs.
+            // Determine if checking with a raised margin is safe; ideally check from higher yMin downward.
+            // Consider using an interpolation method between from and to.
             if (from.isOnGround(0.5, 0.2, 0) || to.isOnGround(0.5, Math.min(0.3, 0.01 + hDistance), Math.min(0.1, 0.01 + -yDistance))) {
                 // (Usually yDistance should be -0.078)
                 return applyLostGround(player, from, true, data.playerMoves.getCurrentMove(), data, "fastedge", tags);

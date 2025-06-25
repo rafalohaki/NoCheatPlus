@@ -163,22 +163,22 @@ public class WorldData implements IWorldData {
          * @param rawConfiguration
          */
         void update(final ConfigFile rawConfiguration) {
-            // Consider a single-pass update for all nodes
+            // NOTE: Consider using a multi update method walking all nodes only once.
             updateActivation(rawConfiguration, true);
             updateDebug(rawConfiguration, true);
             updateLag(rawConfiguration, true);
-            // Additional configurations may be updated here
+            // NOTE: Handle contained configurations.
         }
 
         /**
          * Update to activation states.
          */
         void update() {
-            // Consider a single-pass update for all nodes
+            // NOTE: Consider using a multi update method walking all nodes only once.
             updateActivation(true);
             updateDebug(true);
             updateLag(true);
-            // Additional configurations may be updated here
+            // NOTE: Handle contained configurations.
         }
 
         @SuppressWarnings("unchecked")
@@ -289,7 +289,7 @@ public class WorldData implements IWorldData {
 
     WorldData(final String worldName, final WorldData parent, 
             final IFactoryOneRegistry<WorldFactoryArgument> factoryRegistry) {
-        // Evaluate if implementing ILockable makes sense
+        // NOTE: Evaluate using ILockable.
         this.parent = parent;
         this.worldNameLowerCase = worldName == null ? null : worldName.toLowerCase(); // Locale.ENGLISH ?
         this.factoryRegistry = factoryRegistry;
@@ -318,7 +318,7 @@ public class WorldData implements IWorldData {
         }
         // Force update (custom overrides might be persistent, just not on object creation).
         checkTypeTree.getNode(CheckType.ALL).update();
-        // Child data should also be updated if present
+        // NOTE: Consider behavior if children exist.
     }
 
     /**
@@ -327,8 +327,8 @@ public class WorldData implements IWorldData {
      */
     void addChild(WorldData childData) {
         /*
-         * Locking is optional; if WorldDataManager methods are not called
-         * from here, an additional lock is feasible.
+         * NOTE: Locking or not. -> if we never call WorldDataManager.something
+         * from in here, an extra lock is feasible anyway.
          */
         this.children.add(childData);
     }
@@ -339,8 +339,8 @@ public class WorldData implements IWorldData {
      */
     void removeChild(WorldData childData) {
         /*
-         * Locking is optional; if WorldDataManager methods are not called
-         * from here, an additional lock is feasible.
+         * NOTE: Locking or not. -> if we never call WorldDataManager.something
+         * from in here, an extra lock is feasible anyway.
          */
         this.children.remove(childData);
     }
@@ -354,7 +354,7 @@ public class WorldData implements IWorldData {
     }
 
     void update(final ConfigFile rawConfiguration) {
-        // Consider locking here
+        // NOTE: Confirm locking requirements.
         this.rawConfiguration = rawConfiguration;
         if (this.parent != null && rawConfiguration != this.parent.rawConfiguration) {
             this.parent.removeChild(this);
@@ -362,27 +362,27 @@ public class WorldData implements IWorldData {
             this.checkTypeTree.getNode(CheckType.ALL).setConfigOverrideType(OverrideType.SPECIFIC);
         }
         this.update();
-        // Should this propagate to children?
+        // NOTE: Propagation to children might be necessary.
     }
 
     void update() {
-        // Consider locking here
-        // Distinction between updateByConfig and update() might be useful
+        // NOTE: Confirm locking requirements.
+        // NOTE: Distinguish updateByConfig and update().
         checkTypeTree.getNode(CheckType.ALL).update(rawConfiguration);
-        // Should this propagate to children?
+        // NOTE: Propagation to children might be necessary.
     }
 
     @Override
     public void overrideCheckActivation(final CheckType checkType, 
             final AlmostBoolean active, final OverrideType overrideType, 
             final boolean overrideChildren) {
-        // Implementation should define a locking concept
+        // NOTE: Concept for locking needs review.
         checkTypeTree.getNode(checkType).overrideCheckActivation(
                 active, overrideType, overrideChildren);
-        // Should this propagate to children?
+        // NOTE: Propagation to children might be necessary.
     }
 
-    // overrideDebug not implemented
+    // NOTE: overrideDebug?
 
     @Override
     public ConfigFile getRawConfiguration() {

@@ -126,7 +126,7 @@ public abstract class MiniListenerRegistry<EB, P> {
      * @param otherAnchor
      */
     public void inheritAttached(Object registeredAnchor, Object otherAnchor) {
-        // TODO: More signatures (Collection/Array).
+        // More signatures (Collection/Array) might be useful.
         if (registeredAnchor == null) {
             throw new NullPointerException("Must not be null: registeredAnchor");
         } else if (otherAnchor == null) {
@@ -137,7 +137,7 @@ public abstract class MiniListenerRegistry<EB, P> {
         }
         Set<MiniListener<? extends EB>> attached = attachments.get(registeredAnchor);
         if (attached == null) {
-            // TODO: throw something or return value or ignore?
+            // Decide whether to throw, return a value or simply ignore.
         } else {
             Set<MiniListener<? extends EB>> attached2 = attachments.computeIfAbsent(otherAnchor, k -> new HashSet<>());
             attached2.addAll(attached);
@@ -150,7 +150,7 @@ public abstract class MiniListenerRegistry<EB, P> {
      * @param anchor
      */
     public void unregisterAttached(Object anchor) {
-        // TODO: Consider more signatures for Collection + Array.
+        // Consider adding more signatures for Collection and Array.
         Set<MiniListener<? extends EB>> attached = attachments.get(anchor);
         if (attached != null) {
             for (MiniListener<? extends EB> listener : new ArrayList<MiniListener<? extends EB>>(attached)) {
@@ -161,7 +161,7 @@ public abstract class MiniListenerRegistry<EB, P> {
 
     @SuppressWarnings("unchecked")
     public <E extends EB> void unregister(MiniListener<E> listener) {
-        // TODO: Consider allowing to pinpoint by priority?
+        // Consider allowing to pinpoint by priority.
         /*
          * Somewhat inefficient, as all attachments and all priority levels are checked,
          * this might/should be improved by adding extra mappings (consider check class by reflection).
@@ -172,7 +172,7 @@ public abstract class MiniListenerRegistry<EB, P> {
                 try {
                     ((MiniListenerNode<E, P>) node).removeMiniListener(listener);
                 } catch (ClassCastException e) {
-                    // TODO: Log ?
+                    // Potentially log this occurrence.
                 }
             }
         }
@@ -181,7 +181,7 @@ public abstract class MiniListenerRegistry<EB, P> {
         while (it.hasNext()) {
             Entry<Object, Set<MiniListener<? extends EB>>> entry = it.next();
             Set<MiniListener<? extends EB>> attached = entry.getValue();
-            attached.remove(listener); // TODO: can throw?
+            attached.remove(listener); // Check if this can throw.
             if (attached.isEmpty()) {
                 it.remove();
             }
@@ -206,7 +206,7 @@ public abstract class MiniListenerRegistry<EB, P> {
         Class<?> listenerClass = listener.getClass();
         Method method = ReflectionUtil.getMethod(listenerClass, "onEvent", eventClass);
         if (method != null) {
-            // TODO: otherwise throw earlier.
+            // Otherwise, consider throwing earlier.
             if (method.isAnnotationPresent(RegisterMethodWithOrder.class)) {
                 return new RegistrationOrder(method.getAnnotation(RegisterMethodWithOrder.class));
             }
@@ -258,18 +258,19 @@ public abstract class MiniListenerRegistry<EB, P> {
      */
     public <E extends EB> void register(Class<E> eventClass, MiniListener<E> listener, 
             P basePriority, RegistrationOrder defaultOrder, boolean ignoreCancelled) {
-        // TODO: Can/should the eventClass be read from listener parameters [means constraints on MiniListener?] ?
+        // Can or should the eventClass be read from listener parameters
+        // (meaning constraints on MiniListener)?
         final RegistrationOrder order = getRegistrationOrder(eventClass, listener, defaultOrder);
 
-        // TODO: Accept RegisterEventsWithOrder (and RegisterWithOrder) with listener.
-        // TODO: Accept IRegisterWithOrder with listener.
+        // Accept RegisterEventsWithOrder (and RegisterWithOrder) with listener.
+        // Accept IRegisterWithOrder with listener.
         Map<P, MiniListenerNode<? extends EB, P>> prioMap = classMap.computeIfAbsent(eventClass, k -> new HashMap<>());
-        // TODO: Concept for when to cast.
+        // Concept for when to cast.
         @SuppressWarnings("unchecked")
         MiniListenerNode<E, P> node = (MiniListenerNode<E, P>) prioMap.get(basePriority);
         if (node == null) {
             node = nodeFactory.newNode(eventClass, basePriority);
-            // TODO: Consider try-catch.
+            // Consider using try-catch.
             registerNode(eventClass, node, basePriority);
             prioMap.put(basePriority, node);
         }

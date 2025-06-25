@@ -36,8 +36,6 @@ import fr.neatmonster.nocheatplus.compat.Folia;
 import fr.neatmonster.nocheatplus.logging.StaticLog;
 import fr.neatmonster.nocheatplus.players.DataManager;
 import fr.neatmonster.nocheatplus.utilities.ds.count.ActionFrequency;
-
-// TODO: Auto-generated Javadoc
 /**
  * Task to run every tick, to update permissions and execute actions, and for lag measurement.
  * 
@@ -77,7 +75,7 @@ public class TickTask implements Runnable {
     private static final ReentrantLock improbableLock = new ReentrantLock();
 
     /** Lock for delayedActions. */
-    private static final Object actionLock = new Object(); // TODO: Use a ReentrantLock?
+    private static final Object actionLock = new Object();
     /** Actions to execute. */
     private static List<ViolationData> delayedActions = new LinkedList<ViolationData>();
 
@@ -156,10 +154,9 @@ public class TickTask implements Runnable {
             for (final Entry<UUID, ImprobableUpdateEntry> entry : updateMap.entrySet()) {
                 final Player player = DataManager.getPlayer(entry.getKey());
                 if (player != null) {
-                    Improbable.feed(player, entry.getValue().addLevel, 
+                    Improbable.feed(player, entry.getValue().addLevel,
                             System.currentTimeMillis(), DataManager.getPlayerData(player));
                 }
-                // TODO: else: offline update or warn?
             }
         }
     }
@@ -222,9 +219,8 @@ public class TickTask implements Runnable {
     public static void addTickListener(TickListener listener) {
         synchronized (tickListeners) {
             if (locked) {
-                return; // TODO: Boolean return value ?
+                return;
             }
-            // TODO: Consider sorting (set + lazily generated sorted array).
             if (!tickListeners.contains(listener)) {
                 tickListeners.add(listener);
             }
@@ -342,7 +338,6 @@ public class TickTask implements Runnable {
             return 1f;
         }
         final int add = ms > 0 && (ms % 50) == 0 ? 0 : 1;
-        // TODO: Consider: Put "exact" block here, subtract a tick if appropriate? 
         final int totalTicks = Math.min(tick, add + (int) (ms / 50));
         final int maxTick = Math.min(lagMaxTicks, totalTicks);
         long sum = tickDurations[maxTick - 1];
@@ -367,7 +362,6 @@ public class TickTask implements Runnable {
                 sum += passed;
             }
         }
-        // TODO: Investigate on < 1f.
         return Math.max(1f, (float) sum / (float) covered);
     }
 
@@ -480,7 +474,6 @@ public class TickTask implements Runnable {
      *            the new locked
      */
     public static void setLocked(boolean locked) {
-        // TODO: synchronize over lists !?
         TickTask.locked = locked;
     }
 
@@ -527,7 +520,7 @@ public class TickTask implements Runnable {
         synchronized (tickListeners) {
             // Synchronized to allow concurrent adding and removal.
             // (Ignores the locked state while still running.)
-            // TODO: Policy for locked state. Though locking should only happen during onDisable, so before / after the task is run anyway.
+            // Locking should only happen during onDisable, so before or after the task runs.
             if (tickListeners.isEmpty()) {
                 // Future purpose.
                 return;

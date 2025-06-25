@@ -49,10 +49,10 @@ import fr.neatmonster.nocheatplus.utilities.ColorUtil;
 @SetupOrder(priority = Integer.MIN_VALUE) // Just in case.
 public class BukkitLogManager extends AbstractLogManager implements INotifyReload {
 
-    // TODO: Make LogManager an interface <- AbstractLogManager <- BukkitLogManager (hide some / instanceof).
+    // Consider making LogManager an interface, keeping AbstractLogManager and BukkitLogManager implementations.
 
-    // TODO: ingame logging [ingame needs api to keep track of players who receive notifications.].
-    // TODO: Later: Custom loggers (file, other), per-player-streams (debug per player), custom ingame loggers (one or more players).
+    // Ingame logging requires an API to track players who receive notifications.
+    // Potential extensions include custom loggers, per-player streams and custom ingame loggers.
 
     private static final ContentLogger<String> serverLogger = (level, content) -> {
         try {
@@ -120,10 +120,10 @@ public class BukkitLogManager extends AbstractLogManager implements INotifyReloa
         LoggerID tempID;
 
         // Configuration/defaults.
-        // TODO: More configurability.
-        // TODO: Might attempt to detect if a thread-safe logging framework is in use ("default" instead of false/true).
+        // Additional configurability may be added.
+        // Detecting a thread-safe logging framework could allow choosing "default" instead of true/false.
         boolean bukkitLoggerAsynchronous = config.getBoolean(ConfPaths.LOGGING_BACKEND_CONSOLE_ASYNCHRONOUS);
-        // TODO: Do keep considering: AYNCHRONOUS_DIRECT -> ASYNCHRONOUS_TASK (not to delay async. event handling).
+        // Keep considering AYNCHRONOUS_DIRECT versus ASYNCHRONOUS_TASK to avoid delaying async event handling.
         CallContext defaultAsynchronousContext = CallContext.ASYNCHRONOUS_TASK; // Plugin runtime + asynchronous.
 
         // Server logger.
@@ -135,8 +135,8 @@ public class BukkitLogManager extends AbstractLogManager implements INotifyReloa
         attachStringLogger(tempID, Streams.PLUGIN_LOGGER);
 
         // Ingame logger (assume not thread-safe at first).
-        // TODO: Thread-safe ProtocolLib-based implementation?
-        // TODO: Consider using a task.
+        // A ProtocolLib-based thread-safe implementation might be possible.
+        // Using a task could be considered here.
         tempID = registerStringLogger((level, content) -> {
             // Ignore level for now.
             NCPAPIProvider.getNoCheatPlusAPI().sendAdminNotifyMessage(prefixIngame == null ? content : (prefixIngame + content));
@@ -154,7 +154,7 @@ public class BukkitLogManager extends AbstractLogManager implements INotifyReloa
         }
 
         ContentLogger<String> traceFileLogger = null;
-        // TODO: Create a dedicated trace file, if "needed".
+        // A dedicated trace file could be created if necessary.
 
         if (defaultFileLogger != null) {
             // Do attach the default file logger.
@@ -167,7 +167,7 @@ public class BukkitLogManager extends AbstractLogManager implements INotifyReloa
             }
 
             // Abstract INIT stream (attach file logger).
-            // TODO: Consider configurability of skipping, depending on bukkitLoggerAsynchronous.
+            // Skipping could be made configurable depending on bukkitLoggerAsynchronous.
             tempID = registerStringLogger(defaultFileLogger, new LogOptions(Streams.DEFAULT_FILE.name +".init", CallContext.ANY_THREAD_DIRECT));
             attachStringLogger(tempID, Streams.INIT);
 
@@ -196,18 +196,18 @@ public class BukkitLogManager extends AbstractLogManager implements INotifyReloa
         if (!file.isAbsolute()) {
             file = new File(defaultDir, file.getPath());
         }
-        // TODO: Sanity check file+extensions and fall-back if not valid [make an auxiliary method doing all this at once]!
+        // Sanity checking file names and extensions with a fallback might be useful.
         try {
-            FileLoggerAdapter logger = new FileLoggerAdapter(file, prefix); // TODO: Method to get-or-create these (store logger by canonical abs paths).
+            FileLoggerAdapter logger = new FileLoggerAdapter(file, prefix); // A helper method could store loggers by canonical path.
             if (logger.isInoperable()) {
-                // TODO: Might want to log this?
+                // This might warrant logging.
                 logger.detachLogger();
                 return null;
             } else {
                 return logger;
             }
         } catch (Throwable t) {
-            // TODO: Complain.
+            // Consider throwing an exception or logging a warning.
         }
         return null;
     }
@@ -247,7 +247,7 @@ public class BukkitLogManager extends AbstractLogManager implements INotifyReloa
     @Override
     public void onReload() {
         // Hard clear and re-do loggers. Might result in loss of content.
-        // TODO: Register for "early onReload call", needs API addition.
+        // Registration for an early onReload call may require an API addition.
         clear(0L, true); // Can not afford to wait.
         ConfigFile config = ConfigManager.getConfigFile();
         updateLogLevel(config);
@@ -259,7 +259,7 @@ public class BukkitLogManager extends AbstractLogManager implements INotifyReloa
      * This can be called multiple times without causing damage.
      */
     public void startTasks() {
-        // TODO: Schedule / hide (redundant calls mean no harm, at present). 
+        // Scheduling or hiding this call could avoid redundant executions.
         ((BukkitLogNodeDispatcher) getLogNodeDispatcher()).startTasks();
     }
 

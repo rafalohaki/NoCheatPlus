@@ -1246,7 +1246,36 @@ public class MovingListener extends CheckListener implements TickListener, IRemo
             final int tick, final String playerName, final MovingData data, final MovingConfig cc,
             final IPlayerData pData) {
 
+        if (player == null || pFrom == null || pTo == null || from == null || to == null
+                || data == null || cc == null || pData == null) {
+            return new MoveCheckResult(newTo, checkNf);
+        }
+
         MovingUtil.prepareFullCheck(pFrom, pTo, thisMove, Math.max(cc.noFallyOnGround, cc.yOnGround));
+        handleFlyCheckTransition(lastMove, player, time, tick, debug, data, cc);
+
+        if (newTo == null) {
+            newTo = performSurvivalFlyCheck(player, pFrom, pTo, thisMove, multiMoveCount,
+                    data, cc, pData, tick, time, useBlockChangeTracker);
+        }
+
+        if (checkNf) {
+            checkNf = noFall.isEnabled(player, pData);
+        }
+
+        if (newTo == null) {
+            handleHoverAndNoFall(player, pFrom, pTo, lastMove, playerName, checkNf,
+                    previousSetBackY, data, cc, pData);
+        } else {
+            handleFallDamageForSetBack(player, from, to, pFrom, pTo, checkNf,
+                    previousSetBackY, data, cc, pData);
+        }
+
+        return new MoveCheckResult(newTo, checkNf);
+    }
+
+    private void handleFlyCheckTransition(final PlayerMoveData lastMove, final Player player,
+            final long time, final int tick, final boolean debug, final MovingData data, final MovingConfig cc) {
         if (lastMove.toIsValid && lastMove.flyCheck == CheckType.MOVING_CREATIVEFLY) {
             final long tickHasLag = data.delayWorkaround + Math.round(200 / TickTask.getLag(200, true));
             if (data.delayWorkaround > time || tickHasLag < time) {
@@ -1254,26 +1283,38 @@ public class MovingListener extends CheckListener implements TickListener, IRemo
                 data.delayWorkaround = time;
             }
         }
-        if (newTo == null) {
-            thisMove.flyCheck = CheckType.MOVING_SURVIVALFLY;
-            newTo = survivalFly.check(player, pFrom, pTo, multiMoveCount, data, cc, pData, tick, time,
-                    useBlockChangeTracker);
+    }
+
+    private Location performSurvivalFlyCheck(final Player player, final PlayerLocation pFrom,
+            final PlayerLocation pTo, final PlayerMoveData thisMove, final int multiMoveCount,
+            final MovingData data, final MovingConfig cc, final IPlayerData pData, final int tick,
+            final long time, final boolean useBlockChangeTracker) {
+        thisMove.flyCheck = CheckType.MOVING_SURVIVALFLY;
+        return survivalFly.check(player, pFrom, pTo, multiMoveCount, data, cc, pData, tick, time,
+                useBlockChangeTracker);
+    }
+
+    private void handleHoverAndNoFall(final Player player, final PlayerLocation pFrom,
+            final PlayerLocation pTo, final PlayerMoveData lastMove, final String playerName,
+            final boolean checkNf, final double previousSetBackY, final MovingData data,
+            final MovingConfig cc, final IPlayerData pData) {
+        if (cc.sfHoverCheck && !(lastMove.toIsValid && lastMove.to.extraPropertiesValid
+                && lastMove.to.onGroundOrResetCond) && !pTo.isOnGround()) {
+            hoverTicks.add(playerName);
+            data.sfHoverTicks = 0;
+        } else {
+            data.sfHoverTicks = -1;
         }
         if (checkNf) {
-            checkNf = noFall.isEnabled(player, pData);
+            noFall.check(player, pFrom, pTo, previousSetBackY, data, cc, pData);
         }
-        if (newTo == null) {
-            if (cc.sfHoverCheck && !(lastMove.toIsValid && lastMove.to.extraPropertiesValid
-                    && lastMove.to.onGroundOrResetCond) && !pTo.isOnGround()) {
-                hoverTicks.add(playerName);
-                data.sfHoverTicks = 0;
-            } else {
-                data.sfHoverTicks = -1;
-            }
-            if (checkNf) {
-                noFall.check(player, pFrom, pTo, previousSetBackY, data, cc, pData);
-            }
-        } else if (checkNf && cc.sfSetBackPolicyFallDamage) {
+    }
+
+    private void handleFallDamageForSetBack(final Player player, final Location from, final Location to,
+            final PlayerLocation pFrom, final PlayerLocation pTo, final boolean checkNf,
+            final double previousSetBackY, final MovingData data, final MovingConfig cc,
+            final IPlayerData pData) {
+        if (checkNf && cc.sfSetBackPolicyFallDamage) {
             boolean skip = !noFall.willDealFallDamage(player, from.getY(), previousSetBackY, data);
             if (!skip && (!pFrom.isOnGround() && !pFrom.isResetCond())) {
                 skip = false;
@@ -1282,8 +1323,6 @@ public class MovingListener extends CheckListener implements TickListener, IRemo
                 noFall.checkDamage(player, Math.min(from.getY(), to.getY()), data, pData);
             }
         }
-
-        return new MoveCheckResult(newTo, checkNf);
     }
 
     private Location handleCreativeFlyCheck(final Player player, final PlayerLocation pFrom,
