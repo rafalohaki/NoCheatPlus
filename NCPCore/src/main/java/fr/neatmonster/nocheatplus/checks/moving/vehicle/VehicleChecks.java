@@ -818,10 +818,9 @@ public class VehicleChecks extends CheckListener {
             final Player player = (Player) attacker;
             final IPlayerData pData = DataManager.getPlayerData(player);
             final MovingConfig cc = pData.getGenericInstance(MovingConfig.class);
-            if (cc.vehiclePreventDestroyOwn) {
-                if (pData.isCheckActive(CheckType.MOVING_SURVIVALFLY, player)
-                        || pData.isCheckActive(CheckType.MOVING_CREATIVEFLY, player)) {
-                }
+            if (cc.vehiclePreventDestroyOwn
+                    && (pData.isCheckActive(CheckType.MOVING_SURVIVALFLY, player)
+                            || pData.isCheckActive(CheckType.MOVING_CREATIVEFLY, player))) {
                 event.setCancelled(true);
                 player.sendMessage(ChatColor.DARK_RED + "Destroying your own vehicle is disabled.");
             }
