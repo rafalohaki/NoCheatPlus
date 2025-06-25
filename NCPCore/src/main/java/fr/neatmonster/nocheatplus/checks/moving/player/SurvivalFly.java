@@ -966,44 +966,68 @@ public class SurvivalFly extends Check {
         }
 
         if (resetTo) {
-            if (toOnGround) {
-                if (yDistance > 0.0 && to.getY() > data.getSetBackY() + 0.13
-                        && !from.isResetCond() && !to.isResetCond()) {
-                    if (data.bunnyhopDelay > 0) {
-                        if (data.bunnyhopDelay > 6) {
-                            data.lastbunnyhopDelay = data.bunnyhopDelay;
-                        }
-                        data.bunnyhopDelay = 0;
-                    }
-                    data.sfNoLowJump = true;
-                    if (debug) {
-                        debug(player, "Slope: schedule sfNoLowJump and reset bunnyfly.");
-                    }
-                } else {
-                    data.sfNoLowJump = false;
-                }
-            } else {
-                data.sfNoLowJump = false;
-            }
-            data.setSetBack(to);
-            data.sfJumpPhase = 0;
-            data.clearAccounting();
-            if (data.sfLowJump && resetFrom) {
-                data.sfLowJump = false;
-            }
-            if (hFreedom <= 0.0 && thisMove.verVelUsed == null) {
-                data.resetVelocityJumpPhase(tags);
-            }
+            handleResetTo(player, from, to, toOnGround, resetFrom, yDistance, hFreedom, debug, data, cc, thisMove);
         } else if (resetFrom) {
-            data.setSetBack(from);
-            data.sfJumpPhase = 1;
-            data.clearAccounting();
-            data.sfLowJump = false;
+            handleResetFrom(from, data);
         } else {
-            data.sfJumpPhase++;
-            if (to.getY() < 0.0 && cc.sfSetBackPolicyVoid) {
-                data.setSetBack(to);
+            handleNoReset(to, data, cc);
+        }
+    }
+
+    private void handleResetTo(final Player player, final PlayerLocation from, final PlayerLocation to,
+                               final boolean toOnGround, final boolean resetFrom,
+                               final double yDistance, final double hFreedom, final boolean debug,
+                               final MovingData data, final MovingConfig cc, final PlayerMoveData thisMove) {
+        if (toOnGround) {
+            handleGroundedReset(player, from, to, yDistance, debug, data);
+        } else {
+            data.sfNoLowJump = false;
+        }
+        data.setSetBack(to);
+        data.sfJumpPhase = 0;
+        data.clearAccounting();
+        if (data.sfLowJump && resetFrom) {
+            data.sfLowJump = false;
+        }
+        if (hFreedom <= 0.0 && thisMove.verVelUsed == null) {
+            data.resetVelocityJumpPhase(tags);
+        }
+    }
+
+    private void handleGroundedReset(final Player player, final PlayerLocation from, final PlayerLocation to,
+                                     final double yDistance, final boolean debug, final MovingData data) {
+        if (yDistance > 0.0 && to.getY() > data.getSetBackY() + 0.13
+                && !from.isResetCond() && !to.isResetCond()) {
+            updateBunnyHopDelay(data);
+            data.sfNoLowJump = true;
+            if (debug) {
+                debug(player, "Slope: schedule sfNoLowJump and reset bunnyfly.");
             }
+        } else {
+            data.sfNoLowJump = false;
+        }
+    }
+
+    private void updateBunnyHopDelay(final MovingData data) {
+        if (data.bunnyhopDelay > 0) {
+            if (data.bunnyhopDelay > 6) {
+                data.lastbunnyhopDelay = data.bunnyhopDelay;
+            }
+            data.bunnyhopDelay = 0;
+        }
+    }
+
+    private void handleResetFrom(final PlayerLocation from, final MovingData data) {
+        data.setSetBack(from);
+        data.sfJumpPhase = 1;
+        data.clearAccounting();
+        data.sfLowJump = false;
+    }
+
+    private void handleNoReset(final PlayerLocation to, final MovingData data, final MovingConfig cc) {
+        data.sfJumpPhase++;
+        if (to.getY() < 0.0 && cc.sfSetBackPolicyVoid) {
+            data.setSetBack(to);
         }
     }
 
