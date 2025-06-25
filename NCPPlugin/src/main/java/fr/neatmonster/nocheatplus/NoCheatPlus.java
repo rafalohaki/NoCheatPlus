@@ -586,7 +586,13 @@ public class NoCheatPlus extends JavaPlugin implements NoCheatPlusAPI {
     private boolean addToSubRegistries(final Object obj) {
         boolean added = false;
         for (final ComponentRegistry<?> registry : subRegistries) {
-            final Object res = ReflectionUtil.invokeGenericMethodOneArg(registry, "addComponent", obj);
+            final Object res;
+            if (registry instanceof fr.neatmonster.nocheatplus.players.PlayerDataManager) {
+                res = ((fr.neatmonster.nocheatplus.players.PlayerDataManager) registry)
+                        .addComponentReflectively(obj);
+            } else {
+                res = ReflectionUtil.invokeGenericMethodOneArg(registry, "addComponent", obj);
+            }
             if (res instanceof Boolean && ((Boolean) res).booleanValue()) {
                 added = true;
             }
