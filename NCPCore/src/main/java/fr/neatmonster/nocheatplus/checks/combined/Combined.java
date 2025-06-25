@@ -160,7 +160,7 @@ public class Combined {
         final float threshold = cc.yawRate;
 
         // Angle diff per second
-        final float stScore = data.yawFreq.bucketScore(0) * 3f; // TODO: Better have it 2.5 with lower threshold ?
+        final float stScore = data.yawFreq.bucketScore(0) * 3f; // Possible improvement: use 2.5 with a lower threshold
         final float stViol;
         if (stScore > threshold) {
             // Account for server side lag.
@@ -197,8 +197,8 @@ public class Combined {
             data.timeFreeze.applyPenalty(now, (long) Math.min(
                     Math.max(cc.yawRatePenaltyFactor * amount ,  cc.yawRatePenaltyMin), 
                     cc.yawRatePenaltyMax));
-            // TODO: balance (100 ... 200 ) ?
-            // TODO: New calculations so that weight is not inverse
+            // Potential adjustment: balance between 100 and 200.
+            // Another improvement: compute weight without using the inverse.
             	if (cc.yawRateImprobableWeight > 0.0f) {
                 	if (cc.yawRateImprobableFeedOnly) {
                 		Improbable.feed(player, amount / cc.yawRateImprobableWeight, now);
@@ -230,7 +230,7 @@ public class Combined {
         }
         final CombinedData data = pData.getGenericInstance(CombinedData.class);
         data.lastYaw = yaw;
-        data.lastYawTime = time; // TODO: One might set to some past-time to allow any move at first.
+        data.lastYawTime = time; // Consider using a past timestamp to allow movement initially.
         data.sumYaw = 0;
         if (clear) {
             data.yawFreq.clear(time);
