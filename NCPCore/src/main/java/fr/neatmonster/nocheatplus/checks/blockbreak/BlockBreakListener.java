@@ -124,7 +124,7 @@ public class BlockBreakListener extends CheckListener {
         if (!pData.isCheckActive(CheckType.BLOCKBREAK, player)) return;
 
         // Illegal enchantments hotfix check.
-        // TODO: Legacy / encapsulate fully there.
+        // Legacy compatibility: encapsulate fully in dedicated handler.
         if (Items.checkIllegalEnchantmentsAllHands(player, pData)) {
             event.setCancelled(true);
             counters.addPrimaryThread(idCancelDIllegalItem, 1);
@@ -139,7 +139,7 @@ public class BlockBreakListener extends CheckListener {
             return;
         }
 
-        // TODO: maybe invalidate instaBreak on some occasions.
+        // Note: instaBreak might need invalidation on certain occasions.
 
 
         final Block block = event.getBlock();
@@ -205,7 +205,7 @@ public class BlockBreakListener extends CheckListener {
             }
 
             // Did the player look at the block at all?
-            // TODO: Skip if checks were run on this block (all sorts of hashes/conditions).
+            // Consider skipping if checks have already been run on this block (all sorts of hashes/conditions).
             if (!cancelled) {
                 if (isInteractBlock && (bdata.isPassedCheck(CheckType.BLOCKINTERACT_DIRECTION)
                         || bdata.isPassedCheck(CheckType.BLOCKINTERACT_VISIBLE))) {
@@ -233,7 +233,7 @@ public class BlockBreakListener extends CheckListener {
         if (cancelled) {
             event.setCancelled(cancelled);
             // Reset damage position:
-            // TODO: Review this (!), check if set at all !?
+            // Needs review: verify if this gets set at all.
             data.clickedX = block.getX();
             data.clickedY = block.getY();
             data.clickedZ = block.getZ();
@@ -323,15 +323,15 @@ public class BlockBreakListener extends CheckListener {
     @EventHandler(ignoreCancelled = false, priority = EventPriority.LOWEST)
     public void onBlockDamageLowest(final BlockDamageEvent event) {
         /*
-         * TODO: Add a check type BLOCKDAMAGE_CONFIRM (no permission):
-         * Cancel if the block doesn't match (MC 1.11.2, other ...)?
+         * Potential improvement: add a check type BLOCKDAMAGE_CONFIRM (no permission)
+         * that cancels if the block does not match (MC 1.11.2, other ...).
          */
         if (MovingUtil.hasScheduledPlayerSetBack(event.getPlayer())) {
             event.setCancelled(true);
         }
         else if (event.getInstaBreak()) {
             // Indicate that this might have been set by CB/MC.
-            // TODO: Set in BlockInteractListener !!
+            // Should be set in BlockInteractListener.
             isInstaBreak = AlmostBoolean.MAYBE;
         }
     }
@@ -402,7 +402,7 @@ public class BlockBreakListener extends CheckListener {
         if (!DataManager.getPlayerData(event.getPlayer()).isCheckActive(CheckType.BLOCKBREAK, event.getPlayer())) return;
 
         // Reset clicked block.
-        // TODO: Not for 1.5.2 and before?
+        // Possibly not required for versions 1.5.2 and earlier.
         final Player player = event.getPlayer();
         final BlockBreakData data = DataManager.getPlayerData(player).getGenericInstance(BlockBreakData.class);
         if (data.toolChanged(player.getInventory().getItem(event.getNewSlot()))) {
