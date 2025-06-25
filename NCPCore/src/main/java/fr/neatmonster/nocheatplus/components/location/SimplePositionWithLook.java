@@ -20,7 +20,7 @@ import fr.neatmonster.nocheatplus.utilities.location.LocUtil;
 
 public class SimplePositionWithLook implements IPositionWithLook {
 
-    // TODO: Package organization...
+    // Package organization to be reviewed.
 
     private double x, y, z;
     private float yaw, pitch;
@@ -118,6 +118,6 @@ public class SimplePositionWithLook implements IPositionWithLook {
         return "SimplePositionWithLook(" + LocUtil.simpleFormat(this) + ")";
     }
 
-    // TODO: hashCode, equals?
+    // Consider implementing hashCode and equals.
 
 }
