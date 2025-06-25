@@ -25,12 +25,16 @@ public class ReflectDamageSources {
     public Method nmsDamageSources;
     public Method nmsfall;
 
-    public ReflectDamageSources(ReflectBase base, ReflectDamageSource reflectDamageSource) throws ClassNotFoundException {
-        this(base, reflectDamageSource, Class.forName(base.nmsPackageName + ".Entity"));
+    public ReflectDamageSources(ReflectBase base, ReflectDamageSource reflectDamageSource) {
+        this(base, reflectDamageSource, safeForName(base.nmsPackageName + ".Entity"));
     }
 
-    public ReflectDamageSources(ReflectBase base, ReflectDamageSource reflectDamageSource, Class<?> nmsEntityClass) throws ClassNotFoundException {
-        nmsClass = Class.forName("net.minecraft.world.damagesource.DamageSources");
+    public ReflectDamageSources(ReflectBase base, ReflectDamageSource reflectDamageSource, Class<?> nmsEntityClass) {
+        try {
+            nmsClass = Class.forName("net.minecraft.world.damagesource.DamageSources");
+        } catch (ClassNotFoundException ex) {
+            throw new RuntimeException(ex);
+        }
         nmsfall = ReflectionUtil.getMethodNoArgs(nmsClass, "k", reflectDamageSource.nmsClass);
         // 1.19 Entity.damageSources()
         nmsDamageSources = ReflectionUtil.getMethodNoArgs(nmsEntityClass, "dG", nmsClass);
@@ -61,5 +65,13 @@ public class ReflectDamageSources {
         if (nmsDamageSources == null || nmsfall == null) return null;
         Object damageSources = ReflectionUtil.invokeMethodNoArgs(nmsDamageSources, handle);
         return ReflectionUtil.invokeMethodNoArgs(nmsfall, damageSources);
+    }
+
+    private static Class<?> safeForName(String name) {
+        try {
+            return Class.forName(name);
+        } catch (ClassNotFoundException ex) {
+            throw new RuntimeException(ex);
+        }
     }
 }

@@ -40,12 +40,15 @@ public class ReflectAxisAlignedBB {
 
     /**
      * @param base
-     * @throws ClassNotFoundException
      * @throws NullPointerException
      *             if not available.
      */
-    public ReflectAxisAlignedBB(ReflectBase base) throws ClassNotFoundException {
-        nmsClass = Class.forName(base.nmsPackageName + ".AxisAlignedBB");
+    public ReflectAxisAlignedBB(ReflectBase base) {
+        try {
+            nmsClass = Class.forName(base.nmsPackageName + ".AxisAlignedBB");
+        } catch (ClassNotFoundException ex) {
+            throw new ReflectFailureException(ex);
+        }
         nms_minX = ReflectionUtil.getField(nmsClass, "a", double.class);
         nms_minY = ReflectionUtil.getField(nmsClass, "b", double.class);
         nms_minZ = ReflectionUtil.getField(nmsClass, "c", double.class);

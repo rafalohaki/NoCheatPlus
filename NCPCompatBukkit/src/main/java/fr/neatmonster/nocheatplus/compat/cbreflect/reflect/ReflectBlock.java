@@ -52,25 +52,36 @@ public class ReflectBlock implements IReflectBlock {
      * 
      * @param base
      * @param reflectBlockPosition
-     * @throws ClassNotFoundException
      * @throws ReflectFailureException If not available.
      */
-    public ReflectBlock(ReflectBase base, ReflectBlockPosition reflectBlockPosition, 
-            ReflectMaterial reflectMaterial, ReflectWorld reflectWorld) throws ClassNotFoundException {
+    public ReflectBlock(ReflectBase base, ReflectBlockPosition reflectBlockPosition,
+            ReflectMaterial reflectMaterial, ReflectWorld reflectWorld) {
         // Reference.
         this.reflectBlockPosition = reflectBlockPosition;
         if (reflectBlockPosition.new_nmsBlockPosition == null) {
             fail();
         }
         this.reflectAxisAlignedBB = new ReflectAxisAlignedBB(base); // Fails if not available.
-        this.reflectIBlockData = new ReflectIBlockData(base, reflectMaterial); // Fails if not available.
+        try {
+            this.reflectIBlockData = new ReflectIBlockData(base, reflectMaterial); // Fails if not available.
+        } catch (ClassNotFoundException ex) {
+            throw new ReflectFailureException();
+        }
         this.reflectWorld = reflectWorld;
         if (reflectWorld.nmsClass == null || reflectWorld.nmsGetType == null) {
             fail();
         }
-        this.reflectIBlockAccess = new ReflectIBlockAccess(base);
+        try {
+            this.reflectIBlockAccess = new ReflectIBlockAccess(base);
+        } catch (ClassNotFoundException ex) {
+            throw new ReflectFailureException();
+        }
         // Block.
-        nmsClass = Class.forName(base.nmsPackageName + ".Block");
+        try {
+            nmsClass = Class.forName(base.nmsPackageName + ".Block");
+        } catch (ClassNotFoundException ex) {
+            throw new ReflectFailureException();
+        }
         // byID (static)
         nmsGetById = ReflectionUtil.getMethod(nmsClass, "getById", int.class);
         if (nmsGetById == null) {
