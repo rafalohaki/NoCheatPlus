@@ -32,8 +32,9 @@ public class BlockCacheCBReflect extends BlockCacheBukkit {
     protected Object nmsWorld = null;
 
     public BlockCacheCBReflect(ReflectHelper reflectHelper, World world) {
-        super(world);
+        super(null);      // Avoid premature setAccess
         this.helper = reflectHelper;
+        setAccess(world);
     }
 
     @Override
