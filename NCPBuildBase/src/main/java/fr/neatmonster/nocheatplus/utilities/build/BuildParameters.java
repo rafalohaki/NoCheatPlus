@@ -18,26 +18,33 @@ import java.util.HashMap;
 import java.util.Map;
 
 /**
- * Support for parameters present or set at building time. They are read from BuildParameters.properties
+ * Support for parameters present or set at building time.
+ * They are read from BuildParameters.properties
  * @author mc_dev
  *
  */
 public class BuildParameters {
 
-    private static final Map<String, String> fileContents = new HashMap<String, String>();
+    /**
+     * Raw contents of {@code BuildParameters.properties} as key-value map.
+     */
+    private static final Map<String, String> FILE_CONTENTS = new HashMap<String, String>();
 
-    static{
+    private BuildParameters() {
+    }
+
+    static {
         // Fetch file content from resources.
         String content = null;
-        try{
-            content = ResourceUtil.fetchResource(BuildParameters.class, "BuildParameters.properties");
-        }
-        catch(Throwable t){
+        try {
+            content = ResourceUtil.fetchResource(BuildParameters.class,
+                    "BuildParameters.properties");
+        } catch (Throwable t) {
             t.printStackTrace();
         }
         // Parse properties.
-        if (content != null){
-            ResourceUtil.parseToMap(content, fileContents);
+        if (content != null) {
+            ResourceUtil.parseToMap(content, FILE_CONTENTS);
         }
     }
 
@@ -46,15 +53,20 @@ public class BuildParameters {
     /////////////////////
 
     /**
-     * This gets the raw mapping value, might be something like "${...}" in case the parameter has not been present during building.
+     * This gets the raw mapping value.
+     * Might be something like "${...}" if the parameter has not been present
+     * during building.
      * @param path
      * @param preset
      * @return
      */
-    public static String getMappingValue(String path, String preset){
-        String input = fileContents.get(path);
-        if (input == null) return preset;
-        else return input;
+    public static String getMappingValue(final String path, final String preset) {
+        final String input = FILE_CONTENTS.get(path);
+        if (input == null) {
+            return preset;
+        } else {
+            return input;
+        }
     }
 
     /**
@@ -63,23 +75,33 @@ public class BuildParameters {
      * @param preset
      * @return
      */
-    public static String getString(String path, String preset){
-        String input = fileContents.get(path);
-        if (input == null) return preset;
-        else if (input.startsWith("${") && input.endsWith("}")) return preset;
-        else return input;
+    public static String getString(final String path, final String preset) {
+        final String input = FILE_CONTENTS.get(path);
+        if (input == null) {
+            return preset;
+        } else if (input.startsWith("${") && input.endsWith("}")) {
+            return preset;
+        } else {
+            return input;
+        }
     }
 
-    public static Boolean getBoolean(String path, Boolean preset){
-        String input = fileContents.get(path);
-        if (input == null) return preset;
-        else return ResourceUtil.getBoolean(input, preset);
+    public static Boolean getBoolean(final String path, final Boolean preset) {
+        final String input = FILE_CONTENTS.get(path);
+        if (input == null) {
+            return preset;
+        } else {
+            return ResourceUtil.getBoolean(input, preset);
+        }
     }
 
-    public static Integer getInteger(String path, Integer preset){
-        String input = fileContents.get(path);
-        if (input == null) return preset;
-        else return ResourceUtil.getInteger(input, preset);
+    public static Integer getInteger(final String path, final Integer preset) {
+        final String input = FILE_CONTENTS.get(path);
+        if (input == null) {
+            return preset;
+        } else {
+            return ResourceUtil.getInteger(input, preset);
+        }
     }
 
     //////////////////////
@@ -87,32 +109,38 @@ public class BuildParameters {
     //////////////////////
 
     /** Timestamp from build (maven). "?" if not present. */
-    public static final String buildTimeString = getString("BUILD_TIMESTAMP", "?");
+    public static final String BUILD_TIME_STRING = getString("BUILD_TIMESTAMP", "?");
 
     /** Indicate something about where this was built. */
-    public static final String buildSeries = getString("BUILD_SERIES", "?");
+    public static final String BUILD_SERIES = getString("BUILD_SERIES", "?");
 
     /** The build number as given by Jenkins. Integer.MIN_VALUE if not present. */
-    public static final int buildNumber = getInteger("BUILD_NUMBER", Integer.MIN_VALUE);
+    public static final int BUILD_NUMBER = getInteger("BUILD_NUMBER", Integer.MIN_VALUE);
 
     /**
      * Test level: more testing for higher levels. Defaults to 0.
      * <hr>
-     * Currently only 0 and 1 are used, later there might be more levels and some general policy for level setup (concerning rough time needed on some reference hardware, console output etc.).<br>
+     * Currently only 0 and 1 are used.
+     * Later there might be more levels and some general policy for level setup
+     * (concerning rough time needed on some reference hardware, console output
+     * etc.).
      * Compare to debugLevel. 
      * 
      */
-    public static final int testLevel = getInteger("TEST_LEVEL", 0);
+    public static final int TEST_LEVEL = getInteger("TEST_LEVEL", 0);
 
     /**
      * Debug level: more debug output for higher levels. Defaults to 0.
      * <hr>
-     * Currently only 0 and 1 are used, however at some point this will follow some guidelines (to be documented here):<br>
-     * <li>0 is meant for few output, just enough for user debug reports or simple testing. </li>
+     * Currently only 0 and 1 are used. At some point this will follow some
+     * guidelines (to be documented here):
+     * <li>0 is meant for few output, just enough for user debug reports or
+     * simple testing.</li>
      * <li>There are major levels every 100 units (100, 200, ....)</li>
-     * <li>Consequently minor levels are between major levels to distinguish minor differences like flags</li>
+     * <li>Consequently minor levels are between major levels to distinguish
+     * minor differences like flags</li>
      * 
      */
-    public static final int debugLevel = getInteger("DEBUG_LEVEL", 10000);
+    public static final int DEBUG_LEVEL = getInteger("DEBUG_LEVEL", 10000);
 
 }
