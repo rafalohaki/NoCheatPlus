@@ -43,35 +43,43 @@ public class QueueRORAWithLock<E> implements IQueueRORA<E> {
     @Override
     public int add(final E element) {
         lock.lock();
-        elements.add(element);
-        final int size = elements.size();
-        lock.unlock();
-        return size;
+        try {
+            elements.add(element);
+            return elements.size();
+        } finally {
+            lock.unlock();
+        }
     }
 
     @Override
     public List<E> removeAll() {
         lock.lock();
-        final List<E> result = elements;
-        elements = new LinkedList<E>();
-        lock.unlock();
-        return result;
+        try {
+            final List<E> result = elements;
+            elements = new LinkedList<E>();
+            return result;
+        } finally {
+            lock.unlock();
+        }
     }
 
     @Override
     public int reduce(final int maxSize) {
         int dropped = 0;
         lock.lock();
-        final int size = elements.size();
-        if (size  <= maxSize) {
+        try {
+            final int size = elements.size();
+            if (size  <= maxSize) {
+                return dropped;
+            }
+            while (dropped < size - maxSize) {
+                elements.removeFirst();
+                dropped ++;
+            }
             return dropped;
+        } finally {
+            lock.unlock();
         }
-        while (dropped < size - maxSize) {
-            elements.removeFirst();
-            dropped ++;
-        }
-        lock.unlock();
-        return dropped;
     }
 
     @Override
@@ -82,18 +90,22 @@ public class QueueRORAWithLock<E> implements IQueueRORA<E> {
     @Override
     public boolean isEmpty() {
         lock.lock();
-        final boolean isEmpty = elements.isEmpty();
-        lock.unlock();
-        return isEmpty;
+        try {
+            return elements.isEmpty();
+        } finally {
+            lock.unlock();
+        }
     }
 
     @Override
     public int size() {
         // Could maintain a separate integer for tracking size.
         lock.lock();
-        final int size = elements.size();
-        lock.unlock();
-        return size;
+        try {
+            return elements.size();
+        } finally {
+            lock.unlock();
+        }
     }
 
 }

@@ -51,8 +51,11 @@ public class FactoryOneRegistry<A> implements IFactoryOneRegistry<A> {
             outsideThreadContext("register factory");
         }
         lock.lock();
-        factories.put(registerFor, factory);
-        lock.unlock();
+        try {
+            factories.put(registerFor, factory);
+        } finally {
+            lock.unlock();
+        }
     }
 
     private void outsideThreadContext(final String tag) {

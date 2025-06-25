@@ -193,17 +193,19 @@ public class WorldDataManager implements IWorldDataManager, INotifyReload {
 
     private void createDefaultWorldData() {
         lock.lock();
-        if (worldDataMap.containsKey(null)) {
+        try {
+            if (worldDataMap.containsKey(null)) {
+                return;
+            }
+            ConfigFile config = rawConfigurations.get(null);
+            if (config == null) {
+                config = new DefaultConfig();
+            }
+            worldDataMap.put(null, new WorldData(null, this));
+            updateWorldData(null, config);
+        } finally {
             lock.unlock();
-            return;
         }
-        ConfigFile config = rawConfigurations.get(null);
-        if (config == null) {
-            config = new DefaultConfig();
-        }
-        worldDataMap.put(null, new WorldData(null, this));
-        updateWorldData(null, config);
-        lock.unlock();
     }
 
     /**
@@ -237,17 +239,21 @@ public class WorldDataManager implements IWorldDataManager, INotifyReload {
          * Minimal locking is used, to prevent deadlocks, in case WorldData
          * instances will hold individual locks.
          */
-        lock.lock();
         final Map<String, ConfigFile> rawConfigurations = new LinkedHashMap<String, ConfigFile>(rawWorldConfigs.size());
-        for (final Entry<String, ConfigFile> entry : rawWorldConfigs.entrySet()) {
-            final String worldName = entry.getKey();
-            rawConfigurations.put(worldName == null ? null : worldName.toLowerCase(), entry.getValue());
+        final WorldData defaultWorldData;
+        lock.lock();
+        try {
+            for (final Entry<String, ConfigFile> entry : rawWorldConfigs.entrySet()) {
+                final String worldName = entry.getKey();
+                rawConfigurations.put(worldName == null ? null : worldName.toLowerCase(), entry.getValue());
+            }
+            this.rawConfigurations = rawConfigurations;
+            final ConfigFile defaultConfig = this.rawConfigurations.get(null);
+            defaultWorldData = internalGetDefaultWorldData(); // Always the same instance.
+            defaultWorldData.update(defaultConfig);
+        } finally {
+            lock.unlock(); // From here on, new instances have a proper config set.
         }
-        this.rawConfigurations = rawConfigurations;
-        final ConfigFile defaultConfig = this.rawConfigurations.get(null);
-        final WorldData defaultWorldData = internalGetDefaultWorldData(); // Always the same instance.
-        defaultWorldData.update(defaultConfig);
-        lock.unlock(); // From here on, new instances have a proper config set.
         // Update all given
         for (final Entry<String, ConfigFile> entry : rawConfigurations.entrySet()) {
             final String worldName = entry.getKey();
@@ -267,9 +273,12 @@ public class WorldDataManager implements IWorldDataManager, INotifyReload {
                     && !rawConfigurations.containsKey(worldName)) {
                 final WorldData ref = entry.getValue();
                 lock.lock();
-                defaultWorldData.addChild(ref); // Redundant calls are ok.
-                ref.adjustToParent(defaultWorldData); // Inherit specific overrides and more.
-                lock.unlock();
+                try {
+                    defaultWorldData.addChild(ref); // Redundant calls are ok.
+                    ref.adjustToParent(defaultWorldData); // Inherit specific overrides and more.
+                } finally {
+                    lock.unlock();
+                }
             }
         }
     }
@@ -302,15 +311,18 @@ public class WorldDataManager implements IWorldDataManager, INotifyReload {
     public void updateAllWorldData() {
         // ILockable or an access object might be used
         lock.lock();
-        final WorldData defaultWorldData = internalGetDefaultWorldData();
-        defaultWorldData.update();
-        for (final Entry<String, WorldData> entry : worldDataMap.iterable()) {
-            final WorldData ref = entry.getValue();
-            if (ref != defaultWorldData) {
-                ref.update();
+        try {
+            final WorldData defaultWorldData = internalGetDefaultWorldData();
+            defaultWorldData.update();
+            for (final Entry<String, WorldData> entry : worldDataMap.iterable()) {
+                final WorldData ref = entry.getValue();
+                if (ref != defaultWorldData) {
+                    ref.update();
+                }
             }
+        } finally {
+            lock.unlock();
         }
-        lock.unlock();
     }
 
     /**
@@ -326,39 +338,43 @@ public class WorldDataManager implements IWorldDataManager, INotifyReload {
             final ConfigFile rawConfiguration) {
         final WorldData defaultWorldData = internalGetDefaultWorldData();
         lock.lock(); // Locking here might be moved outside (pros and cons).
-        final String lcName = worldName == null ? null : worldName.toLowerCase();
-        WorldData data = worldDataMap.get(lcName);
-        boolean skipUpdate = false;
-        if (data == null) {
-            data = new WorldData(worldName, defaultWorldData, factoryRegistry);
-            worldDataMap.put(data.getWorldNameLowerCase(), data);
-            if (rawConfiguration == defaultWorldData.getRawConfiguration()) {
-                defaultWorldData.addChild(data);
-                skipUpdate = true;
+        try {
+            final String lcName = worldName == null ? null : worldName.toLowerCase();
+            WorldData data = worldDataMap.get(lcName);
+            boolean skipUpdate = false;
+            if (data == null) {
+                data = new WorldData(worldName, defaultWorldData, factoryRegistry);
+                worldDataMap.put(data.getWorldNameLowerCase(), data);
+                if (rawConfiguration == defaultWorldData.getRawConfiguration()) {
+                    defaultWorldData.addChild(data);
+                    skipUpdate = true;
+                }
             }
+            if (!skipUpdate) {
+                data.update(rawConfiguration); // Parent/child state is updated  here.
+            }
+            return data;
+        } finally {
+            lock.unlock();
         }
-        if (!skipUpdate) {
-            data.update(rawConfiguration); // Parent/child state is updated  here.
-        }
-        lock.unlock();
-        return data;
     }
 
     @Override
     public void overrideCheckActivation(final CheckType checkType, final AlmostBoolean active, 
             final OverrideType overrideType, final boolean overrideChildren) {
         lock.lock();
-        final IWorldData defaultWorldData = getDefaultWorldData();
-        defaultWorldData.overrideCheckActivation(checkType, active, overrideType, overrideChildren);
-        // Override flags.
-        // If possible, skip derived from default, since default data is done first.
-        for (final Entry<String, WorldData> entry : worldDataMap.iterable()) {
-            final IWorldData worldData = entry.getValue();
-            if (worldData != defaultWorldData) {
-                worldData.overrideCheckActivation(checkType, active, overrideType, overrideChildren);
+        try {
+            final IWorldData defaultWorldData = getDefaultWorldData();
+            defaultWorldData.overrideCheckActivation(checkType, active, overrideType, overrideChildren);
+            for (final Entry<String, WorldData> entry : worldDataMap.iterable()) {
+                final IWorldData worldData = entry.getValue();
+                if (worldData != defaultWorldData) {
+                    worldData.overrideCheckActivation(checkType, active, overrideType, overrideChildren);
+                }
             }
+        } finally {
+            lock.unlock();
         }
-        lock.unlock();
     }
 
     @Override
