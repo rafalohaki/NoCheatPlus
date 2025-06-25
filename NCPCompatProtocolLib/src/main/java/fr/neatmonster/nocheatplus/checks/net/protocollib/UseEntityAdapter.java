@@ -95,6 +95,26 @@ public class UseEntityAdapter extends BaseAdapter {
 
     private final LegacyReflectionSet legacySet;
 
+    private static class PlayerContext {
+        final Player player;
+        final IPlayerData pData;
+
+        PlayerContext(Player player, IPlayerData pData) {
+            this.player = player;
+            this.pData = pData;
+        }
+    }
+
+    private static class UseActionResult {
+        final boolean interpreted;
+        final boolean attack;
+
+        UseActionResult(boolean interpreted, boolean attack) {
+            this.interpreted = interpreted;
+            this.attack = attack;
+        }
+    }
+
     public UseEntityAdapter(Plugin plugin) {
         super(plugin, PacketType.Play.Client.USE_ENTITY);
         this.checkType = CheckType.NET_ATTACKFREQUENCY;
@@ -121,75 +141,74 @@ public class UseEntityAdapter extends BaseAdapter {
         return null;
     }
 
-    @Override
-    public void onPacketReceiving(final PacketEvent event) {
+    private PlayerContext extractPlayerContext(PacketEvent event) {
         try {
-            if (event.isPlayerTemporary()) return;
-        } catch(NoSuchMethodError e) {
+            if (event.isPlayerTemporary()) {
+                return null;
+            }
+        } catch (NoSuchMethodError e) {
             // ignore - older ProtocolLib version
         }
-        final long time = System.currentTimeMillis();
         final Player player = event.getPlayer();
         if (player == null) {
-            // NOTE: Consider warning once.
-            return;
+            return null;
         }
         final IPlayerData pData = DataManager.getPlayerDataSafe(player);
-        if (pData == null) return;
-
-        final NetData data = pData.getGenericInstance(NetData.class);
-        // Always set last received time.
-        data.lastKeepAliveTime = time;
-
-        // Quick return, if no checks are active.
-        if (!pData.isCheckActive(CheckType.NET_ATTACKFREQUENCY, player)) {
-            return;
+        if (pData == null) {
+            return null;
         }
+        return new PlayerContext(player, pData);
+    }
 
-        final PacketContainer packet = event.getPacket();
-
-        // MIGHT: use entity, use block both on packet level?
-        boolean isAttack = false;
-        boolean packetInterpreted = false;
+    private UseActionResult parseAction(PacketContainer packet) {
+        boolean attack = false;
+        boolean interpreted = false;
         if (legacySet != null) {
-            // Attempt to extract legacy information.
             final int flags = getAction_legacy(packet);
-            if ((flags & INTERPRETED) != 0 ) {
-                packetInterpreted = true;
+            if ((flags & INTERPRETED) != 0) {
+                interpreted = true;
                 if ((flags & ATTACK) != 0) {
-                    isAttack = true;
+                    attack = true;
                 }
             }
         }
-        if (!packetInterpreted) {
-            // Handle as if latest.
+        if (!interpreted) {
             final StructureModifier<EntityUseAction> actions = packet.getEntityUseActions();
             if (actions != null && actions.size() == 1 && actions.read(0) == EntityUseAction.ATTACK) {
-                isAttack = true;
-                packetInterpreted = true;
+                attack = true;
+                interpreted = true;
             }
         }
-        if (!packetInterpreted) {
-            // NOTE: Log warning once if the packet could not be interpreted.
+        return new UseActionResult(interpreted, attack);
+    }
+
+    @Override
+    public void onPacketReceiving(final PacketEvent event) {
+        final PlayerContext context = extractPlayerContext(event);
+        if (context == null) {
             return;
         }
 
-        // Run checks.
-        boolean cancel = false;
+        final long time = System.currentTimeMillis();
+        final NetData data = context.pData.getGenericInstance(NetData.class);
+        data.lastKeepAliveTime = time;
 
-        // AttackFrequency
-        if (isAttack) {
-            final NetConfig cc = pData.getGenericInstance(NetConfig.class);
-            if (attackFrequency.isEnabled(player, pData)
-                    && attackFrequency.check(player, time, data, cc, pData)) {
-                cancel = true;
+        if (!context.pData.isCheckActive(CheckType.NET_ATTACKFREQUENCY, context.player)) {
+            return;
+        }
+
+        final UseActionResult result = parseAction(event.getPacket());
+        if (!result.interpreted) {
+            return;
+        }
+
+        if (result.attack) {
+            final NetConfig cc = context.pData.getGenericInstance(NetConfig.class);
+            if (attackFrequency.isEnabled(context.player, context.pData)
+                    && attackFrequency.check(context.player, time, data, cc, context.pData)) {
+                event.setCancelled(true);
             }
         }
-
-        if (cancel) {
-            event.setCancelled(true);
-        }
-
     }
 
     private int getAction_legacy(final PacketContainer packetContainer) {
