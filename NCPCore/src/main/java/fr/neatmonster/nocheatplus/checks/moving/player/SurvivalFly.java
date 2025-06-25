@@ -69,6 +69,7 @@ import fr.neatmonster.nocheatplus.utilities.ds.count.ActionAccumulator;
 import fr.neatmonster.nocheatplus.utilities.collision.CollisionUtil;
 import fr.neatmonster.nocheatplus.utilities.location.LocUtil;
 import fr.neatmonster.nocheatplus.utilities.location.PlayerLocation;
+import fr.neatmonster.nocheatplus.checks.moving.player.SurvivalFlyCheckContext;
 import fr.neatmonster.nocheatplus.utilities.location.TrigUtil;
 import fr.neatmonster.nocheatplus.utilities.map.BlockProperties;
 import fr.neatmonster.nocheatplus.utilities.map.BlockFlags;
@@ -136,6 +137,13 @@ public class SurvivalFly extends Check {
             boolean hasHorizontal) {}
 
     /**
+     * Internal container for values initialized at the start of a check.
+     */
+    private static record InitData(boolean debug, PlayerMoveData thisMove,
+            PlayerMoveData lastMove, boolean isSamePos, Distances dist,
+            boolean fromOnGround, boolean toOnGround, boolean resetTo) {}
+
+    /**
      * Compute move distances between from and to locations.
      */
     private static Distances computeDistances(final boolean isSamePos,
@@ -151,6 +159,42 @@ public class SurvivalFly extends Check {
             return new Distances(x, y, z, 0.0, false);
         }
         return new Distances(x, y, z, move.hDistance, true);
+    }
+
+    /**
+     * Prepare commonly used values for a survival fly check.
+     *
+     * @param ctx survival fly context
+     * @return initialized data holder
+     */
+    private InitData prepareInitialData(final SurvivalFlyCheckContext ctx) {
+        final PlayerLocation from = ctx.from();
+        final PlayerLocation to = ctx.to();
+        final MovingData data = ctx.data();
+        final MovingConfig cc = ctx.config();
+
+        tags.clear();
+        final boolean debug = ctx.playerData().isDebugActive(type);
+        final PlayerMoveData thisMove = data.playerMoves.getCurrentMove();
+        final PlayerMoveData lastMove = data.playerMoves.getFirstPastMove();
+        final boolean isSamePos = from.isSamePos(to);
+        final Distances dist = computeDistances(isSamePos, from, to, thisMove);
+        final boolean fromOnGround = thisMove.from.onGround;
+        final boolean toOnGround = thisMove.to.onGround
+                || ctx.useBlockChangeTracker()
+                        && toOnGroundPastStates(from, to, thisMove, ctx.tick(), data, cc);
+        final boolean resetTo = toOnGround || to.isResetCond();
+
+        if (debug) {
+            justUsedWorkarounds.clear();
+            data.ws.setJustUsedIds(justUsedWorkarounds);
+        }
+
+        if (data.liftOffEnvelope == LiftOffEnvelope.UNKNOWN) {
+            data.adjustMediumProperties(from);
+        }
+        return new InitData(debug, thisMove, lastMove, isSamePos, dist,
+                fromOnGround, toOnGround, resetTo);
     }
 
     /** Determine reset-from state using lost-ground checks. */
@@ -214,55 +258,44 @@ public class SurvivalFly extends Check {
 
 
     /**
-     * Checks a player
-     * @param player
-     * @param from
-     * @param to
-     * @param multiMoveCount
-     *            0: Ordinary, 1/2: first/second of a split move.
-     * @param data
-     * @param cc
-     * @param tick
-     * @param now
-     * @param useBlockChangeTracker
-     * @return
+     * Checks a player using aggregated parameters.
+     *
+     * @param ctx context holding all parameters
+     * @return enforced location or {@code null}
      */
-    public Location check(final Player player, final PlayerLocation from, final PlayerLocation to,
-                          final int multiMoveCount,
-                          final MovingData data, final MovingConfig cc, final IPlayerData pData,
-                          final int tick, final long now, final boolean useBlockChangeTracker) {
+    public Location check(final SurvivalFlyCheckContext ctx) {
+        if (ctx == null) {
+            return null;
+        }
+        final Player player = ctx.player();
+        final PlayerLocation from = ctx.from();
+        final PlayerLocation to = ctx.to();
+        final MovingData data = ctx.data();
+        final MovingConfig cc = ctx.config();
+        final IPlayerData pData = ctx.playerData();
+        final int multiMoveCount = ctx.multiMoveCount();
+        final int tick = ctx.tick();
+        final long now = ctx.now();
+        final boolean useBlockChangeTracker = ctx.useBlockChangeTracker();
 
         if (!validateMoveInputs(player, from, to, "check") || data == null || cc == null || pData == null) {
             return null;
         }
 
-        tags.clear();
-        // Shortcuts:
-        final boolean debug = pData.isDebugActive(type);
-        final PlayerMoveData thisMove = data.playerMoves.getCurrentMove();
-        final PlayerMoveData lastMove = data.playerMoves.getFirstPastMove();
-        final boolean isSamePos = from.isSamePos(to);
-        final Distances dist = computeDistances(isSamePos, from, to, thisMove);
+        final InitData init = prepareInitialData(ctx);
+        final boolean debug = init.debug();
+        final PlayerMoveData thisMove = init.thisMove();
+        final PlayerMoveData lastMove = init.lastMove();
+        final boolean isSamePos = init.isSamePos();
+        final Distances dist = init.dist();
         final double xDistance = dist.x();
         final double yDistance = dist.y();
         final double zDistance = dist.z();
         final double hDistance = dist.h();
         final boolean HasHorizontalDistance = dist.hasHorizontal();
-        final boolean fromOnGround = thisMove.from.onGround;
-        final boolean toOnGround = thisMove.to.onGround || useBlockChangeTracker && toOnGroundPastStates(from, to, thisMove, tick, data, cc);
-        final boolean resetTo = toOnGround || to.isResetCond();
-
-        if (debug) {
-            justUsedWorkarounds.clear();
-            data.ws.setJustUsedIds(justUsedWorkarounds);
-        }
-
-        // Distances have been computed above.
-
-        // Recover from data removal (somewhat random insertion point).
-        if (data.liftOffEnvelope == LiftOffEnvelope.UNKNOWN) {
-            data.adjustMediumProperties(from);
-        }
+        final boolean fromOnGround = init.fromOnGround();
+        final boolean toOnGround = init.toOnGround();
+        final boolean resetTo = init.resetTo();
 
         // Determine if the player is actually sprinting.
         final boolean sprinting = determineSprintingState(from, to, fromOnGround, toOnGround,

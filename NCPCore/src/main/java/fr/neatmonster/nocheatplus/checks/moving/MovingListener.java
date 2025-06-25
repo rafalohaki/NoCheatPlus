@@ -83,6 +83,7 @@ import fr.neatmonster.nocheatplus.checks.moving.player.NoFall;
 import fr.neatmonster.nocheatplus.checks.moving.player.Passable;
 import fr.neatmonster.nocheatplus.checks.moving.player.PlayerSetBackMethod;
 import fr.neatmonster.nocheatplus.checks.moving.player.SurvivalFly;
+import fr.neatmonster.nocheatplus.checks.moving.player.SurvivalFlyCheckContext;
 import fr.neatmonster.nocheatplus.checks.moving.util.AuxMoving;
 import fr.neatmonster.nocheatplus.checks.moving.util.MovingUtil;
 import fr.neatmonster.nocheatplus.checks.moving.util.bounce.BounceType;
@@ -1318,8 +1319,9 @@ public class MovingListener extends CheckListener implements TickListener, IRemo
             final MovingData data, final MovingConfig cc, final IPlayerData pData, final int tick,
             final long time, final boolean useBlockChangeTracker) {
         thisMove.flyCheck = CheckType.MOVING_SURVIVALFLY;
-        return survivalFly.check(player, pFrom, pTo, multiMoveCount, data, cc, pData, tick, time,
-                useBlockChangeTracker);
+        final SurvivalFlyCheckContext ctx = new SurvivalFlyCheckContext(player, pFrom, pTo,
+                multiMoveCount, data, cc, pData, tick, time, useBlockChangeTracker);
+        return survivalFly.check(ctx);
     }
 
     private void handleHoverAndNoFall(final Player player, final PlayerLocation pFrom,
