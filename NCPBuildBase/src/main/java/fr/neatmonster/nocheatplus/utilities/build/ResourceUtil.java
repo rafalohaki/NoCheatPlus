@@ -123,8 +123,7 @@ public class ResourceUtil {
         try {
             return Integer.parseInt(input);
         } catch (NumberFormatException e) {
-            // ignore and return preset
+            return preset;
         }
-        return preset;
     }
 }

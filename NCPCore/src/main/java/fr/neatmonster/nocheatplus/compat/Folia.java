@@ -25,6 +25,10 @@ import org.bukkit.Server;
 import org.bukkit.plugin.Plugin;
 
 import fr.neatmonster.nocheatplus.utilities.ReflectionUtil;
+import fr.neatmonster.nocheatplus.NCPAPIProvider;
+import fr.neatmonster.nocheatplus.logging.LogManager;
+import fr.neatmonster.nocheatplus.logging.Streams;
+import fr.neatmonster.nocheatplus.utilities.StringUtil;
 
 import org.bukkit.entity.Entity;
 import org.bukkit.event.player.PlayerTeleportEvent.TeleportCause;
@@ -145,6 +149,11 @@ public class Folia {
      * @return An int represent for task id when running on Paper/Spigot or a ScheduledTask when running on Folia or null if can't schedule
      */
     public static Object runSyncDelayedTask(Plugin plugin, Consumer<Object> run, long delay) {
+        if (plugin == null || run == null) {
+            NCPAPIProvider.getNoCheatPlusAPI().getLogManager()
+                    .warning(Streams.STATUS, "runSyncDelayedTask called with null argument.");
+            return null;
+        }
         if (!isFoliaServer) {
             return Bukkit.getScheduler().scheduleSyncDelayedTask(plugin, () -> run.accept(null), delay);
         }
@@ -158,7 +167,9 @@ public class Folia {
             Object taskInfo = executeMethod.invoke(syncScheduler, plugin, run, delay);
             return taskInfo;
         } catch (Exception e) {
-            e.printStackTrace();
+            LogManager logManager = NCPAPIProvider.getNoCheatPlusAPI().getLogManager();
+            logManager.warning(Streams.STATUS, "Failed to schedule delayed task: " + e.getClass().getSimpleName());
+            logManager.warning(Streams.STATUS, e);
         }
         return null;
     }
@@ -185,6 +196,11 @@ public class Folia {
      * @return An int represent for task id when running on Paper/Spigot or a ScheduledTask when running on Folia or null if can't schedule
      */
     public static Object runSyncDelayedTaskForEntity(Entity entity, Plugin plugin, Consumer<Object> run, Runnable retired, long delay) {
+        if (entity == null || plugin == null || run == null) {
+            NCPAPIProvider.getNoCheatPlusAPI().getLogManager()
+                    .warning(Streams.STATUS, "runSyncDelayedTaskForEntity called with null argument.");
+            return null;
+        }
         if (!isFoliaServer) {
             return Bukkit.getScheduler().scheduleSyncDelayedTask(plugin, () -> run.accept(null), delay);
         }
@@ -198,7 +214,9 @@ public class Folia {
             Object taskInfo = executeMethod.invoke(syncEntityScheduler, plugin, run, retired, delay);
             return taskInfo;
         } catch (Exception e) {
-            e.printStackTrace();
+            LogManager logManager = NCPAPIProvider.getNoCheatPlusAPI().getLogManager();
+            logManager.warning(Streams.STATUS, "Failed to schedule entity task: " + e.getClass().getSimpleName());
+            logManager.warning(Streams.STATUS, e);
         }
         return null;
     }
