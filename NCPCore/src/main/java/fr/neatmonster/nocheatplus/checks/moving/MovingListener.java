@@ -660,9 +660,13 @@ public class MovingListener extends CheckListener implements TickListener, IRemo
      * @param event
      * @return If cancelled/done, i.e. not to process further split moves.
      */
-    private boolean checkPlayerMove(final Player player, final Location from, final Location to, final int multiMoveCount, 
-                                    final PlayerMoveInfo moveInfo, final boolean debug, final MovingData data, 
+    private boolean checkPlayerMove(final Player player, final Location from, final Location to, final int multiMoveCount,
+                                    final PlayerMoveInfo moveInfo, final boolean debug, final MovingData data,
                                     final MovingConfig cc, final IPlayerData pData, final PlayerMoveEvent event) {
+
+        if (player == null || from == null || to == null) {
+            return false;
+        }
 
         Location newTo = null;
         final PlayerMoveData thisMove = data.playerMoves.getCurrentMove();
@@ -712,18 +716,13 @@ public class MovingListener extends CheckListener implements TickListener, IRemo
         //////////////////////////////////////////////
         // HOT FIX - for VehicleLeaveEvent missing. //
         //////////////////////////////////////////////
-        if (data.wasInVehicle) {
-            vehicleChecks.onVehicleLeaveMiss(player, data, cc, pData);
-        }
+        handleVehicleLeave(player, data, cc, pData);
 
 
         ////////////////////////////////////
         // Set some data for this move.   //
         ////////////////////////////////////
-        thisMove.set(pFrom, pTo);
-        if (multiMoveCount > 0) {
-            thisMove.multiMoveCount = multiMoveCount;
-        }
+        initializeMove(thisMove, pFrom, pTo, multiMoveCount);
     
 
         ////////////////////////////
@@ -731,18 +730,14 @@ public class MovingListener extends CheckListener implements TickListener, IRemo
         ////////////////////////////
         // Jump amplifier should be set in PlayerMoveData, and/or only get updated for lift off (?).
         // same for speed (once medium is introduced).
-        final double jumpAmplifier = aux.getJumpAmplifier(player);
-        if (jumpAmplifier > data.jumpAmplifier) {
-            data.jumpAmplifier = jumpAmplifier;
-        }
+        final double jumpAmplifier = updateJumpAmplifier(player, data);
 
 
         ////////////////////////////////////////////////
         // Velocity tick (decrease + invalidation).   //
         ///////////////////////////////////////////////
         // Rework to generic (?) queued velocity entries: activation + invalidation
-        final int tick = TickTask.getTick();
-        applyVelocityAdjustments(data, cc, tick);
+        final int tick = handleVelocityTick(data, cc);
 
 
         ////////////////////////////////////
@@ -757,163 +752,26 @@ public class MovingListener extends CheckListener implements TickListener, IRemo
         ////////////////////////////////////////////////////////////////////////
         // Pre-check checks (hum), either for cf or for sf.                   //
         ////////////////////////////////////////////////////////////////////////
-        boolean checkNf = true;
-        BounceType verticalBounce = BounceType.NO_BOUNCE;
-        final boolean useBlockChangeTracker;
-        final double previousSetBackY;
-        final boolean checkPassable = pData.isCheckActive(CheckType.MOVING_PASSABLE, player);
-
-        // 1: Hot fix: Entering end portal from bottom.
-        if (lastMove.to.getWorldName() != null && !lastMove.to.getWorldName().equals(thisMove.from.getWorldName())) {
-
-            if (TrigUtil.distance(pFrom, pTo) > 5.5) {
-                newTo = data.getSetBack(from);
-                checkNf = false;
-                NCPAPIProvider.getNoCheatPlusAPI().getLogManager().warning(Streams.STATUS, CheckUtils.getLogMessagePrefix(player, CheckType.MOVING) + " Player move end point seems to be set wrongly.");
-            }
-        }
-        
-        // 2: Proactive reset of elytraBoost (MC 1.11.2).
-        if (data.fireworksBoostDuration > 0) {
-            if (!lastMove.valid 
-                || (cc.resetFwOnground && (lastMove.flyCheck != CheckType.MOVING_CREATIVEFLY || lastMove.modelFlying != thisMove.modelFlying))
-                || data.fireworksBoostTickExpire < tick) {
-                data.fireworksBoostDuration = 0;
-            }
-            else data.fireworksBoostDuration --;
-        }
-        
-        // 3: Set time resolutions and various counters.
-        // 3.1: Liquid tick time.
-        if (pFrom.isInLiquid()) data.liqtick = data.liqtick < 10 ? data.liqtick + 1 : data.liqtick > 0 ? data.liqtick - 1 : 0; 
-        else data.liqtick = data.liqtick > 0 ? data.liqtick - 2 : 0;
-
-        // 3.2: Set riptiding time.
-        if (Bridge1_13.isRiptiding(player)) data.timeRiptiding = System.currentTimeMillis();
-
-        // 3.3: Set bubble stream counter
-        // Count how long one is getting pushed by a bubble stream (cap at 50)
-        if (!pFrom.isDraggedByBubbleStream() && !pTo.isDraggedByBubbleStream() 
-            && (pFrom.isInBubbleStream() || pTo.isInBubbleStream()) 
-            && thisMove.yDistance > 0.0 && data.insideBubbleStreamCount <= 50) {
-            data.insideBubbleStreamCount++ ;
-        }
-        // Decrease counter
-        if (data.insideBubbleStreamCount > 0) {
-            // Invalidate
-            if (!lastMove.valid || lastMove.flyCheck != CheckType.MOVING_SURVIVALFLY
-                || !data.liftOffEnvelope.name().startsWith("LIMIT")) {
-                data.insideBubbleStreamCount = 0;
-            }
-            // Left stream or player is descending, decrease.
-            else if (!pFrom.isInBubbleStream() && !pTo.isInBubbleStream() || thisMove.yDistance < 0.0) {
-                data.insideBubbleStreamCount-- ; 
-            }
-            // (else keep)
-        }
-        
-        // 4: Workaround for 1.14+ exiting vehicles.
-        if (data.lastVehicleType != null && thisMove.distanceSquared < 5) {
-            data.setSetBack(from);
-            data.addHorizontalVelocity(new AccountEntry(thisMove.hDistance, 1, 1));
-            data.addVerticalVelocity(new SimpleEntry(thisMove.yDistance, 1));
-            //data.addVerticalVelocity(new SimpleEntry(-0.16, 2));
-            data.lastVehicleType = null;
-        }
-        
-        // 5: Pre-checks relevant to Sf or Cf.
-        if (checkSf || checkCf) {
-            previousSetBackY = data.hasSetBack() ? data.getSetBackY() : Double.NEGATIVE_INFINITY;
-            MovingUtil.checkSetBack(player, pFrom, data, pData, this); // Ensure we have a set back set.
-
-            // 5.1: Check for special cross world teleportation issues with the end.
-            if (data.crossWorldFrom != null) {
-                if (!TrigUtil.isSamePosAndLook(pFrom, pTo) && TrigUtil.isSamePosAndLook(pTo, data.crossWorldFrom)) {
-                    // Assume to (and possibly the player location) to be set to the location the player teleported from within the other world.
-                    newTo = data.getSetBack(from); // (OK, cross-world)
-                    checkNf = false;
-                    NCPAPIProvider.getNoCheatPlusAPI().getLogManager().warning(Streams.STATUS, CheckUtils.getLogMessagePrefix(player, CheckType.MOVING) + " Player move end point seems to be set wrongly.");
-                }
-                // Always reset.
-                data.crossWorldFrom = null;
-            }
-
-            // 5.2: Extreme move check (sf or cf is precondition, should have their own config/actions later).
-            if (newTo == null && ((Math.abs(thisMove.yDistance) > Magic.EXTREME_MOVE_DIST_VERTICAL) || thisMove.hDistance > Magic.EXTREME_MOVE_DIST_HORIZONTAL)) {
-                // Test for friction and velocity.
-                newTo = checkExtremeMove(player, pFrom, pTo, data, cc);
-                if (newTo != null) {
-                    thisMove.flyCheck = checkSf ? CheckType.MOVING_SURVIVALFLY : CheckType.MOVING_CREATIVEFLY;
-                }
-            }
-            
-            // 5.3: Set BCT
-            // NOTE: Block change activity has to be checked *after* the extreme move checks run.
-            useBlockChangeTracker = newTo == null && cc.trackBlockMove && (checkPassable || checkSf || checkCf) && blockChangeTracker.hasActivityShuffled(from.getWorld().getUID(), pFrom, pTo, 1.5625);
-
-            // 5.4: Check jumping on things like slime blocks.
-            // Detect bounce type / use prepared bounce.
-            if (newTo == null) {
-                // Mixed ground (e.g. slime blocks + slabs), specifically on pushing.
-                // More on fall damage. What with sneaking + past states?
-                // With past states: What does jump effects do here?
-                if (thisMove.yDistance < 0.0) {
-                    // Prepare bounce: The center of the player must be above the block.
-                    // Common pre-conditions.
-                    // Check if really leads to calling the method for pistons (checkBounceEnvelope vs. push).
-                    if (!survivalFly.isReallySneaking(player) && BounceUtil.checkBounceEnvelope(player, pFrom, pTo, data, cc, pData)) {
-                        // Check other side conditions (fluids, web, max. distance to the block top (!))
-                        // Classic static bounce.
-                        if ((pTo.getBlockFlags() & BlockFlags.F_BOUNCE25) != 0L) {
-                            /* May need to adapt within this method, if "push up" happened and the trigger had been ordinary */
-                            verticalBounce = BounceType.STATIC;
-                            checkNf = false; // Skip NoFall.
-                        }
-                        
-                        if (verticalBounce == BounceType.NO_BOUNCE && useBlockChangeTracker) { 
-                            if (BounceUtil.checkPastStateBounceDescend(player, pFrom, pTo, thisMove, lastMove, tick, data, cc, blockChangeTracker) != BounceType.NO_BOUNCE) {
-                                // Not set verticalBounce, as this is ascending and it's already force used.
-                                checkNf = false; // Skip NoFall.
-                            }
-                        }
-                    }
-                }
-                else {
-                    if (
-                            // Prepared bounce support.
-                            data.verticalBounce != null && BounceUtil.onPreparedBounceSupport(player, from, to, thisMove, lastMove, tick, data)
-                            // Past state bounce (includes prepending velocity / special calls).
-                            || useBlockChangeTracker 
-                            // 0-dist moves count in: && thisMove.yDistance >= 0.415 
-                            && thisMove.yDistance <= 1.515
-                        ) {
-                        verticalBounce = BounceUtil.checkPastStateBounceAscend(player, pFrom, pTo, thisMove, lastMove, tick, pData, this, data, cc, blockChangeTracker);
-                        if (verticalBounce != BounceType.NO_BOUNCE) checkNf = false;
-                    }
-                }
-
-                // Might a bit tricky when it use to ensure no bounce check is active, not noFall checking here
-                if (useBlockChangeTracker && checkNf && !checkPastStateVerticalPush(player, pFrom, pTo, thisMove, lastMove, tick, debug, data, cc)) {
-                    checkPastStateHorizontalPush(player, pFrom, pTo, thisMove, lastMove, tick, debug, data, cc);
-                }
-            }
-        }
-        // No Sf or Cf check
-        else {
-            // Might still allow block change tracker with only passable enabled.
-            useBlockChangeTracker = false;
-            previousSetBackY = Double.NEGATIVE_INFINITY;
-        }
+        PreChecksResult pre = runPreChecks(player, from, to, pFrom, pTo, thisMove, lastMove,
+                checkSf, checkCf, data, cc, pData, tick, debug);
+        boolean checkNf = pre.checkNf;
+        BounceType verticalBounce = pre.verticalBounce;
+        boolean useBlockChangeTracker = pre.useBlockChangeTracker;
+        double previousSetBackY = pre.previousSetBackY;
+        boolean checkPassable = pre.checkPassable;
+        newTo = pre.newTo;
 
         // 6: Check passable first to prevent set back override.
         boolean mightSkipNoFall = false;
-        if (newTo == null && checkPassable && player.getGameMode() != BridgeMisc.GAME_MODE_SPECTATOR) {
-            newTo = runPassableCheck(player, pFrom, pTo, data, cc, pData, tick, useBlockChangeTracker);
-            if (newTo != null) {
+        if (newTo == null) {
+            final Location pass = performPassableCheck(player, pFrom, pTo, data, cc, pData, tick,
+                    useBlockChangeTracker, checkPassable);
+            if (pass != null) {
+                newTo = pass;
                 mightSkipNoFall = true;
             }
         }
-        
+
         // 7/8: Handle explosion velocity and bubble column launch.
         applyVelocityAdjustments(player, thisMove, lastMove, pFrom, tick, data, cc, checkSf, debug);
 
@@ -1195,6 +1053,35 @@ public class MovingListener extends CheckListener implements TickListener, IRemo
         VelocityProcessor.handleVelocity(player, thisMove, lastMove, data, cc, tick, checkSf, debug, pFrom);
     }
 
+    private void handleVehicleLeave(final Player player, final MovingData data,
+            final MovingConfig cc, final IPlayerData pData) {
+        if (data.wasInVehicle) {
+            vehicleChecks.onVehicleLeaveMiss(player, data, cc, pData);
+        }
+    }
+
+    private void initializeMove(final PlayerMoveData move, final PlayerLocation pFrom,
+            final PlayerLocation pTo, final int multiMoveCount) {
+        move.set(pFrom, pTo);
+        if (multiMoveCount > 0) {
+            move.multiMoveCount = multiMoveCount;
+        }
+    }
+
+    private double updateJumpAmplifier(final Player player, final MovingData data) {
+        final double jumpAmplifier = aux.getJumpAmplifier(player);
+        if (jumpAmplifier > data.jumpAmplifier) {
+            data.jumpAmplifier = jumpAmplifier;
+        }
+        return jumpAmplifier;
+    }
+
+    private int handleVelocityTick(final MovingData data, final MovingConfig cc) {
+        final int tick = TickTask.getTick();
+        applyVelocityAdjustments(data, cc, tick);
+        return tick;
+    }
+
     private void updateBlockChangeTracker(final Player player, final PlayerLocation pTo, final MovingData data,
             final boolean useBlockChangeTracker, final int tick, final boolean debug) {
         if (useBlockChangeTracker && data.blockChangeRef.firstSpanEntry != null) {
@@ -1214,6 +1101,151 @@ public class MovingListener extends CheckListener implements TickListener, IRemo
                 data.jumpAmplifier = jumpAmplifier;
             }
         }
+    }
+
+    private static class PreChecksResult {
+        Location newTo;
+        boolean checkNf = true;
+        BounceType verticalBounce = BounceType.NO_BOUNCE;
+        boolean useBlockChangeTracker;
+        double previousSetBackY = Double.NEGATIVE_INFINITY;
+        boolean checkPassable;
+    }
+
+    private PreChecksResult runPreChecks(final Player player, final Location from, final Location to,
+            final PlayerLocation pFrom, final PlayerLocation pTo, final PlayerMoveData thisMove,
+            final PlayerMoveData lastMove, final boolean checkSf, final boolean checkCf, final MovingData data,
+            final MovingConfig cc, final IPlayerData pData, final int tick, final boolean debug) {
+
+        final PreChecksResult result = new PreChecksResult();
+        result.checkPassable = pData.isCheckActive(CheckType.MOVING_PASSABLE, player);
+
+        // 1: Hot fix: Entering end portal from bottom.
+        if (lastMove.to.getWorldName() != null && !lastMove.to.getWorldName().equals(thisMove.from.getWorldName())) {
+            if (TrigUtil.distance(pFrom, pTo) > 5.5) {
+                result.newTo = data.getSetBack(from);
+                result.checkNf = false;
+                NCPAPIProvider.getNoCheatPlusAPI().getLogManager().warning(Streams.STATUS,
+                        CheckUtils.getLogMessagePrefix(player, CheckType.MOVING)
+                                + " Player move end point seems to be set wrongly.");
+            }
+        }
+
+        // 2: Proactive reset of elytraBoost (MC 1.11.2).
+        if (data.fireworksBoostDuration > 0) {
+            if (!lastMove.valid
+                    || (cc.resetFwOnground && (lastMove.flyCheck != CheckType.MOVING_CREATIVEFLY
+                            || lastMove.modelFlying != thisMove.modelFlying))
+                    || data.fireworksBoostTickExpire < tick) {
+                data.fireworksBoostDuration = 0;
+            } else {
+                data.fireworksBoostDuration--;
+            }
+        }
+
+        // 3: Set time resolutions and various counters.
+        if (pFrom.isInLiquid()) {
+            data.liqtick = data.liqtick < 10 ? data.liqtick + 1 : data.liqtick > 0 ? data.liqtick - 1 : 0;
+        } else {
+            data.liqtick = data.liqtick > 0 ? data.liqtick - 2 : 0;
+        }
+        if (Bridge1_13.isRiptiding(player)) {
+            data.timeRiptiding = System.currentTimeMillis();
+        }
+        if (!pFrom.isDraggedByBubbleStream() && !pTo.isDraggedByBubbleStream()
+                && (pFrom.isInBubbleStream() || pTo.isInBubbleStream())
+                && thisMove.yDistance > 0.0 && data.insideBubbleStreamCount <= 50) {
+            data.insideBubbleStreamCount++;
+        }
+        if (data.insideBubbleStreamCount > 0) {
+            if (!lastMove.valid || lastMove.flyCheck != CheckType.MOVING_SURVIVALFLY
+                    || !data.liftOffEnvelope.name().startsWith("LIMIT")) {
+                data.insideBubbleStreamCount = 0;
+            } else if (!pFrom.isInBubbleStream() && !pTo.isInBubbleStream() || thisMove.yDistance < 0.0) {
+                data.insideBubbleStreamCount--;
+            }
+        }
+
+        // 4: Workaround for 1.14+ exiting vehicles.
+        if (data.lastVehicleType != null && thisMove.distanceSquared < 5) {
+            data.setSetBack(from);
+            data.addHorizontalVelocity(new AccountEntry(thisMove.hDistance, 1, 1));
+            data.addVerticalVelocity(new SimpleEntry(thisMove.yDistance, 1));
+            data.lastVehicleType = null;
+        }
+
+        if (checkSf || checkCf) {
+            result.previousSetBackY = data.hasSetBack() ? data.getSetBackY() : Double.NEGATIVE_INFINITY;
+            MovingUtil.checkSetBack(player, pFrom, data, pData, this);
+
+            if (data.crossWorldFrom != null) {
+                if (!TrigUtil.isSamePosAndLook(pFrom, pTo) && TrigUtil.isSamePosAndLook(pTo, data.crossWorldFrom)) {
+                    result.newTo = data.getSetBack(from);
+                    result.checkNf = false;
+                    NCPAPIProvider.getNoCheatPlusAPI().getLogManager().warning(Streams.STATUS,
+                            CheckUtils.getLogMessagePrefix(player, CheckType.MOVING)
+                                    + " Player move end point seems to be set wrongly.");
+                }
+                data.crossWorldFrom = null;
+            }
+
+            if (result.newTo == null && (Math.abs(thisMove.yDistance) > Magic.EXTREME_MOVE_DIST_VERTICAL
+                    || thisMove.hDistance > Magic.EXTREME_MOVE_DIST_HORIZONTAL)) {
+                result.newTo = checkExtremeMove(player, pFrom, pTo, data, cc);
+                if (result.newTo != null) {
+                    thisMove.flyCheck = checkSf ? CheckType.MOVING_SURVIVALFLY : CheckType.MOVING_CREATIVEFLY;
+                }
+            }
+
+            result.useBlockChangeTracker = result.newTo == null && cc.trackBlockMove
+                    && (result.checkPassable || checkSf || checkCf)
+                    && blockChangeTracker.hasActivityShuffled(from.getWorld().getUID(), pFrom, pTo, 1.5625);
+
+            if (result.newTo == null) {
+                if (thisMove.yDistance < 0.0) {
+                    if (!survivalFly.isReallySneaking(player)
+                            && BounceUtil.checkBounceEnvelope(player, pFrom, pTo, data, cc, pData)) {
+                        if ((pTo.getBlockFlags() & BlockFlags.F_BOUNCE25) != 0L) {
+                            result.verticalBounce = BounceType.STATIC;
+                            result.checkNf = false;
+                        }
+                        if (result.verticalBounce == BounceType.NO_BOUNCE && result.useBlockChangeTracker) {
+                            if (BounceUtil.checkPastStateBounceDescend(player, pFrom, pTo, thisMove, lastMove, tick,
+                                    data, cc, blockChangeTracker) != BounceType.NO_BOUNCE) {
+                                result.checkNf = false;
+                            }
+                        }
+                    }
+                } else if ((data.verticalBounce != null
+                        && BounceUtil.onPreparedBounceSupport(player, from, to, thisMove, lastMove, tick, data))
+                        || result.useBlockChangeTracker && thisMove.yDistance <= 1.515) {
+                    result.verticalBounce = BounceUtil.checkPastStateBounceAscend(player, pFrom, pTo, thisMove,
+                            lastMove, tick, pData, this, data, cc, blockChangeTracker);
+                    if (result.verticalBounce != BounceType.NO_BOUNCE) {
+                        result.checkNf = false;
+                    }
+                }
+
+                if (result.useBlockChangeTracker && result.checkNf
+                        && !checkPastStateVerticalPush(player, pFrom, pTo, thisMove, lastMove, tick, debug, data,
+                                cc)) {
+                    checkPastStateHorizontalPush(player, pFrom, pTo, thisMove, lastMove, tick, debug, data, cc);
+                }
+            }
+        } else {
+            result.useBlockChangeTracker = false;
+        }
+
+        return result;
+    }
+
+    private Location performPassableCheck(final Player player, final PlayerLocation pFrom,
+            final PlayerLocation pTo, final MovingData data, final MovingConfig cc, final IPlayerData pData,
+            final int tick, final boolean useBct, final boolean checkPassable) {
+        if (checkPassable && player.getGameMode() != BridgeMisc.GAME_MODE_SPECTATOR) {
+            return runPassableCheck(player, pFrom, pTo, data, cc, pData, tick, useBct);
+        }
+        return null;
     }
 
     
