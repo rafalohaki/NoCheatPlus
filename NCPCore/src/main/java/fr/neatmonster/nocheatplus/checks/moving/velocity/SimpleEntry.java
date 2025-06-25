@@ -41,7 +41,6 @@ public class SimpleEntry {
     /** Count down for invalidation. */
     public int actCount;
 
-    // TODO: Add more conditions (max tick, real time ?)
 
     public SimpleEntry(double value, int actCount) {
         this(TickTask.getTick(), value, actCount);

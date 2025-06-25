@@ -29,7 +29,7 @@ import fr.neatmonster.nocheatplus.players.IPlayerData;
  */
 public class FlyingFrequency extends Check {
 
-    // Thresholds for firing moving events (CraftBukkit). TODO: Move to some model thing in NCPCore, possibly a ServerConfig?
+    // Thresholds for firing moving events (CraftBukkit).
     public static final double minMoveDistSq = 1f / 256; // PlayerConnection magic.
     public static final float minLookChange = 10f;
 

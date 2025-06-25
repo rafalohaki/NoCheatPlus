@@ -76,7 +76,7 @@ public class InstantBow extends Check {
         }
         else if (valid && data.instantBowInteract > now) {
             // Security check if time ran backwards.
-            // TODO: Maybe this can be removed, though TickTask does not reset at the exact moment.
+            // Potentially removable as TickTask resets slightly later.
         }
         else {
             // Account for server side lag.
@@ -86,7 +86,7 @@ public class InstantBow extends Check {
                             ? (long) (TickTask.getLag(expectedPullDuration, true) * pullDuration) 
                             : pullDuration) : 0;
             if (correctedPullduration < expectedPullDuration) {
-                // TODO: Consider: Allow one time but set yawrate penalty time ?
+                // Consider allowing one fast shot but apply yawrate penalty timing.
                 final double difference = (expectedPullDuration - pullDuration) / 100D;
 
                 // Player was too fast, increase their violation level.

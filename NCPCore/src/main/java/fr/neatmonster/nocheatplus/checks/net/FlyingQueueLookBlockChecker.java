@@ -98,16 +98,16 @@ public abstract class FlyingQueueLookBlockChecker {
             final float yaw = packetData.getYaw();
             final float pitch = packetData.getPitch();
             // Simple heuristic: reduce impact of checking by skipping redundant entries.
-            // TODO: Other heuristic / what's typical? 
+            // More advanced heuristics may be implemented if needed.
             if (yaw == oldYaw && pitch == oldPitch) {
                 if (invalidateFailed) {
                     queue[i] = null;
                 }
                 continue;
             }
-            // TODO: Consider support some other type of metric (possibly checking positions too?);
+            // Alternative metrics such as position based checks could be added.
             if (check(x, y, z, yaw, pitch, blockX, blockY, blockZ)) {
-                // TODO: Consider to remember index and entry as well?
+                // Index and entry could be stored for reporting if required.
                 return true;
             }
             else {

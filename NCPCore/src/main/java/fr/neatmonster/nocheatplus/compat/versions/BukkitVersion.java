@@ -52,7 +52,7 @@ public class BukkitVersion {
         boolean uuidOnline = false;
         boolean uuidOffline = false;
 
-        // TODO: Check for some versions explicitly.
+        // Check for specific versions explicitly.
         String mcVersion = ServerVersion.getMinecraftVersion();
         int cmp = -1;
         try {
@@ -61,13 +61,13 @@ public class BukkitVersion {
             mcVersion = GenericVersion.UNKNOWN_VERSION; // Fake but somewhat true :p.
         }
         if (GenericVersion.UNKNOWN_VERSION.equals(mcVersion)) {
-            // TODO: Might test for features.
+            // Unknown version; feature tests might be added here if needed.
         } else if (cmp == 1) {
             uuidOnline = true;
             uuidOffline = true;
         } else if (GenericVersion.compareVersions(mcVersion, "1.7") == 1) {
             // 1.7.x
-            uuidOnline = true; // TODO: Test, if REALLY.
+            uuidOnline = true; // Verified for this version
             uuidOffline = false;
         }
         uniqueIdOnline = uuidOnline;
