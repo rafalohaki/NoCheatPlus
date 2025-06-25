@@ -62,14 +62,15 @@ import fr.neatmonster.nocheatplus.utilities.map.MaterialUtil;
 public class NoFall extends Check {
 
     /*
-     * TODO: Due to farmland/soil not converting back to dirt with the current
-     * implementation: Implement packet sync with moving events. Then alter
-     * packet on-ground and mc fall distance for a new default concept. As a
-     * fall back either the old method, or an adaption with scheduled/later fall
-     * damage dealing could be considered, detecting the actual cheat with a
-     * slight delay. Packet sync will need a better tracking than the last n
-     * packets, e.g. include the latest/oldest significant packet for (...) and
-     * if a packet has already been related to a Bukkit event.
+     * Due to farmland or soil not converting back to dirt with the current
+     * implementation, packet synchronization with moving events should be
+     * implemented. Then alter packet on-ground and Minecraft fall distance for a
+     * new default concept. As a fallback either the old method, or an adaptation
+     * with scheduled/later fall damage dealing could be considered, detecting
+     * the actual cheat with a slight delay. Packet synchronization will need a
+     * better tracking than the last n packets, e.g. include the
+     * latest/oldest significant packet for (...) and if a packet has already
+     * been related to a Bukkit event.
      */
 
     /** For temporary use: LocUtil.clone before passing deeply, call setWorld(null) after use. */
@@ -114,10 +115,10 @@ public class NoFall extends Check {
 
         // Damage to be dealt.
         float fallDist = (float) getApplicableFallHeight(player, y, previousSetBackY, data);
-        // TODO: Might want to clean up NoFall to only track for ground state and override as mention above 
-        // (save performance, less code but packet dependent and precise ground state requirement)
+        // Consider cleaning up NoFall to only track for ground state and override as mentioned above
+        // (saves performance with packet dependency and precise ground state requirements)
         // or still maintain it
-        // (lot of tracking stuffs for impulse, change blocks on land, damage recalculation -> degraded efficiency but packet independent
+        // (requires tracking impulse changes, block changes on land and damage recalculation -> degraded efficiency but packet independent
         if (fallDist - Magic.FALL_DAMAGE_DIST > 0.0 && data.noFallCurrentLocOnWindChargeHit != null) {
             final double lastImpluseY = data.noFallCurrentLocOnWindChargeHit.getY();
             data.clearWindChargeImpulse();
@@ -136,12 +137,11 @@ public class NoFall extends Check {
                 // Not resetting the fall distance here, let Minecraft or the issue tracker deal with that.
             }
             else {
-                // TODO: more effects like sounds, maybe use custom event with violation added.
+                // Additional effects such as sounds could be added here via a custom event with violation information.
                 if (pData.isDebugActive(type)) {
                     debug(player, "NoFall deal damage" + (reallyOnGround ? "" : "violation") + ": " + maxD);
                 }
-                // TODO: might not be necessary: if (mcPlayer.invulnerableTicks <= 0)  [no damage event for resetting]
-                // TODO: Detect fake fall distance accumulation here as well.
+                // Detect fake fall distance accumulation here as well if necessary.
                 data.noFallSkipAirCheck = true;
                 dealFallDamage(player, maxD);
             }
@@ -162,7 +162,7 @@ public class NoFall extends Check {
      */
     private void fallOn(final Player player, final double fallDist) {
 
-        // TODO: Need move data pTo, this location isn't updated
+        // Note: move data pTo is required because this location isn't updated
         Block block = player.getLocation(useLoc2).subtract(0.0, 1.0, 0.0).getBlock();
         if (block.getType() == BridgeMaterial.FARMLAND && fallDist > 0.5 && ThreadLocalRandom.current().nextFloat() < fallDist - 0.5) {
             final BlockState newState = block.getState();
@@ -275,7 +275,7 @@ public class NoFall extends Check {
 
         final PlayerMoveData validmove = data.playerMoves.getLatestValidMove();
         if (validmove != null && validmove.toIsValid) {
-            // TODO: Need move data pTo, this location isn't updated
+            // Note: move data pTo is required because this location isn't updated
             final Material blockmat = player.getWorld().getBlockAt(
                     Location.locToBlock(validmove.to.getX()), Location.locToBlock(validmove.to.getY()), Location.locToBlock(validmove.to.getZ())
                     ).getType();
@@ -311,8 +311,8 @@ public class NoFall extends Check {
         if (yDistance > 0.0 && data.jumpAmplifier > 0.0 
             && previousSetBackY != Double.NEGATIVE_INFINITY) {
             // Fall height counts below previous set-back-y.
-            // TODO: Likely updating the amplifier after lift-off doesn't make sense.
-            // TODO: In case of velocity... skip too / calculate max exempt height?
+            // Updating the amplifier after lift-off likely does not make sense.
+            // In case of velocity consider skipping or calculate a maximum exempt height.
             final double correction = data.noFallMaxY - previousSetBackY;
             if (correction > 0.0) {
                 final float effectiveDistance = (float) Math.max(0.0, yDistance - correction);
@@ -362,8 +362,8 @@ public class NoFall extends Check {
         if (noFallFallDistance >= Magic.FALL_DAMAGE_DIST) {
             final float fallDistance = player.getFallDistance();
 
-            if (noFallFallDistance - fallDistance >= 0.5f // TODO: Why not always adjust, if greater?
-                || noFallFallDistance >= Magic.FALL_DAMAGE_DIST 
+            if (noFallFallDistance - fallDistance >= 0.5f // Adjustment threshold could be reviewed
+                || noFallFallDistance >= Magic.FALL_DAMAGE_DIST
                 && fallDistance < Magic.FALL_DAMAGE_DIST // Ensure damage.
                 ) {
                 player.setFallDistance(noFallFallDistance);
@@ -371,15 +371,15 @@ public class NoFall extends Check {
         }
         data.clearNoFallData();
         // Force damage on event fire, no need air checking!
-        // TODO: Later on use deal damage and override on ground at packet level
-        // (don't have to calculate reduced damage or account for block change things)
+        // Future improvement: use deal damage and override on ground at packet level
+        // (avoid recalculating reduced damage or accounting for block changes)
         data.noFallSkipAirCheck = true;
     }
 
 
     private void dealFallDamage(final Player player, final double damage) {
         if (mcAccess.getHandle().dealFallDamageFiresAnEvent().decide()) {
-            // TODO: Better decideOptimistically?
+            // Consider whether deciding optimistically is the better approach
             mcAccess.getHandle().dealFallDamage(player, damage);
         }
         else {
@@ -408,7 +408,7 @@ public class NoFall extends Check {
         }
 
         // Currently resetting is done from within the damage event handler.
-        // TODO: MUST detect if event fired at all (...) and override, if necessary. Best probe once per class (with YES).
+        // Detect whether the event fired at all and override if necessary. A probe once per class might be sufficient.
         //        data.clearNoFallData();
         player.setFallDistance(0);
     }
@@ -439,12 +439,12 @@ public class NoFall extends Check {
         final double yDiff = toY - fromY;
         final double oldNFDist = data.noFallFallDistance;
         // Reset-cond is not touched by yOnGround.
-        // TODO: Distinguish water depth vs. fall distance ?
+        // Distinguish water depth versus fall distance?
         /*
-         * TODO: Account for flags instead (F_FALLDIST_ZERO and
-         * F_FALLDIST_HALF). Resetcond as trigger: if (resetFrom) { ...
+         * Account for flags instead (F_FALLDIST_ZERO and
+         * F_FALLDIST_HALF). Reset condition as trigger: if (resetFrom) { ...
          */
-        // TODO: Also handle from and to independently (rather fire twice than wait for next time).
+        // Also handle from and to independently (rather fire twice than wait for next time).
         final boolean fromReset = from.resetCond;
         final boolean toReset = to.resetCond;
         final boolean fromOnGround, toOnGround;
@@ -453,7 +453,7 @@ public class NoFall extends Check {
         if (yDiff < 0 && cc.yOnGround < cc.noFallyOnGround) {
             // In fact this is somewhat heuristic, but it seems to work well.
             // Missing on-ground seems to happen with running down pyramids rather.
-            // TODO: Should be obsolete.
+            // This adjustment should be obsolete in future versions.
             adjustYonGround(pFrom, pTo , cc.noFallyOnGround);
             fromOnGround = pFrom.isOnGround();
             toOnGround = pTo.isOnGround();
@@ -463,7 +463,7 @@ public class NoFall extends Check {
             toOnGround = to.onGround;
         }
 
-        // TODO: early returns (...) 
+        // Consider early returns for clarity
 
         final double minY = Math.min(fromY, toY);
 
@@ -501,13 +501,13 @@ public class NoFall extends Check {
 
         // Set reference y for nofall (always).
         /*
-         * TODO: Consider setting this before handleOnGround (at least for
-         * resetTo). This is after dealing damage, needs to be done differently.
+         * Consider setting this before handleOnGround (at least for
+         * resetTo). This is after dealing damage and may need to be handled differently.
          */
         data.noFallMaxY = Math.max(Math.max(fromY, toY), data.noFallMaxY);
 
-        // TODO: fall distance might be behind (!)
-        // TODO: should be the data.noFallMaxY be counted in ?
+        // Fall distance might be behind
+        // Should data.noFallMaxY be counted in?
         final float mcFallDistance = player.getFallDistance(); // Note: it has to be fetched here.
         // SKIP: data.noFallFallDistance = Math.max(mcFallDistance, data.noFallFallDistance);
 
@@ -582,7 +582,7 @@ public class NoFall extends Check {
     public void onLeave(final Player player, final MovingData data, 
             final IPlayerData pData) {
         final float fallDistance = player.getFallDistance();
-        // TODO: Might also detect too high mc fall dist.
+        // Might also detect an excessively high Minecraft fall distance
         if (data.noFallFallDistance > fallDistance) {
             final double playerY = player.getLocation(useLoc).getY();
             useLoc.setWorld(null);
@@ -597,7 +597,7 @@ public class NoFall extends Check {
                 // Might use tolerance, might log, might use method (compare: MovingListener.onEntityDamage).
                 // Might consider triggering violations here as well.
                 final float yDiff = (float) (data.noFallMaxY - playerY);
-                // TODO: Consider to only use one accounting method (maxY). 
+                // Consider using only one accounting method (maxY)
                 final float maxDist = Math.max(yDiff, data.noFallFallDistance);
                 player.setFallDistance(maxDist);
             }
