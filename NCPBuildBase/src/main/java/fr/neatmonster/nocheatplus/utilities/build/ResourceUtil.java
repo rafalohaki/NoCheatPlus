@@ -38,13 +38,11 @@ public class ResourceUtil {
      * @return content of the resource or {@code null} if not available
      */
     public static String fetchResource(final Class<?> clazz, final String path) {
-        final String className = clazz.getSimpleName() + ".class";
-        final String classPath = clazz.getResource(className).toString();
-        if (!classPath.startsWith("jar")) {
+        final URL codeSource = clazz.getProtectionDomain().getCodeSource().getLocation();
+        if (!codeSource.toString().endsWith(".jar")) {
             return null;
         }
-        final String absPath = classPath.substring(0, classPath.lastIndexOf('!') + 1)
-                + "/" + path;
+        final String absPath = "jar:" + codeSource.toExternalForm() + "!/" + path;
         try {
             final URL url = new URL(absPath);
             try (BufferedReader reader = new BufferedReader(new InputStreamReader((InputStream) url.getContent(), StandardCharsets.UTF_8))) {

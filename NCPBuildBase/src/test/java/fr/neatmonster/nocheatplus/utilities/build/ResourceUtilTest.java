@@ -2,7 +2,6 @@ package fr.neatmonster.nocheatplus.utilities.build;
 
 import static org.junit.Assert.*;
 
-import java.io.InputStream;
 import java.net.URL;
 import java.net.URLClassLoader;
 import java.nio.charset.StandardCharsets;
@@ -18,6 +17,7 @@ public class ResourceUtilTest {
 
     private Class<?> createJarWithResource() throws Exception {
         Path jar = Files.createTempFile("resource", ".jar");
+        jar.toFile().deleteOnExit();
         try (JarOutputStream jos = new JarOutputStream(Files.newOutputStream(jar))) {
             // Add ResourceUtil class from build output
             String classPath = "fr/neatmonster/nocheatplus/utilities/build/ResourceUtil.class";
@@ -31,8 +31,9 @@ public class ResourceUtilTest {
             jos.write("KEY=VALUE\n".getBytes(StandardCharsets.UTF_8));
             jos.closeEntry();
         }
-        URLClassLoader cl = new URLClassLoader(new URL[] { jar.toUri().toURL() }, null);
-        return cl.loadClass("fr.neatmonster.nocheatplus.utilities.build.ResourceUtil");
+        try (URLClassLoader cl = new URLClassLoader(new URL[] { jar.toUri().toURL() }, null)) {
+            return cl.loadClass("fr.neatmonster.nocheatplus.utilities.build.ResourceUtil");
+        }
     }
 
     @Test
