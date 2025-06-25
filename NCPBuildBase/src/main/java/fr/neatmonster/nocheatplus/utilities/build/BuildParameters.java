@@ -53,8 +53,11 @@ public class BuildParameters {
      */
     public static String getMappingValue(String path, String preset){
         String input = fileContents.get(path);
-        if (input == null) return preset;
-        else return input;
+        if (input == null) {
+            return preset;
+        } else {
+            return input;
+        }
     }
 
     /**
@@ -65,21 +68,31 @@ public class BuildParameters {
      */
     public static String getString(String path, String preset){
         String input = fileContents.get(path);
-        if (input == null) return preset;
-        else if (input.startsWith("${") && input.endsWith("}")) return preset;
-        else return input;
+        if (input == null) {
+            return preset;
+        } else if (input.startsWith("${") && input.endsWith("}")) {
+            return preset;
+        } else {
+            return input;
+        }
     }
 
     public static Boolean getBoolean(String path, Boolean preset){
         String input = fileContents.get(path);
-        if (input == null) return preset;
-        else return ResourceUtil.getBoolean(input, preset);
+        if (input == null) {
+            return preset;
+        } else {
+            return ResourceUtil.getBoolean(input, preset);
+        }
     }
 
     public static Integer getInteger(String path, Integer preset){
         String input = fileContents.get(path);
-        if (input == null) return preset;
-        else return ResourceUtil.getInteger(input, preset);
+        if (input == null) {
+            return preset;
+        } else {
+            return ResourceUtil.getInteger(input, preset);
+        }
     }
 
     //////////////////////
