@@ -70,7 +70,7 @@ public class BlockCacheSpigotCB1_8_R2 extends BlockCache {
         final int id = mat.getId();	
         final net.minecraft.server.v1_8_R2.Block block = net.minecraft.server.v1_8_R2.Block.getById(id);
         if (block == null) {
-            // TODO: Convention for null bounds -> full ?
+            // Return null if bounds are not available.
             return null;
         }
         final double[] shape = LegacyBlocks.getShape(this, mat, x, y, z, true);
@@ -84,7 +84,7 @@ public class BlockCacheSpigotCB1_8_R2 extends BlockCache {
     @Override
     public boolean standsOnEntity(final Entity entity, final double minX, final double minY, final double minZ, final double maxX, final double maxY, final double maxZ){
         try{
-            // TODO: Find some simplification!
+            // Potentially simplify this code path.
 
             final net.minecraft.server.v1_8_R2.Entity mcEntity  = ((CraftEntity) entity).getHandle();
 

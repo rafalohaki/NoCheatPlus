@@ -51,7 +51,8 @@ public class Logins extends Check implements IRemoveData{
         final long durBucket = 1000L * cc.loginsSeconds / 6;
         final ActionFrequency freq = getActionFrequency(player.getWorld().getName(), 6, durBucket, cc.loginsPerWorldCount);
         freq.update(now);
-        final boolean cancel = freq.score(1f) > cc.loginsLimit; // TODO: >= ...  This will be 1 after the first login (!).
+        // Using '>' leaves the score at 1 after the first login, so limits of 0 cancel immediately.
+        final boolean cancel = freq.score(1f) > cc.loginsLimit;
         if (!cancel) freq.add(1f);
         return cancel;
     }

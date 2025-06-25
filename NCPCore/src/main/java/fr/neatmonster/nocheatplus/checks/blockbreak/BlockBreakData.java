@@ -46,7 +46,7 @@ public class BlockBreakData extends ACheckData implements IDataOnReload {
     /** Tool that the block was clicked with, null for the case of air. */
     public Material clickedTool = null;
 
-    // TODO: use tick here too  ?
+    // Consider using the tick value here as well.
     public long    wasInstaBreak;
 
     public Timings stats;

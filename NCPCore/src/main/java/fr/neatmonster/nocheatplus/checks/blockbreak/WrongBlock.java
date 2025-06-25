@@ -54,7 +54,7 @@ public class WrongBlock extends Check {
         final boolean wrongBlock;
         final long now = System.currentTimeMillis();
         final boolean debug = pData.isDebugActive(type);
-        // TODO: Remove isInstaBreak argument or use it.
+        // The isInstaBreak argument should either be removed or utilized.
         if (dist == 0) {
             if (wrongTime) {
                 data.fastBreakBreakTime = now;
@@ -65,7 +65,7 @@ public class WrongBlock extends Check {
         }
         else if (dist == 1) {
             // One might to a concession in case of instant breaking.
-            // TODO: WHY ?
+            // Reason for this concession is not documented.
             if (now - data.wasInstaBreak < 60) {
                 if (debug) {
                     debug(player, "Skip on Manhattan 1 and wasInstaBreak within 60 ms.");

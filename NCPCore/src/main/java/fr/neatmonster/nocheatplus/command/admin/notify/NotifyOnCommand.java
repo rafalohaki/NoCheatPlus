@@ -39,7 +39,7 @@ public class NotifyOnCommand extends BaseCommand {
             return true;
         }
         if (!(sender instanceof Player)){
-            // TODO: Might implement if upvoted a lot.
+            // This command currently requires an online player.
             sender.sendMessage(CTAG + "Toggling notifications is only available for online players.");
             return true;
         }
