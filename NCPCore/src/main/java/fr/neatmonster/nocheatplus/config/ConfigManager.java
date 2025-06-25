@@ -143,7 +143,7 @@ public class ConfigManager {
         final File globalFile = new File(plugin.getDataFolder(), "config.yml");
         final ConfigFile defaultConfig = new DefaultConfig();
         final int maxBuildContained = defaultConfig.getMaxLastChangedBuildNumber();
-        // TODO: Detect changes to the configuration (only save back if necessary.).
+        // Detect changes to the configuration (only save back if necessary?).
         PathUtils.processPaths(globalFile, "global config", false);
         final ConfigFile globalConfig = new ConfigFile();
         globalConfig.setDefaults(defaultConfig);
@@ -168,7 +168,7 @@ public class ConfigManager {
                         if (overrideCreated) {
                             globalConfig.set(ConfPaths.CONFIGVERSION_CREATED, maxBuildContained);
                         }
-                        // TODO: Only save back if really changed?
+                        // Consider saving back only if the file actually changed.
                         globalConfig.save(globalFile);
                     }
                 } catch (final Exception e) {
@@ -278,7 +278,7 @@ public class ConfigManager {
         // So far so good... test individual paths.
         final List<String> problems = new LinkedList<String>();
         final Map<String, Integer> lastChangedBuildNumbers = defaultConfig.getLastChangedBuildNumbers();
-        // TODO: Consider some behavior for entire nodes ?
+        // Potential improvement: apply behavior for entire nodes
         for (final Entry<String, Integer> entry : lastChangedBuildNumbers.entrySet()) {
             final int defaultBuild = entry.getValue();
             if (defaultBuild <= buildCreated) {
@@ -455,6 +455,6 @@ public class ConfigManager {
         return min.doubleValue();
     }
 
-    // TODO: consider: filter(Max|Min)NumberForAllConfigs(String path, String filerPath, boolean filterPreset)
+    // Consider adding filter(Max|Min)NumberForAllConfigs(String path, String filerPath, boolean filterPreset)
 
 }
