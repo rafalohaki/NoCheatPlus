@@ -289,58 +289,62 @@ public class TestWorkarounds {
      * @return The given bluePrint for chaining.
      */
     public static <W extends IWorkaround> W checkSetWorkaroundBluePrint(W bluePrint, IWorkaroundRegistry reg) {
-        // Remember old settings.
         final String id = bluePrint.getId();
         IAcceptDenyCounter oldAllTimeCount = bluePrint.getAllTimeCounter();
         if (oldAllTimeCount == null) {
             fail("getAllTimeCounter must not return null: " + id);
         }
-        IAcceptDenyCounter oldAllTimeParent = (bluePrint instanceof ICounterWithParent) ? ((ICounterWithParent) bluePrint).getParentCounter() : null;
-        IAcceptDenyCounter stageCount = (bluePrint instanceof IStagedWorkaround) ? ((IStagedWorkaround) bluePrint).getStageCounter() : null;
+
+        IAcceptDenyCounter oldParent = (bluePrint instanceof ICounterWithParent)
+                ? ((ICounterWithParent) bluePrint).getParentCounter()
+                : null;
+        IAcceptDenyCounter stageCount = (bluePrint instanceof IStagedWorkaround)
+                ? ((IStagedWorkaround) bluePrint).getStageCounter()
+                : null;
+
         IAcceptDenyCounter oldRegCounter = reg.getGlobalCounter(id);
-        // Register.
         reg.setWorkaroundBluePrint(bluePrint);
-        // Demand existence of a counter for that id.
-        IAcceptDenyCounter regCount = reg.getGlobalCounter(id);
-        if (oldAllTimeParent != null && regCount == null) {
+
+        assertGlobalCounterState(id, oldParent, oldRegCounter, reg.getGlobalCounter(id));
+
+        IWorkaround newInstance = reg.getWorkaround(id);
+        assertNewInstance(id, bluePrint, oldParent, stageCount, newInstance);
+
+        return bluePrint;
+    }
+
+    private static void assertGlobalCounterState(String id, IAcceptDenyCounter oldParent,
+            IAcceptDenyCounter oldRegCounter, IAcceptDenyCounter regCount) {
+        if (oldParent != null && regCount == null) {
             fail("There must be a global counter present, if no parent counter was present at the time of registration: " + id);
         }
-        // Demand existence of global counter, if none was set.
-        if (oldAllTimeParent == null && reg.getGlobalCounter(id) == null) {
+        if (oldParent == null && regCount == null) {
             fail("A parent counter must be present, after registering a workaround without a parent counter set: " + id);
         }
-        // Demand no counter to be registered, if none was set and the bluePrint had a parent counter set.
-        if (oldRegCounter == null && oldAllTimeParent != null && reg.getGlobalCounter(id) != null) {
+        if (oldRegCounter == null && oldParent != null && regCount != null) {
             fail("Expect no counter to be registered, if none was and a parent had already been set: " + id);
         }
-        // Demand the registered counter to stay the same, if it already existed.
-        if (oldRegCounter != null && oldRegCounter != reg.getGlobalCounter(id)) {
+        if (oldRegCounter != null && oldRegCounter != regCount) {
             fail("Expect an already registeded counter not to change: " + id);
         }
+    }
 
-        // Fetch an instance for this id.
-        // W newInstance = reg.getWorkaround(id, bluePrint.getClass()); // FAIL
-        IWorkaround newInstance = reg.getWorkaround(id);
-        // Demand newInstancse is not bluePrint.
+    private static void assertNewInstance(String id, IWorkaround bluePrint,
+            IAcceptDenyCounter oldParent, IAcceptDenyCounter stageCount,
+            IWorkaround newInstance) {
         if (newInstance == bluePrint) {
             fail("getWorkaround must not return the same instance: " + id);
         }
-        // Demand class identity (for now).
         if (bluePrint.getClass() != newInstance.getClass()) {
             fail("Demand class identity for factory methods (subject to discussion: ): " + id);
         }
-        // Demand identity of a global counter, if none was set before.
-        if (oldAllTimeParent != null && oldAllTimeParent != newInstance.getAllTimeCounter()) {
+        if (oldParent != null && oldParent != newInstance.getAllTimeCounter()) {
             fail("Expect the global counter to be the same as the parent of a new instance, if none was set: " + id);
         }
-        // Demand stage count to differ.
-        if ((newInstance instanceof IStagedWorkaround) && ((IStagedWorkaround) newInstance).getStageCounter() == stageCount) {
+        if ((newInstance instanceof IStagedWorkaround) &&
+                ((IStagedWorkaround) newInstance).getStageCounter() == stageCount) {
             fail("Expect stage counter of a new instance to differ: " + id);
         }
-
-        // (More specific stuff is possible.)
-
-        return bluePrint;
     }
 
 
