@@ -45,7 +45,7 @@ import fr.neatmonster.nocheatplus.components.registry.order.SetupOrder;
  */
 public class RegisteredItemStore {
 
-    // TODO: Interface
+    // Placeholder for interface implementation
 
     /**
      * Newly created Order object and item instance. Allows sorting by
@@ -59,10 +59,10 @@ public class RegisteredItemStore {
     static class ItemNode <T> implements IGetRegistrationOrder, Comparable<ItemNode<T>> {
 
         /*
-         * TODO: Looking ahead, should probably rather equal on base of the
+         * Looking ahead, should probably rather equal on base of the
          * stored item (HashSet). Sorting by internalId may use a Comparator.
          */
-        // TODO: implement IGetItem
+        // implement IGetItem
 
         final RegistrationOrder order;
         final T item;
@@ -106,7 +106,7 @@ public class RegisteredItemStore {
          * internalId may use a Comparator.
          */
         /*
-         * TODO: Consider only having sortedItems, doing without
+         * Consider only having sortedItems, doing without
          * sortedItemNodes. Contra: future registry features, then stored
          * meta-data.
          */
@@ -125,7 +125,7 @@ public class RegisteredItemStore {
          */
         @SuppressWarnings("unchecked")
         void sort() {
-            // TODO: Might create the typed sort on the fly, instead of storing it ...
+            // Might create the typed sort on the fly, instead of storing it ...
             sortedItemNodes = typedSort.getSortedArray(itemNodes);
             sortedItems = (T[]) new Object[sortedItemNodes.length];
             for (int i = 0; i < sortedItemNodes.length; i++) {
@@ -175,7 +175,7 @@ public class RegisteredItemStore {
             // (Sorting order should not change, if it were removed from all lists alike (!))
             final Iterator<ItemNode<T>> it = itemNodes.iterator();
             while (it.hasNext()) {
-                // TODO: equals or ==
+                // Compare using equals
                 if (it.next().item.equals(item)) {
                     invalidateSorted();
                     it.remove();
@@ -206,8 +206,8 @@ public class RegisteredItemStore {
 
     }
 
-    // TODO: Pre-register allowed types ?
-    // TODO: Thread safety on fetch / version with (abstract class with abstract methods to access store.)?
+    // Consider pre-registering allowed types
+    // Review thread safety on fetch and version handling
 
     /** Registered items in self-sorting ItemListS by class. */
     private final Map<Class<?>, ItemList<?>> itemListMap = new HashMap<Class<?>, ItemList<?>>();
@@ -217,7 +217,7 @@ public class RegisteredItemStore {
      */
     private final Map<Object, Set<Class<?>>> items = new HashMap<Object, Set<Class<?>>>();
 
-    private int internalCount = 0; // TODO: Might support a counter object, passed from extern.
+    private int internalCount = 0; // Counter could be supplied externally
 
     /**
      * Convenience method to register without explicitly passing a
@@ -269,8 +269,8 @@ public class RegisteredItemStore {
         }
         // Ensure to have a RegistrationOrder instance, copy external ones.
         // (No merging of information is done here.)
-        // TODO: Try/Catch ?
-        // TODO: (Perhaps not ListenerOrder...)
+        // Consider using try/catch
+        // Perhaps not ListenerOrder
         // Check the most specific interface.
         if (order == null && item instanceof IRegisterWithOrder) {
             order = ((IRegisterWithOrder) item).getRegistrationOrder(type);
@@ -351,9 +351,9 @@ public class RegisteredItemStore {
                 }
             }
         }
-        // TODO: If count is 1, throw some IllegalRegistryState (extends FatalRegistryException)?
+        // If count is 1, consider throwing IllegalRegistryState (extends FatalRegistryException)?
         /*
-         * TODO: ItemNotRegisteredException ? Not certain this is intended -
+         * ItemNotRegisteredException ? Not certain this is intended -
          * could make that configurable (constructor or otherwise).
          */
         return count > 0; // Was contained (consistently or not).
@@ -373,14 +373,14 @@ public class RegisteredItemStore {
             throw new NullPointerException("Item must not be null.");
         }
         /*
-         * TODO: ItemNotRegisteredException ? Not certain this is intended -
+         * ItemNotRegisteredException ? Not certain this is intended -
          * could make that configurable (constructor or otherwise).
          */
         final Set<Class<?>> registeredFor = items.remove(item);
         if (registeredFor == null) {
             return false;
         }
-        // TODO: Track if consistent?
+        // Track if consistent?
         for (Class<?> type : registeredFor) {
             final ItemList<?> itemList = itemListMap.get(type);
             if (itemList != null) {
@@ -390,7 +390,7 @@ public class RegisteredItemStore {
                     }
                 }
             }
-            // TODO: What if null or not contained - throw / notice somehow?
+            // Handle null or missing items accordingly?
         }
         return true; // Was contained (consistently or not).
     }
