@@ -140,7 +140,7 @@ public class Angle extends Check {
             deltaYaw += yawDiff;
             deltaTime += refLoc.timeDiff;
             if (refLoc.idDiffLast && yawDiff > 30.0) {
-                // TODO: Configurable sensitivity ? Scale with yawDiff?
+                // Possibly use configurable sensitivity or scale with yawDiff.
                 deltaSwitchTarget += 1;
             }
         }
