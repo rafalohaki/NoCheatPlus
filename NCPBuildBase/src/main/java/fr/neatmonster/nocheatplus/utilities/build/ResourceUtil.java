@@ -76,37 +76,64 @@ public class ResourceUtil {
 	 * @param input
 	 * @param map
 	 */
-	public static void parseToMap(String input, Map<String, String> map){
-		final String[] split = input.split("\n");
-		for (final String line : split){
-			final String trimmed = line.trim();
-			if (trimmed.isEmpty() || trimmed.startsWith("#")) continue;
-			final String[] parts = line.split("=", 2);
-			if (parts.length == 1){
-				map.put(parts[0].trim(), "");
-			}
-			else{
-				map.put(parts[0].trim(), parts[1].trim());
-			}
-		}
-	}
+        public static void parseToMap(final String input, final Map<String, String> map) {
+                final String[] split = input.split("\n");
+                for (final String line : split) {
+                        final String trimmed = line.trim();
+                        if (trimmed.isEmpty() || trimmed.startsWith("#")) {
+                                continue;
+                        }
+                        final String[] parts = line.split("=", 2);
+                        if (parts.length == 1) {
+                                map.put(parts[0].trim(), "");
+                        } else {
+                                map.put(parts[0].trim(), parts[1].trim());
+                        }
+                }
+        }
 	
-	public static Boolean getBoolean(String input, Boolean preset){
-		if (input == null) return preset;
-		input = input.trim().toLowerCase();
-		if (input.matches("1|true|yes")) return true;
-		else if (input.matches("0|false|no")) return false;
-		else return preset;
-	}
-	
-	
-	public static Integer getInteger(String input, Integer preset) {
-		if (input == null) return preset;
-		try{
-			return Integer.parseInt(input);
-		}
-		catch (NumberFormatException e) {
-		}
-		return preset;
-	}
+        /**
+         * Parse a boolean value from a string.
+         *
+         * @param input
+         *            the string to parse
+         * @param preset
+         *            value to return if parsing fails
+         * @return the parsed value or the preset if parsing fails
+         */
+        public static Boolean getBoolean(final String input,
+                        final Boolean preset) {
+                if (input == null) {
+                        return preset;
+                }
+                final String trimmed = input.trim().toLowerCase();
+                if (trimmed.matches("1|true|yes")) {
+                        return true;
+                } else if (trimmed.matches("0|false|no")) {
+                        return false;
+                } else {
+                        return preset;
+                }
+        }
+        /**
+         * Parse an integer from a string.
+         *
+         * @param input
+         *            the string to parse
+         * @param preset
+         *            value to return if parsing fails
+         * @return the parsed integer or the preset if parsing fails
+         */
+        public static Integer getInteger(final String input,
+                        final Integer preset) {
+                if (input == null) {
+                        return preset;
+                }
+                try {
+                        return Integer.parseInt(input);
+                } catch (NumberFormatException e) {
+                        // ignore and return preset
+                }
+                return preset;
+        }
 }
