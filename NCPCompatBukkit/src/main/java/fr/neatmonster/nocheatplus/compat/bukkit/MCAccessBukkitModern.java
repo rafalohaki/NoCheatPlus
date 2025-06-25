@@ -177,328 +177,13 @@ public class MCAccessBukkitModern extends MCAccessBukkit {
          * Scaffolding affects fall damage.
          */
 
-        // Variables for repeated flags (Temporary flags, these should be fixed later so that they are not added here)
-        final long blockFix = BlockFlags.SOLID_GROUND;
-        // Adjust flags for individual blocks.
-        BlockFlags.setBlockFlags(Material.COCOA, blockFix);
-        BlockFlags.setBlockFlags(Material.TURTLE_EGG, blockFix);
-        BlockFlags.setBlockFlags(Material.CHORUS_PLANT, blockFix);
-        BlockFlags.setBlockFlags(Material.CREEPER_WALL_HEAD, blockFix);
-        BlockFlags.setBlockFlags(Material.ZOMBIE_WALL_HEAD, blockFix);
-        BlockFlags.setBlockFlags(Material.PLAYER_WALL_HEAD, blockFix);
-        BlockFlags.setBlockFlags(Material.DRAGON_WALL_HEAD, blockFix);
-        BlockFlags.setBlockFlags(Material.WITHER_SKELETON_WALL_SKULL, blockFix);
-        BlockFlags.setBlockFlags(Material.SKELETON_WALL_SKULL, blockFix);
+        applyTemporaryFlagFixes();
+        registerBaseBlocks();
+        registerAutoFetchedBlocks();
+        registerModelGroups();
+        registerMiscBlocks();
+        registerFlagBasedModels();
 
-        // Directly keep blocks as is.
-        for (final Material mat : new Material[] {
-            BridgeMaterial.COBWEB,
-            BridgeMaterial.MOVING_PISTON,
-            Material.SNOW,
-            Material.BEACON,
-            Material.VINE,
-            Material.CHORUS_FLOWER}) {
-            processedBlocks.add(mat);
-        }
-
-        for (final Material mat : BridgeMaterial.getAllBlocks(
-            "light", "glow_lichen", "big_dripleaf_stem",
-            // The following materials require additional testing
-            "scaffolding", "powder_snow")) {
-            processedBlocks.add(mat);
-        }
-
-        // Candle
-        registerCandles();
-
-        // Amethyst
-        registerAmethyst();
-
-        // new flower, and others
-        for (Material mat : BridgeMaterial.getAllBlocks(
-            "azalea", "flowering_azalea",
-            "sculk_sensor", "pointed_dripstone", "frogspawn",
-            "sniffer_egg", "decorated_pot", "pitcher_crop", "calibrated_sculk_sensor")) {
-            addModel(mat, MODEL_AUTO_FETCH);
-        }
-        
-        // Wall hanging signs have a collision box. Hanging signs don't, so they are treated as an ordinary sign.
-        for (Material mat : MaterialUtil.WALL_HANGING_SIGNS) {
-            // Only the post has an actual collision box, the rest is all hit box. 
-            addModel(mat, MODEL_AUTO_FETCH);
-        }
-
-        for (Material mat : BridgeMaterial.getAllBlocks(
-            "stonecutter", "chain")) {
-            addModel(mat, MODEL_AUTO_FETCH_LEGACY);
-        }
-
-        // Camp fire
-        for (Material mat : BridgeMaterial.getAllBlocks(
-            "campfire", "soul_campfire")) {
-            addModel(mat, MODEL_CAMPFIRE);
-        }
-
-        // Cauldron
-        for (Material mat : MaterialUtil.CAULDRON) {
-            BlockFlags.setBlockFlags(mat, BlockFlags.SOLID_GROUND);
-            addModel(mat, MODEL_CAULDRON);
-        }
-
-        //Anvil
-        for (Material mat : new Material[] {
-            Material.ANVIL,
-            Material.CHIPPED_ANVIL,
-            Material.DAMAGED_ANVIL}) {
-            addModel(mat, MODEL_ANVIL);
-        }
-        
-        // Lily pad
-        addModel(BridgeMaterial.LILY_PAD, MODEL_LILY_PAD);
-
-        // End portal frame.
-        addModel(BridgeMaterial.END_PORTAL_FRAME, MODEL_END_PORTAL_FRAME);
-
-        // Cake
-        addModel(BridgeMaterial.CAKE, MODEL_CAKE);
-
-        // End Rod / Lightning Rod.
-        for (Material mat : MaterialUtil.RODS) {
-            addModel(mat, MODEL_END_ROD);
-        }
-
-        // Hoppers - min height changed in 1.13+
-        addModel(Material.HOPPER, MODEL_HOPPER);
-
-        // Ladder
-        addModel(Material.LADDER, MODEL_LADDER);
-
-        // BrewingStand
-        addModel(Material.BREWING_STAND, MODEL_BREWING_STAND);
-
-        // 1/16 inset at full height.
-        addModel(Material.DRAGON_EGG, MODEL_INSET16_1_HEIGHT100);
-        addModel(Material.CACTUS, MODEL_HONEY_BLOCK);
-
-        // 1/8 height.
-        for (Material mat : new Material[] {
-            BridgeMaterial.REPEATER,
-            Material.COMPARATOR }) {
-            addModel(mat, MODEL_XZ100_HEIGHT8_1);
-        }
-
-        // 3/8 height.
-        for (Material mat : new Material[] {
-            Material.DAYLIGHT_DETECTOR}) {
-            addModel(mat, MODEL_XZ100_HEIGHT8_3);
-        }
-
-        // 3/4 height.
-        for (Material mat : new Material[] {
-            BridgeMaterial.ENCHANTING_TABLE}) {
-            addModel(mat, MODEL_XZ100_HEIGHT4_3);
-        }
-
-        for (Material mat : MaterialUtil.ALL_CANDLE_CAKE) {
-            addModel(mat, MODEL_CANDLE_CAKE);
-        }
-
-        // 7/8 height.
-        for (Material mat : new Material[] {
-            Material.SOUL_SAND}) {
-            addModel(mat, MODEL_XZ100_HEIGHT8_7);
-        }
-
-        // 16/15 height, full xz bounds.
-        for (Material mat : new Material[] {
-            BridgeMaterial.GRASS_PATH, 
-            BridgeMaterial.FARMLAND}) {
-            addModel(mat, MODEL_XZ100_HEIGHT16_15);
-        }
-
-        // Thin fence: Glass panes, iron bars.
-        for (final Material mat : MaterialUtil.addBlocks(
-            MaterialUtil.GLASS_PANES, 
-            BridgeMaterial.IRON_BARS)) {
-            addModel(mat, MODEL_THIN_FENCE);
-        }
-
-        // Slabs
-        for (final Material mat : MaterialUtil.SLABS) {
-            addModel(mat, MODEL_SLAB);
-        }
-
-        // Shulker boxes.
-        for (final Material mat : MaterialUtil.SHULKER_BOXES) {
-            addModel(mat, MODEL_SHULKER_BOX);
-        }
-
-        // Chests.
-        // TOOD: Might add a facing/directional extension for double chests.
-        for (Material mat : BridgeMaterial.getAllBlocks(
-            "chest", "trapped_chest", "ender_chest")) {
-            addModel(mat, MODEL_SINGLE_CHEST);
-        }
-
-        // Beds
-        for (Material mat : MaterialUtil.BEDS) {
-            addModel(mat, MODEL_XZ100_HEIGHT16_9);
-        }
-
-        // Flower pots.
-        for (Material mat : MaterialUtil.FLOWER_POTS) {
-            addModel(mat, MODEL_FLOWER_POT);
-        }
-        
-        // Turtle Eggs.
-        for (Material mat : new Material[] {
-            Material.TURTLE_EGG}) {
-            addModel(mat, MODEL_TURTLE_EGG);
-        }
-        
-        // Conduit
-        for (Material mat : new Material[] {
-            Material.CONDUIT}) {
-            addModel(mat, MODEL_CONDUIT);
-        }
-        
-        // Cocoa
-        for (Material mat : new Material[] {
-            Material.COCOA}) {
-            addModel(mat, MODEL_COCOA);
-        }
-        
-        // Sea Pickles
-        for (Material mat : new Material[] {
-            Material.SEA_PICKLE}) {
-            addModel(mat, MODEL_SEA_PICKLE);
-        }
-        
-        // Carpets.
-        for (final Material mat : MaterialUtil.CARPETS) {
-            addModel(mat, MODEL_XZ100_HEIGHT16_1);
-        }
-
-        // Ground heads.
-        for (final Material mat : MaterialUtil.HEADS_GROUND) {
-            addModel(mat, MODEL_GROUND_HEAD);
-        }
-
-        // Heads on walls.
-        for (final Material mat : MaterialUtil.HEADS_WALL) {
-            addModel(mat, MODEL_WALL_HEAD);
-        }
-
-        // Doors.
-        for (final Material mat : MaterialUtil.ALL_DOORS) {
-            addModel(mat, MODEL_DOOR);
-        }
-
-        // Trapdoors.
-        for (final Material mat : MaterialUtil.ALL_TRAP_DOORS) {
-            addModel(mat, MODEL_TRAP_DOOR);
-        }
-        
-        // Chorus Plant.
-        for (Material mat : new Material[] {
-            Material.CHORUS_PLANT}) {
-            addModel(mat, MODEL_CHORUS_PLANT);
-        }
-
-        // Lantern.
-        for (Material mat : BridgeMaterial.getAllBlocks(
-            "lantern", "soul_lantern")) {
-            addModel(mat, MODEL_LANTERN);
-        }
-
-        // Piston.
-        for (Material mat : BridgeMaterial.getAllBlocks(
-            "piston", "sticky_piston", "piston_base", "piston_sticky_base")) {
-            addModel(mat, MODEL_PISTON);
-        }
-
-        // Piston Head.
-        addModel(BridgeMaterial.PISTON_HEAD, MODEL_PISTON_HEAD);
-
-        // Snow.
-        addModel(Material.SNOW, MODEL_SNOW);
-
-        // Levelled blocks.
-        for (Material mat : MaterialUtil.WATER) {
-            addModel(mat, MODEL_LEVELLED);
-        }
-        for (Material mat : MaterialUtil.LAVA) {
-            addModel(mat, MODEL_LEVELLED);
-        }
-
-        for (Material mat : MaterialUtil.WATER_PLANTS) {
-            addModel(mat, MODEL_WATER_PLANTS);
-        }
-
-        // Rails.
-        for (final Material mat : MaterialUtil.RAILS) {
-            addModel(mat, MODEL_RAIL);
-        }
-        
-        // Walls.
-        registerWalls();
-
-        // Lectern.
-        Material mt = BridgeMaterial.getBlock("lectern");
-        if (mt != null) addModel(mt, MODEL_LECTERN);
-
-        // Bamboo.      
-        mt = BridgeMaterial.getBlock("bamboo");
-        if (mt != null) addModel(mt, MODEL_BAMBOO);
-
-        // Bell.
-        mt = BridgeMaterial.getBlock("bell");
-        if (mt != null) addModel(mt, MODEL_BELL);
-
-        // Composter.
-        mt = BridgeMaterial.getBlock("composter");
-        if (mt != null) addModel(mt, MODEL_COMPOSTER);
-
-        // Honey Block.
-        mt = BridgeMaterial.getBlock("honey_block");
-        if (mt != null) addModel(mt, MODEL_HONEY_BLOCK);
-
-        // Big DripLeaf.
-        mt = BridgeMaterial.getBlock("big_dripleaf");
-        if (mt != null) addModel(mt, MODEL_DRIP_LEAF);
-
-        // Grindstone.
-        mt = BridgeMaterial.getBlock("grindstone");
-        if (mt != null) addModel(mt, MODEL_GRIND_STONE);
-
-        // Sculk Shrieker
-        mt = BridgeMaterial.getBlock("sculk_shrieker");
-        if (mt != null) addModel(mt, MODEL_SCULK_SHRIEKER);
-
-        // Mud
-        mt = BridgeMaterial.getBlock("mud");
-        if (mt != null) addModel(mt, MODEL_XZ100_HEIGHT8_7);
-
-        // Heavy core
-        mt = BridgeMaterial.getBlock("heavy_core");
-        if (mt != null) addModel(mt, MODEL_GROUND_HEAD);
-
-        // Sort to processed by flags.
-        for (final Material mat : Material.values()) {
-            final long flags = BlockFlags.getBlockFlags(mat);
-            // Stairs.
-            if (BlockFlags.hasAnyFlag(flags, BlockFlags.F_STAIRS)) {
-                addModel(mat, MODEL_STAIRS);
-            }
-            // Fences.
-            if (BlockFlags.hasAnyFlag(flags, BlockFlags.F_THICK_FENCE)) {
-                if (BlockFlags.hasAnyFlag(flags, BlockFlags.F_PASSABLE_X4)) {
-                    // Use the gate model when the block is passable.
-                    addModel(mat, MODEL_GATE);
-                }
-                else addModel(mat, MODEL_THICK_FENCE);
-            }
-        }
         super.setupBlockProperties(worldConfigProvider);
     }
 
@@ -520,6 +205,272 @@ public class MCAccessBukkitModern extends MCAccessBukkit {
         for (Material mat : MaterialUtil.ALL_WALLS) {
             BlockFlags.setBlockFlags(mat, BlockFlags.SOLID_GROUND | BlockFlags.F_VARIABLE);
             addModel(mat, MODEL_THICK_FENCE2);
+        }
+    }
+
+    private void applyTemporaryFlagFixes() {
+        final long blockFix = BlockFlags.SOLID_GROUND;
+        BlockFlags.setBlockFlags(Material.COCOA, blockFix);
+        BlockFlags.setBlockFlags(Material.TURTLE_EGG, blockFix);
+        BlockFlags.setBlockFlags(Material.CHORUS_PLANT, blockFix);
+        BlockFlags.setBlockFlags(Material.CREEPER_WALL_HEAD, blockFix);
+        BlockFlags.setBlockFlags(Material.ZOMBIE_WALL_HEAD, blockFix);
+        BlockFlags.setBlockFlags(Material.PLAYER_WALL_HEAD, blockFix);
+        BlockFlags.setBlockFlags(Material.DRAGON_WALL_HEAD, blockFix);
+        BlockFlags.setBlockFlags(Material.WITHER_SKELETON_WALL_SKULL, blockFix);
+        BlockFlags.setBlockFlags(Material.SKELETON_WALL_SKULL, blockFix);
+    }
+
+    private void registerBaseBlocks() {
+        for (final Material mat : new Material[] {
+            BridgeMaterial.COBWEB,
+            BridgeMaterial.MOVING_PISTON,
+            Material.SNOW,
+            Material.BEACON,
+            Material.VINE,
+            Material.CHORUS_FLOWER}) {
+            processedBlocks.add(mat);
+        }
+
+        for (final Material mat : BridgeMaterial.getAllBlocks(
+            "light", "glow_lichen", "big_dripleaf_stem",
+            "scaffolding", "powder_snow")) {
+            processedBlocks.add(mat);
+        }
+
+        registerCandles();
+        registerAmethyst();
+    }
+
+    private void registerAutoFetchedBlocks() {
+        for (Material mat : BridgeMaterial.getAllBlocks(
+            "azalea", "flowering_azalea",
+            "sculk_sensor", "pointed_dripstone", "frogspawn",
+            "sniffer_egg", "decorated_pot", "pitcher_crop", "calibrated_sculk_sensor")) {
+            addModel(mat, MODEL_AUTO_FETCH);
+        }
+
+        for (Material mat : MaterialUtil.WALL_HANGING_SIGNS) {
+            addModel(mat, MODEL_AUTO_FETCH);
+        }
+
+        for (Material mat : BridgeMaterial.getAllBlocks(
+            "stonecutter", "chain")) {
+            addModel(mat, MODEL_AUTO_FETCH_LEGACY);
+        }
+    }
+
+    private void registerModelGroups() {
+        for (Material mat : BridgeMaterial.getAllBlocks(
+            "campfire", "soul_campfire")) {
+            addModel(mat, MODEL_CAMPFIRE);
+        }
+
+        for (Material mat : MaterialUtil.CAULDRON) {
+            BlockFlags.setBlockFlags(mat, BlockFlags.SOLID_GROUND);
+            addModel(mat, MODEL_CAULDRON);
+        }
+
+        for (Material mat : new Material[] {
+            Material.ANVIL,
+            Material.CHIPPED_ANVIL,
+            Material.DAMAGED_ANVIL}) {
+            addModel(mat, MODEL_ANVIL);
+        }
+
+        addModel(BridgeMaterial.LILY_PAD, MODEL_LILY_PAD);
+        addModel(BridgeMaterial.END_PORTAL_FRAME, MODEL_END_PORTAL_FRAME);
+        addModel(BridgeMaterial.CAKE, MODEL_CAKE);
+
+        for (Material mat : MaterialUtil.RODS) {
+            addModel(mat, MODEL_END_ROD);
+        }
+
+        addModel(Material.HOPPER, MODEL_HOPPER);
+        addModel(Material.LADDER, MODEL_LADDER);
+        addModel(Material.BREWING_STAND, MODEL_BREWING_STAND);
+
+        addModel(Material.DRAGON_EGG, MODEL_INSET16_1_HEIGHT100);
+        addModel(Material.CACTUS, MODEL_HONEY_BLOCK);
+
+        for (Material mat : new Material[] {
+            BridgeMaterial.REPEATER,
+            Material.COMPARATOR }) {
+            addModel(mat, MODEL_XZ100_HEIGHT8_1);
+        }
+
+        for (Material mat : new Material[] {
+            Material.DAYLIGHT_DETECTOR}) {
+            addModel(mat, MODEL_XZ100_HEIGHT8_3);
+        }
+
+        for (Material mat : new Material[] {
+            BridgeMaterial.ENCHANTING_TABLE}) {
+            addModel(mat, MODEL_XZ100_HEIGHT4_3);
+        }
+
+        for (Material mat : MaterialUtil.ALL_CANDLE_CAKE) {
+            addModel(mat, MODEL_CANDLE_CAKE);
+        }
+
+        for (Material mat : new Material[] {
+            Material.SOUL_SAND}) {
+            addModel(mat, MODEL_XZ100_HEIGHT8_7);
+        }
+
+        for (Material mat : new Material[] {
+            BridgeMaterial.GRASS_PATH,
+            BridgeMaterial.FARMLAND}) {
+            addModel(mat, MODEL_XZ100_HEIGHT16_15);
+        }
+
+        for (final Material mat : MaterialUtil.addBlocks(
+            MaterialUtil.GLASS_PANES,
+            BridgeMaterial.IRON_BARS)) {
+            addModel(mat, MODEL_THIN_FENCE);
+        }
+
+        for (final Material mat : MaterialUtil.SLABS) {
+            addModel(mat, MODEL_SLAB);
+        }
+
+        for (final Material mat : MaterialUtil.SHULKER_BOXES) {
+            addModel(mat, MODEL_SHULKER_BOX);
+        }
+
+        for (Material mat : BridgeMaterial.getAllBlocks(
+            "chest", "trapped_chest", "ender_chest")) {
+            addModel(mat, MODEL_SINGLE_CHEST);
+        }
+
+        for (Material mat : MaterialUtil.BEDS) {
+            addModel(mat, MODEL_XZ100_HEIGHT16_9);
+        }
+
+        for (Material mat : MaterialUtil.FLOWER_POTS) {
+            addModel(mat, MODEL_FLOWER_POT);
+        }
+
+        for (Material mat : new Material[] {
+            Material.TURTLE_EGG}) {
+            addModel(mat, MODEL_TURTLE_EGG);
+        }
+
+        for (Material mat : new Material[] {
+            Material.CONDUIT}) {
+            addModel(mat, MODEL_CONDUIT);
+        }
+
+        for (Material mat : new Material[] {
+            Material.COCOA}) {
+            addModel(mat, MODEL_COCOA);
+        }
+
+        for (Material mat : new Material[] {
+            Material.SEA_PICKLE}) {
+            addModel(mat, MODEL_SEA_PICKLE);
+        }
+
+        for (final Material mat : MaterialUtil.CARPETS) {
+            addModel(mat, MODEL_XZ100_HEIGHT16_1);
+        }
+
+        for (final Material mat : MaterialUtil.HEADS_GROUND) {
+            addModel(mat, MODEL_GROUND_HEAD);
+        }
+
+        for (final Material mat : MaterialUtil.HEADS_WALL) {
+            addModel(mat, MODEL_WALL_HEAD);
+        }
+
+        for (final Material mat : MaterialUtil.ALL_DOORS) {
+            addModel(mat, MODEL_DOOR);
+        }
+
+        for (final Material mat : MaterialUtil.ALL_TRAP_DOORS) {
+            addModel(mat, MODEL_TRAP_DOOR);
+        }
+
+        for (Material mat : new Material[] {
+            Material.CHORUS_PLANT}) {
+            addModel(mat, MODEL_CHORUS_PLANT);
+        }
+
+        for (Material mat : BridgeMaterial.getAllBlocks(
+            "lantern", "soul_lantern")) {
+            addModel(mat, MODEL_LANTERN);
+        }
+
+        for (Material mat : BridgeMaterial.getAllBlocks(
+            "piston", "sticky_piston", "piston_base", "piston_sticky_base")) {
+            addModel(mat, MODEL_PISTON);
+        }
+
+        addModel(BridgeMaterial.PISTON_HEAD, MODEL_PISTON_HEAD);
+        addModel(Material.SNOW, MODEL_SNOW);
+
+        for (Material mat : MaterialUtil.WATER) {
+            addModel(mat, MODEL_LEVELLED);
+        }
+        for (Material mat : MaterialUtil.LAVA) {
+            addModel(mat, MODEL_LEVELLED);
+        }
+        for (Material mat : MaterialUtil.WATER_PLANTS) {
+            addModel(mat, MODEL_WATER_PLANTS);
+        }
+
+        for (final Material mat : MaterialUtil.RAILS) {
+            addModel(mat, MODEL_RAIL);
+        }
+
+        registerWalls();
+    }
+
+    private void registerMiscBlocks() {
+        Material mt = BridgeMaterial.getBlock("lectern");
+        if (mt != null) addModel(mt, MODEL_LECTERN);
+
+        mt = BridgeMaterial.getBlock("bamboo");
+        if (mt != null) addModel(mt, MODEL_BAMBOO);
+
+        mt = BridgeMaterial.getBlock("bell");
+        if (mt != null) addModel(mt, MODEL_BELL);
+
+        mt = BridgeMaterial.getBlock("composter");
+        if (mt != null) addModel(mt, MODEL_COMPOSTER);
+
+        mt = BridgeMaterial.getBlock("honey_block");
+        if (mt != null) addModel(mt, MODEL_HONEY_BLOCK);
+
+        mt = BridgeMaterial.getBlock("big_dripleaf");
+        if (mt != null) addModel(mt, MODEL_DRIP_LEAF);
+
+        mt = BridgeMaterial.getBlock("grindstone");
+        if (mt != null) addModel(mt, MODEL_GRIND_STONE);
+
+        mt = BridgeMaterial.getBlock("sculk_shrieker");
+        if (mt != null) addModel(mt, MODEL_SCULK_SHRIEKER);
+
+        mt = BridgeMaterial.getBlock("mud");
+        if (mt != null) addModel(mt, MODEL_XZ100_HEIGHT8_7);
+
+        mt = BridgeMaterial.getBlock("heavy_core");
+        if (mt != null) addModel(mt, MODEL_GROUND_HEAD);
+    }
+
+    private void registerFlagBasedModels() {
+        for (final Material mat : Material.values()) {
+            final long flags = BlockFlags.getBlockFlags(mat);
+            if (BlockFlags.hasAnyFlag(flags, BlockFlags.F_STAIRS)) {
+                addModel(mat, MODEL_STAIRS);
+            }
+            if (BlockFlags.hasAnyFlag(flags, BlockFlags.F_THICK_FENCE)) {
+                if (BlockFlags.hasAnyFlag(flags, BlockFlags.F_PASSABLE_X4)) {
+                    addModel(mat, MODEL_GATE);
+                } else {
+                    addModel(mat, MODEL_THICK_FENCE);
+                }
+            }
         }
     }
 
