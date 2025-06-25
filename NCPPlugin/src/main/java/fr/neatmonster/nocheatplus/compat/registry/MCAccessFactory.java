@@ -48,12 +48,10 @@ public class MCAccessFactory {
         
         // CraftBukkit (dedicated).
         // Use CraftBukkit dedicated if the server version is below/equal to 1.12.2
-        if (GenericVersion.compareVersions(ServerVersion.getMinecraftVersion(), "1.12.2") <= 0) {
-            if (config.enableCBDedicated) {
-                mcAccess = getMCAccessCraftBukkit(throwables);
-                if (mcAccess != null) {
-                    return mcAccess;
-                }
+        if (GenericVersion.compareVersions(ServerVersion.getMinecraftVersion(), "1.12.2") <= 0 && config.enableCBDedicated) {
+            mcAccess = getMCAccessCraftBukkit(throwables);
+            if (mcAccess != null) {
+                return mcAccess;
             }
         }
 

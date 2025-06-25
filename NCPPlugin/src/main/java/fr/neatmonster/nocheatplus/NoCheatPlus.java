@@ -15,7 +15,6 @@
 package fr.neatmonster.nocheatplus;
 
 import java.util.ArrayList;
-import java.util.Arrays;
 import java.util.Collection;
 import java.util.Collections;
 import java.util.HashMap;
@@ -52,7 +51,6 @@ import org.bukkit.plugin.PluginDescriptionFile;
 import org.bukkit.plugin.java.JavaPlugin;
 import org.bukkit.plugin.java.JavaPluginLoader;
 import java.io.File;
-import org.bukkit.scheduler.BukkitScheduler;
 
 import fr.neatmonster.nocheatplus.actions.ActionFactory;
 import fr.neatmonster.nocheatplus.actions.ActionFactoryFactory;
@@ -61,7 +59,6 @@ import fr.neatmonster.nocheatplus.checks.blockinteract.BlockInteractListener;
 import fr.neatmonster.nocheatplus.checks.blockplace.BlockPlaceListener;
 import fr.neatmonster.nocheatplus.checks.chat.ChatConfig;
 import fr.neatmonster.nocheatplus.checks.chat.ChatListener;
-import fr.neatmonster.nocheatplus.checks.combined.CombinedData;
 import fr.neatmonster.nocheatplus.checks.combined.CombinedListener;
 import fr.neatmonster.nocheatplus.checks.fight.FightListener;
 import fr.neatmonster.nocheatplus.checks.inventory.InventoryListener;
@@ -124,7 +121,6 @@ import fr.neatmonster.nocheatplus.logging.LogManager;
 import fr.neatmonster.nocheatplus.logging.StaticLog;
 import fr.neatmonster.nocheatplus.logging.StreamID;
 import fr.neatmonster.nocheatplus.logging.Streams;
-import fr.neatmonster.nocheatplus.logging.details.IGetStreamId;
 import fr.neatmonster.nocheatplus.permissions.PermissionRegistry;
 import fr.neatmonster.nocheatplus.permissions.PermissionUtil;
 import fr.neatmonster.nocheatplus.permissions.PermissionUtil.CommandProtectionEntry;
@@ -140,7 +136,6 @@ import fr.neatmonster.nocheatplus.utilities.ColorUtil;
 import fr.neatmonster.nocheatplus.utilities.Misc;
 import fr.neatmonster.nocheatplus.utilities.OnDemandTickListener;
 import fr.neatmonster.nocheatplus.utilities.ReflectionUtil;
-import fr.neatmonster.nocheatplus.utilities.StringUtil;
 import fr.neatmonster.nocheatplus.utilities.TickTask;
 import fr.neatmonster.nocheatplus.utilities.entity.PassengerUtil;
 import fr.neatmonster.nocheatplus.utilities.map.BlockCache;
@@ -459,7 +454,7 @@ public class NoCheatPlus extends JavaPlugin implements NoCheatPlusAPI {
                     result.add((ComponentRegistry<T>) registry);
                 }
                 catch(Throwable t) {
-                    // Ignore.
+                    StaticLog.logDebug(t);
                 }
             }
         }
@@ -545,13 +540,13 @@ public class NoCheatPlus extends JavaPlugin implements NoCheatPlusAPI {
         // Add to sub registries.
         for (final ComponentRegistry<?> registry : subRegistries) {
             final Object res = ReflectionUtil.invokeGenericMethodOneArg(registry, "addComponent", obj);
-            if (res != null && (res instanceof Boolean) && ((Boolean) res).booleanValue()) {
+            if (res instanceof Boolean && (Boolean) res) {
                 added = true;
             }
         }
 
         // Add ComponentRegistry instances after adding to sub registries to prevent adding it to itself.
-        if (allowComponentRegistry && (obj instanceof ComponentRegistry<?>)) {
+        if (allowComponentRegistry && obj instanceof ComponentRegistry<?>) {
             subRegistries.add((ComponentRegistry<?>) obj);
             added = true;
         }
@@ -1048,7 +1043,7 @@ public class NoCheatPlus extends JavaPlugin implements NoCheatPlusAPI {
         //        }
 
         // Log other notes.
-        logOtherNotes(config);
+        logOtherNotes();
 
         // Is the version the configuration was created with consistent with the current one?
         if (configProblemsFile != null && config.getBoolean(ConfPaths.CONFIGVERSION_NOTIFY)) {
@@ -1086,9 +1081,8 @@ public class NoCheatPlus extends JavaPlugin implements NoCheatPlusAPI {
     /**
      * Log other notes once on enabling.
      * 
-     * @param config
      */
-    private void logOtherNotes(ConfigFile config) {
+    private void logOtherNotes() {
         if (ServerVersion.compareMinecraftVersion("1.9") >= 0) {
             logManager.info(Streams.INIT, "Force disable FastHeal, FastConsume, PacketFrequency and InstantBow on Minecraft 1.9 and later.");
         }
@@ -1474,7 +1468,7 @@ public class NoCheatPlus extends JavaPlugin implements NoCheatPlusAPI {
     @Override
     public boolean hasFeatureTag(final String key, final String feature) {
         final Collection<String>  features = this.featureTags.get(key);
-        return features == null ? false : features.contains(feature);
+        return features != null && features.contains(feature);
     }
 
     @Override
