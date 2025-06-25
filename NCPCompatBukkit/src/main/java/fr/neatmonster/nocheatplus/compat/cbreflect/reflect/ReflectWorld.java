@@ -43,7 +43,9 @@ public class ReflectWorld {
             reflectIBlockData = new ReflectIBlockData(base, reflectMaterial);
             nmsClass = Class.forName(base.nmsPackageName + ".World");
         }
-        catch (Throwable t) {}
+        catch (Throwable t) {
+            // Ignore and continue with fallback when NMS classes are missing.
+        }
         this.nmsClass = nmsClass;
         if (reflectIBlockData == null || nmsClass == null) {
             nmsGetType = null;
