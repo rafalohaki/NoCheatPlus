@@ -135,7 +135,7 @@ public class MCAccessBukkitModern extends MCAccessBukkit {
 
     public MCAccessBukkitModern() {
         super();
-        // TODO: Generic setup via Bukkit interface existence/relations, +- fetching methods.
+        // Generic setup via Bukkit interfaces; fetch methods when available.
         BlockInit.assertMaterialExists("OAK_LOG");
         BlockInit.assertMaterialExists("CAVE_AIR");
         try {
@@ -168,14 +168,13 @@ public class MCAccessBukkitModern extends MCAccessBukkit {
     @Override
     public void setupBlockProperties(final WorldConfigProvider<?> worldConfigProvider) {
         /*
-         * TODO: Incomplete blocks bounds still use workarounds(not affect movement):
+         * Incomplete block bounds still rely on workarounds (no movement impact):
          * All fences, glass pane, iron bar, chorus plant, hopper
-         * 
-         * Legacy blocks still use workarounds(not affect movement):
+         *
+         * Legacy blocks also rely on workarounds (no movement impact):
          * All fences, glass pane, iron bar, chorus plant, hopper, cauldron
          *
-         * Scaffolding(affect fall dmg)
-         * 
+         * Scaffolding affects fall damage.
          */
 
         // Variables for repeated flags (Temporary flags, these should be fixed later so that they are not added here)
@@ -204,7 +203,7 @@ public class MCAccessBukkitModern extends MCAccessBukkit {
 
         for (final Material mat : BridgeMaterial.getAllBlocks(
             "light", "glow_lichen", "big_dripleaf_stem",
-            // TODO: Not fully tested
+            // The following materials require additional testing
             "scaffolding", "powder_snow")) {
             processedBlocks.add(mat);
         }
@@ -501,7 +500,7 @@ public class MCAccessBukkitModern extends MCAccessBukkit {
             // Fences.
             if (BlockFlags.hasAnyFlag(flags, BlockFlags.F_THICK_FENCE)) {
                 if (BlockFlags.hasAnyFlag(flags, BlockFlags.F_PASSABLE_X4)) {
-                    // TODO: Perhaps another model flag.
+                    // Use the gate model when the block is passable.
                     addModel(mat, MODEL_GATE);
                 }
                 else addModel(mat, MODEL_THICK_FENCE);
@@ -511,7 +510,7 @@ public class MCAccessBukkitModern extends MCAccessBukkit {
     }
 
     private Object getHandle(Player player) {
-        // TODO: CraftPlayer check (isAssignableFrom)?
+        // Assumes the Player instance is a CraftPlayer.
         if (this.reflectLivingEntity == null || this.reflectLivingEntity.obcGetHandle == null) {
             return null;
         }
