@@ -183,7 +183,6 @@ public class MoveData {
     public void set(final IGetLocationWithLook from, final IGetLocationWithLook to) {
         setPositions(from, to);
         resetBase();
-        // TODO: this.from/this.to setExtraProperties ?
     }
 
     /**

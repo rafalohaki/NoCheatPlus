@@ -54,7 +54,7 @@ public class BukkitFence implements BukkitShapeModel {
         if (blockData instanceof MultipleFacing) {
             // Note isPassableWorkaround for these (no voxel shapes / multi cuboid yet).
             final MultipleFacing fence = (MultipleFacing) blockData;
-            // TODO: If height > 1.0, check if it needs to be capped, provided relevant.
+            // If height exceeds 1.0, cap it if appropriate.
             double[] res = new double[] {minXZ, 0.0, minXZ, maxXZ, height, maxXZ};
             for (final BlockFace face : fence.getFaces()) {
                 switch (face) {

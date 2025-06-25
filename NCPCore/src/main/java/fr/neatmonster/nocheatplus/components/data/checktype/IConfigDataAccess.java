@@ -32,7 +32,7 @@ import fr.neatmonster.nocheatplus.config.ConfigFile;
  *
  */
 public interface IConfigDataAccess extends IBaseDataAccess {
-    // Placeholder for improved naming.
+    // Interface name may change in future refactoring.
 
     /**
      * Get the applicable raw configuration file.

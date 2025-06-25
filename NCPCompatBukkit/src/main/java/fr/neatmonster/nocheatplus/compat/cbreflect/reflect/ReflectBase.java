@@ -21,7 +21,7 @@ import fr.neatmonster.nocheatplus.compat.versions.ServerVersion;
 
 public class ReflectBase {
 
-    // TODO: Envelope check, enum for what envelope level (within expected version range, before / after).
+    // Envelope check: consider an enum for envelope levels within the expected version range and beyond.
 
     public final String obcPackageName;
 
@@ -29,7 +29,7 @@ public class ReflectBase {
 
     public ReflectBase() {
         final Server server = Bukkit.getServer();
-        // TODO: Confine even more closely (detect v... package part, sequence of indices).
+        // Further confine detection by verifying package parts and index sequences.
         // obc
         Class<?> clazz = server.getClass();
         String name = clazz.getPackage().getName();
