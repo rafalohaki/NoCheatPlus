@@ -47,33 +47,22 @@ public class ResourceUtil {
                 + "/" + path;
         try {
             final URL url = new URL(absPath);
-            BufferedReader reader = null;
-            try {
-                final Object obj = url.getContent();
-                if (obj instanceof InputStream) {
-                    reader = new BufferedReader(new InputStreamReader((InputStream) obj));
+            final Object obj = url.getContent();
+            if (obj instanceof InputStream) {
+                try (BufferedReader reader = new BufferedReader(new InputStreamReader((InputStream) obj))) {
                     final StringBuilder builder = new StringBuilder();
                     String last = reader.readLine();
                     while (last != null) {
                         builder.append(last).append('\n');
                         last = reader.readLine();
                     }
-                    reader.close();
                     return builder.toString();
-                } else {
-                    return null;
                 }
-            } catch (IOException e) {
-                if (reader != null) {
-                    try {
-                        reader.close();
-                    } catch (IOException e1) {
-                        // ignore
-                    }
-                }
+            } else {
                 return null;
             }
-        } catch (MalformedURLException e) {
+        } catch (IOException e) {
+            // ignore
             return null;
         }
     }
@@ -141,8 +130,7 @@ public class ResourceUtil {
         try {
             return Integer.parseInt(input);
         } catch (NumberFormatException e) {
-            // ignore and return preset
+            return preset;
         }
-        return preset;
     }
 }

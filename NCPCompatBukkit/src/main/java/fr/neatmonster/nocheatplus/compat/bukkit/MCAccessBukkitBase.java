@@ -36,6 +36,7 @@ import fr.neatmonster.nocheatplus.compat.BridgeEntityType;
 import fr.neatmonster.nocheatplus.compat.BridgeHealth;
 import fr.neatmonster.nocheatplus.compat.BridgePotionEffect;
 import fr.neatmonster.nocheatplus.compat.MCAccess;
+import fr.neatmonster.nocheatplus.logging.StaticLog;
 import fr.neatmonster.nocheatplus.utilities.PotionUtil;
 import fr.neatmonster.nocheatplus.utilities.ReflectionUtil;
 import fr.neatmonster.nocheatplus.utilities.map.BlockCache;
@@ -263,7 +264,9 @@ public class MCAccessBukkitBase implements MCAccess {
                 default:
                     break;
             }
-        } catch (Throwable t) {}
+        } catch (Throwable t) {
+            StaticLog.logDebug(t);
+        }
         // Default entity width.
         return 0.6f;
     }
