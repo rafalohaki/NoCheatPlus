@@ -53,7 +53,7 @@ public class Counters {
     private ReentrantLock[] syLocks = new ReentrantLock[0];
     /** Global lock for registration of new locks or ids. */
     private final ReentrantLock globalLock = new ReentrantLock();
-    // TODO: Consider adding extra counts or ActionFrequency to track "n per minute".
+    // Consider adding extra counts or ActionFrequency to track "n per minute".
 
     /**
      * Register a key and return the id that is used for access. If the key is

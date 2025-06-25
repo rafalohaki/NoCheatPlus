@@ -23,7 +23,7 @@ import fr.neatmonster.nocheatplus.checks.ViolationData;
 
 /**
  * Store amount of action executions for last 60 seconds for various actions.<br>
- * TODO: Once away from static access, could put this to generic (Action<D extends ActionData>).
+ * Note: once static access is removed, this could become generic (Action<D extends ActionData>).
  */
 public class ExecutionHistory {
 

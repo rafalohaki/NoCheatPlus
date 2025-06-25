@@ -48,7 +48,7 @@ public class MCAccessSpigotCB1_8_R2 implements MCAccess {
         // block bounds, original: minX, maxX, minY, maxY, minZ, maxZ
         ReflectionUtil.checkMethodReturnTypesNoArgs(net.minecraft.server.v1_8_R2.Block.class, 
                 new String[]{"B", "C", "D", "E", "F", "G"}, double.class);
-        // TODO: Nail it down further.
+        // Note: additional refinement may be necessary.
     }
 
     @Override
@@ -122,7 +122,7 @@ public class MCAccessSpigotCB1_8_R2 implements MCAccess {
         if (entityPlayer.dead) {
             return AlmostBoolean.NO;
         }
-        // TODO: Does this need a method call for the "real" box? Might be no problem during moving events, though.
+        // Note: might require a call for the actual bounding box; moving events may be unaffected.
         final AxisAlignedBB box = entityPlayer.getBoundingBox();
         if (LocUtil.isBadCoordinate(box.a, box.b, box.c, box.d, box.e, box.f)) {
             return AlmostBoolean.YES;
