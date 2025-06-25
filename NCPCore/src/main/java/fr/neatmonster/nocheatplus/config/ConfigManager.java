@@ -258,69 +258,86 @@ public class ConfigManager {
      *         problems otherwise.
      */
     public static String isConfigUpToDate(final ConfigFile globalConfig, final int maxPaths) {
-        Object created_o = globalConfig.get(ConfPaths.CONFIGVERSION_CREATED);
-        int buildCreated = -1;
-        if (created_o != null && created_o instanceof Integer) {
-            buildCreated = ((Integer) created_o).intValue();
-        }
-        // Silence version checking with a value < 0.
+        final int buildCreated = getCreatedBuild(globalConfig);
         if (buildCreated < 0) {
             return null;
         }
+
         final ConfigFile defaultConfig = new DefaultConfig();
         final int maxBuildContained = defaultConfig.getMaxLastChangedBuildNumber();
-        // Legacy build number comparison.
+        final String newerVersionMessage = checkForNewerPluginVersion(buildCreated, maxBuildContained);
+        if (newerVersionMessage != null) {
+            return newerVersionMessage;
+        }
+
+        final List<String> problems = collectChangedPaths(globalConfig, defaultConfig, buildCreated, maxPaths);
+        if (!problems.isEmpty()) {
+            return compileWarningMessage(problems, maxBuildContained, maxPaths);
+        }
+        return null;
+    }
+
+    private static int getCreatedBuild(final ConfigFile config) {
+        final Object created = config.get(ConfPaths.CONFIGVERSION_CREATED);
+        if (created instanceof Integer) {
+            return ((Integer) created).intValue();
+        }
+        return -1;
+    }
+
+    private static String checkForNewerPluginVersion(final int buildCreated, final int maxBuildContained) {
         final int currentBuild = BuildParameters.buildNumber;
         if (currentBuild != Integer.MIN_VALUE && buildCreated > Math.max(maxBuildContained, currentBuild)) {
-            // Installed an older version of NCP.
-            return "Your configuration seems to be created by a newer plugin version.\n" + "Some settings could have changed, you should regenerate it!";
+            return "Your configuration seems to be created by a newer plugin version.\n" +
+                    "Some settings could have changed, you should regenerate it!";
         }
-        // So far so good... test individual paths.
-        final List<String> problems = new LinkedList<String>();
+        return null;
+    }
+
+    private static List<String> collectChangedPaths(final ConfigFile globalConfig, final ConfigFile defaultConfig,
+            final int buildCreated, final int maxPaths) {
         final Map<String, Integer> lastChangedBuildNumbers = defaultConfig.getLastChangedBuildNumbers();
-        // Potential improvement: apply behavior for entire nodes
+        final List<String> problems = new LinkedList<String>();
         for (final Entry<String, Integer> entry : lastChangedBuildNumbers.entrySet()) {
             final int defaultBuild = entry.getValue();
             if (defaultBuild <= buildCreated) {
-                // Ignore, might've been changed on purpose.
                 continue;
             }
             final String path = entry.getKey();
             final Object defaultValue = defaultConfig.get(path);
             if (defaultValue instanceof ConfigurationSection) {
-                problems.add(path + (maxPaths >= 0 ? "" : (" - Changed with build " + defaultBuild + ", can not handle entire configuration sections yet. ")));
+                problems.add(path + (maxPaths >= 0 ? "" :
+                        (" - Changed with build " + defaultBuild + ", can not handle entire configuration sections yet. ")));
                 continue;
             }
             final Object currentValue = globalConfig.get(path);
             if (currentValue == null || defaultValue == null) {
-                // To be handled elsewhere (@Moved / whatever).
                 continue;
             }
-            if (defaultBuild > buildCreated && !defaultValue.equals(currentValue)) {
+            if (!defaultValue.equals(currentValue)) {
                 problems.add(path + (maxPaths >= 0 ? "" : (" - Changed with build " + defaultBuild + ".")));
-                continue;
             }
         }
-        if (!problems.isEmpty()) {
-            Collections.sort(problems); // Sort by path.
-            final List<String> outList;
-            if (maxPaths >= 0 && problems.size() > maxPaths) {
-                outList = new ArrayList<String>(problems.subList(0, maxPaths));
-            }
-            else {
-                outList = problems;
-            }
-            outList.add(0, "The following configuration default values have changed:");
-            if (maxPaths >= 0) {
-                outList.add("-> " + problems.size() + " entries in total, check the log file(s) for a complete list.");
-            }
-            else {
-                outList.add("(Remove/update individual values or set configversion.created to " + maxBuildContained + " to ignore all, then reload the configuration with the 'ncp reload' command.)");
-            }
-            return StringUtil.join(outList, "\n");
+        return problems;
+    }
+
+    private static String compileWarningMessage(final List<String> problems, final int maxBuildContained,
+            final int maxPaths) {
+        Collections.sort(problems);
+        final List<String> outList;
+        if (maxPaths >= 0 && problems.size() > maxPaths) {
+            outList = new ArrayList<String>(problems.subList(0, maxPaths));
+        } else {
+            outList = problems;
         }
-        // No errors could be determined (or versions coudl not be determined): ignore.
-        return null;
+        outList.add(0, "The following configuration default values have changed:");
+        if (maxPaths >= 0) {
+            outList.add("-> " + problems.size() + " entries in total, check the log file(s) for a complete list.");
+        } else {
+            outList.add("(Remove/update individual values or set configversion.created to " + maxBuildContained +
+                    " to ignore all, then reload the configuration with the 'ncp reload' command.)");
+        }
+        return StringUtil.join(outList, "\n");
     }
 
     /**
