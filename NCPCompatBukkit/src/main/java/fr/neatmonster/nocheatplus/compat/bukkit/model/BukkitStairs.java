@@ -202,14 +202,15 @@ public class BukkitStairs implements BukkitShapeModel {
         return list;
     }
 
-    private boolean sameshape(double minX, double minY, double minZ, double maxX, double maxY, double maxZ, double tminX,
-            double tminY, double tminZ, double tmaxX, double tmaxY, double tmaxZ) {
+    private boolean sameshape(double minX, double minY, double minZ, double maxX, double maxY, double maxZ,
+            double tminX, double tminY, double tminZ, double tmaxX, double tmaxY, double tmaxZ) {
         final double dx = maxX - minX;
         final double dy = maxY - minY;
         final double dz = maxZ - minZ;
         final double tdx = tmaxX - tminX;
         final double tdy = tmaxY - tminY;
         final double tdz = tmaxZ - tminZ;
-        return dx == tdx && dy == tdy && dz == tdz;
+        final double tol = 1e-9;
+        return Math.abs(dx - tdx) < tol && Math.abs(dy - tdy) < tol && Math.abs(dz - tdz) < tol;
     }
 }
