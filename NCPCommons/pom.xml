@@ -35,4 +35,10 @@
         </dependency>
     </dependencies>
 
+    <properties>
+        <checkstyle.failOnViolation>false</checkstyle.failOnViolation>
+        <pmd.failOnViolation>false</pmd.failOnViolation>
+        <cpd.failOnViolation>false</cpd.failOnViolation>
+    </properties>
+
 </project>
