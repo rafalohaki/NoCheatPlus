@@ -505,72 +505,113 @@ public class FightListener extends CheckListener implements JoinLeaveListener{
 
         boolean cancelled = false;
 
-        if (speed.isEnabled(player, pData)) {
-            if (speed.check(player, now, data, cc, pData)) {
-                cancelled = true;
-                if (data.speedVL > 50) {
-                    if (cc.speedImprobableWeight > 0.0f && !cc.speedImprobableFeedOnly) {
-                        Improbable.check(player, cc.speedImprobableWeight, now, "fight.speed", pData);
-                    }
-                } else if (cc.speedImprobableWeight > 0.0f) {
-                    Improbable.feed(player, cc.speedImprobableWeight, now);
-                }
-            } else if (normalizedMove > 2.0) {
-                if (cc.speedImprobableWeight > 0.0f
-                        && !cc.speedImprobableFeedOnly
-                        && Improbable.check(player, cc.speedImprobableWeight, now, "fight.speed", pData)) {
-                    cancelled = true;
-                }
-            }
-        }
+        cancelled |= checkSpeed(player, data, cc, pData, normalizedMove, now);
 
-        if (!cancelled && critical.isEnabled(player, pData)
-                && critical.check(player, loc, data, cc, pData, penaltyList)) {
-            cancelled = true;
-        }
-
-        if (!cancelled && mData.timeRiptiding + 3000 < now && noSwing.isEnabled(player, pData)
-                && noSwing.check(player, data, cc)) {
-            cancelled = true;
-        }
-
-        if (!cancelled && impossibleHit.isEnabled(player, pData)) {
-            if (impossibleHit.check(player, data, cc, pData,
-                    mCc.survivalFlyResetItem && mcAccess.getHandle().resetActiveItem(player))) {
-                cancelled = true;
-                if (cc.impossibleHitImprobableWeight > 0.0f) {
-                    Improbable.feed(player, cc.impossibleHitImprobableWeight, System.currentTimeMillis());
-                }
-            }
-        }
-
-        if (!cancelled && visible.isEnabled(player, pData)) {
-            if (visible.check(player, loc, damaged, damagedIsFake, damagedLoc, data, cc)) {
-                cancelled = true;
-            }
+        if (!cancelled) {
+            cancelled |= checkCritical(player, loc, data, cc, pData, penaltyList);
         }
 
         if (!cancelled) {
-            final boolean isDamagedPlayer = damaged instanceof Player;
-            final boolean reachEnabled = reach.isEnabled(player, pData) && isDamagedPlayer;
-            final boolean directionEnabled = direction.isEnabled(player, pData)
-                    && mData.timeRiptiding + 3000 < now;
-            if (reachEnabled || directionEnabled) {
-                if (damagedTrace != null) {
-                    cancelled = locationTraceChecks(player, loc, data, cc, pData, damaged, damagedIsFake, damagedLoc,
-                            damagedTrace, tick, now, debug, reachEnabled, directionEnabled);
-                } else {
-                    if (reachEnabled
-                            && reach.check(player, loc, damaged, damagedIsFake, damagedLoc, data, cc, pData)) {
-                        cancelled = true;
-                    }
-                    if (directionEnabled && direction.check(player, loc, damaged, damagedIsFake, damagedLoc, data, cc)) {
-                        cancelled = true;
-                    }
-                }
-            }
+            cancelled |= checkNoSwing(player, mData, pData, cc, now, data);
         }
 
+        if (!cancelled) {
+            cancelled |= checkImpossibleHit(player, mCc, data, cc, pData);
+        }
+
+        if (!cancelled) {
+            cancelled |= checkVisibility(player, loc, damaged, damagedIsFake, damagedLoc, data, cc, pData);
+        }
+
+        if (!cancelled) {
+            cancelled |= checkReachAndDirection(player, damaged, damagedIsFake, loc, damagedLoc, data, pData,
+                    cc, mData, damagedTrace, tick, now, debug);
+        }
+
+        return cancelled;
+    }
+
+    private boolean checkSpeed(final Player player, final FightData data, final FightConfig cc,
+            final IPlayerData pData, final double normalizedMove, final long now) {
+        if (player == null || pData == null || !speed.isEnabled(player, pData)) {
+            return false;
+        }
+        if (speed.check(player, now, data, cc, pData)) {
+            if (data.speedVL > 50) {
+                if (cc.speedImprobableWeight > 0.0f && !cc.speedImprobableFeedOnly) {
+                    Improbable.check(player, cc.speedImprobableWeight, now, "fight.speed", pData);
+                }
+            } else if (cc.speedImprobableWeight > 0.0f) {
+                Improbable.feed(player, cc.speedImprobableWeight, now);
+            }
+            return true;
+        }
+        if (normalizedMove > 2.0 && cc.speedImprobableWeight > 0.0f && !cc.speedImprobableFeedOnly
+                && Improbable.check(player, cc.speedImprobableWeight, now, "fight.speed", pData)) {
+            return true;
+        }
+        return false;
+    }
+
+    private boolean checkCritical(final Player player, final Location loc, final FightData data, final FightConfig cc,
+            final IPlayerData pData, final IPenaltyList penaltyList) {
+        return player != null && pData != null && critical.isEnabled(player, pData)
+                && critical.check(player, loc, data, cc, pData, penaltyList);
+    }
+
+    private boolean checkNoSwing(final Player player, final MovingData mData, final IPlayerData pData,
+            final FightConfig cc, final long now, final FightData data) {
+        return player != null && pData != null && mData.timeRiptiding + 3000 < now
+                && noSwing.isEnabled(player, pData) && noSwing.check(player, data, cc);
+    }
+
+    private boolean checkImpossibleHit(final Player player, final MovingConfig mCc, final FightData data,
+            final FightConfig cc, final IPlayerData pData) {
+        if (player == null || pData == null || !impossibleHit.isEnabled(player, pData)) {
+            return false;
+        }
+        if (impossibleHit.check(player, data, cc, pData,
+                mCc.survivalFlyResetItem && mcAccess.getHandle().resetActiveItem(player))) {
+            if (cc.impossibleHitImprobableWeight > 0.0f) {
+                Improbable.feed(player, cc.impossibleHitImprobableWeight, System.currentTimeMillis());
+            }
+            return true;
+        }
+        return false;
+    }
+
+    private boolean checkVisibility(final Player player, final Location loc, final Entity damaged,
+            final boolean damagedIsFake, final Location damagedLoc, final FightData data, final FightConfig cc,
+            final IPlayerData pData) {
+        return player != null && pData != null && visible.isEnabled(player, pData)
+                && visible.check(player, loc, damaged, damagedIsFake, damagedLoc, data, cc);
+    }
+
+    private boolean checkReachAndDirection(final Player player, final Entity damaged, final boolean damagedIsFake,
+            final Location loc, final Location damagedLoc, final FightData data, final IPlayerData pData,
+            final FightConfig cc, final MovingData mData, final LocationTrace damagedTrace, final int tick,
+            final long now, final boolean debug) {
+
+        if (player == null || pData == null) {
+            return false;
+        }
+        final boolean isDamagedPlayer = damaged instanceof Player;
+        final boolean reachEnabled = reach.isEnabled(player, pData) && isDamagedPlayer;
+        final boolean directionEnabled = direction.isEnabled(player, pData) && mData.timeRiptiding + 3000 < now;
+        if (!reachEnabled && !directionEnabled) {
+            return false;
+        }
+        if (damagedTrace != null) {
+            return locationTraceChecks(player, loc, data, cc, pData, damaged, damagedIsFake, damagedLoc, damagedTrace,
+                    tick, now, debug, reachEnabled, directionEnabled);
+        }
+        boolean cancelled = false;
+        if (reachEnabled && reach.check(player, loc, damaged, damagedIsFake, damagedLoc, data, cc, pData)) {
+            cancelled = true;
+        }
+        if (directionEnabled && direction.check(player, loc, damaged, damagedIsFake, damagedLoc, data, cc)) {
+            cancelled = true;
+        }
         return cancelled;
     }
 
