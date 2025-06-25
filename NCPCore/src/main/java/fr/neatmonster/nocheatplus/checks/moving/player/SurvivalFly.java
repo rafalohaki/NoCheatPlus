@@ -445,147 +445,16 @@ public class SurvivalFly extends Check {
         //////////////////////////////////////////////////////////////////////////////////////////////
         //  Set data for normal move or violation without cancel (cancel would have returned above) //
         //////////////////////////////////////////////////////////////////////////////////////////////
-        // 1: Adjust lift off envelope to medium
-        // NOTE: isNextToGround(0.15, 0.4) allows a little much (yMargin), but reduces false positives.
-        // Related commit: https://github.com/NoCheatPlus/NoCheatPlus/commit/c8ac66de2c94ac9f70f29c350054dd7896cd8646#diff-b8df089e2a4295e12695420f6066320d96119aa12c80e1c64efcb959f089db2d
-        final LiftOffEnvelope oldLiftOffEnvelope = data.liftOffEnvelope;
-        final Material blockUnder = from.getTypeId(from.getBlockX(), Location.locToBlock(from.getY() - cc.sfStepHeight), from.getBlockZ());
-        if (thisMove.to.inLiquid) {
-            if (fromOnGround && !toOnGround && data.liftOffEnvelope == LiftOffEnvelope.NORMAL
-                && data.sfJumpPhase <= 0 && !thisMove.from.inLiquid) {
-                // KEEP
-            }
-            // Moving in liquid near ground, weak/no jump limit.
-            else if (to.isNextToGround(0.15, 0.2)) {
-                data.liftOffEnvelope = LiftOffEnvelope.LIMIT_NEAR_GROUND;
-            }
-            // Minecraft 1.13 allows players to swim up to the surface and have two consecutive in-air moves with higher jump height.
-            // (Moving near ground takes precedence)
-            else if (Magic.inAir(lastMove) && Magic.intoWater(thisMove) && data.liftOffEnvelope == LiftOffEnvelope.LIMIT_SURFACE
-                    && BlockProperties.isAir(to.getTypeIdAbove()) && !thisMove.headObstructed
-                    && !thisMove.inWaterfall) {
-                // KEEP
-            }
-            // Fallback to default liquid lift-off limit.
-            else data.liftOffEnvelope = LiftOffEnvelope.LIMIT_LIQUID;
-        }
-        else if (thisMove.to.inPowderSnow) {
-            data.liftOffEnvelope = LiftOffEnvelope.POWDER_SNOW;
-        }
-        else if (thisMove.to.inWeb) {
-            data.liftOffEnvelope = LiftOffEnvelope.NO_JUMP;
-        }
-        else if (thisMove.to.inBerryBush) {
-            data.liftOffEnvelope = LiftOffEnvelope.BERRY_JUMP;
-        }
-        else if (thisMove.to.onHoneyBlock) {
-            data.liftOffEnvelope = LiftOffEnvelope.HALF_JUMP;
-        }
-        else if (resetTo) {
-            data.liftOffEnvelope = LiftOffEnvelope.NORMAL;
-        }
-        else if (thisMove.from.inLiquid) {
-            if (!resetTo && data.liftOffEnvelope == LiftOffEnvelope.NORMAL && data.sfJumpPhase <= 0) {
-                // KEEP
-            }
-            // Moving in liquid near ground, weak/no jump limit.
-            else if (to.isNextToGround(0.15, 0.2)) {
-                data.liftOffEnvelope = LiftOffEnvelope.LIMIT_NEAR_GROUND;
-            }
-            // Minecraft 1.13 allows players to swim up to the surface and have two consecutive in-air moves.
-            // (Moving near ground takes precedence)
-            else if (Magic.inWater(lastMove) && Magic.leavingWater(thisMove)
-                    // && BlockProperties.isLiquid(blockUnder)
-                    && !thisMove.headObstructed && !Magic.recentlyInWaterfall(data, 10)) {// && BlockProperties.isAir(from.getTypeIdAbove())
-                data.liftOffEnvelope = LiftOffEnvelope.LIMIT_SURFACE;
-            }
-            // Fallback to default liquid lift-off limit.
-            else data.liftOffEnvelope = LiftOffEnvelope.LIMIT_LIQUID;
+        // 1: Adjust lift off envelope to medium and update medium counters.
+        adjustLiftOffEnvelope(thisMove, lastMove, from, to, fromOnGround, toOnGround,
+                resetFrom, resetTo, yDistance, data, cc);
 
-        }
-        else if (thisMove.from.inPowderSnow) {
-            data.liftOffEnvelope = LiftOffEnvelope.POWDER_SNOW;
-        }
-        else if (thisMove.from.inWeb) {
-            data.liftOffEnvelope = LiftOffEnvelope.NO_JUMP;
-        }
-        else if (thisMove.from.inBerryBush) {
-            data.liftOffEnvelope = LiftOffEnvelope.BERRY_JUMP;
-        }
-        else if (thisMove.from.onHoneyBlock) {
-            data.liftOffEnvelope = LiftOffEnvelope.HALF_JUMP;
-        }
-        else if (resetFrom || thisMove.touchedGround) {
-            data.liftOffEnvelope = LiftOffEnvelope.NORMAL;
-        }
-        else {
-            // Air, Keep medium.
-        }
+        // 2: Apply reset conditions.
+        applyResetConditions(player, from, to, resetFrom, resetTo, toOnGround, yDistance,
+                hFreedom, debug, data, cc, thisMove);
 
-        // 2: Count how long one is moving inside of a medium.
-        if (oldLiftOffEnvelope != data.liftOffEnvelope) {
-            data.insideMediumCount = 0;
-            data.clearHAccounting();
-        }
-        else if (!resetFrom || !resetTo) {
-            data.insideMediumCount = 0;
-        }
-        else data.insideMediumCount ++;
 
-        // 3: Apply reset conditions.
-        if (resetTo) {
-            // The player has moved onto ground.
-            if (toOnGround) {
-                // Moving onto ground but still ascending (jumping next to a block).
-                if (yDistance > 0.0 && to.getY() > data.getSetBackY() + 0.13 // 0.15 ?
-                    && !from.isResetCond() && !to.isResetCond()) {
-
-                    // Too early abort, remember when the delay was reset (see MagicBunny.bunnyHop)
-                    if (data.bunnyhopDelay > 0) {
-                        if (data.bunnyhopDelay > 6) {
-                            data.lastbunnyhopDelay = data.bunnyhopDelay;
-                        }
-                        data.bunnyhopDelay = 0;
-                    }
-                    // Schedule a no low jump flag, because this low descending phase is legit
-                    data.sfNoLowJump = true;
-                    if (debug) {
-                        debug(player, "Slope: schedule sfNoLowJump and reset bunnyfly.");
-                    }
-                }
-                // Ordinary
-                else data.sfNoLowJump = false;
-            }
-            // Lost ground or reset condition
-            else data.sfNoLowJump = false;
-            // Reset data.
-            data.setSetBack(to);
-            data.sfJumpPhase = 0;
-            data.clearAccounting();
-            if (data.sfLowJump && resetFrom) {
-                // Prevent reset if coming from air (purpose of the flag).
-                data.sfLowJump = false;
-            }
-            if (hFreedom <= 0.0 && thisMove.verVelUsed == null) {
-                data.resetVelocityJumpPhase(tags);
-            }
-        }
-        // The player moved from ground.
-        else if (resetFrom) {
-            // Keep old setback if coming from a 1 block high slope.
-            data.setSetBack(from);
-            data.sfJumpPhase = 1; // This event is already in air.
-            data.clearAccounting();
-            data.sfLowJump = false;
-        }
-        else {
-            data.sfJumpPhase ++;
-            if (to.getY() < 0.0 && cc.sfSetBackPolicyVoid) {
-                data.setSetBack(to);
-            }
-        }
-
-        // 4: Adjust in-air counters.
+        // 3: Adjust in-air counters.
         if (inAir) {
             if (yDistance == 0.0) {
                 data.sfZeroVdistRepeat ++;
@@ -598,12 +467,12 @@ public class SurvivalFly extends Check {
             data.sfVLInAir = false;
         }
 
-        // 5: Horizontal velocity invalidation.
+        // 4: Horizontal velocity invalidation.
         if (hDistance <= (cc.velocityStrictInvalidation ? thisMove.hAllowedDistanceBase : thisMove.hAllowedDistanceBase / 2.0)) {
             data.clearActiveHorVel();
         }
 
-        // 6: Update unused velocity tracking.
+        // 5: Update unused velocity tracking.
         if (debug) {
             data.getVerticalVelocityTracker().updateBlockedState(tick,
                     // Assume blocked with being in web/water, despite not entirely correct.
@@ -613,11 +482,11 @@ public class SurvivalFly extends Check {
             UnusedVelocity.checkUnusedVelocity(player, type, data, cc);
         }
 
-        // 7: Adjust friction.
+        // 6: Adjust friction.
         data.lastFrictionHorizontal = data.nextFrictionHorizontal;
         data.lastFrictionVertical = data.nextFrictionVertical;
 
-        // 8: Log tags added after violation handling.
+        // 7: Log tags added after violation handling.
         if (debug && tags.size() > tagsLength) {
             logPostViolationTags(player);
         }
@@ -1007,6 +876,133 @@ public class SurvivalFly extends Check {
                 data.momentumTick = 11;
             } else {
                 data.momentumTick = ServerIsAtLeast1_13 ? 6 : 3;
+            }
+        }
+    }
+
+    /**
+     * Adjust lift-off envelope and update medium counters.
+     */
+    private void adjustLiftOffEnvelope(final PlayerMoveData thisMove, final PlayerMoveData lastMove,
+                                       final PlayerLocation from, final PlayerLocation to,
+                                       final boolean fromOnGround, final boolean toOnGround,
+                                       final boolean resetFrom, final boolean resetTo,
+                                       final double yDistance, final MovingData data,
+                                       final MovingConfig cc) {
+        if (thisMove == null || lastMove == null || from == null || to == null || data == null || cc == null) {
+            return;
+        }
+
+        final LiftOffEnvelope oldLiftOffEnvelope = data.liftOffEnvelope;
+
+        if (thisMove.to.inLiquid) {
+            if (fromOnGround && !toOnGround && data.liftOffEnvelope == LiftOffEnvelope.NORMAL
+                    && data.sfJumpPhase <= 0 && !thisMove.from.inLiquid) {
+                // KEEP
+            } else if (to.isNextToGround(0.15, 0.2)) {
+                data.liftOffEnvelope = LiftOffEnvelope.LIMIT_NEAR_GROUND;
+            } else if (Magic.inAir(lastMove) && Magic.intoWater(thisMove)
+                    && data.liftOffEnvelope == LiftOffEnvelope.LIMIT_SURFACE
+                    && BlockProperties.isAir(to.getTypeIdAbove()) && !thisMove.headObstructed
+                    && !thisMove.inWaterfall) {
+                // KEEP
+            } else {
+                data.liftOffEnvelope = LiftOffEnvelope.LIMIT_LIQUID;
+            }
+        } else if (thisMove.to.inPowderSnow) {
+            data.liftOffEnvelope = LiftOffEnvelope.POWDER_SNOW;
+        } else if (thisMove.to.inWeb) {
+            data.liftOffEnvelope = LiftOffEnvelope.NO_JUMP;
+        } else if (thisMove.to.inBerryBush) {
+            data.liftOffEnvelope = LiftOffEnvelope.BERRY_JUMP;
+        } else if (thisMove.to.onHoneyBlock) {
+            data.liftOffEnvelope = LiftOffEnvelope.HALF_JUMP;
+        } else if (resetTo) {
+            data.liftOffEnvelope = LiftOffEnvelope.NORMAL;
+        } else if (thisMove.from.inLiquid) {
+            if (!resetTo && data.liftOffEnvelope == LiftOffEnvelope.NORMAL && data.sfJumpPhase <= 0) {
+                // KEEP
+            } else if (to.isNextToGround(0.15, 0.2)) {
+                data.liftOffEnvelope = LiftOffEnvelope.LIMIT_NEAR_GROUND;
+            } else if (Magic.inWater(lastMove) && Magic.leavingWater(thisMove)
+                    && !thisMove.headObstructed && !Magic.recentlyInWaterfall(data, 10)) {
+                data.liftOffEnvelope = LiftOffEnvelope.LIMIT_SURFACE;
+            } else {
+                data.liftOffEnvelope = LiftOffEnvelope.LIMIT_LIQUID;
+            }
+        } else if (thisMove.from.inPowderSnow) {
+            data.liftOffEnvelope = LiftOffEnvelope.POWDER_SNOW;
+        } else if (thisMove.from.inWeb) {
+            data.liftOffEnvelope = LiftOffEnvelope.NO_JUMP;
+        } else if (thisMove.from.inBerryBush) {
+            data.liftOffEnvelope = LiftOffEnvelope.BERRY_JUMP;
+        } else if (thisMove.from.onHoneyBlock) {
+            data.liftOffEnvelope = LiftOffEnvelope.HALF_JUMP;
+        } else if (resetFrom || thisMove.touchedGround) {
+            data.liftOffEnvelope = LiftOffEnvelope.NORMAL;
+        } else {
+            // Air, keep medium.
+        }
+
+        if (oldLiftOffEnvelope != data.liftOffEnvelope) {
+            data.insideMediumCount = 0;
+            data.clearHAccounting();
+        } else if (!resetFrom || !resetTo) {
+            data.insideMediumCount = 0;
+        } else {
+            data.insideMediumCount++;
+        }
+    }
+
+    /**
+     * Apply reset conditions after checking movement.
+     */
+    private void applyResetConditions(final Player player, final PlayerLocation from, final PlayerLocation to,
+                                      final boolean resetFrom, final boolean resetTo, final boolean toOnGround,
+                                      final double yDistance, final double hFreedom, final boolean debug,
+                                      final MovingData data, final MovingConfig cc, final PlayerMoveData thisMove) {
+        if (player == null || from == null || to == null || data == null || cc == null || thisMove == null) {
+            return;
+        }
+
+        if (resetTo) {
+            if (toOnGround) {
+                if (yDistance > 0.0 && to.getY() > data.getSetBackY() + 0.13
+                        && !from.isResetCond() && !to.isResetCond()) {
+                    if (data.bunnyhopDelay > 0) {
+                        if (data.bunnyhopDelay > 6) {
+                            data.lastbunnyhopDelay = data.bunnyhopDelay;
+                        }
+                        data.bunnyhopDelay = 0;
+                    }
+                    data.sfNoLowJump = true;
+                    if (debug) {
+                        debug(player, "Slope: schedule sfNoLowJump and reset bunnyfly.");
+                    }
+                } else {
+                    data.sfNoLowJump = false;
+                }
+            } else {
+                data.sfNoLowJump = false;
+            }
+            data.setSetBack(to);
+            data.sfJumpPhase = 0;
+            data.clearAccounting();
+            if (data.sfLowJump && resetFrom) {
+                data.sfLowJump = false;
+            }
+            if (hFreedom <= 0.0 && thisMove.verVelUsed == null) {
+                data.resetVelocityJumpPhase(tags);
+            }
+        } else if (resetFrom) {
+            data.setSetBack(from);
+            data.sfJumpPhase = 1;
+            data.clearAccounting();
+            data.sfLowJump = false;
+        } else {
+            data.sfJumpPhase++;
+            if (to.getY() < 0.0 && cc.sfSetBackPolicyVoid) {
+                data.setSetBack(to);
             }
         }
     }
