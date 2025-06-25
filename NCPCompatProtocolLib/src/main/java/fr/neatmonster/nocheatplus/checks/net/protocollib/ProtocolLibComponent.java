@@ -90,7 +90,14 @@ public class ProtocolLibComponent implements IDisableListener, INotifyReload, Jo
     private static final List<PacketAdapter> registeredPacketAdapters = new LinkedList<PacketAdapter>();
 
     public ProtocolLibComponent(Plugin plugin) {
-        register(plugin);
+        try {
+            register(plugin);
+        } catch (RuntimeException ex) {
+            StaticLog.logWarning("Failed to register ProtocolLib component.");
+            if (ConfigManager.getConfigFile().getBoolean(ConfPaths.LOGGING_EXTENDED_STATUS)) {
+                NCPAPIProvider.getNoCheatPlusAPI().getLogManager().debug(Streams.INIT, ex);
+            }
+        }
         /*
          * TODO: Register listeners iff any check is enabled - unregister from
          * EventRegistry with unregister.

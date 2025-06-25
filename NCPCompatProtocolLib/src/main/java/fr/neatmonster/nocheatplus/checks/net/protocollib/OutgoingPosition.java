@@ -99,17 +99,15 @@ public class OutgoingPosition extends BaseAdapter {
         final double z = doubles.read(indexZ);
         final float yaw = floats.read(indexYaw);
         final float pitch = floats.read(indexPitch);
-        Integer teleportId = Integer.MIN_VALUE;
+        int teleportId = Integer.MIN_VALUE;
 
         if (hasTeleportId) {
             try {
                 final StructureModifier<Integer> integers = packet.getIntegers();
                 if (integers.size() == 1) {
                     // Accept as id.
-                    teleportId = integers.read(0);
-                    if (teleportId == null) {
-                        teleportId = Integer.MIN_VALUE;
-                    }
+                    Integer idObj = integers.read(0);
+                    teleportId = idObj != null ? idObj : Integer.MIN_VALUE;
                     if (teleportId != Integer.MIN_VALUE && debug) {
                         debug(player, "Outgoing confirm teleport id: " + teleportId);
                     }

@@ -66,9 +66,7 @@ public class UseEntityAdapter extends BaseAdapter {
                 this.methodGetAction_legacy = methodGetAction;
                 this.methodName_legacy = ReflectionUtil.getMethodNoArgs(enumClassAction_legacy, "name", String.class);
             }
-            if (this.methodName_legacy == null) {
-                throw new RuntimeException("Not supported.");
-            }
+            // methodName_legacy can be null if not supported
         }
 
         String getActionFromNMSPacket(Object handle) {
@@ -165,18 +163,10 @@ public class UseEntityAdapter extends BaseAdapter {
         }
         if (!packetInterpreted) {
             // Handle as if latest.
-            try {
-                final StructureModifier<EntityUseAction> actions = packet.getEntityUseActions();
-                if (actions.size() == 1 && actions.read(0) == EntityUseAction.ATTACK) {
-                    isAttack = true;
-                    packetInterpreted = true;
-                }
-            }
-            catch (NullPointerException e) {
-                /*
-                 * TODO: Observed somewhere on 1_7_R4, probably a custom build -
-                 * why doesn't the LegacyReflectionSet work here?
-                 */
+            final StructureModifier<EntityUseAction> actions = packet.getEntityUseActions();
+            if (actions != null && actions.size() == 1 && actions.read(0) == EntityUseAction.ATTACK) {
+                isAttack = true;
+                packetInterpreted = true;
             }
         }
         if (!packetInterpreted) {
