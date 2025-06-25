@@ -28,6 +28,7 @@ import fr.neatmonster.nocheatplus.checks.ViolationData;
 import fr.neatmonster.nocheatplus.checks.moving.MovingConfig;
 import fr.neatmonster.nocheatplus.checks.moving.MovingData;
 import fr.neatmonster.nocheatplus.compat.blocks.changetracker.BlockChangeTracker;
+import fr.neatmonster.nocheatplus.compat.blocks.changetracker.IBlockChangeTracker;
 import fr.neatmonster.nocheatplus.players.IPlayerData;
 import fr.neatmonster.nocheatplus.utilities.collision.Axis;
 import fr.neatmonster.nocheatplus.utilities.collision.ICollidePassable;
@@ -62,7 +63,7 @@ public class Passable extends Check {
     }
 
     private final ICollidePassable rayTracing = new PassableAxisTracing();
-    private final BlockChangeTracker blockTracker;
+    private final IBlockChangeTracker blockTracker;
 
     public Passable() {
         super(CheckType.MOVING_PASSABLE);

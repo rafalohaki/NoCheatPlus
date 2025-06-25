@@ -19,12 +19,12 @@ import java.util.Map;
 import java.util.Set;
 
 import fr.neatmonster.nocheatplus.actions.ActionFactoryFactory;
-import fr.neatmonster.nocheatplus.compat.blocks.changetracker.BlockChangeTracker;
+import fr.neatmonster.nocheatplus.compat.blocks.changetracker.IBlockChangeTracker;
 import fr.neatmonster.nocheatplus.components.registry.ComponentRegistry;
 import fr.neatmonster.nocheatplus.components.registry.ComponentRegistryProvider;
 import fr.neatmonster.nocheatplus.components.registry.GenericInstanceRegistry;
 import fr.neatmonster.nocheatplus.components.registry.setup.RegistrationContext;
-import fr.neatmonster.nocheatplus.event.mini.EventRegistryBukkit;
+import fr.neatmonster.nocheatplus.event.mini.IEventRegistry;
 import fr.neatmonster.nocheatplus.logging.LogManager;
 import fr.neatmonster.nocheatplus.permissions.PermissionRegistry;
 import fr.neatmonster.nocheatplus.players.IPlayerDataManager;
@@ -185,7 +185,7 @@ public interface NoCheatPlusAPI extends ComponentRegistry<Object>, ComponentRegi
      * Get the block change tracker (pistons, other).
      * @return
      */
-    public BlockChangeTracker getBlockChangeTracker();
+    public IBlockChangeTracker getBlockChangeTracker();
 
     /**
      * Get the registry to register events with the
@@ -200,7 +200,7 @@ public interface NoCheatPlusAPI extends ComponentRegistry<Object>, ComponentRegi
      * 
      * @return
      */
-    public EventRegistryBukkit getEventRegistry();
+    public IEventRegistry getEventRegistry();
 
     /**
      * Get the internal permission registry, holding internal id mappings and

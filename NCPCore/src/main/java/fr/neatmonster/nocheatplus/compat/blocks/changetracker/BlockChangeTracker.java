@@ -64,7 +64,7 @@ import fr.neatmonster.nocheatplus.utilities.ds.map.CoordHash;
  * @author asofold
  *
  */
-public class BlockChangeTracker {
+public class BlockChangeTracker implements IBlockChangeTracker {
 
     public static enum Direction {
         NONE(BlockFace.SELF),

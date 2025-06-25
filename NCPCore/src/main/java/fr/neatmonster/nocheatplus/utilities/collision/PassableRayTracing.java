@@ -19,6 +19,7 @@ import java.util.UUID;
 
 import fr.neatmonster.nocheatplus.compat.blocks.changetracker.BlockChangeReference;
 import fr.neatmonster.nocheatplus.compat.blocks.changetracker.BlockChangeTracker;
+import fr.neatmonster.nocheatplus.compat.blocks.changetracker.IBlockChangeTracker;
 import fr.neatmonster.nocheatplus.utilities.location.PlayerLocation;
 import fr.neatmonster.nocheatplus.utilities.map.BlockCache;
 import fr.neatmonster.nocheatplus.utilities.map.BlockProperties;
@@ -38,7 +39,7 @@ public class PassableRayTracing extends RayTracing implements ICollidePassable {
     }
 
     @Override
-    public void setBlockChangeTracker(BlockChangeTracker blockChangeTracker,
+    public void setBlockChangeTracker(IBlockChangeTracker blockChangeTracker,
             BlockChangeReference blockChangeReference, int tick, UUID worldId) {
         // (Not supported.)
     }
