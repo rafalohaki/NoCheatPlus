@@ -84,11 +84,22 @@ public class ReflectHelper {
         try {
             this.reflectBase = new ReflectBase();
             ReflectAxisAlignedBB reflectAxisAlignedBB = null;
-            try {
-                reflectAxisAlignedBB = new ReflectAxisAlignedBB(reflectBase);
-            }
-            catch (NullPointerException ex1) {
-                // ignore - axis aligned bounding box not present
+            if (this.reflectBase.nmsPackageName != null) {
+                try {
+                    Class<?> aabbClass = Class.forName(this.reflectBase.nmsPackageName + ".AxisAlignedBB");
+                    boolean hasAllFields =
+                        ReflectionUtil.getField(aabbClass, "a", double.class) != null &&
+                        ReflectionUtil.getField(aabbClass, "b", double.class) != null &&
+                        ReflectionUtil.getField(aabbClass, "c", double.class) != null &&
+                        ReflectionUtil.getField(aabbClass, "d", double.class) != null &&
+                        ReflectionUtil.getField(aabbClass, "e", double.class) != null &&
+                        ReflectionUtil.getField(aabbClass, "f", double.class) != null;
+                    if (hasAllFields) {
+                        reflectAxisAlignedBB = new ReflectAxisAlignedBB(reflectBase);
+                    }
+                } catch (ClassNotFoundException ex1) {
+                    // ignore - axis aligned bounding box not present
+                }
             }
             this.reflectAxisAlignedBB = reflectAxisAlignedBB;
             ReflectBlockPosition reflectBlockPosition = null;
