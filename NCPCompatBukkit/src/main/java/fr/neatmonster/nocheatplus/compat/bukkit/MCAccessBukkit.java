@@ -56,7 +56,8 @@ public class MCAccessBukkit extends MCAccessBukkitBase implements BlockPropertie
             }
         }
         if (!itchyBlocks.isEmpty()) {
-            StaticLog.logDebug("The following blocks can not be modeled correctly: " + StringUtil.join(itchyBlocks, ", "));
+            StaticLog.logWarning("The following blocks can not be modeled correctly, falling back to passable: " +
+                    StringUtil.join(itchyBlocks, ", "));
         }
     }
 
