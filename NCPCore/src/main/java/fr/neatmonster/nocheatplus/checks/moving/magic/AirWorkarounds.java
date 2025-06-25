@@ -545,15 +545,11 @@ public class AirWorkarounds {
             return true;
         }
 
-        boolean result = false;
-
-        result |= moveOntoGroundAllowsShorter(yDistDiffEx, yDistChange, resetTo, fromOnGround, thisMove, data);
-        result |= mirroredFastFallCase(yDistance, lastMove, resetTo, thisMove, data);
-        result |= stairsOffGround(yDistance, resetFrom, resetTo, to, lastMove, data);
-        result |= headBlockedFastFall(yDistance, thisMove, lastMove, data);
-        result |= breakingBlockBelow(yDistance, lastMove, data);
-
-        return result;
+        return moveOntoGroundAllowsShorter(yDistDiffEx, yDistChange, resetTo, fromOnGround, thisMove, data)
+                || mirroredFastFallCase(yDistance, lastMove, resetTo, thisMove, data)
+                || stairsOffGround(yDistance, resetFrom, resetTo, to, lastMove, data)
+                || headBlockedFastFall(yDistance, thisMove, lastMove, data)
+                || breakingBlockBelow(yDistance, lastMove, data);
     }
 
     private static boolean isFireworkBoostTransition(final MovingData data, final PlayerMoveData lastMove,
