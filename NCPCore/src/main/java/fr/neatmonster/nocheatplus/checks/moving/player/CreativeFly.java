@@ -735,81 +735,97 @@ public class CreativeFly extends Check {
      * @param data
      * @return limitV
      */
-    private double hackLytra(final double yDistance, final double limitV, final PlayerMoveData thisMove, 
-                             final PlayerMoveData lastMove, final PlayerLocation from, 
+    private double hackLytra(final double yDistance, final double limitV, final PlayerMoveData thisMove,
+                             final PlayerMoveData lastMove, final PlayerLocation from,
                              final MovingData data) {
 
-        // Elytra jump, let hackElytraH hande it
+        double result = limitV;
+
+        if (handleSpecialElytraStates(yDistance, thisMove, from)) {
+            result = yDistance;
+        } else if (handleGlideAscend(yDistance, thisMove, lastMove, data)) {
+            result = yDistance;
+        } else if (handleFireworkBoostAscend(yDistance, limitV, lastMove, data)) {
+            result = yDistance;
+        }
+
+        return result;
+    }
+
+    /**
+     * Handle conditions like jumps, slowfalling and riptide that should return
+     * the given yDistance directly.
+     */
+    private boolean handleSpecialElytraStates(final double yDistance, final PlayerMoveData thisMove,
+            final PlayerLocation from) {
+        final Player player = from != null ? from.getPlayer() : null;
         if (yDistance > 0.0 && yDistance < 0.42 && thisMove.touchedGround) {
             tags.add("e_jump");
-            return yDistance;
-        } 
-        // Ignore slowfalling here
-        else if (Bridge1_13.getSlowfallingAmplifier(from.getPlayer()) >= 0.0) {
+            return true;
+        }
+        if (player != null && Bridge1_13.getSlowfallingAmplifier(player) >= 0.0) {
             tags.add("e_slowfall");
-            return yDistance;
+            return true;
         }
-        // Do ignore riptiding.
-        else if (Bridge1_13.isRiptiding(from.getPlayer())) {
+        if (player != null && Bridge1_13.isRiptiding(player)) {
             tags.add("e_riptide");
-            return yDistance;
+            return true;
         }
+        return false;
+    }
 
-        if (yDistance > Magic.GLIDE_DESCEND_PHASE_MIN && yDistance < 34.0 * Magic.GRAVITY_MAX 
-            && (
-                // Normal envelope.
-                lastMove.hDistance < 3.3 && yDistance - lastMove.yDistance < lastMove.hDistance / 11.0
-                // Inversion (neg -> pos).
-                || lastMove.yDistance < -Magic.GRAVITY_SPAN 
-                && yDistance < Magic.GRAVITY_MAX + Magic.GRAVITY_ODD && yDistance > Magic.GRAVITY_SPAN
-            )
-            && thisMove.hDistance < lastMove.hDistance
-            && (lastMove.yDistance > 0.0 || lastMove.hDistance > 0.55) // Demand some speed on the transition.
-            // Demand total speed to decrease somehow, unless for the very transition.
-            //&& (thisMove.distanceSquared / lastMove.distanceSquared < 0.99
-            //        || lastMove.yDistance < 0.0) // Might confine the latter something to be tested.
-            ) {
+    /**
+     * Detect ascend phases during gliding and update tags accordingly.
+     */
+    private boolean handleGlideAscend(final double yDistance, final PlayerMoveData thisMove,
+            final PlayerMoveData lastMove, final MovingData data) {
+        if (yDistance > Magic.GLIDE_DESCEND_PHASE_MIN && yDistance < 34.0 * Magic.GRAVITY_MAX
+                && (
+                        lastMove.hDistance < 3.3 && yDistance - lastMove.yDistance < lastMove.hDistance / 11.0
+                        || lastMove.yDistance < -Magic.GRAVITY_SPAN
+                                && yDistance < Magic.GRAVITY_MAX + Magic.GRAVITY_ODD && yDistance > Magic.GRAVITY_SPAN
+                )
+                && thisMove.hDistance < lastMove.hDistance
+                && (lastMove.yDistance > 0.0 || lastMove.hDistance > 0.55)) {
 
-            // (Increasing y-distance.)
             if (lastMove.hDistance > 0.51) {
                 tags.add("e_asc1");
-                return yDistance;
+                return true;
             }
-            // (Decreasing y-distance.)
-            else if (thisMove.hDistance > Magic.GRAVITY_MIN && yDistance < lastMove.yDistance) {
-
+            if (thisMove.hDistance > Magic.GRAVITY_MIN && yDistance < lastMove.yDistance) {
                 final PlayerMoveData pastMove1 = data.playerMoves.getSecondPastMove();
                 if (pastMove1.toIsValid && pastMove1.to.extraPropertiesValid) {
-                    // Demand this being the first one, or decreasing by a decent amount with past two moves.
-                    if (
-                        // First move rather decreasing.
-                        pastMove1.yDistance < lastMove.yDistance 
-                        // Decreasing by a reasonable (?) amount.
-                        || yDistance - pastMove1.yDistance < -0.001) {
+                    if (pastMove1.yDistance < lastMove.yDistance
+                            || yDistance - pastMove1.yDistance < -0.001) {
                         tags.add("e_asc2");
-                        return yDistance;
+                        return true;
                     }
                 }
             }
         }
+        return false;
+    }
 
-        // Elytra boost with fireworks rockets.
+    /**
+     * Determine if a firework boost should override the velocity limit.
+     */
+    private boolean handleFireworkBoostAscend(final double yDistance, final double limitV,
+            final PlayerMoveData lastMove, final MovingData data) {
         if (yDistance > limitV && data.fireworksBoostDuration > 0 && lastMove.toIsValid
-            && (
-                yDistance >= lastMove.yDistance 
-                || yDistance - lastMove.yDistance < Magic.GRAVITY_MAX
-            )
-            && (
-                yDistance - lastMove.yDistance < 0.79
-                || lastMove.yDistance < 0.0 && yDistance < 1.54
-            )
-            && yDistance < 1.67) {
+                && (
+                        yDistance >= lastMove.yDistance
+                                || yDistance - lastMove.yDistance < Magic.GRAVITY_MAX
+                )
+                && (
+                        yDistance - lastMove.yDistance < 0.79
+                                || lastMove.yDistance < 0.0 && yDistance < 1.54
+                )
+                && yDistance < 1.67) {
             /* Additional checks for fireworks boost could be implemented here. */
             tags.add("fw_boost_asc");
-            return yDistance;
+            return true;
         }
-
-        return limitV;
+        return false;
     }
 
     /**
