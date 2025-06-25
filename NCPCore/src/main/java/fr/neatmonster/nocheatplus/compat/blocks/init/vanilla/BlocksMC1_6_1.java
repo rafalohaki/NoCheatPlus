@@ -42,7 +42,7 @@ public class BlocksMC1_6_1 implements BlockPropertiesSetup{
 
         // Hay Bale
         BlockProperties.setBlockProps("HAY_BLOCK", BlockProperties.leverType);
-        BlockFlags.setFlagsAs("HAY_BLOCK", Material.STONE); // TODO: Assumption (!).
+        BlockFlags.setFlagsAs("HAY_BLOCK", Material.STONE); // Assumption: treated as stone.
 
         ConfigFile config = ConfigManager.getConfigFile();
         if (config.getBoolean(ConfPaths.BLOCKBREAK_DEBUG, config.getBoolean(ConfPaths.CHECKS_DEBUG, false)))

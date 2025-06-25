@@ -86,6 +86,5 @@ public interface IWorldData extends IConfigDataAccess, IGetGenericInstance {
             Collection<Class<? extends IDataOnRemoveSubCheckData>> subCheckRemoval,
             Collection<CheckType> checkTypes);
 
-    // TODO: isDebugActive(CheckType checkType);
 
 }

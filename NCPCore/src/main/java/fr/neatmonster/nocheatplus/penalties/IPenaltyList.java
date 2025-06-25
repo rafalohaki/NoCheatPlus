@@ -33,7 +33,7 @@ package fr.neatmonster.nocheatplus.penalties;
  *
  */
 public interface IPenaltyList {
-    // TODO: Typed ? + typed per input getter (mapped lists)
+    // Consider typed penalties and typed getters for mapped lists.
 
     /**
      * Generic method to let the JVM deal with generics.

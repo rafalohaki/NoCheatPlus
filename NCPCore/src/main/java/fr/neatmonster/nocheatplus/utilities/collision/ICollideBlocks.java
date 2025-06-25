@@ -22,7 +22,7 @@ package fr.neatmonster.nocheatplus.utilities.collision;
  */
 public interface ICollideBlocks {
 
-    // TODO: number of visited blocks?
+    // Consider exposing the number of visited blocks.
 
     /**
      * Set the maximum steps to be done during loop() along the primary line.
@@ -32,7 +32,7 @@ public interface ICollideBlocks {
      * 
      * @param maxSteps
      */
-    // TODO: Not sure :p.
+    // Unclear if limiting max steps is sufficient here.
     public void setMaxSteps(int maxSteps);
     public int getMaxSteps();
 
