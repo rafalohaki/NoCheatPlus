@@ -662,9 +662,14 @@ public class MovingListener extends CheckListener implements TickListener, IRemo
      * @param event
      * @return If cancelled/done, i.e. not to process further split moves.
      */
-    private boolean checkPlayerMove(final Player player, final Location from, final Location to, final int multiMoveCount, 
-                                    final PlayerMoveInfo moveInfo, final boolean debug, final MovingData data, 
+    private boolean checkPlayerMove(final Player player, final Location from, final Location to, final int multiMoveCount,
+                                    final PlayerMoveInfo moveInfo, final boolean debug, final MovingData data,
                                     final MovingConfig cc, final IPlayerData pData, final PlayerMoveEvent event) {
+
+        if (player == null || from == null || to == null || moveInfo == null || data == null || cc == null ||
+                pData == null) {
+            return true;
+        }
 
         Location newTo = null;
         final PlayerMoveData thisMove = data.playerMoves.getCurrentMove();
@@ -765,180 +770,36 @@ public class MovingListener extends CheckListener implements TickListener, IRemo
         final double previousSetBackY;
         final boolean checkPassable = pData.isCheckActive(CheckType.MOVING_PASSABLE, player);
 
-        // 1: Hot fix: Entering end portal from bottom.
-        if (lastMove.to.getWorldName() != null && !lastMove.to.getWorldName().equals(thisMove.from.getWorldName())) {
+        final Location portalTo = handleEndPortalFromBottom(player, lastMove, thisMove, pFrom, pTo, from, data);
+        if (portalTo != null) {
+            newTo = portalTo;
+            checkNf = false;
+        }
 
-            if (TrigUtil.distance(pFrom, pTo) > 5.5) {
-                newTo = data.getSetBack(from);
-                checkNf = false;
-                NCPAPIProvider.getNoCheatPlusAPI().getLogManager().warning(Streams.STATUS, CheckUtils.getLogMessagePrefix(player, CheckType.MOVING) + " Player move end point seems to be set wrongly.");
-            }
-        }
-        
-        // 2: Proactive reset of elytraBoost (MC 1.11.2).
-        if (data.fireworksBoostDuration > 0) {
-            if (!lastMove.valid 
-                || (cc.resetFwOnground && (lastMove.flyCheck != CheckType.MOVING_CREATIVEFLY || lastMove.modelFlying != thisMove.modelFlying))
-                || data.fireworksBoostTickExpire < tick) {
-                data.fireworksBoostDuration = 0;
-            }
-            else data.fireworksBoostDuration --;
-        }
-        
-        // 3: Set time resolutions and various counters.
-        // 3.1: Liquid tick time.
-        if (pFrom.isInLiquid()) data.liqtick = data.liqtick < 10 ? data.liqtick + 1 : data.liqtick > 0 ? data.liqtick - 1 : 0; 
-        else data.liqtick = data.liqtick > 0 ? data.liqtick - 2 : 0;
-
-        // 3.2: Set riptiding time.
-        if (Bridge1_13.isRiptiding(player)) data.timeRiptiding = System.currentTimeMillis();
-
-        // 3.3: Set bubble stream counter
-        // Count how long one is getting pushed by a bubble stream (cap at 50)
-        if (!pFrom.isDraggedByBubbleStream() && !pTo.isDraggedByBubbleStream() 
-            && (pFrom.isInBubbleStream() || pTo.isInBubbleStream()) 
-            && thisMove.yDistance > 0.0 && data.insideBubbleStreamCount <= 50) {
-            data.insideBubbleStreamCount++ ;
-        }
-        // Decrease counter
-        if (data.insideBubbleStreamCount > 0) {
-            // Invalidate
-            if (!lastMove.valid || lastMove.flyCheck != CheckType.MOVING_SURVIVALFLY
-                || !data.liftOffEnvelope.name().startsWith("LIMIT")) {
-                data.insideBubbleStreamCount = 0;
-            }
-            // Left stream or player is descending, decrease.
-            else if (!pFrom.isInBubbleStream() && !pTo.isInBubbleStream() || thisMove.yDistance < 0.0) {
-                data.insideBubbleStreamCount-- ; 
-            }
-            // (else keep)
-        }
-        
-        // 4: Workaround for 1.14+ exiting vehicles.
-        if (data.lastVehicleType != null && thisMove.distanceSquared < 5) {
-            data.setSetBack(from);
-            data.addHorizontalVelocity(new AccountEntry(thisMove.hDistance, 1, 1));
-            data.addVerticalVelocity(new SimpleEntry(thisMove.yDistance, 1));
-            //data.addVerticalVelocity(new SimpleEntry(-0.16, 2));
-            data.lastVehicleType = null;
-        }
+        updateMoveStatistics(player, pFrom, pTo, thisMove, lastMove, from, tick, data, cc);
         
         // 5: Pre-checks relevant to Sf or Cf.
         PreCheckData preData = runPreChecks(player, from, to, pFrom, pTo, thisMove, lastMove, checkSf,
                 checkCf, checkPassable, tick, data, cc, pData, debug);
-        newTo = preData.newTo;
+        if (newTo == null) {
+            newTo = preData.newTo;
+        }
         verticalBounce = preData.verticalBounce;
         useBlockChangeTracker = preData.useBlockChangeTracker;
         previousSetBackY = preData.previousSetBackY;
         checkNf = preData.checkNf;
 
         // 6: Check passable first to prevent set back override.
-        boolean mightSkipNoFall = false;
         if (newTo == null && checkPassable && player.getGameMode() != BridgeMisc.GAME_MODE_SPECTATOR) {
             newTo = runPassableCheck(player, pFrom, pTo, data, cc, pData, tick, useBlockChangeTracker);
-            if (newTo != null) {
-                mightSkipNoFall = true;
-            }
         }
         
         // 7/8: Handle explosion velocity and bubble column launch.
         applyVelocityAdjustments(player, thisMove, lastMove, pFrom, tick, data, cc, checkSf, debug);
 
-        
-
-        ////////////////////////////////////////////////////////////////////////
-        // Run through the moving checks (Passable is checked above).         //
-        ////////////////////////////////////////////////////////////////////////
-        // 1: SurvivalFly first
-        if (checkSf) {
-            // 1.1: Prepare from, to, thisMove for full checking.
-            // Could further differentiate if really needed to (newTo / NoFall).
-            MovingUtil.prepareFullCheck(pFrom, pTo, thisMove, Math.max(cc.noFallyOnGround, cc.yOnGround));
-
-            // 1.2: HACK: Add velocity for transitions between creativefly and survivalfly.
-            if (lastMove.toIsValid && lastMove.flyCheck == CheckType.MOVING_CREATIVEFLY) { 
-                final long tickHasLag = data.delayWorkaround + Math.round(200 / TickTask.getLag(200, true));
-                if (data.delayWorkaround > time || tickHasLag < time) {
-                    workaroundFlyCheckTransition(player, tick, debug, data, cc);
-                    data.delayWorkaround = time;
-                }
-            }
-
-            // 1.3: Actual check.
-            // Only check if passable has not already set back.
-            if (newTo == null) {
-                thisMove.flyCheck = CheckType.MOVING_SURVIVALFLY;
-                newTo = survivalFly.check(player, pFrom, pTo, multiMoveCount, data, cc, pData, tick, time, useBlockChangeTracker);
-            }
-
-            // 1.4: Only check NoFall, if not already vetoed.
-            if (checkNf) {
-                checkNf = noFall.isEnabled(player, pData);
-            }
-            
-            // 1.5: Hover subcheck.
-            if (newTo == null) {
-                // Could reset for from-on-ground as well, for not too big moves.
-                if (cc.sfHoverCheck && !(lastMove.toIsValid && lastMove.to.extraPropertiesValid && lastMove.to.onGroundOrResetCond) && !pTo.isOnGround()) {
-                    // Start counting ticks.
-                    hoverTicks.add(playerName);
-                    data.sfHoverTicks = 0;
-                }
-                else data.sfHoverTicks = -1;
-
-                // Still check for NoFall.
-                if (checkNf) {
-                    noFall.check(player, pFrom, pTo, previousSetBackY, data, cc, pData);
-                }
-            }
-            else {
-                if (checkNf && cc.sfSetBackPolicyFallDamage) {
-                    if (!noFall.willDealFallDamage(player, from.getY(), previousSetBackY, data)) {
-                        mightSkipNoFall = true;
-                    }
-                    // Check if to really skip.
-                    else if (mightSkipNoFall) {
-                        if (!pFrom.isOnGround() && !pFrom.isResetCond()) {
-                            mightSkipNoFall = false;
-                        }
-                    }
-
-                    // (Don't deal damage where no fall damage is possible.)
-                    if (!mightSkipNoFall && (!pTo.isResetCond() || !pFrom.isResetCond())) {
-                        noFall.checkDamage(player, Math.min(from.getY(), to.getY()), data, pData);
-                    }
-                }
-            }
-        }
-        // 2: Then creativefly
-        else if (checkCf) {
-            if (newTo == null) {
-                thisMove.flyCheck = CheckType.MOVING_CREATIVEFLY;
-                newTo = creativeFly.check(player, pFrom, pTo, data, cc, pData, time, tick, useBlockChangeTracker);
-
-                // Check for NoFall
-                if (checkNf && noFall.isEnabled(player, pData)) {
-                    noFall.check(player, pFrom, pTo, previousSetBackY, data, cc, pData);
-                }
-            }
-            data.sfHoverTicks = -1;
-            data.sfLowJump = false;
-        }
-        // No fly checking :(.
-        else data.clearFlyData();
-
-        // 3: Morepackets.
-        if (pData.isCheckActive(CheckType.MOVING_MOREPACKETS, player) && (newTo == null || data.isMorePacketsSetBackOldest())) {
-            /* Always check morepackets, if there is a chance that setting/overriding newTo is appropriate, to avoid packet speeding using micro-violations. */
-            final Location mpNewTo = morePackets.check(player, pFrom, pTo, newTo == null, data, cc, pData);
-            if (mpNewTo != null) {
-                // Only override set back, if the morepackets set back location is older/-est. 
-                if (newTo != null && debug) debug(player, "Override set back by the older morepackets set back.");
-                newTo = mpNewTo;
-            }
-        }
-        // Otherwise we need to clear their data.
-        else data.clearPlayerMorePacketsData();
+        newTo = runMovingChecks(player, pFrom, pTo, from, to, thisMove, lastMove, newTo, checkSf, checkCf,
+                checkNf, previousSetBackY, useBlockChangeTracker, debug, multiMoveCount, time, tick, playerName,
+                data, cc, pData);
         
 
         ////////////////////////////////////////////
@@ -1290,6 +1151,141 @@ public class MovingListener extends CheckListener implements TickListener, IRemo
             this.previousSetBackY = previousSetBackY;
             this.checkNf = checkNf;
         }
+    }
+
+    private Location handleEndPortalFromBottom(final Player player, final PlayerMoveData lastMove,
+            final PlayerMoveData thisMove, final PlayerLocation pFrom, final PlayerLocation pTo,
+            final Location from, final MovingData data) {
+        if (lastMove.to.getWorldName() != null
+                && !lastMove.to.getWorldName().equals(thisMove.from.getWorldName())) {
+            if (TrigUtil.distance(pFrom, pTo) > 5.5) {
+                NCPAPIProvider.getNoCheatPlusAPI().getLogManager().warning(Streams.STATUS,
+                        CheckUtils.getLogMessagePrefix(player, CheckType.MOVING)
+                                + " Player move end point seems to be set wrongly.");
+                return data.getSetBack(from);
+            }
+        }
+        return null;
+    }
+
+    private void updateMoveStatistics(final Player player, final PlayerLocation pFrom, final PlayerLocation pTo,
+            final PlayerMoveData thisMove, final PlayerMoveData lastMove, final Location from, final int tick,
+            final MovingData data, final MovingConfig cc) {
+        if (data.fireworksBoostDuration > 0) {
+            if (!lastMove.valid
+                    || (cc.resetFwOnground && (lastMove.flyCheck != CheckType.MOVING_CREATIVEFLY
+                            || lastMove.modelFlying != thisMove.modelFlying))
+                    || data.fireworksBoostTickExpire < tick) {
+                data.fireworksBoostDuration = 0;
+            } else {
+                data.fireworksBoostDuration--;
+            }
+        }
+
+        if (pFrom.isInLiquid()) {
+            data.liqtick = data.liqtick < 10 ? data.liqtick + 1 : data.liqtick > 0 ? data.liqtick - 1 : 0;
+        } else {
+            data.liqtick = data.liqtick > 0 ? data.liqtick - 2 : 0;
+        }
+
+        if (Bridge1_13.isRiptiding(player)) {
+            data.timeRiptiding = System.currentTimeMillis();
+        }
+
+        if (!pFrom.isDraggedByBubbleStream() && !pTo.isDraggedByBubbleStream()
+                && (pFrom.isInBubbleStream() || pTo.isInBubbleStream()) && thisMove.yDistance > 0.0
+                && data.insideBubbleStreamCount <= 50) {
+            data.insideBubbleStreamCount++;
+        }
+        if (data.insideBubbleStreamCount > 0) {
+            if (!lastMove.valid || lastMove.flyCheck != CheckType.MOVING_SURVIVALFLY
+                    || !data.liftOffEnvelope.name().startsWith("LIMIT")) {
+                data.insideBubbleStreamCount = 0;
+            } else if (!pFrom.isInBubbleStream() && !pTo.isInBubbleStream() || thisMove.yDistance < 0.0) {
+                data.insideBubbleStreamCount--;
+            }
+        }
+
+        if (data.lastVehicleType != null && thisMove.distanceSquared < 5) {
+            data.setSetBack(from);
+            data.addHorizontalVelocity(new AccountEntry(thisMove.hDistance, 1, 1));
+            data.addVerticalVelocity(new SimpleEntry(thisMove.yDistance, 1));
+            data.lastVehicleType = null;
+        }
+    }
+
+    private Location runMovingChecks(final Player player, final PlayerLocation pFrom, final PlayerLocation pTo,
+            final Location from, final Location to, final PlayerMoveData thisMove, final PlayerMoveData lastMove,
+            Location newTo, final boolean checkSf, final boolean checkCf, boolean checkNf,
+            final double previousSetBackY, final boolean useBlockChangeTracker, final boolean debug,
+            final int multiMoveCount, final long time, final int tick, final String playerName,
+            final MovingData data, final MovingConfig cc, final IPlayerData pData) {
+
+        if (checkSf) {
+            MovingUtil.prepareFullCheck(pFrom, pTo, thisMove, Math.max(cc.noFallyOnGround, cc.yOnGround));
+            if (lastMove.toIsValid && lastMove.flyCheck == CheckType.MOVING_CREATIVEFLY) {
+                final long tickHasLag = data.delayWorkaround + Math.round(200 / TickTask.getLag(200, true));
+                if (data.delayWorkaround > time || tickHasLag < time) {
+                    workaroundFlyCheckTransition(player, tick, debug, data, cc);
+                    data.delayWorkaround = time;
+                }
+            }
+            if (newTo == null) {
+                thisMove.flyCheck = CheckType.MOVING_SURVIVALFLY;
+                newTo = survivalFly.check(player, pFrom, pTo, multiMoveCount, data, cc, pData, tick, time,
+                        useBlockChangeTracker);
+            }
+            if (checkNf) {
+                checkNf = noFall.isEnabled(player, pData);
+            }
+            if (newTo == null) {
+                if (cc.sfHoverCheck && !(lastMove.toIsValid && lastMove.to.extraPropertiesValid
+                        && lastMove.to.onGroundOrResetCond) && !pTo.isOnGround()) {
+                    hoverTicks.add(playerName);
+                    data.sfHoverTicks = 0;
+                } else {
+                    data.sfHoverTicks = -1;
+                }
+                if (checkNf) {
+                    noFall.check(player, pFrom, pTo, previousSetBackY, data, cc, pData);
+                }
+            } else if (checkNf && cc.sfSetBackPolicyFallDamage) {
+                boolean skip = !noFall.willDealFallDamage(player, from.getY(), previousSetBackY, data);
+                if (!skip && (!pFrom.isOnGround() && !pFrom.isResetCond())) {
+                    skip = false;
+                }
+                if (!skip && (!pTo.isResetCond() || !pFrom.isResetCond())) {
+                    noFall.checkDamage(player, Math.min(from.getY(), to.getY()), data, pData);
+                }
+            }
+        } else if (checkCf) {
+            if (newTo == null) {
+                thisMove.flyCheck = CheckType.MOVING_CREATIVEFLY;
+                newTo = creativeFly.check(player, pFrom, pTo, data, cc, pData, time, tick, useBlockChangeTracker);
+                if (checkNf && noFall.isEnabled(player, pData)) {
+                    noFall.check(player, pFrom, pTo, previousSetBackY, data, cc, pData);
+                }
+            }
+            data.sfHoverTicks = -1;
+            data.sfLowJump = false;
+        } else {
+            data.clearFlyData();
+        }
+
+        if (pData.isCheckActive(CheckType.MOVING_MOREPACKETS, player)
+                && (newTo == null || data.isMorePacketsSetBackOldest())) {
+            final Location mpNewTo = morePackets.check(player, pFrom, pTo, newTo == null, data, cc, pData);
+            if (mpNewTo != null) {
+                if (newTo != null && debug) {
+                    debug(player, "Override set back by the older morepackets set back.");
+                }
+                newTo = mpNewTo;
+            }
+        } else {
+            data.clearPlayerMorePacketsData();
+        }
+
+        return newTo;
     }
 
     
