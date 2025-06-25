@@ -114,7 +114,11 @@ public class BukkitWall implements BukkitShapeModel {
                     if (res == null) res = eastwest;
                 }
                 if (!wall.getHeight(BlockFace.NORTH).equals(Wall.Height.NONE) && !wall.getHeight(BlockFace.SOUTH).equals(Wall.Height.NONE)) {
-                    if (res == null) res = southnorth; else res = add(res, southnorth);
+                    if (res == null) {
+                        res = southnorth;
+                    } else {
+                        res = add(res, southnorth);
+                    }
                 }
                 if (res != null) return res;
             }
