@@ -33,9 +33,17 @@ public class ManagedMap<K, V>{
 
     protected class ValueWrap{
         public long ts;
-        public  V value;
+        private V value;
         public ValueWrap(final V value){
             ts = System.currentTimeMillis();
+            this.value = value;
+        }
+
+        public V getValue() {
+            return value;
+        }
+
+        public void setValue(final V value) {
             this.value = value;
         }
     }
@@ -59,8 +67,8 @@ public class ManagedMap<K, V>{
             return null;
         }
         else{
-            final V res = wrap.value;
-            wrap.value = value;
+            final V res = wrap.getValue();
+            wrap.setValue(value);
             wrap.ts = System.currentTimeMillis();
             return res;
         }
@@ -71,14 +79,14 @@ public class ManagedMap<K, V>{
         if (wrap == null) return null;
         else{
             wrap.ts = System.currentTimeMillis();
-            return wrap.value;
+            return wrap.getValue();
         }
     }
 
     public V remove(final K key){
         final ValueWrap wrap = map.remove(key);
         if (wrap == null) return null;
-        else return wrap.value;
+        else return wrap.getValue();
     }
 
     public void clear(){
