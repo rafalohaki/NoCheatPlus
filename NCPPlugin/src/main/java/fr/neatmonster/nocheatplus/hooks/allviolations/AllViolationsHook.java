@@ -20,6 +20,7 @@ import java.util.LinkedHashSet;
 
 import org.bukkit.ChatColor;
 import org.bukkit.entity.Player;
+import java.util.Objects;
 
 import fr.neatmonster.nocheatplus.NCPAPIProvider;
 import fr.neatmonster.nocheatplus.actions.ParameterName;
@@ -124,14 +125,16 @@ public class AllViolationsHook implements NCPHook, ILast, IStats {
     }
 
     private void log(final CheckType checkType, final Player player, final IViolationInfo info, final boolean toTrace, final boolean toNotify) {
+        if (player == null) {
+            return;
+        }
         // Generate the message. Additional colors could be used here.
         final StringBuilder builder = new StringBuilder(300);
         final String playerName = player.getName();
         builder.append("[VL] [" + checkType.toString() + "] ");
         builder.append("[" + ChatColor.YELLOW + playerName);
         builder.append(ChatColor.WHITE + "] ");
-        final String rawDisplayName = player.getDisplayName();
-        final String displayName = rawDisplayName != null ? ChatColor.stripColor(rawDisplayName).trim() : playerName;
+        final String displayName = Objects.requireNonNull(ChatColor.stripColor(player.getDisplayName()), "displayName").trim();
         if (!playerName.equals(displayName)) {
             builder.append("[->" + ChatColor.YELLOW + displayName + ChatColor.WHITE + "] ");
         }
