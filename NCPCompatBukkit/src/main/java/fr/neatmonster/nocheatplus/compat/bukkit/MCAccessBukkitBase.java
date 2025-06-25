@@ -58,10 +58,10 @@ public class MCAccessBukkitBase implements MCAccess {
      * Constructor to let it fail.
      */
     public MCAccessBukkitBase() {
-        // TODO: Add more that might fail if not supported ?
+        // Additional features might fail if not supported.
         testItchyBlock();
-        // TODO: Deactivate checks that might not work. => MCAccess should have availability method, NCP deactivates check on base of that.
-        // TODO: Move getHeight and the like to EntityAccessXY.
+        // Some features might not be available; checks should be deactivated based on an availability method.
+        // Methods such as getHeight should eventually move to EntityAccessXY.
         bukkitHasGetHeightAndGetWidth = ReflectionUtil.getMethodNoArgs(Entity.class, "getHeight", double.class) != null
                 && ReflectionUtil.getMethodNoArgs(Entity.class, "getWidth", double.class) != null;
     }
@@ -84,7 +84,7 @@ public class MCAccessBukkitBase implements MCAccess {
          * though slabs will be easy to handle).
          */
         if (BlockFlags.hasAnyFlag(flags, BlockFlags.F_IGN_PASSABLE)) {
-            // TODO: Blocks with min_height may actually be ok, if xz100 and some height are set.
+            // Blocks with min_height might be fine if xz100 and a specific height are set.
             return !BlockFlags.hasNoFlags(flags,
                     BlockFlags.F_GROUND_HEIGHT
                     | BlockFlags.F_GROUND
@@ -98,19 +98,19 @@ public class MCAccessBukkitBase implements MCAccess {
             return false;
         }
 
-        // TODO: Use working route.
+        // Fallback to the pre-1.13 implementation.
         return guessItchyBlockPre1_13(mat);
     }
 
     private void testItchyBlock() {
-        // TODO: Route to what works.
+        // Use the basic implementation that works across versions.
         guessItchyBlockPre1_13(Material.AIR);
     }
 
     @Override
     public String getMCVersion() {
         // Bukkit API. Versions lower than MC 1.13 have their own module.
-        // TODO: maybe output something else.
+        // Return the supported MC version range.
         return "1.13-1.20"; // uh oh
     }
 
@@ -166,14 +166,14 @@ public class MCAccessBukkitBase implements MCAccess {
     }
 
     private final double legacyGetWidth(final Entity entity) {
-        // TODO: Make readable from file for defaults + register individual getters where appropriate.
-        // TODO: For height too. [Automatize most by spawning + checking?]
+        // Values should be configurable and per-entity getters registered when possible.
+        // Height values could be automated by spawning and checking entities.
         // Values taken from 1.7.10.
         final EntityType type = entity.getType();
         Double width = BridgeEntityType.LEGACY_ENTITY_WIDTH.get(type);
         if (width != null) return width;
         switch(type){
-            // TODO: case COMPLEX_PART:
+            // case COMPLEX_PART: // not supported yet
             //case ENDER_SIGNAL: // this.a(0.25F, 0.25F);
             //case FIREWORK: // this.a(0.25F, 0.25F);
             //case FISHING_HOOK: // this.a(0.25F, 0.25F);
@@ -299,8 +299,8 @@ public class MCAccessBukkitBase implements MCAccess {
         if (player.isDead()) {
             return AlmostBoolean.NO;
         }
-        if (!player.isSleeping()) { // TODO: ignored sleeping ?
-            // TODO: This can test like ... nothing !
+        if (!player.isSleeping()) {
+            // Sleeping state might not be relevant here.
             // (Might not be necessary.)
         }
         return AlmostBoolean.MAYBE;
@@ -328,9 +328,8 @@ public class MCAccessBukkitBase implements MCAccess {
 
     @Override
     public void dealFallDamage(final Player player, final double damage) {
-        // TODO: Document in knowledge base.
-        // TODO: Account for armor, other.
-        // TODO: use setLastDamageCause here ?
+        // Damage application may require accounting for armor or other modifiers.
+        // Consider using setLastDamageCause when possible.
         BridgeHealth.damage(player, damage);
     }
 
@@ -347,9 +346,9 @@ public class MCAccessBukkitBase implements MCAccess {
 
     @Override
     public void setDead(final Player player, final int deathTicks) {
-        // TODO: Test / kick ? ...
+        // Immediately set the player's health to zero.
         BridgeHealth.setHealth(player, 0.0);
-        // TODO: Might try stuff like setNoDamageTicks.
+        // Consider adjusting no-damage ticks as well.
         BridgeHealth.damage(player, 1.0);
     }
 
@@ -382,7 +381,7 @@ public class MCAccessBukkitBase implements MCAccess {
 
     //  @Override
     //  public void correctDirection(Player player) {
-    //      // TODO: Consider using reflection (detect CraftPlayer, access EntityPlayer + check if possible (!), use flags for if valid or invalid.)
+    //      // Reflection-based correction might be possible via CraftPlayer and EntityPlayer.
     //  }
 
 }
