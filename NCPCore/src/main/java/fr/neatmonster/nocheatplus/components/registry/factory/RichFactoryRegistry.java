@@ -46,7 +46,7 @@ public class RichFactoryRegistry<A> extends RichTypeSetRegistry implements IRich
 
         public final Collection<Class<?>> completeRemoval = new LinkedHashSet<Class<?>>();
         public final Collection<Class<? extends IDataOnRemoveSubCheckData>> subCheckRemoval = new LinkedHashSet<Class<? extends IDataOnRemoveSubCheckData>>();
-        public final Collection<CheckType> checkTypes;;
+        public final Collection<CheckType> checkTypes;
 
         public CheckRemovalSpec(final CheckType checkType, 
                 final boolean withDescendantCheckTypes, 
