@@ -69,6 +69,13 @@ import fr.neatmonster.nocheatplus.worlds.WorldIdentifier;
  * </ul>
  * <hr>
  * Creating PlayerData must always be thread-safe and fail-safe.
+ * <p>
+ * Thread safety: Most interaction with PlayerData happens on the primary
+ * server thread. Some request flags such as {@link #requestUpdateInventory} and
+ * {@link #requestPlayerSetBack} may be modified from asynchronous contexts and
+ * are declared {@code volatile} to guarantee visibility. Compound operations
+ * involving these flags are synchronized on {@code this} where necessary.
+ * </p>
  * <hr>
  * OLD javadocs to be cleaned up (...):<br>
  * On the medium run this is intended to carry all data for the player...
@@ -153,11 +160,11 @@ public class PlayerData implements IPlayerData {
     private final InstanceMapLOW dataCache = new InstanceMapLOW(lock, 24);
 
     /** If is Bedrock Player. This is set if CompatNoCheatPlus is present. */
-    private boolean bedrockPlayer = false;
-    private boolean requestUpdateInventory = false;
-    private boolean requestPlayerSetBack = false;
+    private volatile boolean bedrockPlayer = false;
+    private volatile boolean requestUpdateInventory = false;
+    private volatile boolean requestPlayerSetBack = false;
 
-    private boolean frequentPlayerTaskShouldBeScheduled = false;
+    private volatile boolean frequentPlayerTaskShouldBeScheduled = false;
     /** Actually queried ones. */
     private final DualSet<RegisteredPermission> updatePermissions = new DualSet<RegisteredPermission>(lock);
     /** Possibly needed in future. */
@@ -250,14 +257,19 @@ public class PlayerData implements IPlayerData {
         if (player != null) { // Common criteria ...
             if (player.isOnline()) {
                 long nanos = System.nanoTime();
-                // Set back.
-                if (requestPlayerSetBack) {
+                // Handle pending requests atomically.
+                final boolean doSetBack;
+                final boolean doInventory;
+                synchronized (this) {
+                    doSetBack = requestPlayerSetBack;
                     requestPlayerSetBack = false;
+                    doInventory = requestUpdateInventory;
+                    requestUpdateInventory = false;
+                }
+                if (doSetBack) {
                     MovingUtil.processStoredSetBack(player, "Player set back on tick: ", this);
                 }
-                // Inventory update.
-                if (requestUpdateInventory) {
-                    requestUpdateInventory = false;
+                if (doInventory) {
                     player.updateInventory();
                 }
                 // Permission updates (high priority).
