@@ -357,52 +357,68 @@ public class RegistrationOrder {
                 final String tag2, final String beforeTag2, final String afterTag2) {
             if (basePriority1 < basePriority2) {
                 return true;
-            } else if (basePriority1 > basePriority2) {
-                return false;
-            } else {
-                if (beforeTag1 == null) {
-                    if (beforeTag2 == null) {
-                        if (afterTag1 == null) {
-                            return true;
-                        } else {
-                            if (afterTag2 == null) {
-                                return false;
-                            } else {
-                                if (tag2 != null && tag2.matches(afterTag1)) {
-                                    return false;
-                                }
-                                return tag1 != null && tag1.matches(afterTag2);
-                            }
-                        }
-                    } else {
-                        return afterTag2 != null && tag1 != null && tag1.matches(afterTag2);
-                    }
-                } else {
-                    if (beforeTag2 == null) {
-                        if (afterTag1 != null && tag2 != null && tag2.matches(afterTag1)) {
-                            return false;
-                        } else {
-                            return afterTag2 == null && afterTag1 == null;
-                        }
-                    } else {
-                        if (tag2 != null && tag2.matches(beforeTag1)) {
-                            return true;
-                        } else if (tag1 != null && tag1.matches(beforeTag2)) {
-                            return false;
-                        } else if (afterTag1 == null) {
-                            return true;
-                        } else {
-                            if (tag2 != null && tag2.matches(afterTag1)) {
-                                return false;
-                            } else if (afterTag2 != null) {
-                                return tag1 != null && tag1.matches(afterTag2);
-                            } else {
-                                return false;
-                            }
-                        }
-                    }
-                }
             }
+            if (basePriority1 > basePriority2) {
+                return false;
+            }
+            // basePriority1 == basePriority2
+            if (beforeTag1 == null) {
+                return handleEqualPriorityNoBeforeTag1(tag1, afterTag1, tag2, beforeTag2, afterTag2);
+            }
+            return handleEqualPriorityWithBeforeTag1(tag1, beforeTag1, afterTag1, tag2, beforeTag2, afterTag2);
+        }
+
+        private static boolean handleEqualPriorityNoBeforeTag1(final String tag1, final String afterTag1,
+                final String tag2, final String beforeTag2, final String afterTag2) {
+            if (beforeTag2 == null) {
+                return handleNoBeforeTags(tag1, afterTag1, tag2, afterTag2);
+            }
+            return afterTag2 != null && tag1 != null && tag1.matches(afterTag2);
+        }
+
+        private static boolean handleNoBeforeTags(final String tag1, final String afterTag1, final String tag2,
+                final String afterTag2) {
+            if (afterTag1 == null) {
+                return true;
+            }
+            if (afterTag2 == null) {
+                return false;
+            }
+            if (tag2 != null && tag2.matches(afterTag1)) {
+                return false;
+            }
+            return tag1 != null && tag1.matches(afterTag2);
+        }
+
+        private static boolean handleEqualPriorityWithBeforeTag1(final String tag1, final String beforeTag1,
+                final String afterTag1, final String tag2, final String beforeTag2, final String afterTag2) {
+            if (beforeTag2 == null) {
+                if (afterTag1 != null && tag2 != null && tag2.matches(afterTag1)) {
+                    return false;
+                }
+                return afterTag2 == null && afterTag1 == null;
+            }
+            return handleBothBeforeTags(tag1, beforeTag1, afterTag1, tag2, beforeTag2, afterTag2);
+        }
+
+        private static boolean handleBothBeforeTags(final String tag1, final String beforeTag1,
+                final String afterTag1, final String tag2, final String beforeTag2, final String afterTag2) {
+            if (tag2 != null && tag2.matches(beforeTag1)) {
+                return true;
+            }
+            if (tag1 != null && tag1.matches(beforeTag2)) {
+                return false;
+            }
+            if (afterTag1 == null) {
+                return true;
+            }
+            if (tag2 != null && tag2.matches(afterTag1)) {
+                return false;
+            }
+            if (afterTag2 != null) {
+                return tag1 != null && tag1.matches(afterTag2);
+            }
+            return false;
         }
     }
 
