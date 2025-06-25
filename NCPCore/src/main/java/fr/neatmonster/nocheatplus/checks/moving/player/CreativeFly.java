@@ -79,6 +79,20 @@ public class CreativeFly extends Check {
     /** Default result for invalid elytra handling parameters. */
     private static final double[] INVALID_ELYTRA_RESULT = new double[] {Double.NaN, Double.NaN};
 
+    /**
+     * Container holding intermediate glide related values. This keeps
+     * parameters grouped and helps to reduce the overall complexity of the
+     * gliding computation logic.
+     */
+    private static class AirGlideState {
+        double x;
+        double z;
+        double allowedY;
+        double allowedH;
+        double resultV;
+        double resultH;
+    }
+
 
    /**
     * Instantiates a new creative fly check.
@@ -787,6 +801,89 @@ public class CreativeFly extends Check {
     }
 
     /**
+     * Adjust horizontal and vertical movement based on the player's look
+     * direction and pitch.
+     */
+    private void updateDirection(final Player player, final PlayerLocation to,
+            final double yDistance, final double hDistance, final Vector lookvec,
+            final float radPitch, final double xzlength, final double lastHdist,
+            final double squaredCos, final boolean debug, final AirGlideState state) {
+
+        if (state.allowedY < 0.0D && xzlength > 0.0) {
+            final double d = state.allowedY * -0.1 * squaredCos;
+            state.x += lookvec.getX() * d / xzlength;
+            state.z += lookvec.getZ() * d / xzlength;
+            state.allowedY += d;
+        }
+
+        if (radPitch < 0.0F) {
+            if (to.getPitch() == -90f && isNear(yDistance, state.allowedY * Magic.FRICTION_MEDIUM_ELYTRA_AIR, 0.01)) {
+                state.allowedH += 0.01;
+                if (debug) {
+                    debug(player, "Add the distance to allowed on look up (hDist/Allowed): "
+                            + hDistance + "/" + state.allowedH);
+                }
+            } else if (xzlength > 0.0) {
+                final double d = lastHdist * -Math.sin(radPitch) * 0.04;
+                state.x -= lookvec.getX() * d / xzlength;
+                state.z -= lookvec.getZ() * d / xzlength;
+                state.allowedY += d * 3.2;
+            }
+        }
+
+        if (xzlength > 0.0) {
+            state.x += (lookvec.getX() / xzlength * lastHdist - state.x) * 0.1D;
+            state.z += (lookvec.getZ() / xzlength * lastHdist - state.z) * 0.1D;
+        }
+
+        state.allowedY *= Magic.FRICTION_MEDIUM_ELYTRA_AIR;
+    }
+
+    /**
+     * Apply modifications related to fireworks boost.
+     *
+     * @return true if no further processing should be done
+     */
+    private boolean handleFireworkBoost(final Player player, final double hDistance,
+            final double yDistance, final Vector lookvec, final double xzlength,
+            final PlayerMoveData thisMove, final PlayerMoveData lastMove,
+            final MovingData data, final boolean debug, final AirGlideState state) {
+
+        thisMove.yAllowedDistance = state.allowedY = yDistance;
+        if (Math.round(data.fireworksBoostTickNeedCheck / 4) > data.fireworksBoostDuration
+                && hDistance < Math.sqrt(state.x * state.x + state.z * state.z)) {
+            thisMove.hAllowedDistance = Math.sqrt(state.x * state.x + state.z * state.z);
+            if (debug) {
+                debug(player, "Set hAllowedDistance for this firework boost phase (hDist/Allowed): "
+                        + thisMove.hDistance + "/" + thisMove.hAllowedDistance);
+            }
+            state.resultV = 0.0;
+            state.resultH = 0.0;
+            return true;
+        }
+
+        state.x *= 0.99;
+        state.z *= 0.99;
+        state.x += lookvec.getX() * 0.1D + (lookvec.getX() * 1.5D - state.x) * 0.5D;
+        state.z += lookvec.getZ() * 0.1D + (lookvec.getZ() * 1.5D - state.z) * 0.5D;
+        tags.add("fw_speed");
+        if (hDistance < lastMove.hAllowedDistance * 0.994) {
+            thisMove.hAllowedDistance = lastMove.hAllowedDistance * 0.994;
+            if (debug) {
+                debug(player,
+                        "Firework boost phase has ended sooner than expected, but the player is still legitimately boosting (hDist/Allowed): "
+                                + thisMove.hDistance + "/" + thisMove.hAllowedDistance);
+            }
+            state.resultV = 0.0;
+            state.resultH = 0.0;
+            return true;
+        }
+
+        state.allowedH += 0.2;
+        return false;
+    }
+
+    /**
      * Handle gliding in the air.
      *
      * @return {resultV, resultH, baseV, allowedY, allowedH}
@@ -797,11 +894,12 @@ public class CreativeFly extends Check {
 
         thisMove.elytrafly = true;
 
-        double resultV = 0.0;
-        double resultH = 0.0;
-        double allowedH = 0.0;
-        double allowedY = lastMove.elytrafly ? lastMove.yAllowedDistance : lastMove.toIsValid ? lastMove.yDistance : 0.0;
-        if (Math.abs(allowedY) < 0.003D) allowedY = 0.0D;
+        AirGlideState state = new AirGlideState();
+        state.allowedY = lastMove.elytrafly ? lastMove.yAllowedDistance
+                : lastMove.toIsValid ? lastMove.yDistance : 0.0;
+        if (Math.abs(state.allowedY) < 0.003D) {
+            state.allowedY = 0.0D;
+        }
 
         final double speed = Bridge1_13.getSlowfallingAmplifier(player) >= 0.0 ? 0.01 : 0.08;
         final double lastHdist = lastMove.toIsValid ? lastMove.hDistance : 0.0;
@@ -813,115 +911,86 @@ public class CreativeFly extends Check {
 
         double baseV = getBaseV(hDistance, yDistance, radPitch, squaredCos, -1.0, speed, to.getPitch() == -90f);
 
-        allowedY += speed * (-1.0D + squaredCos * 0.75D);
-        double x = lastMove.to.getX() - lastMove.from.getX();
-        double z = lastMove.to.getZ() - lastMove.from.getZ();
-        if (Math.abs(x) < 0.003D) x = 0.0D;
-        if (Math.abs(z) < 0.003D) z = 0.0D;
-
-        if (allowedY < 0.0D && xzlength > 0.0) {
-            final double d = allowedY * -0.1 * squaredCos;
-            x += lookvec.getX() * d / xzlength;
-            z += lookvec.getZ() * d / xzlength;
-            allowedY += d;
+        state.allowedY += speed * (-1.0D + squaredCos * 0.75D);
+        state.x = lastMove.to.getX() - lastMove.from.getX();
+        state.z = lastMove.to.getZ() - lastMove.from.getZ();
+        if (Math.abs(state.x) < 0.003D) {
+            state.x = 0.0D;
+        }
+        if (Math.abs(state.z) < 0.003D) {
+            state.z = 0.0D;
         }
 
-        if (radPitch < 0.0F) {
-            if (to.getPitch() == -90f && isNear(yDistance, allowedY * Magic.FRICTION_MEDIUM_ELYTRA_AIR, 0.01)) {
-                allowedH += 0.01;
-                if (debug) debug(player, "Add the distance to allowed on look up (hDist/Allowed): " + hDistance +"/"+ allowedH);
-            }
-            else if (xzlength > 0.0) {
-                final double d = lastHdist * -Math.sin(radPitch) * 0.04;
-                x -= lookvec.getX() * d / xzlength;
-                z -= lookvec.getZ() * d / xzlength;
-                allowedY += d * 3.2;
-            }
-        }
+        updateDirection(player, to, yDistance, hDistance, lookvec, radPitch, xzlength, lastHdist,
+                squaredCos, debug, state);
 
-        if (xzlength > 0.0) {
-            x += (lookvec.getX() / xzlength * lastHdist - x) * 0.1D;
-            z += (lookvec.getZ() / xzlength * lastHdist - z) * 0.1D;
-        }
-
-        allowedY *= Magic.FRICTION_MEDIUM_ELYTRA_AIR;
-
+        boolean boosted = false;
         if (data.fireworksBoostDuration > 0) {
-            thisMove.yAllowedDistance = allowedY = yDistance;
-            if (Math.round(data.fireworksBoostTickNeedCheck / 4) > data.fireworksBoostDuration
-                    && hDistance < Math.sqrt(x*x + z*z)) {
-                thisMove.hAllowedDistance = Math.sqrt(x*x + z*z);
-                if (debug) debug(player, "Set hAllowedDistance for this firework boost phase (hDist/Allowed): " + thisMove.hDistance + "/" + thisMove.hAllowedDistance);
-                return new double[] {0.0, 0.0, baseV, allowedY, allowedH};
-            }
-            x *= 0.99;
-            z *= 0.99;
-            x += lookvec.getX() * 0.1D + (lookvec.getX() * 1.5D - x) * 0.5D;
-            z += lookvec.getZ() * 0.1D + (lookvec.getZ() * 1.5D - z) * 0.5D;
-            tags.add("fw_speed");
-            if (hDistance < lastMove.hAllowedDistance * 0.994) {
-                thisMove.hAllowedDistance = lastMove.hAllowedDistance * 0.994;
-                if (debug) debug(player, "Firework boost phase has ended sooner than expected, but the player is still legitimately boosting (hDist/Allowed): " + thisMove.hDistance + "/" + thisMove.hAllowedDistance);
-                return new double[] {0.0, 0.0, baseV, allowedY, allowedH};
-            }
-            else allowedH += 0.2;
+            boosted = handleFireworkBoost(player, hDistance, yDistance, lookvec, xzlength, thisMove,
+                    lastMove, data, debug, state);
         }
 
-        allowedH += Math.sqrt(x*x + z*z) + 0.1;
-        if (debug) {
-            debug(player, "Cumulative elytra hDistance (hDist/Allowed): " + hDistance + "/" + allowedH + " lasthDist:" + lastHdist);
-            debug(player, "radiansPitch: " + radPitch + " yDist:" + yDistance + " lastyDist:" + lastMove.yDistance + " allowy:" + allowedY);
-        }
-
-        final double yDistDiffEx = yDistance - allowedY;
-
-        if (data.fireworksBoostDuration <= 0) {
-            if (yDistance > 0.0 && yDistance < 0.42 && thisMove.touchedGround) {
-                allowedY = yDistance;
-                allowedH = Math.max(0.35, allowedH * 1.35);
-                if (debug) debug(player, "Elytra jump (hDist/Allowed): " + thisMove.hDistance +"/"+ allowedH);
+        if (!boosted) {
+            state.allowedH += Math.sqrt(state.x * state.x + state.z * state.z) + 0.1;
+            if (debug) {
+                debug(player, "Cumulative elytra hDistance (hDist/Allowed): " + hDistance + "/" + state.allowedH
+                        + " lasthDist:" + lastHdist);
+                debug(player, "radiansPitch: " + radPitch + " yDist:" + yDistance + " lastyDist:" + lastMove.yDistance
+                        + " allowy:" + state.allowedY);
             }
-            else if (from.isHeadObstructed() && lastMove.yDistance > 0.0 && yDistDiffEx < 0.0 && (allowedY > 0.0 || yDistance == 0.0)) {
-                allowedY = yDistance;
-            }
-            else if (yDistance < 0.0) {
-                if (lastMove.yDistance > 0.0 && yDistance < 0.0
-                        && (lastMove.yDistance < Magic.GRAVITY_MAX + Magic.GRAVITY_MIN && yDistance > - Magic.GRAVITY_MIN
-                                || lastMove.yDistance < Magic.GRAVITY_MIN && yDistance > - Magic.GRAVITY_MIN - Magic.GRAVITY_MAX)) {
-                    allowedY = yDistance;
+
+            final double yDistDiffEx = yDistance - state.allowedY;
+
+            if (data.fireworksBoostDuration <= 0) {
+                if (yDistance > 0.0 && yDistance < 0.42 && thisMove.touchedGround) {
+                    state.allowedY = yDistance;
+                    state.allowedH = Math.max(0.35, state.allowedH * 1.35);
+                    if (debug) {
+                        debug(player, "Elytra jump (hDist/Allowed): " + thisMove.hDistance + "/" + state.allowedH);
+                    }
+                } else if (from.isHeadObstructed() && lastMove.yDistance > 0.0 && yDistDiffEx < 0.0
+                        && (state.allowedY > 0.0 || yDistance == 0.0)) {
+                    state.allowedY = yDistance;
+                } else if (yDistance < 0.0) {
+                    if (lastMove.yDistance > 0.0 && yDistance < 0.0
+                            && (lastMove.yDistance < Magic.GRAVITY_MAX + Magic.GRAVITY_MIN
+                                    && yDistance > -Magic.GRAVITY_MIN
+                                    || lastMove.yDistance < Magic.GRAVITY_MIN
+                                            && yDistance > -Magic.GRAVITY_MIN - Magic.GRAVITY_MAX)) {
+                        state.allowedY = yDistance;
+                    }
                 }
-            }
 
-            if (yDistance > 0.0) {
-                if (allowedY < yDistance && !isNear(allowedY, yDistance, 0.001)) {
-                    tags.add("e_vasc");
-                    resultV = yDistance;
+                if (yDistance > 0.0) {
+                    if (state.allowedY < yDistance && !isNear(state.allowedY, yDistance, 0.001)) {
+                        tags.add("e_vasc");
+                        state.resultV = yDistance;
+                    }
+                } else if (yDistance < 0.0) {
+                    if (state.allowedY > yDistance && !isNear(state.allowedY, yDistance, Magic.GRAVITY_MAX)) {
+                        tags.add("e_vdesc");
+                        state.resultV = Math.abs(yDistance);
+                    }
                 }
-            }
-            else if (yDistance < 0.0) {
-                if (allowedY > yDistance && !isNear(allowedY, yDistance, Magic.GRAVITY_MAX)) {
-                    tags.add("e_vdesc");
-                    resultV = Math.abs(yDistance);
-                }
-            }
 
-            if (yDistance <= 0.0 && (to.isOnGround() || to.isResetCond() || thisMove.touchedGround)
-                    || yDistDiffEx > -Magic.GRAVITY_MAX && yDistDiffEx < 0.0
-                    || speed < 0.05 && !TrigUtil.isSamePos(lastMove.from, lastMove.to) && (hDistance == 0.0 && yDistance == 0.0 || yDistance < -Magic.GRAVITY_SPAN)) {
-                allowedY = yDistance;
-            }
-            else if (Math.abs(yDistDiffEx) > (speed < 0.05 ? 0.00001 : 0.03)) {
-                tags.add("e_vdiff");
-                resultV = Math.max(Math.abs(yDistance - allowedY), resultV);
+                if (yDistance <= 0.0 && (to.isOnGround() || to.isResetCond() || thisMove.touchedGround)
+                        || yDistDiffEx > -Magic.GRAVITY_MAX && yDistDiffEx < 0.0
+                        || speed < 0.05 && !TrigUtil.isSamePos(lastMove.from, lastMove.to)
+                                && (hDistance == 0.0 && yDistance == 0.0 || yDistance < -Magic.GRAVITY_SPAN)) {
+                    state.allowedY = yDistance;
+                } else if (Math.abs(yDistDiffEx) > (speed < 0.05 ? 0.00001 : 0.03)) {
+                    tags.add("e_vdiff");
+                    state.resultV = Math.max(Math.abs(yDistance - state.allowedY), state.resultV);
+                }
             }
         }
 
-        if (allowedH < hDistance) {
+        if (state.allowedH < hDistance) {
             tags.add("e_hspeed");
-            resultH = hDistance - allowedH;
+            state.resultH = hDistance - state.allowedH;
         }
 
-        return new double[] {resultV, resultH, baseV, allowedY, allowedH};
+        return new double[] {state.resultV, state.resultH, baseV, state.allowedY, state.allowedH};
     }
 
     /**
