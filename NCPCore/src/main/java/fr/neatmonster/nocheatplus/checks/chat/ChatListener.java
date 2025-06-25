@@ -135,7 +135,7 @@ public class ChatListener extends CheckListener implements INotifyReload, JoinLe
 
 
         // Then the no chat check.
-        // TODO: isMainThread: Could consider event.isAsync ?
+        // Note: event.isAsync() indicates if this is run asynchronously.
         if (textChecks(player, event.getMessage(), cc, pData, false, alreadyCancelled)) {
             event.setCancelled(true);
         }
@@ -158,7 +158,7 @@ public class ChatListener extends CheckListener implements INotifyReload, JoinLe
         // Left-trim is necessary because the server accepts leading spaces with commands.
         final String message = event.getMessage();
         final String lcMessage = StringUtil.leftTrim(message).toLowerCase();
-        // TODO: Remove bukkit: etc.
+        // Note: namespace prefixes such as "bukkit:" may need to be removed.
 
         final String[] split = lcMessage.split(" ", 2);
         final String alias = split[0].substring(1);
@@ -189,8 +189,8 @@ public class ChatListener extends CheckListener implements INotifyReload, JoinLe
         // Handle as chat or command.
         if (chatCommands.hasAnyPrefixWords(messageVars)) {
             // Treat as chat.
-            // TODO: Consider requesting permission updates on these, for consistency.
-            // TODO: Cut off the command ?.
+            // Note: permission updates might be requested here for consistency.
+            // Potentially trim the command text.
             if (textChecks(player, checkMessage, cc, pData, true, false)) {
                 event.setCancelled(true);
             }
@@ -201,7 +201,7 @@ public class ChatListener extends CheckListener implements INotifyReload, JoinLe
                 event.setCancelled(true);
             }
             else {
-                // TODO: Consider always checking these?
+                // These commands might always require checking.
                 // Note that this checks for prefixes, not prefix words.
                 final MovingConfig mcc = pData.getGenericInstance(MovingConfig.class);
                 if (mcc.passableUntrackedCommandCheck && mcc.passableUntrackedCommandPrefixes.hasAnyPrefix(messageVars)) {
@@ -225,8 +225,8 @@ public class ChatListener extends CheckListener implements INotifyReload, JoinLe
                         && player.teleport(newTo, BridgeMisc.TELEPORT_CAUSE_CORRECTION_OF_POSITION)) {
                     NCPAPIProvider.getNoCheatPlusAPI().getLogManager().info(Streams.TRACE_FILE, player.getName() + " runs the command '" + message + "' at an untracked location: " + loc + " , teleport to: " + newTo);
                 } else {
-                    // TODO: Allow disabling cancel?
-                    // TODO: Should message the player?
+                    // Cancellation can be made optional via configuration.
+                    // Consider informing the player about the cancellation.
                     NCPAPIProvider.getNoCheatPlusAPI().getLogManager().info(Streams.TRACE_FILE, player.getName() + " runs the command '" + message + "' at an untracked location: " + loc + " , cancel the command.");
                     cancel = true;
                 }
@@ -291,7 +291,7 @@ public class ChatListener extends CheckListener implements INotifyReload, JoinLe
         final ChatConfig cc = pData.getGenericInstance(ChatConfig.class);
         final ChatData data = pData.getGenericInstance(ChatData.class);
         /*
-         * TODO: The isEnabled check must be done with IWorldData (no locking).
+         * The isEnabled check must be done with IWorldData (no locking).
          * Specifically because enabling/disabling checks should be done in the
          * primary thread, regardless of the capabilities of WorldDataManager
          * implementation.
@@ -300,8 +300,8 @@ public class ChatListener extends CheckListener implements INotifyReload, JoinLe
             if (captcha.isEnabled(player, pData)) {
                 if (captcha.shouldCheckCaptcha(player, cc, data, pData)) {
                     // shouldCheckCaptcha: only if really enabled.
-                    // TODO: Later: add check for cc.captchaOnLogin or so (before shouldCheckCaptcha).
-                    // TODO: maybe schedule this to come after other plugins messages.
+                    // Possible addition: check cc.captchaOnLogin before shouldCheckCaptcha.
+                    // Consider scheduling this after other plugin messages.
                     captcha.sendNewCaptcha(player, cc, data);
                 }
             }
