@@ -24,17 +24,21 @@ public class ReflectDamageSource {
 
     public Object nmsFALL;
 
-    public ReflectDamageSource(ReflectBase base) throws ClassNotFoundException {
+    public ReflectDamageSource(ReflectBase base) {
         try {
             Class<?> nmsClass = Class.forName(base.nmsPackageName + ".DamageSource");
             this.nmsClass = nmsClass;
             Field field = ReflectionUtil.getField(nmsClass, "FALL", nmsClass);
             nmsFALL = field == null ? null : ReflectionUtil.get(field, nmsClass, null);
         } catch (ClassNotFoundException e) {
-            Class<?> nmsClass = Class.forName("net.minecraft.world.damagesource.DamageSource");
-            this.nmsClass = nmsClass;
-            Field field = ReflectionUtil.getField(nmsClass, "k", nmsClass);
-            nmsFALL = field == null ? null : ReflectionUtil.get(field, nmsClass, null);
+            try {
+                Class<?> nmsClass = Class.forName("net.minecraft.world.damagesource.DamageSource");
+                this.nmsClass = nmsClass;
+                Field field = ReflectionUtil.getField(nmsClass, "k", nmsClass);
+                nmsFALL = field == null ? null : ReflectionUtil.get(field, nmsClass, null);
+            } catch (ClassNotFoundException ex) {
+                throw new RuntimeException(ex);
+            }
         }
     }
 

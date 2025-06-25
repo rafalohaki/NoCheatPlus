@@ -29,9 +29,15 @@ public class ReflectAttributeAccess implements IAttributeAccess {
     private static class ReflectGenericAttributes {
         public final Object nmsMOVEMENT_SPEED;
 
-        public ReflectGenericAttributes(ReflectBase base) throws ClassNotFoundException {
-            Class<?> clazz = Class.forName(base.nmsPackageName + ".GenericAttributes");
-            Class<?> clazzIAttribute = Class.forName(base.nmsPackageName + ".IAttribute");
+        public ReflectGenericAttributes(ReflectBase base) {
+            Class<?> clazz;
+            Class<?> clazzIAttribute;
+            try {
+                clazz = Class.forName(base.nmsPackageName + ".GenericAttributes");
+                clazzIAttribute = Class.forName(base.nmsPackageName + ".IAttribute");
+            } catch (ClassNotFoundException ex) {
+                throw new RuntimeException(ex);
+            }
             Object nmsMOVEMENT_SPEED = null;
             nmsMOVEMENT_SPEED = get_nmsMOVEMENT_SPEED("MOVEMENT_SPEED", clazz, clazzIAttribute);
             if (nmsMOVEMENT_SPEED == null) {
@@ -65,8 +71,13 @@ public class ReflectAttributeAccess implements IAttributeAccess {
         /** (Custom naming.) */
         public final Method nmsGetAttributeModifier;
 
-        public ReflectAttributeInstance(ReflectBase base) throws ClassNotFoundException {
-            Class<?> clazz = Class.forName(base.nmsPackageName + ".AttributeInstance");
+        public ReflectAttributeInstance(ReflectBase base) {
+            Class<?> clazz;
+            try {
+                clazz = Class.forName(base.nmsPackageName + ".AttributeInstance");
+            } catch (ClassNotFoundException ex) {
+                throw new RuntimeException(ex);
+            }
             // Base value.
             Method method = ReflectionUtil.getMethodNoArgs(clazz, "b", double.class);
             if (method == null) {
@@ -107,8 +118,13 @@ public class ReflectAttributeAccess implements IAttributeAccess {
         /** (Custom naming.) */
         public Method nmsGetValue;
 
-        public ReflectAttributeModifier(ReflectBase base) throws ClassNotFoundException {
-            Class<?> clazz = Class.forName(base.nmsPackageName + ".AttributeModifier");
+        public ReflectAttributeModifier(ReflectBase base) {
+            Class<?> clazz;
+            try {
+                clazz = Class.forName(base.nmsPackageName + ".AttributeModifier");
+            } catch (ClassNotFoundException ex) {
+                throw new RuntimeException(ex);
+            }
             // Scan in a more future proof way if needed.
             nmsGetOperation = ReflectionUtil.getMethodNoArgs(clazz, "c", int.class);
             nmsGetValue = ReflectionUtil.getMethodNoArgs(clazz, "d", double.class);
