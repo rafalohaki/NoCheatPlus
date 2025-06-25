@@ -55,96 +55,29 @@ public class StreamCommand extends BaseCommand {
         String messageColor = null;
         String messageNoColor = null;
         for (String streamDef : args[2].split("\\+")) {
-            Level level = null;
-            boolean color = false;
-            boolean noColor = false;
-            // Check for color def.
-            if (streamDef.indexOf('?') != -1) {
-                String[] split = streamDef.split("\\?");
-                if (split.length != 2) {
-                    sender.sendMessage("Bad flag (color|nocolor): " + streamDef);
-                    continue;
-                }
-                streamDef = split[0];
-                String temp = split[1].toLowerCase();
-                if (temp.matches("^(nc|noc|nocol|nocolor)$")) {
-                    noColor = true;
-                }
-                else if (temp.matches("^(c|col|color)$")) {
-                    color = true;
-                }
-                else {
-                    sender.sendMessage("Bad flag (color|nocolor): " + temp);
-                    continue;
-                }
+            StreamFlagsResult flags = parseStreamFlags(sender, streamDef);
+            if (flags == null) {
+                continue;
             }
-            // Parse level first.
-            if (streamDef.indexOf('@') != -1) {
-                String[] split = streamDef.split("@");
-                if (split.length != 2) {
-                    sender.sendMessage("Bad level definition: " + streamDef);
-                    continue;
-                }
-                streamDef = split[0];
-
-                // Attempt to parse level.
-                try {
-                    // Convert to upper-case to ignore case.
-                    level = Level.parse(split[1].toUpperCase());
-                }
-                catch (IllegalArgumentException e) {
-                    sender.sendMessage("Bad level: " + split[1]);
-                    continue;
-                }
+            StreamLevelResult levelResult = parseStreamLevel(sender, flags.stream());
+            if (levelResult == null) {
+                continue;
             }
-            // Get StreamID, account for shortcuts.
-            StreamID streamId = man.getStreamID(streamDef);
-            if (streamId == null) {
-                String altStreamDef = streamDef.toLowerCase();
-                if (altStreamDef.equals("notify")) {
-                    // Default level should be INFO.
-                    streamId = Streams.NOTIFY_INGAME;
-                }
-                else if (altStreamDef.equals("debug")) {
-                    streamId = Streams.TRACE_FILE;
-                    if (level == null) {
-                        level = Level.FINE;
-                    }
-                }
-                else if (altStreamDef.equals("status")) {
-                    streamId = Streams.STATUS;
-                }
-                else if (altStreamDef.equals("init")) {
-                    streamId = Streams.INIT;
-                }
-                else if (altStreamDef.equals("console")) {
-                    // Prefer the plugin logger.
-                    streamId = Streams.PLUGIN_LOGGER;
-                }
-                else if (altStreamDef.equals("file")) {
-                    streamId = Streams.DEFAULT_FILE;
-                }
-                else {
-                    sender.sendMessage("Bad stream id: " + streamDef);
-                    continue;
-                }
-            }
-            // Finally log.
-            if (level == null) {
-                // Instead: context-dependent?
-                level = Level.INFO;
+            StreamResolution resolution = resolveStreamID(sender, man, levelResult.stream(), levelResult.level());
+            if (resolution == null) {
+                continue;
             }
             if (message == null) {
                 message = StringUtil.join(args, 3, " ");
             }
             final String logMessage;
-            if (noColor) {
+            if (flags.noColor()) {
                 if (messageNoColor == null) {
                     messageNoColor = ChatColor.stripColor(ColorUtil.removeColors(message));
                 }
                 logMessage = messageNoColor;
             }
-            else if (color) {
+            else if (flags.color()) {
                 if (messageColor == null) {
                     messageColor = ColorUtil.replaceColors(message);
                 }
@@ -153,10 +86,103 @@ public class StreamCommand extends BaseCommand {
             else {
                 logMessage = message;
             }
-            man.log(streamId, level, logMessage);
+            man.log(resolution.id(), resolution.level(), logMessage);
         }
         // (No success message.)
         return true;
+    }
+
+    private record StreamFlagsResult(String stream, boolean color, boolean noColor) {
+    }
+
+    private StreamFlagsResult parseStreamFlags(CommandSender sender, String streamDef) {
+        boolean color = false;
+        boolean noColor = false;
+        String result = streamDef;
+        if (streamDef.indexOf('?') != -1) {
+            String[] split = streamDef.split("\\?");
+            if (split.length != 2) {
+                sender.sendMessage("Bad flag (color|nocolor): " + streamDef);
+                return null;
+            }
+            result = split[0];
+            String temp = split[1].toLowerCase();
+            if (temp.matches("^(nc|noc|nocol|nocolor)$")) {
+                noColor = true;
+            }
+            else if (temp.matches("^(c|col|color)$")) {
+                color = true;
+            }
+            else {
+                sender.sendMessage("Bad flag (color|nocolor): " + temp);
+                return null;
+            }
+        }
+        return new StreamFlagsResult(result, color, noColor);
+    }
+
+    private record StreamLevelResult(String stream, Level level) {
+    }
+
+    private StreamLevelResult parseStreamLevel(CommandSender sender, String streamDef) {
+        Level level = null;
+        String result = streamDef;
+        if (streamDef.indexOf('@') != -1) {
+            String[] split = streamDef.split("@");
+            if (split.length != 2) {
+                sender.sendMessage("Bad level definition: " + streamDef);
+                return null;
+            }
+            result = split[0];
+            try {
+                level = Level.parse(split[1].toUpperCase());
+            }
+            catch (IllegalArgumentException e) {
+                sender.sendMessage("Bad level: " + split[1]);
+                return null;
+            }
+        }
+        return new StreamLevelResult(result, level);
+    }
+
+    private record StreamResolution(StreamID id, Level level) {
+    }
+
+    private StreamResolution resolveStreamID(CommandSender sender, LogManager man, String streamDef, Level level) {
+        StreamID streamId = man.getStreamID(streamDef);
+        Level resultLevel = level;
+        if (streamId == null) {
+            String altStreamDef = streamDef.toLowerCase();
+            if (altStreamDef.equals("notify")) {
+                streamId = Streams.NOTIFY_INGAME;
+            }
+            else if (altStreamDef.equals("debug")) {
+                streamId = Streams.TRACE_FILE;
+                if (resultLevel == null) {
+                    resultLevel = Level.FINE;
+                }
+            }
+            else if (altStreamDef.equals("status")) {
+                streamId = Streams.STATUS;
+            }
+            else if (altStreamDef.equals("init")) {
+                streamId = Streams.INIT;
+            }
+            else if (altStreamDef.equals("console")) {
+                streamId = Streams.PLUGIN_LOGGER;
+            }
+            else if (altStreamDef.equals("file")) {
+                streamId = Streams.DEFAULT_FILE;
+            }
+            else {
+                sender.sendMessage("Bad stream id: " + streamDef);
+                return null;
+            }
+        }
+        if (resultLevel == null) {
+            resultLevel = Level.INFO;
+        }
+        return new StreamResolution(streamId, resultLevel);
     }
 
 }
