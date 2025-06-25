@@ -311,30 +311,56 @@ public class CreativeFly extends Check {
         double limitV = 0.0;
         double resultV = baseRes;
 
-        if (yDistance > 0.0) {
-            double[] res = vDistAscend(from, to, yDistance, flying, thisMove, lastMove, model, data,
-                    cc, debug);
-            resultV = Math.max(resultV, res[1]);
-            limitV = res[0];
-        } else if (yDistance < 0.0) {
-            double[] res = vDistDescend(from, to, yDistance, flying, thisMove, lastMove, model,
-                    data, cc);
-            resultV = Math.max(resultV, res[1]);
-            limitV = res[0];
-        } else {
-            double[] res = vDistZero(from, to, yDistance, flying, thisMove, lastMove, model, data,
-                    cc);
-            resultV = Math.max(resultV, res[1]);
-            limitV = res[0];
+        final double[] dist = computeVerticalDistances(from, to, yDistance, flying, thisMove,
+                lastMove, model, data, cc, debug);
+        limitV = dist[0];
+        resultV = Math.max(resultV, dist[1]);
+
+        resultV = applyVerticalVelocityUsage(resultV, data, thisMove, yDistance);
+        resultV = handleLevitation(player, from, to, yDistance, thisMove, lastMove, model, data,
+                pData, now, resultV);
+
+        final double maximumHeight = computeMaximumHeight(player, model);
+        if (to.getY() > maximumHeight) {
+            tags.add("maxheight");
         }
 
+        resultV *= 100.0;
+        if (resultV > 0.0) {
+            tags.add("vdist");
+        }
+
+        return new double[] {limitV, resultV, maximumHeight};
+    }
+
+    private double[] computeVerticalDistances(final PlayerLocation from, final PlayerLocation to,
+            final double yDistance, final boolean flying, final PlayerMoveData thisMove,
+            final PlayerMoveData lastMove, final ModelFlying model, final MovingData data,
+            final MovingConfig cc, final boolean debug) {
+        if (yDistance > 0.0) {
+            return vDistAscend(from, to, yDistance, flying, thisMove, lastMove, model, data, cc, debug);
+        } else if (yDistance < 0.0) {
+            return vDistDescend(from, to, yDistance, flying, thisMove, lastMove, model, data, cc);
+        }
+        return vDistZero(from, to, yDistance, flying, thisMove, lastMove, model, data, cc);
+    }
+
+    private double applyVerticalVelocityUsage(double resultV, final MovingData data,
+            final PlayerMoveData thisMove, final double yDistance) {
         if (resultV > 0.0
                 && (thisMove.verVelUsed != null || data.getOrUseVerticalVelocity(yDistance) != null)) {
             resultV = 0.0;
             tags.add("vvel");
         }
+        return resultV;
+    }
 
-        if (lastMove.toIsValid && !player.isFlying() && model.getScaleLevitationEffect()
+    private double handleLevitation(final Player player, final PlayerLocation from,
+            final PlayerLocation to, final double yDistance, final PlayerMoveData thisMove,
+            final PlayerMoveData lastMove, final ModelFlying model, final MovingData data,
+            final IPlayerData pData, final long now, double resultV) {
+        if (lastMove.toIsValid && player != null && !player.isFlying()
+                && model.getScaleLevitationEffect()
                 && thisMove.modelFlying == lastMove.modelFlying) {
             final double level = Bridge1_9.getLevitationAmplifier(player) + 1;
             final double allowY = (lastMove.yDistance + (0.05D * level - lastMove.yDistance) * 0.2D)
@@ -360,18 +386,12 @@ public class CreativeFly extends Check {
                 }
             }
         }
+        return resultV;
+    }
 
-        final double maximumHeight = model.getMaxHeight() + player.getWorld().getMaxHeight();
-        if (to.getY() > maximumHeight) {
-            tags.add("maxheight");
-        }
-
-        resultV *= 100.0;
-        if (resultV > 0.0) {
-            tags.add("vdist");
-        }
-
-        return new double[] {limitV, resultV, maximumHeight};
+    private double computeMaximumHeight(final Player player, final ModelFlying model) {
+        final World world = player != null ? player.getWorld() : null;
+        return model.getMaxHeight() + (world != null ? world.getMaxHeight() : 0.0);
     }
 
     private Location handleViolation(final Player player, final PlayerLocation from,
