@@ -126,118 +126,32 @@ public class OnGroundReference {
      */
     public boolean initEntries(final int x, final int y, final int z) {
 
-        // Significant cleanup and tests should delegate to auxiliary methods
-        // to shrink code size in this method.
-        // Evaluate which part is most often called.
-
         itEntries = entries == null ? null : entries.listIterator();
         itEntriesAbove = entriesAbove == null ? null : entriesAbove.listIterator();
         entriesAboveLockIndex = 0;
 
-        // First align to the minimum time, according to ref(!).
-        if (itEntries != null) {
-            while(itEntries.hasNext()) {
-                entry = itEntries.next();
-                if (ref != null && !ref.canUpdateWith(entry)
-                        || !BlockProperties.isGround(entry.previousState.getType(), ignoreFlags)) {
-                    entry = null;
-                }
-                else {
-                    // Start with this entry.
-                    break;
-                }
-            }
-        }
-        // Only fetch nodes once, if no entries are there.
+        entry = fetchNext(itEntries, true);
         if (entry == null) {
             node = blockCache.getOrCreateBlockCacheNode(x, y, z, false);
-            // Fast exclusion check right here.
             if (!BlockProperties.isGround(node.getType(), ignoreFlags)) {
                 entriesAbove = entries;
                 return false;
             }
-        }
-        else {
+        } else {
             node = null;
         }
-        itEntriesAbove = entriesAbove == null ? null : entriesAbove.listIterator();
-        if (itEntriesAbove != null) {
-            while(itEntriesAbove.hasNext()) {
-                entryAbove = itEntriesAbove.next();
-                if (ref != null && !ref.canUpdateWith(entryAbove)) {
-                    entryAbove = null;
-                }
-                else {
-                    // Start with this entry.
-                    break;
-                }
-            }
-        }
+
+        entryAbove = fetchNext(itEntriesAbove, false);
         if (entry == null && entryAbove == null) {
-            // Skip these.
             entriesAbove = entries;
-            return false; // Next y.
+            return false;
         }
-        if (entry != null && entryAbove != null 
-                && !entry.overlapsIntervalOfValidity(entryAbove)) {
-            // Wind the "older one" of the iterators forward until first match.
-            if (entryAbove.nextEntryTick >= 0 && entry.tick > entryAbove.nextEntryTick) {
-                entryAbove = null;
-                while (itEntriesAbove.hasNext()) {
-                    entryAbove = itEntriesAbove.next();
-                    if (entryAbove.nextEntryTick >= 0 && entry.tick > entryAbove.nextEntryTick) {
-                        entryAbove = null;
-                    }
-                    else {
-                        break;
-                    }
-                }
-            }
-            else if (entry.nextEntryTick >= 0 && entryAbove.tick > entry.nextEntryTick) {
-                entry = null;
-                while(itEntries.hasNext()) {
-                    entry = itEntries.next();
-                    if (entry.nextEntryTick >= 0 && entryAbove.tick > entry.nextEntryTick
-                            || !BlockProperties.isGround(entry.previousState.getType(), ignoreFlags)) {
-                        entry = null;
-                    }
-                    else {
-                        break;
-                    }
-                }
-            }
-            else {
-                throw new IllegalStateException("Unintended pun.");
-            }
-            if (entry == null && entryAbove == null) {
-                return false;
-            }
-            if (entry == null) {
-                node = blockCache.getOrCreateBlockCacheNode(x, y, z, false);
-                // Fast exclusion check right here.
-                if (!BlockProperties.isGround(node.getType(), ignoreFlags)) {
-                    return false;
-                }
-            }
+
+        if (!alignEntries(x, y, z)) {
+            return false;
         }
-        if (nodeAbove == null) {
-            if (entryAbove == null) {
-                // Use the current state.
-                nodeAbove = blockCache.getOrCreateBlockCacheNode(x, y + 1, z, false);
-            }
-            else {
-                nodeAbove = entryAbove.previousState;
-            }
-        }
-        if (node == null) {
-            if (entry == null) {
-                // Use the current state.
-                node= blockCache.getOrCreateBlockCacheNode(x, y , z, false);
-            }
-            else {
-                node = entry.previousState;
-            }
-        }
+
+        initNodes(x, y, z);
         return true;
     }
 
@@ -375,6 +289,88 @@ public class OnGroundReference {
                 return false;
             }
         } // (while: Find matching pair to continue with)
+    }
+
+    private BlockChangeEntry fetchNext(final ListIterator<BlockChangeEntry> it, final boolean requireGround) {
+        if (it == null) {
+            return null;
+        }
+        while (it.hasNext()) {
+            final BlockChangeEntry candidate = it.next();
+            if (ref != null && !ref.canUpdateWith(candidate)) {
+                continue;
+            }
+            if (requireGround && !BlockProperties.isGround(candidate.previousState.getType(), ignoreFlags)) {
+                continue;
+            }
+            return candidate;
+        }
+        return null;
+    }
+
+    private BlockChangeEntry advanceAboveUntil(final long tick) {
+        if (itEntriesAbove == null) {
+            return null;
+        }
+        BlockChangeEntry result = null;
+        while (itEntriesAbove.hasNext()) {
+            result = itEntriesAbove.next();
+            if (result.nextEntryTick >= 0 && tick > result.nextEntryTick) {
+                result = null;
+            } else {
+                break;
+            }
+        }
+        return result;
+    }
+
+    private BlockChangeEntry advanceBelowUntil(final long tick) {
+        if (itEntries == null) {
+            return null;
+        }
+        BlockChangeEntry result = null;
+        while (itEntries.hasNext()) {
+            result = itEntries.next();
+            if ((result.nextEntryTick >= 0 && tick > result.nextEntryTick)
+                    || !BlockProperties.isGround(result.previousState.getType(), ignoreFlags)) {
+                result = null;
+            } else {
+                break;
+            }
+        }
+        return result;
+    }
+
+    private boolean alignEntries(final int x, final int y, final int z) {
+        if (entry != null && entryAbove != null && !entry.overlapsIntervalOfValidity(entryAbove)) {
+            if (entryAbove.nextEntryTick >= 0 && entry.tick > entryAbove.nextEntryTick) {
+                entryAbove = advanceAboveUntil(entry.tick);
+            } else if (entry.nextEntryTick >= 0 && entryAbove.tick > entry.nextEntryTick) {
+                entry = advanceBelowUntil(entryAbove.tick);
+            } else {
+                throw new IllegalStateException("Unintended pun.");
+            }
+            if (entry == null && entryAbove == null) {
+                return false;
+            }
+            if (entry == null) {
+                node = blockCache.getOrCreateBlockCacheNode(x, y, z, false);
+                if (!BlockProperties.isGround(node.getType(), ignoreFlags)) {
+                    return false;
+                }
+            }
+        }
+        return true;
+    }
+
+    private void initNodes(final int x, final int y, final int z) {
+        if (nodeAbove == null) {
+            nodeAbove = entryAbove == null ? blockCache.getOrCreateBlockCacheNode(x, y + 1, z, false)
+                    : entryAbove.previousState;
+        }
+        if (node == null) {
+            node = entry == null ? blockCache.getOrCreateBlockCacheNode(x, y, z, false) : entry.previousState;
+        }
     }
 
 }
