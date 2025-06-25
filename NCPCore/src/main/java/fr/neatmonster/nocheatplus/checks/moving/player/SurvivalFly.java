@@ -1626,155 +1626,171 @@ public class SurvivalFly extends Check {
     }
 
     private boolean applyNoSlowPacket(final AllowedDistanceContext ctx, final DistanceState st) {
-        if (ctx == null || st == null) return false;
-        final MovingData data = ctx.data();
-        final IPlayerData pData = ctx.pData();
-        final Player player = ctx.player();
-        final boolean checkPermissions = ctx.checkPermissions();
-        if (data == null || pData == null || player == null) return false;
-        if (data.isHackingRI && (!checkPermissions || !pData.hasPermission(Permissions.MOVING_SURVIVALFLY_BLOCKING, player))) {
-            tags.add("noslowpacket");
-            data.isHackingRI = false;
-            st.allowed = 0.0;
-            st.useBaseModifiers = false;
-            st.friction = 0.0;
-            return true;
+        boolean result = false;
+        if (ctx != null && st != null) {
+            final MovingData data = ctx.data();
+            final IPlayerData pData = ctx.pData();
+            final Player player = ctx.player();
+            final boolean checkPermissions = ctx.checkPermissions();
+            if (data != null && pData != null && player != null) {
+                if (data.isHackingRI && (!checkPermissions || !pData.hasPermission(Permissions.MOVING_SURVIVALFLY_BLOCKING, player))) {
+                    tags.add("noslowpacket");
+                    data.isHackingRI = false;
+                    st.allowed = 0.0;
+                    st.useBaseModifiers = false;
+                    st.friction = 0.0;
+                    result = true;
+                }
+            }
         }
-        return false;
+        return result;
     }
 
     private boolean applyInvalidUsePacket(final AllowedDistanceContext ctx, final DistanceState st) {
-        if (ctx == null || st == null) return false;
-        final MovingData data = ctx.data();
-        final IPlayerData pData = ctx.pData();
-        final Player player = ctx.player();
-        final boolean checkPermissions = ctx.checkPermissions();
-        if (data == null || pData == null || player == null) return false;
-        if (data.invalidItemUse && (!checkPermissions || !pData.hasPermission(Permissions.MOVING_SURVIVALFLY_BLOCKING, player))) {
-            tags.add("invalidate_use");
-            data.invalidItemUse = false;
-            st.allowed = 0.0;
-            st.useBaseModifiers = false;
-            st.friction = 0.0;
-            return true;
+        boolean result = false;
+        if (ctx != null && st != null) {
+            final MovingData data = ctx.data();
+            final IPlayerData pData = ctx.pData();
+            final Player player = ctx.player();
+            final boolean checkPermissions = ctx.checkPermissions();
+            if (data != null && pData != null && player != null) {
+                if (data.invalidItemUse && (!checkPermissions || !pData.hasPermission(Permissions.MOVING_SURVIVALFLY_BLOCKING, player))) {
+                    tags.add("invalidate_use");
+                    data.invalidItemUse = false;
+                    st.allowed = 0.0;
+                    st.useBaseModifiers = false;
+                    st.friction = 0.0;
+                    result = true;
+                }
+            }
         }
-        return false;
+        return result;
     }
 
     private boolean applyCollisionModifiers(final AllowedDistanceContext ctx, final DistanceState st) {
-        if (ctx == null || st == null) return false;
-        final PlayerMoveData move = ctx.thisMove();
-        final MovingConfig cc = ctx.cc();
-        final MovingData data = ctx.data();
-        final Player player = ctx.player();
-        if (move == null || cc == null || data == null || player == null) return false;
-        if (ServerIsAtLeast1_9 && CollisionUtil.isCollidingWithEntities(player, true)
-                && st.allowed < 0.35 && data.liftOffEnvelope == LiftOffEnvelope.NORMAL) {
-            tags.add("hcollision");
-            st.allowed = Magic.modCollision * move.walkSpeed * cc.survivalFlyWalkingSpeed / 100D;
-            st.useBaseModifiers = true;
-            data.momentumTick = 20;
-            st.friction = 0.0;
-            return true;
+        boolean result = false;
+        if (ctx != null && st != null) {
+            final PlayerMoveData move = ctx.thisMove();
+            final MovingConfig cc = ctx.cc();
+            final MovingData data = ctx.data();
+            final Player player = ctx.player();
+            if (move != null && cc != null && data != null && player != null) {
+                if (ServerIsAtLeast1_9 && CollisionUtil.isCollidingWithEntities(player, true)
+                        && st.allowed < 0.35 && data.liftOffEnvelope == LiftOffEnvelope.NORMAL) {
+                    tags.add("hcollision");
+                    st.allowed = Magic.modCollision * move.walkSpeed * cc.survivalFlyWalkingSpeed / 100D;
+                    st.useBaseModifiers = true;
+                    data.momentumTick = 20;
+                    st.friction = 0.0;
+                    result = true;
+                }
+            }
         }
-        return false;
+        return result;
     }
 
     private boolean applySneakingModifiers(final AllowedDistanceContext ctx, final DistanceState st,
             final boolean sfDirty, final boolean actuallySneaking) {
-        if (ctx == null || st == null) return false;
-        final PlayerMoveData move = ctx.thisMove();
-        final MovingConfig cc = ctx.cc();
-        final MovingData data = ctx.data();
-        final IPlayerData pData = ctx.pData();
-        final Player player = ctx.player();
-        final boolean checkPermissions = ctx.checkPermissions();
-        if (move == null || cc == null || data == null || pData == null || player == null) return false;
-        if (!sfDirty && move.from.onGround && actuallySneaking
-                && (!checkPermissions || !pData.hasPermission(Permissions.MOVING_SURVIVALFLY_SNEAKING, player))) {
-            tags.add("sneaking");
-            st.allowed = Magic.modSneak * move.walkSpeed * cc.survivalFlySneakingSpeed / 100D;
-            st.allowed += 0.051 * BridgeEnchant.getSwiftSneakLevel(player);
-            st.useBaseModifiers = true;
-            st.friction = 0.0;
-            if (!Double.isInfinite(mcAccess.getHandle().getFasterMovementAmplifier(player))) {
-                st.allowed *= 0.88;
-                st.useBaseModifiersSprint = true;
+        boolean result = false;
+        if (ctx != null && st != null) {
+            final PlayerMoveData move = ctx.thisMove();
+            final MovingConfig cc = ctx.cc();
+            final MovingData data = ctx.data();
+            final IPlayerData pData = ctx.pData();
+            final Player player = ctx.player();
+            final boolean checkPermissions = ctx.checkPermissions();
+            if (move != null && cc != null && data != null && pData != null && player != null) {
+                if (!sfDirty && move.from.onGround && actuallySneaking
+                        && (!checkPermissions || !pData.hasPermission(Permissions.MOVING_SURVIVALFLY_SNEAKING, player))) {
+                    tags.add("sneaking");
+                    st.allowed = Magic.modSneak * move.walkSpeed * cc.survivalFlySneakingSpeed / 100D;
+                    st.allowed += 0.051 * BridgeEnchant.getSwiftSneakLevel(player);
+                    st.useBaseModifiers = true;
+                    st.friction = 0.0;
+                    if (!Double.isInfinite(mcAccess.getHandle().getFasterMovementAmplifier(player))) {
+                        st.allowed *= 0.88;
+                        st.useBaseModifiersSprint = true;
+                    }
+                    result = true;
+                }
             }
-            return true;
         }
-        return false;
+        return result;
     }
 
     private boolean applyUsingItemModifiers(final AllowedDistanceContext ctx, final DistanceState st,
             final PlayerMoveData lastMove, final boolean sfDirty, final boolean isBlockingOrUsing) {
-        if (ctx == null || st == null) return false;
-        final PlayerMoveData move = ctx.thisMove();
-        final MovingConfig cc = ctx.cc();
-        final MovingData data = ctx.data();
-        final IPlayerData pData = ctx.pData();
-        final Player player = ctx.player();
-        final boolean checkPermissions = ctx.checkPermissions();
-        if (move == null || cc == null || data == null || pData == null || player == null || lastMove == null) return false;
-        if (!sfDirty && isBlockingOrUsing && (move.from.onGround || data.noSlowHop > 0 || player.isBlocking())
-                && (!checkPermissions || !pData.hasPermission(Permissions.MOVING_SURVIVALFLY_BLOCKING, player))
-                && data.liftOffEnvelope == LiftOffEnvelope.NORMAL) {
-            tags.add("usingitem");
-            if (move.from.onGround) {
-                if (!move.to.onGround) {
-                    final double speedAmplifier = mcAccess.getHandle().getFasterMovementAmplifier(player);
-                    st.allowed = (lastMove.hDistance > 0.23 ? 0.4 : 0.23 + (ServerIsAtLeast1_13 ? 0.155 : 0.0))
-                            + 0.02 * (Double.isInfinite(speedAmplifier) ? 0 : speedAmplifier + 1.0);
-                    st.allowed *= cc.survivalFlyBlockingSpeed / 100D;
-                    data.noSlowHop = 1;
-                } else {
-                    if (lastMove.toIsValid && lastMove.hDistance > 0.0) {
-                        st.allowed = data.noSlowHop < 7 ?
-                                (lastMove.hAllowedDistance * (0.63 + 0.052 * ++data.noSlowHop)) : lastMove.hAllowedDistance;
-                    } else {
-                        st.allowed = Magic.modBlock * move.walkSpeed * cc.survivalFlyBlockingSpeed / 100D;
+        boolean result = false;
+        if (ctx != null && st != null && lastMove != null) {
+            final PlayerMoveData move = ctx.thisMove();
+            final MovingConfig cc = ctx.cc();
+            final MovingData data = ctx.data();
+            final IPlayerData pData = ctx.pData();
+            final Player player = ctx.player();
+            final boolean checkPermissions = ctx.checkPermissions();
+            if (move != null && cc != null && data != null && pData != null && player != null) {
+                if (!sfDirty && isBlockingOrUsing && (move.from.onGround || data.noSlowHop > 0 || player.isBlocking())
+                        && (!checkPermissions || !pData.hasPermission(Permissions.MOVING_SURVIVALFLY_BLOCKING, player))
+                        && data.liftOffEnvelope == LiftOffEnvelope.NORMAL) {
+                    tags.add("usingitem");
+                    if (move.from.onGround) {
+                        if (!move.to.onGround) {
+                            final double speedAmplifier = mcAccess.getHandle().getFasterMovementAmplifier(player);
+                            st.allowed = (lastMove.hDistance > 0.23 ? 0.4 : 0.23 + (ServerIsAtLeast1_13 ? 0.155 : 0.0))
+                                    + 0.02 * (Double.isInfinite(speedAmplifier) ? 0 : speedAmplifier + 1.0);
+                            st.allowed *= cc.survivalFlyBlockingSpeed / 100D;
+                            data.noSlowHop = 1;
+                        } else {
+                            if (lastMove.toIsValid && lastMove.hDistance > 0.0) {
+                                st.allowed = data.noSlowHop < 7 ?
+                                        (lastMove.hAllowedDistance * (0.63 + 0.052 * ++data.noSlowHop)) : lastMove.hAllowedDistance;
+                            } else {
+                                st.allowed = Magic.modBlock * move.walkSpeed * cc.survivalFlyBlockingSpeed / 100D;
+                            }
+                        }
+                    } else if (data.noSlowHop > 0) {
+                        if (data.noSlowHop == 1 && lastMove.toIsValid) {
+                            st.allowed = lastMove.hAllowedDistance * 0.6 * cc.survivalFlyBlockingSpeed / 100D;
+                            data.noSlowHop = 4;
+                        } else {
+                            st.allowed = lastMove.hAllowedDistance * 0.96 * cc.survivalFlyBlockingSpeed / 100D;
+                        }
+                    } else if (player.isBlocking() && lastMove.toIsValid) {
+                        st.allowed = lastMove.hAllowedDistance * 0.96 * cc.survivalFlyBlockingSpeed / 100D;
+                        data.noSlowHop = 2;
                     }
+                    st.allowed = Math.max(st.allowed, 0.08);
+                    st.friction = 0.0;
+                    st.useBaseModifiers = false;
+                    st.useBaseModifiersSprint = false;
+                    result = true;
                 }
-            } else if (data.noSlowHop > 0) {
-                if (data.noSlowHop == 1 && lastMove.toIsValid) {
-                    st.allowed = lastMove.hAllowedDistance * 0.6 * cc.survivalFlyBlockingSpeed / 100D;
-                    data.noSlowHop = 4;
-                } else {
-                    st.allowed = lastMove.hAllowedDistance * 0.96 * cc.survivalFlyBlockingSpeed / 100D;
-                }
-            } else if (player.isBlocking() && lastMove.toIsValid) {
-                st.allowed = lastMove.hAllowedDistance * 0.96 * cc.survivalFlyBlockingSpeed / 100D;
-                data.noSlowHop = 2;
             }
-            st.allowed = Math.max(st.allowed, 0.08);
-            st.friction = 0.0;
-            st.useBaseModifiers = false;
-            st.useBaseModifiersSprint = false;
-            return true;
         }
-        return false;
+        return result;
     }
 
     private void applyDefaultSpeed(final AllowedDistanceContext ctx, final DistanceState st, final double modHopSprint) {
-        if (ctx == null || st == null) return;
-        final PlayerMoveData move = ctx.thisMove();
-        final MovingConfig cc = ctx.cc();
-        final MovingData data = ctx.data();
-        if (move == null || cc == null || data == null) return;
+        if (ctx != null && st != null) {
+            final PlayerMoveData move = ctx.thisMove();
+            final MovingConfig cc = ctx.cc();
+            final MovingData data = ctx.data();
+            if (move != null && cc != null && data != null) {
+                st.useBaseModifiers = true;
+                if (!move.from.onGround && move.to.onGround) {
+                    st.allowed = Magic.modLanding * move.walkSpeed * cc.survivalFlySprintingSpeed / 100D;
+                    tags.add("walkspeed_to");
+                } else if (data.momentumTick > 0) {
+                    st.allowed = modHopSprint * move.walkSpeed * cc.survivalFlySprintingSpeed / 100D;
+                    tags.add("walkspeed(" + data.momentumTick + ")");
+                } else {
+                    st.allowed = move.walkSpeed * cc.survivalFlySprintingSpeed / 100D;
+                    tags.add("walkspeed");
+                }
 
-        st.useBaseModifiers = true;
-        if (!move.from.onGround && move.to.onGround) {
-            st.allowed = Magic.modLanding * move.walkSpeed * cc.survivalFlySprintingSpeed / 100D;
-            tags.add("walkspeed_to");
-        } else if (data.momentumTick > 0) {
-            st.allowed = modHopSprint * move.walkSpeed * cc.survivalFlySprintingSpeed / 100D;
-            tags.add("walkspeed(" + data.momentumTick + ")");
-        } else {
-            st.allowed = move.walkSpeed * cc.survivalFlySprintingSpeed / 100D;
-            tags.add("walkspeed");
+                if (!Magic.touchedIce(move)) st.friction = 0.0;
+            }
         }
-
-        if (!Magic.touchedIce(move)) st.friction = 0.0;
     }
 
 
