@@ -118,11 +118,11 @@ public class BlockPlaceConfig extends ACheckConfig {
 
         preventBoatsAnywhere = !config.getBoolean(ConfPaths.BLOCKPLACE_PREVENTMISC_BOATSANYWHERE);
         /*
-         * TODO: Placing boats has been possible since 1.4.5-R1.0. Behavior
-         * differs, e.g. 1.12 only places boats when clicking the top of a
-         * block, while in 1.7.10 the boat is placed on top of a block you click
-         * the side of. If exceptions are to be implemented at all, they must
-         * contain protection against abuse.
+         * Note: placing boats has been possible since 1.4.5-R1.0. Behavior
+         * differs between versions. For example, 1.12 only places boats when
+         * clicking the top of a block, while in 1.7.10 the boat is placed on
+         * top of a block you click the side of. If exceptions are implemented,
+         * they must contain protection against abuse.
          */
     }
 

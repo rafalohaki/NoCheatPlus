@@ -82,8 +82,8 @@ public class ExemptionsCommand extends BaseCommand {
             sender.sendMessage((sender instanceof Player ? TAG : CTAG) + "No exemption entries available for " + c3 +""+ playerName + c1 + " .");
         }
         else {
-            // TODO: Compress entries ?
-            sender.sendMessage((sender instanceof Player ? TAG : CTAG) + "Exemptions for " + c3 +""+  playerName + c1 + ": " + c3 +""+ StringUtil.join(entries, ", "));
+            // Potential improvement: compress entries for longer lists
+            sender.sendMessage((sender instanceof Player ? TAG : CTAG) + "Exemptions for " + c3 +""+  playerName + c1 + ": " + c3 +""+ StringUtil.join(entries, ", ")); 
         }
         return true;
     }

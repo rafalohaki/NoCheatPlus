@@ -240,6 +240,6 @@ public class DebugUtil {
         builder.append("}");
     }
 
-    // TODO: method to log raytracing/recorder directly with prefix message.
+    // Placeholder for a method to log raytracing/recorder directly with a prefix message.
 
 }

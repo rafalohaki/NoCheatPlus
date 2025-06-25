@@ -130,8 +130,8 @@ public class BridgeMisc {
      * @return
      */
     public static boolean maybeElytraBoost(final Player player, final Material materialInHand) {
-        // TODO: Account for MC version (needs configuration override or auto adapt to protocol support).
-        // TODO: Non-static due to version checks (...).
+        // NOTE: account for MC version (needs configuration override or auto adapt to protocol support).
+        // NOTE: method left non-static due to version checks
         return BridgeMaterial.FIREWORK_ROCKET != null 
                 && materialInHand == BridgeMaterial.FIREWORK_ROCKET && Bridge1_9.isGlidingWithElytra(player);
     }

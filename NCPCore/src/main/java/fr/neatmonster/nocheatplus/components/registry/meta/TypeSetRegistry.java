@@ -144,7 +144,7 @@ public class TypeSetRegistry {
         for (final Entry<Class<?>, GroupNode<?>> entry : groupedTypes.iterable()) {
             final Class<?> groupType = entry.getKey();
             if (groupType.isAssignableFrom(itemType)) {
-                // TODO: also here try catch.
+                // Consider wrapping in a try/catch to handle unexpected issues
                 final GroupNode<?> group = entry.getValue();
                 group.add(groupType, itemType);
             }

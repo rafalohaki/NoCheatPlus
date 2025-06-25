@@ -69,7 +69,7 @@ public class Fight extends BaseAdapter{
         final StructureModifier<Float> floats = packet.getFloat();
 
         if (floats.size() != 4) {
-            // Add warning
+            // Ignore packets with unexpected float count
             return;
         }
 

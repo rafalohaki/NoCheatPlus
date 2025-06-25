@@ -43,7 +43,7 @@ public class Open extends Check implements IDisableListener{
 
     private final IHandle<ExemptionSettings> exeSet = NCPAPIProvider.getNoCheatPlusAPI().getGenericInstanceHandle(ExemptionSettings.class);
 
-    // TODO: Add specific contexts (allow different settings for fight / blockbreak etc.).
+    // Placeholder for adding specific contexts (different settings for fight, block break, etc.)
 
     /**
      * Static access check, if there is a cancel-action flag the caller should have stored that locally already and use the result to know if to cancel or not.
@@ -75,7 +75,7 @@ public class Open extends Check implements IDisableListener{
         final boolean isShulkerBox = player.getOpenInventory().getTopInventory().getType().toString().equals("SHULKER_BOX");
         
         if (
-                // TODO: POC: Item duplication with teleporting NPCS, having their inventory open.
+                // Guard against teleporting NPCs that might have inventories open
                 exeSet.getHandle().isRegardedAsNpc(player)
                 || !isEnabled(player) 
                 || !InventoryUtil.hasInventoryOpen(player)

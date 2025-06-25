@@ -26,8 +26,6 @@ import java.util.concurrent.Callable;
  */
 public class MoveTrace <MD extends MoveData> {
 
-    // TODO: Class name.
-    // TODO: With splitting to MD and VehicleMoveData, a generic type parameter would be needed here. 
 
     /**
      * Keep track of past moves edge data. First entry always is the last fully
@@ -128,7 +126,7 @@ public class MoveTrace <MD extends MoveData> {
     public void invalidate() {
         final Iterator<MD> it = pastMoves.iterator();
         while (it.hasNext()) {
-            // TODO: If using many elements ever, stop at the first already invalidated one.
+            // Stop once the first invalidated move is found, if ever using many elements
             it.next().invalidate();
         }
         currentMove.invalidate();

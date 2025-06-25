@@ -77,7 +77,7 @@ public class LetterEngine implements IRemoveData, IHaveCheckType, ConsistencyChe
             settings.applyConfig(config, ConfPaths.CHAT_TEXT_GL_SIMILARITY);
             processors.add(new SimilarWordsBKL("glSimilarity", settings));
         }
-        // TODO: At least expiration duration configurable? (Entries expire after 10 minutes.)
+        // Future improvement: make expiration duration configurable (currently 10 minutes).
         dataMap = new EnginePlayerDataMap(600000L, 100, 0.75f);
     }
 

@@ -120,15 +120,14 @@ public class Critical extends Check {
                 final PlayerMoveInfo moveInfo = auxMoving.usePlayerMoveInfo();
                 moveInfo.set(player, loc, null, mCC.yOnGround);
                 // False positives with medium counts reset all nofall data when nearby boat
-                // TODO: Fix isOnGroundDueToStandingOnAnEntity() to work on entity not nearby
+                // Note: isOnGroundDueToStandingOnAnEntity() currently fails if the entity is not nearby
                 if (MovingUtil.shouldCheckSurvivalFly(player, moveInfo.from, null, mData, mCC, pData) 
                     && !moveInfo.from.isOnGroundDueToStandingOnAnEntity()) {
 
                     moveInfo.from.collectBlockFlags(0.4);
                     if ((moveInfo.from.getBlockFlags() & BlockFlags.F_BOUNCE25) != 0 
                         && !thisMove.from.onGround && !thisMove.to.onGround) {
-                        // Slime blocks
-                        // TODO: Remove (See TODO in Discord.)
+                        // Slime blocks (see Discord discussion for removal details)
                     }   
                     else {
 
@@ -138,7 +137,7 @@ public class Critical extends Check {
                         final ViolationData vd = new ViolationData(this, player, data.criticalVL, 1.0, cc.criticalActions);
                         if (vd.needsParameters()) vd.setParameter(ParameterName.TAGS, StringUtil.join(tags, "+"));
                         cancel = executeActions(vd).willCancel();
-                        // TODO: Introduce penalty instead of cancel.
+                        // Consider introducing a penalty instead of canceling
                     }
                     auxMoving.returnPlayerMoveInfo(moveInfo);
                 }

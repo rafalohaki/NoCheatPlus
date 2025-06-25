@@ -45,14 +45,11 @@ public class FastHeal extends Check {
             // Reset.
             data.fastHealVL *= 0.96;
             // Only add a predefined amount to the buffer.
-            // TODO: Confine regain-conditions further? (e.g. if vl < 0.1)
             data.fastHealBuffer = Math.min(cc.fastHealBuffer, data.fastHealBuffer + 50L);
         }
         else{
             // Violation.
             final double correctedDiff = ((double) time - data.fastHealRefTime) * TickTask.getLag(cc.fastHealInterval, true);
-            // TODO: Consider using a simple buffer as well (to get closer to the correct interval).
-            // TODO: Check if we added a buffer.
             if (correctedDiff < cc.fastHealInterval){
                 data.fastHealBuffer -= (cc.fastHealInterval - correctedDiff);
                 if (data.fastHealBuffer <= 0){

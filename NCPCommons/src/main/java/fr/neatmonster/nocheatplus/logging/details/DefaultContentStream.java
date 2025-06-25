@@ -43,10 +43,8 @@ public class DefaultContentStream<C> implements ContentStream<C> {
 
     @Override
     public void addNode(LogNode<C> node) {
-        // TODO: Consider throwing things at callers, in case of duplicate logger entries?
         synchronized (nodes) {
             if (this.nodes.contains(node)) {
-                // TODO: Consider throwing something.
                 return;
             }
             ArrayList<LogNode<C>> nodes = new ArrayList<LogNode<C>>(this.nodes);

@@ -82,7 +82,8 @@ public abstract class AbstractCoordHashMap<V, E extends fr.neatmonster.nocheatpl
      * 
      * @param initialCapacity
      *            Initial internal array size. <br>
-     *            TODO: change to expected number of elements (len = cap/load).
+     *            Should eventually represent the expected number of elements
+     *            (len = cap/load).
      * @param loadFactor
      */
     @SuppressWarnings("unchecked")
@@ -144,7 +145,7 @@ public abstract class AbstractCoordHashMap<V, E extends fr.neatmonster.nocheatpl
             bucket = entries[slot];
         }
         if (bucket == null) {
-            // TODO: use array list ?
+            // Could consider using ArrayList here
             bucket = new LinkedList<E>();
             entries[slot] = bucket;
         }
@@ -178,7 +179,7 @@ public abstract class AbstractCoordHashMap<V, E extends fr.neatmonster.nocheatpl
     }
 
     private void resize(final int size) {
-        // TODO: other capacity / allow to set strategy [also for reducing for long time use]
+        // Future improvement: support alternative strategies or reducing capacity for long term use
         final int newCapacity =  Math.min(Math.max((int) ((size + 4) / loadFactor), entries.length + entries.length / 4), 4);
         @SuppressWarnings("unchecked")
         final List<E>[] newEntries = new List[newCapacity];
@@ -222,7 +223,7 @@ public abstract class AbstractCoordHashMap<V, E extends fr.neatmonster.nocheatpl
             size = 0;
             Arrays.fill(entries, null);
         }
-        // TODO: resize ?
+        // Optional: consider resizing to free memory
     }
 
     /**

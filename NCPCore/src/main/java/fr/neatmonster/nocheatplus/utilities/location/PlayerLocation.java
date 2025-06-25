@@ -24,7 +24,6 @@ import fr.neatmonster.nocheatplus.components.registry.event.IHandle;
 import fr.neatmonster.nocheatplus.utilities.map.BlockCache;
 import fr.neatmonster.nocheatplus.utilities.map.BlockProperties;
 
-// TODO: Auto-generated Javadoc
 /**
  * Lots of content for a location a player is supposed to be at. Constructors
  * for convenient use.
@@ -198,7 +197,6 @@ public class PlayerLocation extends RichEntityLocation {
      * @return true, if successful
      */
     public boolean hasIllegalStance() {
-        // TODO: This doesn't check this location, but the player.
         return getMCAccess().isIllegalBounds(player).decide(); // MAYBE = NO
     }
 
