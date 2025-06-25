@@ -394,7 +394,7 @@ public class TrigUtil {
             return Double.NaN;
         }
         final double diff = a2 - a1;
-        // TODO: What with resulting special values here?
+        // NOTE: consider how to handle resulting special values here.
         if (diff < -Math.PI) {
             return diff + 2.0 * Math.PI;
         }

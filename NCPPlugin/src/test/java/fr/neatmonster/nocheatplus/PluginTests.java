@@ -59,9 +59,10 @@ public class PluginTests {
     public static class UnitTestNoCheatPlusAPI implements NoCheatPlusAPI {
 
         /*
-         * TODO: Mix-in style base functionality, common for testing API and
-         * live plugin. ALT: DefaultNoCheatPlusAPI class and a common base class
-         * (plugin would no further implement that API).
+         * NOTE: mix-in style base functionality might be useful for both the
+         * testing API and the live plugin. Alternatively, a
+         * DefaultNoCheatPlusAPI class with a common base could be created
+         * so the plugin would no longer implement that API directly.
          */
 
         private final WorldDataManager worldDataManager = new WorldDataManager();
@@ -187,7 +188,7 @@ public class PluginTests {
 
         @Override
         public LogManager getLogManager() {
-            // TODO: Maybe do implement a dummy log manager (with file?) 
+            // NOTE: a simple log manager implementation could be added here.
             throw new UnsupportedOperationException();
         }
 

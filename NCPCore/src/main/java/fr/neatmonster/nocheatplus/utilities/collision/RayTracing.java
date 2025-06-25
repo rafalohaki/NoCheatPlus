@@ -155,9 +155,9 @@ public abstract class RayTracing implements ICollideBlocks {
 
         // Actual loop.
         /*
-         * TODO: Fix last transition not taken sometimes (with
-         * "off by x-th digit" or "t=0 transition"). Consider correcting t on
-         * base of the block coordinates in use.
+         * NOTE: the last transition might occasionally be skipped due to
+         * rounding issues or t=0 transitions. Correcting t based on block
+         * coordinates could help.
          */
         while (t + tol < 1.0) {
             // Determine smallest time to block edge, per axis.
@@ -178,7 +178,7 @@ public abstract class RayTracing implements ICollideBlocks {
             }
             if (t + tMin > 1.0) {
                 // Set to the remaining distance (does trigger).
-                // TODO: Inaccurate t can mean iterating too short.
+                // NOTE: if t is inaccurate, the loop might run for too few iterations.
                 tMin = 1.0 - t;
             }
 
@@ -211,7 +211,8 @@ public abstract class RayTracing implements ICollideBlocks {
             }
 
             // Advance on-block origin based on this move.
-            // TODO: Calculate "directly" based on this/next block or and/t?
+            // NOTE: consider calculating the new position directly based on
+            // the current or next block and the current t value.
             oX = Math.min(1.0, Math.max(0.0, oX + tMin * dX));
             oY = Math.min(1.0, Math.max(0.0, oY + tMin * dY));
             oZ = Math.min(1.0, Math.max(0.0, oZ + tMin * dZ));
