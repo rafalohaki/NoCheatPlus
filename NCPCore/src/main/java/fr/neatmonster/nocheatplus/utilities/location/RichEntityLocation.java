@@ -26,7 +26,7 @@ import fr.neatmonster.nocheatplus.utilities.map.BlockProperties;
 import fr.neatmonster.nocheatplus.utilities.map.BlockFlags;
 import fr.neatmonster.nocheatplus.compat.Bridge1_9;
 
-// TODO: Auto-generated Javadoc
+// Auto-generated Javadoc
 /**
  * A location with an entity with a lot of extra stuff.
  * 
@@ -38,7 +38,7 @@ public class RichEntityLocation extends RichBoundsLocation {
     private final boolean is1_13Above = ServerVersion.compareMinecraftVersion("1.13") >= 0;
     
     /*
-     * TODO: HumanEntity default with + height (1.11.2): elytra 0.6/0.6,
+     * HumanEntity default with + height (1.11.2): elytra 0.6/0.6,
      * sleeping 0.2/0.2, sneaking 0.6/1.65, normal 0.6/1.8 - head height is 0.4
      * with elytra, 0.2 with sleeping, height - 0.08 otherwise.
      */
@@ -52,13 +52,13 @@ public class RichEntityLocation extends RichBoundsLocation {
 
     /** Full bounding box width. */
     /*
-     * TODO: This is the entity width, happens to usually be the bounding box
-     * width +-. Move to entity / replace.
+     * This is the entity width, usually close to the bounding box
+     * width. Should be moved to the entity or replaced.
      */
     private double width; 
 
     /** Some entity collision height. */
-    private double height; // TODO: Move to entity / replace.
+    private double height; // Should be moved to the entity or replaced.
 
     /** Indicate that this is a living entity. */
     private boolean isLiving;
@@ -185,7 +185,7 @@ public class RichEntityLocation extends RichBoundsLocation {
         boolean res = super.isOnGround();
         if (!res) {
             // Check if standing on an entity.
-            // TODO: Get rid of needing an entity for checking this (!). Move to RichBoundsLocation.
+            // Consider removing the entity dependency for this check and move to RichBoundsLocation.
             final double d1 = 0.25;
             if (blockCache.standsOnEntity(entity, minX - d1, minY - yOnGround, minZ - d1, 
                     maxX + d1, minY, maxZ + d1)) {
@@ -214,7 +214,7 @@ public class RichEntityLocation extends RichBoundsLocation {
      * @return true, if successful
      */
     public boolean canClimbUp(double jumpHeigth) {
-        // TODO: distinguish vines.
+        // Need to distinguish vines.
         if (BlockProperties.isAttachedClimbable(getTypeId())) {
             // Check if vine is attached to something solid
             if (BlockProperties.canClimbUp(blockCache, blockX, blockY, blockZ)) {
@@ -230,7 +230,7 @@ public class RichEntityLocation extends RichBoundsLocation {
                 }
             }
             // Finally check possible jump height.
-            // TODO: This too is inaccurate.
+            // Note: this might still be inaccurate.
             if (isOnGround(jumpHeigth)) {
                 // Here ladders are ok.
                 return true;
@@ -249,7 +249,8 @@ public class RichEntityLocation extends RichBoundsLocation {
      * @return true, if is head obstructed
      */
     public boolean isHeadObstructed(double marginAboveEyeHeight) {
-        return isHeadObstructed(marginAboveEyeHeight, true); // TODO: This is changed behavior, need to check calls.
+        // Behavior changed; verify call sites if issues arise.
+        return isHeadObstructed(marginAboveEyeHeight, true);
     }
 
     /**
@@ -265,11 +266,11 @@ public class RichEntityLocation extends RichBoundsLocation {
      *             If marginAboveEyeHeight is smaller than 0.
      */
     public boolean isHeadObstructed(double marginAboveEyeHeight, boolean stepCorrection) {
-        // TODO: Add an isObstructed method with extra height parameter to RichBoundsLocation?
+        // Consider adding an isObstructed method with an extra height parameter to RichBoundsLocation.
         if (marginAboveEyeHeight < 0.0) {
             throw new IllegalArgumentException("marginAboveEyeHeight must be greater than 0.");
         }
-        // TODO: Add test for this bit of code.
+        // Tests should be added for this logic.
         // Step correction: see https://github.com/NoCheatPlus/NoCheatPlus/commit/f22bf88824372de2207e6dca5e1c264f3d251897
         if (stepCorrection) {
             double ref = maxY + marginAboveEyeHeight;
