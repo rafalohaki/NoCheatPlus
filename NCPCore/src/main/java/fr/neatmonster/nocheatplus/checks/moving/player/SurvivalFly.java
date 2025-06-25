@@ -449,12 +449,12 @@ public class SurvivalFly extends Check {
         adjustLiftOffEnvelope(thisMove, lastMove, from, to, fromOnGround, toOnGround,
                 resetFrom, resetTo, yDistance, data, cc);
 
-        // 3: Apply reset conditions.
+        // 2: Apply reset conditions.
         applyResetConditions(player, from, to, resetFrom, resetTo, toOnGround, yDistance,
                 hFreedom, debug, data, cc, thisMove);
 
 
-        // 4: Adjust in-air counters.
+        // 3: Adjust in-air counters.
         if (inAir) {
             if (yDistance == 0.0) {
                 data.sfZeroVdistRepeat ++;
@@ -467,12 +467,12 @@ public class SurvivalFly extends Check {
             data.sfVLInAir = false;
         }
 
-        // 5: Horizontal velocity invalidation.
+        // 4: Horizontal velocity invalidation.
         if (hDistance <= (cc.velocityStrictInvalidation ? thisMove.hAllowedDistanceBase : thisMove.hAllowedDistanceBase / 2.0)) {
             data.clearActiveHorVel();
         }
 
-        // 6: Update unused velocity tracking.
+        // 5: Update unused velocity tracking.
         if (debug) {
             data.getVerticalVelocityTracker().updateBlockedState(tick,
                     // Assume blocked with being in web/water, despite not entirely correct.
@@ -482,11 +482,11 @@ public class SurvivalFly extends Check {
             UnusedVelocity.checkUnusedVelocity(player, type, data, cc);
         }
 
-        // 7: Adjust friction.
+        // 6: Adjust friction.
         data.lastFrictionHorizontal = data.nextFrictionHorizontal;
         data.lastFrictionVertical = data.nextFrictionVertical;
 
-        // 8: Log tags added after violation handling.
+        // 7: Log tags added after violation handling.
         if (debug && tags.size() > tagsLength) {
             logPostViolationTags(player);
         }
