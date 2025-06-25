@@ -59,6 +59,9 @@ import org.bukkit.inventory.ItemStack;
 import org.bukkit.inventory.PlayerInventory;
 import org.bukkit.util.Vector;
 
+import fr.neatmonster.nocheatplus.checks.moving.helper.MovePreChecks;
+import fr.neatmonster.nocheatplus.checks.moving.helper.VelocityProcessor;
+
 import fr.neatmonster.nocheatplus.NCPAPIProvider;
 import fr.neatmonster.nocheatplus.actions.ActionList;
 import fr.neatmonster.nocheatplus.actions.ParameterName;
@@ -693,35 +696,14 @@ public class MovingListener extends CheckListener implements TickListener, IRemo
         /////////////////////////////////////
         // Check for location consistency. //
         /////////////////////////////////////
-        if (cc.enforceLocation && playersEnforce.contains(playerName)) {
-            // NOTE: The setback should not be set before this, even if not yet set.
-            // Last to vs. from.
-            newTo = enforceLocation(player, from, data);
-            playersEnforce.remove(playerName);
-        }
+        newTo = MovePreChecks.checkLocationConsistency(player, from, data, cc,
+                playersEnforce, this::enforceLocation);
 
 
         //////////////////////////////////////////////
         // Check for sprinting (assumeSprint)       //
         //////////////////////////////////////////////
-        if (player.isSprinting() || cc.assumeSprint) {
-            // Collect all these properties within a context object (abstraction + avoid re-fetching). 
-            if (player.getFoodLevel() > 5 || player.getAllowFlight() || player.isFlying()) {
-                data.timeSprinting = time;
-                data.multSprinting = attributeAccess.getHandle().getSprintAttributeMultiplier(player);
-
-                if (data.multSprinting == Double.MAX_VALUE) {
-                    data.multSprinting = 1.30000002;
-                }
-                else if (cc.assumeSprint && data.multSprinting == 1.0) {
-                    // Server side can be inconsistent, so the multiplier might be plain wrong (1.0).
-                    // Could be more/less than actual, but "infinite" latency would not work either.
-                    data.multSprinting = 1.30000002;
-                }
-            }
-            else if (time < data.timeSprinting) data.timeSprinting = 0;
-        }
-        else if (time < data.timeSprinting) data.timeSprinting = 0;
+        MovePreChecks.updateSprinting(player, time, data, cc, attributeAccess.getHandle());
         
 
         /////////////////////////////////////
@@ -796,20 +778,10 @@ public class MovingListener extends CheckListener implements TickListener, IRemo
         ////////////////////////////////////
         // Check which fly check to use.  //
         ////////////////////////////////////
-        boolean checkCf;
-        boolean checkSf;
-        if (MovingUtil.shouldCheckSurvivalFly(player, pFrom, pTo, data, cc, pData)) {
-            checkCf = false;
-            checkSf = true;
-            data.adjustWalkSpeed(player.getWalkSpeed(), tick, cc.speedGrace);
-        }
-        else if (pData.isCheckActive(CheckType.MOVING_CREATIVEFLY, player)) {
-            checkCf = true;
-            checkSf = false;
-            prepareCreativeFlyCheck(player, from, to, moveInfo, thisMove, multiMoveCount, tick, data, cc);
-        }
-        // (thisMove.flyCheck stays null.)
-        else checkCf = checkSf = false;
+        FlyCheckResult flyResult = determineFlyCheck(player, pFrom, pTo, thisMove,
+                multiMoveCount, tick, data, cc, pData, from, to, moveInfo);
+        boolean checkCf = flyResult.checkCf;
+        boolean checkSf = flyResult.checkSf;
 
 
         ////////////////////////////////////////////////////////////////////////
@@ -964,91 +936,16 @@ public class MovingListener extends CheckListener implements TickListener, IRemo
         }
 
         // 6: Check passable first to prevent set back override.
-        // Passable is checked first to get the original set back locations from the other checks, if needed. 
-        // Redesign to set set backs later (queue + invalidate).
-        boolean mightSkipNoFall = false; // If to skip nofall check (mainly on violation of other checks).
+        boolean mightSkipNoFall = false;
         if (newTo == null && checkPassable && player.getGameMode() != BridgeMisc.GAME_MODE_SPECTATOR) {
-            newTo = passable.check(player, pFrom, pTo, data, cc, pData, tick, useBlockChangeTracker);
-            // Check if to skip the nofall check.
-            if (newTo != null) mightSkipNoFall = true;
+            newTo = runPassableCheck(player, pFrom, pTo, data, cc, pData, tick, useBlockChangeTracker);
+            if (newTo != null) {
+                mightSkipNoFall = true;
+            }
         }
         
-        // 7: Recalculate explosion velocity as PlayerVelocityEvent can't handle well on 1.13+
-        // Merge with velocity entries that were added at the same time with this one!
-        if (data.shouldApplyExplosionVelocity) {
-            data.shouldApplyExplosionVelocity = false;
-            double xLastDistance = 0.0;
-            double zLastDistance = 0.0;
-            double yLastDistance = 0.0;
-
-            if (lastMove.toIsValid) {
-                xLastDistance = lastMove.to.getX() - lastMove.from.getX();
-                zLastDistance = lastMove.to.getZ() - lastMove.from.getZ();
-                yLastDistance = lastMove.to.onGround ? 0 : lastMove.yDistance; 
-            }
-            boolean addHorizontalVelocity = true;
-            
-            // Process the distances after the explosion
-            final double xDistance2 = data.explosionVelAxisX + xLastDistance;
-            final double zDistance2 = data.explosionVelAxisZ + zLastDistance;
-            final double hDistance = Math.sqrt(xDistance2*xDistance2 + zDistance2*zDistance2);
-
-            // Prevent duplicate entry come from PlayerVelocityEvent
-            if (data.hasActiveHorVel() && data.getHorizontalFreedom() < hDistance 
-                || data.hasQueuedHorVel() && data.useHorizontalVelocity(hDistance) < hDistance
-                || !data.hasAnyHorVel()) {
-                data.getHorizontalVelocityTracker().clear();
-                if (debug) {
-                    debug(player, "Prevent velocity duplication by removing entries that are smaller than the re-calculated hDistance (explosion).");
-                }
-            } 
-            else addHorizontalVelocity = false;
-
-            if (addHorizontalVelocity) {
-                data.addVelocity(player, cc, xDistance2, data.explosionVelAxisY + yLastDistance - Magic.GRAVITY_ODD, zDistance2);
-                if (debug) {
-                    debug(player, "Fake use of explosion velocity (h/v).");
-                }
-            }
-            else {
-                data.addVerticalVelocity(new SimpleEntry(data.explosionVelAxisY + yLastDistance - Magic.GRAVITY_ODD, cc.velocityActivationCounter));
-                if (debug) {
-                    debug(player, "Fake use of vertical explosion velocity only. Horizontal velocity entries bigger than the re-calculated hDistance are present.");
-                }
-            }
-            
-            // Always reset once used
-            data.explosionVelAxisX = 0.0;
-            data.explosionVelAxisY = 0.0;
-            data.explosionVelAxisZ = 0.0;
-        }
-
-        // 8: Handle the launch effect of bubble columns, coarse.
-        // (NOTE: Bubble columns are possible only with source blocks, not flowing water.)
-        if (checkSf && data.liftOffEnvelope == LiftOffEnvelope.LIMIT_LIQUID && !lastMove.headObstructed
-            && !pFrom.isDraggedByBubbleStream()) {
-            
-            if (!thisMove.from.inBubbleStream && lastMove.from.inBubbleStream
-                && !data.hasQueuedVerVel() && data.insideBubbleStreamCount > 1 && thisMove.yDistance > 0.0
-                && lastMove.yDistance > 0.0) {
-                final double velocity = (0.05 * data.insideBubbleStreamCount) * data.lastFrictionVertical;
-                data.addVerticalVelocity(new SimpleEntry(tick, velocity, data.insideBubbleStreamCount));
-                data.setFrictionJumpPhase();
-                if (debug) {
-                    debug(player, "Add vertical velocity for bubble stream launch effect.");
-                }
-            }
-            if (!data.hasQueuedHorVel() && thisMove.yDistance != 0.0
-                && thisMove.hDistance > 0.1 && thisMove.hDistance < thisMove.walkSpeed && thisMove.from.inBubbleStream
-                && BlockProperties.isAir(pFrom.getTypeIdAbove()) && data.insideBubbleStreamCount < 7
-                && !Magic.inAir(thisMove)) {
-                data.addHorizontalVelocity(new AccountEntry(0.5, 0, MovingData.getHorVelValCount(0.5)));
-                data.addHorizontalVelocity(new AccountEntry(0.7, 1, MovingData.getHorVelValCount(0.7)));
-                if (debug) {
-                    debug(player, "Add horizontal velocity for bubble stream bounce effect on the surface.");
-                }
-            }
-        }
+        // 7/8: Handle explosion velocity and bubble column launch.
+        VelocityProcessor.handleVelocity(player, thisMove, lastMove, data, cc, tick, checkSf, debug, pFrom);
 
         
 
@@ -1171,59 +1068,13 @@ public class MovingListener extends CheckListener implements TickListener, IRemo
         //////////////////////////////////////////////
         // Check if the move is to be allowed       //
         //////////////////////////////////////////////
-        // No check has requested a new to-Location (or actions are set not to cancel)
-        if (newTo == null) {
-
-            // 1: Ignore this one.
-            if (data.hasTeleported()) {
-                data.resetTeleported();
-                if (debug) debug(player, "Ignore hook-induced set-back: actions not set to cancel.");
-            }
-
-            // 2: Process the bounce effect if the move is allowed.
-            if (verticalBounce != BounceType.NO_BOUNCE) {
-                BounceUtil.processBounce(player, pFrom.getY(), pTo.getY(), verticalBounce, tick, this, data, cc, pData);
-            }
-
-            // 3: Finish processing the current move, move it to past ones
-            // More simple: UUID keys or a data flag instead?
-            if (processingEvents.containsKey(playerName)) {
-                data.playerMoves.finishCurrentMove();
-            }
-            // Teleport during violation processing, just invalidate thisMove.
-            else thisMove.invalidate();
-            // Increase time since set back.
-            data.timeSinceSetBack ++;
-            return false;
-        }
-        // A check has requested a new to-location.
-        else {
-
-            // 1: Setback override, adjust newTo.
-            if (data.hasTeleported()) {
-                if (debug) debug(player, "The set back has been overridden from (" + newTo + ") to: " + data.getTeleported());
-                newTo = data.getTeleported();
-            }
-            if (debug) { // Remove, if not relevant (doesn't look like it was :p).
-                if (verticalBounce != BounceType.NO_BOUNCE) debug(player, "Bounce effect not processed: " + verticalBounce);
-                if (data.verticalBounce != null) debug(player, "Bounce effect not used: " + data.verticalBounce);  
-            }
-
-            // 2: Set back handling.
-            prepareSetBack(player, event, newTo, data, cc, pData);
-
-            // 3: Prevent freezing (e.g. ascending with gliding set in water, but moving normally).
-            if ((thisMove.flyCheck == CheckType.MOVING_SURVIVALFLY || thisMove.flyCheck == CheckType.MOVING_CREATIVEFLY
-                && pFrom.isInLiquid()) && Bridge1_9.isGlidingWithElytra(player)) {
-                player.setGliding(false);            
-            }
-            return true;
-        }
+        return finalizeMove(player, event, newTo, verticalBounce, tick, pFrom, pTo,
+                thisMove, playerName, data, cc, pData, debug);
     }
 
 
-    private void prepareCreativeFlyCheck(final Player player, final Location from, final Location to, 
-                                         final PlayerMoveInfo moveInfo, final PlayerMoveData thisMove, final int multiMoveCount, 
+    private void prepareCreativeFlyCheck(final Player player, final Location from, final Location to,
+                                         final PlayerMoveInfo moveInfo, final PlayerMoveData thisMove, final int multiMoveCount,
                                          final int tick, final MovingData data, final MovingConfig cc) {
 
         data.adjustFlySpeed(player.getFlySpeed(), tick, cc.speedGrace);
@@ -1238,6 +1089,88 @@ public class MovingListener extends CheckListener implements TickListener, IRemo
             if (multiMoveCount > 0) thisMove.multiMoveCount = multiMoveCount;
         }
         thisMove.modelFlying = model;
+    }
+
+    private static class FlyCheckResult {
+        final boolean checkCf;
+        final boolean checkSf;
+        FlyCheckResult(boolean cf, boolean sf) {
+            this.checkCf = cf;
+            this.checkSf = sf;
+        }
+    }
+
+    private FlyCheckResult determineFlyCheck(final Player player, final PlayerLocation pFrom,
+            final PlayerLocation pTo, final PlayerMoveData thisMove, final int multiMoveCount, final int tick,
+            final MovingData data, final MovingConfig cc, final IPlayerData pData, final Location from,
+            final Location to, final PlayerMoveInfo moveInfo) {
+        boolean checkCf;
+        boolean checkSf;
+        if (MovingUtil.shouldCheckSurvivalFly(player, pFrom, pTo, data, cc, pData)) {
+            checkCf = false;
+            checkSf = true;
+            data.adjustWalkSpeed(player.getWalkSpeed(), tick, cc.speedGrace);
+        }
+        else if (pData.isCheckActive(CheckType.MOVING_CREATIVEFLY, player)) {
+            checkCf = true;
+            checkSf = false;
+            prepareCreativeFlyCheck(player, from, to, moveInfo, thisMove, multiMoveCount, tick, data, cc);
+        }
+        else {
+            checkCf = false;
+            checkSf = false;
+        }
+        return new FlyCheckResult(checkCf, checkSf);
+    }
+
+    private Location runPassableCheck(final Player player, final PlayerLocation pFrom, final PlayerLocation pTo,
+            final MovingData data, final MovingConfig cc, final IPlayerData pData, final int tick,
+            final boolean useBlockChangeTracker) {
+        return passable.check(player, pFrom, pTo, data, cc, pData, tick, useBlockChangeTracker);
+    }
+
+    private boolean finalizeMove(final Player player, final PlayerMoveEvent event, Location newTo,
+            final BounceType verticalBounce, final int tick, final PlayerLocation pFrom,
+            final PlayerLocation pTo, final PlayerMoveData thisMove, final String playerName,
+            final MovingData data, final MovingConfig cc, final IPlayerData pData, final boolean debug) {
+        if (newTo == null) {
+            if (data.hasTeleported()) {
+                data.resetTeleported();
+                if (debug) {
+                    debug(player, "Ignore hook-induced set-back: actions not set to cancel.");
+                }
+            }
+            if (verticalBounce != BounceType.NO_BOUNCE) {
+                BounceUtil.processBounce(player, pFrom.getY(), pTo.getY(), verticalBounce, tick, this, data, cc, pData);
+            }
+            if (processingEvents.containsKey(playerName)) {
+                data.playerMoves.finishCurrentMove();
+            } else {
+                thisMove.invalidate();
+            }
+            data.timeSinceSetBack++;
+            return false;
+        }
+        if (data.hasTeleported()) {
+            if (debug) {
+                debug(player, "The set back has been overridden from(" + newTo + ") to: " + data.getTeleported());
+            }
+            newTo = data.getTeleported();
+        }
+        if (debug) {
+            if (verticalBounce != BounceType.NO_BOUNCE) {
+                debug(player, "Bounce effect not processed: " + verticalBounce);
+            }
+            if (data.verticalBounce != null) {
+                debug(player, "Bounce effect not used: " + data.verticalBounce);
+            }
+        }
+        prepareSetBack(player, event, newTo, data, cc, pData);
+        if ((thisMove.flyCheck == CheckType.MOVING_SURVIVALFLY || thisMove.flyCheck == CheckType.MOVING_CREATIVEFLY
+                && pFrom.isInLiquid()) && Bridge1_9.isGlidingWithElytra(player)) {
+            player.setGliding(false);
+        }
+        return true;
     }
 
     
