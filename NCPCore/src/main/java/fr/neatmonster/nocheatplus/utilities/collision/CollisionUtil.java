@@ -626,32 +626,48 @@ public class CollisionUtil {
         }
     }
 
+    /**
+     * Apply exclude values for vertical movement.
+     */
     private static void applyVerticalExclude(double[] last, double[] next, RichAxisData data) {
-        updateExclude(last, next, 1, 4, 2, 5, 0, 3, Direction.X_NEG, Direction.X_POS, data);
-        updateExclude(last, next, 1, 4, 0, 3, 2, 5, Direction.Z_NEG, Direction.Z_POS, data);
+        excludeOnFullOverlap(last, next, 1, 4, 2, 5, 0, 3, Direction.X_NEG, Direction.X_POS, data);
+        excludeOnFullOverlap(last, next, 1, 4, 0, 3, 2, 5, Direction.Z_NEG, Direction.Z_POS, data);
     }
 
+    /**
+     * Apply exclude values for horizontal movement along the X axis.
+     */
     private static void applyHorizontalXExclude(double[] last, double[] next, RichAxisData data) {
-        updateExclude(last, next, 0, 3, 2, 5, 1, 4, Direction.Y_NEG, Direction.Y_POS, data);
-        updateExclude(last, next, 1, 4, 0, 3, 2, 5, Direction.Z_NEG, Direction.Z_POS, data);
+        excludeOnFullOverlap(last, next, 0, 3, 2, 5, 1, 4, Direction.Y_NEG, Direction.Y_POS, data);
+        excludeOnFullOverlap(last, next, 1, 4, 0, 3, 2, 5, Direction.Z_NEG, Direction.Z_POS, data);
     }
 
+    /**
+     * Apply exclude values for horizontal movement along the Z axis.
+     */
     private static void applyHorizontalZExclude(double[] last, double[] next, RichAxisData data) {
-        updateExclude(last, next, 0, 3, 2, 5, 1, 4, Direction.Y_NEG, Direction.Y_POS, data);
-        updateExclude(last, next, 1, 4, 2, 5, 0, 3, Direction.X_NEG, Direction.X_POS, data);
+        excludeOnFullOverlap(last, next, 0, 3, 2, 5, 1, 4, Direction.Y_NEG, Direction.Y_POS, data);
+        excludeOnFullOverlap(last, next, 1, 4, 2, 5, 0, 3, Direction.X_NEG, Direction.X_POS, data);
     }
 
-    private static void updateExclude(double[] last, double[] next,
+    /**
+     * Set the exclude direction if both ranges cover a full block and the variable
+     * range overlaps completely.
+     */
+    private static void excludeOnFullOverlap(double[] last, double[] next,
             int c1Min, int c1Max, int c2Min, int c2Max,
             int varMin, int varMax, Direction neg, Direction pos, RichAxisData data) {
-        if (isUnitRange(next, last, c1Min, c1Max) && isUnitRange(next, last, c2Min, c2Max)
+        if (isFullRange(next, last, c1Min, c1Max) && isFullRange(next, last, c2Min, c2Max)
                 && rangeContains(next[varMin], last[varMin], next[varMax], last[varMax])) {
             data.exclude = next[varMin] == 0.0 ? neg
                     : next[varMax] == 1.0 ? pos : Direction.NONE;
         }
     }
 
-    private static boolean isUnitRange(double[] next, double[] last, int minIdx, int maxIdx) {
+    /**
+     * Check if both bounds occupy the entire unit range from 0.0 to 1.0.
+     */
+    private static boolean isFullRange(double[] next, double[] last, int minIdx, int maxIdx) {
         return next[minIdx] == 0.0 && next[maxIdx] == 1.0
                 && last[minIdx] == 0.0 && last[maxIdx] == 1.0;
     }
