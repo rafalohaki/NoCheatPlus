@@ -146,6 +146,67 @@ public abstract class RayTracing implements ICollideBlocks {
         }
     }
 
+    /**
+     * Calculate the next time step for the main loop.
+     *
+     * @param tX time to the next x-axis block edge
+     * @param tY time to the next y-axis block edge
+     * @param tZ time to the next z-axis block edge
+     * @return the time delta or a negative value to signal abort
+     */
+    private double computeTMin(final double tX, final double tY, final double tZ) {
+        double result = Math.max(0.0, Math.min(tX, Math.min(tY, tZ)));
+        if (result == Double.MAX_VALUE) {
+            // All differences are 0 (no progress).
+            if (step < 1) {
+                result = 0.0;
+            } else {
+                return -1.0;
+            }
+        }
+        if (t + result > 1.0) {
+            // Limit to the remaining distance.
+            result = 1.0 - t;
+        }
+        return result;
+    }
+
+    /**
+     * Determine which axes need transitions for the given time step.
+     * Bits: 1 = X, 2 = Y, 4 = Z.
+     *
+     * @param tX time to the next x-axis block edge
+     * @param tY time to the next y-axis block edge
+     * @param tZ time to the next z-axis block edge
+     * @param tMin smallest time step considered
+     * @return a bit mask of axes that require a transition
+     */
+    private int computeTransitionMask(final double tX, final double tY, final double tZ, final double tMin) {
+        int mask = 0;
+        if (Math.abs(tX - tMin) < EPSILON && blockX != endBlockX && dX != 0.0) {
+            mask |= 1;
+        }
+        if (Math.abs(tY - tMin) < EPSILON && blockY != endBlockY && dY != 0.0) {
+            mask |= 2;
+        }
+        if (Math.abs(tZ - tMin) < EPSILON && blockZ != endBlockZ && dZ != 0.0) {
+            mask |= 4;
+        }
+        return mask;
+    }
+
+    /**
+     * Advance the on-block origin and the absolute time by the given amount.
+     *
+     * @param delta the time delta for this move
+     */
+    private void advanceOriginAndTime(final double delta) {
+        oX = Math.min(1.0, Math.max(0.0, oX + delta * dX));
+        oY = Math.min(1.0, Math.max(0.0, oY + delta * dY));
+        oZ = Math.min(1.0, Math.max(0.0, oZ + delta * dZ));
+        t = Math.min(1.0, t + delta);
+    }
+
     @Override
     public void loop() {
 
@@ -167,27 +228,14 @@ public abstract class RayTracing implements ICollideBlocks {
             tX = tDiff(dX, oX, blockX == endBlockX);
             tY = tDiff(dY, oY, blockY == endBlockY);
             tZ = tDiff(dZ, oZ, blockZ == endBlockZ);
-            // Adjust time.
-            tMin = Math.max(0.0, Math.min(tX,  Math.min(tY, tZ)));
-            if (tMin == Double.MAX_VALUE) {
-                // All differences are 0 (no progress).
-                if (step < 1) {
-                    // Allow one step always.
-                    tMin = 0.0;
-                }
-                else {
-                    break;
-                }
-            }
-            if (t + tMin > 1.0) {
-                // Set to the remaining distance (does trigger).
-                // NOTE: if t is inaccurate, the loop might run for too few iterations.
-                tMin = 1.0 - t;
-            }
 
+            tMin = computeTMin(tX, tY, tZ);
+            if (tMin < 0.0) {
+                break;
+            }
 
             // Step for the primary line.
-            step ++;
+            step++;
             if (!step(blockX, blockY, blockZ, oX, oY, oZ, tMin, true)) {
                 break;
             }
@@ -197,31 +245,16 @@ public abstract class RayTracing implements ICollideBlocks {
                 break;
             }
 
-            // Determine transitions, per axis.
-            transitions = 0;
-            transX = transY = transZ = false;
-            if (Math.abs(tX - tMin) < EPSILON && blockX != endBlockX && dX != 0.0) {
-                transX = true;
-                transitions ++;
-            }
-            if (Math.abs(tY - tMin) < EPSILON && blockY != endBlockY && dY != 0.0) {
-                transY = true;
-                transitions ++;
-            }
-            if (Math.abs(tZ - tMin) < EPSILON && blockZ != endBlockZ && dZ != 0.0) {
-                transZ = true;
-                transitions ++;
-            }
+            int mask = computeTransitionMask(tX, tY, tZ, tMin);
+            transitions = Integer.bitCount(mask);
+            transX = (mask & 1) != 0;
+            transY = (mask & 2) != 0;
+            transZ = (mask & 4) != 0;
 
-            // Advance on-block origin based on this move.
+            // Advance on-block origin and time based on this move.
             // NOTE: consider calculating the new position directly based on
             // the current or next block and the current t value.
-            oX = Math.min(1.0, Math.max(0.0, oX + tMin * dX));
-            oY = Math.min(1.0, Math.max(0.0, oY + tMin * dY));
-            oZ = Math.min(1.0, Math.max(0.0, oZ + tMin * dZ));
-
-            // Advance time.
-            t = Math.min(1.0, t + tMin);
+            advanceOriginAndTime(tMin);
 
             // Handle block transitions.
             if (transitions > 0) {
