@@ -314,7 +314,7 @@ public class BlockPlaceListener extends CheckListener {
                 }
                 else if (directionCheck) {
                     if (blockAgainst.getType() == Material.LADDER || BlockProperties.isCarpet(blockAgainst.getType())) {
-                        // TODO: Actually fix this, don't just ignore it.
+                        // This needs a proper fix rather than simply being ignored.
                         // ISSUE: https://github.com/NoCheatPlus/Issues/issues/524
                     } 
                     else if (direction.check(player, loc, eyeHeight, block, null, flyingHandle, data, cc, pData)) {
@@ -365,7 +365,7 @@ public class BlockPlaceListener extends CheckListener {
         }
         if (event.getClass() != SignChangeEvent.class) {
             // Built in plugin compatibility.
-            // TODO: Don't understand why two consecutive events editing the same block are a problem.
+            // It is unclear why two consecutive events editing the same block cause issues.
             return;
         }
         final Player player = event.getPlayer();
@@ -425,7 +425,7 @@ public class BlockPlaceListener extends CheckListener {
         final Material type = stack.getType();
         if (MaterialUtil.isBoat(type)) {
             if (cc.preventBoatsAnywhere) {
-                // TODO: Version/plugin specific alteration for 'default'.
+                // Version or plugin specific alteration for 'default'.
                 checkBoatsAnywhere(player, event, pData);
             }
         }
@@ -455,22 +455,22 @@ public class BlockPlaceListener extends CheckListener {
         final Block block = event.getClickedBlock();
         final Material mat = block.getType();
 
-        // TODO: allow lava ?
+        // Consider allowing lava.
         if (BlockProperties.isWater(mat)) {
             return;
         }
 
-        // TODO: Shouldn't this be the opposite face?
+        // Shouldn't this be the opposite face?
         final BlockFace blockFace = event.getBlockFace();
         final Block relBlock = block.getRelative(blockFace);
         final Material relMat = relBlock.getType();
 
-        // TODO: Placing inside of water, but not "against" ?
+        // Placing inside of water, but not "against" ?
         if (BlockProperties.isWater(relMat)) {
             return;
         }
 
-        // TODO: Add a check type for exemption?
+        // Consider adding a check type for exemption.
         if (!pData.hasPermission(Permissions.BLOCKPLACE_BOATSANYWHERE, player)) {
             final Result previousUseBlock = event.useInteractedBlock();
             event.setCancelled(true);
@@ -499,7 +499,7 @@ public class BlockPlaceListener extends CheckListener {
         if (!DataManager.getPlayerData(player).isCheckActive(CheckType.BLOCKPLACE, player)) return;
 
         if (MovingUtil.hasScheduledPlayerSetBack(player)) {
-            // TODO: Should log.
+            // Should log.
             event.setCancelled(true);
             return;
         }
@@ -537,7 +537,7 @@ public class BlockPlaceListener extends CheckListener {
         if (!cancel && type == EntityType.ENDER_PEARL) {
             if (!pData.getGenericInstance(CombinedConfig.class).enderPearlCheck) {
                 // Do nothing !
-                // TODO: Might have further flags?
+                // Might have further flags?
             }
             else if (!BlockProperties.isPassable(projectile.getLocation(useLoc2))) {
                 // Launch into a block.
@@ -575,7 +575,7 @@ public class BlockPlaceListener extends CheckListener {
         useLoc2.setWorld(null);
     }
 
-    // TODO: remove this
+    // This handler might be removed in the future.
     @EventHandler(priority = EventPriority.MONITOR)
     public void onMove(PlayerMoveEvent event) {
         Player player = event.getPlayer();
