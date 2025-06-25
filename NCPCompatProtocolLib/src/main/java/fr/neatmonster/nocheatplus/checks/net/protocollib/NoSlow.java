@@ -33,6 +33,7 @@ import org.bukkit.inventory.EquipmentSlot;
 import org.bukkit.inventory.ItemStack;
 import org.bukkit.inventory.PlayerInventory;
 import org.bukkit.inventory.meta.CrossbowMeta;
+import org.bukkit.inventory.meta.ItemMeta;
 import org.bukkit.plugin.Plugin;
 
 import com.comphenix.protocol.PacketType;
@@ -197,38 +198,47 @@ public class NoSlow extends BaseAdapter {
                 return false;
             }
 
-            if (type == Material.POTION || type == Material.MILK_BUCKET || type.toString().endsWith("_APPLE")
-                    || type.name().startsWith("HONEY_BOTTLE")) {
-                data.offHandUse = Bridge1_9.hasGetItemInOffHand() && event.getHand() == EquipmentSlot.OFF_HAND;
-                return true;
-            }
+        if (type == Material.POTION || type == Material.MILK_BUCKET || type.toString().endsWith("_APPLE")
+                || type.name().startsWith("HONEY_BOTTLE")) {
+            final EquipmentSlot slot = event.getHand();
+            data.offHandUse = Bridge1_9.hasGetItemInOffHand() && slot != null && slot == EquipmentSlot.OFF_HAND;
+            return true;
+        }
 
-            if (type.isEdible() && player.getFoodLevel() < 20) {
-                data.offHandUse = Bridge1_9.hasGetItemInOffHand() && event.getHand() == EquipmentSlot.OFF_HAND;
-                return true;
-            }
+        if (type.isEdible() && player.getFoodLevel() < 20) {
+            final EquipmentSlot slot = event.getHand();
+            data.offHandUse = Bridge1_9.hasGetItemInOffHand() && slot != null && slot == EquipmentSlot.OFF_HAND;
+            return true;
+        }
         }
 
         if (type == Material.BOW && hasArrow(player.getInventory(), false)) {
-            data.offHandUse = Bridge1_9.hasGetItemInOffHand() && event.getHand() == EquipmentSlot.OFF_HAND;
+            final EquipmentSlot slot = event.getHand();
+            data.offHandUse = Bridge1_9.hasGetItemInOffHand() && slot != null && slot == EquipmentSlot.OFF_HAND;
             return true;
         }
 
         if (Bridge1_9.hasElytra() && type == Material.SHIELD) {
-            data.offHandUse = event.getHand() == EquipmentSlot.OFF_HAND;
+            final EquipmentSlot slot = event.getHand();
+            data.offHandUse = slot != null && slot == EquipmentSlot.OFF_HAND;
             return false;
         }
 
         if (Bridge1_13.hasIsRiptiding() && type == Material.TRIDENT) {
-            data.offHandUse = event.getHand() == EquipmentSlot.OFF_HAND;
+            final EquipmentSlot slot = event.getHand();
+            data.offHandUse = slot != null && slot == EquipmentSlot.OFF_HAND;
             return false;
         }
 
         if (type.toString().equals("CROSSBOW")) {
-            final CrossbowMeta meta = (CrossbowMeta) item.getItemMeta();
-            if (!meta.hasChargedProjectiles() && hasArrow(player.getInventory(), true)) {
-                data.offHandUse = event.getHand() == EquipmentSlot.OFF_HAND;
-                return true;
+            final ItemMeta rawMeta = item.getItemMeta();
+            if (rawMeta instanceof CrossbowMeta) {
+                final CrossbowMeta meta = (CrossbowMeta) rawMeta;
+                if (!meta.hasChargedProjectiles() && hasArrow(player.getInventory(), true)) {
+                    final EquipmentSlot slot = event.getHand();
+                    data.offHandUse = slot != null && slot == EquipmentSlot.OFF_HAND;
+                    return true;
+                }
             }
         }
 
