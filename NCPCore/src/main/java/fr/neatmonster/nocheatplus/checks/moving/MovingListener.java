@@ -2742,58 +2742,84 @@ public class MovingListener extends CheckListener implements TickListener, IRemo
     private void checkMissedMovesOnLeave(final Player player, final IPlayerData pData,
                                          final MovingData data, final Location loc) {
 
-        // Check for missed moves.
-        // Force-load chunks [log if (!)] ?
-        // Check only from the old versions, newer versions don't seem like a problem to account for
-        if (!BlockProperties.isPassable(loc) && !Bridge1_13.hasIsSwimming()) {
+        if (player == null || pData == null || data == null || loc == null) return;
 
-            final PlayerMoveData lastMove = data.playerMoves.getFirstPastMove();
-            final PlayerMoveData lastMove2 = data.playerMoves.getNumberOfPastMoves() > 1
-                    ? data.playerMoves.getSecondPastMove() : null;
-            // Won't use lastMove.toIsValid to prevent players already failed some checks in last move
-            if (lastMove.valid) {
-                Location refLoc = lastMove.toIsValid
-                        ? new Location(loc.getWorld(), lastMove.to.getX(), lastMove.to.getY(), lastMove.to.getZ())
-                        : new Location(loc.getWorld(), lastMove.from.getX(), lastMove.from.getY(), lastMove.from.getZ());
+        // Check for missed moves. Skip if passable or on modern versions.
+        if (BlockProperties.isPassable(loc) || Bridge1_13.hasIsSwimming()) return;
 
-                // More likely lastmove location is same with left location, try to check for second lastmove
-                if (TrigUtil.isSamePos(loc, refLoc) && !lastMove.toIsValid && lastMove2 != null) {
-                    refLoc = lastMove2.toIsValid
-                            ? new Location(loc.getWorld(), lastMove2.to.getX(), lastMove2.to.getY(), lastMove2.to.getZ())
-                            : new Location(loc.getWorld(), lastMove2.from.getX(), lastMove2.from.getY(), lastMove2.from.getZ());
-                }
-                // Correct position by scan block up
-                // what about try to phase upward not downward anymore?
-                if (!BlockProperties.isPassable(refLoc) || refLoc.distanceSquared(loc) > 1.25) {
-                    double y = Math.ceil(loc.getY());
-                    refLoc = loc.clone();
-                    refLoc.setY(y);
-                    if (!BlockProperties.isPassable(refLoc)) refLoc = loc;
-                }
-                final double d = refLoc.distanceSquared(loc);
-                if (d > 0.0) {
-                    // Consider to always set back here. Might skip on big distances.
-                    if (TrigUtil.manhattan(loc, refLoc) > 0 || BlockProperties.isPassable(refLoc)) {
+        final PlayerMoveData lastMove = data.playerMoves.getFirstPastMove();
+        if (!lastMove.valid) return;
+        final PlayerMoveData lastMove2 = data.playerMoves.getNumberOfPastMoves() > 1
+                ? data.playerMoves.getSecondPastMove() : null;
 
-                        if (passable.isEnabled(player, pData)) {
-                            StaticLog.logWarning("Potential exploit: Player" + player.getName()
-                                    + " leaves, having moved into a block (not tracked by moving checks): "
-                                    + player.getWorld().getName() + " / " + DebugUtil.formatMove(refLoc, loc));
-                            // Actually trigger a passable violation (+tag).
-                            if (d > 1.25) {
-                                StaticLog.logWarning("SKIP set back for " + player.getName()
-                                        + ", because distance is too high (risk of false positives): " + d);
-                            } else {
-                                StaticLog.logInfo("Set back player " + player.getName() + ": "
-                                        + LocUtil.simpleFormat(refLoc));
-                                data.prepareSetBack(refLoc);
-                                if (!player.teleport(refLoc, BridgeMisc.TELEPORT_CAUSE_CORRECTION_OF_POSITION)) {
-                                    StaticLog.logWarning("FAILED to set back player " + player.getName());
-                                }
-                            }
-                        }
-                    }
-                }
+        Location refLoc = determineReferenceLocation(loc, lastMove, lastMove2);
+        refLoc = adjustReferenceLocation(loc, refLoc);
+        final double distSq = refLoc.distanceSquared(loc);
+        if (distSq <= 0.0) return;
+
+        if (shouldSetBack(player, pData, loc, refLoc)) {
+            setBackPlayer(player, pData, data, refLoc, distSq);
+        }
+    }
+
+    /**
+     * Determine a reference location based on the last valid move.
+     */
+    private Location determineReferenceLocation(final Location loc, final PlayerMoveData lastMove,
+                                                final PlayerMoveData lastMove2) {
+        final Location refLoc = lastMove.toIsValid
+                ? new Location(loc.getWorld(), lastMove.to.getX(), lastMove.to.getY(), lastMove.to.getZ())
+                : new Location(loc.getWorld(), lastMove.from.getX(), lastMove.from.getY(), lastMove.from.getZ());
+
+        if (TrigUtil.isSamePos(loc, refLoc) && !lastMove.toIsValid && lastMove2 != null) {
+            return lastMove2.toIsValid
+                    ? new Location(loc.getWorld(), lastMove2.to.getX(), lastMove2.to.getY(), lastMove2.to.getZ())
+                    : new Location(loc.getWorld(), lastMove2.from.getX(), lastMove2.from.getY(), lastMove2.from.getZ());
+        }
+        return refLoc;
+    }
+
+    /**
+     * Adjust the reference location if it points into a block or too far away.
+     */
+    private Location adjustReferenceLocation(final Location loc, Location refLoc) {
+        if (!BlockProperties.isPassable(refLoc) || refLoc.distanceSquared(loc) > 1.25) {
+            final double y = Math.ceil(loc.getY());
+            refLoc = loc.clone();
+            refLoc.setY(y);
+            if (!BlockProperties.isPassable(refLoc)) {
+                refLoc = loc;
+            }
+        }
+        return refLoc;
+    }
+
+    /**
+     * Decide if a set back should be executed for the given locations.
+     */
+    private boolean shouldSetBack(final Player player, final IPlayerData pData,
+                                  final Location loc, final Location refLoc) {
+        return (TrigUtil.manhattan(loc, refLoc) > 0 || BlockProperties.isPassable(refLoc))
+                && passable.isEnabled(player, pData);
+    }
+
+    /**
+     * Attempt to set the player back to a reference location and log actions.
+     */
+    private void setBackPlayer(final Player player, final IPlayerData pData,
+                               final MovingData data, final Location refLoc, final double distSq) {
+        StaticLog.logWarning("Potential exploit: Player" + player.getName()
+                + " leaves, having moved into a block (not tracked by moving checks): "
+                + player.getWorld().getName() + " / " + DebugUtil.formatMove(refLoc, player.getLocation()));
+        if (distSq > 1.25) {
+            StaticLog.logWarning("SKIP set back for " + player.getName()
+                    + ", because distance is too high (risk of false positives): " + distSq);
+        } else {
+            StaticLog.logInfo("Set back player " + player.getName() + ": "
+                    + LocUtil.simpleFormat(refLoc));
+            data.prepareSetBack(refLoc);
+            if (!player.teleport(refLoc, BridgeMisc.TELEPORT_CAUSE_CORRECTION_OF_POSITION)) {
+                StaticLog.logWarning("FAILED to set back player " + player.getName());
             }
         }
     }
