@@ -2434,46 +2434,72 @@ public class MovingListener extends CheckListener implements TickListener, IRemo
                                                   final MovingConfig cc, final PlayerLocation pLoc,
                                                   final boolean debug) {
 
+        if (player == null || event == null || data == null || thisMove == null
+                || moveInfo == null || cc == null || pLoc == null) {
+            return new NoFallBypassResult(fallDistance, true, false);
+        }
+
         float fDist = fallDistance;
         boolean allowReset = true;
+        boolean earlyExit = false;
 
         if (!data.noFallSkipAirCheck) {
             final float dataDist = Math.max(yDiff, data.noFallFallDistance);
             final double dataDamage = NoFall.getDamage(dataDist);
             if (damage > dataDamage + 0.5 || dataDamage <= 0.0) {
                 final PlayerMoveData firstPastMove = data.playerMoves.getFirstPastMove();
-                if (pLoc.isOnGround() && pLoc.isInLava() && firstPastMove.toIsValid && firstPastMove.yDistance < 0.0) {
-                    if (debug) debug(player, "NoFall/Damage: allow fall damage in lava (hotfix).");
-                }
-                else if (moveInfo.from.isOnClimbable()
-                        && (firstPastMove.modelFlying != null && firstPastMove.modelFlying.getVerticalAscendGliding()
-                            || firstPastMove.elytrafly || thisMove.modelFlying != null && thisMove.modelFlying.getVerticalAscendGliding()
-                            || thisMove.elytrafly)) {
-                    if (debug) debug(player, "Ignore fakefall on climbable on elytra move");
-                }
-                else if (noFallVL(player, "fakefall", data, cc)) {
+                if (!isFakeFallException(player, pLoc, moveInfo, thisMove, firstPastMove, debug)
+                        && noFallVL(player, "fakefall", data, cc)) {
                     player.setFallDistance(dataDist);
                     if (dataDamage <= 0.0) {
                         event.setCancelled(true);
-                        return new NoFallBypassResult(fDist, allowReset, true);
+                        earlyExit = true;
                     } else {
-                        if (debug) debug(player, "NoFall/Damage: override player fall distance and damage (" + fDist + " -> " + dataDist + ").");
+                        if (debug) {
+                            debug(player, "NoFall/Damage: override player fall distance and damage (" + fDist + " -> " + dataDist + ").");
+                        }
                         fDist = dataDist;
                         BridgeHealth.setRawDamage(event, dataDamage);
                     }
                 }
             }
             data.noFallFallDistance += 1.0;
-            if (!pLoc.isOnGround(1.0, 0.3, 0.1) && !pLoc.isResetCond() && !pLoc.isAboveLadder() && !pLoc.isAboveStairs()) {
+            if (requiresFakeGroundCheck(pLoc)) {
                 if (noFallVL(player, "fakeground", data, cc) && data.hasSetBack()) {
                     allowReset = false;
                 }
-            }
-            else {
+            } else {
                 data.vDistAcc.clear();
             }
         }
-        return new NoFallBypassResult(fDist, allowReset, false);
+        return new NoFallBypassResult(fDist, allowReset, earlyExit);
+    }
+
+    private boolean isFakeFallException(final Player player, final PlayerLocation pLoc,
+                                        final PlayerMoveInfo moveInfo, final PlayerMoveData thisMove,
+                                        final PlayerMoveData firstPastMove, final boolean debug) {
+        if (pLoc.isOnGround() && pLoc.isInLava() && firstPastMove.toIsValid && firstPastMove.yDistance < 0.0) {
+            if (debug) {
+                debug(player, "NoFall/Damage: allow fall damage in lava (hotfix).");
+            }
+            return true;
+        }
+        if (moveInfo.from.isOnClimbable()
+                && ((firstPastMove.modelFlying != null && firstPastMove.modelFlying.getVerticalAscendGliding())
+                        || firstPastMove.elytrafly
+                        || (thisMove.modelFlying != null && thisMove.modelFlying.getVerticalAscendGliding())
+                        || thisMove.elytrafly)) {
+            if (debug) {
+                debug(player, "Ignore fakefall on climbable on elytra move");
+            }
+            return true;
+        }
+        return false;
+    }
+
+    private boolean requiresFakeGroundCheck(final PlayerLocation pLoc) {
+        return !pLoc.isOnGround(1.0, 0.3, 0.1) && !pLoc.isResetCond()
+                && !pLoc.isAboveLadder() && !pLoc.isAboveStairs();
     }
 
     /** Adjust fall damage based on calculated values. */
