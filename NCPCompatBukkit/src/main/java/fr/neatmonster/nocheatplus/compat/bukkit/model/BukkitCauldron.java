@@ -35,7 +35,7 @@ public class BukkitCauldron implements BukkitShapeModel {
 
     @Override
     public double[] getShape(BlockCache blockCache, World world, int x, int y, int z) {
-        return bounds;
+        return bounds.clone();
     }
 
     @Override
