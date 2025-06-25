@@ -85,13 +85,10 @@ public abstract class Action <D extends ActionData, L extends AbstractActionList
     }
 
     /**
-     * Get an optimized instance for the provided configuration. The default
-     * implementation returns this instance if no optimization is required.
-     *
+     * Get an optimized copy, given the config in use. The default implementation may return this instance rather than creating a new object.<br>
      * @param config
      * @param threshold
-     * @return this instance if unchanged, {@code null} if not to be executed, or
-     *         a new instance containing optimized settings.
+     * @return Can return this (unchanged), null (not to be executed ever) or a new instance (changed, optimized).
      */
     public Action<D, L> getOptimizedCopy(final ConfigFileWithActions<D, L> config, final Integer threshold) {
         return this;
