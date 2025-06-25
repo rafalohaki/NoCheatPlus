@@ -33,6 +33,18 @@ import fr.neatmonster.nocheatplus.players.DataManager;
 import fr.neatmonster.nocheatplus.players.IPlayerData;
 
 public class Fight extends BaseAdapter{
+
+    /**
+     * Velocity components below this value are treated as zero. Adjust via
+     * configuration if needed for specific server implementations.
+     */
+    static final float VELOCITY_EPSILON = 1e-5f;
+
+    static boolean isNegligibleVelocity(float x, float y, float z) {
+        return Math.abs(x) <= VELOCITY_EPSILON
+                && Math.abs(y) <= VELOCITY_EPSILON
+                && Math.abs(z) <= VELOCITY_EPSILON;
+    }
     private static PacketType[] initPacketTypes() {
         final List<PacketType> types = new LinkedList<>(Collections.singletonList(
                 //PacketType.Play.Client.ARM_ANIMATION,
@@ -78,7 +90,9 @@ public class Fight extends BaseAdapter{
         final Float velX = floats.read(1);
         final Float velY = floats.read(2);
         final Float velZ = floats.read(3);
-        if (Math.abs(velX) == 0.0 && Math.abs(velZ) == 0.0 && Math.abs(velY) == 0.0) return;
+        if (isNegligibleVelocity(velX, velY, velZ)) {
+            return;
+        }
 
         final IPlayerData pData = DataManager.getPlayerData(player);
         if (!pData.isCheckActive(CheckType.MOVING, player)) return;
