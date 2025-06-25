@@ -616,47 +616,73 @@ public class CollisionUtil {
             return;
         }
         if (dy != 0) {
-            if (nextBounds[1] == 0.0 && nextBounds[4] == 1.0 && nextBounds[2] == 0.0 && nextBounds[5] == 1.0
-                    && lastBounds[1] == 0.0 && lastBounds[4] == 1.0 && lastBounds[2] == 0.0 && lastBounds[5] == 1.0
-                    && rangeContains(nextBounds[0], lastBounds[0], nextBounds[3], lastBounds[3])) {
-                axisData.exclude = nextBounds[0] == 0.0 ? Direction.X_NEG
-                        : nextBounds[3] == 1.0 ? Direction.X_POS : Direction.NONE;
-            }
-            if (nextBounds[1] == 0.0 && nextBounds[4] == 1.0 && nextBounds[0] == 0.0 && nextBounds[3] == 1.0
-                    && lastBounds[1] == 0.0 && lastBounds[4] == 1.0 && lastBounds[0] == 0.0 && lastBounds[3] == 1.0
-                    && rangeContains(nextBounds[2], lastBounds[2], nextBounds[5], lastBounds[5])) {
-                axisData.exclude = nextBounds[2] == 0.0 ? Direction.Z_NEG
-                        : nextBounds[5] == 1.0 ? Direction.Z_POS : Direction.NONE;
-            }
+            excludeForYMove(lastBounds, nextBounds, axisData);
         }
         if (dx != 0) {
-            if (nextBounds[0] == 0.0 && nextBounds[3] == 1.0 && nextBounds[2] == 0.0 && nextBounds[5] == 1.0
-                    && lastBounds[0] == 0.0 && lastBounds[3] == 1.0 && lastBounds[2] == 0.0 && lastBounds[5] == 1.0
-                    && rangeContains(nextBounds[1], lastBounds[1], nextBounds[4], lastBounds[4])) {
-                axisData.exclude = nextBounds[1] == 0.0 ? Direction.Y_NEG
-                        : nextBounds[4] == 1.0 ? Direction.Y_POS : Direction.NONE;
-            }
-            if (nextBounds[1] == 0.0 && nextBounds[4] == 1.0 && nextBounds[0] == 0.0 && nextBounds[3] == 1.0
-                    && lastBounds[1] == 0.0 && lastBounds[4] == 1.0 && lastBounds[0] == 0.0 && lastBounds[3] == 1.0
-                    && rangeContains(nextBounds[2], lastBounds[2], nextBounds[5], lastBounds[5])) {
-                axisData.exclude = nextBounds[2] == 0.0 ? Direction.Z_NEG
-                        : nextBounds[5] == 1.0 ? Direction.Z_POS : Direction.NONE;
-            }
+            excludeForXMove(lastBounds, nextBounds, axisData);
         }
         if (dz != 0) {
-            if (nextBounds[0] == 0.0 && nextBounds[3] == 1.0 && nextBounds[2] == 0.0 && nextBounds[5] == 1.0
-                    && lastBounds[0] == 0.0 && lastBounds[3] == 1.0 && lastBounds[2] == 0.0 && lastBounds[5] == 1.0
-                    && rangeContains(nextBounds[1], lastBounds[1], nextBounds[4], lastBounds[4])) {
-                axisData.exclude = nextBounds[1] == 0.0 ? Direction.Y_NEG
-                        : nextBounds[4] == 1.0 ? Direction.Y_POS : Direction.NONE;
-            }
-            if (nextBounds[1] == 0.0 && nextBounds[4] == 1.0 && nextBounds[2] == 0.0 && nextBounds[5] == 1.0
-                    && lastBounds[1] == 0.0 && lastBounds[4] == 1.0 && lastBounds[2] == 0.0 && lastBounds[5] == 1.0
-                    && rangeContains(nextBounds[0], lastBounds[0], nextBounds[3], lastBounds[3])) {
-                axisData.exclude = nextBounds[0] == 0.0 ? Direction.X_NEG
-                        : nextBounds[3] == 1.0 ? Direction.X_POS : Direction.NONE;
-            }
+            excludeForZMove(lastBounds, nextBounds, axisData);
         }
+    }
+
+    private static void excludeForYMove(double[] lastBounds, double[] nextBounds, RichAxisData axisData) {
+        if (fullYZ(nextBounds) && fullYZ(lastBounds)
+                && rangeContains(nextBounds[0], lastBounds[0], nextBounds[3], lastBounds[3])) {
+            axisData.exclude = chooseDirection(nextBounds[0], nextBounds[3], Direction.X_NEG, Direction.X_POS);
+        }
+        if (fullXY(nextBounds) && fullXY(lastBounds)
+                && rangeContains(nextBounds[2], lastBounds[2], nextBounds[5], lastBounds[5])) {
+            axisData.exclude = chooseDirection(nextBounds[2], nextBounds[5], Direction.Z_NEG, Direction.Z_POS);
+        }
+    }
+
+    private static void excludeForXMove(double[] lastBounds, double[] nextBounds, RichAxisData axisData) {
+        if (fullXZ(nextBounds) && fullXZ(lastBounds)
+                && rangeContains(nextBounds[1], lastBounds[1], nextBounds[4], lastBounds[4])) {
+            axisData.exclude = chooseDirection(nextBounds[1], nextBounds[4], Direction.Y_NEG, Direction.Y_POS);
+        }
+        if (fullXY(nextBounds) && fullXY(lastBounds)
+                && rangeContains(nextBounds[2], lastBounds[2], nextBounds[5], lastBounds[5])) {
+            axisData.exclude = chooseDirection(nextBounds[2], nextBounds[5], Direction.Z_NEG, Direction.Z_POS);
+        }
+    }
+
+    private static void excludeForZMove(double[] lastBounds, double[] nextBounds, RichAxisData axisData) {
+        if (fullXZ(nextBounds) && fullXZ(lastBounds)
+                && rangeContains(nextBounds[1], lastBounds[1], nextBounds[4], lastBounds[4])) {
+            axisData.exclude = chooseDirection(nextBounds[1], nextBounds[4], Direction.Y_NEG, Direction.Y_POS);
+        }
+        if (fullYZ(nextBounds) && fullYZ(lastBounds)
+                && rangeContains(nextBounds[0], lastBounds[0], nextBounds[3], lastBounds[3])) {
+            axisData.exclude = chooseDirection(nextBounds[0], nextBounds[3], Direction.X_NEG, Direction.X_POS);
+        }
+    }
+
+    private static Direction chooseDirection(double min, double max, Direction negative, Direction positive) {
+        if (min == 0.0) {
+            return negative;
+        }
+        if (max == 1.0) {
+            return positive;
+        }
+        return Direction.NONE;
+    }
+
+    private static boolean isFullRange(double[] bounds, int minIndex, int maxIndex) {
+        return bounds[minIndex] == 0.0 && bounds[maxIndex] == 1.0;
+    }
+
+    private static boolean fullXY(double[] bounds) {
+        return isFullRange(bounds, 0, 3) && isFullRange(bounds, 1, 4);
+    }
+
+    private static boolean fullYZ(double[] bounds) {
+        return isFullRange(bounds, 1, 4) && isFullRange(bounds, 2, 5);
+    }
+
+    private static boolean fullXZ(double[] bounds) {
+        return isFullRange(bounds, 0, 3) && isFullRange(bounds, 2, 5);
     }
 
     private static boolean isInitiallyInside(BlockCoord sCollidingBox, BlockCoord eCollidingBox, int x, int y, int z) {
