@@ -37,7 +37,7 @@ public class KeepAliveFrequency extends Check implements Listener {
     /**
      * Join timestamps per player for delaying checks after login.
      */
-    private final Map<UUID, Long> joinTimestamps = new ConcurrentHashMap<>();
+    private final Map<UUID, Long> joinTimes = new ConcurrentHashMap<>();
 
     /**
      * Checks hasBypass on violation only.
@@ -50,7 +50,7 @@ public class KeepAliveFrequency extends Check implements Listener {
     public boolean check(final Player player, final long time, final NetData data, final NetConfig cc, final IPlayerData pData) {
         data.keepAliveFreq.add(time, 1f);
         final float first = data.keepAliveFreq.bucketScore(0);
-        final long now = System.currentTimeMillis();
+        final long now = time;
 
         boolean cancel = false;
         if (!isJoinDelayActive(player, now, cc.keepAliveFrequencyStartupDelay) && first > 1f) {
@@ -59,13 +59,11 @@ public class KeepAliveFrequency extends Check implements Listener {
         }
         return cancel;
     }
-    // Event listener probably shouldn't be used here, but I don't think it will be
-    // needed to make another class just for this.
     @EventHandler
     public void playerJoin(PlayerJoinEvent e) {
         final Player player = e.getPlayer();
         if (player != null) {
-            joinTimestamps.put(player.getUniqueId(), System.currentTimeMillis());
+            joinTimes.put(player.getUniqueId(), System.currentTimeMillis());
         }
     }
 
@@ -73,7 +71,7 @@ public class KeepAliveFrequency extends Check implements Listener {
     public void playerQuit(PlayerQuitEvent e) {
         final Player player = e.getPlayer();
         if (player != null) {
-            joinTimestamps.remove(player.getUniqueId());
+            joinTimes.remove(player.getUniqueId());
         }
     }
 
@@ -89,7 +87,7 @@ public class KeepAliveFrequency extends Check implements Listener {
         if (player == null) {
             return false;
         }
-        final Long joinTime = joinTimestamps.get(player.getUniqueId());
+        final Long joinTime = joinTimes.get(player.getUniqueId());
         return joinTime != null && now - joinTime < delay;
     }
 
