@@ -25,7 +25,7 @@ import fr.neatmonster.nocheatplus.utilities.ds.count.acceptdeny.IAcceptDenyCount
  */
 public interface IStagedWorkaround {
 
-    // TODO: resetConditions: Consider to have it return false by default (x.use() || x.resetConditions() with pre-conditions).
+    // resetConditions might return false by default when combined with use() and preconditions.
     /**
      * Generic reset to the initial conditions. This does not reset the all time
      * counters, other effects depend on the implementation.

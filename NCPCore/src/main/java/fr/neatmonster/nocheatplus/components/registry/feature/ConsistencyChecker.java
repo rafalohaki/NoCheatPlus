@@ -28,5 +28,6 @@ public interface ConsistencyChecker {
 	 */
 	public void checkConsistency(Player[] onlinePlayers);
 	
-	// TODO: Might add method to check consistency for single players (on join, on certain check failures).
+       // Consider adding a method to check consistency for single players
+       // (e.g. on join or after specific check failures).
 }
