@@ -473,7 +473,16 @@ public class MovingListener extends CheckListener implements TickListener, IRemo
         ////////////////////////////////////////////////////
         // Early return checks (no full processing).      //
         ////////////////////////////////////////////////////
-        EarlyReturnDecision er = determineEarlyReturn(player, from, to, event, data, cc, pData);
+        MovementContext context = new MovementContext();
+        context.player = player;
+        context.from = from;
+        context.to = to;
+        context.event = event;
+        context.data = data;
+        context.config = cc;
+        context.pData = pData;
+        context.debug = debug;
+        EarlyReturnDecision er = determineEarlyReturn(context);
         final boolean earlyReturn = er.earlyReturn;
         final String token = er.token;
         newTo = er.newTo;
@@ -514,7 +523,7 @@ public class MovingListener extends CheckListener implements TickListener, IRemo
 
 
 
-        handleSplitMoves(player, from, to, event, debug, data, cc, pData);
+        handleSplitMoves(context);
     }
 
 
@@ -559,9 +568,15 @@ public class MovingListener extends CheckListener implements TickListener, IRemo
 
     private static record EarlyReturnDecision(boolean earlyReturn, Location newTo, String token) {}
 
-    private EarlyReturnDecision determineEarlyReturn(final Player player, final Location from, final Location to,
-                                                     final PlayerMoveEvent event, final MovingData data,
-                                                     final MovingConfig cc, final IPlayerData pData) {
+    private EarlyReturnDecision determineEarlyReturn(final MovementContext context) {
+
+        final Player player = context.player;
+        final Location from = context.from;
+        final Location to = context.to;
+        final PlayerMoveEvent event = context.event;
+        final MovingData data = context.data;
+        final MovingConfig cc = context.config;
+        final IPlayerData pData = context.pData;
 
         Location newTo = null;
         final String token;
@@ -612,9 +627,16 @@ public class MovingListener extends CheckListener implements TickListener, IRemo
         return new EarlyReturnDecision(earlyReturn, newTo, token);
     }
 
-    private void handleSplitMoves(final Player player, final Location from, final Location to,
-                                  final PlayerMoveEvent event, final boolean debug,
-                                  final MovingData data, final MovingConfig cc, final IPlayerData pData) {
+    private void handleSplitMoves(final MovementContext context) {
+
+        final Player player = context.player;
+        final Location from = context.from;
+        final Location to = context.to;
+        final PlayerMoveEvent event = context.event;
+        final boolean debug = context.debug;
+        final MovingData data = context.data;
+        final MovingConfig cc = context.config;
+        final IPlayerData pData = context.pData;
 
         final PlayerMoveInfo moveInfo = aux.usePlayerMoveInfo();
         final Location loc = player.getLocation(moveInfo.useLoc);
@@ -626,19 +648,28 @@ public class MovingListener extends CheckListener implements TickListener, IRemo
         if (!cc.splitMoves || TrigUtil.isSamePos(from, loc)
                 || lastMove.valid && TrigUtil.isSamePos(loc, lastMove.from.getX(), lastMove.from.getY(), lastMove.from.getZ())) {
             moveInfo.set(player, from, to, cc.yOnGround);
-            checkPlayerMove(player, from, to, 0, moveInfo, debug, data, cc, pData, event);
+            context.from = from;
+            context.to = to;
+            context.multiMoveCount = 0;
+            checkPlayerMove(context, moveInfo);
         }
         else {
             if (debug) debug(player, "Split move 1 (from -> loc):");
             moveInfo.set(player, from, loc, cc.yOnGround);
-            if (!checkPlayerMove(player, from, loc, 1, moveInfo, debug, data, cc, pData, event)
+            context.from = from;
+            context.to = loc;
+            context.multiMoveCount = 1;
+            if (!checkPlayerMove(context, moveInfo)
                     && processingEvents.containsKey(player.getName())) {
                 onMoveMonitorNotCancelled(player, from, loc, System.currentTimeMillis(), TickTask.getTick(),
                         pData.getGenericInstance(CombinedData.class), data, cc, pData);
                 data.joinOrRespawn = false;
                 if (debug) debug(player, "Split move 2 (loc -> to):");
                 moveInfo.set(player, loc, to, cc.yOnGround);
-                checkPlayerMove(player, loc, to, 2, moveInfo, debug, data, cc, pData, event);
+                context.from = loc;
+                context.to = to;
+                context.multiMoveCount = 2;
+                checkPlayerMove(context, moveInfo);
             }
         }
         data.joinOrRespawn = false;
@@ -660,9 +691,17 @@ public class MovingListener extends CheckListener implements TickListener, IRemo
      * @param event
      * @return If cancelled/done, i.e. not to process further split moves.
      */
-    private boolean checkPlayerMove(final Player player, final Location from, final Location to, final int multiMoveCount, 
-                                    final PlayerMoveInfo moveInfo, final boolean debug, final MovingData data, 
-                                    final MovingConfig cc, final IPlayerData pData, final PlayerMoveEvent event) {
+    private boolean checkPlayerMove(final MovementContext context, final PlayerMoveInfo moveInfo) {
+
+        final Player player = context.player;
+        final Location from = context.from;
+        final Location to = context.to;
+        final int multiMoveCount = context.multiMoveCount;
+        final boolean debug = context.debug;
+        final MovingData data = context.data;
+        final MovingConfig cc = context.config;
+        final IPlayerData pData = context.pData;
+        final PlayerMoveEvent event = context.event;
 
         Location newTo = null;
         final PlayerMoveData thisMove = data.playerMoves.getCurrentMove();
@@ -748,8 +787,9 @@ public class MovingListener extends CheckListener implements TickListener, IRemo
         ////////////////////////////////////
         // Check which fly check to use.  //
         ////////////////////////////////////
-        FlyCheckResult flyResult = determineFlyCheck(player, pFrom, pTo, thisMove,
-                multiMoveCount, tick, data, cc, pData, from, to, moveInfo);
+        context.from = from;
+        context.to = to;
+        FlyCheckResult flyResult = determineFlyCheck(context, pFrom, pTo, thisMove, tick, moveInfo);
         boolean checkCf = flyResult.checkCf;
         boolean checkSf = flyResult.checkSf;
 
@@ -1029,8 +1069,8 @@ public class MovingListener extends CheckListener implements TickListener, IRemo
         //////////////////////////////////////////////
         // Check if the move is to be allowed       //
         //////////////////////////////////////////////
-        return finalizeMove(player, event, newTo, verticalBounce, tick, pFrom, pTo,
-                thisMove, playerName, data, cc, pData, debug);
+        return finalizeMove(context, newTo, verticalBounce, tick, pFrom, pTo,
+                thisMove, playerName);
     }
 
 
@@ -1061,10 +1101,17 @@ public class MovingListener extends CheckListener implements TickListener, IRemo
         }
     }
 
-    private FlyCheckResult determineFlyCheck(final Player player, final PlayerLocation pFrom,
-            final PlayerLocation pTo, final PlayerMoveData thisMove, final int multiMoveCount, final int tick,
-            final MovingData data, final MovingConfig cc, final IPlayerData pData, final Location from,
-            final Location to, final PlayerMoveInfo moveInfo) {
+    private FlyCheckResult determineFlyCheck(final MovementContext context, final PlayerLocation pFrom,
+            final PlayerLocation pTo, final PlayerMoveData thisMove, final int tick,
+            final PlayerMoveInfo moveInfo) {
+
+        final Player player = context.player;
+        final int multiMoveCount = context.multiMoveCount;
+        final MovingData data = context.data;
+        final MovingConfig cc = context.config;
+        final IPlayerData pData = context.pData;
+        final Location from = context.from;
+        final Location to = context.to;
         boolean checkCf;
         boolean checkSf;
         if (MovingUtil.shouldCheckSurvivalFly(player, pFrom, pTo, data, cc, pData)) {
@@ -1090,10 +1137,16 @@ public class MovingListener extends CheckListener implements TickListener, IRemo
         return passable.check(player, pFrom, pTo, data, cc, pData, tick, useBlockChangeTracker);
     }
 
-    private boolean finalizeMove(final Player player, final PlayerMoveEvent event, Location newTo,
+    private boolean finalizeMove(final MovementContext context, Location newTo,
             final BounceType verticalBounce, final int tick, final PlayerLocation pFrom,
-            final PlayerLocation pTo, final PlayerMoveData thisMove, final String playerName,
-            final MovingData data, final MovingConfig cc, final IPlayerData pData, final boolean debug) {
+            final PlayerLocation pTo, final PlayerMoveData thisMove, final String playerName) {
+
+        final Player player = context.player;
+        final PlayerMoveEvent event = context.event;
+        final MovingData data = context.data;
+        final MovingConfig cc = context.config;
+        final IPlayerData pData = context.pData;
+        final boolean debug = context.debug;
         if (newTo == null) {
             if (data.hasTeleported()) {
                 data.resetTeleported();

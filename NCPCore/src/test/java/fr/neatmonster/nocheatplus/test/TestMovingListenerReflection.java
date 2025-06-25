@@ -1,12 +1,7 @@
 package fr.neatmonster.nocheatplus.test;
 
 import fr.neatmonster.nocheatplus.checks.moving.MovingListener;
-import fr.neatmonster.nocheatplus.checks.moving.MovingData;
-import fr.neatmonster.nocheatplus.checks.moving.MovingConfig;
-import fr.neatmonster.nocheatplus.players.IPlayerData;
-import org.bukkit.Location;
-import org.bukkit.entity.Player;
-import org.bukkit.event.player.PlayerMoveEvent;
+import fr.neatmonster.nocheatplus.checks.moving.MovementContext;
 import org.junit.Test;
 
 import java.lang.reflect.Method;
@@ -19,13 +14,7 @@ public class TestMovingListenerReflection {
     public void testDetermineEarlyReturnExists() throws Exception {
         Method m = MovingListener.class.getDeclaredMethod(
                 "determineEarlyReturn",
-                Player.class,
-                Location.class,
-                Location.class,
-                PlayerMoveEvent.class,
-                MovingData.class,
-                MovingConfig.class,
-                IPlayerData.class
+                MovementContext.class
         );
         assertNotNull(m);
     }
