@@ -54,7 +54,8 @@ public class BridgeCrossPlugin implements IBridgeCrossPlugin, IPostRegisterRunna
         }
     }
 
-    private Class<?> getEntityClass(ReflectBase reflectBase, String entityName) { // Dreeam - TODO: idk what's this
+    // Convenience overload that uses the same suffix for OBC and NMS classes.
+    private Class<?> getEntityClass(ReflectBase reflectBase, String entityName) {
         return getEntityClass(reflectBase, entityName, entityName);
     }
 
