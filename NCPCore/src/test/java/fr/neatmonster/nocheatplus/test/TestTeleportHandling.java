@@ -19,6 +19,8 @@ import fr.neatmonster.nocheatplus.compat.blocks.changetracker.BlockChangeTracker
 import fr.neatmonster.nocheatplus.compat.MCAccess;
 import fr.neatmonster.nocheatplus.components.registry.event.IGenericInstanceHandle;
 import fr.neatmonster.nocheatplus.utilities.map.FakeBlockCache;
+import fr.neatmonster.nocheatplus.checks.workaround.WRPT;
+import fr.neatmonster.nocheatplus.checks.moving.location.tracking.LocationTrace.TraceEntryPool;
 import org.bukkit.Location;
 import org.bukkit.World;
 import org.bukkit.entity.Player;
@@ -32,6 +34,7 @@ import java.lang.reflect.Method;
 import java.lang.reflect.Proxy;
 import java.util.HashMap;
 import java.util.UUID;
+import static org.mockito.Mockito.*;
 
 import static org.junit.Assert.*;
 
@@ -59,11 +62,17 @@ public class TestTeleportHandling {
         IGenericInstanceHandle<MCAccess> mcHandle = new SimpleHandle<>(mc);
         Object api = Proxy.newProxyInstance(NCPAPIProvider.class.getClassLoader(),
                 new Class<?>[]{fr.neatmonster.nocheatplus.components.NoCheatPlusAPI.class},
-                (pr,m,a) -> {
+                (pr, m, a) -> {
                     if ("getGenericInstanceHandle".equals(m.getName())) {
                         Class<?> c = (Class<?>) a[0];
                         if (c == MCAccess.class) return mcHandle;
                         if (c == IAttributeAccess.class) return attrHandle;
+                        return null;
+                    }
+                    if ("getGenericInstance".equals(m.getName())) {
+                        Class<?> c = (Class<?>) a[0];
+                        if (c == WRPT.class) return new WRPT();
+                        if (c == TraceEntryPool.class) return new TraceEntryPool(1000);
                         return null;
                     }
                     if ("getBlockChangeTracker".equals(m.getName())) return new BlockChangeTracker();
@@ -106,6 +115,7 @@ public class TestTeleportHandling {
         InvocationHandler h = (proxy, method, args) -> {
             Class<?> r = method.getReturnType();
             if (r == boolean.class) return false;
+            if (r == double.class || r == float.class) return 0.0;
             if (r.isPrimitive()) return 0;
             return null;
         };
@@ -130,7 +140,7 @@ public class TestTeleportHandling {
     }
 
     private static DummyPlayerData createPlayerData(Flag flag, sun.misc.Unsafe u) throws Exception {
-        DummyPlayerData pd = (DummyPlayerData) u.allocateInstance(DummyPlayerData.class);
+        DummyPlayerData pd = new DummyPlayerData();
         pd.flag = flag;
         return pd;
     }
@@ -156,8 +166,16 @@ public class TestTeleportHandling {
     public static class DummyAuxMoving extends AuxMoving {
         @Override
         public synchronized PlayerMoveInfo usePlayerMoveInfo() {
-            MCAccess mc = (MCAccess) Proxy.newProxyInstance(MCAccess.class.getClassLoader(), new Class[]{MCAccess.class},
-                    (p,m,a) -> new FakeBlockCache());
+            MCAccess mc = (MCAccess) Proxy.newProxyInstance(MCAccess.class.getClassLoader(),
+                    new Class[]{MCAccess.class},
+                    (p, m, a) -> {
+                        if ("getBlockCache".equals(m.getName())) return new FakeBlockCache();
+                        Class<?> r = m.getReturnType();
+                        if (r == boolean.class) return false;
+                        if (r == double.class || r == float.class) return 0.0;
+                        if (r.isPrimitive()) return 0;
+                        return null;
+                    });
             return new PlayerMoveInfo(new SimpleHandle<>(mc));
         }
         @Override
@@ -229,5 +247,28 @@ public class TestTeleportHandling {
         boolean early = invokeHandle(from, to, data, flag);
         assertFalse(early);
         assertFalse(data.hasTeleported());
+    }
+
+    @Test
+    public void testConfirmSetBackNullTeleported() throws Exception {
+        Flag flag = new Flag();
+        PlayerData pData = createPlayerData(flag, unsafe);
+        Field f = DataManager.class.getDeclaredField("instance");
+        f.setAccessible(true);
+        f.set(null, createDataMan(pData, unsafe));
+
+        MovingData data = mock(MovingData.class);
+        when(data.getTeleported()).thenReturn(null);
+        doNothing().when(data).onSetBack(any());
+        doNothing().when(data).resetTeleported();
+        Location fallback = new Location(world, 0, 0, 0);
+
+        Method m = MovingListener.class.getDeclaredMethod(
+                "confirmSetBack", Player.class, boolean.class, MovingData.class,
+                MovingConfig.class, IPlayerData.class, Location.class);
+        m.setAccessible(true);
+        m.invoke(listener, player, false, data, config, pData, fallback);
+        // pass if no exception
+        assertTrue(true);
     }
 }
