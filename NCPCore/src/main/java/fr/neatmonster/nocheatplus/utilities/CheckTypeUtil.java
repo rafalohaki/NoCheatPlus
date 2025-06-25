@@ -39,7 +39,7 @@ public class CheckTypeUtil {
         // Parent/children relations.
 
         // Recursive first.
-        // TODO: Really recursive (...). So create direct children first, then others from those.
+        // Build the recursive parent/child relationships after adding direct children
         final Map<CheckType, Set<CheckType>> map = new HashMap<CheckType, Set<CheckType>>();
         for (final CheckType type : CheckType.values()) {
             map.put(type, new LinkedHashSet<CheckType>());
@@ -128,7 +128,6 @@ public class CheckTypeUtil {
      */
     public static final boolean isAncestor(final CheckType supposedAncestor,
             final CheckType supposedDescendant) {
-        // TODO: Perhaps rename to isAncestor !?
         if (supposedAncestor == supposedDescendant) {
             return false;
         } else if (supposedAncestor == CheckType.ALL) {
