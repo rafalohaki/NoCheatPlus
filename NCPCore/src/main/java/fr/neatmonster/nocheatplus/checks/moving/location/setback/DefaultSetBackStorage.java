@@ -36,9 +36,9 @@ import fr.neatmonster.nocheatplus.time.monotonic.Monotonic;
  */
 public class DefaultSetBackStorage extends SetBackStorage {
 
-    // TODO: Might rename mid-term to short-term, as that's the next step after last-valid (safe-medium is special anyway).
-    // TODO: Might keep mid-term as is, because the morepackets set back maximum age should somehow relate to the monitored period of time at some point?
-    // TODO: In case of keeping track of past moves, last valid could be skipped (vehicles are currently not planned to have past moves accessible).
+    // "mid-term" represents the position after last-valid but before safe-medium.
+    // The naming relates to the morepackets setback duration and may change later.
+    // Past-move tracking could omit "last-valid"; vehicles currently lack such support.
 
     public static final int indexDefault = 0;
     public static final int indexMidTerm = 1;

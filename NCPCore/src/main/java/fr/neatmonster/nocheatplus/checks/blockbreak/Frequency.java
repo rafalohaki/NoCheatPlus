@@ -75,15 +75,15 @@ public class Frequency extends Check {
         // Find if one of both or both are violations:
         final float fullViolation = (fullScore > fullTime * fullLag) ? (fullScore - fullTime * fullLag) : 0;
         final float shortTermWeight = 50f * cc.frequencyShortTermTicks / (float) cc.frequencyShortTermLimit; 
-        final float shortTermViolation = (data.frequencyShortTermCount > cc.frequencyShortTermLimit) 
-                ? (data.frequencyShortTermCount - cc.frequencyShortTermLimit) * shortTermWeight : 0; 
-                // TODO: AUTO INDENT?
-                final float violation = Math.max(fullViolation, shortTermViolation);
+        final float shortTermViolation = (data.frequencyShortTermCount > cc.frequencyShortTermLimit)
+                ? (data.frequencyShortTermCount - cc.frequencyShortTermLimit) * shortTermWeight
+                : 0;
+        final float violation = Math.max(fullViolation, shortTermViolation);
 
                 boolean cancel = false;
                 if (violation > 0f){
 
-                    // TODO: account for lag spikes !
+                    // Lag spikes may still affect this calculation.
 
                     final double change = violation / 1000;
                     data.frequencyVL += change;
