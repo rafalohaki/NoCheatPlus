@@ -282,7 +282,7 @@ public class Folia {
             Method teleportAsyncMethod = ReflectionUtil.getMethod(Entity.class, "teleportAsync", Location.class, TeleportCause.class);
             Object result = ReflectionUtil.invokeMethod(teleportAsyncMethod, entity, loc, cause);
             CompletableFuture<Boolean> res = (CompletableFuture<Boolean>) result;
-            return res.get();
+            return res.join();
         } catch (Exception e) {
             e.printStackTrace();
         }
