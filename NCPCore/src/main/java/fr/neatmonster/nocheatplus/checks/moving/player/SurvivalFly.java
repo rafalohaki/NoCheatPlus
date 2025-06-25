@@ -95,6 +95,24 @@ public class SurvivalFly extends Check {
     private IGenericInstanceHandle<IAttributeAccess> attributeAccess = NCPAPIProvider.getNoCheatPlusAPI().getGenericInstanceHandle(IAttributeAccess.class);
     //private final Plugin plugin = Bukkit.getPluginManager().getPlugin("NoCheatPlus");
 
+    /** Container for horizontal speed related state. */
+    private static class HSpeedResult {
+        double allowed;
+        boolean base;
+        boolean baseSprint;
+        boolean sneak;
+        double friction;
+
+        HSpeedResult(final double allowed, final boolean base, final boolean baseSprint,
+                final boolean sneak, final double friction) {
+            this.allowed = allowed;
+            this.base = base;
+            this.baseSprint = baseSprint;
+            this.sneak = sneak;
+            this.friction = friction;
+        }
+    }
+
     /**
      * Some note for mcbe compatibility:
      * - New step pattern 0.42-0.58-0.001 ?
@@ -1056,6 +1074,10 @@ public class SurvivalFly extends Check {
                                    final MovingConfig cc, final IPlayerData pData, final PlayerLocation from,
                                    final PlayerLocation to, final boolean checkPermissions) {
 
+        if (player == null || thisMove == null || data == null || from == null || to == null) {
+            return 0.0;
+        }
+
         //       - Web before liquid, because web speed can apply in water as well (same with berry bushes, despite not being able to place them underwater but you never know what plugins can do...)
         //       - Powder snow in water -> Check what movement takes precedence.
         //       - Being on medium while in water (soulsand, slime block, honey block and stairs in water)
@@ -1093,42 +1115,14 @@ public class SurvivalFly extends Check {
         //      friction = 0.0;
         //  }
 
-        // Webs
-        if (thisMove.from.inWeb) {
-            tags.add("hweb");
-            hAllowedDistance = Magic.modWeb * thisMove.walkSpeed * cc.survivalFlyWalkingSpeed / 100D;
-            useBaseModifiersSprint = false;
-            useBaseModifiers = true;
-            useSneakModifier = true;
-            friction = 0.0;
-        }
-
-        // Powder snow
-        else if (thisMove.from.inPowderSnow) {
-            tags.add("hsnow");
-            hAllowedDistance = Magic.modPowderSnow * thisMove.walkSpeed * cc.survivalFlyWalkingSpeed / 100D;
-            // Lift-off acceleration
-            if (thisMove.yDistance > data.liftOffEnvelope.getMinJumpGain(data.jumpAmplifier) - Magic.GRAVITY_SPAN
-                && thisMove.from.onGround && !thisMove.to.onGround) {
-                hAllowedDistance *= 2.3;
-            }
-            useBaseModifiers = true;
-            useSneakModifier = true;
-            friction = 0.0;
-        }
-
-        // Berry bush
-        else if (thisMove.from.inBerryBush) {
-            tags.add("hbush");
-            hAllowedDistance = Magic.modBush * thisMove.walkSpeed * cc.survivalFlyWalkingSpeed / 100D;
-            // Lift-off acceleration
-            if (thisMove.yDistance > data.liftOffEnvelope.getMinJumpGain(data.jumpAmplifier) - Magic.GRAVITY_SPAN
-                && thisMove.from.onGround && !thisMove.to.onGround) {
-                hAllowedDistance *= 2.3;
-            }
-            useSneakModifier = true;
-            useBaseModifiers = true;
-            friction = 0.0;
+        HSpeedResult liquidRes;
+        final HSpeedResult webRes = handleWebMovement(player, thisMove, data, cc, from, to);
+        if (webRes != null) {
+            hAllowedDistance = webRes.allowed;
+            useBaseModifiers = webRes.base;
+            useBaseModifiersSprint = webRes.baseSprint;
+            useSneakModifier = webRes.sneak;
+            friction = webRes.friction;
         }
 
         // Soulsand
@@ -1202,117 +1196,13 @@ public class SurvivalFly extends Check {
             friction = 0.0;
         }
 
-        // In liquid
-        // Check all liquids (lava might demand even slower speed though).
-        else if (thisMove.from.inLiquid && thisMove.to.inLiquid) {
-            tags.add("hliquid");
-            // Moving close to the surface allows a higher speed (always use the lower modifier for lava)
-            final double modSwim = (from.isSubmerged(0.701) || thisMove.from.inLava) ? Magic.modSwim[0] : Magic.modSwim[3];
-            hAllowedDistance = Bridge1_13.isSwimming(player) ? Magic.modSwim[1] : modSwim * thisMove.walkSpeed * cc.survivalFlySwimmingSpeed / 100D;
-            useBaseModifiers = false;
-            useSneakModifier = true;
-            if (sfDirty) friction = 0.0;
-            // (Bubble streams are handled via velocity)
-
-            // Account for all water-related enchants
-            if (thisMove.from.inWater || !thisMove.from.inLava) {
-                final int StriderLevel = BridgeEnchant.getDepthStriderLevel(player);
-                if (StriderLevel > 0) {
-                    // Speed effect, attribute will affect to water movement whenever you has DepthStrider enchant.
-                    useBaseModifiers = true;
-                    useBaseModifiersSprint = true;
-                    hAllowedDistance *= Magic.modDepthStrider[StriderLevel];
-                    // Modifiers: Most speed seems to be reached on ground, but couldn't nail down.
-                }
-
-                if (!Double.isInfinite(Bridge1_13.getDolphinGraceAmplifier(player))) {
-                    hAllowedDistance *= Magic.modDolphinsGrace;
-                    if (StriderLevel > 1) hAllowedDistance *= 1.0 + 0.07 * StriderLevel;
-                }
-
-                if (data.liqtick < 5 && lastMove.toIsValid) {
-                    if (!lastMove.from.inLiquid) {
-                        if (lastMove.hDistance * 0.92 > thisMove.hDistance) {
-                            hAllowedDistance = lastMove.hDistance * 0.92;
-                        }
-                    }
-                    else if (lastMove.hAllowedDistance * 0.92 > thisMove.hDistance) {
-                        hAllowedDistance = lastMove.hAllowedDistance * 0.92;
-                    }
-                }
-
-                // Friction issues with waterlogged blocks on the first/second move.
-                if (from.isInWaterLogged() && data.insideMediumCount <= 1 // (Actually observed was 0)
-                    && !from.isSubmerged(0.75) && (!lastMove.from.inLiquid || !pastMove2.from.inLiquid)
-                    && !thisMove.headObstructed && BlockProperties.isAir(from.getTypeIdAbove())) {
-                    // Speed will keep increasing with each hop, roughly reaching walkSpeed levels (a bit less)
-                    if (Magic.XORonGround(thisMove) || Magic.XORonGround(lastMove)) {
-                        hAllowedDistance = thisMove.walkSpeed * data.lastFrictionHorizontal * cc.survivalFlySwimmingSpeed / 100D;
-                    }
-                }
-            }
-
-            final int fromBlockData = from.getData(from.getBlockX(), from.getBlockY(), from.getBlockZ());
-            // NOTE: This happens without velocity (god mode on), but can occour with it as well, so keep this workaround.
-            if (BlockProperties.isAir(from.getTypeIdAbove()) && !thisMove.headObstructed && !from.isSubmerged(0.8)
-                && (data.insideMediumCount < 4 || data.liftOffEnvelope == LiftOffEnvelope.NORMAL)) {
-
-                // Spriting/hopping on lava, briefly.
-                // See: https://www.mcpk.wiki/wiki/Version_Differences  (1.16 update)
-                // Mojang tweaked the bounding box in 1.13, then reverted back to the old bounding box in 1.16 (pre 1.13)
-                if (thisMove.from.inLava) {
-                    if (
-                        // 0: Allow walk speed for this one transition
-                        !lastMove.from.inLava || !pastMove2.from.inLava
-                        // 0: Another wildcard. Allow walk speed if lifting off from ground or landing on lower levels.
-                        || Magic.XORonGround(thisMove) && (fromBlockData == 0 || fromBlockData == 6)) {
-                        hAllowedDistance = (sprinting ? Magic.modSprint : 1.0) * thisMove.walkSpeed * cc.survivalFlySwimmingSpeed / 100D;
-
-                        // Do add momentum ticks here.
-                        if (!thisMove.from.onGround && thisMove.to.onGround) {
-                            data.momentumTick = 6;
-                        }
-                    }
-                }
-            }
-        }
-
-        // Speed restriction for leaving a liquid.
-        else if (!sfDirty && (!checkPermissions || !pData.hasPermission(Permissions.MOVING_SURVIVALFLY_WATERWALK, player))
-                && (Magic.leavingLiquid(thisMove) || data.surfaceId == 1) && data.liftOffEnvelope.name().startsWith("LIMIT")
-                && !from.isInWaterLogged()) {
-            tags.add("hliquidexit");
-            final int StriderLevel = BridgeEnchant.getDepthStriderLevel(player);
-            hAllowedDistance = Bridge1_13.isSwimming(player) ? Magic.modSwim[1] : Magic.modSwim[0] * thisMove.walkSpeed * Magic.modSurface[0] * cc.survivalFlySwimmingSpeed / 100D;
-            useBaseModifiersSprint = false;
-            friction = 0.0;
-            // (Bubble streams are handled via velocity)
-
-            // Speed effect, attribute will affect to water movement whenever you have DepthStrider enchant.
-            if (StriderLevel > 0 && data.surfaceId == 0) {
-               useBaseModifiers = true;
-               useBaseModifiersSprint = true;
-               friction = data.lastFrictionHorizontal;
-               hAllowedDistance *= Magic.modDepthStrider[StriderLevel];
-            }
-
-            if (!Double.isInfinite(Bridge1_13.getDolphinGraceAmplifier(player))) {
-                hAllowedDistance *= Magic.modDolphinsGrace;
-                if (StriderLevel > 1) hAllowedDistance *= 1.0 + 0.07 * StriderLevel;
-            }
-
-            if (data.surfaceId == 1) hAllowedDistance *= Magic.modSurface[1];
-            // This movement has left liquid, set the Id to keep enforcing the speed limit
-            data.surfaceId = 1;
-            final int blockData = from.getData(from.getBlockX(), from.getBlockY(), from.getBlockZ());
-            final int blockUnderData = from.getData(from.getBlockX(), from.getBlockY() - 1, from.getBlockZ());
-
-            // Reset the Id for these conditions.
-            if (blockData > 3 || blockUnderData > 3 || data.isdownstream) {
-                data.surfaceId = 0;
-                hAllowedDistance = thisMove.walkSpeed * cc.survivalFlySwimmingSpeed / 100D;
-                data.isdownstream = false;
-            }
+        else if ((liquidRes = handleLiquidMovement(player, thisMove, lastMove, pastMove2, data, cc,
+                pData, from, to, checkPermissions, sfDirty, sprinting)) != null) {
+            hAllowedDistance = liquidRes.allowed;
+            useBaseModifiers = liquidRes.base;
+            useBaseModifiersSprint = liquidRes.baseSprint;
+            useSneakModifier = liquidRes.sneak;
+            friction = liquidRes.friction;
         }
 
         // Sneaking
@@ -1405,70 +1295,7 @@ public class SurvivalFly extends Check {
 
 
         ////////////////////////////////////////////////////////////////////////////
-        // Apply various modifiers to the BASE speed (sprinting, attributes, ...) //
-        ///////////////////////////////////////////////////////////////////////////
-        if (useBaseModifiers) {
-
-            // Apply sprinting speed
-            if (useBaseModifiersSprint && sprinting) {
-                hAllowedDistance *= data.multSprinting;
-            }
-            // Note: Attributes count in slowness potions, thus leaving out isn't possible.
-            final double attrMod = attributeAccess.getHandle().getSpeedAttributeMultiplier(player);
-            // Count in speed potions.
-            if (attrMod == Double.MAX_VALUE) {
-                final double speedAmplifier = mcAccess.getHandle().getFasterMovementAmplifier(player);
-                if (!Double.isInfinite(speedAmplifier) && useBaseModifiersSprint) {
-                    hAllowedDistance *= 1.0D + 0.2D * speedAmplifier;
-                }
-            }
-            else {
-                hAllowedDistance *= attrMod;
-                // Hack for allow sprint-jumping with slowness.
-                if (sprinting && hAllowedDistance < 0.29 && cc.sfSlownessSprintHack
-                    && (
-                        player.hasPotionEffect(BridgePotionEffect.SLOWNESS)
-                        || data.walkSpeed < Magic.DEFAULT_WALKSPEED
-                        || attrMod < 1.0
-                    )) {
-                    hAllowedDistance = slownessSprintHack(player, hAllowedDistance);
-                }
-                //useBaseModifiersSprint = false mean not apply speed effect in it
-                if (!useBaseModifiersSprint) {
-                    final double speedAmplifier = mcAccess.getHandle().getFasterMovementAmplifier(player);
-                    if (!Double.isInfinite(speedAmplifier)) {
-                        hAllowedDistance /= attrMod;
-                        hAllowedDistance *= attrMod - 0.15D * speedAmplifier;
-                    }
-                }
-            }
-        }
-
-        // Account for flowing liquids (only if needed).
-        if (thisMove.downStream && thisMove.hDistance > thisMove.walkSpeed * Magic.modSwim[0]
-            && thisMove.from.inLiquid) {
-            hAllowedDistance *= Magic.modDownStream;
-        }
-
-        // Apply sneaking speed for other modifiers.
-        if (useSneakModifier && actuallySneaking && !Bridge1_13.isSwimming(player)) {
-            hAllowedDistance *= 0.682;
-        }
-
-        // Edge case bullshit (undetectable jump with head obstructed and trapdoor underneath)
-        if (thisMove.headObstructed
-            && ((from.getBlockFlags() & BlockFlags.F_ICE) != 0 || (from.getBlockFlags() & BlockFlags.F_BLUE_ICE) != 0)
-            && (from.getBlockFlags() & BlockFlags.F_ATTACHED_LOW2_SNEW) != 0) {
-            hAllowedDistance *= Magic.modIce;
-        }
-
-        // Speeding bypass permission (can be combined with other bypasses).
-        if (checkPermissions && pData.hasPermission(Permissions.MOVING_SURVIVALFLY_SPEEDING, player)) {
-            hAllowedDistance *= cc.survivalFlySpeedingSpeed / 100D;
-        }
-
-        // Base speed is set.
-        thisMove.hAllowedDistanceBase = hAllowedDistance;
+        hAllowedDistance = applyBaseModifiers(player, sprinting, data, cc, pData, from, thisMove, useBaseModifiers, useBaseModifiersSprint, useSneakModifier, checkPermissions, actuallySneaking, hAllowedDistance);
 
 
 
@@ -1514,6 +1341,218 @@ public class SurvivalFly extends Check {
     private double slownessSprintHack(final Player player, final double hAllowedDistance) {
         // Simple: up to high levels they can stay close, with a couple of hops until max base speed.
         return 0.29;
+    }
+
+    private HSpeedResult handleWebMovement(final Player player, final PlayerMoveData thisMove,
+            final MovingData data, final MovingConfig cc, final PlayerLocation from,
+            final PlayerLocation to) {
+        if (player == null || thisMove == null || data == null || from == null || to == null) {
+            return null;
+        }
+
+        if (thisMove.from.inWeb) {
+            tags.add("hweb");
+            return new HSpeedResult(Magic.modWeb * thisMove.walkSpeed * cc.survivalFlyWalkingSpeed / 100D,
+                    true, false, true, 0.0);
+        }
+        if (thisMove.from.inPowderSnow) {
+            double allowed = Magic.modPowderSnow * thisMove.walkSpeed * cc.survivalFlyWalkingSpeed / 100D;
+            if (thisMove.yDistance > data.liftOffEnvelope.getMinJumpGain(data.jumpAmplifier) - Magic.GRAVITY_SPAN
+                    && thisMove.from.onGround && !thisMove.to.onGround) {
+                allowed *= 2.3;
+            }
+            tags.add("hsnow");
+            return new HSpeedResult(allowed, true, true, true, 0.0);
+        }
+        if (thisMove.from.inBerryBush) {
+            double allowed = Magic.modBush * thisMove.walkSpeed * cc.survivalFlyWalkingSpeed / 100D;
+            if (thisMove.yDistance > data.liftOffEnvelope.getMinJumpGain(data.jumpAmplifier) - Magic.GRAVITY_SPAN
+                    && thisMove.from.onGround && !thisMove.to.onGround) {
+                allowed *= 2.3;
+            }
+            tags.add("hbush");
+            return new HSpeedResult(allowed, true, true, true, 0.0);
+        }
+        return null;
+    }
+
+    private HSpeedResult handleLiquidMovement(final Player player, final PlayerMoveData thisMove,
+            final PlayerMoveData lastMove, final PlayerMoveData pastMove2, final MovingData data,
+            final MovingConfig cc, final IPlayerData pData, final PlayerLocation from,
+            final PlayerLocation to, final boolean checkPermissions, final boolean sfDirty,
+            final boolean sprinting) {
+        if (player == null || thisMove == null || data == null || from == null || to == null) {
+            return null;
+        }
+
+        if (thisMove.from.inLiquid && thisMove.to.inLiquid) {
+            tags.add("hliquid");
+            final double modSwim = (from.isSubmerged(0.701) || thisMove.from.inLava) ? Magic.modSwim[0]
+                    : Magic.modSwim[3];
+            double allowed = Bridge1_13.isSwimming(player) ? Magic.modSwim[1]
+                    : modSwim * thisMove.walkSpeed * cc.survivalFlySwimmingSpeed / 100D;
+            boolean base = false;
+            boolean baseSprint = true;
+            boolean sneak = true;
+            double friction = sfDirty ? 0.0 : data.lastFrictionHorizontal;
+
+            if (thisMove.from.inWater || !thisMove.from.inLava) {
+                final int strider = BridgeEnchant.getDepthStriderLevel(player);
+                if (strider > 0) {
+                    allowed *= Magic.modDepthStrider[strider];
+                    base = true;
+                }
+
+                if (!Double.isInfinite(Bridge1_13.getDolphinGraceAmplifier(player))) {
+                    allowed *= Magic.modDolphinsGrace;
+                    if (strider > 1) {
+                        allowed *= 1.0 + 0.07 * strider;
+                    }
+                }
+
+                if (data.liqtick < 5 && lastMove.toIsValid) {
+                    if (!lastMove.from.inLiquid) {
+                        if (lastMove.hDistance * 0.92 > thisMove.hDistance) {
+                            allowed = lastMove.hDistance * 0.92;
+                        }
+                    } else if (lastMove.hAllowedDistance * 0.92 > thisMove.hDistance) {
+                        allowed = lastMove.hAllowedDistance * 0.92;
+                    }
+                }
+
+                if (from.isInWaterLogged() && data.insideMediumCount <= 1 && !from.isSubmerged(0.75)
+                        && (!lastMove.from.inLiquid || !pastMove2.from.inLiquid)
+                        && !thisMove.headObstructed && BlockProperties.isAir(from.getTypeIdAbove())) {
+                    if (Magic.XORonGround(thisMove) || Magic.XORonGround(lastMove)) {
+                        allowed = thisMove.walkSpeed * data.lastFrictionHorizontal * cc.survivalFlySwimmingSpeed
+                                / 100D;
+                    }
+                }
+            }
+
+            final int fromBlockData = from.getData(from.getBlockX(), from.getBlockY(), from.getBlockZ());
+            if (BlockProperties.isAir(from.getTypeIdAbove()) && !thisMove.headObstructed && !from.isSubmerged(0.8)
+                    && (data.insideMediumCount < 4 || data.liftOffEnvelope == LiftOffEnvelope.NORMAL)) {
+                if (thisMove.from.inLava) {
+                    if (!lastMove.from.inLava || !pastMove2.from.inLava
+                            || Magic.XORonGround(thisMove) && (fromBlockData == 0 || fromBlockData == 6)) {
+                        allowed = (sprinting ? Magic.modSprint : 1.0) * thisMove.walkSpeed
+                                * cc.survivalFlySwimmingSpeed / 100D;
+                        if (!thisMove.from.onGround && thisMove.to.onGround) {
+                            data.momentumTick = 6;
+                        }
+                    }
+                }
+            }
+
+            return new HSpeedResult(allowed, base, baseSprint, sneak, friction);
+        }
+
+        if (!sfDirty && (!checkPermissions || !pData.hasPermission(Permissions.MOVING_SURVIVALFLY_WATERWALK, player))
+                && (Magic.leavingLiquid(thisMove) || data.surfaceId == 1)
+                && data.liftOffEnvelope.name().startsWith("LIMIT") && !from.isInWaterLogged()) {
+            tags.add("hliquidexit");
+            final int strider = BridgeEnchant.getDepthStriderLevel(player);
+            double allowed = Bridge1_13.isSwimming(player) ? Magic.modSwim[1]
+                    : Magic.modSwim[0] * thisMove.walkSpeed * Magic.modSurface[0] * cc.survivalFlySwimmingSpeed
+                            / 100D;
+            boolean base = false;
+            boolean baseSprint = false;
+            double friction = 0.0;
+
+            if (strider > 0 && data.surfaceId == 0) {
+                allowed *= Magic.modDepthStrider[strider];
+                base = true;
+                baseSprint = true;
+                friction = data.lastFrictionHorizontal;
+            }
+
+            if (!Double.isInfinite(Bridge1_13.getDolphinGraceAmplifier(player))) {
+                allowed *= Magic.modDolphinsGrace;
+                if (strider > 1) {
+                    allowed *= 1.0 + 0.07 * strider;
+                }
+            }
+
+            if (data.surfaceId == 1) {
+                allowed *= Magic.modSurface[1];
+            }
+
+            data.surfaceId = 1;
+            final int blockData = from.getData(from.getBlockX(), from.getBlockY(), from.getBlockZ());
+            final int blockUnderData = from.getData(from.getBlockX(), from.getBlockY() - 1, from.getBlockZ());
+
+            if (blockData > 3 || blockUnderData > 3 || data.isdownstream) {
+                data.surfaceId = 0;
+                allowed = thisMove.walkSpeed * cc.survivalFlySwimmingSpeed / 100D;
+                data.isdownstream = false;
+            }
+
+            return new HSpeedResult(allowed, base, baseSprint, true, friction);
+        }
+
+        return null;
+    }
+
+    private double applyBaseModifiers(final Player player, final boolean sprinting, final MovingData data,
+            final MovingConfig cc, final IPlayerData pData, final PlayerLocation from,
+            final PlayerMoveData thisMove, final boolean useBaseModifiers, final boolean useBaseModifiersSprint,
+            final boolean useSneakModifier, final boolean checkPermissions, final boolean actuallySneaking,
+            double hAllowedDistance) {
+
+        if (player == null || data == null || thisMove == null || from == null) {
+            return hAllowedDistance;
+        }
+
+        if (useBaseModifiers) {
+            if (useBaseModifiersSprint && sprinting) {
+                hAllowedDistance *= data.multSprinting;
+            }
+            final double attrMod = attributeAccess.getHandle().getSpeedAttributeMultiplier(player);
+            if (attrMod == Double.MAX_VALUE) {
+                final double speedAmplifier = mcAccess.getHandle().getFasterMovementAmplifier(player);
+                if (!Double.isInfinite(speedAmplifier) && useBaseModifiersSprint) {
+                    hAllowedDistance *= 1.0D + 0.2D * speedAmplifier;
+                }
+            } else {
+                hAllowedDistance *= attrMod;
+                if (sprinting && hAllowedDistance < 0.29 && cc.sfSlownessSprintHack
+                        && (player.hasPotionEffect(BridgePotionEffect.SLOWNESS)
+                                || data.walkSpeed < Magic.DEFAULT_WALKSPEED || attrMod < 1.0)) {
+                    hAllowedDistance = slownessSprintHack(player, hAllowedDistance);
+                }
+                if (!useBaseModifiersSprint) {
+                    final double speedAmplifier = mcAccess.getHandle().getFasterMovementAmplifier(player);
+                    if (!Double.isInfinite(speedAmplifier)) {
+                        hAllowedDistance /= attrMod;
+                        hAllowedDistance *= attrMod - 0.15D * speedAmplifier;
+                    }
+                }
+            }
+        }
+
+        if (thisMove.downStream && thisMove.hDistance > thisMove.walkSpeed * Magic.modSwim[0]
+                && thisMove.from.inLiquid) {
+            hAllowedDistance *= Magic.modDownStream;
+        }
+
+        if (useSneakModifier && actuallySneaking && !Bridge1_13.isSwimming(player)) {
+            hAllowedDistance *= 0.682;
+        }
+
+        if (thisMove.headObstructed
+                && ((from.getBlockFlags() & BlockFlags.F_ICE) != 0
+                        || (from.getBlockFlags() & BlockFlags.F_BLUE_ICE) != 0)
+                && (from.getBlockFlags() & BlockFlags.F_ATTACHED_LOW2_SNEW) != 0) {
+            hAllowedDistance *= Magic.modIce;
+        }
+
+        if (checkPermissions && pData.hasPermission(Permissions.MOVING_SURVIVALFLY_SPEEDING, player)) {
+            hAllowedDistance *= cc.survivalFlySpeedingSpeed / 100D;
+        }
+
+        thisMove.hAllowedDistanceBase = hAllowedDistance;
+        return hAllowedDistance;
     }
 
 
