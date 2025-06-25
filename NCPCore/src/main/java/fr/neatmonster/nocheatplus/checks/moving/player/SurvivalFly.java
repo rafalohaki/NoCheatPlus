@@ -129,6 +129,57 @@ public class SurvivalFly extends Check {
         }
     }
 
+    /**
+     * Helper structure for holding computed move distances.
+     */
+    private static record Distances(double x, double y, double z, double h,
+            boolean hasHorizontal) {}
+
+    /**
+     * Compute move distances between from and to locations.
+     */
+    private static Distances computeDistances(final boolean isSamePos,
+            final PlayerLocation from, final PlayerLocation to,
+            final PlayerMoveData move) {
+        if (isSamePos) {
+            return new Distances(0.0, 0.0, 0.0, 0.0, false);
+        }
+        final double x = to.getX() - from.getX();
+        final double y = move.yDistance;
+        final double z = to.getZ() - from.getZ();
+        if (x == 0.0 && z == 0.0) {
+            return new Distances(x, y, z, 0.0, false);
+        }
+        return new Distances(x, y, z, move.hDistance, true);
+    }
+
+    /** Determine reset-from state using lost-ground checks. */
+    private boolean computeResetFrom(final Player player, final PlayerLocation from,
+            final PlayerLocation to, final boolean isSamePos, final boolean fromOnGround,
+            final boolean useBlockChangeTracker, final double hDistance,
+            final double yDistance, final boolean sprinting, final PlayerMoveData lastMove,
+            final MovingData data, final MovingConfig cc, final int tick,
+            final ArrayList<String> tags) {
+        if (fromOnGround || from.isResetCond()) {
+            return true;
+        }
+        if (isSamePos) {
+            if (useBlockChangeTracker && from.isOnGroundOpportune(cc.yOnGround, 0L,
+                    blockChangeTracker, data.blockChangeRef, tick)) {
+                tags.add("pastground_from");
+                return true;
+            }
+            if (lastMove.toIsValid) {
+                return LostGround.lostGroundStill(player, from, to, hDistance, yDistance,
+                        sprinting, lastMove, data, cc, tags);
+            }
+            return false;
+        }
+        return LostGround.lostGround(player, from, to, hDistance, yDistance, sprinting,
+                lastMove, data, cc,
+                useBlockChangeTracker ? blockChangeTracker : null, tags);
+    }
+
     /** Validate player movement parameters and log if invalid. */
     private boolean validateMoveInputs(final Player player, final PlayerLocation from,
                                        final PlayerLocation to, final String method) {
@@ -191,8 +242,12 @@ public class SurvivalFly extends Check {
         final PlayerMoveData thisMove = data.playerMoves.getCurrentMove();
         final PlayerMoveData lastMove = data.playerMoves.getFirstPastMove();
         final boolean isSamePos = from.isSamePos(to);
-        final double xDistance, yDistance, zDistance, hDistance;
-        final boolean HasHorizontalDistance;
+        final Distances dist = computeDistances(isSamePos, from, to, thisMove);
+        final double xDistance = dist.x();
+        final double yDistance = dist.y();
+        final double zDistance = dist.z();
+        final double hDistance = dist.h();
+        final boolean HasHorizontalDistance = dist.hasHorizontal();
         final boolean fromOnGround = thisMove.from.onGround;
         final boolean toOnGround = thisMove.to.onGround || useBlockChangeTracker && toOnGroundPastStates(from, to, thisMove, tick, data, cc);
         final boolean resetTo = toOnGround || to.isResetCond();
@@ -202,24 +257,7 @@ public class SurvivalFly extends Check {
             data.ws.setJustUsedIds(justUsedWorkarounds);
         }
 
-        // Calculate some distances.
-        if (isSamePos) {
-            xDistance = yDistance = zDistance = hDistance = 0.0;
-            HasHorizontalDistance = false;
-        }
-        else {
-            xDistance = to.getX() - from.getX();
-            yDistance = thisMove.yDistance;
-            zDistance = to.getZ() - from.getZ();
-            if (xDistance == 0.0 && zDistance == 0.0) {
-                hDistance = 0.0;
-                HasHorizontalDistance = false;
-            }
-            else {
-                HasHorizontalDistance = true;
-                hDistance = thisMove.hDistance;
-            }
-        }
+        // Distances have been computed above.
 
         // Recover from data removal (somewhat random insertion point).
         if (data.liftOffEnvelope == LiftOffEnvelope.UNKNOWN) {
@@ -240,24 +278,9 @@ public class SurvivalFly extends Check {
         ////////////////////////////////////
         // Mixed checks (lost ground)    ///
         ////////////////////////////////////
-        final boolean resetFrom;
-        if (fromOnGround || from.isResetCond()) {
-            resetFrom = true;
-        }
-        else if (isSamePos) {
-
-            if (useBlockChangeTracker && from.isOnGroundOpportune(cc.yOnGround, 0L, blockChangeTracker, data.blockChangeRef, tick)) {
-                resetFrom = true;
-                tags.add("pastground_from");
-            }
-            else if (lastMove.toIsValid) {
-                // Note that to is not on ground either.
-                resetFrom = LostGround.lostGroundStill(player, from, to, hDistance, yDistance, sprinting, lastMove, data, cc, tags);
-            }
-            else resetFrom = false;
-        }
-        // Check lost-ground workarounds.
-        else resetFrom = LostGround.lostGround(player, from, to, hDistance, yDistance, sprinting, lastMove, data, cc, useBlockChangeTracker ? blockChangeTracker : null, tags);
+        final boolean resetFrom = computeResetFrom(player, from, to, isSamePos,
+                fromOnGround, useBlockChangeTracker, hDistance, yDistance,
+                sprinting, lastMove, data, cc, tick, tags);
 
         if (thisMove.touchedGround) {
             // Lost ground workaround has just been applied, check resetting of the dirty flag.
