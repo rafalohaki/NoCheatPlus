@@ -291,6 +291,11 @@ public class LegacyBlocks {
         private final double[][] top_stairs = makeshape(topslabs, octet_nnn, octet_pnn, octet_nnp, octet_pnp);
         private final double[][] bottom_stairs = makeshape(bottomslabs, octet_npn, octet_ppn, octet_npp, octet_ppp);
         private final int[] shape_by_state = new int[]{12, 5, 3, 10, 14, 13, 7, 11, 13, 7, 11, 14, 8, 4, 1, 2, 4, 1, 2, 8};
+        /**
+         * Tolerance for comparing bounding box side lengths.
+         */
+        private static final double SHAPE_TOLERANCE = 1e-9;
+
 
         public BlockStairs() {
             
@@ -502,7 +507,8 @@ public class LegacyBlocks {
             final double tdx = tmaxX - tminX;
             final double tdy = tmaxY - tminY;
             final double tdz = tmaxZ - tminZ;
-            return dx == tdx && dy == tdy && dz == tdz;
+            final double tol = SHAPE_TOLERANCE;
+            return Math.abs(dx - tdx) < tol && Math.abs(dy - tdy) < tol && Math.abs(dz - tdz) < tol;
         }
     }
 }
