@@ -333,7 +333,7 @@ public abstract class DualCollection<T, C extends Collection<T>> {
      * @return
      */
     public Iterator<T> iteratorPrimaryThread() {
-        // TODO: Consider to store an empty and/or unmodifiable iterator.
+        // Consider storing an empty or unmodifiable iterator instead.
         if (primaryThreadCollection == null) {
             primaryThreadCollection = newCollection();
         }

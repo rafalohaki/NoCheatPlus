@@ -60,7 +60,7 @@ public class DebugPlayerCommand extends BaseCommand {
                 try {
                     CheckType checkType = CheckType.valueOf(split[i].toUpperCase().replace('.', '_'));
                     if (checkType == null) {
-                        // TODO: Possible !?
+                        // Should this situation be possible?
                         return entry;
                     }
                     entry.checkTypes.add(checkType);
@@ -117,8 +117,8 @@ public class DebugPlayerCommand extends BaseCommand {
             sender.sendMessage((sender instanceof Player ? TAG : CTAG) + "Bad setup. Command usage: /ncp debug player (playername) yes/no:(checktype).");
             return true;
         }
-        // TODO: Wild cards (all players)?
-        // TODO: (Allow to specify OverrideType ?)
+        // Future: add support for wild cards to target all players.
+        // Also consider allowing to specify OverrideType.
 
         // Note that MAYBE means to reset here, it's not the same as direct PlayerData API access.
         DebugEntry entry = new DebugEntry();

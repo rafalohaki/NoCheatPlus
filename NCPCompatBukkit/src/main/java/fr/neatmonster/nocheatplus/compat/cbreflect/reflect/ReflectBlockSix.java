@@ -110,8 +110,10 @@ public class ReflectBlockSix implements IReflectBlock {
                 methods = new Method[] {null, null, null, null, null, null};
             }
         }
-        // TODO: Test which is which [ALLOW to configure and also save used ones to config, by mc version].
-        // TODO: Dynamically test these ? [needs an extra world/space to place blocks inside of...]
+        // Consider testing which method is which and allow configuration, also
+        // store used ones to config by Minecraft version.
+        // Dynamically test these? This might need an extra world or space to
+        // place blocks in.
         if (ConfigManager.getConfigFile().getBoolean(ConfPaths.LOGGING_EXTENDED_STATUS)) {
             NCPAPIProvider.getNoCheatPlusAPI().getLogManager().debug(Streams.INIT, "ReflectBlock: Use methods for shape: " + StringUtil.join(Arrays.asList(names), ", "));
         }
@@ -251,7 +253,8 @@ public class ReflectBlockSix implements IReflectBlock {
     public double[] nms_fetchBounds(final Object nmsWorld, final Object nmsBlock,
             final int x, final int y, final int z) {
         nms_updateShape(nmsBlock, nmsWorld, x, y, z);
-        // TODO: The methods could return null [better try-catch here].
+        // The invoked methods might return null; consider adding try-catch
+        // handling here.
         return new double[] {
                 ((Number) ReflectionUtil.invokeMethodNoArgs(this.nmsGetMinX, nmsBlock)).doubleValue(),
                 ((Number) ReflectionUtil.invokeMethodNoArgs(this.nmsGetMinY, nmsBlock)).doubleValue(),
