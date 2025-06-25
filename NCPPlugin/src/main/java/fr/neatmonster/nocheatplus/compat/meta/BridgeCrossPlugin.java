@@ -23,6 +23,7 @@ import fr.neatmonster.nocheatplus.compat.cbreflect.reflect.ReflectBase;
 import fr.neatmonster.nocheatplus.compat.cbreflect.reflect.ReflectHelper.ReflectFailureException;
 import fr.neatmonster.nocheatplus.components.registry.feature.IPostRegisterRunnable;
 import fr.neatmonster.nocheatplus.utilities.ReflectionUtil;
+import fr.neatmonster.nocheatplus.logging.StaticLog;
 
 /**
  * Utility to probe for cross-plugin issues, such as Player delegates.
@@ -44,10 +45,10 @@ public class BridgeCrossPlugin implements IBridgeCrossPlugin, IPostRegisterRunna
             reflectBase = new ReflectBase();
         }
         catch (ReflectFailureException e2) {
-            // ignore - reflection helper not available
+            StaticLog.logDebug(e2);
         }
         catch (RuntimeException e1) {
-            // ignore - reflection helper not available (includes NPE)
+            StaticLog.logDebug(e1);
         }
         if (reflectBase != null) {
             this.playerClass = getEntityClass(reflectBase, "Player");

@@ -20,6 +20,7 @@ import fr.neatmonster.nocheatplus.compat.bukkit.NSBukkitAttributeAccess;
 import fr.neatmonster.nocheatplus.compat.versions.ServerVersion;
 import fr.neatmonster.nocheatplus.components.modifier.DummyAttributeAccess;
 import fr.neatmonster.nocheatplus.components.modifier.IAttributeAccess;
+import fr.neatmonster.nocheatplus.logging.StaticLog;
 
 public class AttributeAccessFactory {
 
@@ -39,7 +40,7 @@ public class AttributeAccessFactory {
             fallBackDedicated = ServerVersion.compareMinecraftVersion("1.21") < 0 ? new BukkitAttributeAccess() : new NSBukkitAttributeAccess();
         }
         catch (Throwable t) {
-            // ignore - dedicated access not available for this server version
+            StaticLog.logDebug(t);
         }
         RegistryHelper.setupGenericInstance(new String[] {
                 "fr.neatmonster.nocheatplus.compat.cbdev.AttributeAccess",
