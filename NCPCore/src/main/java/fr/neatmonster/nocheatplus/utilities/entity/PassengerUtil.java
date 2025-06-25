@@ -291,8 +291,7 @@ public class PassengerUtil {
                     else {
                         if (Folia.teleportEntity(passenger, location, BridgeMisc.TELEPORT_CAUSE_CORRECTION_OF_POSITION)
                             && vehicleTeleported && TrigUtil.distance(passenger.getLocation(useLoc2), vehicle.getLocation(useLoc)) < 1.5) {
-                            if (!handleVehicle.getHandle().addPassenger(passenger, vehicle)) {
-                            }
+                            handleVehicle.getHandle().addPassenger(passenger, vehicle);
                         }
                     }
                 }
@@ -363,8 +362,7 @@ public class PassengerUtil {
                             CheckUtils.debug(player, CheckType.MOVING_VEHICLE, "Attempt set passenger directly");
                         }
 
-                        if (!handleVehicle.getHandle().addPassenger(player, vehicle)) {
-                        }
+                        handleVehicle.getHandle().addPassenger(player, vehicle);
                     }
                 } 
                 else if (debug) CheckUtils.debug(player, CheckType.MOVING_VEHICLE, "Set passenger task already scheduled, skip this time.");
