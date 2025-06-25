@@ -60,7 +60,7 @@ public class HotFixFallingBlockPortalEnter implements Listener {
     /** Temporary use only: setWorld(null) after use. */
     private final Location useLoc = new Location(null, 0, 0, 0);
 
-    private final WrapBlockCache wrapBlockCache; // TODO: Fetch a getter from the registry.
+    private final WrapBlockCache wrapBlockCache;
 
     public HotFixFallingBlockPortalEnter() {
         testAvailability();
@@ -75,7 +75,7 @@ public class HotFixFallingBlockPortalEnter implements Listener {
             mat = ((FallingBlock) entity).getMaterial();
         }
         else if (entity instanceof Item) {
-            // TODO: Not sure if needed.
+            // Only process items affected by gravity.
             if (((Item) entity).getItemStack().getType().hasGravity()) {
                 mat = ((Item) entity).getItemStack().getType();
             }
@@ -102,7 +102,7 @@ public class HotFixFallingBlockPortalEnter implements Listener {
                     // Likely spigot currently removes entities entering portals anyway (cross-world teleport issues).
                     // On remove: Looks like setDropItem(false) wouldn't suffice.
                     entity.remove();
-                    // TODO: STATUS: should have another stream for violations/protection.
+                    // STATUS: a dedicated stream for violations or protection would be preferable.
                     final String message = "[INVENTORY_HOTFIX] Remove falling block entering a portal near an end portal: " + mat + " at " + world.getName() + "/" + LocUtil.simpleFormatPosition(loc);
                     NCPAPIProvider.getNoCheatPlusAPI().getLogManager().info(Streams.STATUS, message);
                 }

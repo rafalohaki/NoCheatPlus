@@ -162,6 +162,9 @@ public class SoundDistance extends BaseAdapter {
 
         // Compare distance of player to the weather location.
         final Location loc = player.getLocation(useLoc);
+        if (loc == null) {
+            return;
+        }
         final StructureModifier<Integer> ints = packetContainer.getIntegers();
         final double dSq = TrigUtil.distanceSquared((double) ints.read(0) / 8, (double) ints.read(2) / 8, loc.getX(), loc.getZ());
         //        if (data.debug) {
