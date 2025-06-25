@@ -33,18 +33,18 @@ import fr.neatmonster.nocheatplus.utilities.StringUtil;
  */
 public abstract class AbstractLogManager implements LogManager {
 
-    // TODO: Visibility of methods.
-    // TODO: Add option for per stream prefixes.
-    // TODO: Concept for adding in the time at the point of call/scheduling.
+    // Visibility of methods is subject to review.
+    // Consider adding an option for per stream prefixes.
+    // Concept for adding the time at the point of call or scheduling.
 
-    // TODO: Re-register with other options: Add methods for LoggerID + StreamID + options.
-    // TODO: Hierarchical LogNode relations, to ensure other log nodes with the same logger are removed too [necessary to allow removing individual loggers].
+    // Potential enhancement: re-register with other options via methods for LoggerID and StreamID.
+    // Explore hierarchical LogNode relations to ensure removing individual loggers also removes siblings.
 
-    // TODO: Temporary streams, e.g. for players, unregistering with command and/or logout.
-    // TODO: Mechanics of removing temporary streams (flush stream, remove entries from queues, wait with removal until tasks have run once more).
+    // Provide temporary streams, e.g. for players, which can be unregistered via command or logout.
+    // Define mechanics for removing temporary streams: flush, remove queue entries, wait for pending tasks.
 
-    // TODO: Consider generalizing the (internal) implementation right away (sub registry by content class).
-    // TODO: Consider adding a global cache (good for re-mapping, contra: reload is not intended to happen on a regular basis).
+    // Consider generalizing the internal implementation, e.g. sub registry by content class.
+    // Evaluate adding a global cache for re-mapping, though reloads are rare.
 
     private final LogNodeDispatcher dispatcher;
     private final String defaultPrefix;
@@ -81,7 +81,7 @@ public abstract class AbstractLogManager implements LogManager {
 
     /** Registry changes have to be done under this lock (copy on write) */
     protected final Object registryCOWLock = new Object();
-    // TODO: Future: Only an init string stream or (later) always "the init stream" for all content types.
+    // Future consideration: only an init string stream or always use "the init stream" for all content types.
     private final StreamID initStreamID;
     private final StreamID voidStreamID = new StreamID("void");
     /**
@@ -159,7 +159,7 @@ public abstract class AbstractLogManager implements LogManager {
 
     @Override
     public void debug(final StreamID streamID, final String message) {
-        log(streamID, Level.FINE, message); // TODO: Not sure what happens with FINE and provided Logger instances.
+        log(streamID, Level.FINE, message); // Effect of Level.FINE with provided Logger instances is uncertain.
     }
 
     @Override
@@ -199,7 +199,7 @@ public abstract class AbstractLogManager implements LogManager {
 
     @Override
     public void debug(final StreamID streamID, final Throwable t) {
-        log(streamID, Level.FINE, t); // TODO: Not sure what happens with FINE and provided Logger instances.
+        log(streamID, Level.FINE, t); // Effect of Level.FINE with provided Logger instances is uncertain.
     }
 
     @Override
@@ -366,7 +366,7 @@ public abstract class AbstractLogManager implements LogManager {
         LogNode<String> node;
         synchronized (registryCOWLock) {
             LoggerAdapter adapter = new LoggerAdapter(logger); // Low cost.
-            // TODO: Store loggers too to prevent redundant registration.
+            // Potential improvement: store loggers to prevent redundant registration.
             node = registerStringLogger(loggerID, adapter, options);
         }
         return node;
@@ -380,7 +380,7 @@ public abstract class AbstractLogManager implements LogManager {
         LogNode<String> node;
         synchronized (registryCOWLock) {
             testRegisterLogger(loggerID); // Redundant checking, because file loggers are expensive.
-            // TODO: Detect duplicate loggers (register same logger with given id and options).
+            // Detect duplicate loggers when registering the same id with given options.
             FileLoggerAdapter adapter = new FileLoggerAdapter(file, prefix);
             if (adapter.isInoperable()) {
                 adapter.detachLogger();
@@ -389,7 +389,7 @@ public abstract class AbstractLogManager implements LogManager {
             try {
                 node = registerStringLogger(loggerID, adapter, options);
             } catch (Exception ex) {
-                // TODO: Exception is still bad.
+                // Note: exception handling here remains undesirable.
                 adapter.detachLogger();
                 throw new RuntimeException(ex);
             }
@@ -403,7 +403,7 @@ public abstract class AbstractLogManager implements LogManager {
      * @param streamID Must exist.
      */
     protected void attachStringLogger(final LoggerID loggerID, final StreamID streamID) {
-        // TODO: More light-weight locking concept (thinking of dynamically changing per player streams)?
+        // Investigate a more lightweight locking concept for dynamically changing per-player streams.
         synchronized (registryCOWLock) {
             if (!hasLogger(loggerID)) {
                 throw new RuntimeException("Logger is not registered: " + loggerID);
@@ -414,7 +414,7 @@ public abstract class AbstractLogManager implements LogManager {
             }
             final LogNode<String> node = idNodeMap.get(loggerID);
             if (streamID == initStreamID) {
-                // TODO: Not sure about restrictions here. Could allow attaching other streams temporarily if other stuff is wanted.
+                // Unsure about restrictions here; may allow temporary attachment of other streams if needed.
                 switch(node.options.callContext) {
                     case PRIMARY_THREAD_ONLY:
                     case ANY_THREAD_DIRECT:
@@ -427,11 +427,11 @@ public abstract class AbstractLogManager implements LogManager {
         }
     }
 
-    // TODO: Methods to replace options for loggers (+ loggers themselves)
+    // Provide methods to replace options for loggers and the loggers themselves.
 
-    // TODO: Later: attach streams to streams ? [few loggers: attach loggers rather]
+    // Later: consider attaching streams to streams; maybe attach loggers instead.
 
-    // TODO: logger/stream: allow id lookup logger, file, etc. ?
+    // Allow ID lookup for logger, file, and related entities.
 
     /**
      * Remove all loggers and streams including init, resulting in roughly the
@@ -441,7 +441,7 @@ public abstract class AbstractLogManager implements LogManager {
      * @param msWaitFlush
      */
     protected void clear(final long msWaitFlush, final boolean recreateInitLogger) {
-        // TODO: enum (remove_all, recreate init, remap init, remap all to init)
+        // Potential enumeration: remove_all, recreate init, remap init, remap all to init.
         synchronized (registryCOWLock) {
             // Remove loggers from string streams.
             for (ContentStream<String> stream : idStreamMap.values()) {
@@ -489,7 +489,7 @@ public abstract class AbstractLogManager implements LogManager {
      * Call from the primary thread (policy pending).
      */
     public void shutdown() {
-        clear(500, false); // TODO: Policy / making sense.
+        clear(500, false); // Policy for shutdown behavior requires evaluation.
     }
 
 }
