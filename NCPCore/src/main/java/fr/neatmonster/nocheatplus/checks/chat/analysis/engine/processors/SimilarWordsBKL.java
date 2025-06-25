@@ -82,7 +82,7 @@ public class SimilarWordsBKL extends DigestedWords {
 
 	@Override
 	protected float getScore(final List<Character> chars, final long ts) {
-		// TODO: very short words, very long words.
+            // Consider special handling for very short or very long words.
 		lastAdd = ts;
 		final char[] a = DigestedWords.toArray(chars);
 		final STBKLResult result = tree.lookup(a, range, maxSeek, true);

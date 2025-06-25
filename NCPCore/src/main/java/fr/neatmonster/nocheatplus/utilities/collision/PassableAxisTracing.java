@@ -31,8 +31,10 @@ public class PassableAxisTracing extends AxisTracing implements ICollidePassable
     private int tick;
     private UUID worldId;
 
-    // TODO: Might need another option for margins (option to skip margin for the axis-start point, or alter ignoreFirst behavior).
-    // TODO: Consider an iteration margin as well (0.5 below for fences).
+    // Consider providing another option for margins (option to skip margin for the
+    // axis-start point, or alter ignoreFirst behavior).
+    // An iteration margin might be useful as well, for example 0.5 below for
+    // fences.
 
     public BlockCache getBlockCache() {
         return blockCache;
@@ -64,20 +66,21 @@ public class PassableAxisTracing extends AxisTracing implements ICollidePassable
             final Axis axis, final int increment) {
         if (BlockProperties.isPassableBox(blockCache, blockX, blockY, blockZ, minX, minY, minZ, maxX, maxY, maxZ)) {
             /*
-             * TODO: HEIGHT150 -> if not passable... how/where to test for block
-             * change tracker? E.g.: y-offset from block < 0.5 -> check the
-             * block underneath. (one method check box normal + opportunistic
-             * past state handling in one?) Prefer to set the
-             * air/liquid/whichever block above the fence as ignored, in order
-             * to allow collision with the 1.0 height border of the fence (TODO:
-             * legacy only?).
+             * HEIGHT150 -> if not passable, how/where to test for the block
+             * change tracker? For example, if the y-offset from the block is
+             * below 0.5, check the block underneath. One method might check the
+             * box normally while also handling past states opportunistically.
+             * Prefer to set the air/liquid/whichever block above the fence as
+             * ignored, in order to allow collision with the 1.0 height border of
+             * the fence (legacy only?).
              */
             return true;
         }
         // Recovery attempt via the BlockChangeTracker.
         if (blockChangeTracker != null) {
             // Opportunistic (FCFS, no consistency).
-            // TODO: Replace by BlockChangeTracker.isPassableBox(...) - iteration is necessary / better.
+            // Should use BlockChangeTracker.isPassableBox(...) with iteration for
+            // better accuracy.
             BlockChangeEntry entry = blockChangeTracker.getBlockChangeEntry(blockChangeRef, tick, worldId, blockX, blockY + 1, blockZ, null);
             if (entry == null) entry = blockChangeTracker.getBlockChangeEntry(blockChangeRef, tick, worldId, blockX, blockY, blockZ, null);
             if (entry != null) {
