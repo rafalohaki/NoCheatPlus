@@ -27,7 +27,7 @@ import fr.neatmonster.nocheatplus.utilities.CheckUtils;
 
 public class UnusedVelocity {
     
-    // TODO: Currently is debug only (!). Only call if some debug flag is set. Needs checks.moving.debug to work at all.
+    // Note: Currently debug only. Invoke only if the appropriate debug flag is set (checks.moving.debug).
 
     /**
      * Test if any unused velocity has been tracked and what that means. (Convenience.)
@@ -80,7 +80,7 @@ public class UnusedVelocity {
             DebugUtil.debug(CheckUtils.getLogMessagePrefix(player, checkType) + msg);
         }
         tracker.resetResults(); // Reset for now.
-        // TODO: A real check, e.g. track frequency and/or average amount of violation per so and so time.
+        // Placeholder for a real check: consider tracking frequency or average violation amount over time.
         return false; // Player can't possibly fail this yet.
     }
 
