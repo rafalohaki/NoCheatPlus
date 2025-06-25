@@ -39,7 +39,7 @@ import fr.neatmonster.nocheatplus.utilities.ds.prefixtree.SimpleCharPrefixTree;
 
 public class PathUtils {
 
-    // TODO: Make this a class to be able to process multiple files with different paths and annotations.
+    // NOTE: Could be converted to a class to process multiple files with different paths and annotations.
 
     /**
      * Individual configuration paths moved somewhere else. Can use @Moved or custom setup.
@@ -156,7 +156,7 @@ public class PathUtils {
      * @return
      */
     private static void initPaths() {
-        // TODO: Retrieving such entries should be (instance...) methods of ConfPaths or a specific configuration instance.
+        // Entries could be retrieved from ConfPaths or a specific configuration instance.
         deprecatedFields.clear();
         deprecatedPrefixes.clear();
         globalOnlyFields.clear();
@@ -175,7 +175,7 @@ public class PathUtils {
             checkAddPrefixes(field, fieldName, GlobalConfig.class, globalOnlyFields, globalOnlyPrefixes);
             checkAddPrefixes(field, fieldName, Deprecated.class, deprecatedFields, deprecatedPrefixes);
             if (field.isAnnotationPresent(Moved.class)) {
-                // TODO: Prefixes: Might later support relocating  entire sections with one annotation?
+                // Prefixes: might later support relocating entire sections with one annotation.
                 addMoved(field, field.getAnnotation(Moved.class));
             }
         }
@@ -280,7 +280,7 @@ public class PathUtils {
         final Set<String> removePaths = new LinkedHashSet<String>();
         final Map<String, Object> addPaths = new LinkedHashMap<String, Object>();
         if (isWorldConfig) {
-            // TODO: might remove these [though some global only paths might actually work].
+            // These may be removed, although some global-only paths might actually work.
             processGlobalOnlyPaths(config, configName, null);
         }
         processDeprecatedPaths(config, configName, removePaths);
@@ -346,7 +346,7 @@ public class PathUtils {
         for (final Entry<String, Object> entry : config.getValues(true).entrySet()) {
             final String path = entry.getKey();
             final Object value = entry.getValue();
-            // TODO: To support moving entire sections, this needs to be changed.
+            // To support moving entire sections, this part needs change.
             if (value instanceof ConfigurationSection) {
                 continue;
             }
@@ -376,7 +376,7 @@ public class PathUtils {
                 }
                 if (value instanceof ConfigurationSection) {
                     if (moved.configurationSection) {
-                        // TODO: Ensure those can be processed at all.
+                        // Ensure those can be processed at all.
                     } else {
                         // Ignore configuration sections.
                         continue;
