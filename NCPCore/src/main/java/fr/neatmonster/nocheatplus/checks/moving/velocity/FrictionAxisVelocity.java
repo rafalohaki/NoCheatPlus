@@ -36,7 +36,7 @@ public class FrictionAxisVelocity {
     private final List<AccountEntry> active = new LinkedList<AccountEntry>();
 
     public void add(AccountEntry vel) {
-        // TODO: Merging behavior?
+        // Merging behavior is not yet implemented.
         if (Math.abs(vel.value) != 0.0) {
             queued.add(vel);
         }
@@ -75,9 +75,9 @@ public class FrictionAxisVelocity {
      */
     public void tick(final double frictionFactor) {
         // Decrease counts for active.
-        // TODO: Actual friction. Could pass as an argument (special value for not to be used).
-        // TODO: Consider removing already invalidated here.
-        // TODO: Consider working removeInvalid into this ?
+        // Actual friction is simplified here; a special value could disable it.
+        // Removal of invalidated entries is handled elsewhere.
+        // Invalidation is handled by removeInvalid().
         for (final AccountEntry vel : active) {
             vel.valCount --;
             vel.sum += vel.value;
@@ -97,14 +97,14 @@ public class FrictionAxisVelocity {
      */
     public void removeInvalid(final int tick) {
         // Note: Adding unused entries to a collection should later be supported.
-        // TODO: Also merge entries here, or just on adding?
+        // Merging entries might be done here or when adding.
         Iterator<AccountEntry> it;
         // Active.
         it = active.iterator();
         while (it.hasNext()) {
             final AccountEntry vel = it.next();
-            // TODO: 0.001 can be stretched somewhere else, most likely...
-            // TODO: Somehow use tick here too (actCount, valCount)?
+            // The 0.001 threshold could be defined elsewhere.
+            // Using the tick here might improve actCount/valCount accuracy.
             if (vel.valCount <= 0 || Math.abs(vel.value) <= minValue) {
                 //              System.out.prsintln("Invalidate active: " + vel);
                 it.remove();
@@ -113,7 +113,7 @@ public class FrictionAxisVelocity {
         // Queued.
         it = queued.iterator();
         while (it.hasNext()) {
-            // TODO: Could check for alternating signum (error).
+            // Could check for alternating signum to detect errors.
             final AccountEntry vel = it.next();
             if (vel.actCount <= 0 || vel.tick < tick) {
                 //              NCPAPIProvider.getNoCheatPlusAPI().getLogManager().debug(Streams.TRACE_FILE, "Invalidate queued: " + vel);
@@ -127,7 +127,7 @@ public class FrictionAxisVelocity {
      * @return Can be positive or negative.
      */
     public double getFreedom() {
-        // TODO: model/calculate it as accurate as possible...
+        // Further modeling could increase accuracy.
         double f = 0;
         for (final AccountEntry vel : active) {
             f += vel.value;
@@ -156,9 +156,9 @@ public class FrictionAxisVelocity {
             final AccountEntry vel = it.next();
             if (vel.value * amount < 0.0) {
                 // Not aligned.
-                // TODO: This could be a problem with small amounts of velocity.
-                // TODO: break or remove !? -> need find "next fitting one" and remove all non-fitting before (iff fitting found) ...
-                it.remove(); // TODO: queues ~ continue? vs. invalidate (remove) vs. break; vs. collect and invalidate non-matching BEFORE.
+                // Small amounts of velocity might still be problematic.
+                // Determine whether to remove or skip non-fitting entries until a matching one is found.
+                it.remove(); // Removal might change queued entries.
                 continue;
             }
             used += vel.value;
@@ -168,7 +168,7 @@ public class FrictionAxisVelocity {
                 break;
             }
         }
-        // TODO: Add to sum.
+        // Sum could be tracked here if needed.
         return used;
     }
 
