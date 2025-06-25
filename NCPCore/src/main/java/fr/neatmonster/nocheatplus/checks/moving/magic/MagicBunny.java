@@ -99,9 +99,9 @@ public class MagicBunny {
         ///////////////////////////////////////////////////////////////////
         // Note: Rework and simplify bunnyfly, merge bunnyslope and friction behaviour. Possibly stick to how Minecraft calculates speed.
         // (bunnyhop model is decently accurate, despite a bit convoluted)
-        if (lastMove.toIsValid && data.bunnyhopDelay > 0 && hDistance > baseSpeed) {
+        if (lastMove.toIsValid && data.getBunnyhopDelay() > 0 && hDistance > baseSpeed) {
             allowHop = false;
-            final int hopTime = BUNNYHOP_MAX_DELAY - data.bunnyhopDelay;
+            final int hopTime = BUNNYHOP_MAX_DELAY - data.getBunnyhopDelay();
 
             // Bunnyfly phase (decreasing speed due to friction)
             if (lastMove.hDistance > hDistance) { 
@@ -109,7 +109,7 @@ public class MagicBunny {
                 final double hDistDiff = lastMove.hDistance - hDistance;
                 // Slope (directly after hop but before friction): the initial/bunnyhop acceleration needs to drop sharply at first.
                 // Ensure relative speed decrease vs. hop is met somehow. 
-                if (data.bunnyhopDelay == 9 && hDistDiff >= bunnySpeedLossMod(data, headObstructed) * (lastMove.hDistance - baseSpeed)) {
+                if (data.getBunnyhopDelay() == 9 && hDistDiff >= bunnySpeedLossMod(data, headObstructed) * (lastMove.hDistance - baseSpeed)) {
                     tags.add("bunnyslope");
                     hDistanceAboveLimit = 0.0;
                 }
@@ -129,11 +129,11 @@ public class MagicBunny {
 
                     // ... one move between toonground and liftoff remains for hbuf ... 
                     // Do prolong bunnyfly if the player is yet to touch the ground
-                    if (data.bunnyhopDelay == 1 && !thisMove.to.onGround && !to.isResetCond()) {
-                        data.bunnyhopDelay++;
+                    if (data.getBunnyhopDelay() == 1 && !thisMove.to.onGround && !to.isResetCond()) {
+                        data.setBunnyhopDelay(data.getBunnyhopDelay() + 1);
                         tags.add("bunnyfly(keep)");
                     }
-                    else tags.add("bunnyfly(" + data.bunnyhopDelay + ")");
+                    else tags.add("bunnyfly(" + data.getBunnyhopDelay() + ")");
                 }
             } 
 
@@ -177,7 +177,7 @@ public class MagicBunny {
                     allowHop = double_bunny = true;
                 }
                 // Introduced with commit: https://github.com/Updated-NoCheatPlus/NoCheatPlus/commit/2ee891a427a047010f7358a7b246dd740398fa12
-                else if (data.bunnyhopDelay <= 6 && !thisMove.headObstructed
+                else if (data.getBunnyhopDelay() <= 6 && !thisMove.headObstructed
                          && (thisMove.from.onGround || thisMove.touchedGroundWorkaround)) {
                     tags.add("ediblebunny");
                     allowHop = true;  
@@ -205,7 +205,7 @@ public class MagicBunny {
         final double inc = ServerIsAtLeast1_13 ? 0.03 : 0;
         final double hopMargin = Magic.wasOnIceRecently(data) ? 1.4 : (data.momentumTick > 0 ? (data.momentumTick > 2 ? 1.0 + inc : 1.11 + inc) : 1.22 + inc);
 
-        if (lastMove.toIsValid && data.bunnyhopDelay <= 0 && data.lastbunnyhopDelay > 0
+        if (lastMove.toIsValid && data.getBunnyhopDelay() <= 0 && data.lastbunnyhopDelay > 0
             && lastMove.hDistance > hDistance && baseSpeed > 0.0 && hDistance / baseSpeed < hopMargin) {
             
             final double hDistDiff = lastMove.hDistance - hDistance;
@@ -225,7 +225,7 @@ public class MagicBunny {
                         data.sfLowJump = false;
                         tags.add("bunnyflyresume");
                         // Renew bunnyfly.
-                        data.bunnyhopDelay = data.lastbunnyhopDelay - 1;
+                        data.setBunnyhopDelay(data.lastbunnyhopDelay - 1);
                         data.lastbunnyhopDelay = 0;
                     }
                 } 
@@ -307,7 +307,7 @@ public class MagicBunny {
                    !from.isResetCond() && !to.isResetCond() 
                 )) {
                 // Set the maximum delay before the player will be allowed to bunnyhop again. Bunnyfly starts.
-                data.bunnyhopDelay = BUNNYHOP_MAX_DELAY;
+                data.setBunnyhopDelay(BUNNYHOP_MAX_DELAY);
                 hDistanceAboveLimit = 0.0;
                 thisMove.bunnyHop = true;
                 tags.add("bunnyhop");

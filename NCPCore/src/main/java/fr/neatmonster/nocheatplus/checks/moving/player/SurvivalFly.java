@@ -851,8 +851,8 @@ public class SurvivalFly extends Check {
             } else {
                 data.clearActiveHorVel();
                 hFreedom = 0.0;
-                if (resetFrom && data.bunnyhopDelay <= 6) {
-                    data.bunnyhopDelay = 0;
+                if (resetFrom && data.getBunnyhopDelay() <= 6) {
+                    data.setBunnyhopDelay(0);
                 }
             }
 
@@ -941,7 +941,7 @@ public class SurvivalFly extends Check {
 
     /** Helper to decrease bunnyhop related counters. */
     private void decreaseBunnyhopCounters(final MovingData data) {
-        data.bunnyhopDelay--;
+        data.setBunnyhopDelay(data.getBunnyhopDelay() - 1);
         data.lastbunnyhopDelay -= data.lastbunnyhopDelay > 0 ? 1 : 0;
     }
 
@@ -1178,11 +1178,11 @@ public class SurvivalFly extends Check {
     }
 
     private void updateBunnyHopDelay(final MovingData data) {
-        if (data.bunnyhopDelay > 0) {
-            if (data.bunnyhopDelay > 6) {
-                data.lastbunnyhopDelay = data.bunnyhopDelay;
+        if (data.getBunnyhopDelay() > 0) {
+            if (data.getBunnyhopDelay() > 6) {
+                data.lastbunnyhopDelay = data.getBunnyhopDelay();
             }
-            data.bunnyhopDelay = 0;
+            data.setBunnyhopDelay(0);
         }
     }
 
@@ -2405,7 +2405,7 @@ public class SurvivalFly extends Check {
         if (lastMove.touchedGround || lastMove.to.extraPropertiesValid && lastMove.to.resetCond) {
             tags.add("ychinc");
         }
-        else if (data.bunnyhopDelay < 9 && !((lastMove.touchedGround || lastMove.from.onGroundOrResetCond)
+        else if (data.getBunnyhopDelay() < 9 && !((lastMove.touchedGround || lastMove.from.onGroundOrResetCond)
                 && TrigUtil.isZero(lastMove.yDistance)) && data.getOrUseVerticalVelocity(yDistance) == null) {
             vDistanceAboveLimit = Math.max(vDistanceAboveLimit, Math.abs(yDistance));
             tags.add("airjump");
@@ -3379,7 +3379,7 @@ public class SurvivalFly extends Check {
                 + data.liftOffEnvelope.getMaxJumpHeight(data.jumpAmplifier) + ")") : "?"));
         if (lastMove.toIsValid) {
             builder.append("\n fdsq: " + StringUtil.fdec3.format(thisMove.distanceSquared / lastMove.distanceSquared));
-            if (data.bunnyhopDelay > 0) {
+            if (data.getBunnyhopDelay() > 0) {
                 builder.append("\n Bunny ratios: " + "c/b(" + StringUtil.fdec3.format(hDistance / thisMove.hAllowedDistanceBase)
                         + ") / c/l(" + StringUtil.fdec3.format(hDistance / lastMove.hDistance) + ")");
             }

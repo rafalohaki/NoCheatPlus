@@ -84,8 +84,8 @@ public final class ExtremeMoveHandler {
         } else {
             check = creativeFly;
             actions = cc.creativeFlyActions;
-            data.creativeFlyVL += violation;
-            vL = data.creativeFlyVL;
+            data.setCreativeFlyVL(data.getCreativeFlyVL() + violation);
+            vL = data.getCreativeFlyVL();
         }
         final ViolationData vd = new ViolationData(check, player, vL, violation, actions);
         if (vd.needsParameters()) {
