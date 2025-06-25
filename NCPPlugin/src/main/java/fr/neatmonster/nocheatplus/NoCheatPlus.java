@@ -80,6 +80,7 @@ import fr.neatmonster.nocheatplus.compat.MCAccess;
 import fr.neatmonster.nocheatplus.compat.blocks.changetracker.BlockChangeListener;
 import fr.neatmonster.nocheatplus.compat.blocks.changetracker.BlockChangeTracker;
 import fr.neatmonster.nocheatplus.compat.meta.BridgeCrossPlugin;
+import fr.neatmonster.nocheatplus.compat.meta.BridgeCrossPluginLoader;
 import fr.neatmonster.nocheatplus.compat.registry.AttributeAccessFactory;
 import fr.neatmonster.nocheatplus.compat.registry.DefaultComponentFactory;
 import fr.neatmonster.nocheatplus.compat.registry.EntityAccessFactory;
@@ -942,7 +943,7 @@ public class NoCheatPlus extends JavaPlugin implements NoCheatPlusAPI {
         registerGenericInstance(new PassengerUtil());
         genericInstanceRegistry.denyChangeExistingRegistration(PassengerUtil.class);
         // (Allow override others.)
-        addComponent(new BridgeCrossPlugin());
+        BridgeCrossPluginLoader.load().ifPresent(this::addComponent);
 
         // World data init (basic).
         for (final World world : Bukkit.getWorlds()) {
