@@ -26,9 +26,7 @@ import org.bukkit.event.player.PlayerQuitEvent;
 
 import fr.neatmonster.nocheatplus.checks.Check;
 import fr.neatmonster.nocheatplus.checks.CheckType;
-import fr.neatmonster.nocheatplus.players.DataManager;
 import fr.neatmonster.nocheatplus.players.IPlayerData;
-import fr.neatmonster.nocheatplus.utilities.TickTask;
 
 public class KeepAliveFrequency extends Check implements Listener {
 
@@ -39,7 +37,7 @@ public class KeepAliveFrequency extends Check implements Listener {
     /**
      * Join timestamps per player for delaying checks after login.
      */
-    private final Map<UUID, Long> joinTimes = new ConcurrentHashMap<>();
+    private final Map<UUID, Long> joinTimestamps = new ConcurrentHashMap<>();
 
     /**
      * Checks hasBypass on violation only.
@@ -55,7 +53,7 @@ public class KeepAliveFrequency extends Check implements Listener {
         final long now = System.currentTimeMillis();
 
         boolean cancel = false;
-        if (!isWithinJoinDelay(player, now, cc.keepAliveFrequencyStartupDelay) && first > 1f) {
+        if (!isJoinDelayActive(player, now, cc.keepAliveFrequencyStartupDelay) && first > 1f) {
             final double vl = Math.max(first - 1f, data.keepAliveFreq.score(1f) - data.keepAliveFreq.numberOfBuckets());
             cancel = executeActions(player, vl, 1.0, cc.keepAliveFrequencyActions).willCancel();
         }
@@ -67,7 +65,7 @@ public class KeepAliveFrequency extends Check implements Listener {
     public void playerJoin(PlayerJoinEvent e) {
         final Player player = e.getPlayer();
         if (player != null) {
-            joinTimes.put(player.getUniqueId(), System.currentTimeMillis());
+            joinTimestamps.put(player.getUniqueId(), System.currentTimeMillis());
         }
     }
 
@@ -75,15 +73,23 @@ public class KeepAliveFrequency extends Check implements Listener {
     public void playerQuit(PlayerQuitEvent e) {
         final Player player = e.getPlayer();
         if (player != null) {
-            joinTimes.remove(player.getUniqueId());
+            joinTimestamps.remove(player.getUniqueId());
         }
     }
 
-    private boolean isWithinJoinDelay(Player player, long now, long delay) {
+    /**
+     * Check if join delay is still active for the player.
+     *
+     * @param player The player to check for.
+     * @param now    The current system time in milliseconds.
+     * @param delay  The configured delay after join.
+     * @return True if join delay is active, false otherwise.
+     */
+    private boolean isJoinDelayActive(Player player, long now, long delay) {
         if (player == null) {
             return false;
         }
-        final Long joinTime = joinTimes.get(player.getUniqueId());
+        final Long joinTime = joinTimestamps.get(player.getUniqueId());
         return joinTime != null && now - joinTime < delay;
     }
 
