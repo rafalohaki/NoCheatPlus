@@ -34,8 +34,8 @@ public class MagicVehicle {
     /** Maximum descend distance. */
     public static final double maxDescend = 5.0;
     /** Maximum ascend distance (overall, no special effects counted in). */
-    // TODO: Likely needs adjustments, many thinkable edge cases, also pistons (!).
-    // TODO: Does trigger on vehicle enter somehow some time.
+    // Note: Likely needs adjustments, many thinkable edge cases, also pistons (!).
+    // Investigation: may trigger on vehicle enter at some point.
     public static final double maxAscend = 0.27;
     
     public static final double maxRailsVertical = 0.5;
@@ -65,7 +65,7 @@ public class MagicVehicle {
      * @return
      */
     public static boolean oddInAir(final VehicleMoveData thisMove, final double minDescend, final double maxDescend, final CheckDetails checkDetails, final MovingData data) {
-        // TODO: Guard by past move tracking, instead of minDescend and maxDescend.
+        // Suggestion: guard by past move tracking instead of using minDescend and maxDescend.
         // (Try individual if this time, let JIT do the rest.)
         if (thisMove.yDistance < 0 && oddInAirDescend(thisMove, minDescend, maxDescend, checkDetails, data)) {
             return true;
@@ -82,14 +82,14 @@ public class MagicVehicle {
      * @return
      */
     private static boolean oddInAirDescend(final VehicleMoveData thisMove, final double minDescend, final double maxDescend, final CheckDetails checkDetails, final MovingData data) {
-        // TODO: Guard by past move tracking, instead of minDescend and maxDescend.
+        // Suggestion: guard by past move tracking instead of using minDescend and maxDescend.
         // (Try individual if this time, let JIT do the rest.)
         // Boat.
         if (checkDetails.simplifiedType == EntityType.BOAT) {
             // Boat descending in-air, skip one vehicle move event during late in-air phase.
             if (data.sfJumpPhase > 54 && thisMove.yDistance < 2.0 * minDescend && thisMove.yDistance > 2.0 * maxDescend
-                    // TODO: Past move tracking.
-                    // TODO: Fall distances?
+                    // Review past move tracking.
+                    // Evaluate fall distances.
                     && data.ws.use(WRPT.W_M_V_ENV_INAIR_SKIP)
                     ) {
                 // (In-air count usually > 60.)
@@ -126,8 +126,8 @@ public class MagicVehicle {
                     && thisMove.yDistance < MagicVehicle.boatMaxBackToSurfaceAscend
                     && data.ws.use(WRPT.W_M_V_ENV_INWATER_BTS)) {
                 // (Assume players can't control sinking boats for now.)
-                // TODO: Limit by more side conditions (e.g. to is on the surface and in-medium count is about 1, past moves).
-                // TODO: Checking for surface can be complicated. Might check blocks at location and above and accept if any is not liquid.
+                // Consider limiting by additional side conditions (e.g., being on the surface and in-medium count about 1, past moves).
+                // Checking for surface is complicated: might inspect blocks at location and above and accept if any is not liquid.
                 // (Always smaller than previous descending move, roughly to below 0.5 above water.)
                 return true;
             }
