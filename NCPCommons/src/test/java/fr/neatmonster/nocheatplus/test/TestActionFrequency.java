@@ -32,7 +32,6 @@ public class TestActionFrequency {
 		freq.clear(0);
 		if (freq.score(1f) != 0f) fail("clear=0");
 		
-		// TODO: more tests...
 	}
 	
 	@Test
@@ -54,7 +53,6 @@ public class TestActionFrequency {
 		freq.update(time);
 		for (int i = 0; i < 999; i++){
 			freq.add(time + i, 1f);
-			// TODO: maybe test sums here already.
 		}
 		if (freq.score(1f) != 999) fail("Sum should be 999, got instead: " + freq.score(1f));
 		freq.update(time + 999);
