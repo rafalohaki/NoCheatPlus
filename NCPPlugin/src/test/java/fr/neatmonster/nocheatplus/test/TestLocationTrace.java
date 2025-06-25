@@ -58,7 +58,7 @@ public class TestLocationTrace {
         return center + (ThreadLocalRandom.current().nextBoolean() ? step : -step);
     }
 
-    // TODO: Test pool as well.
+    // NOTE: pool functionality could also be tested.
     private TraceEntryPool pool = new TraceEntryPool(1000);
 
     @Test
@@ -231,6 +231,6 @@ public class TestLocationTrace {
         }
     }
 
-    // TODO: Tests with expiration of entries (size and iterators).
+    // NOTE: consider adding tests for entry expiration (size and iterators).
 
 }

@@ -59,7 +59,7 @@ public class TestConfig {
         }
     }
 
-    // TODO: More ConfigFile tests, once processing gets changed.
+    // NOTE: additional ConfigFile tests can be added once processing changes.
 
     @Test
     public void testMovePaths() {
