@@ -32,7 +32,7 @@ import fr.neatmonster.nocheatplus.permissions.Permissions;
 /**
  * Root command. <br>
  * Intended features: current time with /stopwatch, sub commands: start+stop, distance, return to location<br>
- * TODO: countdown
+ * Feature planned: countdown
  * @author asofold
  *
  */
@@ -58,7 +58,7 @@ public class StopWatchCommand extends BaseCommand {
     @Override
     public boolean onCommand(CommandSender sender, Command command, String alias, String[] args) {
         if (!(sender instanceof Player)) {
-            // TODO: Implement checking others clocks!
+            // Implement checking others clocks
             sender.sendMessage(CTAG + "Stopwatch functionality is only available to players.");
             return true;
         }

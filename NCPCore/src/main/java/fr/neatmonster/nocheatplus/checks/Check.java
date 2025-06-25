@@ -71,10 +71,10 @@ import fr.neatmonster.nocheatplus.worlds.IWorldData;
  * actual check.</li>
  * 
  */
-// TODO: javadocs redo (above)
+// Javadocs redo needed (above)
 public abstract class Check implements IDebugPlayer {
 
-    // TODO: Do these get cleaned up ?
+    // Are these cleaned up ?
     /** The execution histories of each check. */
     protected static Map<String, ExecutionHistory> histories = new HashMap<String, ExecutionHistory>();
 
@@ -169,7 +169,7 @@ public abstract class Check implements IDebugPlayer {
         }
         else {
             // Always schedule to add to ViolationHistory.
-            // TODO: Might clear input-specific effects (stored ones will be handled extra to those).
+            // Might clear input-specific effects (stored ones will be handled separately).
             TickTask.requestActionsExecution(violationData);
         }
 
