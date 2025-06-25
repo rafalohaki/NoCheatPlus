@@ -516,11 +516,38 @@ public class NoCheatPlus extends JavaPlugin implements NoCheatPlusAPI {
 
         boolean added = false;
 
-        // First register generic instances.
         if (obj instanceof IRegisterAsGenericInstance) {
             registerGenericInstance(obj);
         }
-        // Other types.
+
+        added |= registerInterfaces(obj);
+        added |= addToSubRegistries(obj);
+
+        if (allowComponentRegistry) {
+            added |= registerComponentRegistry(obj);
+        }
+
+        added |= handleSubComponentHolder(obj);
+
+        if (added) {
+            allComponents.add(obj);
+        }
+
+        runPostRegisterHook(obj);
+
+        return added;
+    }
+
+    /**
+     * Register objects implementing framework interfaces.
+     *
+     * @param obj the component to register
+     * @return true if the object was added to at least one registry
+     */
+    @SuppressWarnings("unchecked")
+    private boolean registerInterfaces(final Object obj) {
+        boolean added = false;
+
         if (obj instanceof Listener) {
             addListener((Listener) obj);
             added = true;
@@ -553,38 +580,41 @@ public class NoCheatPlus extends JavaPlugin implements NoCheatPlusAPI {
             added = true;
         }
 
-        // Add to sub registries.
+        return added;
+    }
+
+    private boolean addToSubRegistries(final Object obj) {
+        boolean added = false;
         for (final ComponentRegistry<?> registry : subRegistries) {
             final Object res = ReflectionUtil.invokeGenericMethodOneArg(registry, "addComponent", obj);
-            if (res != null && (res instanceof Boolean) && ((Boolean) res).booleanValue()) {
+            if (res instanceof Boolean && ((Boolean) res).booleanValue()) {
                 added = true;
             }
         }
+        return added;
+    }
 
-        // Add ComponentRegistry instances after adding to sub registries to prevent adding it to itself.
-        if (allowComponentRegistry && (obj instanceof ComponentRegistry<?>)) {
+    private boolean registerComponentRegistry(final Object obj) {
+        if (obj instanceof ComponentRegistry<?>) {
             subRegistries.add((ComponentRegistry<?>) obj);
-            added = true;
+            return true;
         }
+        return false;
+    }
 
-        // Components holding more components to register later.
+    private boolean handleSubComponentHolder(final Object obj) {
         if (obj instanceof IHoldSubComponents) {
             subComponentholders.add((IHoldSubComponents) obj);
             onDemandTickListener.register();
-            added = true; // Convention.
+            return true;
         }
+        return false;
+    }
 
-        // Add to allComponents if in fact added.
-        if (added) {
-            allComponents.add(obj);
-        }
-
-        // Post register hooks.
+    private void runPostRegisterHook(final Object obj) {
         if (obj instanceof IPostRegisterRunnable) {
             ((IPostRegisterRunnable) obj).runPostRegister();
         }
-
-        return added;
     }
 
     /**
