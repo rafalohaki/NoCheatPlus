@@ -105,8 +105,8 @@ public class ReflectionUtil {
      *             has arguments.
      */
     public static void checkMethodReturnTypesNoArgs(Class<?> objClass, String[] methodNames, Class<?> returnType){
-        // TODO: Add check: boolean isStatic.
-        // TODO: Overloading !?
+        // Potential enhancement: verify the method is static.
+        // Consider supporting overloaded methods.
         try {
             for (String methodName : methodNames){
                 Method m = objClass.getMethod(methodName);
@@ -139,7 +139,7 @@ public class ReflectionUtil {
      * @return null in case of errors (can not be distinguished).
      */
     public static Object invokeGenericMethodOneArg(final Object obj, final String methodName, final Object arg){
-        // TODO: Isn't there a one-line-call for this ??
+        // A dedicated helper might exist for this operation.
         final Class<?> objClass = obj.getClass();
         final Class<?> argClass = arg.getClass();
         // Collect methods that might work.
@@ -194,13 +194,13 @@ public class ReflectionUtil {
      * @param returnTypePreference
      *            Most preferred return type first, might return null, might
      *            return a method with a completely different return type,
-     *            comparison with ==, no isAssignableForm. TODO: really ?
+     *            comparison with ==, no isAssignableForm. Is this really intended?
      * @return
      */
     public static Object invokeMethodNoArgs(final Object obj,
             final String methodName,
             final Class<?>... returnTypePreference) {
-        // TODO: Isn't there a one-line-call for this ??
+        // This could potentially be replaced by a one-line convenience call.
         final Class<?> objClass = obj.getClass();
         // Try to get it directly first.
         Method methodFound = getMethodNoArgs(objClass, methodName, returnTypePreference);
@@ -324,7 +324,7 @@ public class ReflectionUtil {
         // Collect methods that might work.
         Method methodFound = null;
         int returnTypeIndex = returnTypePreference.length; // This can be 0 for no preferences given.
-        // TODO: Does there exist an optimized method for getting all by name?
+        // Consider caching methods retrieved by name to improve performance.
         for (final Method method : objClass.getMethods()){
             if (method.getName().equals(methodName)){
                 final Class<?>[] parameterTypes = method.getParameterTypes();
@@ -535,11 +535,11 @@ public class ReflectionUtil {
      * @return
      */
     public static String getClassDescription(final Class<?> clazz) {
-        // TODO: Option to sort by names ?
+        // Future enhancement: allow sorting by member names.
         final StringBuilder builder = new StringBuilder(512);
         builder.append("Class: ");
         builder.append(clazz);
-        // TODO: superclass, interfaces, generics
+        // Pending support for superclass, interface, and generic details.
         for (final Field field : clazz.getFields()) {
             builder.append("\n  ");
             builder.append(getSimpleMemberModifierDescription(field));
