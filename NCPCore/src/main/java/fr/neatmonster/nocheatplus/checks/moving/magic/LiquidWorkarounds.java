@@ -43,20 +43,39 @@ public class LiquidWorkarounds {
      *         If no workaround applies, null is returned.
      */
     public static Double liquidWorkarounds(final PlayerLocation from, final PlayerLocation to, final double baseSpeed, final double frictDist, final PlayerMoveData lastMove, final MovingData data) {
+        if (from == null || to == null || lastMove == null || data == null) {
+            return null;
+        }
         final PlayerMoveData thisMove = data.playerMoves.getCurrentMove();
+        if (thisMove == null) {
+            return null;
+        }
         final double yDistance = thisMove.yDistance;
         final PlayerMoveData pastMove1 = data.playerMoves.getSecondPastMove();
 
+        Double result = null;
         if (yDistance >= 0.0) {
             // Note: liftOffEnvelope conditions might need refinement near water level.
             // Note: 1.5 high blocks ?
             // Note: Conditions seem warped.
             if (yDistance <= 0.5) {
+                result = upwardSimpleCases(from, to, baseSpeed, frictDist, thisMove, lastMove, data, yDistance);
+            }
+            if (result == null && lastMove.toIsValid) {
+                result = upwardPastMoveCases(baseSpeed, frictDist, thisMove, lastMove, pastMove1, data, yDistance, from, to);
+            }
+        } else if (lastMove.toIsValid) {
+            result = downwardCases(baseSpeed, frictDist, lastMove, pastMove1, data, yDistance, from, to);
+        }
+        return result;
+    }
 
-                // Decrease more than difference to baseSpeed.
-                if (lastMove.toIsValid && yDistance < lastMove.yDistance && lastMove.yDistance - yDistance > Math.max(0.001, yDistance - baseSpeed)) {
-                    return yDistance;
-                }
+    private static Double upwardSimpleCases(final PlayerLocation from, final PlayerLocation to, final double baseSpeed, final double frictDist,
+            final PlayerMoveData thisMove, final PlayerMoveData lastMove, final MovingData data, final double yDistance) {
+        // Decrease more than difference to baseSpeed.
+        if (lastMove.toIsValid && yDistance < lastMove.yDistance && lastMove.yDistance - yDistance > Math.max(0.001, yDistance - baseSpeed)) {
+            return yDistance;
+        }
 
                 // Jump out water near edge ground
                 if (lastMove.yDistance < -0.5 && yDistance > 0.4 && yDistance < frictDist - Magic.GRAVITY_MAX && from.isOnGround(0.6)) {
@@ -72,49 +91,52 @@ public class LiquidWorkarounds {
                         || (thisMove.to.onGround || lastMove.toIsValid && lastMove.yDistance - yDistance >= 0.010 || to.isAboveStairs())
                     )) {
 
-                    double vAllowedDistance = baseSpeed + 0.397; 
-                    double vDistanceAboveLimit = yDistance - vAllowedDistance;
-                    if (vDistanceAboveLimit <= 0.0) {
-                        return vAllowedDistance;
-                    }
-                }
+        // Asc by water level
+        if (!(data.liftOffEnvelope == LiftOffEnvelope.LIMIT_LIQUID && Double.isInfinite(Bridge1_13.getDolphinGraceAmplifier(from.getPlayer())))
+            && (
+                yDistance <= data.liftOffEnvelope.getMaxJumpGain(data.jumpAmplifier)
+                && !BlockProperties.isLiquid(from.getTypeIdAbove())
+                || !to.isInLiquid() // TODO: impossible !?
+                || (thisMove.to.onGround || lastMove.toIsValid && lastMove.yDistance - yDistance >= 0.010 || to.isAboveStairs())
+            )) {
+
+            double vAllowedDistance = baseSpeed + 0.397;
+            double vDistanceAboveLimit = yDistance - vAllowedDistance;
+            if (vDistanceAboveLimit <= 0.0) {
+                return vAllowedDistance;
             }
+        }
+        return null;
+    }
 
-            if (lastMove.toIsValid) {
+    private static Double upwardPastMoveCases(final double baseSpeed, final double frictDist, final PlayerMoveData thisMove,
+            final PlayerMoveData lastMove, final PlayerMoveData pastMove1, final MovingData data, final double yDistance,
+            final PlayerLocation from, final PlayerLocation to) {
+        // Launched in liquid by a bubble column with space bar kept pressed.
+        // (This is called after having used up all velocity and this move does not fit in the friction envelope)
+        if (data.insideBubbleStreamCount > 0 && yDistance > 0.0 && lastMove.yDistance > 0.0
+            && !data.isVelocityJumpPhase() && yDistance < lastMove.yDistance * data.lastFrictionVertical
+            && yDistance < Magic.bubbleStreamAscend) {
+            return yDistance;
+        }
 
-                // Launched in liquid by a bubble column with space bar kept pressed.
-                // (This is called after having used up all velocity and this move does not fit in the friction envelope)
-                if (data.insideBubbleStreamCount > 0 && yDistance > 0.0 && lastMove.yDistance > 0.0
-                    && !data.isVelocityJumpPhase() && yDistance < lastMove.yDistance * data.lastFrictionVertical
-                    && yDistance < Magic.bubbleStreamAscend) {
-                    return yDistance;
-                }
+        // Lenient on marginal violation if speed decreases by 'enough'.
+        // (Observed on 'dirty' phase. Then why not confining by isVelocityJumpPhase?)
+        if (Math.abs(frictDist - yDistance) <= 2.0 * Magic.GRAVITY_MAX
+            && yDistance < lastMove.yDistance - 4.0 * Math.abs(frictDist - yDistance)
+            && data.isVelocityJumpPhase()) {
+            return yDistance;
+        }
 
-                // Lenient on marginal violation if speed decreases by 'enough'.
-                // (Observed on 'dirty' phase. Then why not confining by isVelocityJumpPhase?)
-                if (Math.abs(frictDist - yDistance) <= 2.0 * Magic.GRAVITY_MAX
-                    && yDistance < lastMove.yDistance - 4.0 * Math.abs(frictDist - yDistance)
-                    && data.isVelocityJumpPhase()) {
-                    return yDistance;
-                }
+        // Jumping with velocity into water from below, just slightly more decrease than gravity, twice.
+        // (Should be able to do without aw-ww-ww confinement.)
+        // (dirty seems to be set/kept reliably)
+        if (yDistance > frictDist && yDistance < lastMove.yDistance - Magic.GRAVITY_MAX && data.insideMediumCount <= 1) {
+            return yDistance;
+        }
 
-                // Jumping with velocity into water from below, just slightly more decrease than gravity, twice.
-                // (Should be able to do without aw-ww-ww confinement.)
-                // (dirty seems to be set/kept reliably)
-                if (yDistance > frictDist && yDistance < lastMove.yDistance - Magic.GRAVITY_MAX && data.insideMediumCount <= 1) {
-                    return yDistance;
-                }
-                
-                // Cases considering two past moves with moving up.
-                if (pastMove1.toIsValid && pastMove1.to.extraPropertiesValid) {
-
-                    // Splash move with space space pressed (this move leaving liquid).
-                    if (pastMove1.yDistance > 0.0 && thisMove.yDistance > 0.0
-                        && pastMove1.yDistance - Magic.GRAVITY_MAX > lastMove.yDistance 
-                        && lastMove.yDistance - Magic.GRAVITY_ODD > thisMove.yDistance
-                        && Magic.intoLiquid(lastMove) && Magic.leavingLiquid(thisMove)) {
-                        return yDistance;
-                    }
+        // Cases considering two past moves with moving up.
+        if (pastMove1.toIsValid && pastMove1.to.extraPropertiesValid) {
 
                     // Velocity use in lastMove, keep air friction roughly.
                     // (Then confine it by lastMove.verVelUsed != null?)
