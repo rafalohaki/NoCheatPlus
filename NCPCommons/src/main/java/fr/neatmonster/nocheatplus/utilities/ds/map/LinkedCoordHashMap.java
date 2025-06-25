@@ -33,8 +33,8 @@ import java.util.NoSuchElementException;
  */
 public class LinkedCoordHashMap<V> extends AbstractCoordHashMap<V, fr.neatmonster.nocheatplus.utilities.ds.map.LinkedCoordHashMap.LinkedHashEntry<V>> implements CoordMap<V> {
 
-    // TODO: Add default order for get/put?
-    // TODO: Tests.
+    // Add default order for get/put?
+    // Tests pending.
 
     /**
      * Where to move an entry.
@@ -91,7 +91,7 @@ public class LinkedCoordHashMap<V> extends AbstractCoordHashMap<V, fr.neatmonste
         @Override
         public void remove() {
             if (current != null) {
-                // TODO: more efficient version ?
+                // Consider implementing a more efficient version.
                 map.remove(current.x, current.y, current.z);
                 current = null;
             }
@@ -189,7 +189,7 @@ public class LinkedCoordHashMap<V> extends AbstractCoordHashMap<V, fr.neatmonste
      * @return
      */
     public V put(final int x, final int y, final int z, final V value, final MoveOrder order) {
-        // TODO: Optimized.
+        // Could be optimized.
         final V previousValue = super.put(x, y, z, value);
         if (order == MoveOrder.FRONT) {
             moveToFront(x, y, z);
@@ -202,7 +202,7 @@ public class LinkedCoordHashMap<V> extends AbstractCoordHashMap<V, fr.neatmonste
     }
 
     public V get(final int x, final int y, final int z, final MoveOrder order) {
-        // TODO: Optimized.
+        // Could be optimized.
         final V value = super.get(x, y ,z);
         if (value != null && order != MoveOrder.NOT) {
             move(x, y, z, order);
