@@ -59,6 +59,9 @@ import fr.neatmonster.nocheatplus.utilities.map.BlockFlags;
  */
 public class VehicleEnvelope extends Check {
 
+    /** Tolerance for floating point comparisons. */
+    private static final double EPSILON = 1.0E-6;
+
     /**
      * Check specific details for re-use.
      * 
@@ -476,8 +479,8 @@ public class VehicleEnvelope extends Check {
             if (blockUnder != null && blockAbove != null && BlockProperties.isAir(blockAbove)
                 && BlockProperties.isLiquid(blockUnder) && !(strider != null && strider.isAssignableFrom(vehicle.getClass()))) {
                 if (thisMove.hDistance > 0.11D && thisMove.yDistance <= 0.1D && !thisMove.to.onGround && !thisMove.from.onGround
-                    && firstPastMove.valid && (firstPastMove.yDistance == thisMove.yDistance
-                    || firstPastMove.yDistance == thisMove.yDistance * -1)
+                    && firstPastMove.valid && (Math.abs(firstPastMove.yDistance - thisMove.yDistance) < EPSILON
+                    || Math.abs(firstPastMove.yDistance + thisMove.yDistance) < EPSILON)
                     && firstPastMove.yDistance != 0D
                     && !thisMove.headObstructed) {
                     if (!(thisMove.yDistance < 0 && thisMove.yDistance != 0 && firstPastMove.yDistance < 0 && firstPastMove.yDistance != 0)) {

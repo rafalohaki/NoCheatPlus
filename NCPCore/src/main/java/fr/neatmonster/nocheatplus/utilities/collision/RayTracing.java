@@ -23,6 +23,9 @@ import org.bukkit.Location;
  */
 public abstract class RayTracing implements ICollideBlocks {
 
+    /** Tolerance for floating point comparisons. */
+    private static final double EPSILON = 1.0E-6;
+
     //	/** End point coordinates (from, to) */
     protected double x0, y0, z0; // x1, y1, z1;
 
@@ -197,15 +200,15 @@ public abstract class RayTracing implements ICollideBlocks {
             // Determine transitions, per axis.
             transitions = 0;
             transX = transY = transZ = false;
-            if (tX == tMin && blockX != endBlockX && dX != 0.0) {
+            if (Math.abs(tX - tMin) < EPSILON && blockX != endBlockX && dX != 0.0) {
                 transX = true;
                 transitions ++;
             }
-            if (tY == tMin && blockY != endBlockY && dY != 0.0) {
+            if (Math.abs(tY - tMin) < EPSILON && blockY != endBlockY && dY != 0.0) {
                 transY = true;
                 transitions ++;
             }
-            if (tZ == tMin && blockZ != endBlockZ && dZ != 0.0) {
+            if (Math.abs(tZ - tMin) < EPSILON && blockZ != endBlockZ && dZ != 0.0) {
                 transZ = true;
                 transitions ++;
             }

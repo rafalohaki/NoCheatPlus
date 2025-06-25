@@ -160,7 +160,7 @@ public class GodMode extends Check {
         }
         keepAlive = Math.max(keepAlive, CheckUtils.guessKeepAliveTime(player, now, maxAge, pData));
 
-        if (keepAlive != Double.MIN_VALUE && now - keepAlive > cc.godModeLagMinAge && now - keepAlive < maxAge){
+        if (keepAlive != Long.MIN_VALUE && now - keepAlive > cc.godModeLagMinAge && now - keepAlive < maxAge){
             // Assume lag.
             return false;
         }

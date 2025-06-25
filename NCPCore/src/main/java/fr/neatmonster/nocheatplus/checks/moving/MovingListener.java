@@ -153,6 +153,9 @@ import fr.neatmonster.nocheatplus.worlds.WorldFactoryArgument;
  */
 public class MovingListener extends CheckListener implements TickListener, IRemoveData, IHaveCheckType, INeedConfig, JoinLeaveListener {
 
+    /** Tolerance for floating point comparisons. */
+    private static final double EPSILON = 1.0E-6;
+
     /** The no fall check. **/
     public final NoFall noFall = addCheck(new NoFall());
 
@@ -2581,7 +2584,10 @@ public class MovingListener extends CheckListener implements TickListener, IRemo
                     NoFall.calcReducedDamageByBlock(player, data, maxD),
                     mcAccess.getHandle().dealFallDamageFiresAnEvent().decide());
             BridgeHealth.setRawDamage(event, damageAfter);
-            if (debug) debug(player, "Adjust fall damage to: " + (damageAfter != maxD ? damageAfter : maxD));
+            if (debug) {
+                final double shown = Math.abs(damageAfter - maxD) < EPSILON ? maxD : damageAfter;
+                debug(player, "Adjust fall damage to: " + shown);
+            }
         }
     }
 

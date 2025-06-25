@@ -34,6 +34,9 @@ public class LegacyBlocks {
     private static final BlockTrapDoor TRAPDOOR = new BlockTrapDoor();
     private static final Map<Material, Block> blocks = init(); // new HashMap<>(); //private final Map<Material, Block> block;
 
+    /** Tolerance for floating point comparisons. */
+    private static final double EPSILON = 1.0E-6;
+
     //public LegacyBlocks() {
     //    blocks = init();
     //}

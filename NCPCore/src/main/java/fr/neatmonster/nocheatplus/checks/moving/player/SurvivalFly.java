@@ -84,6 +84,8 @@ public class SurvivalFly extends Check {
     private final boolean ServerIsAtLeast1_9 = ServerVersion.compareMinecraftVersion("1.9") >= 0;
     private final boolean ServerIsAtLeast1_10 = ServerVersion.compareMinecraftVersion("1.10") >= 0;
     private final boolean ServerIsAtLeast1_13 = ServerVersion.compareMinecraftVersion("1.13") >= 0;
+    /** Tolerance for floating point comparisons. */
+    private static final double EPSILON = 1.0E-6;
     /** Flag to indicate whether the buffer should be used for this move (only work inside setAllowedhDist). */
     private boolean bufferUse;
     /** To join some tags with moving check violations. */
@@ -670,13 +672,13 @@ public class SurvivalFly extends Check {
         // Checks for micro y deltas when moving above liquid.
         if (blockUnder != null && BlockProperties.isLiquid(blockUnder) && BlockProperties.isAir(blockAbove)) {
 
-            if (hDistanceAboveLimit <= 0.0
-                && hDistance > 0.11 && yDistance <= LiftOffEnvelope.LIMIT_LIQUID.getMaxJumpGain(0.0)
-                && !toOnGround && !fromOnGround
-                && lastMove.toIsValid && lastMove.yDistance == yDistance
-                || lastMove.yDistance == yDistance * -1 && lastMove.yDistance != 0.0
-                && !from.isHeadObstructed() && !to.isHeadObstructed()
-                && !Bridge1_13.isSwimming(player)) {
+                if (hDistanceAboveLimit <= 0.0
+                    && hDistance > 0.11 && yDistance <= LiftOffEnvelope.LIMIT_LIQUID.getMaxJumpGain(0.0)
+                    && !toOnGround && !fromOnGround
+                    && lastMove.toIsValid && Math.abs(lastMove.yDistance - yDistance) < EPSILON
+                    || Math.abs(lastMove.yDistance + yDistance) < EPSILON && lastMove.yDistance != 0.0
+                    && !from.isHeadObstructed() && !to.isHeadObstructed()
+                    && !Bridge1_13.isSwimming(player)) {
 
                 // Prevent being flagged if a player transitions from a block to water and the player falls into the water.
                 if (!(yDistance < 0.0 && yDistance != 0.0 && lastMove.yDistance < 0.0 && lastMove.yDistance != 0.0)) {
@@ -1300,7 +1302,7 @@ public class SurvivalFly extends Check {
         if (move == null) {
             return isMovingBackwards ? 1.0 : 1.325;
         }
-        return isMovingBackwards ? 1.0 : move.yDistance == 0.5 ? 1.85 : 1.325;
+        return isMovingBackwards ? 1.0 : Math.abs(move.yDistance - 0.5) < EPSILON ? 1.85 : 1.325;
     }
 
     private static double calcModHopSprint(final MovingData data, final PlayerMoveData move, final PlayerLocation to) {
