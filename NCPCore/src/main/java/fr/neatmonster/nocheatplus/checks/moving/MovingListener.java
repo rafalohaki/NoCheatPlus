@@ -2122,7 +2122,7 @@ public class MovingListener extends CheckListener implements TickListener, IRemo
      * @param data
      * @param cc
      */
-    private void confirmSetBack(final Player player, final boolean fakeNews, final MovingData data, 
+    private void confirmSetBack(final Player player, final boolean fakeNews, final MovingData data,
                                 final MovingConfig cc, final IPlayerData pData, final Location fallbackTeleported) {
 
         // Find the reason why it can be null even passed the precondition not null.
@@ -2136,8 +2136,21 @@ public class MovingListener extends CheckListener implements TickListener, IRemo
         data.onSetBack(moveInfo.from);
         aux.returnPlayerMoveInfo(moveInfo);
         // Reset stuff.
-        Combined.resetYawRate(player, teleported.getYaw(), System.currentTimeMillis(), true, pData); // Not sure.
+        final Float yaw = getYawForSetBack(teleported, fallbackTeleported);
+        if (yaw != null) {
+            Combined.resetYawRate(player, yaw.floatValue(), System.currentTimeMillis(), true, pData); // Not sure.
+        }
         data.resetTeleported();
+    }
+
+    private Float getYawForSetBack(final Location teleported, final Location fallback) {
+        if (teleported != null) {
+            return Float.valueOf(teleported.getYaw());
+        }
+        if (fallback != null) {
+            return Float.valueOf(fallback.getYaw());
+        }
+        return null;
     }
 
 
