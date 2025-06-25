@@ -165,167 +165,57 @@ public class BlockPlaceListener extends CheckListener {
      */
     @EventHandler(ignoreCancelled = true, priority = EventPriority.LOWEST)
     public void onBlockPlace(final BlockPlaceEvent event) {
-        if (!DataManager.getPlayerData(event.getPlayer()).isCheckActive(CheckType.BLOCKPLACE, event.getPlayer())) {
+        final Player player = event.getPlayer();
+        if (player == null) {
             return;
         }
+        final IPlayerData pData = DataManager.getPlayerData(player);
+        if (!pData.isCheckActive(CheckType.BLOCKPLACE, player)) {
+            return;
+        }
+
         final Block block = event.getBlockPlaced();
         final Block blockAgainst = event.getBlockAgainst();
-        // Skip any null blocks.
         if (block == null || blockAgainst == null) {
             return;
         }
-        final Player player = event.getPlayer();
-        final Material placedMat;
-        if (hasGetReplacedState) {
-            placedMat = event.getBlockPlaced().getType();
-        }
-        else if (Bridge1_9.hasGetItemInOffHand()) {
-            placedMat = BlockProperties.isAir(event.getItemInHand()) ? Material.AIR : event.getItemInHand().getType();
-        }
-        else placedMat = Bridge1_9.getItemInMainHand(player).getType(); // Safety first.
-    
-        boolean cancelled = false;
+
+        final Material placedMat = resolvePlacedMaterial(event, player);
+
         int skippedRedundantChecks = 0;
-        boolean shouldCheck;
-        final IPlayerData pData = DataManager.getPlayerData(player);
         final BlockPlaceData data = pData.getGenericInstance(BlockPlaceData.class);
         final BlockPlaceConfig cc = pData.getGenericInstance(BlockPlaceConfig.class);
         final BlockInteractData bdata = pData.getGenericInstance(BlockInteractData.class);
-        // isInteractBlock - the block placed against is the block last interacted with.
         final boolean isInteractBlock = !bdata.getLastIsCancelled() && bdata.matchesLastBlock(TickTask.getTick(), blockAgainst);
         final BlockFace placedFace = event.getBlock().getFace(blockAgainst);
-        final Block blockPlaced = event.getBlockPlaced();
-        final boolean shouldSkipSome;
+        final boolean shouldSkipSome = shouldSkipChecks(event, placedMat, pData, player);
 
-        if (blockMultiPlaceEvent != null && event.getClass() == blockMultiPlaceEvent) {
-            if (placedMat == Material.BEDROCK || Bridge1_9.hasEndCrystalItem() && placedMat == Bridge1_9.END_CRYSTAL_ITEM) {
-                shouldSkipSome = true;
-            }
-            else {
-                if (pData.isDebugActive(CheckType.BLOCKPLACE)) {
-                    debug(player, "Block place " + event.getClass().getName() + " " + placedMat);
-                }
-                shouldSkipSome = false;
-            }
-        } 
-        else shouldSkipSome = BlockProperties.isScaffolding(placedMat);
+        recordAutoSignData(placedMat, block, data, pData, player);
 
-        if (MaterialUtil.isAnySign(placedMat)) {
-            data.autoSignPlacedTime = System.currentTimeMillis();
-            data.autoSignPlacedHash = getBlockPlaceHash(block, placedMat);
-            if (pData.isDebugActive(CheckType.BLOCKPLACE_AUTOSIGN)) {
-                debug(player, "Register time and hash for this placed sign: h= " + data.autoSignPlacedHash + " / t= " + data.autoSignPlacedTime);
-            }
-        }
+        boolean cancelled = checkSetBack(pData, player);
 
-        // Don't run checks, if a set back is scheduled.
-        if (pData.isPlayerSetBackScheduled()) {
-            cancelled = true;
-            debug(player, "Prevent block place due to a scheduled set back.");
-        }
-
-        // Surrounding material first.
-        if (!cancelled && against.isEnabled(player, pData) && !BlockProperties.isScaffolding(placedMat)
-            && against.check(player, block, placedMat, blockAgainst, isInteractBlock, data, cc, pData)) {
+        if (!cancelled && performAgainstCheck(player, block, placedMat, blockAgainst, isInteractBlock, data, cc, pData)) {
             cancelled = true;
         }
 
-        // Fast place check.
-        if (!cancelled && fastPlace.isEnabled(player, pData)) {
-            if (fastPlace.check(player, block, TickTask.getTick(), data, cc, pData)) {
-                cancelled = true;
-            }
-            // Check for Improbable, whatever FastPlace says, provided the feature is enabled at all.
-            if (cc.fastPlaceImprobableWeight > 0.0f) {
-                // Check only if frequency is decently high.
-                if (data.fastPlaceVL > 20) {
-                    // Don't check if set to only feed.
-                    if (!cc.fastPlaceImprobableFeedOnly) {
-                        if (Improbable.check(player, cc.fastPlaceImprobableWeight, System.currentTimeMillis(), "blockplace.fastplace", pData)) {
-                            cancelled = true;
-                        }
-                    }
-                    else Improbable.feed(player, cc.fastPlaceImprobableWeight, System.currentTimeMillis()); 
-                }
-                // Feed only for lower frequencies.
-                else Improbable.feed(player, cc.fastPlaceImprobableWeight, System.currentTimeMillis()); 
-            }
-        }
-
-        // No swing check (player doesn't swing their arm when placing a lily pad).
-        if (!cancelled && !cc.noSwingExceptions.contains(placedMat) 
-            && noSwing.isEnabled(player, pData) && noSwing.check(player, data, cc)) {
+        if (!cancelled && performFastPlaceCheck(player, block, data, cc, pData)) {
             cancelled = true;
         }
 
-        // Scaffold Check
-        // Null check because I guess it can return null sometimes?
-        if (Scaffold.isEnabled(player, pData) && placedFace != null) {
-            final PlayerMoveData thisMove = pData.getGenericInstance(MovingData.class).playerMoves.getCurrentMove();
-            if (faces.contains(placedFace) 
-                && thisMove.from.getY() - blockPlaced.getY() < 2.0
-                && thisMove.from.getY() - blockPlaced.getY() >= 1.0
-                && blockPlaced.getType().isSolid() 
-                && TrigUtil.distance(player.getLocation(), blockPlaced.getLocation()) < 2.0) {
+        if (!cancelled && performNoSwingCheck(player, placedMat, data, cc, pData)) {
+            cancelled = true;
+        }
 
-                // Monitor yawrate before feeding Improbable or checking for Scaffold
-                if (Combined.checkYawRate(player, thisMove.from.getYaw(), System.currentTimeMillis(), thisMove.from.getWorldName(), pData)) {
-                    cancelled = true;
-                }
-                // Always check for Scaffold whatever yawrate says. 
-                if (data.cancelNextPlace && (Math.abs(data.currentTick - TickTask.getTick()) < 10)
-                    || Scaffold.check(player, placedFace, pData, data, cc, event.isCancelled(), thisMove.yDistance, pData.getGenericInstance(MovingData.class).sfJumpPhase)) {
-                    cancelled = true;
-                }
-                // If not cancelled, do feed the Improbable.
-                else if (cc.scaffoldImprobableWeight > 0.0f) {
-                    if (cc.scaffoldImprobableFeedOnly) {
-                        Improbable.feed(player, cc.scaffoldImprobableWeight, System.currentTimeMillis());
-                    } 
-                    else if (Improbable.check(player, cc.scaffoldImprobableWeight, System.currentTimeMillis(), "blockplace.scaffold", pData)) {
-                        cancelled = true;
-                    }
-                }
-                if (!cancelled) data.scaffoldVL *= 0.98;
-            }
-            // Cleanup
-            data.cancelNextPlace = false;
+        if (!cancelled && performScaffoldCheck(player, placedFace, block, data, cc, event, pData)) {
+            cancelled = true;
         }
 
         final FlyingQueueHandle flyingHandle = new FlyingQueueHandle(pData);
-        final boolean reachCheck = pData.isCheckActive(CheckType.BLOCKPLACE_REACH, player);
-        final boolean directionCheck = pData.isCheckActive(CheckType.BLOCKPLACE_DIRECTION, player);
-        if (reachCheck || directionCheck) {
-            final Location loc = player.getLocation(useLoc);
-            final double eyeHeight = MovingUtil.getEyeHeight(player);
-            // Reach check (distance).
-            if (!cancelled && !shouldSkipSome) {
-                if (isInteractBlock && bdata.isPassedCheck(CheckType.BLOCKINTERACT_REACH)) {
-                    skippedRedundantChecks++;
-                }
-                else if (reachCheck && reach.check(player, eyeHeight, block, data, cc)) {
-                    cancelled = true;
-                }
-            }
-            // Direction check.
-            if (!cancelled && !shouldSkipSome) {
-                if (isInteractBlock && bdata.isPassedCheck(CheckType.BLOCKINTERACT_DIRECTION)) {
-                    skippedRedundantChecks++;
-                }
-                else if (directionCheck) {
-                    if (blockAgainst.getType() == Material.LADDER || BlockProperties.isCarpet(blockAgainst.getType())) {
-                        // This needs a proper fix rather than simply being ignored.
-                        // ISSUE: https://github.com/NoCheatPlus/Issues/issues/524
-                    } 
-                    else if (direction.check(player, loc, eyeHeight, block, null, flyingHandle, data, cc, pData)) {
-                        cancelled = true;
-                    }
-                }
-            }
-            useLoc.setWorld(null);
+        if (!cancelled && performReachAndDirectionChecks(player, block, blockAgainst, isInteractBlock,
+                data, cc, bdata, pData, shouldSkipSome, flyingHandle)) {
+            cancelled = true;
         }
 
-        // If one of the checks requested to cancel the event, do so.
         if (cancelled) {
             event.setCancelled(true);
         }
@@ -333,8 +223,163 @@ public class BlockPlaceListener extends CheckListener {
         if (pData.isDebugActive(CheckType.BLOCKPLACE)) {
             debugBlockPlace(player, placedMat, block, blockAgainst, skippedRedundantChecks, flyingHandle, pData);
         }
-        // Cleanup
         // Reminder(currently unused): useLoc.setWorld(null);
+    }
+
+    private Material resolvePlacedMaterial(final BlockPlaceEvent event, final Player player) {
+        if (hasGetReplacedState) {
+            return event.getBlockPlaced().getType();
+        }
+        if (Bridge1_9.hasGetItemInOffHand()) {
+            return BlockProperties.isAir(event.getItemInHand()) ? Material.AIR : event.getItemInHand().getType();
+        }
+        return Bridge1_9.getItemInMainHand(player).getType();
+    }
+
+    private boolean shouldSkipChecks(final BlockPlaceEvent event, final Material placedMat,
+            final IPlayerData pData, final Player player) {
+        if (blockMultiPlaceEvent != null && event.getClass() == blockMultiPlaceEvent) {
+            if (placedMat == Material.BEDROCK || (Bridge1_9.hasEndCrystalItem() && placedMat == Bridge1_9.END_CRYSTAL_ITEM)) {
+                return true;
+            }
+            if (pData.isDebugActive(CheckType.BLOCKPLACE)) {
+                debug(player, "Block place " + event.getClass().getName() + " " + placedMat);
+            }
+            return false;
+        }
+        return BlockProperties.isScaffolding(placedMat);
+    }
+
+    private void recordAutoSignData(final Material placedMat, final Block block, final BlockPlaceData data,
+            final IPlayerData pData, final Player player) {
+        if (!MaterialUtil.isAnySign(placedMat)) {
+            return;
+        }
+        data.autoSignPlacedTime = System.currentTimeMillis();
+        data.autoSignPlacedHash = getBlockPlaceHash(block, placedMat);
+        if (pData.isDebugActive(CheckType.BLOCKPLACE_AUTOSIGN)) {
+            debug(player, "Register time and hash for this placed sign: h= " + data.autoSignPlacedHash
+                    + " / t= " + data.autoSignPlacedTime);
+        }
+    }
+
+    private boolean checkSetBack(final IPlayerData pData, final Player player) {
+        if (pData.isPlayerSetBackScheduled()) {
+            debug(player, "Prevent block place due to a scheduled set back.");
+            return true;
+        }
+        return false;
+    }
+
+    private boolean performAgainstCheck(final Player player, final Block block, final Material placedMat,
+            final Block blockAgainst, final boolean isInteractBlock, final BlockPlaceData data, final BlockPlaceConfig cc,
+            final IPlayerData pData) {
+        return against.isEnabled(player, pData) && !BlockProperties.isScaffolding(placedMat)
+                && against.check(player, block, placedMat, blockAgainst, isInteractBlock, data, cc, pData);
+    }
+
+    private boolean performFastPlaceCheck(final Player player, final Block block, final BlockPlaceData data,
+            final BlockPlaceConfig cc, final IPlayerData pData) {
+        if (!fastPlace.isEnabled(player, pData)) {
+            return false;
+        }
+        boolean cancelled = fastPlace.check(player, block, TickTask.getTick(), data, cc, pData);
+        if (cc.fastPlaceImprobableWeight > 0.0f) {
+            if (data.fastPlaceVL > 20) {
+                if (!cc.fastPlaceImprobableFeedOnly) {
+                    if (Improbable.check(player, cc.fastPlaceImprobableWeight, System.currentTimeMillis(),
+                            "blockplace.fastplace", pData)) {
+                        cancelled = true;
+                    }
+                } else {
+                    Improbable.feed(player, cc.fastPlaceImprobableWeight, System.currentTimeMillis());
+                }
+            } else {
+                Improbable.feed(player, cc.fastPlaceImprobableWeight, System.currentTimeMillis());
+            }
+        }
+        return cancelled;
+    }
+
+    private boolean performNoSwingCheck(final Player player, final Material placedMat, final BlockPlaceData data,
+            final BlockPlaceConfig cc, final IPlayerData pData) {
+        return !cc.noSwingExceptions.contains(placedMat) && noSwing.isEnabled(player, pData)
+                && noSwing.check(player, data, cc);
+    }
+
+    private boolean performScaffoldCheck(final Player player, final BlockFace placedFace, final Block blockPlaced,
+            final BlockPlaceData data, final BlockPlaceConfig cc, final BlockPlaceEvent event,
+            final IPlayerData pData) {
+        if (!Scaffold.isEnabled(player, pData) || placedFace == null) {
+            data.cancelNextPlace = false;
+            return false;
+        }
+        final PlayerMoveData thisMove = pData.getGenericInstance(MovingData.class).playerMoves.getCurrentMove();
+        boolean cancel = false;
+        if (faces.contains(placedFace)
+                && thisMove.from.getY() - blockPlaced.getY() < 2.0
+                && thisMove.from.getY() - blockPlaced.getY() >= 1.0
+                && blockPlaced.getType().isSolid()
+                && TrigUtil.distance(player.getLocation(), blockPlaced.getLocation()) < 2.0) {
+            if (Combined.checkYawRate(player, thisMove.from.getYaw(), System.currentTimeMillis(),
+                    thisMove.from.getWorldName(), pData)) {
+                cancel = true;
+            }
+            if (data.cancelNextPlace && Math.abs(data.currentTick - TickTask.getTick()) < 10
+                    || Scaffold.check(player, placedFace, pData, data, cc, event.isCancelled(), thisMove.yDistance,
+                            pData.getGenericInstance(MovingData.class).sfJumpPhase)) {
+                cancel = true;
+            } else if (cc.scaffoldImprobableWeight > 0.0f) {
+                if (cc.scaffoldImprobableFeedOnly) {
+                    Improbable.feed(player, cc.scaffoldImprobableWeight, System.currentTimeMillis());
+                } else if (Improbable.check(player, cc.scaffoldImprobableWeight, System.currentTimeMillis(),
+                        "blockplace.scaffold", pData)) {
+                    cancel = true;
+                }
+            }
+            if (!cancel) {
+                data.scaffoldVL *= 0.98;
+            }
+        }
+        data.cancelNextPlace = false;
+        return cancel;
+    }
+
+    private boolean performReachAndDirectionChecks(final Player player, final Block block, final Block blockAgainst,
+            final boolean isInteractBlock, final BlockPlaceData data, final BlockPlaceConfig cc,
+            final BlockInteractData bdata, final IPlayerData pData, final boolean shouldSkipSome,
+            final FlyingQueueHandle flyingHandle) {
+        final boolean reachCheck = pData.isCheckActive(CheckType.BLOCKPLACE_REACH, player);
+        final boolean directionCheck = pData.isCheckActive(CheckType.BLOCKPLACE_DIRECTION, player);
+        if (!reachCheck && !directionCheck) {
+            return false;
+        }
+        boolean cancelled = false;
+        final Location loc = player.getLocation(useLoc);
+        final double eyeHeight = MovingUtil.getEyeHeight(player);
+        if (!shouldSkipSome) {
+            if (!cancelled) {
+                if (isInteractBlock && bdata.isPassedCheck(CheckType.BLOCKINTERACT_REACH)) {
+                    // Skip redundant check.
+                } else if (reachCheck && reach.check(player, eyeHeight, block, data, cc)) {
+                    cancelled = true;
+                }
+            }
+            if (!cancelled) {
+                if (isInteractBlock && bdata.isPassedCheck(CheckType.BLOCKINTERACT_DIRECTION)) {
+                    // Skip redundant check.
+                } else if (directionCheck) {
+                    if (blockAgainst.getType() == Material.LADDER
+                            || BlockProperties.isCarpet(blockAgainst.getType())) {
+                        // TODO: fix ignoring of ladders and carpets (Issue #524).
+                    } else if (direction.check(player, loc, eyeHeight, block, null, flyingHandle, data, cc, pData)) {
+                        cancelled = true;
+                    }
+                }
+            }
+        }
+        useLoc.setWorld(null);
+        return cancelled;
     }
 
     private void debugBlockPlace(final Player player, final Material placedMat, 
