@@ -45,10 +45,10 @@ public interface IWorkaroundRegistry {
      */
     public static class WorkaroundSet {
 
-        // TODO: getUseCount()
-        // TODO: A list of just used IStageWorkaround / maybe other extra, or a flag (reset externally).
-        // TODO: Alternative: provide a use(Collection<String>) method to add the id to on accept.
-        // TODO: Better optimized constructor (instanceof-decisions can be pre-cached).
+        // getUseCount() not yet implemented
+        // A list of just used IStageWorkaround / maybe other extra, or a flag (reset externally).
+        // Alternative: provide a use(Collection<String>) method to add the id to on accept.
+        // Better optimized constructor (instanceof-decisions can be pre-cached).
 
         /** Map workaround id to workaround. */
         private final Map<String, IWorkaround> workaroundsById = new LinkedHashMap<String, IWorkaround>();
@@ -56,7 +56,7 @@ public interface IWorkaroundRegistry {
         /** Only the workarounds that might need resetting. */
         private final IStagedWorkaround[] stagedWorkarounds;
 
-        // TODO: Consider to make accessible (flexible log/stats command) or remove keeping entire groups.
+        // Consider making accessible (flexible log/stats command) or remove keeping entire groups.
         /** Map groupId to workarounds. Set to null, if no groups are present. */
         private final Map<String, IWorkaround[]> groups;
 
@@ -179,7 +179,7 @@ public interface IWorkaroundRegistry {
          * 
          */
         public boolean use(String workaroundId) {
-            // TODO: For consistency might throw the same exception everywhere (IllegalArgument?). 
+            // For consistency might throw the same exception everywhere (IllegalArgument?).
             final IWorkaround workaround = workaroundsById.get(workaroundId);
             if (workaround == null) {
                 throw new IllegalArgumentException("Workaround id not registered: " + workaroundId);
@@ -208,7 +208,7 @@ public interface IWorkaroundRegistry {
          * 
          */
         public boolean canUse(String workaroundId) {
-            // TODO: For consistency might throw the same exception everywhere (IllegalArgument?). 
+            // For consistency might throw the same exception everywhere (IllegalArgument?).
             return workaroundsById.get(workaroundId).canUse();
         }
 
