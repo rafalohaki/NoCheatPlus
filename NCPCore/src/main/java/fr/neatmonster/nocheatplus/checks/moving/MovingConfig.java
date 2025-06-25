@@ -102,7 +102,7 @@ public class MovingConfig extends ACheckConfig {
     public final boolean noFallAntiCriticals;
     public final ActionList noFallActions;
 
-    // TODO: passableAccuracy: also use if not using ray-tracing
+    // PassableAccuracy: also use if ray-tracing is not used
     public final ActionList passableActions;
     public final double     passableHorizontalMargins;
     public final double     passableVerticalMargins;
@@ -138,7 +138,7 @@ public class MovingConfig extends ACheckConfig {
     public final boolean    sfSetBackPolicyFallDamage;
     public final ActionList survivalFlyActions;
 
-    public final boolean 	sfHoverCheck; // TODO: Sub check ?
+    public final boolean 	sfHoverCheck; // Placeholder for potential sub check
     public final int 		sfHoverTicks;
     public final int		sfHoverLoginTicks;
     public final boolean    sfHoverFallDamage;
@@ -305,7 +305,7 @@ public class MovingConfig extends ACheckConfig {
         AlmostBoolean refSplitMoves = config.getAlmostBoolean(ConfPaths.MOVING_SPLITMOVES, AlmostBoolean.MAYBE);
         //splitMoves = refSplitMoves == AlmostBoolean.MAYBE ? ServerVersion.compareMinecraftVersion("1.9") == -1 : refSplitMoves.decide();
         splitMoves = refSplitMoves.decideOptimistically();
-        // TODO: Ignore the stance, once it is known that the server catches such.
+        // Ignore the stance once the server is confirmed to catch such cases.
         AlmostBoolean refIgnoreStance = config.getAlmostBoolean(ConfPaths.MOVING_IGNORESTANCE, AlmostBoolean.MAYBE);
         ignoreStance = refIgnoreStance == AlmostBoolean.MAYBE ? ServerVersion.compareMinecraftVersion("1.8") >= 0 : refIgnoreStance.decide();
         tempKickIllegal = config.getBoolean(ConfPaths.MOVING_TEMPKICKILLEGAL);
@@ -322,10 +322,10 @@ public class MovingConfig extends ACheckConfig {
         } else {
             enforceLocation = ref.decide();
         }
-        // TODO: Rename overall flag to trackBlockChanges. Create a sub-config rather.
+        // Consider renaming overall flag to trackBlockChanges and creating a sub-config.
         trackBlockMove = config.getBoolean(ConfPaths.COMPATIBILITY_BLOCKS_CHANGETRACKER_ACTIVE) 
                 && (config.getBoolean(ConfPaths.COMPATIBILITY_BLOCKS_CHANGETRACKER_PISTONS
-                        // TODO: || other activation flags.
+                        // Consider adding other activation flags.
                         ));
         final PlayerSetBackMethod playerSetBackMethod = PlayerSetBackMethod.fromString(
                 "extern.fromconfig", config.getString(ConfPaths.MOVING_SETBACK_METHOD));
@@ -440,7 +440,7 @@ public class MovingConfig extends ACheckConfig {
             return flyingModelSlowfalling;
         }
         // Riptiding
-        // TODO: Put on top priority, add data.timeRiptiding too, remove redundant
+        // Riptide should have top priority; consider adding data.timeRiptiding and removing redundant checks
         if (RiptidePhase) {
             return flyingModelRiptiding;
         }
