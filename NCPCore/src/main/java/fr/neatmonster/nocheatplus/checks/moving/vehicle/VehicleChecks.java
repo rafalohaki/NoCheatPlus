@@ -477,111 +477,112 @@ public class VehicleChecks extends CheckListener {
      * @param data
      * @param cc2 
      */
-    private void checkVehicleMove(final Entity vehicle, final EntityType vehicleType, 
-            final Location vehicleLocation, final World world, 
-            final VehicleMoveInfo moveInfo, final VehicleMoveData thisMove, final VehicleMoveData firstPastMove, 
-            final Player player, final boolean fake, 
+    private void checkVehicleMove(final Entity vehicle, final EntityType vehicleType,
+            final Location vehicleLocation, final World world,
+            final VehicleMoveInfo moveInfo, final VehicleMoveData thisMove, final VehicleMoveData firstPastMove,
+            final Player player, final boolean fake,
             final MovingData data, final MovingConfig cc, final IPlayerData pData) {
+        if (player == null || vehicleLocation == null || world == null) {
+            return;
+        }
+
         final boolean debug = pData.isDebugActive(checkType);
 
-        data.joinOrRespawn = false;
-        data.vehicleConsistency = MoveConsistency.getConsistency(thisMove, player.getLocation(useLoc));
-        switch (data.vehicleConsistency) {
-            case FROM:
-            case TO:
-                aux.resetPositionsAndMediumProperties(player, player.getLocation(useLoc), data, cc); 
-                break;
-            case INCONSISTENT:
-                
-                break;
-        }
-
-        SetBackEntry newTo = null;
-        data.sfNoLowJump = true;
-
-        if (cc.noFallVehicleReset) {
-            // Reset noFall data.
-            data.noFallSkipAirCheck = true; // Might allow one time cheat.
-            data.sfLowJump = false;
-            data.clearNoFallData();
-        }
+        prepareForVehicleMove(player, thisMove, data, cc);
 
         if (debug) {
-            // Log move.
             outputDebugVehicleMove(player, vehicle, thisMove, fake);
         }
 
-        // Ensure a common set back for now.
         if (!data.vehicleSetBacks.isDefaultEntryValid()) {
             ensureSetBack(player, thisMove, data, pData);
         }
 
-        //if ((newTo == null || data.vehicleSetBacks.getSafeMediumEntry().isValidAndOlderThan(newTo))
-        //        //&& pData.isCheckActive(CheckType.MOVING_VEHICLE_PASSABLE, player)
-        //        ) {
-        //    final SetBackEntry tempNewTo = vehiclePassable.check(player, moveInfo.from, moveInfo.to, data, cc, pData, TickTask.getTick(), false);
-        //    if (tempNewTo != null) {
-        //        newTo = tempNewTo;
-        //    }
-        //}
-        
-        // Moving envelope check(s).
+        SetBackEntry newTo = null;
+
+        newTo = performEnvelopeCheck(vehicle, moveInfo, thisMove, player, fake, data, cc, pData, newTo, debug);
+
+        newTo = performMorePacketsCheck(thisMove, newTo, player, data, cc, pData);
+
+        finalizeVehicleMove(vehicle, moveInfo, thisMove, player, data, newTo, cc, pData);
+        useLoc.setWorld(null);
+    }
+
+    private void prepareForVehicleMove(final Player player, final VehicleMoveData thisMove,
+            final MovingData data, final MovingConfig cc) {
+        data.joinOrRespawn = false;
+        if (player != null) {
+            data.vehicleConsistency = MoveConsistency.getConsistency(thisMove, player.getLocation(useLoc));
+            switch (data.vehicleConsistency) {
+                case FROM:
+                case TO:
+                    aux.resetPositionsAndMediumProperties(player, player.getLocation(useLoc), data, cc);
+                    break;
+                default:
+                    break;
+            }
+        } else {
+            data.vehicleConsistency = MoveConsistency.INCONSISTENT;
+        }
+        data.sfNoLowJump = true;
+        if (cc.noFallVehicleReset) {
+            data.noFallSkipAirCheck = true;
+            data.sfLowJump = false;
+            data.clearNoFallData();
+        }
+    }
+
+    private SetBackEntry performEnvelopeCheck(final Entity vehicle, final VehicleMoveInfo moveInfo,
+            final VehicleMoveData thisMove, final Player player, final boolean fake,
+            final MovingData data, final MovingConfig cc, final IPlayerData pData,
+            SetBackEntry newTo, final boolean debug) {
         if ((newTo == null || data.vehicleSetBacks.getSafeMediumEntry().isValidAndOlderThan(newTo))
                 && pData.isCheckActive(CheckType.MOVING_VEHICLE_ENVELOPE, player)) {
-            // Skip if this is the first move after set back, with to=set back.
             if (data.timeSinceSetBack == 0 || thisMove.to.hashCode() == data.lastSetBackHash) {
-                
                 thisMove.specialCondition = true;
                 if (debug) {
                     debug(player, "Skip envelope check on first move after set back acknowledging the set back with an odd starting point (from).");
                 }
-            }
-            else {
-                // Set up basic details about what/how to check.
+            } else {
                 vehicleEnvelope.prepareCheckDetails(vehicle, moveInfo, thisMove);
-                // Check.
-                final SetBackEntry tempNewTo  = vehicleEnvelope.check(player, vehicle, 
+                final SetBackEntry tempNewTo = vehicleEnvelope.check(player, vehicle,
                         thisMove, fake, data, cc, pData, moveInfo);
                 if (tempNewTo != null) {
                     newTo = tempNewTo;
                 }
             }
         }
+        return newTo;
+    }
 
-        // More packets: Sort this in last, to avoid setting the set back early. Always check to adjust set back, for now.
-        if ((newTo == null || data.vehicleSetBacks.getMidTermEntry().isValidAndOlderThan(newTo))) {
+    private SetBackEntry performMorePacketsCheck(final VehicleMoveData thisMove, SetBackEntry newTo,
+            final Player player, final MovingData data, final MovingConfig cc, final IPlayerData pData) {
+        if (newTo == null || data.vehicleSetBacks.getMidTermEntry().isValidAndOlderThan(newTo)) {
             if (pData.isCheckActive(CheckType.MOVING_VEHICLE_MOREPACKETS, player)) {
-                final SetBackEntry tempNewTo = vehicleMorePackets.check(player, thisMove, newTo, 
-                        data, cc, pData);
+                final SetBackEntry tempNewTo = vehicleMorePackets.check(player, thisMove, newTo, data, cc, pData);
                 if (tempNewTo != null) {
                     newTo = tempNewTo;
                 }
-            }
-            else {
-                // Otherwise we need to clear their data.
+            } else {
                 data.clearVehicleMorePacketsData();
             }
         }
+        return newTo;
+    }
 
-        // Schedule a set back?
+    private void finalizeVehicleMove(final Entity vehicle, final VehicleMoveInfo moveInfo,
+            final VehicleMoveData thisMove, final Player player, final MovingData data,
+            final SetBackEntry newTo, final MovingConfig cc, final IPlayerData pData) {
         if (newTo == null) {
-            // Update vehicle data for passive player passengers.
             final List<Entity> passengers = passengerUtil.handleVehicle.getHandle().getEntityPassengers(vehicle);
             if (passengers.size() > 1) {
                 updateVehicleData(player, data, vehicle, moveInfo, passengers);
             }
-            // Increase time since set back.
-            data.timeSinceSetBack ++;
-            // Finally finish processing the current move and move it to past ones.
+            data.timeSinceSetBack++;
             data.vehicleMoves.finishCurrentMove();
+        } else {
+            setBack(player, vehicle, newTo, data, cc, pData);
         }
-        else {
-            //final SetBackEntry tNewTo = newTo;
-            //Folia.runSyncTaskForEntity(vehicle, plugin, (arg) -> {
-                setBack(player, vehicle, newTo, data, cc, pData);
-            //}, null);
-        }
-        useLoc.setWorld(null);
     }
 
     private void updateVehicleData(final Player player, final MovingData data, final Entity vehicle, 
