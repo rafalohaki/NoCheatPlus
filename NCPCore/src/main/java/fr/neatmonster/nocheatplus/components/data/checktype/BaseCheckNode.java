@@ -32,7 +32,7 @@ import fr.neatmonster.nocheatplus.config.ConfigFile;
  */
 public abstract class BaseCheckNode<N extends BaseCheckNode<N>> extends CheckTypeTreeNode<N> {
 
-    // TODO: Not optimal - references that are from the container should be fetched from there.
+    // NOTE: References that originate from the container should be fetched from there.
     protected OverrideType configOverrideType = OverrideType.DEFAULT;
 
     protected static interface IConfigFlagAccess<N> {
@@ -56,7 +56,8 @@ public abstract class BaseCheckNode<N extends BaseCheckNode<N>> extends CheckTyp
         super(checkType, parent, factory);
     }
 
-    // TODO: GENERIC (ConfigFlagAccess/Fetch based) Override / update / reset.
+    // NOTE: This method could be generalized using ConfigFlagAccess for override,
+    // update and reset functionality.
 
     /**
      * Override state.
@@ -101,7 +102,7 @@ public abstract class BaseCheckNode<N extends BaseCheckNode<N>> extends CheckTyp
     protected void update(final boolean forceUpdateChildren, 
             final IConfigFlagAccess<N> access) {
         @SuppressWarnings("unchecked")
-        final N thisNode = (N) this; // TODO
+        final N thisNode = (N) this;
         final boolean previousActive = access.getState(thisNode);
         final AlmostBooleanWithOverride configActivation = access.getConfigState(thisNode);
         AlmostBoolean newActive = configActivation.getValue();
@@ -147,27 +148,27 @@ public abstract class BaseCheckNode<N extends BaseCheckNode<N>> extends CheckTyp
     protected void update(final ConfigFile rawConfiguration, 
             final boolean forceUpdateChildren, final IConfigFlagAccess<N> access) {
         @SuppressWarnings("unchecked")
-        final N thisNode = (N) this; // TODO
+        final N thisNode = (N) this;
         final AlmostBooleanWithOverride configActivation = access.getConfigState(thisNode);
 
         // First attempt to override by config.
         if (rawConfiguration != null) {
             if (configActivation.allowsOverrideBy(
                     OverrideType.SPECIFIC)) {
-                // TODO: SPECIFIC for inherited !?
+                // NOTE: Investigate SPECIFIC handling for inherited cases.
                 final String configPath = access.getConfigPath(thisNode);
                 final AlmostBoolean setValue;
                 if (configPath == null) {
                     setValue = AlmostBoolean.MAYBE;
                 }
                 else {
-                    // TODO: Contract? Either config is null, or path must exist.
+                    // NOTE: Ensure that either the configuration is null or the path exists.
                     setValue = rawConfiguration.getAlmostBoolean(configPath, AlmostBoolean.MAYBE);
                 }
                 configActivation.setValue(setValue, configOverrideType);
             }
         }
-        // TODO: else -> set to MAYBE ?
+        // NOTE: If rawConfiguration is null consider setting the value to MAYBE.
 
         final boolean oldState = access.getState(thisNode);
         update(false, access); // Update in-place.
