@@ -537,7 +537,8 @@ public class ReflectionUtil {
     public static String getClassDescription(final Class<?> clazz) {
         // TODO: Option to sort by names ?
         final StringBuilder builder = new StringBuilder(512);
-        builder.append("Class: "); builder.append(clazz);
+        builder.append("Class: ");
+        builder.append(clazz);
         // TODO: superclass, interfaces, generics
         for (final Field field : clazz.getFields()) {
             builder.append("\n  ");
