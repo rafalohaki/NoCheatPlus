@@ -35,10 +35,10 @@ import fr.neatmonster.nocheatplus.components.location.IGetBlockPosition;
  */
 public class BlockPositionContainer implements IAddBlockPosition, IContainBlockPosition {
 
-    // TODO: Not sure where to put this.
-    // TODO: Future use / interfacing could involve collecting cuboids from block positions (mining/activity/areas).
-
-    // TODO: Consider switching to a HashSet or an ArrayList.
+    /**
+     * Container for block positions. Future implementations might switch to a
+     * different backing collection if necessary.
+     */
     private final LinkedList<BlockPositionGet> blocks = new LinkedList<BlockPositionGet>();
 
     private int minX, minY, minZ, maxX, maxY, maxZ;

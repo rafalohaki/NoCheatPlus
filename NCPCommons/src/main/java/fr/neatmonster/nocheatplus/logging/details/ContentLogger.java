@@ -22,9 +22,14 @@ import java.util.logging.Level;
  *
  * @param <C>
  */
-public interface ContentLogger <C> {
-    
-    // TODO: Not sure about generics.
+public interface ContentLogger<C> {
+
+    /**
+     * Log the specified content with the given log level.
+     *
+     * @param level   the log level
+     * @param content the content to log
+     */
     void log(Level level, C content);
     
 }

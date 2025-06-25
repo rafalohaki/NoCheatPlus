@@ -208,7 +208,6 @@ public interface NoCheatPlusAPI extends ComponentRegistry<Object>, ComponentRegi
      * 
      * @return
      */
-    // TODO: Remove in favor of per world permission registries (!).
     public PermissionRegistry getPermissionRegistry();
 
     /**
