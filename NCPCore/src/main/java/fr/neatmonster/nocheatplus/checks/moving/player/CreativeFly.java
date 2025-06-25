@@ -496,28 +496,46 @@ public class CreativeFly extends Check {
      * @param cc
      * @return limitV, resultV (not normalized).
      */
-    private double[] vDistAscend(final PlayerLocation from, final PlayerLocation to, final double yDistance, 
-                                 final boolean flying, final PlayerMoveData thisMove, final PlayerMoveData lastMove, 
+    private double[] vDistAscend(final PlayerLocation from, final PlayerLocation to, final double yDistance,
+                                 final boolean flying, final PlayerMoveData thisMove, final PlayerMoveData lastMove,
                                  final ModelFlying model, final MovingData data, final MovingConfig cc, final boolean debug) {
 
-        final boolean ripglide = Bridge1_13.isRiptiding(from.getPlayer()) && Bridge1_9.isGlidingWithElytra(from.getPlayer());
+        final boolean ripglide = Bridge1_13.isRiptiding(from != null ? from.getPlayer() : null)
+                && Bridge1_9.isGlidingWithElytra(from != null ? from.getPlayer() : null);
         final long now = System.currentTimeMillis();
-        // Set the vertical limit.
-        double limitV = model.getVerticalAscendModSpeed() / 100.0 * ModelFlying.VERTICAL_ASCEND_SPEED; 
+        double limitV = model.getVerticalAscendModSpeed() / 100.0 * ModelFlying.VERTICAL_ASCEND_SPEED;
         double resultV = 0.0;
-        
-        // Let fly speed apply with moving upwards.
+
+        limitV = applyFlySpeed(limitV, flying, yDistance, model, data);
+        limitV = applyLevitationAdjustment(from, yDistance, thisMove, model, data, limitV);
+        limitV = applyElytraAscendLimit(yDistance, thisMove, lastMove, from, data, model, limitV);
+        limitV = applyRipglide(ripglide, lastMove, yDistance, limitV);
+        handleRiptideBounce(from, yDistance, limitV, thisMove, data, debug);
+        limitV = applyGlideWater(from, data, limitV);
+        limitV = applyGravityFriction(model, yDistance, lastMove, flying, limitV);
+        limitV = applyJumpLiftOffGain(model, yDistance, thisMove, lastMove, data, limitV);
+        limitV = applyStepUpCheck(yDistance, cc, lastMove, from, thisMove, to, limitV);
+
+        resultV = Math.max(0.0, yDistance - limitV);
+        return new double[] { limitV, resultV };
+    }
+
+    private double applyFlySpeed(double limitV, boolean flying, double yDistance,
+            ModelFlying model, MovingData data) {
         if (model.getApplyModifiers() && flying && yDistance > 0.0) {
             limitV *= data.flySpeed / Magic.DEFAULT_FLYSPEED;
         }
-        else if (model.getScaleLevitationEffect() && Bridge1_9.hasLevitation()) {
-            // Exclude modifiers for now.
-            final double levitation = Bridge1_9.getLevitationAmplifier(from.getPlayer());
+        return limitV;
+    }
+
+    private double applyLevitationAdjustment(final PlayerLocation from, final double yDistance,
+            final PlayerMoveData thisMove, final ModelFlying model, final MovingData data, double limitV) {
+        if (model.getScaleLevitationEffect() && Bridge1_9.hasLevitation()) {
+            final Player p = from != null ? from.getPlayer() : null;
+            final double levitation = Bridge1_9.getLevitationAmplifier(p);
             if (levitation >= 0.0) {
-                // (Double checked.)
-                limitV += 0.046 * levitation; // (It ends up like 0.5 added extra for some levels of levitation, roughly.)
+                limitV += 0.046 * levitation;
                 final double minJumpGain = LiftOffEnvelope.NORMAL.getMinJumpGain(data.jumpAmplifier) + 0.01;
-                // Bug, duplicate motion
                 if (yDistance > 0.0 && yDistance < minJumpGain && thisMove.touchedGround) {
                     limitV = minJumpGain;
                     data.addVerticalVelocity(new SimpleEntry(yDistance, 2));
@@ -525,81 +543,86 @@ public class CreativeFly extends Check {
                 tags.add("levitation:" + levitation);
             }
         }
+        return limitV;
+    }
 
-        // Related to elytra.
+    private double applyElytraAscendLimit(double yDistance, PlayerMoveData thisMove, PlayerMoveData lastMove,
+            PlayerLocation from, MovingData data, ModelFlying model, double limitV) {
         if (model.getVerticalAscendGliding()) {
-            limitV = Math.max(limitV, limitV = hackLytra(yDistance, limitV, thisMove, lastMove, from, data));
+            limitV = Math.max(limitV, hackLytra(yDistance, limitV, thisMove, lastMove, from, data));
         }
+        return limitV;
+    }
 
-        // "Ripglide" (riptiding+gliding phase): allow some additional speed increase
-        // Note that the ExtremeMove subcheck is skipped during such phases.
+    private double applyRipglide(boolean ripglide, PlayerMoveData lastMove, double yDistance, double limitV) {
         if (lastMove.toIsValid && ripglide && yDistance > limitV) {
             limitV += 5.9;
             tags.add("vripglide");
         }
-        
-        // Riptiding right onto a bouncy block (2nd time, higher bounce distance)
-        // Note that the ExtremeMove subcheck is skipped during such phases.
-        if (Bridge1_13.isRiptiding(from.getPlayer()) && (from.getBlockFlags() & BlockFlags.F_BOUNCE25) != 0
-            && yDistance > limitV && data.sfJumpPhase <= 2
-            && yDistance > 0.0 && yDistance < 7.5  // Cap the distance: observed maximum speed -> 5.536355205897621 (+5.993) / 5.0
-            && thisMove.from.onGround && !thisMove.to.onGround) {
+        return limitV;
+    }
+
+    private void handleRiptideBounce(final PlayerLocation from, final double yDistance, final double limitV,
+            final PlayerMoveData thisMove, final MovingData data, final boolean debug) {
+        final Player player = from != null ? from.getPlayer() : null;
+        if (Bridge1_13.isRiptiding(player) && (from.getBlockFlags() & BlockFlags.F_BOUNCE25) != 0
+                && yDistance > limitV && data.sfJumpPhase <= 2 && yDistance > 0.0 && yDistance < 7.5
+                && thisMove.from.onGround && !thisMove.to.onGround) {
             data.addVerticalVelocity(new SimpleEntry(yDistance, 4));
-            if (debug) debug(from.getPlayer(), "Riptide bounce: add velocity");
+            if (debug) {
+                debug(player, "Riptide bounce: add velocity");
+            }
         }
-        
-        // Gliding in water
-        if (Bridge1_9.isGlidingWithElytra(from.getPlayer()) && data.liqtick > 1) {
+    }
+
+    private double applyGlideWater(final PlayerLocation from, final MovingData data, double limitV) {
+        final Player player = from != null ? from.getPlayer() : null;
+        if (Bridge1_9.isGlidingWithElytra(player) && data.liqtick > 1) {
             limitV = Math.max(limitV, 0.35);
         }
-        
-        // Friction with gravity.
-        if (model.getGravity()) {
-            if (yDistance > limitV && lastMove.toIsValid) { 
-                // (Disregard gravity.)
-                double frictionDist = lastMove.yDistance * Magic.FRICTION_MEDIUM_AIR;
-                if (!flying) {
-                    frictionDist -= 0.019;
-                }
-                if (frictionDist > limitV) {
-                    limitV = frictionDist;
-                    tags.add("vfrict_g");
-                }
+        return limitV;
+    }
+
+    private double applyGravityFriction(ModelFlying model, double yDistance, PlayerMoveData lastMove, boolean flying,
+            double limitV) {
+        if (model.getGravity() && yDistance > limitV && lastMove.toIsValid) {
+            double frictionDist = lastMove.yDistance * Magic.FRICTION_MEDIUM_AIR;
+            if (!flying) {
+                frictionDist -= 0.019;
+            }
+            if (frictionDist > limitV) {
+                limitV = frictionDist;
+                tags.add("vfrict_g");
             }
         }
+        return limitV;
+    }
 
-        if (model.getGround()) {
-            // Jump lift off gain.
-            // NOTE: This assumes SurvivalFly busies about moves with from.onGroundOrResetCond.
-            if (yDistance > limitV && !thisMove.to.onGroundOrResetCond && !thisMove.from.onGroundOrResetCond && (
-                // Last move touched ground.
-                lastMove.toIsValid && lastMove.touchedGround && 
-                (lastMove.yDistance <= 0.0 || lastMove.to.extraPropertiesValid && lastMove.to.onGround)
-                // This move touched ground by a workaround.
-                || thisMove.touchedGroundWorkaround
-                )) {
-                // Allow normal jumping.
-                final double maxGain = LiftOffEnvelope.NORMAL.getMaxJumpGain(data.jumpAmplifier);
-                if (maxGain > limitV) {
-                    limitV = maxGain;
-                    tags.add("jump_gain");
-                }
+    private double applyJumpLiftOffGain(ModelFlying model, double yDistance, PlayerMoveData thisMove,
+            PlayerMoveData lastMove, MovingData data, double limitV) {
+        if (model.getGround() && yDistance > limitV && !thisMove.to.onGroundOrResetCond
+                && !thisMove.from.onGroundOrResetCond && (lastMove.toIsValid && lastMove.touchedGround
+                        && (lastMove.yDistance <= 0.0 || lastMove.to.extraPropertiesValid && lastMove.to.onGround)
+                        || thisMove.touchedGroundWorkaround)) {
+            final double maxGain = LiftOffEnvelope.NORMAL.getMaxJumpGain(data.jumpAmplifier);
+            if (maxGain > limitV) {
+                limitV = maxGain;
+                tags.add("jump_gain");
             }
         }
+        return limitV;
+    }
 
-        // Ordinary step up.
-        if (yDistance > limitV && yDistance <= cc.sfStepHeight 
-            && (lastMove.toIsValid && lastMove.yDistance < 0.0 || from.isOnGroundOrResetCond() || thisMove.touchedGroundWorkaround)
-            && to.isOnGround()) {
-            // (Jump effect not checked yet.)
+    private double applyStepUpCheck(double yDistance, MovingConfig cc, PlayerMoveData lastMove, PlayerLocation from,
+            PlayerMoveData thisMove, PlayerLocation to, double limitV) {
+        if (yDistance > limitV && yDistance <= cc.sfStepHeight
+                && (lastMove.toIsValid && lastMove.yDistance < 0.0 || from.isOnGroundOrResetCond()
+                        || thisMove.touchedGroundWorkaround)
+                && to.isOnGround()) {
             limitV = cc.sfStepHeight;
             tags.add("step_up");
         }
-
-        // Determine violation amount.
-        resultV = Math.max(0.0, yDistance - limitV);
-        // Post-violation recovery.
-        return new double[] {limitV, resultV};
+        return limitV;
     }
 
 
