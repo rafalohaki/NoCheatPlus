@@ -71,13 +71,13 @@ public class MorePackets extends Check {
 
         //    	if (from.isSamePos(to)) {
         //    		// Ignore moves with "just look" for now.
-        //    		// TODO: Extra ActionFrequency for "just look" + use to burn, maybe also check individually.
+        //    		// Extra ActionFrequency for "just look" + use to burn, maybe also check individually.
         //    		return null;
         //    	}
 
         // Ensure we have a set back location.
         if (allowSetSetBack && !data.hasMorePacketsSetBack()){
-            // TODO: Check if other set back is appropriate or if to set/reset on other events.
+            // Check if another set back is appropriate or if to set/reset on other events.
             if (data.hasSetBack()) {
                 data.setMorePacketsSetBackFromSurvivalfly();
             }
@@ -93,7 +93,7 @@ public class MorePackets extends Check {
         // Process violation result.
         if (violation > 0.0) {
             // Increment violation level.
-            data.morePacketsVL = violation; // TODO: Accumulate somehow [e.g. always += 1, decrease with continuous moving without violation]?
+            data.morePacketsVL = violation; // Accumulate somehow [e.g. always += 1, decrease with continuous moving without violation]?
 
             // Violation handling.
             final ViolationData vd = new ViolationData(this, player, data.morePacketsVL, violation, cc.morePacketsActions);
@@ -104,10 +104,10 @@ public class MorePackets extends Check {
             if (executeActions(vd).willCancel()) {
                 // Set to cancel the move.
                 /*
-                 * TODO: Harmonize with MovingUtil.getApplicableSetBackLocation
+                 * Harmonize with MovingUtil.getApplicableSetBackLocation
                  * (somehow include the desired set back type / loc / context).
                  */
-                return data.hasMorePacketsSetBack() ? data.getMorePacketsSetBack() : data.getSetBack(to); // TODO
+                return data.hasMorePacketsSetBack() ? data.getMorePacketsSetBack() : data.getSetBack(to);
             }
         } 
         else if (allowSetSetBack && data.getMorePacketsSetBackAge() > cc.morePacketsSetBackAge) {
