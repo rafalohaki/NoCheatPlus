@@ -38,7 +38,7 @@ import fr.neatmonster.nocheatplus.checks.moving.model.LiftOffEnvelope;
  */
 public class Magic {
 
-    // TODO: Do any of these belong to MovingUtil?
+    // Evaluate if any of these belong to MovingUtil
     // Might move some methods to another class (EnvironmentUtils (?))
     
     // CraftBukkit/Minecraft constants.
@@ -133,7 +133,7 @@ public class Magic {
     // On-ground.
     public static final double Y_ON_GROUND_MIN = 0.00001;
     public static final double Y_ON_GROUND_MAX = 0.0626;
-    // TODO: Model workarounds as lost ground, use Y_ON_GROUND_MIN?
+    // Consider modeling workarounds as lost ground using Y_ON_GROUND_MIN
     public static final double Y_ON_GROUND_DEFAULT = 0.025; // Jump upwards, while placing blocks. // Old 0.016
     //    public static final double Y_ON_GROUND_DEFAULT = 0.029; // Bounce off slime blocks.
     /** The lower bound of fall distance for taking fall damage. */
@@ -165,7 +165,7 @@ public class Magic {
      * @return
      */
     public static double swimBaseSpeedV(boolean isSwimming) {
-        // TODO: Does this have to be the dynamic walk speed (refactoring)?
+        // Check if this has to be the dynamic walk speed (refactoring)
         return isSwimming ? WALK_SPEED * modSwim[2] + 0.1 : WALK_SPEED * modSwim[0] + 0.07; // 0.244
     }
 
@@ -181,9 +181,9 @@ public class Magic {
         if (yDistance >= lastYDist) {
             return false;
         }
-        // TODO: data.lastFrictionVertical (see vDistAir).
+        // Use data.lastFrictionVertical (see vDistAir)
         final double frictDist = lastYDist * lastFrictionVertical - GRAVITY_MIN;
-        // TODO: Extra amount: distinguish pos/neg?
+        // Extra amount: distinguish positive and negative values?
         return yDistance <= frictDist + extraGravity && yDistance > frictDist - GRAVITY_SPAN - extraGravity;
     }
 
@@ -210,7 +210,7 @@ public class Magic {
     public static boolean enoughFrictionEnvelope(final PlayerMoveData thisMove, final PlayerMoveData lastMove, final double friction, 
                                                  final double minGravity, final double maxOff, final double decreaseByOff) {
 
-        // TODO: Elaborate... could have one method to test them all?
+        // Elaborate: could have one method to test them all
         final double frictDist = lastMove.yDistance * friction - minGravity;
         final double off = Math.abs(thisMove.yDistance - frictDist);
         return off <= maxOff && Math.abs(thisMove.yDistance - lastMove.yDistance) <= off * decreaseByOff;
@@ -546,7 +546,7 @@ public class Magic {
      * @return
      */
     public static boolean skipPaper(final PlayerMoveData thisMove, final PlayerMoveData lastMove, final MovingData data) {
-        // TODO: Confine to from at block level (offset 0)?
+        // Consider confining to from at block level (offset 0)
         final double setBackYDistance;
         if (data.hasSetBack()) {
             setBackYDistance = thisMove.to.getY() - data.getSetBackY();
@@ -613,7 +613,7 @@ public class Magic {
     public static boolean noobJumpsOffTower(final double yDistance, final double maxJumpGain, 
             final PlayerMoveData thisMove, final PlayerMoveData lastMove, final MovingData data) {
         final PlayerMoveData secondPastMove = data.playerMoves.getSecondPastMove();
-        return (data.sfJumpPhase == 1 && lastMove.touchedGroundWorkaround // TODO: Not observed though.
+        return (data.sfJumpPhase == 1 && lastMove.touchedGroundWorkaround // Not observed though.
                 || data.sfJumpPhase == 2 && inAir(lastMove)
                 && secondPastMove.valid && secondPastMove.touchedGroundWorkaround
                 )
