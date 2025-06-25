@@ -518,6 +518,24 @@ public class PlayerDataManager  implements IPlayerDataManager, ComponentWithName
         }
     }
 
+    /**
+     * Fallback for reflective component registration.
+     *
+     * <p>This method prevents noisy warnings when {@link #addComponent(IRemoveData)}
+     * is invoked reflectively with objects that are not {@link IRemoveData}
+     * instances. It delegates to the specialized method if possible and otherwise
+     * returns {@code false}.</p>
+     *
+     * @param obj component instance
+     * @return {@code true} if the component was added
+     */
+    public boolean addComponent(Object obj) {
+        if (obj instanceof IRemoveData) {
+            return addComponent((IRemoveData) obj);
+        }
+        return false;
+    }
+
     @Override
     public void removeComponent(IRemoveData obj) {
         iRemoveData.remove((IRemoveData) obj);
