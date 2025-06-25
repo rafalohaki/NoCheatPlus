@@ -1260,7 +1260,7 @@ public class MovingListener extends CheckListener implements TickListener, IRemo
         final UUID worldId = from.getWorld().getUID();
         double amount = -1.0;
         boolean addvel = false;
-        final BlockChangeEntry entryBelowY_POS = BlockChangeSearch(from, tick, Direction.Y_POS, debug, data, cc, worldId, true);
+        final BlockChangeEntry entryBelowY_POS = blockChangeSearch(from, tick, Direction.Y_POS, debug, data, cc, worldId, true);
 
         if (
                 // Center push..
@@ -1338,8 +1338,8 @@ public class MovingListener extends CheckListener implements TickListener, IRemo
      * @param searchBelow
      * @return
      */
-    private BlockChangeEntry BlockChangeSearch(final PlayerLocation from, final int tick, Direction direction,
-                                               final boolean debug, final MovingData data, final MovingConfig cc, 
+    private BlockChangeEntry blockChangeSearch(final PlayerLocation from, final int tick, Direction direction,
+                                               final boolean debug, final MovingData data, final MovingConfig cc,
                                                final UUID worldId, final boolean searchBelow) {
 
         final int iMinX = Location.locToBlock(from.getMinX());
@@ -1384,7 +1384,7 @@ public class MovingListener extends CheckListener implements TickListener, IRemo
         if (Math.abs(xDistance) > Math.abs(zDistance)) dir = xDistance > 0.0 ? Direction.X_POS : Direction.X_NEG;
         else  dir = zDistance > 0.0 ? Direction.Z_POS : Direction.Z_NEG;
     
-        final BlockChangeEntry entry = BlockChangeSearch(from, tick, dir, debug, data, cc, worldId, false);
+        final BlockChangeEntry entry = blockChangeSearch(from, tick, dir, debug, data, cc, worldId, false);
         if (entry != null) {
             final int count = MovingData.getHorVelValCount(0.6);
             // Clear active horizontal velocity?
