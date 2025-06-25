@@ -107,7 +107,7 @@ public class FastConsume extends Check implements Listener, INotifyReload {
         }
         // Check exceptions.
         final InventoryConfig cc = pData.getGenericInstance(InventoryConfig.class);
-        final Material mat = stack == null ? null : stack.getType();
+        final Material mat = stack.getType();
         if (mat != null){
             if (cc.fastConsumeWhitelist){
                 if (!cc.fastConsumeItems.contains(mat)){

@@ -41,12 +41,20 @@ public abstract class BKModTree<V, N extends Node<V, N>, L extends LookupEntry<V
 	 * @param <V>
 	 * @param <N>
 	 */
-	public static abstract class Node<V, N extends Node<V, N>>{
-		public V value;
-		
-		public Node(V value){
-			this.value = value;
-		}
+        public static abstract class Node<V, N extends Node<V, N>>{
+                private V value;
+
+                public Node(V value){
+                        this.value = value;
+                }
+
+                public V getValue() {
+                        return value;
+                }
+
+                public void setValue(V value) {
+                        this.value = value;
+                }
 		public abstract N putChild(final int distance, final N child);
 		
 		public abstract N getChild(final int distance);
@@ -216,9 +224,9 @@ public abstract class BKModTree<V, N extends Node<V, N>, L extends LookupEntry<V
 		open.add(root);
 		N insertion = null;
 		int insertionDist = 0;
-		do{
-			final N current = open.remove(open.size() - 1);
-			int distance = distance(current.value, value);
+                do{
+                        final N current = open.remove(open.size() - 1);
+                        int distance = distance(current.getValue(), value);
 			if (visit) visit(current, value, distance);
 			if (distance == 0){
 				// exact match.

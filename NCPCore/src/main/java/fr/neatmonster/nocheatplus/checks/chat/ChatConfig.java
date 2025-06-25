@@ -39,7 +39,7 @@ public class ChatConfig extends ACheckConfig {
     };
 
     public static RegisteredPermission[] getPreferKeepUpdatedPermissions() {
-        return preferKeepUpdatedPermissions;
+        return preferKeepUpdatedPermissions.clone();
     }
 
     public final boolean      captchaSkipCommands;
