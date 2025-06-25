@@ -42,7 +42,7 @@ import fr.neatmonster.nocheatplus.utilities.StringUtil;
  */
 public class MaterialUtil {
 
-    // TODO: Naming conventions for collections (_BLOCKS suffix?).
+    // Collection names follow the _BLOCKS suffix convention.
 
 
     ///////////////////////
@@ -381,7 +381,7 @@ public class MaterialUtil {
 
     /** All ordinary terracotta (hard clay) blocks. */
     public static final Set<Material> TERRACOTTA_BLOCKS = Collections.unmodifiableSet(addBlocks(
-            // TODO: exclude GLAZED or not?
+            // Excludes glazed terracotta from this set.
             BridgeMaterial.getByPrefixAndSuffix(
                     null, Collections.singletonList("_terracotta"),
                     AlmostBoolean.YES, 

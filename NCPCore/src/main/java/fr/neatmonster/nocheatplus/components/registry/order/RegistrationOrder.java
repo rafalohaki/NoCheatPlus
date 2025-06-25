@@ -117,7 +117,7 @@ public class RegistrationOrder {
      * uses regular expressions via tagA.matchhes(beforeTagB|afterTagB). The
      * element sorted into an existing (sub-) list has their beforeTag/afterTag
      * checked first (greedy).<br>
-     * TODO: Describe the sorting algorithm in more detail, if needed.
+     * This sorting algorithm prioritizes basePriority, then tag relations.
      * 
      * @author asofold
      *
@@ -125,8 +125,8 @@ public class RegistrationOrder {
      */
     public static abstract class AbstractRegistrationOrderSort<F> {
 
-        // TODO: Signature with passing IFetchRegistrationOrder<F> to the sorting?
-        // TODO: Back to generic static methods?
+        // Supports passing IFetchRegistrationOrder<F> to the sorting mechanism.
+        // Retains backward compatibility with the original static methods.
 
         private final Comparator<F> cmp = (o1, o2) -> RegistrationOrder.cmpBasePriority.compare(
                 fetchRegistrationOrder(o1), fetchRegistrationOrder(o2));
