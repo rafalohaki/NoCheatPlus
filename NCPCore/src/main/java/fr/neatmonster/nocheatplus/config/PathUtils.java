@@ -202,7 +202,9 @@ public class PathUtils {
                 pathPrefixes.feed(path);
             }
         } catch (IllegalArgumentException e) {
+            StaticLog.logDebug(e);
         } catch (IllegalAccessException e) {
+            StaticLog.logDebug(e);
         }
     }
 
@@ -211,7 +213,9 @@ public class PathUtils {
             final String path = field.get(null).toString();
             movedPaths.put(path, new WrapMoved(path, rel));
         } catch (IllegalArgumentException e) {
+            StaticLog.logDebug(e);
         } catch (IllegalAccessException e) {
+            StaticLog.logDebug(e);
         }
     }
 
@@ -255,8 +259,11 @@ public class PathUtils {
                 }
             }
         } catch (FileNotFoundException e) {
+            StaticLog.logDebug(e);
         } catch (IOException e) {
+            StaticLog.logDebug(e);
         } catch (InvalidConfigurationException e) {
+            StaticLog.logDebug(e);
         }
     }
 
