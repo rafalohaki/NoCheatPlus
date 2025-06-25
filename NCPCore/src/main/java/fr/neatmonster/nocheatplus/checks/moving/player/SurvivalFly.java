@@ -1256,115 +1256,11 @@ public class SurvivalFly extends Check {
         if (!handled && applyUsingItemModifiers(ctx, state, lastMove, sfDirty, isBlockingOrUsing)) {
             handled = true;
         }
-
         if (!handled) {
             applyDefaultSpeed(ctx, state, modHopSprint);
         }
 
-        hAllowedDistance = state.allowed;
-        friction = state.friction;
-        useBaseModifiers = state.useBaseModifiers;
-        useBaseModifiersSprint = state.useBaseModifiersSprint;
-        useSneakModifier = state.useSneakModifier;
-
-
-
-        ////////////////////////////////////////////////////////////////////////////
-        // Apply various modifiers to the BASE speed (sprinting, attributes, ...) //
-        ///////////////////////////////////////////////////////////////////////////
-        if (useBaseModifiers) {
-
-            // Apply sprinting speed
-            if (useBaseModifiersSprint && sprinting) {
-                hAllowedDistance *= data.multSprinting;
-            }
-            // Note: Attributes count in slowness potions, thus leaving out isn't possible.
-            final double attrMod = attributeAccess.getHandle().getSpeedAttributeMultiplier(player);
-            // Count in speed potions.
-            if (attrMod == Double.MAX_VALUE) {
-                final double speedAmplifier = mcAccess.getHandle().getFasterMovementAmplifier(player);
-                if (!Double.isInfinite(speedAmplifier) && useBaseModifiersSprint) {
-                    hAllowedDistance *= 1.0D + 0.2D * speedAmplifier;
-                }
-            }
-            else {
-                hAllowedDistance *= attrMod;
-                // Hack for allow sprint-jumping with slowness.
-                if (sprinting && hAllowedDistance < 0.29 && cc.sfSlownessSprintHack
-                    && (
-                        player.hasPotionEffect(BridgePotionEffect.SLOWNESS)
-                        || data.walkSpeed < Magic.DEFAULT_WALKSPEED
-                        || attrMod < 1.0
-                    )) {
-                    hAllowedDistance = slownessSprintHack(player, hAllowedDistance);
-                }
-                //useBaseModifiersSprint = false mean not apply speed effect in it
-                if (!useBaseModifiersSprint) {
-                    final double speedAmplifier = mcAccess.getHandle().getFasterMovementAmplifier(player);
-                    if (!Double.isInfinite(speedAmplifier)) {
-                        hAllowedDistance /= attrMod;
-                        hAllowedDistance *= attrMod - 0.15D * speedAmplifier;
-                    }
-                }
-            }
-        }
-
-        // Account for flowing liquids (only if needed).
-        if (thisMove.downStream && thisMove.hDistance > thisMove.walkSpeed * Magic.modSwim[0]
-            && thisMove.from.inLiquid) {
-            hAllowedDistance *= Magic.modDownStream;
-        }
-
-        // Apply sneaking speed for other modifiers.
-        if (useSneakModifier && actuallySneaking && !Bridge1_13.isSwimming(player)) {
-            hAllowedDistance *= 0.682;
-        }
-
-        // Edge case bullshit (undetectable jump with head obstructed and trapdoor underneath)
-        if (thisMove.headObstructed
-            && ((from.getBlockFlags() & BlockFlags.F_ICE) != 0 || (from.getBlockFlags() & BlockFlags.F_BLUE_ICE) != 0)
-            && (from.getBlockFlags() & BlockFlags.F_ATTACHED_LOW2_SNEW) != 0) {
-            hAllowedDistance *= Magic.modIce;
-        }
-
-        // Speeding bypass permission (can be combined with other bypasses).
-        if (checkPermissions && pData.hasPermission(Permissions.MOVING_SURVIVALFLY_SPEEDING, player)) {
-            hAllowedDistance *= cc.survivalFlySpeedingSpeed / 100D;
-        }
-
-        // Base speed is set.
-        thisMove.hAllowedDistanceBase = hAllowedDistance;
-
-
-
-        /////////////////////////////////////////////////////////////////////
-        // Set the FINAL allowed speed, accounting for friction and more   //
-        ////////////////////////////////////////////////////////////////////
-        // Friction mechanics (next move).
-        // Move is within lift-off/burst envelope, allow next time.
-        if (thisMove.hDistance <= hAllowedDistance) {
-            data.nextFrictionHorizontal = 1.0;
-        }
-
-        // Soul speed workaround (friction)
-        if (data.keepfrictiontick > 0) {
-            if (!BridgeEnchant.hasSoulSpeed(player)) {
-                data.keepfrictiontick = 0;
-            }
-            else if (lastMove.toIsValid) {
-                hAllowedDistance = Math.max(hAllowedDistance, lastMove.hAllowedDistance * 0.96);
-            }
-        }
-
-        // Friction or not (this move).
-        if (lastMove.toIsValid && friction > 0.0) {
-            tags.add("hfrict");
-            hAllowedDistance = Math.max(hAllowedDistance, lastMove.hDistance * friction);
-        }
-
-        // The final allowed speed is set.
-        thisMove.hAllowedDistance = hAllowedDistance;
-        return thisMove.hAllowedDistance;
+        return finalizeAllowedDistance(ctx, state, lastMove, sprinting, actuallySneaking);
     }
 
     private boolean applyWebModifiers(final AllowedDistanceContext ctx, final DistanceState st) {
@@ -1720,54 +1616,73 @@ public class SurvivalFly extends Check {
 
     private boolean applyUsingItemModifiers(final AllowedDistanceContext ctx, final DistanceState st,
             final PlayerMoveData lastMove, final boolean sfDirty, final boolean isBlockingOrUsing) {
+        if (ctx == null || st == null || lastMove == null) return false;
+        final PlayerMoveData move = ctx.thisMove();
+        final MovingConfig cc = ctx.cc();
+        final MovingData data = ctx.data();
+        final IPlayerData pData = ctx.pData();
+        final Player player = ctx.player();
+        final boolean checkPermissions = ctx.checkPermissions();
+        if (move == null || cc == null || data == null || pData == null || player == null) return false;
+
         boolean result = false;
-        if (ctx != null && st != null && lastMove != null) {
-            final PlayerMoveData move = ctx.thisMove();
-            final MovingConfig cc = ctx.cc();
-            final MovingData data = ctx.data();
-            final IPlayerData pData = ctx.pData();
-            final Player player = ctx.player();
-            final boolean checkPermissions = ctx.checkPermissions();
-            if (move != null && cc != null && data != null && pData != null && player != null) {
-                if (!sfDirty && isBlockingOrUsing && (move.from.onGround || data.noSlowHop > 0 || player.isBlocking())
-                        && (!checkPermissions || !pData.hasPermission(Permissions.MOVING_SURVIVALFLY_BLOCKING, player))
-                        && data.liftOffEnvelope == LiftOffEnvelope.NORMAL) {
-                    tags.add("usingitem");
-                    if (move.from.onGround) {
-                        if (!move.to.onGround) {
-                            final double speedAmplifier = mcAccess.getHandle().getFasterMovementAmplifier(player);
-                            st.allowed = (lastMove.hDistance > 0.23 ? 0.4 : 0.23 + (ServerIsAtLeast1_13 ? 0.155 : 0.0))
-                                    + 0.02 * (Double.isInfinite(speedAmplifier) ? 0 : speedAmplifier + 1.0);
-                            st.allowed *= cc.survivalFlyBlockingSpeed / 100D;
-                            data.noSlowHop = 1;
-                        } else {
-                            if (lastMove.toIsValid && lastMove.hDistance > 0.0) {
-                                st.allowed = data.noSlowHop < 7 ?
-                                        (lastMove.hAllowedDistance * (0.63 + 0.052 * ++data.noSlowHop)) : lastMove.hAllowedDistance;
-                            } else {
-                                st.allowed = Magic.modBlock * move.walkSpeed * cc.survivalFlyBlockingSpeed / 100D;
-                            }
-                        }
-                    } else if (data.noSlowHop > 0) {
-                        if (data.noSlowHop == 1 && lastMove.toIsValid) {
-                            st.allowed = lastMove.hAllowedDistance * 0.6 * cc.survivalFlyBlockingSpeed / 100D;
-                            data.noSlowHop = 4;
-                        } else {
-                            st.allowed = lastMove.hAllowedDistance * 0.96 * cc.survivalFlyBlockingSpeed / 100D;
-                        }
-                    } else if (player.isBlocking() && lastMove.toIsValid) {
-                        st.allowed = lastMove.hAllowedDistance * 0.96 * cc.survivalFlyBlockingSpeed / 100D;
-                        data.noSlowHop = 2;
-                    }
-                    st.allowed = Math.max(st.allowed, 0.08);
-                    st.friction = 0.0;
-                    st.useBaseModifiers = false;
-                    st.useBaseModifiersSprint = false;
-                    result = true;
-                }
+        if (shouldHandleItemUse(sfDirty, isBlockingOrUsing, move, data, pData, player, checkPermissions)) {
+            tags.add("usingitem");
+            if (move.from.onGround) {
+                handleItemUseOnGround(move, lastMove, data, cc, player, st);
+            } else if (data.noSlowHop > 0) {
+                handleNoSlowHop(lastMove, data, cc, st);
+            } else if (player.isBlocking() && lastMove.toIsValid) {
+                handleBlockingItem(lastMove, cc, data, st);
             }
+            st.allowed = Math.max(st.allowed, 0.08);
+            st.friction = 0.0;
+            st.useBaseModifiers = false;
+            st.useBaseModifiersSprint = false;
+            result = true;
         }
         return result;
+    }
+
+    private boolean shouldHandleItemUse(final boolean sfDirty, final boolean isBlockingOrUsing,
+            final PlayerMoveData move, final MovingData data, final IPlayerData pData,
+            final Player player, final boolean checkPermissions) {
+        return !sfDirty && isBlockingOrUsing && (move.from.onGround || data.noSlowHop > 0 || player.isBlocking())
+                && (!checkPermissions || !pData.hasPermission(Permissions.MOVING_SURVIVALFLY_BLOCKING, player))
+                && data.liftOffEnvelope == LiftOffEnvelope.NORMAL;
+    }
+
+    private void handleItemUseOnGround(final PlayerMoveData move, final PlayerMoveData lastMove,
+            final MovingData data, final MovingConfig cc, final Player player, final DistanceState st) {
+        if (!move.to.onGround) {
+            final double speedAmplifier = mcAccess.getHandle().getFasterMovementAmplifier(player);
+            st.allowed = (lastMove.hDistance > 0.23 ? 0.4 : 0.23 + (ServerIsAtLeast1_13 ? 0.155 : 0.0))
+                    + 0.02 * (Double.isInfinite(speedAmplifier) ? 0 : speedAmplifier + 1.0);
+            st.allowed *= cc.survivalFlyBlockingSpeed / 100D;
+            data.noSlowHop = 1;
+        } else if (lastMove.toIsValid && lastMove.hDistance > 0.0) {
+            st.allowed = data.noSlowHop < 7
+                    ? (lastMove.hAllowedDistance * (0.63 + 0.052 * ++data.noSlowHop))
+                    : lastMove.hAllowedDistance;
+        } else {
+            st.allowed = Magic.modBlock * move.walkSpeed * cc.survivalFlyBlockingSpeed / 100D;
+        }
+    }
+
+    private void handleNoSlowHop(final PlayerMoveData lastMove, final MovingData data, final MovingConfig cc,
+            final DistanceState st) {
+        if (data.noSlowHop == 1 && lastMove.toIsValid) {
+            st.allowed = lastMove.hAllowedDistance * 0.6 * cc.survivalFlyBlockingSpeed / 100D;
+            data.noSlowHop = 4;
+        } else {
+            st.allowed = lastMove.hAllowedDistance * 0.96 * cc.survivalFlyBlockingSpeed / 100D;
+        }
+    }
+
+    private void handleBlockingItem(final PlayerMoveData lastMove, final MovingConfig cc, final MovingData data,
+            final DistanceState st) {
+        st.allowed = lastMove.hAllowedDistance * 0.96 * cc.survivalFlyBlockingSpeed / 100D;
+        data.noSlowHop = 2;
     }
 
     private void applyDefaultSpeed(final AllowedDistanceContext ctx, final DistanceState st, final double modHopSprint) {
@@ -1792,6 +1707,97 @@ public class SurvivalFly extends Check {
             }
         }
     }
+    private double finalizeAllowedDistance(final AllowedDistanceContext ctx, final DistanceState st,
+            final PlayerMoveData lastMove, final boolean sprinting, final boolean actuallySneaking) {
+        if (ctx == null || st == null || lastMove == null) return 0.0;
+        final PlayerMoveData move = ctx.thisMove();
+        final MovingConfig cc = ctx.cc();
+        final MovingData data = ctx.data();
+        final IPlayerData pData = ctx.pData();
+        final Player player = ctx.player();
+        final PlayerLocation from = ctx.from();
+        final boolean checkPermissions = ctx.checkPermissions();
+        if (move == null || cc == null || data == null || pData == null || player == null || from == null) {
+            return 0.0;
+        }
+
+        double hAllowedDistance = st.allowed;
+        final double friction = st.friction;
+        final boolean useBaseModifiers = st.useBaseModifiers;
+        final boolean useBaseModifiersSprint = st.useBaseModifiersSprint;
+        final boolean useSneakModifier = st.useSneakModifier;
+
+        if (useBaseModifiers) {
+            if (useBaseModifiersSprint && sprinting) {
+                hAllowedDistance *= data.multSprinting;
+            }
+            final double attrMod = attributeAccess.getHandle().getSpeedAttributeMultiplier(player);
+            if (attrMod == Double.MAX_VALUE) {
+                final double speedAmplifier = mcAccess.getHandle().getFasterMovementAmplifier(player);
+                if (!Double.isInfinite(speedAmplifier) && useBaseModifiersSprint) {
+                    hAllowedDistance *= 1.0D + 0.2D * speedAmplifier;
+                }
+            } else {
+                hAllowedDistance *= attrMod;
+                if (sprinting && hAllowedDistance < 0.29 && cc.sfSlownessSprintHack
+                        && (player.hasPotionEffect(BridgePotionEffect.SLOWNESS)
+                            || data.walkSpeed < Magic.DEFAULT_WALKSPEED
+                            || attrMod < 1.0)) {
+                    hAllowedDistance = slownessSprintHack(player, hAllowedDistance);
+                }
+                if (!useBaseModifiersSprint) {
+                    final double speedAmplifier = mcAccess.getHandle().getFasterMovementAmplifier(player);
+                    if (!Double.isInfinite(speedAmplifier)) {
+                        hAllowedDistance /= attrMod;
+                        hAllowedDistance *= attrMod - 0.15D * speedAmplifier;
+                    }
+                }
+            }
+        }
+
+        if (move.downStream && move.hDistance > move.walkSpeed * Magic.modSwim[0]
+                && move.from.inLiquid) {
+            hAllowedDistance *= Magic.modDownStream;
+        }
+
+        if (useSneakModifier && actuallySneaking && !Bridge1_13.isSwimming(player)) {
+            hAllowedDistance *= 0.682;
+        }
+
+        if (move.headObstructed
+                && ((from.getBlockFlags() & BlockFlags.F_ICE) != 0
+                        || (from.getBlockFlags() & BlockFlags.F_BLUE_ICE) != 0)
+                && (from.getBlockFlags() & BlockFlags.F_ATTACHED_LOW2_SNEW) != 0) {
+            hAllowedDistance *= Magic.modIce;
+        }
+
+        if (checkPermissions && pData.hasPermission(Permissions.MOVING_SURVIVALFLY_SPEEDING, player)) {
+            hAllowedDistance *= cc.survivalFlySpeedingSpeed / 100D;
+        }
+
+        move.hAllowedDistanceBase = hAllowedDistance;
+
+        if (move.hDistance <= hAllowedDistance) {
+            data.nextFrictionHorizontal = 1.0;
+        }
+
+        if (data.keepfrictiontick > 0) {
+            if (!BridgeEnchant.hasSoulSpeed(player)) {
+                data.keepfrictiontick = 0;
+            } else if (lastMove.toIsValid) {
+                hAllowedDistance = Math.max(hAllowedDistance, lastMove.hAllowedDistance * 0.96);
+            }
+        }
+
+        if (lastMove.toIsValid && friction > 0.0) {
+            tags.add("hfrict");
+            hAllowedDistance = Math.max(hAllowedDistance, lastMove.hDistance * friction);
+        }
+
+        move.hAllowedDistance = hAllowedDistance;
+        return move.hAllowedDistance;
+    }
+
 
 
     /**
