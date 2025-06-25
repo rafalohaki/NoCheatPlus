@@ -36,7 +36,9 @@ public class AttributeAccessFactory {
         final IAttributeAccess fallBackReflect = new DummyAttributeAccess();
         IAttributeAccess fallBackDedicated = null;
         try {
-            fallBackDedicated = ServerVersion.compareMinecraftVersion("1.21") < 0 ? new BukkitAttributeAccess() : new NSBukkitAttributeAccess();
+            fallBackDedicated = ServerVersion.compareMinecraftVersion("1.21") < 0
+                    ? BukkitAttributeAccess.createIfSupported()
+                    : NSBukkitAttributeAccess.createIfSupported();
         }
         catch (Throwable t) {
             // ignore - dedicated access not available for this server version

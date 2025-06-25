@@ -22,35 +22,42 @@ public class BukkitStatic implements BukkitShapeModel {
 
     private final double[] bounds;
 
-    /**
-     * Initialize with the given height and with full xz-bounds.
-     * 
-     * @param height
-     */
-    public BukkitStatic(double height) {
-        this(0.0, height);
+    private BukkitStatic(double... bounds) {
+        this.bounds = bounds;
     }
 
     /**
-     * Initialize with the given height and xz-inset.
-     * 
+     * Create a shape model using full xz-bounds for the given height.
+     *
+     * @param height
+     * @return New instance.
+     */
+    public static BukkitStatic ofHeight(double height) {
+        return ofInsetAndHeight(0.0, height);
+    }
+
+    /**
+     * Create a shape model with the given xz-inset and height.
+     *
      * @param xzInset
      * @param height
+     * @return New instance.
      */
-    public BukkitStatic(double xzInset, double height) {
-        this(xzInset, 0.0, xzInset, 1.0 - xzInset, height, 1.0 - xzInset);
+    public static BukkitStatic ofInsetAndHeight(double xzInset, double height) {
+        return ofBounds(xzInset, 0.0, xzInset, 1.0 - xzInset, height, 1.0 - xzInset);
     }
 
     /**
-     * Initialize with the given bounds 
-     * 
+     * Create a shape model from the given bounds.
+     *
+     * @param bounds The bounds, length must be a multiple of 6.
+     * @return New instance.
      */
-    public BukkitStatic(double ...bounds) {
+    public static BukkitStatic ofBounds(double... bounds) {
         if (bounds.length % 6 != 0) {
             throw new IllegalArgumentException("The length must be a multiple of 6");
         }
-        this.bounds = bounds;
-
+        return new BukkitStatic(bounds);
     }
 
     @Override
