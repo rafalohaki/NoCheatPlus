@@ -72,7 +72,7 @@ public class EventRegistryBukkit extends MultiListenerRegistry<Event, EventPrior
             super(baseType, basePriority);
         }
 
-        // TODO: Future java: E extends Cancellable ?
+        // Future: consider using generics with "E extends Cancellable"
         @Override
         protected boolean isCancelled(E event) {
             return ((Cancellable) event).isCancelled();
@@ -85,7 +85,7 @@ public class EventRegistryBukkit extends MultiListenerRegistry<Event, EventPrior
      * Pass this listener with each event registration to the
      * {@link org.bukkit.plugin.PluginManager}.
      */
-    private final Listener dummyListener = new Listener() {}; // TODO: Get from NCP ?
+    private final Listener dummyListener = new Listener() {}; // Placeholder listener for event registration
 
     public EventRegistryBukkit(Plugin plugin) {
         this.plugin = plugin;
@@ -93,8 +93,8 @@ public class EventRegistryBukkit extends MultiListenerRegistry<Event, EventPrior
             @Override
             public <E extends Event> MiniListenerNode<E, EventPriority> newNode(Class<E> eventClass, EventPriority basePriority) {
                 if (Cancellable.class.isAssignableFrom(eventClass)) {
-                    // TODO: Check if order is right (eventClass extends Cancellable).
-                    // TODO: Future java (see above) ?
+                    // Verify that the order is correct when the event class implements Cancellable.
+                    // See above for potential generic bounds adjustments.
                     return new CancellableNodeBukkit<E>(eventClass, basePriority);
                 } else {
                     return new MiniListenerNode<E, EventPriority>(eventClass, basePriority);
@@ -102,7 +102,7 @@ public class EventRegistryBukkit extends MultiListenerRegistry<Event, EventPrior
             }
         };
         // Auto register for plugin disable.
-        // TODO: Ensure the ignoreCancelled setting is correct (do listeners really not unregister if the event is cancelled).
+        // Check that ignoreCancelled is appropriate (listeners should not unregister if the event is cancelled).
         register((MiniListener<PluginDisableEvent>) event -> unregisterAttached(event.getPlugin()), EventPriority.MONITOR, new RegistrationOrder("nocheatplus.system.registry", null, ".*"), true);
     }
 
@@ -233,7 +233,7 @@ public class EventRegistryBukkit extends MultiListenerRegistry<Event, EventPrior
      */
     @SuppressWarnings("unchecked")
     public <E extends Event> void register (MiniListener<E> listener) {
-        // TODO: Throw something if there is more than one method, or implement differently.
+        // If more than one onEvent method is found, consider throwing an exception or handling it differently.
         Class<E> eventClass;
         final Class<MiniListener<E>> clazz = (Class<MiniListener<E>>) listener.getClass();
         try {
