@@ -322,33 +322,8 @@ public class SurvivalFly extends Check {
                 fromOnGround, useBlockChangeTracker, hDistance, yDistance,
                 sprinting, lastMove, data, cc, tick, tags);
 
-        if (thisMove.touchedGround) {
-            // Lost ground workaround has just been applied, check resetting of the dirty flag.
-            if (!thisMove.from.onGround && !thisMove.to.onGround) {
-                data.resetVelocityJumpPhase(tags);
-            }
-            // Ground somehow appeared out of thin air (block place).
-            else if (multiMoveCount == 0 && thisMove.from.onGround && Magic.inAir(lastMove)
-                    && TrigUtil.isSamePosAndLook(thisMove.from, lastMove.to)) {
-                data.setSetBack(from);
-                // Schedule a no low jump flag because the setback update will then cause a low-jump with the subsequent descending phase
-                data.sfNoLowJump = true;
-                if (debug) {
-                    debug(player, "Ground appeared due to a block-place: schedule sfNoLowJump and adjust set-back location.");
-                }
-            }
-        }
-
-        // Renew the "dirty"-flag (in-air phase affected by velocity).
-        // (Reset is done after checks run.)
-        if (data.isVelocityJumpPhase() || data.resetVelocityJumpPhase(tags)) {
-            tags.add("dirty");
-        }
-
-        // HACK: Force sfNoLowJump by a flag.
-        if ((from.getBlockFlags() & BlockFlags.F_ALLOW_LOWJUMP) != 0) {
-            data.sfNoLowJump = true;
-        }
+        handleTouchedGround(player, multiMoveCount, debug, thisMove, lastMove, from, data);
+        updateDirtyAndLowJumpFlags(from, data);
 
         // Alter some data before checking anything
         setHorVerDataExAnte(thisMove, from, to, data, yDistance, pData, player, cc, xDistance, zDistance);
@@ -396,15 +371,9 @@ public class SurvivalFly extends Check {
         ////////////////////////////
         // Debug output.          //
         ////////////////////////////
-        final int tagsLength;
-        if (debug) {
-            outputDebug(player, to, data, cc, hDistance, hAllowedDistance, hFreedom,
-                        yDistance, vAllowedDistance, fromOnGround, resetFrom, toOnGround,
-                        resetTo, thisMove, vDistanceAboveLimit);
-            tagsLength = tags.size();
-            data.ws.setJustUsedIds(null);
-        }
-        else tagsLength = 0; // JIT vs. IDE.
+        final int tagsLength = outputDebugInfo(debug, player, to, data, cc, hDistance,
+                hAllowedDistance, hFreedom, yDistance, vAllowedDistance, fromOnGround,
+                resetFrom, toOnGround, resetTo, thisMove, vDistanceAboveLimit);
 
 
 
@@ -413,35 +382,11 @@ public class SurvivalFly extends Check {
         //////////////////////////////////////
         final boolean inAir = Magic.inAir(thisMove);
         final double result = (Math.max(hDistanceAboveLimit, 0D) + Math.max(vDistanceAboveLimit, 0D)) * 100D;
-        if (result > 0D) {
-
-            final Location vLoc = handleViolation(now, Double.isInfinite(result) ? 30.0 : result, player, from, to, data, cc);
-            if (inAir) {
-                data.sfVLInAir = true;
-            }
-            // Request a new to-location
-            if (vLoc != null) {
-                return vLoc;
-            }
-        }
-        else {
-            // Slowly reduce the level with each event, if violations have not recently happened.
-            if (data.getPlayerMoveCount() - data.sfVLMoveCount > cc.survivalFlyVLFreezeCount
-                && (!cc.survivalFlyVLFreezeInAir || !inAir
-                    // Favor bunny-hopping slightly: clean descend.
-                    || !data.sfVLInAir
-                    && data.liftOffEnvelope == LiftOffEnvelope.NORMAL
-                    && lastMove.toIsValid
-                    && lastMove.yDistance < -Magic.GRAVITY_MIN
-                    && thisMove.yDistance - lastMove.yDistance < -Magic.GRAVITY_MIN)) {
-                // Relax VL.
-                data.survivalFlyVL *= 0.95;
-                // Finally check horizontal buffer regain.
-                if (hDistanceAboveLimit < 0.0 && result <= 0.0 && !isSamePos && data.sfHorizontalBuffer < cc.hBufMax
-                    && !data.sfLowJump) {
-                    hBufRegain(hDistance, Math.min(0.2, Math.abs(hDistanceAboveLimit)), data, cc);
-                }
-            }
+        final Location violationLocation = handleViolations(now, player, from, to, data, cc,
+                inAir, result, hDistanceAboveLimit, vDistanceAboveLimit, isSamePos,
+                lastMove, thisMove, hDistance);
+        if (violationLocation != null) {
+            return violationLocation;
         }
 
 
@@ -449,53 +394,154 @@ public class SurvivalFly extends Check {
         //////////////////////////////////////////////////////////////////////////////////////////////
         //  Set data for normal move or violation without cancel (cancel would have returned above) //
         //////////////////////////////////////////////////////////////////////////////////////////////
-        // 1: Adjust lift off envelope to medium and update medium counters.
-        adjustLiftOffEnvelope(thisMove, lastMove, from, to, fromOnGround, toOnGround,
-                resetFrom, resetTo, yDistance, data, cc);
+        postCheckUpdates(player, from, to, resetFrom, resetTo, fromOnGround, toOnGround, yDistance,
+                hFreedom, debug, data, cc, thisMove, lastMove, inAir, hDistance,
+                hDistanceAboveLimit, tagsLength, tick);
+        return null;
+    }
 
-        // 2: Apply reset conditions.
+    /**
+     * Handle touched ground events and related state updates.
+     */
+    private void handleTouchedGround(final Player player, final int multiMoveCount,
+                                     final boolean debug, final PlayerMoveData thisMove,
+                                     final PlayerMoveData lastMove, final PlayerLocation from,
+                                     final MovingData data) {
+        if (thisMove == null || lastMove == null || from == null || data == null) {
+            return;
+        }
+        if (thisMove.touchedGround) {
+            if (!thisMove.from.onGround && !thisMove.to.onGround) {
+                data.resetVelocityJumpPhase(tags);
+            } else if (multiMoveCount == 0 && thisMove.from.onGround && Magic.inAir(lastMove)
+                    && TrigUtil.isSamePosAndLook(thisMove.from, lastMove.to)) {
+                data.setSetBack(from);
+                data.sfNoLowJump = true;
+                if (debug && player != null) {
+                    debug(player,
+                            "Ground appeared due to a block-place: schedule sfNoLowJump and adjust set-back location.");
+                }
+            }
+        }
+    }
+
+    /** Renew dirty flag and sfNoLowJump flag based on the current state. */
+    private void updateDirtyAndLowJumpFlags(final PlayerLocation from, final MovingData data) {
+        if (from == null || data == null) {
+            return;
+        }
+        if (data.isVelocityJumpPhase() || data.resetVelocityJumpPhase(tags)) {
+            tags.add("dirty");
+        }
+        if ((from.getBlockFlags() & BlockFlags.F_ALLOW_LOWJUMP) != 0) {
+            data.sfNoLowJump = true;
+        }
+    }
+
+    /**
+     * Output debug information if debugging is enabled.
+     */
+    private int outputDebugInfo(final boolean debug, final Player player, final PlayerLocation to,
+                                final MovingData data, final MovingConfig cc, final double hDistance,
+                                final double hAllowedDistance, final double hFreedom,
+                                final double yDistance, final double vAllowedDistance,
+                                final boolean fromOnGround, final boolean resetFrom, final boolean toOnGround,
+                                final boolean resetTo, final PlayerMoveData thisMove,
+                                final double vDistanceAboveLimit) {
+        if (!debug) {
+            return 0;
+        }
+        outputDebug(player, to, data, cc, hDistance, hAllowedDistance, hFreedom,
+                yDistance, vAllowedDistance, fromOnGround, resetFrom, toOnGround,
+                resetTo, thisMove, vDistanceAboveLimit);
+        int len = tags.size();
+        data.ws.setJustUsedIds(null);
+        return len;
+    }
+
+    /**
+     * Handle violation logic and compute a potential new location.
+     */
+    private Location handleViolations(final long now, final Player player, final PlayerLocation from,
+                                      final PlayerLocation to, final MovingData data, final MovingConfig cc,
+                                      final boolean inAir, final double result, final double hDistanceAboveLimit,
+                                      final double vDistanceAboveLimit, final boolean isSamePos,
+                                      final PlayerMoveData lastMove, final PlayerMoveData thisMove,
+                                      final double hDistance) {
+        if (data == null || cc == null || lastMove == null || thisMove == null) {
+            return null;
+        }
+        if (result > 0D) {
+            final Location vLoc = handleViolation(now, Double.isInfinite(result) ? 30.0 : result,
+                    player, from, to, data, cc);
+            if (inAir) {
+                data.sfVLInAir = true;
+            }
+            return vLoc;
+        }
+        if (data.getPlayerMoveCount() - data.sfVLMoveCount > cc.survivalFlyVLFreezeCount
+                && (!cc.survivalFlyVLFreezeInAir || !inAir
+                    || !data.sfVLInAir
+                    && data.liftOffEnvelope == LiftOffEnvelope.NORMAL
+                    && lastMove.toIsValid
+                    && lastMove.yDistance < -Magic.GRAVITY_MIN
+                    && thisMove.yDistance - lastMove.yDistance < -Magic.GRAVITY_MIN)) {
+            data.survivalFlyVL *= 0.95;
+            if (hDistanceAboveLimit < 0.0 && result <= 0.0 && !isSamePos && data.sfHorizontalBuffer < cc.hBufMax
+                    && !data.sfLowJump) {
+                hBufRegain(hDistance, Math.min(0.2, Math.abs(hDistanceAboveLimit)), data, cc);
+            }
+        }
+        return null;
+    }
+
+    /**
+     * Apply various post-check updates.
+     */
+    private void postCheckUpdates(final Player player, final PlayerLocation from, final PlayerLocation to,
+                                  final boolean resetFrom, final boolean resetTo, final boolean fromOnGround,
+                                  final boolean toOnGround, final double yDistance, final double hFreedom,
+                                  final boolean debug, final MovingData data, final MovingConfig cc,
+                                  final PlayerMoveData thisMove, final PlayerMoveData lastMove, final boolean inAir,
+                                  final double hDistance, final double hDistanceAboveLimit, final int tagsLength,
+                                  final int tick) {
+        if (player == null || from == null || to == null || data == null || cc == null || thisMove == null) {
+            return;
+        }
+
+        adjustLiftOffEnvelope(thisMove, lastMove, from, to,
+                fromOnGround, toOnGround, resetFrom, resetTo, yDistance, data, cc);
+
         applyResetConditions(player, from, to, resetFrom, resetTo, toOnGround, yDistance,
                 hFreedom, debug, data, cc, thisMove);
 
-
-        // 3: Adjust in-air counters.
         if (inAir) {
             if (TrigUtil.isZero(yDistance)) {
                 data.sfZeroVdistRepeat ++;
             }
-            else data.sfZeroVdistRepeat = 0;
-        }
-        else {
+        } else {
             data.sfZeroVdistRepeat = 0;
             data.ws.resetConditions(WRPT.G_RESET_NOTINAIR);
             data.sfVLInAir = false;
         }
 
-        // 4: Horizontal velocity invalidation.
         if (hDistance <= (cc.velocityStrictInvalidation ? thisMove.hAllowedDistanceBase : thisMove.hAllowedDistanceBase / 2.0)) {
             data.clearActiveHorVel();
         }
 
-        // 5: Update unused velocity tracking.
         if (debug) {
             data.getVerticalVelocityTracker().updateBlockedState(tick,
-                    // Assume blocked with being in web/water, despite not entirely correct.
                     thisMove.headObstructed || thisMove.from.resetCond,
-                    // (Similar here.)
                     thisMove.touchedGround || thisMove.to.resetCond);
             UnusedVelocity.checkUnusedVelocity(player, type, data, cc);
         }
 
-        // 6: Adjust friction.
         data.lastFrictionHorizontal = data.nextFrictionHorizontal;
         data.lastFrictionVertical = data.nextFrictionVertical;
 
-        // 7: Log tags added after violation handling.
         if (debug && tags.size() > tagsLength) {
             logPostViolationTags(player);
         }
-        // Nothing to do, newTo (MovingListener) stays null
-        return null;
     }
 
 
