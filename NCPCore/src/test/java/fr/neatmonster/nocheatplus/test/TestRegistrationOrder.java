@@ -130,7 +130,11 @@ public class TestRegistrationOrder {
     }
 
     private <F> void testIfSorted(List<F> items, IAccessSort<F> fetcher) {
-        // Test priority ordering and rough region order.
+        verifyPriorityOrdering(items, fetcher);
+        verifyPairOrdering(items, fetcher);
+    }
+
+    private <F> void verifyPriorityOrdering(List<F> items, IAccessSort<F> fetcher) {
         Integer lastPriority = null;
         Integer maxPriority = null;
         boolean priorityContained = false;
@@ -144,56 +148,49 @@ public class TestRegistrationOrder {
                         nullShouldFollow = true;
                         // Assume the pair-comparison would catch wrongly sorted null entries on occasion.
                     }
-                }
-                else {
-                    if (nullShouldFollow && order.getBeforeTag() != null) {
-                        fail("Invalid null-basePriority entry after basePriority>0 region: beforeTag is set.");
-                    }
-                    // 
+                } else {
+                    handleNullPriorityAfterFirst(order, nullShouldFollow);
                     if (maxPriority > 0) {
                         nullShouldFollow = true;
-                    }
-                    else if (maxPriority == 0) {
-                        if (order.getBeforeTag() != null) {
-                            fail("Invalid null-basePriority entry within 0-basePriority region: beforeTag is set.");
-                        }
+                    } else if (maxPriority == 0 && order.getBeforeTag() != null) {
+                        fail("Invalid null-basePriority entry within 0-basePriority region: beforeTag is set.");
                     }
                 }
-            }
-            else {
+            } else {
                 if (nullShouldFollow) {
                     fail("Invalid mixture of priority null/set after 0-basePriority region.");
-                }
-                else if (priorityContained && basePriority < 0 && lastPriority == null) {
+                } else if (priorityContained && basePriority < 0 && lastPriority == null) {
                     fail("Invalid mixture of priority null/set before 0-basePriority region.");
                 }
                 if (maxPriority == null) {
                     maxPriority = basePriority;
-                }
-                else if (basePriority < maxPriority) {
+                } else if (basePriority < maxPriority) {
                     fail("Order by priority broken.");
-                }
-                else {
+                } else {
                     maxPriority = basePriority;
                 }
                 priorityContained = true; // Remember to be able to exclude cases.
             }
             lastPriority = basePriority;
         }
-        // Compare pairs, for being wrongly ordered.
-        for (int i = 1; i <items.size(); i++) {
-            // (Careful testing: greedy could apply both ways round.)
+    }
+
+    private void handleNullPriorityAfterFirst(RegistrationOrder order, boolean nullShouldFollow) {
+        if (nullShouldFollow && order.getBeforeTag() != null) {
+            fail("Invalid null-basePriority entry after basePriority>0 region: beforeTag is set.");
+        }
+    }
+
+    private <F> void verifyPairOrdering(List<F> items, IAccessSort<F> fetcher) {
+        for (int i = 1; i < items.size(); i++) {
             if (!RegistrationOrder.AbstractRegistrationOrderSort.shouldSortBefore(
-                    fetcher.getRegistrationOrder(items.get(i - 1)), 
+                    fetcher.getRegistrationOrder(items.get(i - 1)),
                     fetcher.getRegistrationOrder(items.get(i)))) {
-                // Still test the other way round, to see if it's really demanded.
                 if (RegistrationOrder.AbstractRegistrationOrderSort.shouldSortBefore(
-                        fetcher.getRegistrationOrder(items.get(i)), 
+                        fetcher.getRegistrationOrder(items.get(i)),
                         fetcher.getRegistrationOrder(items.get(i - 1)))) {
-                    // The following object is explicitly set to come before.
                     fail("Pair is wrongly ordered.");
                 }
-                // Consider checking i-1 versus following items until explicit stop/end.
             }
         }
     }
