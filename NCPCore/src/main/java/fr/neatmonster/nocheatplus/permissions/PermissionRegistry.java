@@ -34,12 +34,12 @@ import fr.neatmonster.nocheatplus.utilities.ds.map.HashMapLOW;
  */
 public class PermissionRegistry {
 
-    // TODO: Interface / interfaces: consider read-only access IPermissionInfo, IPermissionPolicy etc.
+    // Note: consider read-only access interfaces such as IPermissionInfo and IPermissionPolicy.
 
-    // TODO: Suffix permissions, because it's tedious to define constants for them. Might auto register within somewhere else.
+    // Note: suffix permissions might be auto registered in the future.
 
     /*
-     * TODO: Per world (rule/proxy) registries, with one central registry for
+     * Idea: Per world (rule/proxy) registries, with one central registry for
      * ids (per-world registries would proxy id registration, but have their own
      * rule settings). THUS, have the rule registry as a common super class, an
      * interface for the full thing.
@@ -52,7 +52,7 @@ public class PermissionRegistry {
     /** No need to map to the strings in an extra step here. */
     private final HashMapLOW<String, PermissionInfo> infosString = new HashMapLOW<String, PermissionInfo>(lock, 100);
 
-    // TODO: Might do lazy tasks for all player data regularly.
+    // Consider running lazy tasks for all player data regularly.
     /**
      * All registered permissions that are meant to be kept updated for players.
      * Guarantees are not to actually keep them updated, but might lazily update
@@ -209,7 +209,7 @@ public class PermissionRegistry {
                 case ALWAYS:
                 case INTERVAL:
                     // Update as often as makes sense in this context.
-                    // TODO: Might later run lazy tasks permanently for online players.
+                    // Potential improvement: run lazy tasks permanently for online players.
                     preferKeepUpdatedOffline.add(registeredPermission);
                     preferKeepUpdatedWorld.add(registeredPermission);
                     break;
@@ -217,8 +217,8 @@ public class PermissionRegistry {
                     if (info.invalidationOffline()) {
                         preferKeepUpdatedOffline.add(registeredPermission);
                     }
-                    else if (info.invalidationWorld()) { // TODO: 'else' as long as world includes offline.
-                        preferKeepUpdatedOffline.add(registeredPermission); // TODO: as long as world includes offline.
+                    else if (info.invalidationWorld()) { // Applies as long as world includes offline players.
+                        preferKeepUpdatedOffline.add(registeredPermission); // Because world invalidation also includes offline players.
                         preferKeepUpdatedWorld.add(registeredPermission);
                     }
                     break;
