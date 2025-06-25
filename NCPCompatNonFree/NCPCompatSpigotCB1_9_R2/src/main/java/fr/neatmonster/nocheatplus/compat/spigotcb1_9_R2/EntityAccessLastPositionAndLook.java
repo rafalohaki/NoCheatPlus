@@ -17,10 +17,13 @@ package fr.neatmonster.nocheatplus.compat.spigotcb1_9_R2;
 import org.bukkit.craftbukkit.v1_9_R2.entity.CraftEntity;
 import org.bukkit.entity.Entity;
 
+import fr.neatmonster.nocheatplus.NCPAPIProvider;
 import fr.neatmonster.nocheatplus.components.entity.IEntityAccessLastPositionAndLook;
 import fr.neatmonster.nocheatplus.components.location.IGetPositionWithLook;
 import fr.neatmonster.nocheatplus.components.location.ISetPositionWithLook;
+import fr.neatmonster.nocheatplus.logging.Streams;
 import fr.neatmonster.nocheatplus.utilities.ReflectionUtil;
+import fr.neatmonster.nocheatplus.utilities.Validate;
 
 public class EntityAccessLastPositionAndLook implements IEntityAccessLastPositionAndLook {
 
@@ -35,7 +38,21 @@ public class EntityAccessLastPositionAndLook implements IEntityAccessLastPositio
 
     @Override
     public void getPositionAndLook(final Entity entity, final ISetPositionWithLook location) {
-        // Pending: implement proper error handling according to conventions.
+        try {
+            performGet(entity, location);
+        }
+        catch (Throwable t) {
+            NCPAPIProvider.getNoCheatPlusAPI().getLogManager().warning(Streams.STATUS,
+                    "Could not retrieve last position and look for Entity: "
+                    + (entity != null ? entity.getClass().getName() : "null"));
+        }
+    }
+
+    private void performGet(final Entity entity, final ISetPositionWithLook location) {
+        Validate.validateNotNull(entity, location);
+        if (!(entity instanceof CraftEntity)) {
+            throw new IllegalArgumentException("Entity must be CraftEntity.");
+        }
         final net.minecraft.server.v1_9_R2.Entity nmsEntity = ((CraftEntity) entity).getHandle();
         location.setX(nmsEntity.lastX);
         location.setY(nmsEntity.lastY);
@@ -46,6 +63,21 @@ public class EntityAccessLastPositionAndLook implements IEntityAccessLastPositio
 
     @Override
     public void setPositionAndLook(Entity entity, IGetPositionWithLook location) {
+        try {
+            performSet(entity, location);
+        }
+        catch (Throwable t) {
+            NCPAPIProvider.getNoCheatPlusAPI().getLogManager().warning(Streams.STATUS,
+                    "Could not set last position and look for Entity: "
+                    + (entity != null ? entity.getClass().getName() : "null"));
+        }
+    }
+
+    private void performSet(Entity entity, IGetPositionWithLook location) {
+        Validate.validateNotNull(entity, location);
+        if (!(entity instanceof CraftEntity)) {
+            throw new IllegalArgumentException("Entity must be CraftEntity.");
+        }
         final net.minecraft.server.v1_9_R2.Entity nmsEntity = ((CraftEntity) entity).getHandle();
         nmsEntity.lastX = location.getX();
         nmsEntity.lastY = location.getY();
