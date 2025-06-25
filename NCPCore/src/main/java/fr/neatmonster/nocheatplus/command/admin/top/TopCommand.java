@@ -211,7 +211,7 @@ public class TopCommand extends BaseCommand{
         
         Comparator<VLView> comparator = VLView.parseMixedComparator(args, startIndex);
         if (comparator == null) {
-            // TODO: Default comparator ?
+            // NOTE: Fallback to a default comparator.
             comparator = new FCFSComparator<VLView>(Arrays.asList(VLView.CmpnVL, VLView.CmpSumVL), true);
         }
         
