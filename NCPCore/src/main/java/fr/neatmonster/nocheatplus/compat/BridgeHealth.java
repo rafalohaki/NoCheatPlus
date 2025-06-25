@@ -35,8 +35,8 @@ import fr.neatmonster.nocheatplus.utilities.ReflectionUtil;
  * NOTES:
  * <li>To simplify code IncompatibleClassChangeError is caught instead of
  * AbstractMethodError and NoSuchMethodError etc.</li>
- * <li>TODO: Since API dependency is now 1.6.1+, some things can be simplified
- * to just call the "int-methods".</li>
+ * <li>Since the API dependency is now 1.6.1+, some things can be simplified to
+ * just call the "int-methods".</li>
  * 
  * @author asofold
  *
@@ -44,9 +44,9 @@ import fr.neatmonster.nocheatplus.utilities.ReflectionUtil;
 @SuppressWarnings("deprecation")
 public class BridgeHealth {
 
-    // TODO: Move to (smaller?) IGenericInstanceHandle instances.
+    // Consider moving to smaller IGenericInstanceHandle instances.
 
-    /** For debugging purposes. TODO: Reset on shutdown !? */
+    /** For debugging purposes. Should this be reset on shutdown? */
     private static Set<String> failures = new HashSet<String>();
 
     private static DamageCause getDamageCause(String name) {
@@ -229,7 +229,7 @@ public class BridgeHealth {
     public static void multiplyFinalDamage(final EntityDamageEvent event, 
             final double multiplier) {
         try {
-            // TODO: Better recalculate modifiers, as this scales them.
+            // Ideally recalculate modifiers rather than scaling them.
             setFinalDamage(event, event.getFinalDamage() * multiplier);
         }
         catch (Throwable e) {
@@ -266,7 +266,7 @@ public class BridgeHealth {
      */
     public static double getMaxHealth(final LivingEntity entity) {
         try{
-            // TODO: Attribute.GENERIC_MAX_HEALTH for latest.
+            // Attribute.GENERIC_MAX_HEALTH should be used for recent versions.
             return entity.getMaxHealth();
         }
         catch(IncompatibleClassChangeError e) {
