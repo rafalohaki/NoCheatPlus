@@ -1473,7 +1473,32 @@ public class SurvivalFly extends Check {
 
     private boolean applyLiquidExitModifiers(final AllowedDistanceContext ctx, final DistanceState st,
             final boolean sfDirty) {
-        if (ctx == null || st == null) return false;
+        if (!canApplyLiquidExit(ctx, st, sfDirty)) {
+            return false;
+        }
+
+        final PlayerMoveData move = ctx.thisMove();
+        final MovingConfig cc = ctx.cc();
+        final MovingData data = ctx.data();
+        final PlayerLocation from = ctx.from();
+        final Player player = ctx.player();
+
+        tags.add("hliquidexit");
+        final int strider = BridgeEnchant.getDepthStriderLevel(player);
+
+        initLiquidExitState(st, move, cc, player);
+        applyStriderModifier(st, data, strider);
+        applyDolphinGraceModifier(st, strider, player);
+        adjustSurfaceExit(st, data, from, move, cc);
+
+        return true;
+    }
+
+    private boolean canApplyLiquidExit(final AllowedDistanceContext ctx, final DistanceState st,
+            final boolean sfDirty) {
+        if (ctx == null || st == null) {
+            return false;
+        }
         final PlayerMoveData move = ctx.thisMove();
         final MovingConfig cc = ctx.cc();
         final MovingData data = ctx.data();
@@ -1484,41 +1509,51 @@ public class SurvivalFly extends Check {
         if (move == null || cc == null || data == null || from == null || pData == null || player == null) {
             return false;
         }
-        if (!sfDirty && (!checkPermissions || !pData.hasPermission(Permissions.MOVING_SURVIVALFLY_WATERWALK, player))
-                && (Magic.leavingLiquid(move) || data.surfaceId == 1) && data.liftOffEnvelope.name().startsWith("LIMIT")
-                && !from.isInWaterLogged()) {
-            tags.add("hliquidexit");
-            final int strider = BridgeEnchant.getDepthStriderLevel(player);
-            st.allowed = Bridge1_13.isSwimming(player) ? Magic.modSwim[1]
-                    : Magic.modSwim[0] * move.walkSpeed * Magic.modSurface[0] * cc.survivalFlySwimmingSpeed / 100D;
-            st.useBaseModifiersSprint = false;
-            st.friction = 0.0;
+        return !sfDirty && (!checkPermissions
+                || !pData.hasPermission(Permissions.MOVING_SURVIVALFLY_WATERWALK, player))
+                && (Magic.leavingLiquid(move) || data.surfaceId == 1)
+                && data.liftOffEnvelope.name().startsWith("LIMIT") && !from.isInWaterLogged();
+    }
 
-            if (strider > 0 && data.surfaceId == 0) {
-                st.useBaseModifiers = true;
-                st.useBaseModifiersSprint = true;
-                st.friction = data.lastFrictionHorizontal;
-                st.allowed *= Magic.modDepthStrider[strider];
-            }
+    private void initLiquidExitState(final DistanceState st, final PlayerMoveData move, final MovingConfig cc,
+            final Player player) {
+        st.allowed = Bridge1_13.isSwimming(player) ? Magic.modSwim[1]
+                : Magic.modSwim[0] * move.walkSpeed * Magic.modSurface[0] * cc.survivalFlySwimmingSpeed / 100D;
+        st.useBaseModifiersSprint = false;
+        st.friction = 0.0;
+    }
 
-            if (!Double.isInfinite(Bridge1_13.getDolphinGraceAmplifier(player))) {
-                st.allowed *= Magic.modDolphinsGrace;
-                if (strider > 1) st.allowed *= 1.0 + 0.07 * strider;
-            }
-
-            if (data.surfaceId == 1) st.allowed *= Magic.modSurface[1];
-            data.surfaceId = 1;
-            final int blockData = from.getData(from.getBlockX(), from.getBlockY(), from.getBlockZ());
-            final int blockUnderData = from.getData(from.getBlockX(), from.getBlockY() - 1, from.getBlockZ());
-
-            if (blockData > 3 || blockUnderData > 3 || data.isdownstream) {
-                data.surfaceId = 0;
-                st.allowed = move.walkSpeed * cc.survivalFlySwimmingSpeed / 100D;
-                data.isdownstream = false;
-            }
-            return true;
+    private void applyStriderModifier(final DistanceState st, final MovingData data, final int strider) {
+        if (strider > 0 && data.surfaceId == 0) {
+            st.useBaseModifiers = true;
+            st.useBaseModifiersSprint = true;
+            st.friction = data.lastFrictionHorizontal;
+            st.allowed *= Magic.modDepthStrider[strider];
         }
-        return false;
+    }
+
+    private void applyDolphinGraceModifier(final DistanceState st, final int strider, final Player player) {
+        if (!Double.isInfinite(Bridge1_13.getDolphinGraceAmplifier(player))) {
+            st.allowed *= Magic.modDolphinsGrace;
+            if (strider > 1) {
+                st.allowed *= 1.0 + 0.07 * strider;
+            }
+        }
+    }
+
+    private void adjustSurfaceExit(final DistanceState st, final MovingData data, final PlayerLocation from,
+            final PlayerMoveData move, final MovingConfig cc) {
+        if (data.surfaceId == 1) {
+            st.allowed *= Magic.modSurface[1];
+        }
+        data.surfaceId = 1;
+        final int blockData = from.getData(from.getBlockX(), from.getBlockY(), from.getBlockZ());
+        final int blockUnderData = from.getData(from.getBlockX(), from.getBlockY() - 1, from.getBlockZ());
+        if (blockData > 3 || blockUnderData > 3 || data.isdownstream) {
+            data.surfaceId = 0;
+            st.allowed = move.walkSpeed * cc.survivalFlySwimmingSpeed / 100D;
+            data.isdownstream = false;
+        }
     }
 
     private boolean applyNoSlowPacket(final AllowedDistanceContext ctx, final DistanceState st) {
