@@ -2609,55 +2609,98 @@ public class SurvivalFly extends Check {
                                     final PlayerMoveData thisMove, final PlayerMoveData lastMove,
                                     final double yDistance, final MovingData data) {
 
+        if (!validateMoveInputs(player, from, to, "vDistClimbable")
+                || thisMove == null || lastMove == null || data == null) {
+            return new double[]{0.0, 0.0};
+        }
+
         data.sfNoLowJump = true;
         data.clearActiveHorVel(); // Might want to clear ALL horizontal vel.
         double vDistanceAboveLimit = 0.0;
-        double yDistAbs = Math.abs(yDistance);
-        /** Climbing a ladder in water and exiting water for whatever reason speeds up the player a lot in that one transition ... */
-        boolean waterStep = lastMove.from.inLiquid && yDistAbs < Magic.swimBaseSpeedV(Bridge1_13.hasIsSwimming());
-        double vAllowedDistance = waterStep ? yDistAbs : yDistance < 0.0 ? Magic.climbSpeedDescend : Magic.climbSpeedAscend;
-        final double jumpHeight = LiftOffEnvelope.NORMAL.getMaxJumpHeight(0.0) + (data.jumpAmplifier > 0 ? (0.6 + data.jumpAmplifier - 1.0) : 0.0);
+        final double yDistAbs = Math.abs(yDistance);
+
+        final boolean waterStep = isWaterStep(lastMove, yDistAbs);
+        double vAllowedDistance = computeClimbSpeed(waterStep, yDistance);
+        final double jumpHeight = computeJumpHeight(data.jumpAmplifier);
         final double maxJumpGain = data.liftOffEnvelope.getMaxJumpGain(data.jumpAmplifier) + 0.005;
-        // Quick, temporary fix for scaffolding block
-        boolean scaffolding = from.isOnGround() && from.getBlockY() == Location.locToBlock(from.getY())
-                              && yDistance > 0.0 && yDistance < maxJumpGain;
+        final boolean scaffolding = isScaffolding(from, yDistance, maxJumpGain);
 
-        if (yDistAbs > vAllowedDistance) {
-            // Catch insta-ladder quick.
-            if (from.isOnGround(jumpHeight, 0D, 0D, BlockFlags.F_CLIMBABLE)) {
-                if (yDistance > maxJumpGain) {
-                    vDistanceAboveLimit = yDistAbs - vAllowedDistance;
-                    tags.add("climbstep");
-                }
-                else tags.add("climbheight("+ StringUtil.fdec3.format(yDistance) +")");
-            }
-            else if (!scaffolding) {
-                vDistanceAboveLimit = yDistAbs - vAllowedDistance;
-                tags.add("climbspeed");
-            }
-        }
+        vDistanceAboveLimit = handleClimbSpeedViolation(yDistance, yDistAbs, vAllowedDistance,
+                from, jumpHeight, maxJumpGain, scaffolding);
 
-        // Can't climb up with vine not attached to a solid block (legacy).
-        if (yDistance > 0.0 && !thisMove.touchedGround && !from.canClimbUp(jumpHeight)) {
+        if (shouldFlagDetachedClimb(yDistance, thisMove, from, jumpHeight)) {
             vDistanceAboveLimit = yDistance;
             vAllowedDistance = 0.0;
             tags.add("climbdetached");
         }
 
-        // Do allow friction with velocity.
-        if (vDistanceAboveLimit > 0.0 && thisMove.yDistance > 0.0
-            && lastMove.yDistance - (Magic.GRAVITY_MAX + Magic.GRAVITY_MIN) / 2.0 > thisMove.yDistance) {
+        if (shouldAllowFriction(vDistanceAboveLimit, thisMove, lastMove)) {
             vDistanceAboveLimit = 0.0;
             vAllowedDistance = yDistance;
             tags.add("vfrict_climb");
         }
 
-        // Do allow vertical velocity.
-        if (vDistanceAboveLimit > 0.0 && data.getOrUseVerticalVelocity(yDistance) != null) {
+        if (shouldAllowVerticalVelocity(vDistanceAboveLimit, data, yDistance)) {
             vDistanceAboveLimit = 0.0;
         }
 
         return new double[]{vAllowedDistance, vDistanceAboveLimit};
+    }
+
+    private boolean isWaterStep(final PlayerMoveData lastMove, final double yDistAbs) {
+        return lastMove.from.inLiquid && yDistAbs < Magic.swimBaseSpeedV(Bridge1_13.hasIsSwimming());
+    }
+
+    private double computeClimbSpeed(final boolean waterStep, final double yDistance) {
+        return waterStep ? Math.abs(yDistance)
+                : yDistance < 0.0 ? Magic.climbSpeedDescend : Magic.climbSpeedAscend;
+    }
+
+    private double computeJumpHeight(final double jumpAmplifier) {
+        return LiftOffEnvelope.NORMAL.getMaxJumpHeight(0.0)
+                + (jumpAmplifier > 0 ? (0.6 + jumpAmplifier - 1.0) : 0.0);
+    }
+
+    private boolean isScaffolding(final PlayerLocation from, final double yDistance, final double maxJumpGain) {
+        return from.isOnGround() && from.getBlockY() == Location.locToBlock(from.getY())
+                && yDistance > 0.0 && yDistance < maxJumpGain;
+    }
+
+    private double handleClimbSpeedViolation(final double yDistance, final double yDistAbs,
+                                             final double vAllowedDistance, final PlayerLocation from,
+                                             final double jumpHeight, final double maxJumpGain,
+                                             final boolean scaffolding) {
+        double violation = 0.0;
+        if (yDistAbs > vAllowedDistance) {
+            if (from.isOnGround(jumpHeight, 0D, 0D, BlockFlags.F_CLIMBABLE)) {
+                if (yDistance > maxJumpGain) {
+                    violation = yDistAbs - vAllowedDistance;
+                    tags.add("climbstep");
+                } else {
+                    tags.add("climbheight(" + StringUtil.fdec3.format(yDistance) + ")");
+                }
+            } else if (!scaffolding) {
+                violation = yDistAbs - vAllowedDistance;
+                tags.add("climbspeed");
+            }
+        }
+        return violation;
+    }
+
+    private boolean shouldFlagDetachedClimb(final double yDistance, final PlayerMoveData thisMove,
+                                            final PlayerLocation from, final double jumpHeight) {
+        return yDistance > 0.0 && !thisMove.touchedGround && !from.canClimbUp(jumpHeight);
+    }
+
+    private boolean shouldAllowFriction(final double vDistanceAboveLimit, final PlayerMoveData thisMove,
+                                        final PlayerMoveData lastMove) {
+        return vDistanceAboveLimit > 0.0 && thisMove.yDistance > 0.0
+                && lastMove.yDistance - (Magic.GRAVITY_MAX + Magic.GRAVITY_MIN) / 2.0 > thisMove.yDistance;
+    }
+
+    private boolean shouldAllowVerticalVelocity(final double vDistanceAboveLimit, final MovingData data,
+                                                final double yDistance) {
+        return vDistanceAboveLimit > 0.0 && data.getOrUseVerticalVelocity(yDistance) != null;
     }
 
 
