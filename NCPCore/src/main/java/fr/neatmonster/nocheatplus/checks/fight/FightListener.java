@@ -194,29 +194,13 @@ public class FightListener extends CheckListener implements JoinLeaveListener{
         final boolean worldChanged = !worldName.equals(data.lastWorld);
         final Location loc =  player.getLocation(useLoc1);
         final Location damagedLoc = damaged.getLocation(useLoc2);
-        final double targetMove;
-        final int tickAge;
-        /** Milliseconds ticks actually took */
-        final long msAge; 
-        /** Blocks per second */
-        final double normalizedMove; 
 
-        // relative distance (player - target)!
-        // Use trace for this ?
-        if (data.lastAttackedX == Double.MAX_VALUE || tick < data.lastAttackTick || worldChanged || tick - data.lastAttackTick > 20) {
-            // 20 ?
-            tickAge = 0;
-            targetMove = 0.0;
-            normalizedMove = 0.0;
-            msAge = 0;
-        }
-        else {
-            tickAge = tick - data.lastAttackTick;
-            // Maybe use 3d distance if dy(normalized) is too big. 
-            targetMove = TrigUtil.distance(data.lastAttackedX, data.lastAttackedZ, damagedLoc.getX(), damagedLoc.getZ());
-            msAge = (long) (50f * TickTask.getLag(50L * tickAge, true) * (float) tickAge);
-            normalizedMove = msAge == 0 ? targetMove : targetMove * Math.min(20.0, 1000.0 / (double) msAge);
-        }
+        final TargetMoveInfo moveInfo = computeTargetMoveInfo(data, damagedLoc, tick, worldChanged);
+        final double targetMove = moveInfo.targetMove;
+        final int tickAge = moveInfo.tickAge;
+        final long msAge = moveInfo.msAge;
+        final double normalizedMove = moveInfo.normalizedMove;
+
         // calculate factor for dists: ticks * 50 * lag
         // dist < width => skip some checks (direction, ..)
 
@@ -419,30 +403,8 @@ public class FightListener extends CheckListener implements JoinLeaveListener{
         // For pvp: make use of "player was there" heuristic later on.
         // Confine further with simple pre-conditions.
         // Evaluate if moving traces can help here.
-        if (!cancelled && TrigUtil.distance(loc.getX(), loc.getZ(), damagedLoc.getX(), damagedLoc.getZ()) < 4.5) {
-
-            // Check if fly checks is an issue at all, re-check "real sprinting".
-            final PlayerMoveData lastMove = mData.playerMoves.getFirstPastMove();
-            if (lastMove.valid && mData.liftOffEnvelope == LiftOffEnvelope.NORMAL) {
-
-                final double hDist = TrigUtil.xzDistance(loc, lastMove.from);
-                if (hDist >= 0.23) {
-
-                    // Might need to check hDist relative to speed / modifiers.
-                    final PlayerMoveInfo moveInfo = auxMoving.usePlayerMoveInfo();
-                    moveInfo.set(player, loc, null, mCc.yOnGround);
-                    if (now <= mData.timeSprinting + mCc.sprintingGrace 
-                        && MovingUtil.shouldCheckSurvivalFly(player, moveInfo.from, moveInfo.to, mData, mCc, pData)) {
-                        // Judge as "lost sprint" problem.
-                        // What would mData.lostSprintCount > 0  mean here?
-                        mData.lostSprintCount = 7;
-                        if ((debug || pData.isDebugActive(CheckType.MOVING)) && BuildParameters.debugLevel > 0) {
-                            debug(player, "lostsprint: hDist to last from: " + hDist + " | targetdist=" + TrigUtil.distance(loc.getX(), loc.getZ(), damagedLoc.getX(), damagedLoc.getZ()) + " | sprinting=" + player.isSprinting() + " | food=" + player.getFoodLevel() +" | hbuf=" + mData.sfHorizontalBuffer);
-                        }
-                    }
-                    auxMoving.returnPlayerMoveInfo(moveInfo);
-                }
-            }
+        if (!cancelled) {
+            checkLostSprint(player, loc, damagedLoc, now, mData, mCc, pData, debug);
         }
 
         // Generic attacking penalty.
@@ -559,6 +521,77 @@ public class FightListener extends CheckListener implements JoinLeaveListener{
             debug(player, "Latency estimate: " + latencyEstimate + " ms."); // FCFS rather, at present.
         }
         return cancelled;
+    }
+
+    /**
+     * Calculate relative movement of the damaged entity since last attack.
+     */
+    private TargetMoveInfo computeTargetMoveInfo(final FightData data, final Location damagedLoc,
+                                                 final int tick, final boolean worldChanged) {
+
+        if (data == null || damagedLoc == null) {
+            return new TargetMoveInfo(0, 0.0, 0, 0.0);
+        }
+        if (data.lastAttackedX == Double.MAX_VALUE || tick < data.lastAttackTick
+                || worldChanged || tick - data.lastAttackTick > 20) {
+            return new TargetMoveInfo(0, 0.0, 0, 0.0);
+        }
+        final int age = tick - data.lastAttackTick;
+        final double move = TrigUtil.distance(data.lastAttackedX, data.lastAttackedZ,
+                                              damagedLoc.getX(), damagedLoc.getZ());
+        final long msAge = (long) (50f * TickTask.getLag(50L * age, true) * (float) age);
+        final double normalized = msAge == 0 ? move : move * Math.min(20.0, 1000.0 / (double) msAge);
+        return new TargetMoveInfo(age, move, msAge, normalized);
+    }
+
+    /**
+     * Detect potential lost sprint when attacking.
+     */
+    private void checkLostSprint(final Player player, final Location loc, final Location damagedLoc,
+                                 final long now, final MovingData mData, final MovingConfig mCc,
+                                 final IPlayerData pData, final boolean debug) {
+
+        if (TrigUtil.distance(loc.getX(), loc.getZ(), damagedLoc.getX(), damagedLoc.getZ()) >= 4.5) {
+            return;
+        }
+
+        final PlayerMoveData lastMove = mData.playerMoves.getFirstPastMove();
+        if (!lastMove.valid || mData.liftOffEnvelope != LiftOffEnvelope.NORMAL) {
+            return;
+        }
+
+        final double hDist = TrigUtil.xzDistance(loc, lastMove.from);
+        if (hDist < 0.23) {
+            return;
+        }
+
+        final PlayerMoveInfo moveInfo = auxMoving.usePlayerMoveInfo();
+        moveInfo.set(player, loc, null, mCc.yOnGround);
+        if (now <= mData.timeSprinting + mCc.sprintingGrace
+                && MovingUtil.shouldCheckSurvivalFly(player, moveInfo.from, moveInfo.to, mData, mCc, pData)) {
+            mData.lostSprintCount = 7;
+            if ((debug || pData.isDebugActive(CheckType.MOVING)) && BuildParameters.debugLevel > 0) {
+                debug(player, "lostsprint: hDist to last from: " + hDist + " | targetdist="
+                        + TrigUtil.distance(loc.getX(), loc.getZ(), damagedLoc.getX(), damagedLoc.getZ())
+                        + " | sprinting=" + player.isSprinting() + " | food=" + player.getFoodLevel()
+                        + " | hbuf=" + mData.sfHorizontalBuffer);
+            }
+        }
+        auxMoving.returnPlayerMoveInfo(moveInfo);
+    }
+
+    private static final class TargetMoveInfo {
+        final int tickAge;
+        final double targetMove;
+        final long msAge;
+        final double normalizedMove;
+
+        TargetMoveInfo(final int tickAge, final double targetMove, final long msAge, final double normalizedMove) {
+            this.tickAge = tickAge;
+            this.targetMove = targetMove;
+            this.msAge = msAge;
+            this.normalizedMove = normalizedMove;
+        }
     }
 
     /**
