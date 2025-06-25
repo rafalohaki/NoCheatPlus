@@ -1216,61 +1216,95 @@ public class MovingListener extends CheckListener implements TickListener, IRemo
 
     private Location runMovingChecks(final Player player, final PlayerLocation pFrom, final PlayerLocation pTo,
             final Location from, final Location to, final PlayerMoveData thisMove, final PlayerMoveData lastMove,
-            Location newTo, final boolean checkSf, final boolean checkCf, boolean checkNf,
+            Location newTo, final boolean checkSf, final boolean checkCf, final boolean checkNf,
             final double previousSetBackY, final boolean useBlockChangeTracker, final boolean debug,
             final int multiMoveCount, final long time, final int tick, final String playerName,
             final MovingData data, final MovingConfig cc, final IPlayerData pData) {
 
         if (checkSf) {
-            MovingUtil.prepareFullCheck(pFrom, pTo, thisMove, Math.max(cc.noFallyOnGround, cc.yOnGround));
-            if (lastMove.toIsValid && lastMove.flyCheck == CheckType.MOVING_CREATIVEFLY) {
-                final long tickHasLag = data.delayWorkaround + Math.round(200 / TickTask.getLag(200, true));
-                if (data.delayWorkaround > time || tickHasLag < time) {
-                    workaroundFlyCheckTransition(player, tick, debug, data, cc);
-                    data.delayWorkaround = time;
-                }
-            }
-            if (newTo == null) {
-                thisMove.flyCheck = CheckType.MOVING_SURVIVALFLY;
-                newTo = survivalFly.check(player, pFrom, pTo, multiMoveCount, data, cc, pData, tick, time,
-                        useBlockChangeTracker);
-            }
-            if (checkNf) {
-                checkNf = noFall.isEnabled(player, pData);
-            }
-            if (newTo == null) {
-                if (cc.sfHoverCheck && !(lastMove.toIsValid && lastMove.to.extraPropertiesValid
-                        && lastMove.to.onGroundOrResetCond) && !pTo.isOnGround()) {
-                    hoverTicks.add(playerName);
-                    data.sfHoverTicks = 0;
-                } else {
-                    data.sfHoverTicks = -1;
-                }
-                if (checkNf) {
-                    noFall.check(player, pFrom, pTo, previousSetBackY, data, cc, pData);
-                }
-            } else if (checkNf && cc.sfSetBackPolicyFallDamage) {
-                boolean skip = !noFall.willDealFallDamage(player, from.getY(), previousSetBackY, data);
-                if (!skip && (!pFrom.isOnGround() && !pFrom.isResetCond())) {
-                    skip = false;
-                }
-                if (!skip && (!pTo.isResetCond() || !pFrom.isResetCond())) {
-                    noFall.checkDamage(player, Math.min(from.getY(), to.getY()), data, pData);
-                }
-            }
+            final MoveCheckResult result = handleSurvivalFlyCheck(player, pFrom, pTo, from, to, thisMove, lastMove,
+                    newTo, checkNf, previousSetBackY, useBlockChangeTracker, debug, multiMoveCount, time, tick,
+                    playerName, data, cc, pData);
+            newTo = result.newTo;
         } else if (checkCf) {
-            if (newTo == null) {
-                thisMove.flyCheck = CheckType.MOVING_CREATIVEFLY;
-                newTo = creativeFly.check(player, pFrom, pTo, data, cc, pData, time, tick, useBlockChangeTracker);
-                if (checkNf && noFall.isEnabled(player, pData)) {
-                    noFall.check(player, pFrom, pTo, previousSetBackY, data, cc, pData);
-                }
-            }
-            data.sfHoverTicks = -1;
-            data.sfLowJump = false;
+            newTo = handleCreativeFlyCheck(player, pFrom, pTo, thisMove, newTo, checkNf, previousSetBackY,
+                    useBlockChangeTracker, time, tick, data, cc, pData);
         } else {
             data.clearFlyData();
         }
+
+        newTo = handleMorePacketsCheck(player, pFrom, pTo, newTo, debug, data, cc, pData);
+
+        return newTo;
+    }
+
+    private MoveCheckResult handleSurvivalFlyCheck(final Player player, final PlayerLocation pFrom,
+            final PlayerLocation pTo, final Location from, final Location to, final PlayerMoveData thisMove,
+            final PlayerMoveData lastMove, Location newTo, boolean checkNf, final double previousSetBackY,
+            final boolean useBlockChangeTracker, final boolean debug, final int multiMoveCount, final long time,
+            final int tick, final String playerName, final MovingData data, final MovingConfig cc,
+            final IPlayerData pData) {
+
+        MovingUtil.prepareFullCheck(pFrom, pTo, thisMove, Math.max(cc.noFallyOnGround, cc.yOnGround));
+        if (lastMove.toIsValid && lastMove.flyCheck == CheckType.MOVING_CREATIVEFLY) {
+            final long tickHasLag = data.delayWorkaround + Math.round(200 / TickTask.getLag(200, true));
+            if (data.delayWorkaround > time || tickHasLag < time) {
+                workaroundFlyCheckTransition(player, tick, debug, data, cc);
+                data.delayWorkaround = time;
+            }
+        }
+        if (newTo == null) {
+            thisMove.flyCheck = CheckType.MOVING_SURVIVALFLY;
+            newTo = survivalFly.check(player, pFrom, pTo, multiMoveCount, data, cc, pData, tick, time,
+                    useBlockChangeTracker);
+        }
+        if (checkNf) {
+            checkNf = noFall.isEnabled(player, pData);
+        }
+        if (newTo == null) {
+            if (cc.sfHoverCheck && !(lastMove.toIsValid && lastMove.to.extraPropertiesValid
+                    && lastMove.to.onGroundOrResetCond) && !pTo.isOnGround()) {
+                hoverTicks.add(playerName);
+                data.sfHoverTicks = 0;
+            } else {
+                data.sfHoverTicks = -1;
+            }
+            if (checkNf) {
+                noFall.check(player, pFrom, pTo, previousSetBackY, data, cc, pData);
+            }
+        } else if (checkNf && cc.sfSetBackPolicyFallDamage) {
+            boolean skip = !noFall.willDealFallDamage(player, from.getY(), previousSetBackY, data);
+            if (!skip && (!pFrom.isOnGround() && !pFrom.isResetCond())) {
+                skip = false;
+            }
+            if (!skip && (!pTo.isResetCond() || !pFrom.isResetCond())) {
+                noFall.checkDamage(player, Math.min(from.getY(), to.getY()), data, pData);
+            }
+        }
+
+        return new MoveCheckResult(newTo, checkNf);
+    }
+
+    private Location handleCreativeFlyCheck(final Player player, final PlayerLocation pFrom,
+            final PlayerLocation pTo, final PlayerMoveData thisMove, Location newTo, final boolean checkNf,
+            final double previousSetBackY, final boolean useBlockChangeTracker, final long time, final int tick,
+            final MovingData data, final MovingConfig cc, final IPlayerData pData) {
+
+        if (newTo == null) {
+            thisMove.flyCheck = CheckType.MOVING_CREATIVEFLY;
+            newTo = creativeFly.check(player, pFrom, pTo, data, cc, pData, time, tick, useBlockChangeTracker);
+            if (checkNf && noFall.isEnabled(player, pData)) {
+                noFall.check(player, pFrom, pTo, previousSetBackY, data, cc, pData);
+            }
+        }
+        data.sfHoverTicks = -1;
+        data.sfLowJump = false;
+        return newTo;
+    }
+
+    private Location handleMorePacketsCheck(final Player player, final PlayerLocation pFrom,
+            final PlayerLocation pTo, Location newTo, final boolean debug, final MovingData data,
+            final MovingConfig cc, final IPlayerData pData) {
 
         if (pData.isCheckActive(CheckType.MOVING_MOREPACKETS, player)
                 && (newTo == null || data.isMorePacketsSetBackOldest())) {
@@ -1288,6 +1322,15 @@ public class MovingListener extends CheckListener implements TickListener, IRemo
         return newTo;
     }
 
+    private static class MoveCheckResult {
+        final Location newTo;
+        final boolean checkNf;
+        MoveCheckResult(final Location newTo, final boolean checkNf) {
+            this.newTo = newTo;
+            this.checkNf = checkNf;
+        }
+    }
+
     
     /**
      * Vertical block push
@@ -1302,21 +1345,29 @@ public class MovingListener extends CheckListener implements TickListener, IRemo
      * @return
      */
     private boolean checkPastStateVerticalPush(final Player player, final PlayerLocation from, final PlayerLocation to,
-                                               final PlayerMoveData thisMove, final PlayerMoveData lastMove, final int tick, 
+                                               final PlayerMoveData thisMove, final PlayerMoveData lastMove, final int tick,
                                                final boolean debug, final MovingData data, final MovingConfig cc) {
 
         final UUID worldId = from.getWorld().getUID();
+        final VerticalPush push = calculateVerticalPush(player, from, to, thisMove, lastMove, tick, debug, data, cc,
+                worldId);
+        if (push != null) {
+            applyVerticalPush(player, tick, thisMove, data, push, debug);
+            return true;
+        }
+        return false;
+    }
+
+    private VerticalPush calculateVerticalPush(final Player player, final PlayerLocation from,
+            final PlayerLocation to, final PlayerMoveData thisMove, final PlayerMoveData lastMove, final int tick,
+            final boolean debug, final MovingData data, final MovingConfig cc, final UUID worldId) {
+
         double amount = -1.0;
         boolean addvel = false;
-        final BlockChangeEntry entryBelowY_POS = blockChangeSearch(from, tick, Direction.Y_POS, debug, data, cc, worldId, true);
+        final BlockChangeEntry entryBelowY_POS = blockChangeSearch(from, tick, Direction.Y_POS, debug, data, cc,
+                worldId, true);
 
-        if (
-                // Center push..
-                entryBelowY_POS != null
-                // Off center push.
-                //|| thisMove.yDistance < 0.6 && from.matchBlockChange(blockChangeTracker, data.blockChangeRef, Direction.Y_POS, Math.min(.415, thisMove.yDistance))
-                ) {
-
+        if (entryBelowY_POS != null) {
             if (debug) {
                 final StringBuilder builder = new StringBuilder(150);
                 builder.append("Direct block push at (");
@@ -1327,50 +1378,48 @@ public class MovingListener extends CheckListener implements TickListener, IRemo
                 builder.append(")");
                 debug(player, builder.toString());
             }
-            /*
-             * One case left still not covered, double ascend motions (0.25, 0.649)
-             * Mostly happen while jumping into block and piston push!
-             */
             if (lastMove.valid && thisMove.yDistance >= 0.0) {
                 if ((from.isOnGroundOrResetCond() || thisMove.touchedGroundWorkaround) && from.isOnGround(1.0)) {
                     amount = Math.min(thisMove.yDistance, 0.5625);
-                }
-                else if (lastMove.yDistance < -Magic.GRAVITY_MAX) {
+                } else if (lastMove.yDistance < -Magic.GRAVITY_MAX) {
                     amount = Math.min(thisMove.yDistance, 0.34);
                 }
-                if (thisMove.yDistance == 0.0) amount = 0.0;
+                if (thisMove.yDistance == 0.0) {
+                    amount = 0.0;
+                }
             }
-            if (lastMove.toIsValid && amount < 0.0 && thisMove.yDistance < 0.0 
-                && thisMove.yDistance > -1.515 && lastMove.yDistance >= 0.0) {
+            if (lastMove.toIsValid && amount < 0.0 && thisMove.yDistance < 0.0 && thisMove.yDistance > -1.515
+                    && lastMove.yDistance >= 0.0) {
                 amount = thisMove.yDistance;
                 addvel = true;
             }
-            if (entryBelowY_POS != null) {
-                data.blockChangeRef.updateSpan(entryBelowY_POS);
-            }
+            data.blockChangeRef.updateSpan(entryBelowY_POS);
         }
-        // Finally add velocity if set.
+
         if (amount >= 0.0 || addvel) {
-            data.removeLeadingQueuedVerticalVelocityByFlag(VelocityFlags.ORIGIN_BLOCK_MOVE);
-            /*
-             * Concepts for limiting... max amount based on side
-             * conditions such as block height+1.5, max coordinate, max
-             * amount per use, ALLOW_ZERO flag/boolean and set in
-             * constructor, demand max. 1 zero dist during validity. Bind
-             * use to initial xz coordinates... Too precise = better with
-             * past move tracking, or a sub-class of SimpleEntry with better
-             * access signatures including thisMove.
-             */
-            final SimpleEntry vel = new SimpleEntry(tick, amount, VelocityFlags.ORIGIN_BLOCK_MOVE, 1);
-            data.verticalBounce = vel;
-            data.useVerticalBounce(player);
-            data.useVerticalVelocity(thisMove.yDistance);
-            if (debug) {
-                debug(player, "checkPastStateVerticalPush: set velocity: " + vel);
-            }
-            return true;
+            return new VerticalPush(amount);
         }
-        return false;
+        return null;
+    }
+
+    private void applyVerticalPush(final Player player, final int tick, final PlayerMoveData thisMove,
+            final MovingData data, final VerticalPush push, final boolean debug) {
+        data.removeLeadingQueuedVerticalVelocityByFlag(VelocityFlags.ORIGIN_BLOCK_MOVE);
+        final SimpleEntry vel = new SimpleEntry(tick, push.amount, VelocityFlags.ORIGIN_BLOCK_MOVE, 1);
+        data.verticalBounce = vel;
+        data.useVerticalBounce(player);
+        data.useVerticalVelocity(thisMove.yDistance);
+        if (debug) {
+            debug(player, "checkPastStateVerticalPush: set velocity: " + vel);
+        }
+    }
+
+    private static class VerticalPush {
+        final double amount;
+
+        VerticalPush(final double amount) {
+            this.amount = amount;
+        }
     }
 
 
