@@ -140,8 +140,9 @@ public abstract class MultiListenerRegistry<EB, P> extends MiniListenerRegistry<
     protected <E extends EB> MiniListener<E> register(Object listener, Method method, P basePriority, 
             RegistrationOrder defaultOrder, boolean ignoreCancelled) {
         RegistrationOrder order = null;
-        if (method.getClass().isAnnotationPresent(RegisterMethodWithOrder.class)) {
-            order = new RegistrationOrder(method.getClass().getAnnotation(RegisterMethodWithOrder.class));
+        if (method.isAnnotationPresent(RegisterMethodWithOrder.class)) {
+            RegisterMethodWithOrder annotation = method.getAnnotation(RegisterMethodWithOrder.class);
+            order = new RegistrationOrder(annotation);
         }
         if (order == null) {
             order = defaultOrder;
