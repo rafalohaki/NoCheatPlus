@@ -160,7 +160,7 @@ public class SurvivalFly extends Check {
         final double x = to.getX() - from.getX();
         final double y = move.yDistance;
         final double z = to.getZ() - from.getZ();
-        if (x == 0.0 && z == 0.0) {
+        if (TrigUtil.isZero(x) && TrigUtil.isZero(z)) {
             return new Distances(x, y, z, 0.0, false);
         }
         return new Distances(x, y, z, move.hDistance, true);
@@ -458,7 +458,7 @@ public class SurvivalFly extends Check {
 
         // 3: Adjust in-air counters.
         if (inAir) {
-            if (yDistance == 0.0) {
+            if (TrigUtil.isZero(yDistance)) {
                 data.sfZeroVdistRepeat ++;
             }
             else data.sfZeroVdistRepeat = 0;
@@ -619,7 +619,7 @@ public class SurvivalFly extends Check {
                     && pastMove2.setBackYDistance > pastMove3.setBackYDistance && pastMove3.setBackYDistance <= minJumpGain + jumpGainMargin
                     && pastMove3.setBackYDistance >= minJumpGain - (Magic.GRAVITY_MAX + Magic.GRAVITY_SPAN)
                     // 0: Too little dropoff
-                    || thisMove.setBackYDistance == 0.0 && lastMove.setBackYDistance < data.liftOffEnvelope.getMaxJumpHeight(data.jumpAmplifier)
+                    || TrigUtil.isZero(thisMove.setBackYDistance) && lastMove.setBackYDistance < data.liftOffEnvelope.getMaxJumpHeight(data.jumpAmplifier)
                     && pastMove2.setBackYDistance > lastMove.setBackYDistance && pastMove2.setBackYDistance - lastMove.setBackYDistance < jumpGainMargin
                     // 0: Sharp distance dropoff
                     // (Not observed nor tested though. This is just an educated guess.)
@@ -655,7 +655,7 @@ public class SurvivalFly extends Check {
         Material blockAbove = from.getTypeId(from.getBlockX(), Location.locToBlock(from.getY() + 0.1), from.getBlockZ());
 
         // Checks for no gravity when moving in a liquid
-        if (hDistanceAboveLimit <= 0.0 && yDistance == 0.0 && lastMove.yDistance == 0.0 && lastMove.toIsValid
+        if (hDistanceAboveLimit <= 0.0 && TrigUtil.isZero(yDistance) && TrigUtil.isZero(lastMove.yDistance) && lastMove.toIsValid
             && hDistance > 0.090 && lastMove.hDistance > 0.090 // Do not check lower speeds. The cheat would be purely cosmetic at that point, it wouldn't offer any advantage.
             && BlockProperties.isLiquid(to.getTypeId())
             && BlockProperties.isLiquid(from.getTypeId())
@@ -821,7 +821,7 @@ public class SurvivalFly extends Check {
                                                 thisMove, lastMove, pData, to);
             }
         } else {
-            if (cc.velocityStrictInvalidation && lastMove.hAllowedDistanceBase == 0.0 && data.hasQueuedHorVel()) {
+            if (cc.velocityStrictInvalidation && TrigUtil.isZero(lastMove.hAllowedDistanceBase) && data.hasQueuedHorVel()) {
                 data.clearAllHorVel();
                 hFreedom = 0.0;
             }
@@ -2353,7 +2353,7 @@ public class SurvivalFly extends Check {
             tags.add("ychinc");
         }
         else if (data.bunnyhopDelay < 9 && !((lastMove.touchedGround || lastMove.from.onGroundOrResetCond)
-                && lastMove.yDistance == 0D) && data.getOrUseVerticalVelocity(yDistance) == null) {
+                && TrigUtil.isZero(lastMove.yDistance)) && data.getOrUseVerticalVelocity(yDistance) == null) {
             vDistanceAboveLimit = Math.max(vDistanceAboveLimit, Math.abs(yDistance));
             tags.add("airjump");
         }
