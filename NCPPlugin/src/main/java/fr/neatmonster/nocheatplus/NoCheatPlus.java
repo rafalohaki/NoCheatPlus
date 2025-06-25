@@ -635,7 +635,11 @@ public class NoCheatPlus extends JavaPlugin implements NoCheatPlusAPI {
         }
         // Remove from present registries, order prevents to remove from itself.
         for (final ComponentRegistry<?> registry : subRegistries) {
-            ReflectionUtil.invokeGenericMethodOneArg(registry, "removeComponent", obj);
+            if (registry instanceof fr.neatmonster.nocheatplus.players.PlayerDataManager) {
+                ((fr.neatmonster.nocheatplus.players.PlayerDataManager) registry).removeComponentReflectively(obj);
+            } else {
+                ReflectionUtil.invokeGenericMethodOneArg(registry, "removeComponent", obj);
+            }
         }
 
         allComponents.remove(obj);
