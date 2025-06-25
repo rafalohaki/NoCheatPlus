@@ -17,6 +17,9 @@ package fr.neatmonster.nocheatplus.compat.spigotcb1_9_R1;
 import org.bukkit.craftbukkit.v1_9_R1.entity.CraftEntity;
 import org.bukkit.entity.Entity;
 
+import fr.neatmonster.nocheatplus.NCPAPIProvider;
+import fr.neatmonster.nocheatplus.logging.Streams;
+
 import fr.neatmonster.nocheatplus.components.entity.IEntityAccessLastPositionAndLook;
 import fr.neatmonster.nocheatplus.components.location.IGetPositionWithLook;
 import fr.neatmonster.nocheatplus.components.location.ISetPositionWithLook;
@@ -35,7 +38,33 @@ public class EntityAccessLastPositionAndLook implements IEntityAccessLastPositio
 
     @Override
     public void getPositionAndLook(final Entity entity, final ISetPositionWithLook location) {
-        // TODO: Error handling / conventions.
+        if (entity == null || location == null) {
+            return;
+        }
+        try {
+            performGet(entity, location);
+        }
+        catch (Throwable t) {
+            NCPAPIProvider.getNoCheatPlusAPI().getLogManager().warning(Streams.STATUS,
+                    "Could not retrieve last position and look for Entity: " + entity.getClass().getName());
+        }
+    }
+
+    @Override
+    public void setPositionAndLook(Entity entity, IGetPositionWithLook location) {
+        if (entity == null || location == null) {
+            return;
+        }
+        try {
+            performSet(entity, location);
+        }
+        catch (Throwable t) {
+            NCPAPIProvider.getNoCheatPlusAPI().getLogManager().warning(Streams.STATUS,
+                    "Could not set last position and look for Entity: " + entity.getClass().getName());
+        }
+    }
+
+    private void performGet(final Entity entity, final ISetPositionWithLook location) {
         final net.minecraft.server.v1_9_R1.Entity nmsEntity = ((CraftEntity) entity).getHandle();
         location.setX(nmsEntity.lastX);
         location.setY(nmsEntity.lastY);
@@ -44,8 +73,7 @@ public class EntityAccessLastPositionAndLook implements IEntityAccessLastPositio
         location.setPitch(nmsEntity.lastPitch);
     }
 
-    @Override
-    public void setPositionAndLook(Entity entity, IGetPositionWithLook location) {
+    private void performSet(Entity entity, IGetPositionWithLook location) {
         final net.minecraft.server.v1_9_R1.Entity nmsEntity = ((CraftEntity) entity).getHandle();
         nmsEntity.lastX = location.getX();
         nmsEntity.lastY = location.getY();
