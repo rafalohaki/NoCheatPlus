@@ -18,9 +18,8 @@ import fr.neatmonster.nocheatplus.components.data.ICheckData;
 
 /**
  * Abstract implementation to do nothing.
- * 
+ *
  * @author asofold
- * @TODO: Keep/remove.
  *
  */
 public abstract class ACheckData implements ICheckData {

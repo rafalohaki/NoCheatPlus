@@ -15,8 +15,7 @@
 package fr.neatmonster.nocheatplus.components.config;
 
 /**
- * TODO: Keep / Remove.
- * 
+ *
  * @author asofold
  */
 public interface ICheckConfig extends IConfig {
