@@ -148,7 +148,8 @@ public abstract class DigestedWords extends AbstractWordProcessor{
 		for (final Character c : chars){
 			a[i] = c;
 			i ++;
-			// TODO: lol, horrible.
+                        // Potential optimization: use array indexing directly
+                        // or preallocate capacity for better performance.
 		}
 		return a;
 	}
