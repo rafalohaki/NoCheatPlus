@@ -207,10 +207,6 @@ public class PassengerUtil {
         final String pWorld = player.getWorld().getName();
         final String vWorld = vehicle.getWorld() != null ? vehicle.getWorld().getName() : "";
         final boolean vWorldMatchesPWorld = vWorld.equals(pWorld);
-        // TODO: Rubber band issue needs synchronizing with packet level and ignore certain incoming ones?
-        // TODO: This handling could conflict with WorldGuard region flags.
-        // TODO: Account for nested passengers and inconsistencies.
-        // TODO: Conception: Restore the passengers at the time of setting the vehicle set back?
         data.isVehicleSetBack = true;
         int otherPlayers = 0;
         boolean playerIsOriginalPassenger = false;
@@ -249,29 +245,23 @@ public class PassengerUtil {
         boolean playerTeleported = false;
         int otherPlayersTeleported = 0;
         if (vehicle.isDead() || !vehicle.isValid()) {
-            // TODO: Still consider teleporting the player.
             vehicleTeleported = false;
         }
         else {
-            // TODO: if (!redoPassengers) { 
             // Can the vehicle teleport with passengers directly, one day?
             // Attempt to only teleport the entity first. On failure use eject.
-            // TODO: Probably needs a guard depending on version.
             //            if (vehicle.teleport(location, 
             //                  BridgeMisc.TELEPORT_CAUSE_CORRECTION_OF_POSITION)) {
             //                // Check success.
-            //                if (vehicle.getLocation(useLoc).equals(location) && isPassenger(player, vehicle)) { // TODO: Compare all passengers (...)
             //                    vehicleTeleported = true;
             //                    playerTeleported = true;
             //                    if (debug) {
             //                        CheckUtils.debug(player, CheckType.MOVING_VEHICLE, "Direct teleport of entity with passenger succeeded.");
             //                    }
             //                }
-            //            } // TODO: other players flags reset etc.
             if (redoPassengers){
                 // Teleport the vehicle independently.
                 vehicle.eject(); // NOTE: VehicleExit fires, unknown TP fires.
-                // TODO: Confirm eject worked, handle if not.
                 //vehicleTeleported = vehicle.teleport(LocUtil.clone(location), BridgeMisc.TELEPORT_CAUSE_CORRECTION_OF_POSITION);
                 vehicleTeleported = Folia.teleportEntity(vehicle, LocUtil.clone(location), BridgeMisc.TELEPORT_CAUSE_CORRECTION_OF_POSITION);
             }
@@ -302,7 +292,6 @@ public class PassengerUtil {
                         if (Folia.teleportEntity(passenger, location, BridgeMisc.TELEPORT_CAUSE_CORRECTION_OF_POSITION)
                             && vehicleTeleported && TrigUtil.distance(passenger.getLocation(useLoc2), vehicle.getLocation(useLoc)) < 1.5) {
                             if (!handleVehicle.getHandle().addPassenger(passenger, vehicle)) {
-                                // TODO: What?
                             }
                         }
                     }
@@ -314,7 +303,6 @@ public class PassengerUtil {
                 }
             }
         }
-        // TODO: else: reset flags for other players?
 
         // Log resolution.
         if (debug) { 
@@ -352,7 +340,6 @@ public class PassengerUtil {
                 // NOTE: VehicleEnter fires, unknown TP fires.
                 boolean scheduledelay = cc.schedulevehicleSetPassenger;
                 if (data.vehicleSetPassengerTaskId == null) {
-                    // TODO: Check which version fixed this?
                     if (vehicle.getType() == EntityType.BOAT) {
                         if (!handleVehicle.getHandle().addPassenger(player, vehicle)) {
                             // Not schedule set passenger for boat due to location async
@@ -377,13 +364,11 @@ public class PassengerUtil {
                         }
 
                         if (!handleVehicle.getHandle().addPassenger(player, vehicle)) {
-                            // TODO: What?
                         }
                     }
                 } 
                 else if (debug) CheckUtils.debug(player, CheckType.MOVING_VEHICLE, "Set passenger task already scheduled, skip this time.");
                 // Ensure a set back.
-                // TODO: Set backs get invalidated somewhere, likely on an extra unknown TP. Use data.isVehicleSetBack in MovingListener/teleport.
                 if (data.vehicleSetBacks.getFirstValidEntry(location) == null) {
                     // At least ensure one of the entries has to match the location we teleported the vehicle to.
                     if (debug) {
