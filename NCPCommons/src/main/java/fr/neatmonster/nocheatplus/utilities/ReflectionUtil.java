@@ -21,6 +21,8 @@ import java.lang.reflect.InvocationTargetException;
 import java.lang.reflect.Member;
 import java.lang.reflect.Method;
 import java.lang.reflect.Modifier;
+import java.util.logging.Level;
+import java.util.logging.Logger;
 
 /**
  * Auxiliary methods for dealing with reflection.
@@ -29,6 +31,9 @@ import java.lang.reflect.Modifier;
  *
  */
 public class ReflectionUtil {
+
+    private static final Logger LOG =
+            Logger.getLogger(ReflectionUtil.class.getName());
 
     /**
      * Convenience method to check if members exist and fail if not. This checks
@@ -50,8 +55,7 @@ public class ReflectionUtil {
                 }
             }
         } catch (SecurityException e) {
-            // Let this one pass.
-            //throw new RuntimeException(e);
+            LOG.log(Level.FINE, "Security exception during member check", e);
         } catch (Throwable t) {
             throw new RuntimeException(t);
         }
@@ -78,12 +82,13 @@ public class ReflectionUtil {
                     throw new NoSuchFieldException(clazz.getName() + "." + fieldName + " does not exist.");
                 }
                 else if (field.getType() != type) {
-                    throw new NoSuchFieldException(clazz.getName() + "." + fieldName + " has wrong type: " + field.getType());
+                    throw new NoSuchFieldException(
+                            clazz.getName() + "." + fieldName
+                                    + " has wrong type: " + field.getType());
                 }
             }
         } catch (SecurityException e) {
-            // Let this one pass.
-            //throw new RuntimeException(e);
+            LOG.log(Level.FINE, "Security exception during member check", e);
         } catch (Throwable t) {
             throw new RuntimeException(t);
         }
@@ -105,16 +110,17 @@ public class ReflectionUtil {
         try {
             for (String methodName : methodNames){
                 Method m = objClass.getMethod(methodName);
-                if (m.getParameterTypes().length != 0){
-                    throw new RuntimeException("Expect method without arguments for " + objClass.getName() + "." + methodName);
+                if (m.getParameterTypes().length != 0) {
+                    throw new RuntimeException(
+                            "Expect method without arguments for " + objClass.getName()
+                                    + "." + methodName);
                 }
                 if (m.getReturnType() != returnType){
                     throw new RuntimeException("Wrong return type for: " + objClass.getName() + "." + methodName);
                 }
             }
         } catch (SecurityException e) {
-            // Let this one pass.
-            //throw new RuntimeException(e);
+            LOG.log(Level.FINE, "Security exception during method return type check", e);
         } catch (Throwable t) {
             throw new RuntimeException(t);
         }
@@ -147,29 +153,33 @@ public class ReflectionUtil {
                     if (parameterTypes[0] != Object.class && !parameterTypes[0].isAssignableFrom(argClass)){
                         denyObject = true;
                     }
-                    // Override the found method if none found yet and assignment is possible, or if it has a specialized argument of an already found one.
-                    if ((methodFound == null && parameterTypes[0].isAssignableFrom(argClass) || methodFound != null && methodFound.getParameterTypes()[0].isAssignableFrom(parameterTypes[0]))){
+                    // Override the found method if none found yet and assignment is
+                    // possible, or if it has a specialized argument of an already
+                    // found one.
+                    if ((methodFound == null && parameterTypes[0].isAssignableFrom(argClass)
+                            || methodFound != null
+                                    && methodFound.getParameterTypes()[0].isAssignableFrom(parameterTypes[0]))){
                         methodFound = method;
                     }
                 }
             }
         }
-        if (denyObject && methodFound.getParameterTypes()[0] == Object.class){
-            // TODO: Throw something !?
+        if (denyObject && methodFound.getParameterTypes()[0] == Object.class) {
+            LOG.warning("Object argument denied while a specialized method exists.");
             return null;
-        }
-        else if (methodFound != null && methodFound.getParameterTypes()[0].isAssignableFrom(argClass)){
-            try{
+        } else if (methodFound != null
+                && methodFound.getParameterTypes()[0].isAssignableFrom(argClass)) {
+            try {
                 final Object res = methodFound.invoke(obj, arg);
                 return res;
-            }
-            catch (Throwable t){
-                // TODO: Throw something !?
+            } catch (Throwable t) {
+                LOG.log(Level.WARNING,
+                        "Failed invoking method " + methodName + " on " + objClass,
+                        t);
                 return null;
             }
-        }
-        else{
-            // TODO: Throw something !?
+        } else {
+            LOG.warning("Method " + methodName + " not found for class " + objClass);
             return null;
         }
     }
@@ -187,7 +197,9 @@ public class ReflectionUtil {
      *            comparison with ==, no isAssignableForm. TODO: really ?
      * @return
      */
-    public static Object invokeMethodNoArgs(final Object obj, final String methodName, final Class<?> ...  returnTypePreference){
+    public static Object invokeMethodNoArgs(final Object obj,
+            final String methodName,
+            final Class<?>... returnTypePreference) {
         // TODO: Isn't there a one-line-call for this ??
         final Class<?> objClass = obj.getClass();
         // Try to get it directly first.
@@ -197,18 +209,17 @@ public class ReflectionUtil {
             methodFound = seekMethodNoArgs(objClass, methodName, returnTypePreference);
         }
         // Invoke if found.
-        if (methodFound != null){
-            try{
-                final Object res = methodFound.invoke(obj);
-                return res;
-            }
-            catch (Throwable t){
-                // TODO: Throw something !?
+        if (methodFound != null) {
+            try {
+                return methodFound.invoke(obj);
+            } catch (Throwable t) {
+                LOG.log(Level.WARNING,
+                        "Failed invoking method " + methodName + " on " + objClass,
+                        t);
                 return null;
             }
-        }
-        else{
-            // TODO: Throw something !?
+        } else {
+            LOG.warning("Method " + methodName + " not found for class " + objClass);
             return null;
         }
     }
@@ -223,17 +234,11 @@ public class ReflectionUtil {
     public static Object invokeMethodNoArgs(Method method, Object object) {
         try {
             return method.invoke(object);
+        } catch (IllegalAccessException | IllegalArgumentException
+                | InvocationTargetException e) {
+            LOG.log(Level.FINE, "Failed reflective invocation", e);
+            return null;
         }
-        catch (IllegalAccessException e) {
-            // Failed to access method reflectively.
-        }
-        catch (IllegalArgumentException e) {
-            // Arguments mismatch for reflective call.
-        }
-        catch (InvocationTargetException e) {
-            // Target method threw an exception.
-        }
-        return null;
     }
 
     /**
@@ -247,17 +252,11 @@ public class ReflectionUtil {
     public static Object invokeMethod(Method method, Object object, Object... arguments) {
         try {
             return method.invoke(object, arguments);
+        } catch (IllegalAccessException | IllegalArgumentException
+                | InvocationTargetException e) {
+            LOG.log(Level.FINE, "Failed reflective invocation", e);
+            return null;
         }
-        catch (IllegalAccessException e) {
-            // Failed to access method reflectively.
-        }
-        catch (IllegalArgumentException e) {
-            // Arguments mismatch for reflective call.
-        }
-        catch (InvocationTargetException e) {
-            // Target method threw an exception.
-        }
-        return null;
     }
 
     /**
@@ -268,7 +267,9 @@ public class ReflectionUtil {
      * @param returnTypePreference
      * @return
      */
-    public static Method getMethodNoArgs(final Class<?> objClass, final String methodName, final Class<?>... returnTypePreference) {
+    public static Method getMethodNoArgs(final Class<?> objClass,
+            final String methodName,
+            final Class<?>... returnTypePreference) {
         try {
             final Method methodFound = objClass.getMethod(methodName);
             if (methodFound != null) {
@@ -283,9 +284,9 @@ public class ReflectionUtil {
                 }
             }
         } catch (SecurityException e) {
-            // Access restrictions prevented retrieving the method.
+            LOG.log(Level.FINE, "Security exception while retrieving method", e);
         } catch (NoSuchMethodException e) {
-            // Method not found; ignore and return null.
+            LOG.log(Level.FINE, "Method not found", e);
         }
         return null;
     }
@@ -374,9 +375,9 @@ public class ReflectionUtil {
             if (type == null || field.getType() == type) {
                 return field;
             }
+        } catch (NoSuchFieldException | SecurityException e) {
+            LOG.log(Level.FINE, "Failed to retrieve field", e);
         }
-        catch (NoSuchFieldException e) {}
-        catch (SecurityException e) {}
         return null;
     }
 
@@ -392,54 +393,54 @@ public class ReflectionUtil {
         try {
             field.set(object, value);
             return true;
+        } catch (IllegalArgumentException | IllegalAccessException e) {
+            LOG.log(Level.FINE, "Failed to set field", e);
         }
-        catch (IllegalArgumentException e) {}
-        catch (IllegalAccessException e) {}
         return false;
     }
 
     public static boolean getBoolean(Field field, Object object, boolean defaultValue) {
         try {
             return field.getBoolean(object);
+        } catch (IllegalArgumentException | IllegalAccessException e) {
+            LOG.log(Level.FINE, "Failed to get boolean field", e);
         }
-        catch (IllegalArgumentException e) {}
-        catch (IllegalAccessException e) {}
         return defaultValue;
     }
 
     public static int getInt(Field field, Object object, int defaultValue) {
         try {
             return field.getInt(object);
+        } catch (IllegalArgumentException | IllegalAccessException e) {
+            LOG.log(Level.FINE, "Failed to get int field", e);
         }
-        catch (IllegalArgumentException e) {}
-        catch (IllegalAccessException e) {}
         return defaultValue;
     }
 
     public static float getFloat(Field field, Object object, float defaultValue) {
         try {
             return field.getFloat(object);
+        } catch (IllegalArgumentException | IllegalAccessException e) {
+            LOG.log(Level.FINE, "Failed to get float field", e);
         }
-        catch (IllegalArgumentException e) {}
-        catch (IllegalAccessException e) {}
         return defaultValue;
     }
 
     public static double getDouble(Field field, Object object, double defaultValue) {
         try {
             return field.getDouble(object);
+        } catch (IllegalArgumentException | IllegalAccessException e) {
+            LOG.log(Level.FINE, "Failed to get double field", e);
         }
-        catch (IllegalArgumentException e) {}
-        catch (IllegalAccessException e) {}
         return defaultValue;
     }
 
     public static Object get(Field field, Object object, Object defaultValue) {
         try {
             return field.get(object);
+        } catch (IllegalArgumentException | IllegalAccessException e) {
+            LOG.log(Level.FINE, "Failed to get field", e);
         }
-        catch (IllegalArgumentException e) {}
-        catch (IllegalAccessException e) {}
         return defaultValue;
     }
 
@@ -454,9 +455,9 @@ public class ReflectionUtil {
     public static Method getMethod(Class<?> clazz, String methodName, Class<?>... arguments) {
         try {
             return clazz.getMethod(methodName, arguments);
+        } catch (NoSuchMethodException | SecurityException e) {
+            LOG.log(Level.FINE, "Failed to retrieve method", e);
         }
-        catch (NoSuchMethodException e) {}
-        catch (SecurityException e) {}
         return null;
     }
 
@@ -489,9 +490,9 @@ public class ReflectionUtil {
     public static Constructor<?> getConstructor(Class<?> clazz, Class<?>... parameterTypes) {
         try {
             return clazz.getConstructor(parameterTypes);
+        } catch (NoSuchMethodException | SecurityException e) {
+            LOG.log(Level.FINE, "Failed to retrieve constructor", e);
         }
-        catch (NoSuchMethodException e) {}
-        catch (SecurityException e) {}
         return null;
     }
 
@@ -505,11 +506,11 @@ public class ReflectionUtil {
     public static Object newInstance(Constructor<?> constructor, Object... arguments) {
         try {
             return constructor.newInstance(arguments);
-        } catch (InstantiationException e) {}
-        catch (IllegalAccessException e) {}
-        catch (IllegalArgumentException e) {}
-        catch (InvocationTargetException e) {}
-        return null;
+        } catch (InstantiationException | IllegalAccessException
+                | IllegalArgumentException | InvocationTargetException e) {
+            LOG.log(Level.FINE, "Failed to create instance", e);
+            return null;
+        }
     }
 
     /**
@@ -521,9 +522,9 @@ public class ReflectionUtil {
         try {
             return Class.forName(fullName);
         } catch (ClassNotFoundException e) {
-            // Ignore.
+            LOG.log(Level.FINE, "Class not found: " + fullName, e);
+            return null;
         }
-        return null;
     }
 
     /**
