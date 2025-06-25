@@ -18,6 +18,7 @@ import java.io.BufferedReader;
 import java.io.IOException;
 import java.io.InputStream;
 import java.io.InputStreamReader;
+import java.nio.charset.StandardCharsets;
 import java.net.URL;
 import java.util.Map;
 
@@ -46,7 +47,7 @@ public class ResourceUtil {
                 + "/" + path;
         try {
             final URL url = new URL(absPath);
-            try (BufferedReader reader = new BufferedReader(new InputStreamReader((InputStream) url.getContent()))) {
+            try (BufferedReader reader = new BufferedReader(new InputStreamReader((InputStream) url.getContent(), StandardCharsets.UTF_8))) {
                 final StringBuilder builder = new StringBuilder();
                 String last = reader.readLine();
                 while (last != null) {
