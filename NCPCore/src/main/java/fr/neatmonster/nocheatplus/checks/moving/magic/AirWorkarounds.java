@@ -357,105 +357,109 @@ private static boolean oddLiquid(final double yDistance, final double yDistDiffE
                 && yDistance < lastMove.yDistance - 0.001
                 && data.ws.use(WRPT.W_M_SF_ODDLIQUID_16);
     }
-    private static boolean oddGravity(final PlayerLocation from, final PlayerLocation to, 
-                                      final double yDistance, final double yDistChange, 
-                                      final double yDistDiffEx, final PlayerMoveData thisMove, 
+    private static boolean oddGravity(final PlayerLocation from, final PlayerLocation to,
+                                      final double yDistance, final double yDistChange,
+                                      final double yDistDiffEx, final PlayerMoveData thisMove,
                                       final PlayerMoveData lastMove, final MovingData data) {
 
-        // Old condition (normal lift-off envelope).
-        //        yDistance >= -GRAVITY_MAX - GRAVITY_SPAN 
-        //        && (yDistChange < -GRAVITY_MIN && Math.abs(yDistChange) <= 2.0 * GRAVITY_MAX + GRAVITY_SPAN
-        //        || from.isHeadObstructed(from.getyOnGround()) || data.fromWasReset && from.isHeadObstructed())
-        final int blockdata = from.getData(from.getBlockX(), from.getBlockY(), from.getBlockZ());
-        final boolean LiquidEnvelope = (data.liftOffEnvelope == LiftOffEnvelope.LIMIT_LIQUID || data.liftOffEnvelope == LiftOffEnvelope.LIMIT_NEAR_GROUND || data.liftOffEnvelope == LiftOffEnvelope.LIMIT_SURFACE);
-        return 
-                // 0: Any envelope (supposedly normal) near 0 yDistance.
-                yDistance > -2.0 * Magic.GRAVITY_MAX - Magic.GRAVITY_MIN && yDistance < 2.0 * Magic.GRAVITY_MAX + Magic.GRAVITY_MIN
+        if (from == null || to == null || thisMove == null || lastMove == null || data == null) {
+            return false;
+        }
+
+        return isOddGravityAnyEnvelope(from, to, yDistance, yDistChange, thisMove, lastMove, data)
+                || isOddGravityWithVelocity(yDistance, yDistChange, yDistDiffEx, lastMove, data)
+                || isOddGravitySetBack(from, yDistChange, lastMove, data)
+                || isOddGravityJumpEffect(yDistance, yDistChange, lastMove, data)
+                || isOddGravityNearZero(yDistance, lastMove, data);
+    }
+
+    private static boolean isOddGravityAnyEnvelope(final PlayerLocation from, final PlayerLocation to,
+                                                   final double yDistance, final double yDistChange,
+                                                   final PlayerMoveData thisMove, final PlayerMoveData lastMove,
+                                                   final MovingData data) {
+
+        return yDistance > -2.0 * Magic.GRAVITY_MAX - Magic.GRAVITY_MIN && yDistance < 2.0 * Magic.GRAVITY_MAX + Magic.GRAVITY_MIN
                 && (
-                        // 1: Too big chunk of change, but within reasonable bounds (should be contained in some other generic case?).
-                        lastMove.yDistance < 3.0 * Magic.GRAVITY_MAX + Magic.GRAVITY_MIN && yDistChange < -Magic.GRAVITY_MIN 
-                        && yDistChange > -2.5 * Magic.GRAVITY_MAX -Magic.GRAVITY_MIN
+                        lastMove.yDistance < 3.0 * Magic.GRAVITY_MAX + Magic.GRAVITY_MIN && yDistChange < -Magic.GRAVITY_MIN
+                        && yDistChange > -2.5 * Magic.GRAVITY_MAX - Magic.GRAVITY_MIN
                         && data.ws.use(WRPT.W_M_SF_ODDGRAVITY_1)
-                        // 1: Transition to 0.0 yDistance, ascending.
                         || lastMove.yDistance > Magic.GRAVITY_ODD / 2.0 && lastMove.yDistance < Magic.GRAVITY_MIN && yDistance == 0.0
                         && data.ws.use(WRPT.W_M_SF_ODDGRAVITY_2)
-                        // 1: yDist inversion near 0 (almost). 
-                        // lastYDist < Gravity max + min happens with dirty phase (slimes),. previously: max + span
                         || lastMove.yDistance <= Magic.GRAVITY_MAX + Magic.GRAVITY_MIN && lastMove.yDistance > Magic.GRAVITY_ODD
                         && yDistance < Magic.GRAVITY_ODD && yDistance > -2.0 * Magic.GRAVITY_MAX - Magic.GRAVITY_ODD / 2.0
                         && data.ws.use(WRPT.W_M_SF_ODDGRAVITY_3)
-                        // 1: Head is obstructed. 
                         || lastMove.yDistance >= 0.0 && yDistance < Magic.GRAVITY_ODD
                         && (thisMove.headObstructed || lastMove.headObstructed)
                         && data.ws.use(WRPT.W_M_SF_ODDGRAVITY_4)
-                        // 1: Break the block underneath.
                         || lastMove.yDistance < 0.0 && lastMove.to.extraPropertiesValid && lastMove.to.onGround
                         && yDistance >= -Magic.GRAVITY_MAX - Magic.GRAVITY_SPAN && yDistance <= Magic.GRAVITY_MIN
                         && data.ws.use(WRPT.W_M_SF_ODDGRAVITY_5)
-                        // 1: Slope with slimes (also near ground without velocityJumpPhase, rather lowjump but not always).
-                        || lastMove.yDistance < -Magic.GRAVITY_MAX && yDistChange < - Magic.GRAVITY_ODD / 2.0 && yDistChange > -Magic.GRAVITY_MIN
-                        && Magic.wasOnBouncyBlockRecently(data) 
+                        || lastMove.yDistance < -Magic.GRAVITY_MAX && yDistChange < -Magic.GRAVITY_ODD / 2.0 && yDistChange > -Magic.GRAVITY_MIN
+                        && Magic.wasOnBouncyBlockRecently(data)
                         && data.ws.use(WRPT.W_M_SF_ODDGRAVITY_6)
-                        // 1: Near ground (slime block).
-                        || lastMove.yDistance == 0.0 && yDistance < -Magic.GRAVITY_ODD / 2.5 
-                        && yDistance > -Magic.GRAVITY_MIN && to.isOnGround(Magic.GRAVITY_MIN) 
-                        && Magic.wasOnBouncyBlockRecently(data) 
+                        || lastMove.yDistance == 0.0 && yDistance < -Magic.GRAVITY_ODD / 2.5
+                        && yDistance > -Magic.GRAVITY_MIN && to.isOnGround(Magic.GRAVITY_MIN)
+                        && Magic.wasOnBouncyBlockRecently(data)
                         && data.ws.use(WRPT.W_M_SF_ODDGRAVITY_7)
-                        // 1: Start to fall after touching ground somehow (possibly too slowly).
-                        || (lastMove.touchedGround || lastMove.to.resetCond) && lastMove.yDistance <= Magic.GRAVITY_MIN 
-                        && lastMove.yDistance >= - Magic.GRAVITY_MAX
-                        && yDistance < lastMove.yDistance - Magic.GRAVITY_SPAN && yDistance < Magic.GRAVITY_ODD 
+                        || (lastMove.touchedGround || lastMove.to.resetCond) && lastMove.yDistance <= Magic.GRAVITY_MIN
+                        && lastMove.yDistance >= -Magic.GRAVITY_MAX
+                        && yDistance < lastMove.yDistance - Magic.GRAVITY_SPAN && yDistance < Magic.GRAVITY_ODD
                         && yDistance > lastMove.yDistance - Magic.GRAVITY_MAX
                         && data.ws.use(WRPT.W_M_SF_ODDGRAVITY_8)
-                )
-                // 0: With velocity.
-                || data.isVelocityJumpPhase()
-                && (
-                        // 1: Near zero inversion with slimes (rather dirty phase).
-                        lastMove.yDistance > Magic.GRAVITY_ODD && lastMove.yDistance < Magic.GRAVITY_MAX + Magic.GRAVITY_MIN
-                        && yDistance <= -lastMove.yDistance && yDistance > -lastMove.yDistance - Magic.GRAVITY_MAX - Magic.GRAVITY_ODD
-                        && data.ws.use(WRPT.W_M_SF_ODDGRAVITY_VEL_1)
-                        // 1: Odd mini-decrease with dirty phase (slime).
-                        || lastMove.yDistance < -0.204 && yDistance > -0.26
-                        && yDistChange > -Magic.GRAVITY_MIN && yDistChange < -Magic.GRAVITY_ODD / 4.0
-                        && data.ws.use(WRPT.W_M_SF_ODDGRAVITY_VEL_2)
-                        // 1: Lot's of decrease near zero, to be merged later.
-                        || lastMove.yDistance < -Magic.GRAVITY_ODD && lastMove.yDistance > -Magic.GRAVITY_MIN
-                        && yDistance > -2.0 * Magic.GRAVITY_MAX - 2.0 * Magic.GRAVITY_MIN && yDistance < -Magic.GRAVITY_MAX
-                        && data.ws.use(WRPT.W_M_SF_ODDGRAVITY_VEL_3)
-                        // 1: Odd decrease less near zero.
-                        || yDistChange > -Magic.GRAVITY_MIN && yDistChange < -Magic.GRAVITY_ODD 
-                        && lastMove.yDistance < 0.5 && lastMove.yDistance > 0.4
-                        && data.ws.use(WRPT.W_M_SF_ODDGRAVITY_VEL_4)
-                        // 1: Small decrease after high edge.
-                        || lastMove.yDistance == 0.0 && yDistance > -Magic.GRAVITY_MIN && yDistance < -Magic.GRAVITY_ODD
-                        && data.ws.use(WRPT.W_M_SF_ODDGRAVITY_VEL_5)
-                        // 1: Too small but decent decrease moving up, marginal violation.
-                        || yDistDiffEx > 0.0 && yDistDiffEx < 0.01
-                        && yDistance > Magic.GRAVITY_MAX && yDistance < lastMove.yDistance - Magic.GRAVITY_MAX
-                        && data.ws.use(WRPT.W_M_SF_ODDGRAVITY_VEL_6)
-                )
-                // 0: Small distance to setback.
-                || data.hasSetBack() && Math.abs(data.getSetBackY() - from.getY()) < 1.0 && !data.sfLowJump // Ensure this workaround only gets applied if the player performed a full jump (Experimental)
-                && (
-                        // 1: Near ground small decrease.
-                        lastMove.yDistance > Magic.GRAVITY_MAX && lastMove.yDistance < 3.0 * Magic.GRAVITY_MAX
-                        && yDistChange > -Magic.GRAVITY_MIN && yDistChange < -Magic.GRAVITY_ODD
-                        && data.ws.use(WRPT.W_M_SF_ODDGRAVITY_SETBACK)
-                )
-                // 0: Jump-effect-specific
-                || data.jumpAmplifier > 0 && lastMove.yDistance < Magic.GRAVITY_MAX + Magic.GRAVITY_MIN / 2.0 
+                );
+    }
+
+    private static boolean isOddGravityWithVelocity(final double yDistance, final double yDistChange,
+                                                    final double yDistDiffEx, final PlayerMoveData lastMove,
+                                                    final MovingData data) {
+        if (!data.isVelocityJumpPhase()) {
+            return false;
+        }
+        return lastMove.yDistance > Magic.GRAVITY_ODD && lastMove.yDistance < Magic.GRAVITY_MAX + Magic.GRAVITY_MIN
+                && yDistance <= -lastMove.yDistance && yDistance > -lastMove.yDistance - Magic.GRAVITY_MAX - Magic.GRAVITY_ODD
+                && data.ws.use(WRPT.W_M_SF_ODDGRAVITY_VEL_1)
+                || lastMove.yDistance < -0.204 && yDistance > -0.26
+                && yDistChange > -Magic.GRAVITY_MIN && yDistChange < -Magic.GRAVITY_ODD / 4.0
+                && data.ws.use(WRPT.W_M_SF_ODDGRAVITY_VEL_2)
+                || lastMove.yDistance < -Magic.GRAVITY_ODD && lastMove.yDistance > -Magic.GRAVITY_MIN
+                && yDistance > -2.0 * Magic.GRAVITY_MAX - 2.0 * Magic.GRAVITY_MIN && yDistance < -Magic.GRAVITY_MAX
+                && data.ws.use(WRPT.W_M_SF_ODDGRAVITY_VEL_3)
+                || yDistChange > -Magic.GRAVITY_MIN && yDistChange < -Magic.GRAVITY_ODD
+                && lastMove.yDistance < 0.5 && lastMove.yDistance > 0.4
+                && data.ws.use(WRPT.W_M_SF_ODDGRAVITY_VEL_4)
+                || lastMove.yDistance == 0.0 && yDistance > -Magic.GRAVITY_MIN && yDistance < -Magic.GRAVITY_ODD
+                && data.ws.use(WRPT.W_M_SF_ODDGRAVITY_VEL_5)
+                || yDistDiffEx > 0.0 && yDistDiffEx < 0.01
+                && yDistance > Magic.GRAVITY_MAX && yDistance < lastMove.yDistance - Magic.GRAVITY_MAX
+                && data.ws.use(WRPT.W_M_SF_ODDGRAVITY_VEL_6);
+    }
+
+    private static boolean isOddGravitySetBack(final PlayerLocation from, final double yDistChange,
+                                               final PlayerMoveData lastMove, final MovingData data) {
+        if (!data.hasSetBack() || Math.abs(data.getSetBackY() - from.getY()) >= 1.0 || data.sfLowJump) {
+            return false;
+        }
+        return lastMove.yDistance > Magic.GRAVITY_MAX && lastMove.yDistance < 3.0 * Magic.GRAVITY_MAX
+                && yDistChange > -Magic.GRAVITY_MIN && yDistChange < -Magic.GRAVITY_ODD
+                && data.ws.use(WRPT.W_M_SF_ODDGRAVITY_SETBACK);
+    }
+
+    private static boolean isOddGravityJumpEffect(final double yDistance, final double yDistChange,
+                                                  final PlayerMoveData lastMove, final MovingData data) {
+        return data.jumpAmplifier > 0 && lastMove.yDistance < Magic.GRAVITY_MAX + Magic.GRAVITY_MIN / 2.0
                 && lastMove.yDistance > -2.0 * Magic.GRAVITY_MAX - 0.5 * Magic.GRAVITY_MIN
                 && yDistance > -2.0 * Magic.GRAVITY_MAX - 2.0 * Magic.GRAVITY_MIN && yDistance < Magic.GRAVITY_MIN
-                && yDistChange < -Magic.GRAVITY_SPAN && data.liftOffEnvelope == LiftOffEnvelope.NORMAL // Skip for other envelopes.
-                && data.ws.use(WRPT.W_M_SF_ODDGRAVITY_JUMPEFFECT)
-                // 0: Another near 0 yDistance case.
-                || lastMove.yDistance > -Magic.GRAVITY_MAX && lastMove.yDistance < Magic.GRAVITY_MIN 
+                && yDistChange < -Magic.GRAVITY_SPAN && data.liftOffEnvelope == LiftOffEnvelope.NORMAL
+                && data.ws.use(WRPT.W_M_SF_ODDGRAVITY_JUMPEFFECT);
+    }
+
+    private static boolean isOddGravityNearZero(final double yDistance, final PlayerMoveData lastMove,
+                                                final MovingData data) {
+        return lastMove.yDistance > -Magic.GRAVITY_MAX && lastMove.yDistance < Magic.GRAVITY_MIN
                 && !(lastMove.touchedGround || lastMove.to.extraPropertiesValid && lastMove.to.onGroundOrResetCond)
-                && yDistance < lastMove.yDistance - Magic.GRAVITY_MIN / 2.0 
+                && yDistance < lastMove.yDistance - Magic.GRAVITY_MIN / 2.0
                 && yDistance > lastMove.yDistance - Magic.GRAVITY_MAX - 0.5 * Magic.GRAVITY_MIN
-                && data.ws.use(WRPT.W_M_SF_ODDGRAVITY_NEAR_0)
-            ;
+                && data.ws.use(WRPT.W_M_SF_ODDGRAVITY_NEAR_0);
     }
 
 
