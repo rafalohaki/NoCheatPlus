@@ -98,10 +98,14 @@ public class CreativeFly extends Check {
     * @param time Milliseconds.
     * @return
     */
-    public Location check(final Player player, final PlayerLocation from, final PlayerLocation to, 
+    public Location check(final Player player, final PlayerLocation from, final PlayerLocation to,
                           final MovingData data, final MovingConfig cc, final IPlayerData pData,
                           final long time, final int tick,
                           final boolean useBlockChangeTracker) {
+
+        if (player == null || from == null || to == null) {
+            return null;
+        }
 
         // Reset tags, just in case.
         tags.clear();
@@ -117,47 +121,20 @@ public class CreativeFly extends Check {
         final long now = System.currentTimeMillis();
         boolean lostGround = false;
 
-        // Allow elytra fly (not packet mode)
-        // Since in Winds Anarchy, we have another plugin to handle elyta fly better.
-        if (pData.hasPermission(Permissions.MOVING_ELYTRAFLY, player)
-                && player.getInventory().getChestplate() != null && player.getInventory().getChestplate().getType() == Material.ELYTRA && player.isGliding()) {
-            // Adjust the set back and other last distances.
-            data.setSetBack(to);
-            // Adjust jump phase.
-            if (!thisMove.from.onGroundOrResetCond && !thisMove.to.onGroundOrResetCond) {
-                data.sfJumpPhase ++;
-            }
-            else if (thisMove.touchedGround && !thisMove.to.onGroundOrResetCond) {
-                data.sfJumpPhase = 1;
-            }
-            else {
-                data.sfJumpPhase = 0;
-            }
+        // Allow elytra fly (not packet mode). Since Winds Anarchy handles
+        // Elytra flight in a different plugin, skip further checks here.
+        if (allowElytraFlight(player, to, thisMove, data, pData)) {
             return null;
         }
 
         // Lost ground, if set so.
         if (model.getGround()) {
-            MovingUtil.prepareFullCheck(from, to, thisMove, Math.max(cc.yOnGround, cc.noFallyOnGround));
-            if (!thisMove.from.onGroundOrResetCond) {
-                if (from.isSamePos(to)) {
-                    if (lastMove.toIsValid && lastMove.hDistance > 0.0 && lastMove.yDistance < -0.3 // Copy and paste from sf.
-                        && LostGround.lostGroundStill(player, from, to, hDistance, yDistance, sprinting, lastMove, data, cc, tags)) {
-                        lostGround = true;
-                    }
-                }
-                else if (LostGround.lostGround(player, from, to, hDistance, yDistance, sprinting, lastMove, 
-                                               data, cc, useBlockChangeTracker ? blockChangeTracker : null, tags)) {
-                    lostGround = true;
-                }
-            }
+            lostGround = detectLostGround(player, from, to, thisMove, lastMove, hDistance, yDistance,
+                    sprinting, data, cc, useBlockChangeTracker);
         }
 
         // Do not check for nofall if the player has slowfalling active or is gliding
-        if (Bridge1_13.hasSlowfalling() && model.getScaleSlowfallingEffect() 
-            || Bridge1_9.isGlidingWithElytra(player) && thisMove.yDistance > -0.5) {
-            data.clearNoFallData();
-        } 
+        handleNoFall(player, model, thisMove, data);
         
         // HACK: when switching model, we need to add some velocity to harmonize the transition and not trggering fps.
         workaroundSwitchingModel(player, thisMove, lastMove, model, data, cc, debug);
@@ -171,35 +148,10 @@ public class CreativeFly extends Check {
         // Horizontal move.
         //////////////////////////
 
-        double[] resH = hDist(player, from, to, hDistance, yDistance, sprinting, flying, thisMove, lastMove, time, model, data, cc);
-        double limitH = resH[0];
-        double resultH = resH[1];
-        double[] rese = hackElytraH(player, from, to, hDistance, yDistance, thisMove, lastMove, lostGround, data, cc, debug); // Related to the elytra
-        resultH = Math.max(resultH, rese[1]);
-
-        // Check velocity.
-        if (resultH > 0) {
-            double hFreedom = data.getHorizontalFreedom();
-            if (hFreedom < resultH) {
-                // Use queued velocity if possible.
-                hFreedom += data.useHorizontalVelocity(resultH - hFreedom);
-            }
-            if (hFreedom > 0.0) {
-                resultH = Math.max(0.0, resultH - hFreedom);
-                if (resultH <= 0.0) {
-                    limitH = hDistance;
-                }
-                tags.add("hvel");
-            }
-        }
-        else {
-            data.clearActiveHorVel();
-        }
-
-        resultH *= 100.0; // Normalize to % of a block.
-        if (resultH > 0.0) {
-            tags.add("hdist");
-        }
+        double[] hMove = processHorizontalMove(player, from, to, hDistance, yDistance, sprinting,
+                flying, thisMove, lastMove, time, model, data, cc, lostGround, debug);
+        double limitH = hMove[0];
+        double resultH = hMove[1];
 
 
 
@@ -210,73 +162,11 @@ public class CreativeFly extends Check {
         // Vertical move.
         //////////////////////////
 
-        double limitV = 0.0; // Limit. For debug only, violation handle on resultV
-        double resultV = rese[0]; // Violation (normalized to 100 * 1 block, applies if > 0.0).
-
-        // Distinguish checking method by y-direction of the move:
-        // Ascend.
-        if (yDistance > 0.0) {
-            double[] res = vDistAscend(from, to, yDistance, flying, thisMove, lastMove, model, data, cc, debug);
-            resultV = Math.max(resultV, res[1]);
-            limitV = res[0];
-        }
-        // Descend.
-        else if (yDistance < 0.0) {
-            double[] res = vDistDescend(from, to, yDistance, flying, thisMove, lastMove, model, data, cc);
-            resultV = Math.max(resultV, res[1]);
-            limitV = res[0];
-        }
-        // Keep altitude.
-        else {
-            double[] res = vDistZero(from, to, yDistance, flying, thisMove, lastMove, model, data, cc);
-            resultV = Math.max(resultV, res[1]);
-            limitV = res[0];
-        }
-
-        // Velocity.
-        if (resultV > 0.0 && (thisMove.verVelUsed != null || data.getOrUseVerticalVelocity(yDistance) != null)) {
-            resultV = 0.0;
-            tags.add("vvel");
-        }
-        
-        // The antilevitation subcheck
-        if (lastMove.toIsValid && !player.isFlying() && model.getScaleLevitationEffect()
-            && thisMove.modelFlying == lastMove.modelFlying) { // InLiquid check is alread included in MovingConfig.getModelFlying()
-
-            final double level = Bridge1_9.getLevitationAmplifier(player) + 1;
-            final double allowY = (lastMove.yDistance + (0.05D * level - lastMove.yDistance) * 0.2D) * Magic.FRICTION_MEDIUM_AIR;
-            if (allowY * 1.001 >= yDistance) resultV = 0.0;
-
-            if (!from.isHeadObstructed() && !to.isHeadObstructed()
-                // Exempt check for 20 seconds after joined
-                && !(now > pData.getLastJoinTime() && pData.getLastJoinTime() + 20000 > now)
-                && !(thisMove.yDistance < 0.0 && lastMove.yDistance - thisMove.yDistance < 0.0001)
-                ) {
- 
-                if (lastMove.yDistance < 0.0 && thisMove.yDistance < allowY
-                    || from.getY() >= to.getY() && !(thisMove.yDistance == 0.0 && allowY < 0.0)
-                    ) {
-                    resultV = Math.max(resultV, 0.1);
-                    tags.add("antilevitate");
-
-                    if (data.getOrUseVerticalVelocity(getBaseV(0.0, yDistance, 0f, 0.0, level, 0.0, false)) != null) {
-                        data.addVerticalVelocity(new SimpleEntry(yDistance, 2));
-                        resultV = 0.0;
-                    }
-                }
-            }
-        }
-
-        // Add tag for maximum height check (silent set back).
-        final double maximumHeight = model.getMaxHeight() + player.getWorld().getMaxHeight();
-        if (to.getY() > maximumHeight) {
-            tags.add("maxheight");
-        }
-
-        resultV *= 100.0; // Normalize to % of a block.
-        if (resultV > 0.0) {
-            tags.add("vdist");
-        }
+        double[] vMove = processVerticalMove(player, from, to, yDistance, flying, thisMove, lastMove,
+                model, data, cc, debug, hMove[2], pData, now);
+        double limitV = vMove[0];
+        double resultV = vMove[1];
+        final double maximumHeight = vMove[2];
 
         final double result = Math.max(0.0, resultH) + Math.max(0.0, resultV);
 
@@ -295,49 +185,227 @@ public class CreativeFly extends Check {
         // Violation handling
         ///////////////////////
 
-        Location setBack = null; // Might get altered below.
+        Location setBack = handleViolation(player, from, to, model, data, cc, result,
+                maximumHeight, debug, tags);
+
+        return finalizeMove(setBack, to, data, thisMove, maximumHeight, player, debug);
+    }
+
+    /**
+     * Bypass further checks if elytra flight should be ignored.
+     */
+    private boolean allowElytraFlight(final Player player, final PlayerLocation to,
+            final PlayerMoveData thisMove, final MovingData data, final IPlayerData pData) {
+        return pData.hasPermission(Permissions.MOVING_ELYTRAFLY, player)
+                && player.getInventory() != null
+                && player.getInventory().getChestplate() != null
+                && player.getInventory().getChestplate().getType() == Material.ELYTRA
+                && player.isGliding()
+                && updateJumpPhaseAndSetBack(to, data, thisMove);
+    }
+
+    private boolean updateJumpPhaseAndSetBack(final PlayerLocation to, final MovingData data,
+            final PlayerMoveData move) {
+        data.setSetBack(to);
+        if (!move.from.onGroundOrResetCond && !move.to.onGroundOrResetCond) {
+            data.sfJumpPhase++;
+        } else if (move.touchedGround && !move.to.onGroundOrResetCond) {
+            data.sfJumpPhase = 1;
+        } else {
+            data.sfJumpPhase = 0;
+        }
+        return true;
+    }
+
+    private boolean detectLostGround(final Player player, final PlayerLocation from,
+            final PlayerLocation to, final PlayerMoveData thisMove, final PlayerMoveData lastMove,
+            final double hDistance, final double yDistance, final boolean sprinting,
+            final MovingData data, final MovingConfig cc, final boolean useBlockChangeTracker) {
+
+        MovingUtil.prepareFullCheck(from, to, thisMove, Math.max(cc.yOnGround, cc.noFallyOnGround));
+        if (!thisMove.from.onGroundOrResetCond) {
+            if (from.isSamePos(to)) {
+                if (lastMove.toIsValid && lastMove.hDistance > 0.0 && lastMove.yDistance < -0.3
+                        && LostGround.lostGroundStill(player, from, to, hDistance, yDistance,
+                                sprinting, lastMove, data, cc, tags)) {
+                    return true;
+                }
+            } else if (LostGround.lostGround(player, from, to, hDistance, yDistance, sprinting,
+                    lastMove, data, cc,
+                    useBlockChangeTracker ? blockChangeTracker : null, tags)) {
+                return true;
+            }
+        }
+        return false;
+    }
+
+    private void handleNoFall(final Player player, final ModelFlying model,
+            final PlayerMoveData thisMove, final MovingData data) {
+        if ((Bridge1_13.hasSlowfalling() && model.getScaleSlowfallingEffect())
+                || (Bridge1_9.isGlidingWithElytra(player) && thisMove.yDistance > -0.5)) {
+            data.clearNoFallData();
+        }
+    }
+
+    private double[] processHorizontalMove(final Player player, final PlayerLocation from,
+            final PlayerLocation to, final double hDistance, final double yDistance,
+            final boolean sprinting, final boolean flying, final PlayerMoveData thisMove,
+            final PlayerMoveData lastMove, final long time, final ModelFlying model,
+            final MovingData data, final MovingConfig cc, final boolean lostGround,
+            final boolean debug) {
+
+        double[] resH = hDist(player, from, to, hDistance, yDistance, sprinting, flying,
+                thisMove, lastMove, time, model, data, cc);
+        double limitH = resH[0];
+        double resultH = resH[1];
+        double[] rese = hackElytraH(player, from, to, hDistance, yDistance, thisMove, lastMove,
+                lostGround, data, cc, debug);
+        resultH = Math.max(resultH, rese[1]);
+        double baseRes = rese[0];
+
+        if (resultH > 0) {
+            double hFreedom = data.getHorizontalFreedom();
+            if (hFreedom < resultH) {
+                hFreedom += data.useHorizontalVelocity(resultH - hFreedom);
+            }
+            if (hFreedom > 0.0) {
+                resultH = Math.max(0.0, resultH - hFreedom);
+                if (resultH <= 0.0) {
+                    limitH = hDistance;
+                }
+                tags.add("hvel");
+            }
+        } else {
+            data.clearActiveHorVel();
+        }
+
+        resultH *= 100.0;
+        if (resultH > 0.0) {
+            tags.add("hdist");
+        }
+        return new double[] {limitH, resultH, baseRes};
+    }
+
+    private double[] processVerticalMove(final Player player, final PlayerLocation from,
+            final PlayerLocation to, final double yDistance, final boolean flying,
+            final PlayerMoveData thisMove, final PlayerMoveData lastMove, final ModelFlying model,
+            final MovingData data, final MovingConfig cc, final boolean debug, final double baseRes,
+            final IPlayerData pData, final long now) {
+
+        double limitV = 0.0;
+        double resultV = baseRes;
+
+        if (yDistance > 0.0) {
+            double[] res = vDistAscend(from, to, yDistance, flying, thisMove, lastMove, model, data,
+                    cc, debug);
+            resultV = Math.max(resultV, res[1]);
+            limitV = res[0];
+        } else if (yDistance < 0.0) {
+            double[] res = vDistDescend(from, to, yDistance, flying, thisMove, lastMove, model,
+                    data, cc);
+            resultV = Math.max(resultV, res[1]);
+            limitV = res[0];
+        } else {
+            double[] res = vDistZero(from, to, yDistance, flying, thisMove, lastMove, model, data,
+                    cc);
+            resultV = Math.max(resultV, res[1]);
+            limitV = res[0];
+        }
+
+        if (resultV > 0.0
+                && (thisMove.verVelUsed != null || data.getOrUseVerticalVelocity(yDistance) != null)) {
+            resultV = 0.0;
+            tags.add("vvel");
+        }
+
+        if (lastMove.toIsValid && !player.isFlying() && model.getScaleLevitationEffect()
+                && thisMove.modelFlying == lastMove.modelFlying) {
+            final double level = Bridge1_9.getLevitationAmplifier(player) + 1;
+            final double allowY = (lastMove.yDistance + (0.05D * level - lastMove.yDistance) * 0.2D)
+                    * Magic.FRICTION_MEDIUM_AIR;
+            if (allowY * 1.001 >= yDistance) {
+                resultV = 0.0;
+            }
+
+            if (!from.isHeadObstructed() && !to.isHeadObstructed()
+                    && !(now > pData.getLastJoinTime() && pData.getLastJoinTime() + 20000 > now)
+                    && !(thisMove.yDistance < 0.0 && lastMove.yDistance - thisMove.yDistance < 0.0001)) {
+
+                if (lastMove.yDistance < 0.0 && thisMove.yDistance < allowY
+                        || from.getY() >= to.getY() && !(thisMove.yDistance == 0.0 && allowY < 0.0)) {
+                    resultV = Math.max(resultV, 0.1);
+                    tags.add("antilevitate");
+
+                    if (data.getOrUseVerticalVelocity(
+                            getBaseV(0.0, yDistance, 0f, 0.0, level, 0.0, false)) != null) {
+                        data.addVerticalVelocity(new SimpleEntry(yDistance, 2));
+                        resultV = 0.0;
+                    }
+                }
+            }
+        }
+
+        final double maximumHeight = model.getMaxHeight() + player.getWorld().getMaxHeight();
+        if (to.getY() > maximumHeight) {
+            tags.add("maxheight");
+        }
+
+        resultV *= 100.0;
+        if (resultV > 0.0) {
+            tags.add("vdist");
+        }
+
+        return new double[] {limitV, resultV, maximumHeight};
+    }
+
+    private Location handleViolation(final Player player, final PlayerLocation from,
+            final PlayerLocation to, final ModelFlying model, final MovingData data,
+            final MovingConfig cc, final double result, final double maximumHeight,
+            final boolean debug, final List<String> localTags) {
+
+        Location setBack = null;
 
         if (result > 0.0) {
             data.creativeFlyVL += result;
-            // Execute whatever actions are associated with this check and the violation level and find out if we
-            // should cancel the event.
-            final ViolationData vd = new ViolationData(this, player, data.creativeFlyVL, result, cc.creativeFlyActions);
+            final ViolationData vd = new ViolationData(this, player, data.creativeFlyVL, result,
+                    cc.creativeFlyActions);
             if (vd.needsParameters()) {
-                vd.setParameter(ParameterName.LOCATION_FROM, String.format(Locale.US, "%.2f, %.2f, %.2f", from.getX(), from.getY(), from.getZ()));
-                vd.setParameter(ParameterName.LOCATION_TO, String.format(Locale.US, "%.2f, %.2f, %.2f", to.getX(), to.getY(), to.getZ()));
-                vd.setParameter(ParameterName.DISTANCE, String.format(Locale.US, "%.2f", TrigUtil.distance(from,  to)));
+                vd.setParameter(ParameterName.LOCATION_FROM, String.format(Locale.US, "%.2f, %.2f, %.2f",
+                        from.getX(), from.getY(), from.getZ()));
+                vd.setParameter(ParameterName.LOCATION_TO, String.format(Locale.US, "%.2f, %.2f, %.2f",
+                        to.getX(), to.getY(), to.getZ()));
+                vd.setParameter(ParameterName.DISTANCE,
+                        String.format(Locale.US, "%.2f", TrigUtil.distance(from, to)));
                 if (model != null) {
                     vd.setParameter(ParameterName.MODEL, model.getId().toString());
                 }
-                if (!tags.isEmpty()) {
-                    vd.setParameter(ParameterName.TAGS, StringUtil.join(tags, "+"));
+                if (!localTags.isEmpty()) {
+                    vd.setParameter(ParameterName.TAGS, StringUtil.join(localTags, "+"));
                 }
             }
             if (executeActions(vd).willCancel()) {
-                // Compose a new location based on coordinates of "newTo" and viewing direction of "event.getTo()"
-                // to allow the player to look somewhere else despite getting pulled back by NoCheatPlus.
-                setBack = data.getSetBack(to); // (OK)
+                setBack = data.getSetBack(to);
             }
-        }
-        else {
-            // Maximum height check (silent set back).
+        } else {
             if (to.getY() > maximumHeight) {
-                setBack = data.getSetBack(to); // (OK)
+                setBack = data.getSetBack(to);
                 if (debug) {
                     debug(player, "Maximum height exceeded, silent set-back.");
                 }
             }
             if (setBack == null) {
-                // Slowly reduce the violation level with each event.
                 data.creativeFlyVL *= 0.97;
             }
         }
+        return setBack;
+    }
 
-        // Return setBack, if set.
+    private Location finalizeMove(final Location setBack, final PlayerLocation to, final MovingData data,
+            final PlayerMoveData thisMove, final double maximumHeight, final Player player,
+            final boolean debug) {
+
         if (setBack != null) {
-            // Check for max height of the set back.
             if (setBack.getY() > maximumHeight) {
-                // Correct the y position.
                 setBack.setY(getCorrectedHeight(maximumHeight, setBack.getWorld()));
                 if (debug) {
                     debug(player, "Maximum height exceeded by set back, correct to: " + setBack.getY());
@@ -346,21 +414,16 @@ public class CreativeFly extends Check {
             data.sfJumpPhase = 0;
             return setBack;
         }
-        else {
-            // Adjust the set back and other last distances.
-            data.setSetBack(to);
-            // Adjust jump phase.
-            if (!thisMove.from.onGroundOrResetCond && !thisMove.to.onGroundOrResetCond) {
-                data.sfJumpPhase ++;
-            }
-            else if (thisMove.touchedGround && !thisMove.to.onGroundOrResetCond) {
-                data.sfJumpPhase = 1;
-            }
-            else {
-                data.sfJumpPhase = 0;
-            }
-            return null;
+
+        data.setSetBack(to);
+        if (!thisMove.from.onGroundOrResetCond && !thisMove.to.onGroundOrResetCond) {
+            data.sfJumpPhase++;
+        } else if (thisMove.touchedGround && !thisMove.to.onGroundOrResetCond) {
+            data.sfJumpPhase = 1;
+        } else {
+            data.sfJumpPhase = 0;
         }
+        return null;
     }
 
 
