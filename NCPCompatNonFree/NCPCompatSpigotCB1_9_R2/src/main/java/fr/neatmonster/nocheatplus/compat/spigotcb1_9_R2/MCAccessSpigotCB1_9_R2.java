@@ -198,24 +198,28 @@ public class MCAccessSpigotCB1_9_R2 implements MCAccess {
 
     @Override
     public double getJumpAmplifier(final Player player) {
-        final EntityPlayer mcPlayer = ((CraftPlayer) player).getHandle();
-        if (mcPlayer.hasEffect(JUMP)) {
-            return mcPlayer.getEffect(JUMP).getAmplifier();
-        }
-        else {
+        if (player == null) {
             return Double.NEGATIVE_INFINITY;
         }
+        final EntityPlayer mcPlayer = ((CraftPlayer) player).getHandle();
+        if (mcPlayer != null && mcPlayer.hasEffect(JUMP)) {
+            final net.minecraft.server.v1_9_R2.MobEffect effect = mcPlayer.getEffect(JUMP);
+            return effect != null ? effect.getAmplifier() : Double.NEGATIVE_INFINITY;
+        }
+        return Double.NEGATIVE_INFINITY;
     }
 
     @Override
     public double getFasterMovementAmplifier(final Player player) {
-        final EntityPlayer mcPlayer = ((CraftPlayer) player).getHandle();
-        if (mcPlayer.hasEffect(FASTER_MOVEMENT)) {
-            return mcPlayer.getEffect(FASTER_MOVEMENT).getAmplifier();
-        }
-        else {
+        if (player == null) {
             return Double.NEGATIVE_INFINITY;
         }
+        final EntityPlayer mcPlayer = ((CraftPlayer) player).getHandle();
+        if (mcPlayer != null && mcPlayer.hasEffect(FASTER_MOVEMENT)) {
+            final net.minecraft.server.v1_9_R2.MobEffect effect = mcPlayer.getEffect(FASTER_MOVEMENT);
+            return effect != null ? effect.getAmplifier() : Double.NEGATIVE_INFINITY;
+        }
+        return Double.NEGATIVE_INFINITY;
     }
 
     @Override
