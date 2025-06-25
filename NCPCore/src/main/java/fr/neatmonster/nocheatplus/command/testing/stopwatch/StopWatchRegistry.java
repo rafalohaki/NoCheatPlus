@@ -40,7 +40,7 @@ public class StopWatchRegistry {
 
     public static final String TAG = ChatColor.GRAY +""+ ChatColor.BOLD + "[" + ChatColor.RED + "NC+" + ChatColor.GRAY +""+ ChatColor.BOLD + "] " + ChatColor.GRAY;
 
-    // TODO: Make its own plugin + no NCP dependency.
+    // NOTE: this may become its own plugin without a direct NCP dependency.
 
     /** Currently by player name. */
     private Map<String, StopWatch> clocks = new LinkedHashMap<String, StopWatch>(20);
@@ -128,7 +128,7 @@ public class StopWatchRegistry {
     public void setClock(Player player, StopWatch clock) {
         StopWatch oldClock = getClock(player);
         if (oldClock != null && !oldClock.isFinished()) {
-            // TODO: Might add a more descriptive message.
+            // Stopping existing stopwatch and informing about final time.
             oldClock.stop();
             oldClock.sendStatus();
         }
@@ -148,7 +148,7 @@ public class StopWatchRegistry {
         boolean wasRunning = false;
         if (oldClock != null) {
             wasRunning = !oldClock.isFinished();
-            // TODO: Might add a more descriptive message.
+            // Stopping running stopwatch and notifying the player.
             oldClock.stop();
             oldClock.sendStatus();
         }
@@ -158,10 +158,10 @@ public class StopWatchRegistry {
     public void tellClock(Player player) {
         StopWatch oldClock = getClock(player);
         if (oldClock != null) {
-            // TODO: Might add a more descriptive message.
+            // Sending status information about the current stopwatch.
             oldClock.sendStatus();
         } else {
-            // TODO: Might tell "no clock running".
+            // Inform player that no stopwatch is currently running.
         }
     }
 
