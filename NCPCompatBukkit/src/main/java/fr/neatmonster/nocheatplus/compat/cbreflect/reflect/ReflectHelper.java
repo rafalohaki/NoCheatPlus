@@ -88,7 +88,7 @@ public class ReflectHelper {
                 reflectAxisAlignedBB = new ReflectAxisAlignedBB(reflectBase);
             }
             catch (NullPointerException ex1) {
-                StaticLog.logDebug(ex1);
+                // ignore - axis aligned bounding box not present
             }
             this.reflectAxisAlignedBB = reflectAxisAlignedBB;
             ReflectBlockPosition reflectBlockPosition = null;
@@ -96,7 +96,7 @@ public class ReflectHelper {
                 reflectBlockPosition = new ReflectBlockPosition(this.reflectBase);
             }
             catch (ClassNotFoundException ex) {
-                StaticLog.logDebug(ex);
+                // ignore - BlockPosition class not available
             }
             this.reflectBlockPosition = reflectBlockPosition;
             this.reflectMaterial = new ReflectMaterial(this.reflectBase);
@@ -107,7 +107,7 @@ public class ReflectHelper {
                         reflectMaterial, reflectWorld);
             }
             catch (Throwable t) {
-                StaticLog.logDebug(t);
+                // ignore - using ReflectBlockSix fallback
             }
             if (reflectBlockLatest == null) {
                 // More lenient constructor.

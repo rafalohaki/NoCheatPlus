@@ -273,16 +273,22 @@ public class DataManager {
     public static IPlayerData getPlayerDataSafe(final Player player) {
         try {
             return getPlayerData(player);
-        } 
-        catch (UnsupportedOperationException e) {}
+        }
+        catch (UnsupportedOperationException e) {
+            // ignore - fall through to alternate lookup
+        }
         try {
             return getPlayerData(player.getUniqueId());
-        } 
-        catch (UnsupportedOperationException e) {}
+        }
+        catch (UnsupportedOperationException e) {
+            // ignore - fall through to name-based lookup
+        }
         try {
             return getPlayerData(player.getName());
-        } 
-        catch (UnsupportedOperationException e) {}
+        }
+        catch (UnsupportedOperationException e) {
+            // ignore - giving up on retrieval
+        }
         // Failure.
         return null;
     }

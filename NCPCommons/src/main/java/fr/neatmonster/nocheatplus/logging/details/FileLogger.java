@@ -123,7 +123,9 @@ public class FileLogger {
                 logger.log(Level.INFO, "Logger started.");
                 inoperable = false;
             } catch (SecurityException e) {
+                logger.log(Level.WARNING, "Failed to initialize file logger due to security restrictions.", e);
             } catch (IOException e) {
+                logger.log(Level.WARNING, "Failed to initialize file logger.", e);
             }
         }
         
