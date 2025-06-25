@@ -25,6 +25,8 @@ import org.bukkit.Server;
 import org.bukkit.plugin.Plugin;
 
 import fr.neatmonster.nocheatplus.utilities.ReflectionUtil;
+import java.util.logging.Level;
+import java.util.logging.Logger;
 
 import org.bukkit.entity.Entity;
 import org.bukkit.event.player.PlayerTeleportEvent.TeleportCause;
@@ -35,6 +37,17 @@ public class Folia {
     private static final Class<?> GlobalRegionScheduler = ReflectionUtil.getClass("io.papermc.paper.threadedregions.scheduler.GlobalRegionScheduler");
     private static final Class<?> EntityScheduler = ReflectionUtil.getClass("io.papermc.paper.threadedregions.scheduler.EntityScheduler");
     private static final boolean isFoliaServer = RegionizedServer && GlobalRegionScheduler != null && EntityScheduler != null; // && AsyncScheduler != null
+
+    /** Logger for reporting scheduler issues. */
+    private static final Logger LOGGER = Logger.getLogger(Folia.class.getName());
+
+    /**
+     * Log resource related problems consistently.
+     */
+    private static void logResource(final Level level, final String message,
+            final Throwable throwable) {
+        LOGGER.log(level, message, throwable);
+    }
     
     /**
      * @return Whether the server is running Folia
@@ -99,7 +112,7 @@ public class Folia {
             Object taskInfo = executeMethod.invoke(syncScheduler, plugin, run, delay, period);
             return taskInfo;
         } catch (Exception e) {
-            e.printStackTrace();
+            logResource(Level.WARNING, "Failed to schedule repeating task", e);
         }
         return null;
     }
@@ -132,7 +145,7 @@ public class Folia {
             Object taskInfo = executeMethod.invoke(syncScheduler, plugin, run);
             return taskInfo;
         } catch (Exception e) {
-            e.printStackTrace();
+            logResource(Level.WARNING, "Failed to schedule sync task", e);
         }
         return null;
     }
@@ -158,7 +171,7 @@ public class Folia {
             Object taskInfo = executeMethod.invoke(syncScheduler, plugin, run, delay);
             return taskInfo;
         } catch (Exception e) {
-            e.printStackTrace();
+            logResource(Level.WARNING, "Failed to schedule delayed task", e);
         }
         return null;
     }
@@ -198,7 +211,7 @@ public class Folia {
             Object taskInfo = executeMethod.invoke(syncEntityScheduler, plugin, run, retired, delay);
             return taskInfo;
         } catch (Exception e) {
-            e.printStackTrace();
+            logResource(Level.WARNING, "Failed to schedule entity task", e);
         }
         return null;
     }
@@ -242,7 +255,7 @@ public class Folia {
                 //executeMethod = schedulerClass.getMethod("cancelTasks", Plugin.class);
                 //executeMethod.invoke(asyncScheduler, plugin);
             } catch (Exception e) {
-                e.printStackTrace();
+                logResource(Level.WARNING, "Failed to cancel tasks", e);
             }
         }
     }
@@ -257,7 +270,7 @@ public class Folia {
             CompletableFuture<Boolean> res = (CompletableFuture<Boolean>) result;
             return res.get();
         } catch (Exception e) {
-            e.printStackTrace();
+            logResource(Level.WARNING, "Failed to teleport entity", e);
         }
         return false;
     }

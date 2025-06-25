@@ -18,7 +18,7 @@ import java.util.HashMap;
 import java.util.Map;
 
 import java.util.logging.Level;
-import java.util.logging.Logger;
+import fr.neatmonster.nocheatplus.utilities.build.ResourceUtil;
 
 /**
  * Support for parameters present or set at building time.
@@ -33,8 +33,6 @@ public class BuildParameters {
      */
     private static final Map<String, String> FILE_CONTENTS = new HashMap<String, String>();
 
-    /** Logger for reporting resource loading issues. */
-    private static final Logger LOGGER = Logger.getLogger(BuildParameters.class.getName());
 
     private BuildParameters() {
     }
@@ -46,7 +44,7 @@ public class BuildParameters {
             content = ResourceUtil.fetchResource(BuildParameters.class,
                     "BuildParameters.properties");
         } catch (Exception ex) {
-            LOGGER.log(Level.WARNING, "Failed to load BuildParameters.properties", ex);
+            ResourceUtil.logResource(Level.WARNING, "Failed to load BuildParameters.properties", ex);
         }
         // Parse properties.
         if (content != null) {

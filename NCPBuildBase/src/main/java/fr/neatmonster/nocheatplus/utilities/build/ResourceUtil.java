@@ -20,11 +20,31 @@ import java.io.InputStream;
 import java.io.InputStreamReader;
 import java.net.MalformedURLException;
 import java.net.URL;
+import java.util.logging.Level;
+import java.util.logging.Logger;
 import java.util.Map;
 
 public class ResourceUtil {
 
+    /** Logger for reporting resource loading issues. */
+    private static final Logger LOGGER = Logger.getLogger(ResourceUtil.class.getName());
+
     private ResourceUtil() {
+    }
+
+    /**
+     * Log resource related problems consistently.
+     *
+     * @param level
+     *            the log level to use
+     * @param message
+     *            the message to log
+     * @param throwable
+     *            the associated exception
+     */
+    public static void logResource(final Level level, final String message,
+            final Throwable throwable) {
+        LOGGER.log(level, message, throwable);
     }
 
     /**
@@ -39,7 +59,11 @@ public class ResourceUtil {
      */
     public static String fetchResource(final Class<?> clazz, final String path) {
         final String className = clazz.getSimpleName() + ".class";
-        final String classPath = clazz.getResource(className).toString();
+        final URL location = clazz.getResource(className);
+        if (location == null) {
+            return null;
+        }
+        final String classPath = location.toString();
         if (!classPath.startsWith("jar")) {
             return null;
         }
@@ -47,22 +71,20 @@ public class ResourceUtil {
                 + "/" + path;
         try {
             final URL url = new URL(absPath);
-            final Object obj = url.getContent();
-            if (obj instanceof InputStream) {
-                try (BufferedReader reader = new BufferedReader(new InputStreamReader((InputStream) obj))) {
-                    final StringBuilder builder = new StringBuilder();
-                    String last = reader.readLine();
-                    while (last != null) {
-                        builder.append(last).append('\n');
-                        last = reader.readLine();
-                    }
-                    return builder.toString();
+            try (InputStream stream = url.openStream();
+                 BufferedReader reader = new BufferedReader(new InputStreamReader(stream))) {
+                final StringBuilder builder = new StringBuilder();
+                String line;
+                while ((line = reader.readLine()) != null) {
+                    builder.append(line).append('\n');
                 }
-            } else {
-                return null;
+                return builder.toString();
             }
+        } catch (MalformedURLException e) {
+            logResource(Level.WARNING, "Invalid resource URL: " + absPath, e);
+            return null;
         } catch (IOException e) {
-            // ignore
+            logResource(Level.FINE, "Failed to load resource: " + absPath, e);
             return null;
         }
     }
