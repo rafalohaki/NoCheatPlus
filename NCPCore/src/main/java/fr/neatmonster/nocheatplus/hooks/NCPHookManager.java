@@ -173,7 +173,7 @@ public final class NCPHookManager {
                     return true;
                 }
             } catch (final Throwable t) {
-                // TODO: maybe distinguish some exceptions here (interrupted ?).
+                // NOTE: Consider distinguishing exceptions here (e.g., interrupted).
                 logHookFailure(checkType, player, hook, t);
             }
         }
@@ -278,8 +278,8 @@ public final class NCPHookManager {
      *            the throwable
      */
     private static final void logHookFailure(final CheckType checkType, final Player player, final NCPHook hook, final Throwable t) {
-        // TODO: might accumulate failure rate and only log every so and so seconds or disable hook if spamming (leads
-        // to NCP spam though)?
+        // NOTE: Consider accumulating failure rate and logging less frequently or disabling the hook if spamming
+        // would lead to excessive NCP log output.
         final StringBuilder builder = new StringBuilder(1024);
         builder.append("Hook " + getHookDescription(hook) + " encountered an unexpected exception:\n");
         builder.append("Processing: ");

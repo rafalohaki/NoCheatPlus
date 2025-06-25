@@ -35,7 +35,7 @@ import fr.neatmonster.nocheatplus.compat.meta.BridgeCrossPluginLoader;
  */
 public class BridgeCrossPlugin implements IBridgeCrossPlugin, IPostRegisterRunnable {
 
-    // TODO: More sophisticated checking ?
+    // Checking might need to be more sophisticated.
 
     private final Class<?> playerClass;
     private final Class<?> entityClass;

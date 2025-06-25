@@ -32,7 +32,7 @@ import org.bukkit.Location;
  */
 public abstract class AxisTracing implements ICollideBlocks, ISetMargins {
 
-    // TODO: Consider an extra loop(coordinates + margins...) for convenience.
+    // NOTE: Consider an extra loop(coordinates + margins...) for convenience.
 
     /** The order of axis to be checked. */
     private final Axis[] axisOrder = new Axis[3];
@@ -79,7 +79,7 @@ public abstract class AxisTracing implements ICollideBlocks, ISetMargins {
 
     private int maxSteps = 0;
 
-    // TODO: Margin only for iteration, not for the bounds (for use-cases like fences).
+    // NOTE: Margin only for iteration, not for the bounds (for use-cases like fences).
 
     public AxisTracing() {
         setDefaultAxisOrder();
@@ -207,8 +207,8 @@ public abstract class AxisTracing implements ICollideBlocks, ISetMargins {
                 z = this.z1;
             }
             else if (axis != Axis.NONE) {
-                // TODO: Might still just skip these.
-                // TODO: Should throw IllegalArgumentException with setting to this.
+                // NOTE: Might still just skip these.
+                // NOTE: Should throw IllegalArgumentException with setting to this.
                 throw new IllegalStateException("Can not ");
             }
             // NONE = skip

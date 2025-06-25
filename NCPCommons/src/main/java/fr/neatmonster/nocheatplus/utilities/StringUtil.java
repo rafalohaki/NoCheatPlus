@@ -163,7 +163,7 @@ public class StringUtil {
      * @return An (Array)List with the results.
      */
     public static List<String> split(String input, Collection<Character> chars){
-        // TODO: Construct one regular expression to do the entire job!?
+        // NOTE: constructing a single regular expression could handle all cases
         List<String> out = new ArrayList<String>();
         out.add(input);
         List<String> queue = new ArrayList<String>();
@@ -296,11 +296,11 @@ public class StringUtil {
      * @return
      */
     public static final String stackTraceToString(final Throwable t, final boolean header, final boolean trim) {
-        // TODO: Consider to use System.getProperty("line.separator").
-        // TODO: Consider to add a trimDepth argument, for repetition of a sequence of elements.
+        // NOTE: System.getProperty("line.separator") might be used for platform lines.
+        // NOTE: a trimDepth argument could help with repeated sequences.
         final StringBuilder b = new StringBuilder(325);
         if (header) {
-            b.append(t.toString()); // TODO: Check.
+            b.append(t.toString()); // NOTE: verify this is suitable for all throwable types.
             b.append("\n");
         }
         final StackTraceElement[] elements = t.getStackTrace();
