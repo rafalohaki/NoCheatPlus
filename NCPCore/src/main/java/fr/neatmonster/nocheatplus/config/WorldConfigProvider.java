@@ -45,5 +45,5 @@ public interface WorldConfigProvider <C extends RawConfigFile>{
      */
     public Collection<C> getAllConfigs();
 
-    // TODO: Add operations for all configs, like setForAllConfigs, get(Max|min)NumberForAllConfigs, ....
+    // Consider adding operations for all configs, such as setForAllConfigs and get(Max|min)NumberForAllConfigs.
 }
