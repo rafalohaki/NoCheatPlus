@@ -99,7 +99,6 @@ public class NCPExemptionManager {
         if (data != null) {
             data.exempt(checkType);
         }
-        // TODO: else throw ?
     }
 
     /**
@@ -219,7 +218,6 @@ public class NCPExemptionManager {
      *            the check type
      */
     public static final void unexempt(final Player player, final CheckType checkType) {
-        // TODO: Consider settings for removing meta data as well.
         unexempt(player.getUniqueId(), checkType);
     }
 

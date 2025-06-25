@@ -20,7 +20,6 @@ public class BlocksMC1_15 implements BlockPropertiesSetup{
         BlockFlags.addFlags("BEEHIVE", BlockFlags.FULLY_SOLID_BOUNDS);
         BlockFlags.addFlags("BEE_NEST", BlockFlags.FULLY_SOLID_BOUNDS);
         BlockFlags.addFlags("HONEYCOMB_BLOCK", BlockFlags.FULLY_SOLID_BOUNDS);
-        // TODO: Is this a good idea to just allow low jump to fix honey block elevator?
         BlockFlags.addFlags("HONEY_BLOCK", BlockFlags.SOLID_GROUND | BlockFlags.F_STICKY | BlockFlags.F_ALLOW_LOWJUMP);
         
         BlockProperties.setBlockProps("BEEHIVE", new BlockProperties.BlockProps(BlockProperties.woodAxe, 0.6f));

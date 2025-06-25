@@ -21,7 +21,6 @@ import org.bukkit.entity.Player;
 import org.bukkit.potion.PotionEffect;
 import org.bukkit.potion.PotionEffectType;
 
-// TODO: Auto-generated Javadoc
 /**
  * Could not help it.
  * @author mc_dev
@@ -41,7 +40,7 @@ public class PotionUtil {
      */
     public static final double getPotionEffectAmplifier(final Player player, final PotionEffectType type) {
         if (!player.hasPotionEffect(type)) {
-            return Double.NEGATIVE_INFINITY; // TODO: Might not win anything.
+            return Double.NEGATIVE_INFINITY;
         }
         final Collection<PotionEffect> effects = player.getActivePotionEffects();
         double max = Double.NEGATIVE_INFINITY;
@@ -65,7 +64,7 @@ public class PotionUtil {
      */
     public static final double getPotionEffectAmplifier(final LivingEntity entity, final PotionEffectType type) {
         if (!entity.hasPotionEffect(type)) {
-            return Double.NEGATIVE_INFINITY; // TODO: Might not win anything.
+            return Double.NEGATIVE_INFINITY;
         }
         final Collection<PotionEffect> effects = entity.getActivePotionEffects();
         double max = Double.NEGATIVE_INFINITY;

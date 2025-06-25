@@ -34,8 +34,7 @@ import fr.neatmonster.nocheatplus.utilities.map.BlockCache;
  * NOTE: If an instance implements BlockPropertiesSetup, the setup method will
  * be called after basic initialization but before configuration is applied.<br>
  * <hr>
- * TODO: Make minimal.
- * 
+ *
  * @author asofold
  *
  */
@@ -167,9 +166,7 @@ public interface MCAccess extends IGetBlockCache, IEntityAccessDimensions {
 
     /**
      * Ensure the player is really taken out: Set flag + death ticks.
-     * 
-     * TODO: Check if still necessary + make knowledge-base entries for what to check.
-     * 
+     *
      * @param player
      * @param deathTicks
      */
