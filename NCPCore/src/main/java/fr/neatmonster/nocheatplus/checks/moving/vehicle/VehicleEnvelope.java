@@ -610,18 +610,9 @@ public class VehicleEnvelope extends Check {
             debugDetails.add("air-air");
         }
 
-        if (checkDetails.canJump) {
-            // Maximum Y-distance for set back is yet to be finalized.
-            // Friction may also need to be accounted for.
-        }
-        else {
-            if (thisMove.yDistance > 0.0) {
-                tags.add("ascend_at_all");
-                return true;
-            }
-        }
+        boolean violation = isAscendingViolation(thisMove);
 
-        boolean violation = false;
+        // Absolute vertical distance to set back.
         // Absolute vertical distance to set back.
         // Future work might include a vertical distance based roll back.
         //            final double setBackYdistance = to.getY() - data.vehicleSetBacks.getValidSafeMediumEntry().getY();
@@ -639,33 +630,46 @@ public class VehicleEnvelope extends Check {
                                     (checkDetails.canJump ? Math.max(data.sfJumpPhase - MagicVehicle.maxJumpPhaseAscend, 0) : data.sfJumpPhase);                     
         final double maxDescend = getInAirMaxDescend(thisMove, data);
 
+        violation = violation || evaluateFallSpeed(thisMove, data, debug, vehicle, from, minDescend, maxDescend);
+
+        return violation;
+    }
+
+    private boolean isAscendingViolation(final VehicleMoveData thisMove) {
+        boolean violation = false;
+        if (!checkDetails.canJump && thisMove.yDistance > 0.0) {
+            tags.add("ascend_at_all");
+            violation = true;
+        }
+        return violation;
+    }
+
+    private boolean evaluateFallSpeed(final VehicleMoveData thisMove, final MovingData data,
+                                      final boolean debug, final Entity vehicle,
+                                      final RichEntityLocation from, final double minDescend,
+                                      final double maxDescend) {
+        boolean violation = false;
         if (data.sfJumpPhase > (checkDetails.canJump ? MagicVehicle.maxJumpPhaseAscend : 1)
             && thisMove.yDistance > Math.max(minDescend, -checkDetails.gravityTargetSpeed)) {
-            
             boolean noViolation = ColliesHoneyBlock(from)
-                    || (vehicle instanceof LivingEntity && !Double.isInfinite(Bridge1_13.getSlowfallingAmplifier((LivingEntity)vehicle)))
+                    || (vehicle instanceof LivingEntity && !Double.isInfinite(Bridge1_13.getSlowfallingAmplifier((LivingEntity) vehicle)))
                     || !vehicle.hasGravity();
-            // Possible sliding on honey block may cause this behavior.
-            if (ColliesHoneyBlock(from)) data.sfJumpPhase = 5;
-
+            if (ColliesHoneyBlock(from)) {
+                data.sfJumpPhase = 5;
+            }
             if (!noViolation) {
                 tags.add("slow_fall_vdist");
                 violation = true;
             }
-        }
-        // Fast falling (vdist).
-        else if (data.sfJumpPhase > 1 && thisMove.yDistance < maxDescend) {
-            // One skipped move per jump phase (1, 2, 3) might be acceptable.
+        } else if (data.sfJumpPhase > 1 && thisMove.yDistance < maxDescend) {
             tags.add("fast_fall_vdist");
             violation = true;
         }
         if (violation) {
-            // Post violation detection workarounds.
             if (MagicVehicle.oddInAir(thisMove, minDescend, maxDescend, checkDetails, data)) {
                 violation = false;
-                checkDetails.checkDescendMuch = checkDetails.checkAscendMuch = false; // (Full envelope has been checked.)
+                checkDetails.checkDescendMuch = checkDetails.checkAscendMuch = false;
             }
-
             if (debug) {
                 debugDetails.add("maxDescend: " + maxDescend);
             }
