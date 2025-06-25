@@ -59,7 +59,7 @@ public class Visible extends Check {
             // Run ray-tracing again with updated pitch and yaw.
             useLoc.setPitch(pitch);
             useLoc.setYaw(yaw);
-            final Vector direction = useLoc.getDirection(); // TODO: Better.
+            final Vector direction = useLoc.getDirection();
             tags.clear();
             if (checkRayTracing(x, y, z, direction.getX(), direction.getY(), direction.getZ(), blockX, blockY, blockZ, face, tags, debug)) {
                 // Collision still.
@@ -109,15 +109,12 @@ public class Visible extends Check {
     public Visible() {
         super(CheckType.BLOCKINTERACT_VISIBLE);
         wrapBlockCache = new WrapBlockCache();
-        rayTracing.setMaxSteps(30); // TODO: Configurable ?
+        rayTracing.setMaxSteps(30);
     }
 
     public boolean check(final Player player, final Location loc, final double eyeHeight, final Block block, 
             final BlockFace face, final Action action, final FlyingQueueHandle flyingHandle, 
             final BlockInteractData data, final BlockInteractConfig cc, final IPlayerData pData) {
-
-        // TODO: This check might make parts of interact/blockbreak/... + direction (+?) obsolete.
-        // TODO: Might confine what to check for (left/right-click, target blocks depending on item in hand, container blocks).
         boolean collides;
         final int blockX = block.getX();
         final int blockY = block.getY();
@@ -130,7 +127,6 @@ public class Visible extends Check {
         tags.clear();
         if (TrigUtil.isSameBlock(blockX, blockY, blockZ, eyeX, eyeY, eyeZ)) {
             // Player is interacting with the block their head is in.
-            // TODO: Should the reachable-face-check be done here too (if it is added at all)?
             collides = false;
         }
         else {
@@ -201,7 +197,7 @@ public class Visible extends Check {
             data.visibleVL += 1;
             final ViolationData vd = new ViolationData(this, player, data.visibleVL, 1, cc.visibleActions);
             //            if (data.debug || vd.needsParameters()) {
-            //                // TODO: Consider adding the start/end/block-type information if debug is set.
+            //
             //                vd.setParameter(ParameterName.TAGS, StringUtil.join(tags, "+"));
             //            }
             if (executeActions(vd).willCancel()) {
@@ -230,14 +226,11 @@ public class Visible extends Check {
         final int bdZ = blockZ - eyeBlockZ;
 
         // Coarse orientation check.
-        // TODO: Might skip (axis transitions...)?
         //        if (bdX != 0 && dirX * bdX <= 0.0 || bdY != 0 && dirY * bdY <= 0.0 || bdZ != 0 && dirZ * bdZ <= 0.0) {
-        //            // TODO: There seem to be false positives, do add debug logging with/before violation handling.
+        //
         //            tags.add("coarse_orient");
         //            return true;
         //        }
-
-        // TODO: If medium strict, check if the given BlockFace seems acceptable.
 
         // Time windows for coordinates passing through the target block.
         final double tMinX = getMinTime(eyeX, eyeBlockX, dirX, bdX);
@@ -262,10 +255,9 @@ public class Visible extends Check {
         if (tMinX > tMaxY && tMinX > tMaxZ || 
             tMinY > tMaxX && tMinY > tMaxZ || 
             tMinZ > tMaxX && tMaxZ > tMaxY) {
-            // TODO: Option to tolerate a minimal difference in t and use a corrected position then.
             tags.add("time_miss");
             //            Bukkit.getServer().broadcastMessage("visible: " + tMinX + "," + tMaxX + " | " + tMinY + "," + tMaxY + " | " + tMinZ + "," + tMaxZ);
-            // return true; // TODO: Strict or not (direction check ...).
+            // return true;
             // Attempt to correct somehow.
             collideX = postCorrect(blockX, bdX, collideX);
             collideY = postCorrect(blockY, bdY, collideY);
@@ -273,7 +265,6 @@ public class Visible extends Check {
         }
 
         // Correct the last-on-block to be on the edge (could be two).
-        // TODO: Correct towards minimum of all time values, then towards block, rather.
         if (tMinX == tCollide) {
             collideX = Math.round(collideX);
         }
@@ -288,10 +279,6 @@ public class Visible extends Check {
             tags.add("late_block_miss");
         }
 
-        /*
-         * TODO: Still false positives on transitions between blocks. The
-         * location does not reflect the latest flying packet(s).
-         */
 
         // Perform ray-tracing.
         //rayTracing.set(eyeX, eyeY, eyeZ, collideX, collideY, collideZ, blockX, blockY, blockZ);
