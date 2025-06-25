@@ -213,9 +213,13 @@ public class GodMode extends Check {
                             // Artificially "kill" them.
                             mcAccess.getHandle().setDead(player, 19);
                         }
-                    } catch (final Exception e) {}
-            	}, null, 30);
-            } catch (final Exception e) {}
+                    } catch (final Exception e) {
+                        // ignore - failed to set player dead
+                    }
+                }, null, 30);
+            } catch (final Exception e) {
+                // ignore - scheduled task failed
+            }
         }
     }
 }

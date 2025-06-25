@@ -454,16 +454,15 @@ permissions:
                     nocheatplus.command.denylist: true
                     nocheatplus.command.commands: true
                     nocheatplus.command.stopwatch: true
-                    # TODO: Put lag here ?
+                    nocheatplus.command.lag: true
             nocheatplus.shortcut.monitor:
                 description: All monitoring commands such as player and system info (including plugins).
                 children:
                     nocheatplus.shortcut.info: true
                     nocheatplus.command.version: true
                     nocheatplus.command.lag: true
-                    # TODO: All commands !?
+                    nocheatplus.command.inspect: true
                     nocheatplus.filter.command: true
-                    # TODO: inspect ?
             nocheatplus.shortcut.safeadmin:
                 description: 'Permissions for "safe" administration, excluding rather critical operations like reload and action commands like ban/delay (arbitrary console commands!). Fit for "heavy" mods, include temp-kicking and exemptions, does bypass login-denial.'
                 children:
@@ -474,7 +473,7 @@ permissions:
                     nocheatplus.command.removeplayer: true
                     nocheatplus.filter.command: true
                     nocheatplus.bypass.denylogin: true
-                    # TODO: inspect ?
+                    nocheatplus.command.inspect: true
             nocheatplus.shortcut.bypass:
                 description: Bypass everything that can be bypassed.
                 children:
@@ -490,7 +489,7 @@ permissions:
     nocheatplus.tester:
         description: Monitoring and debugging permissions, including removing data and exemption handling for oneself.
         children:
-            # TODO: Might just inherit from shortcut.info.
+            # Inherit monitoring commands for convenient testing.
             nocheatplus.shortcut.monitor: true
             nocheatplus.admin.debug: true
             nocheatplus.command.exempt.self: true
@@ -501,7 +500,7 @@ permissions:
     nocheatplus.admin:
         description: "Give the player all administration rights (does not exclude from checks), do not give lightly - if in doubt use shortcut permissions for moderators (nocheatplus.shortcut.monitor|safeadmin ...)."
         children:
-            # TODO: move debug permission (debug.XYZ?).
+            # Includes debugging permission.
             nocheatplus.admin.debug:
                 description: Receive debugging information (or cause console logs on other occasions).
             

@@ -671,24 +671,15 @@ public class MovingListener extends CheckListener implements TickListener, IRemo
         final String playerName = player.getName(); // Could switch to UUID here (needs more changes).
         final long time = System.currentTimeMillis();
         final PlayerMoveData lastMove = data.playerMoves.getFirstPastMove();
-        // Order this to above "early return"?
-        // Set up data / caching.
-        // Data resetting above ?
         data.resetTeleported();
-        ////////////////////////////
-        // Debug.                 //
-        ////////////////////////////
-        if (debug) {
-            outputMoveDebug(player, moveInfo.from, moveInfo.to, Math.max(cc.noFallyOnGround, cc.yOnGround), mcAccess.getHandle());
-        }
+
+        debugOutput(player, moveInfo, cc, debug);
         
 
         ////////////////////////////////////////////////////
         // Check for illegal move and bounding box etc.   //
         ///////////////////////////////////////////////////
-        if ((moveInfo.from.hasIllegalCoords() || moveInfo.to.hasIllegalCoords()) ||
-            !cc.ignoreStance && (moveInfo.from.hasIllegalStance() || moveInfo.to.hasIllegalStance())) {
-            MovingUtil.handleIllegalMove(event, player, data, cc);
+        if (handleIllegalCoordinates(player, event, data, cc, moveInfo)) {
             return true;
         }
         
@@ -696,14 +687,13 @@ public class MovingListener extends CheckListener implements TickListener, IRemo
         /////////////////////////////////////
         // Check for location consistency. //
         /////////////////////////////////////
-        newTo = MovePreChecks.checkLocationConsistency(player, from, data, cc,
-                playersEnforce, this::enforceLocation);
+        newTo = validateLocationConsistency(player, from, data, cc);
 
 
         //////////////////////////////////////////////
         // Check for sprinting (assumeSprint)       //
         //////////////////////////////////////////////
-        MovePreChecks.updateSprinting(player, time, data, cc, attributeAccess.getHandle());
+        updateSprintingState(player, time, data, cc);
         
 
         /////////////////////////////////////
@@ -715,29 +705,9 @@ public class MovingListener extends CheckListener implements TickListener, IRemo
         pTo = moveInfo.to;
         
 
-        ////////////////////////////////////
-        // Powder snow handling 1.17+     //
-        ////////////////////////////////////
-        if (Bridge1_17.hasIsFrozen()) {
-            boolean hasboots = Bridge1_17.hasLeatherBootsOn(player);
-            if (pTo.isOnGround() && !hasboots 
-                && pTo.adjustOnGround(!pTo.isOnGroundDueToStandingOnAnEntity() && !pTo.isOnGround(cc.yOnGround, BlockFlags.F_POWDERSNOW)) && debug) {
-                debug(player, "Collide ground surface but not actually on ground. Adjusting To location.");
-            }
-            if (pFrom.isOnGround() && !hasboots 
-                && pFrom.adjustOnGround(!pFrom.isOnGroundDueToStandingOnAnEntity() && !pFrom.isOnGround(cc.yOnGround, BlockFlags.F_POWDERSNOW)) && debug) {
-                debug(player, "Collide ground surface but not actually on ground. Adjusting From location");
-            }
-        }
+        handlePowderSnow(player, pFrom, pTo, cc, debug);
 
-        ////////////////////////////////////
-        // Wind Charge handling 1.21+     //
-        ////////////////////////////////////
-        // Incorrect but safe for now
-        // Missing case: If player taken another explosion after wind_charge, do reset impulse
-        if (data.timeRiptiding + 1500 > System.currentTimeMillis() || pFrom.isInLiquid() || pFrom.isOnClimbable() || Bridge1_9.isGlidingWithElytra(player)) {
-            data.clearWindChargeImpulse();
-        }
+        resetWindChargeImpulse(player, pFrom, data);
 
         //////////////////////////////////////////////
         // HOT FIX - for VehicleLeaveEvent missing. //
@@ -772,7 +742,7 @@ public class MovingListener extends CheckListener implements TickListener, IRemo
         ///////////////////////////////////////////////
         // Rework to generic (?) queued velocity entries: activation + invalidation
         final int tick = TickTask.getTick();
-        data.velocityTick(tick - cc.velocityActivationTicks);
+        applyVelocityAdjustments(data, cc, tick);
 
 
         ////////////////////////////////////
@@ -945,7 +915,7 @@ public class MovingListener extends CheckListener implements TickListener, IRemo
         }
         
         // 7/8: Handle explosion velocity and bubble column launch.
-        VelocityProcessor.handleVelocity(player, thisMove, lastMove, data, cc, tick, checkSf, debug, pFrom);
+        applyVelocityAdjustments(player, thisMove, lastMove, pFrom, tick, data, cc, checkSf, debug);
 
         
 
@@ -1047,22 +1017,13 @@ public class MovingListener extends CheckListener implements TickListener, IRemo
         ////////////////////////////////////////////
         // Reset jump amplifier if needed.        //
         ////////////////////////////////////////////
-        if ((checkSf || checkCf) && jumpAmplifier != data.jumpAmplifier) {
-            // General cool-down for latency?
-            if (thisMove.touchedGround || !checkSf && (pFrom.isOnGround() || pTo.isOnGround())) {
-                // (No need to check from/to for onGround, if SurvivalFly is to be checked.)
-                data.jumpAmplifier = jumpAmplifier;
-            }
-        }
+        processNoFall(checkSf, checkCf, jumpAmplifier, thisMove, pFrom, pTo, data);
 
         
         ////////////////////////////////////////
         // Update BlockChangeTracker          //
         ////////////////////////////////////////
-        if (useBlockChangeTracker && data.blockChangeRef.firstSpanEntry != null) {
-            if (debug) debug(player, "BlockChangeReference: " + data.blockChangeRef.firstSpanEntry.tick + " .. " + data.blockChangeRef.lastSpanEntry.tick + " / " + tick);
-            data.blockChangeRef.updateFinal(pTo);
-        }
+        updateBlockChangeTracker(player, pTo, data, useBlockChangeTracker, tick, debug);
         
         
         //////////////////////////////////////////////
@@ -1171,6 +1132,88 @@ public class MovingListener extends CheckListener implements TickListener, IRemo
             player.setGliding(false);
         }
         return true;
+    }
+
+    private void debugOutput(final Player player, final PlayerMoveInfo moveInfo, final MovingConfig cc, final boolean debug) {
+        if (debug) {
+            outputMoveDebug(player, moveInfo.from, moveInfo.to,
+                    Math.max(cc.noFallyOnGround, cc.yOnGround), mcAccess.getHandle());
+        }
+    }
+
+    private boolean handleIllegalCoordinates(final Player player, final PlayerMoveEvent event,
+            final MovingData data, final MovingConfig cc, final PlayerMoveInfo moveInfo) {
+        if ((moveInfo.from.hasIllegalCoords() || moveInfo.to.hasIllegalCoords())
+                || !cc.ignoreStance && (moveInfo.from.hasIllegalStance() || moveInfo.to.hasIllegalStance())) {
+            MovingUtil.handleIllegalMove(event, player, data, cc);
+            return true;
+        }
+        return false;
+    }
+
+    private Location validateLocationConsistency(final Player player, final Location from,
+            final MovingData data, final MovingConfig cc) {
+        return MovePreChecks.checkLocationConsistency(player, from, data, cc, playersEnforce, this::enforceLocation);
+    }
+
+    private void updateSprintingState(final Player player, final long time, final MovingData data,
+            final MovingConfig cc) {
+        MovePreChecks.updateSprinting(player, time, data, cc, attributeAccess.getHandle());
+    }
+
+    private void handlePowderSnow(final Player player, final PlayerLocation from, final PlayerLocation to,
+            final MovingConfig cc, final boolean debug) {
+        if (Bridge1_17.hasIsFrozen()) {
+            final boolean hasBoots = Bridge1_17.hasLeatherBootsOn(player);
+            if (to.isOnGround() && !hasBoots
+                    && to.adjustOnGround(!to.isOnGroundDueToStandingOnAnEntity()
+                            && !to.isOnGround(cc.yOnGround, BlockFlags.F_POWDERSNOW)) && debug) {
+                debug(player, "Collide ground surface but not actually on ground. Adjusting To location.");
+            }
+            if (from.isOnGround() && !hasBoots
+                    && from.adjustOnGround(!from.isOnGroundDueToStandingOnAnEntity()
+                            && !from.isOnGround(cc.yOnGround, BlockFlags.F_POWDERSNOW)) && debug) {
+                debug(player, "Collide ground surface but not actually on ground. Adjusting From location");
+            }
+        }
+    }
+
+    private void resetWindChargeImpulse(final Player player, final PlayerLocation from, final MovingData data) {
+        if (data.timeRiptiding + 1500 > System.currentTimeMillis() || from.isInLiquid()
+                || from.isOnClimbable() || Bridge1_9.isGlidingWithElytra(player)) {
+            data.clearWindChargeImpulse();
+        }
+    }
+
+    private void applyVelocityAdjustments(final MovingData data, final MovingConfig cc, final int tick) {
+        data.velocityTick(tick - cc.velocityActivationTicks);
+    }
+
+    private void applyVelocityAdjustments(final Player player, final PlayerMoveData thisMove,
+            final PlayerMoveData lastMove, final PlayerLocation pFrom, final int tick, final MovingData data,
+            final MovingConfig cc, final boolean checkSf, final boolean debug) {
+        VelocityProcessor.handleVelocity(player, thisMove, lastMove, data, cc, tick, checkSf, debug, pFrom);
+    }
+
+    private void updateBlockChangeTracker(final Player player, final PlayerLocation pTo, final MovingData data,
+            final boolean useBlockChangeTracker, final int tick, final boolean debug) {
+        if (useBlockChangeTracker && data.blockChangeRef.firstSpanEntry != null) {
+            if (debug) {
+                debug(player, "BlockChangeReference: " + data.blockChangeRef.firstSpanEntry.tick + " .. "
+                        + data.blockChangeRef.lastSpanEntry.tick + " / " + tick);
+            }
+            data.blockChangeRef.updateFinal(pTo);
+        }
+    }
+
+    private void processNoFall(final boolean checkSf, final boolean checkCf, final double jumpAmplifier,
+            final PlayerMoveData thisMove, final PlayerLocation pFrom, final PlayerLocation pTo,
+            final MovingData data) {
+        if ((checkSf || checkCf) && jumpAmplifier != data.jumpAmplifier) {
+            if (thisMove.touchedGround || !checkSf && (pFrom.isOnGround() || pTo.isOnGround())) {
+                data.jumpAmplifier = jumpAmplifier;
+            }
+        }
     }
 
     
