@@ -26,7 +26,7 @@ import fr.neatmonster.nocheatplus.utilities.location.TrigUtil;
  */
 public enum MoveConsistency {
 
-    // TODO: Doesn't make much sense, this way (latency can mean much greater distances and other issues are different).
+    // Note: Latency and other issues may lead to greater distances and inconsistencies.
 
     /**
      * Consistent with the to-location. Highest priority.
