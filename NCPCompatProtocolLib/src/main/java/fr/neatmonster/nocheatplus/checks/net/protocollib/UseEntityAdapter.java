@@ -116,7 +116,9 @@ public class UseEntityAdapter extends BaseAdapter {
             try {
                 return new LegacyReflectionSet(versionDetail);
             }
-            catch (RuntimeException e) {} // +-
+            catch (RuntimeException e) {
+                // ignore - version detail not supported
+            }
         }
         return null;
     }
@@ -125,7 +127,9 @@ public class UseEntityAdapter extends BaseAdapter {
     public void onPacketReceiving(final PacketEvent event) {
         try {
             if (event.isPlayerTemporary()) return;
-        } catch(NoSuchMethodError e) {}
+        } catch(NoSuchMethodError e) {
+            // ignore - older ProtocolLib version
+        }
         final long time = System.currentTimeMillis();
         final Player player = event.getPlayer();
         if (player == null) {

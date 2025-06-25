@@ -18,7 +18,6 @@ import java.io.BufferedReader;
 import java.io.IOException;
 import java.io.InputStream;
 import java.io.InputStreamReader;
-import java.net.MalformedURLException;
 import java.net.URL;
 import java.util.Map;
 
@@ -47,22 +46,16 @@ public class ResourceUtil {
                 + "/" + path;
         try {
             final URL url = new URL(absPath);
-            final Object obj = url.getContent();
-            if (obj instanceof InputStream) {
-                try (BufferedReader reader = new BufferedReader(new InputStreamReader((InputStream) obj))) {
-                    final StringBuilder builder = new StringBuilder();
-                    String last = reader.readLine();
-                    while (last != null) {
-                        builder.append(last).append('\n');
-                        last = reader.readLine();
-                    }
-                    return builder.toString();
+            try (BufferedReader reader = new BufferedReader(new InputStreamReader((InputStream) url.getContent()))) {
+                final StringBuilder builder = new StringBuilder();
+                String last = reader.readLine();
+                while (last != null) {
+                    builder.append(last).append('\n');
+                    last = reader.readLine();
                 }
-            } else {
-                return null;
+                return builder.toString();
             }
         } catch (IOException e) {
-            // ignore
             return null;
         }
     }
