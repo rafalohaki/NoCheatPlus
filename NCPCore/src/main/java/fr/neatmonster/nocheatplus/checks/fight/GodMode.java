@@ -25,6 +25,7 @@ import fr.neatmonster.nocheatplus.compat.BridgeHealth;
 import fr.neatmonster.nocheatplus.compat.Folia;
 import fr.neatmonster.nocheatplus.compat.IBridgeCrossPlugin;
 import fr.neatmonster.nocheatplus.components.registry.event.IGenericInstanceHandle;
+import fr.neatmonster.nocheatplus.logging.StaticLog;
 import fr.neatmonster.nocheatplus.players.IPlayerData;
 import fr.neatmonster.nocheatplus.utilities.CheckUtils;
 import fr.neatmonster.nocheatplus.utilities.TickTask;
@@ -214,7 +215,7 @@ public class GodMode extends Check {
                             mcAccess.getHandle().setDead(player, 19);
                         }
                     } catch (final Exception e) {
-                        // ignore - failed to set player dead
+                        StaticLog.logWarning("Failed to set player dead: " + e.getMessage());
                     }
                 }, null, 30);
             } catch (final Exception e) {

@@ -18,6 +18,7 @@ import org.bukkit.Bukkit;
 import org.bukkit.permissions.Permission;
 import org.bukkit.permissions.PermissionDefault;
 import org.bukkit.plugin.PluginManager;
+import java.util.Locale;
 
 /**
  * A permission registered with the PermissionRegistry. Essentially contains an
@@ -29,7 +30,7 @@ import org.bukkit.plugin.PluginManager;
 public class RegisteredPermission {
 
     public static final String toLowerCaseStringRepresentation(final String stringRepresentation) {
-        return stringRepresentation.toLowerCase(java.util.Locale.ENGLISH);
+        return stringRepresentation.toLowerCase(Locale.ENGLISH);
     }
 
     private final Integer id;

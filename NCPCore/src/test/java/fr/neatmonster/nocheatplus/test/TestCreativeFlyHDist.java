@@ -6,6 +6,7 @@ import java.lang.reflect.Field;
 import java.lang.reflect.Method;
 import java.lang.reflect.Proxy;
 import java.lang.reflect.InvocationHandler;
+import java.util.HashMap;
 
 import org.bukkit.Material;
 import org.bukkit.entity.Player;
@@ -115,7 +116,7 @@ public class TestCreativeFlyHDist {
         Object pdm = un.allocateInstance(fr.neatmonster.nocheatplus.players.PlayerDataManager.class);
         Field eh = fr.neatmonster.nocheatplus.players.PlayerDataManager.class.getDeclaredField("executionHistories");
         eh.setAccessible(true);
-        eh.set(pdm, new java.util.HashMap<>());
+        eh.set(pdm, new HashMap<>());
         Field dm = fr.neatmonster.nocheatplus.players.DataManager.class.getDeclaredField("instance");
         dm.setAccessible(true);
         dm.set(null, pdm);

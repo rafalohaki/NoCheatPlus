@@ -19,6 +19,8 @@ import java.util.UUID;
 
 import org.bukkit.entity.Player;
 
+import fr.neatmonster.nocheatplus.logging.StaticLog;
+
 import fr.neatmonster.nocheatplus.NCPAPIProvider;
 import fr.neatmonster.nocheatplus.checks.CheckType;
 
@@ -269,8 +271,11 @@ public class DataManager {
      * 
      * @param player
      * @return null in case of failures.
-     */
+    */
     public static IPlayerData getPlayerDataSafe(final Player player) {
+        if (player == null) {
+            return null;
+        }
         try {
             return getPlayerData(player);
         }
@@ -287,7 +292,7 @@ public class DataManager {
             return getPlayerData(player.getName());
         }
         catch (UnsupportedOperationException e) {
-            // ignore - giving up on retrieval
+            StaticLog.logWarning("All player data retrieval methods failed for player: " + player.getName());
         }
         // Failure.
         return null;
