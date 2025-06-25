@@ -287,191 +287,127 @@ public class RegistrationOrder {
             final String tag2 = order2.getTag();
             final String beforeTag2 = order2.getBeforeTag();
             final String afterTag2 = order2.getAfterTag();
+
             if (basePriority1 == null) {
                 if (basePriority2 == null) {
-                    if (beforeTag1 == null) {
-                        if (beforeTag2 == null) {
-                            if (afterTag1 == null) {
-                                // Safe to abort here.
-                                return true;
-                            }
-                            else {
-                                // order1 might be set to come after order2.
-                                // Must proceed to check other entries with afterTag set.
-                                // The other entry is not set to come after this one.
-                                return !(
-                                        tag2 != null && tag2.matches(afterTag1)
-                                        || afterTag2 == null
-                                        || tag1 == null
-                                        || !tag1.matches(afterTag2));
-                            }
-                        }
-                        else {
-                            /*
-                             * beforeTag2 is not null - the only way to let
-                             * order1 come first, is to have tag1 match
-                             * afterTag2. Otherwise 
-                             */
-                            return tag1 != null && afterTag2 != null && tag1.matches(afterTag2);
-                        }
-                    }
-                    else {
-                        /*
-                         * beforeTag1 is not null - the only way to let
-                         * order2 come first, is to have tag2 match
-                         * afterTag1. Otherwise 
-                         */
-                        return tag2 == null || afterTag1 == null || !tag2.matches(afterTag1);
-                    }
+                    return handleBothNullPriorities(tag1, beforeTag1, afterTag1, tag2, beforeTag2, afterTag2);
                 }
-                else {
-                    // order2 has basePriority set, proceed depending on tags.
-                    return 
-                            // Pre-any-basePriority region.
-                            beforeTag1 != null 
-                            // To center region (simple).
-                            || afterTag1 == null && basePriority2 > 0
-                            // To center region (with comparison).
-                            || afterTag1 == null && basePriority2 == 0
-                            && (
-                                    // Sort to the end of 0-basePriority, where neither beforeTag nor afterTag is set.
-                                    tag1 == null && (beforeTag2 == null && afterTag2 != null)
-                                    // The other is explicitly set to be later.
-                                    || tag1 != null && afterTag2 != null && tag1.matches(afterTag2)
-                                    // Before anything that only has the afterTag set, otherwise.
-                                    || beforeTag2 == null && afterTag2 != null
-                                    )
-                            ;
-                }
+                return handleFirstNullPriority(tag1, beforeTag1, afterTag1, tag2, beforeTag2, afterTag2, basePriority2);
+            } else if (basePriority2 == null) {
+                return handleSecondNullPriority(basePriority1, tag1, beforeTag1, afterTag1, tag2, beforeTag2, afterTag2);
+            } else {
+                return handleBothPrioritiesSet(basePriority1, tag1, beforeTag1, afterTag1,
+                        basePriority2, tag2, beforeTag2, afterTag2);
             }
-            else if (basePriority2 == null) {
-                // Determine region to fit in (...).
+            // (No catch all.)
+        }
+
+        private static boolean handleBothNullPriorities(final String tag1, final String beforeTag1,
+                final String afterTag1, final String tag2, final String beforeTag2, final String afterTag2) {
+            if (beforeTag1 == null) {
                 if (beforeTag2 == null) {
-                    if (afterTag2 == null) {
-                        // order2 is within the 0-basePriority region.
-                        if (basePriority1 < 0) {
+                    if (afterTag1 == null) {
+                        return true;
+                    }
+                    return !(tag2 != null && tag2.matches(afterTag1)
+                            || afterTag2 == null
+                            || tag1 == null
+                            || !tag1.matches(afterTag2));
+                }
+                return tag1 != null && afterTag2 != null && tag1.matches(afterTag2);
+            }
+            return tag2 == null || afterTag1 == null || !tag2.matches(afterTag1);
+        }
+
+        private static boolean handleFirstNullPriority(final String tag1, final String beforeTag1,
+                final String afterTag1, final String tag2, final String beforeTag2,
+                final String afterTag2, final Integer basePriority2) {
+            return beforeTag1 != null
+                    || afterTag1 == null && basePriority2 > 0
+                    || afterTag1 == null && basePriority2 == 0
+                    && (
+                            tag1 == null && (beforeTag2 == null && afterTag2 != null)
+                            || tag1 != null && afterTag2 != null && tag1.matches(afterTag2)
+                            || beforeTag2 == null && afterTag2 != null
+                            );
+        }
+
+        private static boolean handleSecondNullPriority(final Integer basePriority1, final String tag1,
+                final String beforeTag1, final String afterTag1, final String tag2,
+                final String beforeTag2, final String afterTag2) {
+            if (beforeTag2 == null) {
+                if (afterTag2 == null) {
+                    if (basePriority1 < 0) {
+                        return false;
+                    } else if (basePriority1 > 0) {
+                        return true;
+                    } else {
+                        if (tag2 != null && afterTag1 != null && tag2.matches(afterTag1)) {
+                            return false;
+                        } else if (beforeTag1 != null) {
+                            return true;
+                        } else if (afterTag1 != null) {
                             return false;
                         }
-                        else if (basePriority1 > 0) {
-                            return true;
-                        }
-                        else {
-                            // Both are within the same region.
-                            if (tag2 != null && afterTag1 != null && tag2.matches(afterTag1)) {
-                                // order1 is set to come after order2.
-                                return false;
-                            }
-                            else if (beforeTag1 != null) {
-                                // Order1 comes first.
-                                return true;
-                            }
-                            else if (afterTag1 != null) {
-                                // Order1 is sorted to the end of the region rather.
-                                return false;
-                            }
-                            /*
-                             * Prefer to have have set basePriority 0 first,
-                             * assuming null basePriority to be interpreted
-                             * as 'later registered', keeping the order of
-                             * registration rather.
-                             */
-                            return true;
-                        }
-                    }
-                    else {
-                        // order2 comes later.
                         return true;
                     }
                 }
-                else {
-                    // order2 comes first.
-                    return false;
-                }
+                return true;
             }
-            else {
-                // Both not null.
-                if (basePriority1 < basePriority2) {
-                    return true;
-                }
-                else if (basePriority1 > basePriority2) {
-                    return false;
-                }
-                else {
-                    // Same priority set, distinguish by tag settings.
-                    if (beforeTag1 == null) {
-                        if (beforeTag2 == null) {
-                            // Only distinction could be afterTagS.
-                            if (afterTag1 == null) {
-                                // Either can't distinguish, or order2 should come afterwards.
-                                return true;
-                            }
-                            else {
-                                if (afterTag2 == null) {
-                                    // order1 should be passed on.
-                                    return false;
-                                }
-                                else {
-                                    // Both afterTagS are not null.
-                                    if (tag2 != null && tag2.matches(afterTag1)) {
-                                        // Greedy (could override afterTag2).
-                                        return false;
-                                    }
-                                    // order2 is set to come after order1?
-                                    return tag1 != null && tag1.matches(afterTag2);
-                                }
-                            }
-                        }
-                        else {
-                            // beforeTag1 is null, beforeTag2 not.
-                            // beforeTag set rules otherwise.
-                            return afterTag2 != null && tag1 != null && tag1.matches(afterTag2);
-                        }
-                    }
-                    else {
-                        // beforeTag1 is null.
-                        if (beforeTag2 == null) {
-                            if (afterTag1 != null && tag2 != null && tag2.matches(afterTag1)) {
-                                // order1 is explicitly set to come after order2.
+            return false;
+        }
+
+        private static boolean handleBothPrioritiesSet(final Integer basePriority1, final String tag1,
+                final String beforeTag1, final String afterTag1, final Integer basePriority2,
+                final String tag2, final String beforeTag2, final String afterTag2) {
+            if (basePriority1 < basePriority2) {
+                return true;
+            } else if (basePriority1 > basePriority2) {
+                return false;
+            } else {
+                if (beforeTag1 == null) {
+                    if (beforeTag2 == null) {
+                        if (afterTag1 == null) {
+                            return true;
+                        } else {
+                            if (afterTag2 == null) {
                                 return false;
-                            }
-                            else {
-                                return afterTag2 == null && afterTag1 == null;
-                            }
-                        }
-                        else {
-                            // Both beforeTag1 and beforeTag2 are not so null.
-                            if (tag2 != null && tag2.matches(beforeTag1)) {
-                                // order1 is set to come before order2.
-                                return true;
-                            }
-                            else if (tag1 != null && tag1.matches(beforeTag2)) {
-                                // order2 is set to come before order1.
-                                return false;
-                            }
-                            else if (afterTag1 == null) {
-                                // Either can't distinguish, or afterTag2 is set, thus sort in before.
-                                return true;
-                            }
-                            else {
-                                // afterTag1 is not null.
+                            } else {
                                 if (tag2 != null && tag2.matches(afterTag1)) {
-                                    // order1 is set to come after order2.
                                     return false;
                                 }
-                                else if (afterTag2 != null){
-                                    // order2 is set to come after order1?
-                                    return tag1 != null && tag1.matches(afterTag2);
-                                }
-                                else {
-                                    // afterTag1 is null, otherwise not matching, thus order1 comes behind.
-                                    return false;
-                                }
+                                return tag1 != null && tag1.matches(afterTag2);
+                            }
+                        }
+                    } else {
+                        return afterTag2 != null && tag1 != null && tag1.matches(afterTag2);
+                    }
+                } else {
+                    if (beforeTag2 == null) {
+                        if (afterTag1 != null && tag2 != null && tag2.matches(afterTag1)) {
+                            return false;
+                        } else {
+                            return afterTag2 == null && afterTag1 == null;
+                        }
+                    } else {
+                        if (tag2 != null && tag2.matches(beforeTag1)) {
+                            return true;
+                        } else if (tag1 != null && tag1.matches(beforeTag2)) {
+                            return false;
+                        } else if (afterTag1 == null) {
+                            return true;
+                        } else {
+                            if (tag2 != null && tag2.matches(afterTag1)) {
+                                return false;
+                            } else if (afterTag2 != null) {
+                                return tag1 != null && tag1.matches(afterTag2);
+                            } else {
+                                return false;
                             }
                         }
                     }
                 }
             }
-            // (No catch all.)
         }
     }
 
