@@ -30,11 +30,11 @@ import fr.neatmonster.nocheatplus.components.location.IGetPosition;
  */
 public interface ICollideRayVsAABB extends IGetPosition {
 
-    // TODO: Control of counting in colliding with the edge?
-    // TODO: Method to get the maximum per-axis distance in case of not colliding and findNearest... set.
-    // TODO: Convenience methods to retrieve distances (especially in case of not colliding).
-    // TODO: Convenience methods for other argument types (vector, IGet..., double[], setAABB(block/ints).
-    // TODO: Implement fight.visible, use in BlockBreak.direction/visible.
+    // Control if collisions with the edge should count directly.
+    // Method to retrieve the maximum per-axis distance when not colliding could be useful.
+    // Convenience methods may help to retrieve distances when not colliding.
+    // Additional convenience methods for various argument types could be added.
+    // Implementations may integrate with fight.visible for BlockBreak.direction or visibility checks.
 
     /**
      * Set the start and direction of the ray. This can be called independently

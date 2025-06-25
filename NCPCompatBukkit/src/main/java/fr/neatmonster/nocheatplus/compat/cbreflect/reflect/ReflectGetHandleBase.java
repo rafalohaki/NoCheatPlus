@@ -33,7 +33,7 @@ public abstract class ReflectGetHandleBase <BO> {
     public ReflectGetHandleBase(ReflectBase base, Class<?> obcClass, Class<?> nmsClass) throws ClassNotFoundException {
         // getHandle
         obcGetHandle = ReflectionUtil.getMethodNoArgs(obcClass, "getHandle");
-        // TODO: Consider throw in case of getHandle missing.
+        // Throwing an exception might be preferable if getHandle is missing.
     }
 
     /**
@@ -43,7 +43,7 @@ public abstract class ReflectGetHandleBase <BO> {
      * @return
      */
     public Object getHandle(BO bukkitObject) {
-        // TODO: CraftPlayer check (isAssignableFrom)?
+        // CraftPlayer check might be desirable via isAssignableFrom.
         if (this.obcGetHandle == null) {
             fail();
         }

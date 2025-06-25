@@ -39,13 +39,16 @@ public class MapRecorder {
 
         private final BlockCache worldAccess;
         private final FakeBlockCache recorder;
-        private final int margin; // TODO: separated y margin(s) ?
+        /**
+         * Margin applied in all directions when recording blocks.
+         */
+        private final int margin;
 
         public TraceRecorder(BlockCache worldAccess, FakeBlockCache recorder, int margin) {
             this.worldAccess = worldAccess;
             this.recorder = recorder;
             this.margin = margin;
-            // TODO: maxSteps ? [In some cases it might be better with limiting recording by the steps done.]
+            // Limiting the number of steps can reduce recording overhead.
         }
 
         @Override
