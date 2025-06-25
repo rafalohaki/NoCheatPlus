@@ -200,95 +200,88 @@ public class OnGroundReference {
     }
 
     private boolean advanceDualEntries() {
-        // Re-iterate, if necessary.
         while (true) {
-            // Try to iterate aboveEntries first.
+            if (advanceEntriesAbove()) {
+                return true;
+            }
+            if (!moveToNextEntry()) {
+                return false;
+            }
+            alignEntryAbove();
+            if (entryAbove != null) {
+                return true;
+            }
+            if (entry == null && entryAbove == null) {
+                return false;
+            }
+        }
+    }
+
+    private boolean advanceEntriesAbove() {
+        entryAbove = null;
+        nodeAbove = null;
+        while (itEntriesAbove.hasNext()) {
+            entryAbove = itEntriesAbove.next();
+            nodeAbove = entryAbove.previousState;
+            if (entry == null) {
+                return true;
+            }
+            if (entry.nextEntryTick >= 0 && entryAbove.tick > entry.nextEntryTick) {
+                entryAbove = null;
+                nodeAbove = null;
+                break;
+            }
+            if (entry.overlapsIntervalOfValidity(entryAbove)) {
+                return true;
+            }
             entryAbove = null;
             nodeAbove = null;
-            while (itEntriesAbove.hasNext()) {
+        }
+        return false;
+    }
+
+    private boolean moveToNextEntry() {
+        entry = null;
+        node = null;
+        if (!itEntries.hasNext()) {
+            entry = entryAbove = null;
+            node = nodeAbove = null;
+            return false;
+        }
+        entry = itEntries.next();
+        node = entry.previousState;
+        rewindEntriesAbove();
+        return true;
+    }
+
+    private void rewindEntriesAbove() {
+        while (itEntriesAbove.nextIndex() > entriesAboveLockIndex) {
+            entryAbove = itEntriesAbove.previous();
+            nodeAbove = entryAbove.previousState;
+        }
+    }
+
+    private void alignEntryAbove() {
+        if (entryAbove == null) {
+            return;
+        }
+        while (!entry.overlapsIntervalOfValidity(entryAbove)) {
+            if (entry.nextEntryTick >= 0 && entryAbove.tick > entry.nextEntryTick) {
+                entryAbove = null;
+                nodeAbove = null;
+                break;
+            }
+            if (itEntriesAbove.hasNext()) {
                 entryAbove = itEntriesAbove.next();
                 nodeAbove = entryAbove.previousState;
-                if (entry == null) {
-                    // Iterate to end. (Then stop, rewind shouldn't happen.)
-                    return true;
-                }
-                else {
-                    if (entry.nextEntryTick >= 0 && entryAbove.tick > entry.nextEntryTick) {
-                        entryAbove = null;
-                        nodeAbove = null;
-                        break;
-                    }
-                    else if (entry.overlapsIntervalOfValidity(entryAbove)) {
-                        // Good to use.
-                        return true;
-                    }
-                    else {
-                        entryAbove = null;
-                        nodeAbove = null;
-                        // Check the next one (not out of range yet).
-                    }
-                }
-            }
-
-            // Rewind entryAbove, advance entry.
-            entry = null;
-            node = null;
-            if (itEntries.hasNext()) {
-                entry = itEntries.next();
-                node = entry.previousState;
-                // Skip if not ground (!).
-                // Rewind.
-                while (itEntriesAbove.nextIndex() > entriesAboveLockIndex) {
-                    entryAbove = itEntriesAbove.previous();
-                    nodeAbove = entryAbove.previousState;
-                    // Consider optimized break here.
-                }
-                // Advance towards next overlap.
-                if (entryAbove != null) {
-                    while (!entry.overlapsIntervalOfValidity(entryAbove)) {
-                        if (entry.nextEntryTick >= 0 && entryAbove.tick > entry.nextEntryTick) {
-                            // Try next entry.
-                            entryAbove = null;
-                            nodeAbove = null;
-                            break;
-                        }
-                        if (itEntriesAbove.hasNext()) {
-                            entryAbove = itEntriesAbove.next();
-                            nodeAbove = entryAbove.previousState;
-                            entriesAboveLockIndex = itEntriesAbove.nextIndex();
-                        }
-                        else {
-                            // Try next entry.
-                            entryAbove = null;
-                            nodeAbove = null;
-                              // Consider allowing a check for entry + null once.
-                            break;
-                        }
-                    }
-                    if (entryAbove != null) {
-                        return true;
-                    }
-                }
+                entriesAboveLockIndex = itEntriesAbove.nextIndex();
             }
             else {
-                /*
-                 * Consider covering the current state for entry versus the
-                 * last of entriesAbove for the very last step. The same applies
-                 * for the current above state versus the last of entries.
-                 */
-                entry = entryAbove = null;
-                node = nodeAbove = null;
-                return false;
+                entryAbove = null;
+                nodeAbove = null;
+                break;
             }
-
-            if (entry == null && entryAbove == null) { 
-                /*
-                 * This should be dead code. Ensure all cases except for
-                 * "Try next entry." are covered above.
-                 */
-                return false;
-            }
-        } // (while: Find matching pair to continue with)
+        }
     }
 
     private BlockChangeEntry fetchNext(final ListIterator<BlockChangeEntry> it, final boolean requireGround) {
