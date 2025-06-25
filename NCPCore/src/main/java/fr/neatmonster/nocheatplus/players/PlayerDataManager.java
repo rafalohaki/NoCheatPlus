@@ -648,23 +648,26 @@ public class PlayerDataManager  implements IPlayerDataManager, ComponentWithName
     private void onPlayerLogin(final PlayerLoginEvent event) {
         // Consistency check existing data.
         final Player player = event.getPlayer();
-        final UUID playerId = player.getUniqueId();
-        final PlayerData pData = getPlayerData(playerId);
-        if (pData == null) {
-            // Create an instance.
-            // NOTE: Legacy server compatibility with world retrieval?
-            getPlayerData(player);
-        }
-        else {
-            // Consistency check.
-            final String playerName = pData.getPlayerName();
-            if (!playerName.equals(player.getName())) {
-                updatePlayerName(playerId, playerName, pData, "login");
+        if (player != null) {
+            final UUID playerId = player.getUniqueId();
+            PlayerData pData = getPlayerData(playerId);
+            if (pData == null) {
+                // Create an instance.
+                // NOTE: Legacy server compatibility with world retrieval?
+                pData = getPlayerData(player);
+            } else {
+                // Consistency check.
+                final String playerName = pData.getPlayerName();
+                if (!playerName.equals(player.getName())) {
+                    updatePlayerName(playerId, playerName, pData, "login");
+                }
+                // Update world.
+                pData.updateCurrentWorld(worldDataManager.getWorldData(player.getWorld()));
             }
-            // Update world.
-            pData.updateCurrentWorld(worldDataManager.getWorldData(player.getWorld()));
+            if (pData != null) {
+                pData.removeTag(PlayerData.TAG_OPTIMISTIC_CREATE);
+            }
         }
-        pData.removeTag(PlayerData.TAG_OPTIMISTIC_CREATE);
     }
 
     private void updatePlayerName(final UUID playerId, final String playerName,

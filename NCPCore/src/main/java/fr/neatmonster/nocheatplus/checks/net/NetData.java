@@ -127,14 +127,17 @@ public class NetData extends ACheckData {
     public boolean addFlyingQueue(final DataPacketFlying packetData) {
         boolean res = false;
         lock.lock();
-        packetData.setSequence(++maxSequence);
-        flyingQueue.addFirst(packetData);
-        if (flyingQueue.size() > flyingQueueMaxSize) {
-            flyingQueue.removeLast();
-            res = true;
+        try {
+            packetData.setSequence(++maxSequence);
+            flyingQueue.addFirst(packetData);
+            if (flyingQueue.size() > flyingQueueMaxSize) {
+                flyingQueue.removeLast();
+                res = true;
+            }
+            return res;
+        } finally {
+            lock.unlock();
         }
-        lock.unlock();
-        return res;
     }
 
     /**
@@ -142,8 +145,11 @@ public class NetData extends ACheckData {
      */
     public void clearFlyingQueue() {
         lock.lock();
-        flyingQueue.clear();
-        lock.unlock();
+        try {
+            flyingQueue.clear();
+        } finally {
+            lock.unlock();
+        }
     }
 
     /**
@@ -153,13 +159,15 @@ public class NetData extends ACheckData {
      */
     public DataPacketFlying[] copyFlyingQueue() {
         lock.lock();
-        /*
-         * Packet inversion is acute on 1.11.2 (dig is processed
-         * before flying). Synchronizing with the current position might be added.
-         */
-        final DataPacketFlying[] out = flyingQueue.toArray(new DataPacketFlying[flyingQueue.size()]);
-        lock.unlock();
-        return out;
+        try {
+            /*
+             * Packet inversion is acute on 1.11.2 (dig is processed
+             * before flying). Synchronizing with the current position might be added.
+             */
+            return flyingQueue.toArray(new DataPacketFlying[flyingQueue.size()]);
+        } finally {
+            lock.unlock();
+        }
     }
 
     /**
@@ -169,9 +177,11 @@ public class NetData extends ACheckData {
      */
     public DataPacketFlying getCurrentFlyingPacket() {
         lock.lock();
-        final DataPacketFlying latest = flyingQueue.isEmpty() ? null : flyingQueue.getFirst();
-        lock.unlock();
-        return latest;
+        try {
+            return flyingQueue.isEmpty() ? null : flyingQueue.getFirst();
+        } finally {
+            lock.unlock();
+        }
     }
 
     /**
@@ -181,9 +191,11 @@ public class NetData extends ACheckData {
      */
     public DataPacketFlying getPastFlyingPacketInQueue(final int index) {
         lock.lock();
-        final DataPacketFlying packet = flyingQueue.isEmpty() ? null : flyingQueue.get(index);
-        lock.unlock();
-        return packet;
+        try {
+            return flyingQueue.isEmpty() ? null : flyingQueue.get(index);
+        } finally {
+            lock.unlock();
+        }
     }
 
     /**

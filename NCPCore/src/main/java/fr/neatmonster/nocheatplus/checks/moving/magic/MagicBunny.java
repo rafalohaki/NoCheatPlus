@@ -52,6 +52,8 @@ public class MagicBunny {
     /** Divisor vs. last hDist for minimum slow down. */
     private static final double bunnyDivFriction = 160.0; // Rather in-air, blocks would differ by friction.
     private static final boolean ServerIsAtLeast1_13 = ServerVersion.compareMinecraftVersion("1.13") >= 0;
+    /** Tolerance for floating point comparisons. */
+    private static final double EPSILON = 1.0E-6;
 
 
     /**
@@ -237,7 +239,9 @@ public class MagicBunny {
         // Bunnyhop model (singular peak up to roughly two times the allowed distance)              //
         //////////////////////////////////////////////////////////////////////////////////////////////
         // Further testing bunny spike over all sorts of speeds and attributes is necessary.
-        final double MinAccelMod = needLowerMultiplier ? 1.0274 : (!lastMove.toIsValid || lastMove.hDistance == 0.0 && lastMove.yDistance == 0.0) ? 1.11 : 1.314;
+        final double MinAccelMod = needLowerMultiplier ? 1.0274
+                : (!lastMove.toIsValid || Math.abs(lastMove.hDistance) < EPSILON && Math.abs(lastMove.yDistance) < EPSILON)
+                        ? 1.11 : 1.314;
         final double MaxAccelMod = data.momentumTick > 0 ? (data.momentumTick > 2 ? 1.76 : 1.96) : 2.15;
         final double MaxAccelMod1 = data.momentumTick > 0 ? (data.momentumTick > 2 ? 1.9 : 2.1) : 2.3;
 
@@ -265,7 +269,7 @@ public class MagicBunny {
                     // 1: Too short with head obstructed.
                     || headObstructed
                     // 1: Grounded acceleration case observed around 1.6.4; maybe drop for old servers.
-                    || (cc.sfGroundHop || yDistance == 0.0 && !lastMove.touchedGroundWorkaround && !lastMove.from.onGround)
+                    || (cc.sfGroundHop || Math.abs(yDistance) < EPSILON && !lastMove.touchedGroundWorkaround && !lastMove.from.onGround)
                     && baseSpeed > 0.0 && hDistance / baseSpeed < 1.5 && (hDistance / lastMove.hDistance < 1.35 || hDistance / baseSpeed < 1.35)
                     // 1: Landing on ground with negative yDistance left. Observed with slime blocks.
                     // Confine by typical gravity change from the previous move.
@@ -278,9 +282,9 @@ public class MagicBunny {
                     && Magic.jumpedUpSlope(data, from, 14)
                     && (
                         // 2: Keeping yDistance once or minimal change in gravity.
-                        yDistance == 0.0 
+                        Math.abs(yDistance) < EPSILON
                         && (
-                            lastMove.yDistance - yDistance == 0.0 
+                            Math.abs(lastMove.yDistance - yDistance) < EPSILON
                             || Math.abs(lastMove.yDistance - yDistance) > 0.0 && Math.abs(lastMove.yDistance - yDistance) < Magic.GRAVITY_ODD / 2.0
                         )
                         // 2: Change to descending phase 

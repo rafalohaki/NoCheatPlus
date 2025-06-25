@@ -444,8 +444,8 @@ public class MovingData extends ACheckData implements IDataOnRemoveSubCheckData,
         // Reset to setBack.
         resetPlayerPositions(setBack);
         adjustMediumProperties(setBack);
-        // Only setSetBack if no set back location is there.
-        if (setBack == null) {
+        // Only store a set-back location if none has been stored yet.
+        if (this.setBack == null && setBack != null) {
             setSetBack(setBack);
         }
         // vehicleSetBacks.resetAllLazily(setBack); // Not good: Overrides older set back locations.

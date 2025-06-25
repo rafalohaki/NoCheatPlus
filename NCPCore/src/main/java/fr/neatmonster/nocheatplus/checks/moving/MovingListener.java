@@ -153,6 +153,9 @@ import fr.neatmonster.nocheatplus.worlds.WorldFactoryArgument;
  */
 public class MovingListener extends CheckListener implements TickListener, IRemoveData, IHaveCheckType, INeedConfig, JoinLeaveListener {
 
+    /** Tolerance for floating point comparisons. */
+    private static final double EPSILON = 1.0E-6;
+
     /** The no fall check. **/
     public final NoFall noFall = addCheck(new NoFall());
 
@@ -675,12 +678,12 @@ public class MovingListener extends CheckListener implements TickListener, IRemo
 
         Location newTo = null;
         final PlayerMoveData thisMove = data.playerMoves.getCurrentMove();
-        final double xDistance = to.getX() - from.getX();
-        final double zDistance = to.getZ() - from.getZ();
         final String playerName = player.getName(); // Could switch to UUID here (needs more changes).
         final long time = System.currentTimeMillis();
         final PlayerMoveData lastMove = data.playerMoves.getFirstPastMove();
         data.resetTeleported();
+        // Horizontal distances are calculated on-demand in dedicated handlers
+        // (e.g. checkPastStateHorizontalPush).
 
         debugOutput(player, moveInfo, cc, debug);
         
@@ -2136,7 +2139,10 @@ public class MovingListener extends CheckListener implements TickListener, IRemo
         data.onSetBack(moveInfo.from);
         aux.returnPlayerMoveInfo(moveInfo);
         // Reset stuff.
-        Combined.resetYawRate(player, teleported.getYaw(), System.currentTimeMillis(), true, pData); // Not sure.
+        final Location yawSource = teleported != null ? teleported : fallbackTeleported;
+        if (yawSource != null) {
+            Combined.resetYawRate(player, yawSource.getYaw(), System.currentTimeMillis(), true, pData); // Not sure.
+        }
         data.resetTeleported();
     }
 
@@ -2578,7 +2584,10 @@ public class MovingListener extends CheckListener implements TickListener, IRemo
                     NoFall.calcReducedDamageByBlock(player, data, maxD),
                     mcAccess.getHandle().dealFallDamageFiresAnEvent().decide());
             BridgeHealth.setRawDamage(event, damageAfter);
-            if (debug) debug(player, "Adjust fall damage to: " + (damageAfter != maxD ? damageAfter : maxD));
+            if (debug) {
+                final double shown = Math.abs(damageAfter - maxD) < EPSILON ? maxD : damageAfter;
+                debug(player, "Adjust fall damage to: " + shown);
+            }
         }
     }
 

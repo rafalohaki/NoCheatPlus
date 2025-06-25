@@ -84,6 +84,8 @@ public class SurvivalFly extends Check {
     private final boolean ServerIsAtLeast1_9 = ServerVersion.compareMinecraftVersion("1.9") >= 0;
     private final boolean ServerIsAtLeast1_10 = ServerVersion.compareMinecraftVersion("1.10") >= 0;
     private final boolean ServerIsAtLeast1_13 = ServerVersion.compareMinecraftVersion("1.13") >= 0;
+    /** Tolerance for floating point comparisons. */
+    private static final double EPSILON = 1.0E-6;
     /** Flag to indicate whether the buffer should be used for this move (only work inside setAllowedhDist). */
     private boolean bufferUse;
     /** To join some tags with moving check violations. */
@@ -160,7 +162,7 @@ public class SurvivalFly extends Check {
         final double x = to.getX() - from.getX();
         final double y = move.yDistance;
         final double z = to.getZ() - from.getZ();
-        if (x == 0.0 && z == 0.0) {
+        if (TrigUtil.isZero(x) && TrigUtil.isZero(z)) {
             return new Distances(x, y, z, 0.0, false);
         }
         return new Distances(x, y, z, move.hDistance, true);
@@ -514,10 +516,8 @@ public class SurvivalFly extends Check {
                 hFreedom, debug, data, cc, thisMove);
 
         if (inAir) {
-            if (yDistance == 0.0) {
-                data.sfZeroVdistRepeat++;
-            } else {
-                data.sfZeroVdistRepeat = 0;
+            if (TrigUtil.isZero(yDistance)) {
+                data.sfZeroVdistRepeat ++;
             }
         } else {
             data.sfZeroVdistRepeat = 0;
@@ -667,7 +667,7 @@ public class SurvivalFly extends Check {
                     && pastMove2.setBackYDistance > pastMove3.setBackYDistance && pastMove3.setBackYDistance <= minJumpGain + jumpGainMargin
                     && pastMove3.setBackYDistance >= minJumpGain - (Magic.GRAVITY_MAX + Magic.GRAVITY_SPAN)
                     // 0: Too little dropoff
-                    || thisMove.setBackYDistance == 0.0 && lastMove.setBackYDistance < data.liftOffEnvelope.getMaxJumpHeight(data.jumpAmplifier)
+                    || TrigUtil.isZero(thisMove.setBackYDistance) && lastMove.setBackYDistance < data.liftOffEnvelope.getMaxJumpHeight(data.jumpAmplifier)
                     && pastMove2.setBackYDistance > lastMove.setBackYDistance && pastMove2.setBackYDistance - lastMove.setBackYDistance < jumpGainMargin
                     // 0: Sharp distance dropoff
                     // (Not observed nor tested though. This is just an educated guess.)
@@ -703,7 +703,7 @@ public class SurvivalFly extends Check {
         Material blockAbove = from.getTypeId(from.getBlockX(), Location.locToBlock(from.getY() + 0.1), from.getBlockZ());
 
         // Checks for no gravity when moving in a liquid
-        if (hDistanceAboveLimit <= 0.0 && yDistance == 0.0 && lastMove.yDistance == 0.0 && lastMove.toIsValid
+        if (hDistanceAboveLimit <= 0.0 && TrigUtil.isZero(yDistance) && TrigUtil.isZero(lastMove.yDistance) && lastMove.toIsValid
             && hDistance > 0.090 && lastMove.hDistance > 0.090 // Do not check lower speeds. The cheat would be purely cosmetic at that point, it wouldn't offer any advantage.
             && BlockProperties.isLiquid(to.getTypeId())
             && BlockProperties.isLiquid(from.getTypeId())
@@ -718,13 +718,13 @@ public class SurvivalFly extends Check {
         // Checks for micro y deltas when moving above liquid.
         if (blockUnder != null && BlockProperties.isLiquid(blockUnder) && BlockProperties.isAir(blockAbove)) {
 
-            if (hDistanceAboveLimit <= 0.0
-                && hDistance > 0.11 && yDistance <= LiftOffEnvelope.LIMIT_LIQUID.getMaxJumpGain(0.0)
-                && !toOnGround && !fromOnGround
-                && lastMove.toIsValid && lastMove.yDistance == yDistance
-                || lastMove.yDistance == yDistance * -1 && lastMove.yDistance != 0.0
-                && !from.isHeadObstructed() && !to.isHeadObstructed()
-                && !Bridge1_13.isSwimming(player)) {
+                if (hDistanceAboveLimit <= 0.0
+                    && hDistance > 0.11 && yDistance <= LiftOffEnvelope.LIMIT_LIQUID.getMaxJumpGain(0.0)
+                    && !toOnGround && !fromOnGround
+                    && lastMove.toIsValid && Math.abs(lastMove.yDistance - yDistance) < EPSILON
+                    || Math.abs(lastMove.yDistance + yDistance) < EPSILON && lastMove.yDistance != 0.0
+                    && !from.isHeadObstructed() && !to.isHeadObstructed()
+                    && !Bridge1_13.isSwimming(player)) {
 
                 // Prevent being flagged if a player transitions from a block to water and the player falls into the water.
                 if (!(yDistance < 0.0 && yDistance != 0.0 && lastMove.yDistance < 0.0 && lastMove.yDistance != 0.0)) {
@@ -869,7 +869,7 @@ public class SurvivalFly extends Check {
                                                 thisMove, lastMove, pData, to);
             }
         } else {
-            if (cc.velocityStrictInvalidation && lastMove.hAllowedDistanceBase == 0.0 && data.hasQueuedHorVel()) {
+            if (cc.velocityStrictInvalidation && TrigUtil.isZero(lastMove.hAllowedDistanceBase) && data.hasQueuedHorVel()) {
                 data.clearAllHorVel();
                 hFreedom = 0.0;
             }
@@ -1348,7 +1348,7 @@ public class SurvivalFly extends Check {
         if (move == null) {
             return isMovingBackwards ? 1.0 : 1.325;
         }
-        return isMovingBackwards ? 1.0 : move.yDistance == 0.5 ? 1.85 : 1.325;
+        return isMovingBackwards ? 1.0 : Math.abs(move.yDistance - 0.5) < EPSILON ? 1.85 : 1.325;
     }
 
     private static double calcModHopSprint(final MovingData data, final PlayerMoveData move, final PlayerLocation to) {
@@ -1620,8 +1620,9 @@ public class SurvivalFly extends Check {
         if (st == null || player == null || move == null || cc == null || from == null) {
             return;
         }
-        final double modSwim = (from.isSubmerged(0.701) || move.from.inLava) ? Magic.modSwim[0] : Magic.modSwim[3];
-        st.allowed = Bridge1_13.isSwimming(player) ? Magic.modSwim[1]
+        final double[] swimMods = Magic.getModSwim();
+        final double modSwim = (from.isSubmerged(0.701) || move.from.inLava) ? swimMods[0] : swimMods[3];
+        st.allowed = Bridge1_13.isSwimming(player) ? swimMods[1]
                 : modSwim * move.walkSpeed * cc.survivalFlySwimmingSpeed / 100D;
         st.useBaseModifiers = false;
         st.useSneakModifier = true;
@@ -1654,7 +1655,7 @@ public class SurvivalFly extends Check {
         if (strider > 0) {
             st.useBaseModifiers = true;
             st.useBaseModifiersSprint = true;
-            st.allowed *= Magic.modDepthStrider[strider];
+            st.allowed *= Magic.getModDepthStrider()[strider];
         }
     }
 
@@ -1763,8 +1764,10 @@ public class SurvivalFly extends Check {
 
     private void initLiquidExitState(final DistanceState st, final PlayerMoveData move, final MovingConfig cc,
             final Player player) {
-        st.allowed = Bridge1_13.isSwimming(player) ? Magic.modSwim[1]
-                : Magic.modSwim[0] * move.walkSpeed * Magic.modSurface[0] * cc.survivalFlySwimmingSpeed / 100D;
+        final double[] swimMods = Magic.getModSwim();
+        final double[] surfaceMods = Magic.getModSurface();
+        st.allowed = Bridge1_13.isSwimming(player) ? swimMods[1]
+                : swimMods[0] * move.walkSpeed * surfaceMods[0] * cc.survivalFlySwimmingSpeed / 100D;
         st.useBaseModifiersSprint = false;
         st.friction = 0.0;
     }
@@ -1774,7 +1777,7 @@ public class SurvivalFly extends Check {
             st.useBaseModifiers = true;
             st.useBaseModifiersSprint = true;
             st.friction = data.lastFrictionHorizontal;
-            st.allowed *= Magic.modDepthStrider[strider];
+            st.allowed *= Magic.getModDepthStrider()[strider];
         }
     }
 
@@ -1790,7 +1793,7 @@ public class SurvivalFly extends Check {
     private void adjustSurfaceExit(final DistanceState st, final MovingData data, final PlayerLocation from,
             final PlayerMoveData move, final MovingConfig cc) {
         if (data.surfaceId == 1) {
-            st.allowed *= Magic.modSurface[1];
+            st.allowed *= Magic.getModSurface()[1];
         }
         data.surfaceId = 1;
         final int blockData = from.getData(from.getBlockX(), from.getBlockY(), from.getBlockZ());
@@ -2060,7 +2063,8 @@ public class SurvivalFly extends Check {
             return hAllowedDistance;
         }
 
-        if (move.downStream && move.hDistance > move.walkSpeed * Magic.modSwim[0]
+        final double[] swimMods = Magic.getModSwim();
+        if (move.downStream && move.hDistance > move.walkSpeed * swimMods[0]
                 && move.from.inLiquid) {
             hAllowedDistance *= Magic.modDownStream;
         }
@@ -2401,7 +2405,7 @@ public class SurvivalFly extends Check {
             tags.add("ychinc");
         }
         else if (data.bunnyhopDelay < 9 && !((lastMove.touchedGround || lastMove.from.onGroundOrResetCond)
-                && lastMove.yDistance == 0D) && data.getOrUseVerticalVelocity(yDistance) == null) {
+                && TrigUtil.isZero(lastMove.yDistance)) && data.getOrUseVerticalVelocity(yDistance) == null) {
             vDistanceAboveLimit = Math.max(vDistanceAboveLimit, Math.abs(yDistance));
             tags.add("airjump");
         }
