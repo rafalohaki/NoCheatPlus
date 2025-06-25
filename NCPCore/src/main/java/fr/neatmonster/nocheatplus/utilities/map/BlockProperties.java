@@ -26,6 +26,7 @@ import java.util.List;
 import java.util.Map;
 import java.util.Map.Entry;
 import java.util.Set;
+import java.util.Objects;
 
 import org.bukkit.Location;
 import org.bukkit.Material;
@@ -38,6 +39,7 @@ import org.bukkit.block.data.type.BubbleColumn;
 import org.bukkit.configuration.ConfigurationSection;
 import org.bukkit.entity.Player;
 import org.bukkit.inventory.ItemStack;
+import org.bukkit.inventory.PlayerInventory;
 
 import fr.neatmonster.nocheatplus.NCPAPIProvider;
 import fr.neatmonster.nocheatplus.checks.moving.util.MovingUtil;
@@ -495,8 +497,8 @@ public class BlockProperties {
             if (obj instanceof BlockBreakKey) {
                 final BlockBreakKey other = (BlockBreakKey) obj;
                 // NOTE: Some should be equals later.
-                return blockType == other.blockType 
-                        && efficiency == other.efficiency // fastest first.
+                return blockType == other.blockType
+                        && Objects.equals(efficiency, other.efficiency) // fastest first.
                         && toolType == other.toolType
                         && materialBase == other.materialBase;
             }
@@ -795,7 +797,7 @@ public class BlockProperties {
     protected static final Map<Material, BlockProps> blocks = new HashMap<Material, BlockProps>();
 
     /** Map for the tool properties. */
-    protected static Map<Material, ToolProps> tools = new LinkedHashMap<Material, ToolProps>(50, 0.5f);
+    protected static final Map<Material, ToolProps> tools = new LinkedHashMap<Material, ToolProps>(50, 0.5f);
 
     /** Direct overrides for specific side conditions.*/
     private static Map<BlockBreakKey, Long> breakingTimeOverrides = new HashMap<BlockProperties.BlockBreakKey, Long>();
@@ -864,7 +866,7 @@ public class BlockProperties {
     public static final ToolProps diamondPickaxe = new ToolProps(ToolType.PICKAXE, MaterialBase.DIAMOND);
 
     /** Times for instant breaking. */
-    public static final long[] instantTimes = secToMs(0);
+    static final long[] instantTimes = secToMs(0);
 
     /** The Constant indestructibleTimes. */
     private static final long[] indestructibleTimes = new long[] {indestructible, indestructible, indestructible, indestructible, indestructible, indestructible, indestructible}; 
@@ -957,7 +959,7 @@ public class BlockProperties {
     protected static float breakPenaltyInWater = 5f;
     
     /** Penalty factor for block break duration if not on ground. */
-    protected static float breakPenaltyOffGround = 5f;
+    static float breakPenaltyOffGround = 5f;
 
     /** The Constant useLoc. */
     private static final Location useLoc = new Location(null, 0, 0, 0);
@@ -1403,7 +1405,14 @@ public class BlockProperties {
      * @return the breaking duration
      */
     public static long getBreakingDuration(final Material BlockType, final Player player) {
-        final long res = getBreakingDuration(BlockType, Bridge1_9.getItemInMainHand(player), player.getInventory().getHelmet(), player, player.getLocation(useLoc));
+        if (player == null) {
+            return 0L;
+        }
+        final PlayerInventory inventory = player.getInventory();
+        final long res = getBreakingDuration(BlockType,
+                Bridge1_9.getItemInMainHand(player),
+                inventory != null ? inventory.getHelmet() : null,
+                player, player.getLocation(useLoc));
         useLoc.setWorld(null);
         return res;
     }
@@ -2821,12 +2830,20 @@ public class BlockProperties {
      *            the path prefix
      */
     public static void applyConfig(final RawConfigFile config, final String pathPrefix) {
+        loadBreakingTimeOverrides(config, pathPrefix);
+        loadInstantBreakList(config, pathPrefix);
+        loadOverrideFlags(config, pathPrefix);
+        minWorldY = config.getInt(pathPrefix + ConfPaths.SUB_BLOCKCACHE_WORLD_MINY);
+    }
 
-        // Breaking time overrides for specific side conditions.
+    private static void loadBreakingTimeOverrides(final RawConfigFile config, final String pathPrefix) {
         ConfigurationSection section = config.getConfigurationSection(pathPrefix + ConfPaths.SUB_BREAKINGTIME);
+        if (section == null) {
+            return;
+        }
         for (final String input : section.getKeys(false)) {
             try {
-                BlockProperties.setBreakingTimeOverride(new BlockBreakKey().fromString(input.trim()), 
+                BlockProperties.setBreakingTimeOverride(new BlockBreakKey().fromString(input.trim()),
                         section.getLong(input));
             }
             catch (Exception e) {
@@ -2834,68 +2851,68 @@ public class BlockProperties {
                 StaticLog.logWarning(e);
             }
         }
+    }
 
-        // Allow instant breaking.
+    private static void loadInstantBreakList(final RawConfigFile config, final String pathPrefix) {
         for (final String input : config.getStringList(pathPrefix + ConfPaths.SUB_ALLOWINSTANTBREAK)) {
             final Material id = RawConfigFile.parseMaterial(input);
             if (id == null) {
                 StaticLog.logWarning("Bad block id (" + pathPrefix + ConfPaths.SUB_ALLOWINSTANTBREAK + "): " + input);
-            }
-            else {
+            } else {
                 setBlockProps(id, instantType);
             }
         }
+    }
 
-        // Override block flags.
-        section = config.getConfigurationSection(pathPrefix + ConfPaths.SUB_OVERRIDEFLAGS);
-        if (section != null) {
-            final Map<String, Object> entries = section.getValues(false);
-            boolean hasErrors = false;
-            for (final Entry<String, Object> entry : entries.entrySet()) {
-                final String key = entry.getKey();
-                final Material id = RawConfigFile.parseMaterial(key);
-                if (id == null) {
-                    StaticLog.logWarning("Bad block id (" + pathPrefix + ConfPaths.SUB_OVERRIDEFLAGS + "): " + key);
-                    continue;
-                }
-                final Object obj = entry.getValue();
-                if (!(obj instanceof String)) {
-                    StaticLog.logWarning("Bad flags at " + pathPrefix + ConfPaths.SUB_OVERRIDEFLAGS + " for key: " + key);
-                    hasErrors = true;
-                    continue;
-                }
-                final Collection<String> split = StringUtil.split((String) obj, ' ', ',', '/', '|', '+', ';', '\t');
-                long flags = 0;
-                boolean error = false;
-                for (String input : split) {
-                    input = input.trim();
-                    if (input.isEmpty()) {
-                        continue;
-                    }
-                    else if (input.equalsIgnoreCase("default")) {
-                        flags |= BlockFlags.getBlockFlags(id);
-                        continue;
-                    }
-                    try {
-                        flags |= BlockFlags.parseFlag(input);
-                    } 
-                    catch(InputMismatchException e) {
-                        StaticLog.logWarning("Bad flag at " + pathPrefix + ConfPaths.SUB_OVERRIDEFLAGS + " for key " + key + " (skip setting flags for this block): " + input);
-                        error = true;
-                        hasErrors = true;
-                        break;
-                    }
-                }
-                if (error) {
-                    continue;
-                }
-                BlockFlags.setBlockFlags(id, flags);
-            }
-            if (hasErrors) {
-                StaticLog.logInfo("Overriding block-flags was not entirely successful, all available flags: \n" + StringUtil.join(BlockFlags.flagNameMap.values(), "|"));
-            }
+    private static void loadOverrideFlags(final RawConfigFile config, final String pathPrefix) {
+        ConfigurationSection section = config.getConfigurationSection(pathPrefix + ConfPaths.SUB_OVERRIDEFLAGS);
+        if (section == null) {
+            return;
         }
-        minWorldY = config.getInt(pathPrefix + ConfPaths.SUB_BLOCKCACHE_WORLD_MINY); 
+        final Map<String, Object> entries = section.getValues(false);
+        boolean hasErrors = false;
+        for (final Entry<String, Object> entry : entries.entrySet()) {
+            final String key = entry.getKey();
+            final Material id = RawConfigFile.parseMaterial(key);
+            if (id == null) {
+                StaticLog.logWarning("Bad block id (" + pathPrefix + ConfPaths.SUB_OVERRIDEFLAGS + "): " + key);
+                continue;
+            }
+            final Object obj = entry.getValue();
+            if (!(obj instanceof String)) {
+                StaticLog.logWarning("Bad flags at " + pathPrefix + ConfPaths.SUB_OVERRIDEFLAGS + " for key: " + key);
+                hasErrors = true;
+                continue;
+            }
+            final Collection<String> split = StringUtil.split((String) obj, ' ', ',', '/', '|', '+', ';', '\t');
+            long flags = 0;
+            boolean error = false;
+            for (String input : split) {
+                input = input.trim();
+                if (input.isEmpty()) {
+                    continue;
+                } else if (input.equalsIgnoreCase("default")) {
+                    flags |= BlockFlags.getBlockFlags(id);
+                    continue;
+                }
+                try {
+                    flags |= BlockFlags.parseFlag(input);
+                }
+                catch(InputMismatchException e) {
+                    StaticLog.logWarning("Bad flag at " + pathPrefix + ConfPaths.SUB_OVERRIDEFLAGS + " for key " + key + " (skip setting flags for this block): " + input);
+                    error = true;
+                    hasErrors = true;
+                    break;
+                }
+            }
+            if (error) {
+                continue;
+            }
+            BlockFlags.setBlockFlags(id, flags);
+        }
+        if (hasErrors) {
+            StaticLog.logInfo("Overriding block-flags was not entirely successful, all available flags: \n" + StringUtil.join(BlockFlags.flagNameMap.values(), "|"));
+        }
     }
 
     /**
@@ -3366,9 +3383,9 @@ public class BlockProperties {
                 minZ > this.maxZ + z || maxZ < this.minZ + z) {
                 return false;
             }
-            if (minX == this.maxX + x && (this.maxX < 1.0 || allowEdge) ||
-                minY == this.maxY + y && (this.maxY < 1.0 || allowEdge) ||
-                minZ == this.maxZ + z && (this.maxZ < 1.0 || allowEdge)) {
+            if (doubleEquals(minX, this.maxX + x) && (this.maxX < 1.0 || allowEdge) ||
+                doubleEquals(minY, this.maxY + y) && (this.maxY < 1.0 || allowEdge) ||
+                doubleEquals(minZ, this.maxZ + z) && (this.maxZ < 1.0 || allowEdge)) {
                 return false;
             }
             return true;
@@ -4859,6 +4876,10 @@ public class BlockProperties {
 
         // Cobblestone wall: keep legacy height flag for 1.5-high bounding box
         BlockFlags.setFlag(BridgeMaterial.COBBLESTONE_WALL, BlockFlags.F_HEIGHT150);
+    }
+
+    private static boolean doubleEquals(double a, double b) {
+        return Math.abs(a - b) < 1.0e-6;
     }
 
 }
