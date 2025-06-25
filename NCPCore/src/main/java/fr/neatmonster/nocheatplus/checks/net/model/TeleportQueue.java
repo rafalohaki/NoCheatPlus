@@ -53,7 +53,7 @@ public class TeleportQueue {
         public int maxConfirmedId = Integer.MIN_VALUE;
     }
 
-    // TODO: Consider passing a reentrant lock in the constructor (e.g. one lock per NetData).
+    // Consider passing a reentrant lock in the constructor (e.g. one lock per NetData).
     private final Lock lock = new ReentrantLock();
 
     /** Validated outgoing teleport locations, expected to be confirmed by the client. */
@@ -61,8 +61,8 @@ public class TeleportQueue {
     /** Location from a Bukkit event, which we expect an outgoing teleport for. */
     private DataLocation expectOutgoing = null;
 
-    private long maxAge = 4000; // TODO: configurable
-    private int maxQueueSize = 60; // TODO: configurable
+    private long maxAge = 4000; // configurable
+    private int maxQueueSize = 60; // configurable
 
     /**
      * Queried from the primary thread (read only), reset with outgoing
@@ -104,7 +104,7 @@ public class TeleportQueue {
 
     /**
      * Call for Bukkit events (expect this packet to be sent).<br>
-     * TODO: The method name is misleading, as this also should be called with
+     * NOTE: The method name is misleading, as this also should be called with
      * expected outgoing packet.
      * 
      * @param packetData
@@ -302,7 +302,7 @@ public class TeleportQueue {
             }
             else {
                 // Skip until match or none found.
-                // TODO: Consider settings like maxSkipCount or strictly return WAITING.
+                // Consider settings like maxSkipCount or strictly return WAITING.
                 if (packetData.time < ref.time) {
                     // Time ran backwards, update to now.
                     ref.time = packetData.time;
