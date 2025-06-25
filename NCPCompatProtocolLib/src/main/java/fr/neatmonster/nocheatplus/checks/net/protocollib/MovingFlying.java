@@ -331,11 +331,11 @@ public class MovingFlying extends BaseAdapter {
 
         final PacketContainer packet = event.getPacket();
         final List<Boolean> booleans = packet.getBooleans().getValues();
-        if (booleans.size() != 3 && booleans.size() != 4) {
-            // 4: 1.21.3 onwards
+        if (!isValidBooleanSize(booleans)) {
             packetMismatch(event);
             return null;
         }
+
         final boolean onGround = booleans.get(MovingFlying.indexOnGround);
         final boolean hasPos = booleans.get(MovingFlying.indexhasPos);
         final boolean hasLook = booleans.get(MovingFlying.indexhasLook);
@@ -343,43 +343,47 @@ public class MovingFlying extends BaseAdapter {
         if (!hasPos && !hasLook) {
             return new DataPacketFlying(onGround, time);
         }
-        final List<Double> doubles;
-        final List<Float> floats;
 
-        if (hasPos) {
-            doubles = packet.getDoubles().getValues();
-            if (doubles.size() != 3 && doubles.size() != 4) {
-                // 3: 1.8, 4: 1.7.10 and before (stance).
-                packetMismatch(event);
-                return null;
-            }
-        }
-        else {
-            doubles = null;
+        final List<Double> doubles = hasPos ? packet.getDoubles().getValues() : null;
+        if (hasPos && !isValidPosSize(doubles)) {
+            packetMismatch(event);
+            return null;
         }
 
-        if (hasLook) {
-            floats = packet.getFloat().getValues();
-            if (floats.size() != 2) {
-                packetMismatch(event);
-                return null;
-            }
+        final List<Float> floats = hasLook ? packet.getFloat().getValues() : null;
+        if (hasLook && !isValidLookSize(floats)) {
+            packetMismatch(event);
+            return null;
         }
-        else {
-            floats = null;
-        }
+
+        return createPacketData(onGround, hasPos, hasLook, doubles, floats, time);
+    }
+
+    private boolean isValidBooleanSize(final List<Boolean> booleans) {
+        return booleans.size() == 3 || booleans.size() == 4;
+    }
+
+    private boolean isValidPosSize(final List<Double> doubles) {
+        return doubles != null && (doubles.size() == 3 || doubles.size() == 4);
+    }
+
+    private boolean isValidLookSize(final List<Float> floats) {
+        return floats != null && floats.size() == 2;
+    }
+
+    private DataPacketFlying createPacketData(final boolean onGround, final boolean hasPos,
+            final boolean hasLook, final List<Double> doubles, final List<Float> floats, final long time) {
         if (hasPos && hasLook) {
-            return new DataPacketFlying(onGround, doubles.get(indexX), doubles.get(indexY), doubles.get(indexZ), floats.get(indexYaw), floats.get(indexPitch), time);
+            return new DataPacketFlying(onGround, doubles.get(indexX), doubles.get(indexY), doubles.get(indexZ),
+                    floats.get(indexYaw), floats.get(indexPitch), time);
         }
-        else if (hasLook) {
+        if (hasLook) {
             return new DataPacketFlying(onGround, floats.get(indexYaw), floats.get(indexPitch), time);
         }
-        else if (hasPos) {
+        if (hasPos) {
             return new DataPacketFlying(onGround, doubles.get(indexX), doubles.get(indexY), doubles.get(indexZ), time);
         }
-        else {
-            throw new IllegalStateException("Can't be, it can't be!");
-        }
+        throw new IllegalStateException("Can't be, it can't be!");
     }
 
     /**
