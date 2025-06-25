@@ -57,7 +57,7 @@ public class GodMode extends Check {
         final int noDamageTicks = Math.max(0, player.getNoDamageTicks());
         final int invulnerabilityTicks = playerIsFake ? 0 : mcAccess.getHandle().getInvulnerableTicks(player);
 
-        // TODO: cleanup this leugique beume...
+        // TODO: clean up the surrounding logic
 
         boolean legit = false; // Return, reduce vl.
         boolean set = false; // Set tick/ndt and return
@@ -71,17 +71,17 @@ public class GodMode extends Check {
 
         final double health = BridgeHealth.getHealth(player);
 
-        // TODO: Adjust to double values.
+        // TODO: adjust to double values
 
         if (data.godModeHealth > health ){
             data.godModeHealthDecreaseTick = tick;
             legit = set = resetAcc = true;
         }
 
-        // TODO: Might account for ndt/2 on regain health (!).
+        // TODO: account for ndt/2 on regain health
 
         // Invulnerable or inconsistent.
-        // TODO: might check as well if NCP has taken over invulnerable ticks of this player.
+        // TODO: check if NCP manages invulnerable ticks for this player
         if (invulnerabilityTicks != Integer.MAX_VALUE && invulnerabilityTicks > 0 || tick < data.lastDamageTick){
             // (Second criteria is for MCAccessBukkit.)
             legit = set = resetAcc = true;
@@ -90,11 +90,11 @@ public class GodMode extends Check {
         // Reset accumulator.
         if (20 + data.godModeAcc < dTick || dTick > 40){
             legit = resetAcc = true;
-            set = true; // TODO
+            set = true; // force tick update
         }
 
         // Check if reduced more than expected or new/count down fully.
-        // TODO: Mostly workarounds.
+        // TODO: remove workaround logic
         if (delta <= 0  || data.lastNoDamageTicks <= player.getMaximumNoDamageTicks() / 2 || dTick > data.lastNoDamageTicks || damage > BridgeHealth.getLastDamage(player)|| damage == 0.0){
             // Not resetting acc.
             legit = set = true;
@@ -111,7 +111,7 @@ public class GodMode extends Check {
 
         //    	Bukkit.getServer().broadcastMessage("God " + player.getName() + " delta=" + delta + " dt=" + dTick + " dndt=" + dNDT + " acc=" + data.godModeAcc + " d=" + damage + " ndt=" + noDamageTicks + " h=" + health + " slag=" + TickTask.getLag(dTick, true));
 
-        // TODO: might check last damage taken as well (really taken with health change)
+        // TODO: check last damage taken as well
 
         // Resetting
         data.godModeHealth = health;
@@ -169,9 +169,9 @@ public class GodMode extends Check {
         data.godModeAcc += delta;
 
         boolean cancel = false;
-        // TODO: bounds
+        // TODO: implement bounds
         if (data.godModeAcc > 2){
-            // TODO: To match with old checks vls / actions, either change actions or apply a factor.
+            // TODO: adjust vl scaling to match legacy actions
             data.godModeVL += delta;
             if (executeActions(player, data.godModeVL, delta, 
                     pData.getGenericInstance(FightConfig.class).godModeActions).willCancel()){
@@ -200,13 +200,13 @@ public class GodMode extends Check {
      *            the player
      */
     public void death(final Player player) {
-        // TODO: Is this still relevant ?
+        // TODO: confirm if still relevant
         // First check if the player is really dead (e.g. another plugin could have just fired an artificial event).
         if (BridgeHealth.getHealth(player) <= 0.0 && player.isDead()
                 && crossPlugin.getHandle().isNativeEntity(player)) {
             try {
                 // Schedule a task to be executed in roughly 1.5 seconds.
-                // TODO: Get plugin otherwise !?
+                // TODO: verify plugin retrieval here
             	Folia.runSyncDelayedTaskForEntity(player, Bukkit.getPluginManager().getPlugin("NoCheatPlus"), (arg) -> {
             		try {
                         // Check again if the player should be dead, and if the game didn't mark them as dead.
