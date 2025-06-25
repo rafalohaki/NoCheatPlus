@@ -174,71 +174,66 @@ public class RegistrationOrder {
             final F[] output = (F[]) new Object[input == null ? 0 : input.size()];
             if (input == null || input.isEmpty()) {
                 return output;
-            }
-            else if (input.size() == 1) {
+            } else if (input.size() == 1) {
                 input.toArray(output);
                 return output;
             }
-            // Sort into rough groups.
+
             final LinkedList<F> belowZeroPriority = new LinkedList<F>();
             final LinkedList<F> zeroPriority = new LinkedList<F>();
             final LinkedList<F> aboveZeroPriority = new LinkedList<F>();
-            int insertionIndex = output.length - 1; // Where to start sorting in elements to output.
+
+            int insertionIndex = output.length - 1;
             for (final F item : input) {
-                final RegistrationOrder order = fetchRegistrationOrder(item);
-                final Integer basePriority = order.getBasePriority();
-                if (basePriority == null) {
-                    // Distinguish cases, note the sorting order of cmpBasePriority.
-                    if (order.getBeforeTag() != null) {
-                        /*
-                         * These will be sorted to front, processed last within
-                         * this list, resulting in optimal order.
-                         */
-                        belowZeroPriority.add(item);
-                    }
-                    else if (order.getAfterTag() != null) {
-                        // These will be last in the end, thus add to tempOut directly.
-                        sortInFromStart(item, output, insertionIndex);
-                        insertionIndex --;
-                    }
-                    else {
-                        /*
-                         * These are somehow added to 0-priority - could end up
-                         * anywhere, if 0-basePriority items have an afterTag
-                         * set that matches the tag. Consequently items with
-                         * null base priority are processed last.
-                         */
-                        zeroPriority.add(item);
-                    }
-                }
-                else if (basePriority < 0) {
-                    belowZeroPriority.add(item);
-                }
-                else if (basePriority > 0) {
-                    aboveZeroPriority.add(item);
-                }
-                else {
-                    // Ensure to process items with 0 basePriority set first.
-                    zeroPriority.add(0, item);
-                }
+                insertionIndex = categorizeItem(item, output, insertionIndex,
+                        belowZeroPriority, zeroPriority, aboveZeroPriority);
             }
-            // Combine lists into output.
+
+            insertSortedGroups(aboveZeroPriority, zeroPriority, belowZeroPriority,
+                    output, insertionIndex);
+            return output;
+        }
+
+        private int categorizeItem(F item, F[] output, int insertionIndex,
+                List<F> belowZeroPriority, List<F> zeroPriority,
+                List<F> aboveZeroPriority) {
+            final RegistrationOrder order = fetchRegistrationOrder(item);
+            final Integer basePriority = order.getBasePriority();
+            if (basePriority == null) {
+                if (order.getBeforeTag() != null) {
+                    belowZeroPriority.add(item);
+                } else if (order.getAfterTag() != null) {
+                    sortInFromStart(item, output, insertionIndex);
+                    insertionIndex--;
+                } else {
+                    zeroPriority.add(item);
+                }
+            } else if (basePriority < 0) {
+                belowZeroPriority.add(item);
+            } else if (basePriority > 0) {
+                aboveZeroPriority.add(item);
+            } else {
+                zeroPriority.add(0, item);
+            }
+            return insertionIndex;
+        }
+
+        private void insertSortedGroups(List<F> aboveZeroPriority,
+                List<F> zeroPriority, List<F> belowZeroPriority,
+                F[] output, int insertionIndex) {
             if (!aboveZeroPriority.isEmpty()) {
                 addSortedSubList(aboveZeroPriority, output, insertionIndex);
                 insertionIndex -= aboveZeroPriority.size();
             }
             if (!zeroPriority.isEmpty()) {
-                // Still need to sort the roughly pre-grouped items, to match tags.
                 for (final F item : zeroPriority) {
                     sortInFromStart(item, output, insertionIndex);
-                    insertionIndex --;
+                    insertionIndex--;
                 }
             }
             if (!belowZeroPriority.isEmpty()) {
                 addSortedSubList(belowZeroPriority, output, insertionIndex);
-                //insertionIndex -= belowZeroPriority.size();
             }
-            return output;
         }
 
         /**
