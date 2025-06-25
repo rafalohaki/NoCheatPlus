@@ -60,7 +60,9 @@ public class MultiClientProtocolBlockShapePatch extends AbstractBlockPropertiesP
         BlockFlags.addFlags(BridgeMaterial.LILY_PAD, BlockFlags.F_GROUND | BlockFlags.F_HEIGHT8_1 | BlockFlags.F_GROUND_HEIGHT);
         done.add("water_lily");
 
-        BlockFlags.addFlags(BridgeMaterial.FARMLAND, BlockFlags.F_MIN_HEIGHT16_15 | BlockFlags.F_HEIGHT100 | BlockFlags.F_GROUND_HEIGHT);
+        BlockFlags.addFlags(BridgeMaterial.FARMLAND,
+                BlockFlags.F_MIN_HEIGHT16_15 | BlockFlags.F_HEIGHT100 | BlockFlags.F_GROUND_HEIGHT
+                        | BlockFlags.F_GROUND);
         done.add("soil");
 
         BlockFlags.addFlags(Material.VINE, BlockFlags.F_CLIMBUPABLE);

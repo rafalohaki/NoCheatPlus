@@ -4859,7 +4859,8 @@ public class BlockProperties {
 
     private static void registerSpecialStaticFlags() {
         // Flexible ground height for farmland (server uses bounding-box height)
-        BlockFlags.setFlag(BridgeMaterial.FARMLAND, BlockFlags.F_GROUND_HEIGHT);
+        BlockFlags.setFlag(BridgeMaterial.FARMLAND,
+                BlockFlags.F_GROUND_HEIGHT | BlockFlags.F_GROUND);
 
         // End-portal frames are fully solid ground
         BlockFlags.setFlag(BridgeMaterial.END_PORTAL_FRAME, BlockFlags.SOLID_GROUND);
