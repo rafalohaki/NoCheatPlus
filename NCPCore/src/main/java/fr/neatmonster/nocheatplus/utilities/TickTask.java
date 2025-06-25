@@ -451,7 +451,7 @@ public class TickTask implements Runnable {
     // Public methods for internal use.
     public static Object start(final Plugin plugin) {
         cancel();
-        taskId = Folia.runSyncRepatingTask(plugin, (arg) -> new TickTask().run(), 1, 1);
+        taskId = Folia.runSyncRepeatingTask(plugin, (arg) -> new TickTask().run(), 1, 1);
         if (Folia.isTaskScheduled(taskId)) {
             timeStart = System.currentTimeMillis();
         }
