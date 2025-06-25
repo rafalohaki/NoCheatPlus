@@ -132,6 +132,20 @@ public class TestCoordMap {
     }
 
     /**
+     * Fill a map without checking for duplicates.
+     *
+     * @param map
+     *            the map to fill
+     * @param coords
+     *            the coordinates to put
+     */
+    public void fillMapAllowOverwrite(CoordMap<Integer> map, int[][] coords) {
+        for (int i = 0; i < coords.length; i++) {
+            map.put(coords[i][0], coords[i][1], coords[i][2], i);
+        }
+    }
+
+    /**
      * Match map contents (must match exactly).
      * @param map
      * @param coords
@@ -230,8 +244,7 @@ public class TestCoordMap {
      * @param indexMap
      * @param initialSize
      */
-    @SuppressWarnings("unchecked")
-    public  void series(int[][] coords, Map<Integer, int[]> indexMap, int initialSize, float loadFactor) {
+    public void series(int[][] coords, Map<Integer, int[]> indexMap, int initialSize, float loadFactor) {
 
         // Fill and check
         for (CoordMap<Integer> map : Arrays.asList(
@@ -320,15 +333,39 @@ public class TestCoordMap {
 
         Map<Integer, int[]> indexMap = getIndexMap(coords);
 
-        // No resize 
+        // No resize
         series(coords, indexMap, 3 * n, 0.75f);
 
         // With some times resize.
         series(coords, indexMap, 1, 0.75f);
 
-        // TODO: Also test with certain sets of coords that always are the same.
-        // TODO: fill in multiple times + size, fill in new ones (careful random) + size
+        // Fixed coordinates repeated to check overwrite behavior.
+        int[][] sameCoords = new int[10][3];
+        for (int i = 0; i < sameCoords.length; i++) {
+            sameCoords[i][0] = 1;
+            sameCoords[i][1] = 2;
+            sameCoords[i][2] = 3;
+        }
+        for (CoordMap<Integer> map : Arrays.asList(
+                new CoordHashMap<Integer>(1, 0.75f),
+                new LinkedCoordHashMap<Integer>(1, 0.75f))) {
+            fillMapAllowOverwrite(map, sameCoords);
+            if (map.size() != 1) {
+                fail("Map should contain a single entry for identical keys.");
+            }
+            if (map.get(1, 2, 3) == null || map.get(1, 2, 3) != sameCoords.length - 1) {
+                fail("Value for duplicated key should equal last index.");
+            }
+            map.clear();
+            int[][] randomCoords = getRandomCoords(sameCoords.length, max, random);
+            fillMapAllowOverwrite(map, randomCoords);
+            if (map.size() != sameCoords.length) {
+                fail("Map size should match number of unique coordinates.");
+            }
+        }
+
     }
+
 
     @Test
     public void testLinkedCoordHashMap() {
