@@ -321,70 +321,97 @@ public class PassengerUtil {
      * @param data
      * @return
      */
-    private final boolean teleportPlayerPassenger(final Player player, final Entity vehicle, final Location location, final boolean vehicleTeleported, final MovingData data, final boolean debug) {
+    private boolean teleportPlayerPassenger(final Player player, final Entity vehicle,
+                                            final Location location, final boolean vehicleTeleported,
+                                            final MovingData data, final boolean debug) {
+        if (player == null || vehicle == null || location == null) {
+            return false;
+        }
+
         final boolean playerTeleported;
         if (player.isOnline() && !player.isDead()) {
             final MovingConfig cc = DataManager.getGenericInstance(player, MovingConfig.class);
+
             // Mask player teleport as a set back.
             data.prepareSetBack(location);
-            playerTeleported = Folia.teleportEntity(player, LocUtil.clone(location), BridgeMisc.TELEPORT_CAUSE_CORRECTION_OF_POSITION);
+            playerTeleported = Folia.teleportEntity(player, LocUtil.clone(location),
+                    BridgeMisc.TELEPORT_CAUSE_CORRECTION_OF_POSITION);
             data.resetTeleported(); // Cleanup, just in case.
-            // Workarounds.
-            // Allow re-use of certain workarounds. Hack/shouldbedoneelsewhere?
+
+            // Allow re-use of certain workarounds.
             data.ws.resetConditions(WRPT.G_RESET_NOTINAIR);
 
-            if (playerTeleported && vehicleTeleported && player.getLocation(useLoc2).distance(vehicle.getLocation(useLoc)) < 1.5) {
-
-                // Still set as passenger.
-                // NOTE: VehicleEnter fires, unknown TP fires.
-                boolean scheduledelay = cc.schedulevehicleSetPassenger;
-                if (data.vehicleSetPassengerTaskId == null) {
-                    if (vehicle.getType() == EntityType.BOAT) {
-                        if (!handleVehicle.getHandle().addPassenger(player, vehicle)) {
-                            // Not schedule set passenger for boat due to location async
-                            // Re-add to vehicle then reject. Fix boat teleported but player didn't
-                        } 
-                        else vehicle.eject();
-                    } 
-                    else if (scheduledelay) {
-
-                        data.vehicleSetPassengerTaskId = Folia.runSyncDelayedTaskForEntity(player, plugin, (arg) -> new VehicleSetPassengerTask(handleVehicle, vehicle, player).run(), null, 2L);
-                        if (data.vehicleSetPassengerTaskId == null) {
-
-                            if (debug) CheckUtils.debug(player, CheckType.MOVING_VEHICLE, "Failed to schedule set passenger!");
-                            scheduledelay = false;
-                        } 
-                        else if (debug) CheckUtils.debug(player, CheckType.MOVING_VEHICLE, "Schedule set passenger task id: " + data.vehicleSetPassengerTaskId);
-                    }
-
-                    if (!scheduledelay) {
-                        if (debug) {
-                            CheckUtils.debug(player, CheckType.MOVING_VEHICLE, "Attempt set passenger directly");
-                        }
-
-                        handleVehicle.getHandle().addPassenger(player, vehicle);
-                    }
-                } 
-                else if (debug) CheckUtils.debug(player, CheckType.MOVING_VEHICLE, "Set passenger task already scheduled, skip this time.");
-                // Ensure a set back.
-                if (data.vehicleSetBacks.getFirstValidEntry(location) == null) {
-                    // At least ensure one of the entries has to match the location we teleported the vehicle to.
-                    if (debug) {
-                        CheckUtils.debug(player, CheckType.MOVING_VEHICLE, "No set back is matching the vehicle location that it has just been set back to. Reset all lazily to: " + location);
-                    }
-                    data.vehicleSetBacks.resetAllLazily(location);
-                }
-                // Set this location as past move.
-                final VehicleMoveData firstPastMove = data.vehicleMoves.getFirstPastMove();
-                if (!firstPastMove.valid || firstPastMove.toIsValid || !TrigUtil.isSamePos(firstPastMove.from, location)) {
-                    NCPAPIProvider.getNoCheatPlusAPI().getGenericInstance(AuxMoving.class).resetVehiclePositions(vehicle, location, data, cc);
-                }
+            if (playerTeleported && vehicleTeleported
+                    && player.getLocation(useLoc2).distance(vehicle.getLocation(useLoc)) < 1.5) {
+                handlePassengerScheduling(player, vehicle, cc, data, debug);
+                ensureSetBackLocation(player, location, data, debug);
+                updatePastMove(vehicle, location, data, cc);
             }
-        }
-        else {
+        } else {
             playerTeleported = false;
         }
+
         data.isVehicleSetBack = false;
         return playerTeleported;
+    }
+
+    private void handlePassengerScheduling(final Player player, final Entity vehicle,
+                                           final MovingConfig cc, final MovingData data,
+                                           final boolean debug) {
+        boolean scheduleDelay = cc.schedulevehicleSetPassenger;
+        if (data.vehicleSetPassengerTaskId == null) {
+            if (vehicle.getType() == EntityType.BOAT) {
+                if (!handleVehicle.getHandle().addPassenger(player, vehicle)) {
+                    // Not schedule set passenger for boat due to location async
+                } else {
+                    vehicle.eject();
+                }
+            } else if (scheduleDelay) {
+                data.vehicleSetPassengerTaskId = Folia.runSyncDelayedTaskForEntity(player, plugin,
+                        (arg) -> new VehicleSetPassengerTask(handleVehicle, vehicle, player).run(), null, 2L);
+                if (data.vehicleSetPassengerTaskId == null) {
+                    if (debug) {
+                        CheckUtils.debug(player, CheckType.MOVING_VEHICLE,
+                                "Failed to schedule set passenger!");
+                    }
+                    scheduleDelay = false;
+                } else if (debug) {
+                    CheckUtils.debug(player, CheckType.MOVING_VEHICLE,
+                            "Schedule set passenger task id: " + data.vehicleSetPassengerTaskId);
+                }
+            }
+
+            if (!scheduleDelay) {
+                if (debug) {
+                    CheckUtils.debug(player, CheckType.MOVING_VEHICLE,
+                            "Attempt set passenger directly");
+                }
+                handleVehicle.getHandle().addPassenger(player, vehicle);
+            }
+        } else if (debug) {
+            CheckUtils.debug(player, CheckType.MOVING_VEHICLE,
+                    "Set passenger task already scheduled, skip this time.");
+        }
+    }
+
+    private void ensureSetBackLocation(final Player player, final Location location,
+                                       final MovingData data, final boolean debug) {
+        if (data.vehicleSetBacks.getFirstValidEntry(location) == null) {
+            if (debug) {
+                CheckUtils.debug(player, CheckType.MOVING_VEHICLE,
+                        "No set back is matching the vehicle location that it has just been set back to. Reset all lazily to: "
+                                + location);
+            }
+            data.vehicleSetBacks.resetAllLazily(location);
+        }
+    }
+
+    private void updatePastMove(final Entity vehicle, final Location location, final MovingData data,
+                                final MovingConfig cc) {
+        final VehicleMoveData firstPastMove = data.vehicleMoves.getFirstPastMove();
+        if (!firstPastMove.valid || firstPastMove.toIsValid || !TrigUtil.isSamePos(firstPastMove.from, location)) {
+            NCPAPIProvider.getNoCheatPlusAPI().getGenericInstance(AuxMoving.class)
+                    .resetVehiclePositions(vehicle, location, data, cc);
+        }
     }
 }
