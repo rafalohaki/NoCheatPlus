@@ -153,10 +153,10 @@ public class CollisionUtil {
     public static double directionCheck(final double sourceX, final double sourceY, final double sourceZ, final double dirX, final double dirY, final double dirZ, final double targetX, final double targetY, final double targetZ, final double targetWidth, final double targetHeight, final double precision)
     {
 
-        //        // TODO: Here we have 0.x vs. 2.x, sometimes !
+        //        // Legacy debug output kept for reference
         //        NCPAPIProvider.getNoCheatPlusAPI().getLogManager().debug(Streams.TRACE_FILE, "COMBINED: " + combinedDirectionCheck(sourceX, sourceY, sourceZ, dirX, dirY, dirZ, targetX, targetY, targetZ, targetWidth, targetHeight, precision, 60));
 
-        // TODO: rework / standardize.
+        // NOTE: Method should be reviewed and standardized.
 
         double dirLength = Math.sqrt(dirX * dirX + dirY * dirY + dirZ * dirZ);
         if (dirLength == 0.0) dirLength = 1.0; // ...
@@ -576,8 +576,8 @@ public class CollisionUtil {
         int dy = y - lastBlock.getY();
         int dx = x - lastBlock.getX();
         int dz = z - lastBlock.getZ();
-        // TODO: This is wrong, liguid should have no bound but still have height. But instead of messing up entire collision system, this hack work well
-        // TODO: What about water plants?
+        // Liquid blocks should have no bounds but maintain height; this hack keeps the collision system intact.
+        // Water plant interactions may require special handling.
         mightEdgeInteraction |= (BlockFlags.getBlockFlags(blockCache.getType(lastBlock.getX(), lastBlock.getY(), lastBlock.getZ())) & BlockFlags.F_LIQUID) != 0;
         // Door and trap door
         double[] lastBounds = blockCache.getBounds(lastBlock.getX(), lastBlock.getY(), lastBlock.getZ());
@@ -697,12 +697,12 @@ public class CollisionUtil {
     private static boolean canPassThroughWorkAround(BlockCache blockCache, int blockX, int blockY, int blockZ, Vector direction, double eyeX, double eyeY, double eyeZ, double eyeHeight) {
         final Material mat = blockCache.getType(blockX, blockY, blockZ);
         final long flags = BlockFlags.getBlockFlags(mat);
-        // TODO: (flags & BlockFlags.F_SOLID) == 0?
+        // Consider checking for non-solid blocks with (flags & BlockFlags.F_SOLID) == 0
         //if ((flags & BlockFlags.F_SOLID) == 0) {
             // Ignore non solid blocks anyway.
         //    return true;
         //}
-        // TODO: Passable in movement doesn't mean passable in interaction(F_INTERACT_PASSABLE?)
+        // Passable for movement does not necessarily mean passable for interaction (see F_INTERACT_PASSABLE?)
         // To achive this, first, need to change collision system to flag passable block(complicated), 
         // second add flag F_INTERACT_PASSABLE to ignore block can truly passable, 
         // third add bounds to BlockCacheBukkit.java
