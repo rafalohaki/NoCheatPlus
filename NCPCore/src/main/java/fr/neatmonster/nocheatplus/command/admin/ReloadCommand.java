@@ -71,11 +71,11 @@ public class ReloadCommand extends BaseCommand {
 
         // Do the actual reload.
         ConfigManager.cleanup();
-        // (Magic/TODO)
+        // Previously used as a placeholder for reload logic.
         final WorldDataManager worldDataManager = (WorldDataManager) NCPAPIProvider.getNoCheatPlusAPI().getWorldDataManager();
         ConfigManager.init(access, worldDataManager);
         worldDataManager.removeCachedConfigs();
-        if (logManager instanceof INotifyReload) { // TODO: This is a band-aid.
+        if (logManager instanceof INotifyReload) { // Temporary notification hook.
             ((INotifyReload) logManager).onReload();
         }
 

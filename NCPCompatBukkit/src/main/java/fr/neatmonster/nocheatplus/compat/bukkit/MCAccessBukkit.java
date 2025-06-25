@@ -48,8 +48,8 @@ public class MCAccessBukkit extends MCAccessBukkitBase implements BlockPropertie
                     flags |= BlockFlags.F_GROUND | BlockFlags.F_GROUND_HEIGHT;
                 }
                 /*
-                 * TODO: Might have to set all blocks to ground here, rather
-                 * catch flowers and the like with MaterialUtil.
+                 * Might have to set all blocks to ground here; alternatively
+                 * catch flowers and similar blocks with MaterialUtil.
                  */
                 BlockFlags.addFlags(mat, flags);
                 itchyBlocks.add(mat);

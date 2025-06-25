@@ -33,7 +33,7 @@ import fr.neatmonster.nocheatplus.utilities.StringUtil;
 public class CommandsCommand extends BaseCommand {
 
     final String[] moreCommands = new String[]{
-            // TODO: Mmmmh, spaghetti.
+            // Consider refactoring for clarity.
             ChatColor.GOLD +""+ ChatColor.BOLD + "Console commands:",
             ChatColor.GRAY +""+ ChatColor.BOLD +"• "+ChatColor.RED +""+ ChatColor.ITALIC + "/<command> ban (playername) (reason)"+ChatColor.GRAY+" - Ban player.",
             ChatColor.GRAY +""+ ChatColor.BOLD +"• "+ChatColor.RED +""+ ChatColor.ITALIC +"/<command> kick (playername) (reason)"+ChatColor.GRAY+" - Kick player.",

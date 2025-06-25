@@ -31,7 +31,7 @@ import java.util.NoSuchElementException;
  */
 public class CoordHashMap<V> extends AbstractCoordHashMap<V, fr.neatmonster.nocheatplus.utilities.ds.map.AbstractCoordHashMap.HashEntry<V>> {
 
-    // TODO: Move parts of abstract map here.
+    // Consider moving additional logic from AbstractCoordHashMap here.
 
     /**
      * 
@@ -45,7 +45,7 @@ public class CoordHashMap<V> extends AbstractCoordHashMap<V, fr.neatmonster.noch
      */
     public static class HashIterator<V> implements Iterator<Entry<V>> {
 
-        // TODO: Switch to store an iterator?
+        // Potentially switch to storing an iterator.
 
         private final CoordHashMap<V> map;
         private final List<HashEntry<V>>[] entries;
@@ -110,7 +110,7 @@ public class CoordHashMap<V> extends AbstractCoordHashMap<V, fr.neatmonster.noch
                         return res;
                     }
                     else{
-                        // TODO: inconsistent, could be empty though.
+                        // Inconsistent state; bucket might be empty.
                         slot++;
                         index = 0;
                     }

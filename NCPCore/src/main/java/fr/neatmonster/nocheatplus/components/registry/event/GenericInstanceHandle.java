@@ -26,7 +26,7 @@ import fr.neatmonster.nocheatplus.components.registry.GenericInstanceRegistry;
  */
 public class GenericInstanceHandle<T> implements IGenericInstanceRegistryListener<T>, IGenericInstanceHandle<T> {
 
-    // TODO: <? extends T> ?
+    // Generic parameter could potentially use <? extends T>
 
     /**
      * Delegates getHandle, disables the parent only once (meant for reference

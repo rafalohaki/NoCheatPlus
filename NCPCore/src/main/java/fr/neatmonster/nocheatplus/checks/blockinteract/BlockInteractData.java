@@ -301,7 +301,7 @@ public class BlockInteractData extends ACheckData {
      */
     public void setPlayerInteractEventResolution(final PlayerInteractEvent event) {
         if (event.isCancelled()) {
-            // TODO: resetPassedChecks() ?
+            // NOTE: consider calling resetPassedChecks()
             lastIsCancelled = true;
             lastAllowUseItem = event.useItemInHand() == Result.ALLOW;
             lastAllowUseBlock = event.useInteractedBlock() == Result.ALLOW;

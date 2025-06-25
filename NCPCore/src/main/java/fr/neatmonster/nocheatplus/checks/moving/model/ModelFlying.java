@@ -75,9 +75,8 @@ public class ModelFlying {
      */
     private boolean scaleRiptidingEffect = false;
 
-    // TODO: vertical ascend/descend, limit gain a/d/v, limit abs. distance a/d/v
-    // TODO: possibly other friction based envelope constraints.
-    // TODO: Check if needed: use fly/walk speed.
+    // Future improvements might include vertical ascend/descend limits,
+    // friction based envelope constraints and evaluating fly/walk speed usage.
 
     private boolean locked = false;
 

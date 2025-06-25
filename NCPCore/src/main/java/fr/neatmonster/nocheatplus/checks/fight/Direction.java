@@ -68,7 +68,8 @@ public class Direction extends Check {
         final double height = damagedIsFake ? (damaged instanceof LivingEntity ? ((LivingEntity) damaged).getEyeHeight() : 1.75) : mcAccess.getHeight(damaged);
         
 
-        // TODO: allow any hit on the y axis (might just adapt interface to use foot position + height)!
+        // Improvement idea: allow hits along the entire Y-axis; this may require
+        // adapting the interface to work with foot position and height.
 
         // How far "off" is the player with their aim. We calculate from the players eye location and view direction to
         // the center of the target entity. If the line of sight is more too far off, "off" will be bigger than 0.
@@ -153,15 +154,15 @@ public class Direction extends Check {
             final DirectionContext context, 
             final FightData data, final FightConfig cc) {
 
-        // Ignore complex entities for the moment.
+        // Ignore complex entities for the moment. This section needs revision.
         if (context.damagedComplex) {
-            // TODO: Revise :p
             return false;
         }
         boolean cancel = false;
         boolean isPlayer = damaged instanceof Player;
 
-        // TODO: allow any hit on the y axis (might just adapt interface to use foot position + height)!
+        // Improvement idea: allow hits along the entire Y-axis; this may require
+        // adapting the interface to work with foot position and height.
 
         // How far "off" is the player with their aim. We calculate from the players eye location and view direction to
         // the center of the target entity. If the line of sight is more too far off, "off" will be bigger than 0.
