@@ -824,88 +824,13 @@ public class MovingListener extends CheckListener implements TickListener, IRemo
         }
         
         // 5: Pre-checks relevant to Sf or Cf.
-        if (checkSf || checkCf) {
-            previousSetBackY = data.hasSetBack() ? data.getSetBackY() : Double.NEGATIVE_INFINITY;
-            MovingUtil.checkSetBack(player, pFrom, data, pData, this); // Ensure we have a set back set.
-
-            // 5.1: Check for special cross world teleportation issues with the end.
-            if (data.crossWorldFrom != null) {
-                if (!TrigUtil.isSamePosAndLook(pFrom, pTo) && TrigUtil.isSamePosAndLook(pTo, data.crossWorldFrom)) {
-                    // Assume to (and possibly the player location) to be set to the location the player teleported from within the other world.
-                    newTo = data.getSetBack(from); // (OK, cross-world)
-                    checkNf = false;
-                    NCPAPIProvider.getNoCheatPlusAPI().getLogManager().warning(Streams.STATUS, CheckUtils.getLogMessagePrefix(player, CheckType.MOVING) + " Player move end point seems to be set wrongly.");
-                }
-                // Always reset.
-                data.crossWorldFrom = null;
-            }
-
-            // 5.2: Extreme move check (sf or cf is precondition, should have their own config/actions later).
-            if (newTo == null && ((Math.abs(thisMove.yDistance) > Magic.EXTREME_MOVE_DIST_VERTICAL) || thisMove.hDistance > Magic.EXTREME_MOVE_DIST_HORIZONTAL)) {
-                // Test for friction and velocity.
-                newTo = checkExtremeMove(player, pFrom, pTo, data, cc);
-                if (newTo != null) {
-                    thisMove.flyCheck = checkSf ? CheckType.MOVING_SURVIVALFLY : CheckType.MOVING_CREATIVEFLY;
-                }
-            }
-            
-            // 5.3: Set BCT
-            // NOTE: Block change activity has to be checked *after* the extreme move checks run.
-            useBlockChangeTracker = newTo == null && cc.trackBlockMove && (checkPassable || checkSf || checkCf) && blockChangeTracker.hasActivityShuffled(from.getWorld().getUID(), pFrom, pTo, 1.5625);
-
-            // 5.4: Check jumping on things like slime blocks.
-            // Detect bounce type / use prepared bounce.
-            if (newTo == null) {
-                // Mixed ground (e.g. slime blocks + slabs), specifically on pushing.
-                // More on fall damage. What with sneaking + past states?
-                // With past states: What does jump effects do here?
-                if (thisMove.yDistance < 0.0) {
-                    // Prepare bounce: The center of the player must be above the block.
-                    // Common pre-conditions.
-                    // Check if really leads to calling the method for pistons (checkBounceEnvelope vs. push).
-                    if (!survivalFly.isReallySneaking(player) && BounceUtil.checkBounceEnvelope(player, pFrom, pTo, data, cc, pData)) {
-                        // Check other side conditions (fluids, web, max. distance to the block top (!))
-                        // Classic static bounce.
-                        if ((pTo.getBlockFlags() & BlockFlags.F_BOUNCE25) != 0L) {
-                            /* May need to adapt within this method, if "push up" happened and the trigger had been ordinary */
-                            verticalBounce = BounceType.STATIC;
-                            checkNf = false; // Skip NoFall.
-                        }
-                        
-                        if (verticalBounce == BounceType.NO_BOUNCE && useBlockChangeTracker) { 
-                            if (BounceUtil.checkPastStateBounceDescend(player, pFrom, pTo, thisMove, lastMove, tick, data, cc, blockChangeTracker) != BounceType.NO_BOUNCE) {
-                                // Not set verticalBounce, as this is ascending and it's already force used.
-                                checkNf = false; // Skip NoFall.
-                            }
-                        }
-                    }
-                }
-                else {
-                    if (
-                            // Prepared bounce support.
-                            data.verticalBounce != null && BounceUtil.onPreparedBounceSupport(player, from, to, thisMove, lastMove, tick, data)
-                            // Past state bounce (includes prepending velocity / special calls).
-                            || useBlockChangeTracker 
-                            // 0-dist moves count in: && thisMove.yDistance >= 0.415 
-                            && thisMove.yDistance <= 1.515
-                        ) {
-                        verticalBounce = BounceUtil.checkPastStateBounceAscend(player, pFrom, pTo, thisMove, lastMove, tick, pData, this, data, cc, blockChangeTracker);
-                        if (verticalBounce != BounceType.NO_BOUNCE) checkNf = false;
-                    }
-                }
-
-                // Might a bit tricky when it use to ensure no bounce check is active, not noFall checking here
-                if (useBlockChangeTracker && checkNf && !checkPastStateVerticalPush(player, pFrom, pTo, thisMove, lastMove, tick, debug, data, cc)) {
-                    checkPastStateHorizontalPush(player, pFrom, pTo, thisMove, lastMove, tick, debug, data, cc);
-                }
-            }
-        }
-        // No Sf or Cf check
-        else {
-            // Might still allow block change tracker with only passable enabled.
-            useBlockChangeTracker = false;
-            previousSetBackY = Double.NEGATIVE_INFINITY;
-        }
+        PreCheckData preData = runPreChecks(player, from, to, pFrom, pTo, thisMove, lastMove, checkSf,
+                checkCf, checkPassable, tick, data, cc, pData, debug);
+        newTo = preData.newTo;
+        verticalBounce = preData.verticalBounce;
+        useBlockChangeTracker = preData.useBlockChangeTracker;
+        previousSetBackY = preData.previousSetBackY;
+        checkNf = preData.checkNf;
 
         // 6: Check passable first to prevent set back override.
         boolean mightSkipNoFall = false;
@@ -1215,6 +1140,155 @@ public class MovingListener extends CheckListener implements TickListener, IRemo
             if (thisMove.touchedGround || !checkSf && (pFrom.isOnGround() || pTo.isOnGround())) {
                 data.jumpAmplifier = jumpAmplifier;
             }
+        }
+    }
+
+    private PreCheckData runPreChecks(final Player player, final Location from, final Location to,
+            final PlayerLocation pFrom, final PlayerLocation pTo, final PlayerMoveData thisMove,
+            final PlayerMoveData lastMove, final boolean checkSf, final boolean checkCf,
+            final boolean checkPassable, final int tick, final MovingData data,
+            final MovingConfig cc, final IPlayerData pData, final boolean debug) {
+
+        if (player == null || pFrom == null || pTo == null || thisMove == null || lastMove == null
+                || data == null || cc == null || pData == null) {
+            return new PreCheckData(null, BounceType.NO_BOUNCE, false, Double.NEGATIVE_INFINITY, true);
+        }
+
+        boolean checkNf = true;
+        BounceType verticalBounce = BounceType.NO_BOUNCE;
+        boolean useBlockChangeTracker;
+        double previousSetBackY;
+        Location newTo = null;
+
+        if (checkSf || checkCf) {
+            previousSetBackY = data.hasSetBack() ? data.getSetBackY() : Double.NEGATIVE_INFINITY;
+            MovingUtil.checkSetBack(player, pFrom, data, pData, this);
+
+            final Location cross = handleCrossWorldTeleport(player, from, pFrom, pTo, data);
+            if (cross != null) {
+                newTo = cross;
+                checkNf = false;
+            }
+
+            if (newTo == null && isExtremeMove(thisMove)) {
+                newTo = checkExtremeMove(player, pFrom, pTo, data, cc);
+                if (newTo != null) {
+                    thisMove.flyCheck = checkSf ? CheckType.MOVING_SURVIVALFLY : CheckType.MOVING_CREATIVEFLY;
+                }
+            }
+
+            useBlockChangeTracker = shouldTrackBlockChanges(from, pFrom, pTo, checkPassable || checkSf || checkCf, cc,
+                    newTo);
+
+            if (newTo == null) {
+                BounceResult res = processBounceAndPush(player, from, to, pFrom, pTo, thisMove, lastMove, tick, debug,
+                        data, cc, pData, useBlockChangeTracker);
+                verticalBounce = res.verticalBounce;
+                checkNf = res.checkNf;
+            }
+        } else {
+            useBlockChangeTracker = false;
+            previousSetBackY = Double.NEGATIVE_INFINITY;
+        }
+
+        return new PreCheckData(newTo, verticalBounce, useBlockChangeTracker, previousSetBackY, checkNf);
+    }
+
+    private boolean isExtremeMove(final PlayerMoveData move) {
+        if (move == null) {
+            return false;
+        }
+        return Math.abs(move.yDistance) > Magic.EXTREME_MOVE_DIST_VERTICAL
+                || move.hDistance > Magic.EXTREME_MOVE_DIST_HORIZONTAL;
+    }
+
+    private Location handleCrossWorldTeleport(final Player player, final Location from, final PlayerLocation pFrom,
+            final PlayerLocation pTo, final MovingData data) {
+        if (data.crossWorldFrom != null) {
+            if (!TrigUtil.isSamePosAndLook(pFrom, pTo) && TrigUtil.isSamePosAndLook(pTo, data.crossWorldFrom)) {
+                NCPAPIProvider.getNoCheatPlusAPI().getLogManager().warning(Streams.STATUS,
+                        CheckUtils.getLogMessagePrefix(player, CheckType.MOVING)
+                                + " Player move end point seems to be set wrongly.");
+                data.crossWorldFrom = null;
+                return data.getSetBack(from);
+            }
+            data.crossWorldFrom = null;
+        }
+        return null;
+    }
+
+    private boolean shouldTrackBlockChanges(final Location from, final PlayerLocation pFrom,
+            final PlayerLocation pTo, final boolean hasCheck, final MovingConfig cc, final Location newTo) {
+        if (newTo != null || !hasCheck || cc == null || !cc.trackBlockMove || from == null
+                || from.getWorld() == null) {
+            return false;
+        }
+        return blockChangeTracker.hasActivityShuffled(from.getWorld().getUID(), pFrom, pTo, 1.5625);
+    }
+
+    private BounceResult processBounceAndPush(final Player player, final Location from, final Location to,
+            final PlayerLocation pFrom, final PlayerLocation pTo, final PlayerMoveData thisMove,
+            final PlayerMoveData lastMove, final int tick, final boolean debug, final MovingData data,
+            final MovingConfig cc, final IPlayerData pData, final boolean useBlockChangeTracker) {
+
+        BounceType verticalBounce = BounceType.NO_BOUNCE;
+        boolean checkNf = true;
+
+        if (thisMove.yDistance < 0.0) {
+            if (!survivalFly.isReallySneaking(player)
+                    && BounceUtil.checkBounceEnvelope(player, pFrom, pTo, data, cc, pData)) {
+                if ((pTo.getBlockFlags() & BlockFlags.F_BOUNCE25) != 0L) {
+                    verticalBounce = BounceType.STATIC;
+                    checkNf = false;
+                }
+                if (verticalBounce == BounceType.NO_BOUNCE && useBlockChangeTracker && BounceUtil
+                        .checkPastStateBounceDescend(player, pFrom, pTo, thisMove, lastMove, tick, data, cc,
+                                blockChangeTracker) != BounceType.NO_BOUNCE) {
+                    checkNf = false;
+                }
+            }
+        } else {
+            if ((data.verticalBounce != null
+                    && BounceUtil.onPreparedBounceSupport(player, from, to, thisMove, lastMove, tick, data))
+                    || useBlockChangeTracker && thisMove.yDistance <= 1.515) {
+                verticalBounce = BounceUtil.checkPastStateBounceAscend(player, pFrom, pTo, thisMove, lastMove, tick,
+                        pData, this, data, cc, blockChangeTracker);
+                if (verticalBounce != BounceType.NO_BOUNCE) {
+                    checkNf = false;
+                }
+            }
+        }
+
+        if (useBlockChangeTracker && checkNf
+                && !checkPastStateVerticalPush(player, pFrom, pTo, thisMove, lastMove, tick, debug, data, cc)) {
+            checkPastStateHorizontalPush(player, pFrom, pTo, thisMove, lastMove, tick, debug, data, cc);
+        }
+
+        return new BounceResult(verticalBounce, checkNf);
+    }
+
+    private static class BounceResult {
+        final BounceType verticalBounce;
+        final boolean checkNf;
+        BounceResult(BounceType verticalBounce, boolean checkNf) {
+            this.verticalBounce = verticalBounce;
+            this.checkNf = checkNf;
+        }
+    }
+
+    private static class PreCheckData {
+        final Location newTo;
+        final BounceType verticalBounce;
+        final boolean useBlockChangeTracker;
+        final double previousSetBackY;
+        final boolean checkNf;
+        PreCheckData(Location newTo, BounceType verticalBounce, boolean useBlockChangeTracker,
+                double previousSetBackY, boolean checkNf) {
+            this.newTo = newTo;
+            this.verticalBounce = verticalBounce;
+            this.useBlockChangeTracker = useBlockChangeTracker;
+            this.previousSetBackY = previousSetBackY;
+            this.checkNf = checkNf;
         }
     }
 
