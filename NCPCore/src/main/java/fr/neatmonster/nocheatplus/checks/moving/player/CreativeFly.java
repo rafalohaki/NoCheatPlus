@@ -943,6 +943,69 @@ public class CreativeFly extends Check {
     }
 
     /**
+     * Apply adjustments when no firework boost is active.
+     */
+    private void applyRegularGlideAdjustments(final Player player, final PlayerLocation from,
+            final PlayerLocation to, final double hDistance, final double yDistance,
+            final double speed, final float radPitch, final double lastHdist,
+            final PlayerMoveData thisMove, final PlayerMoveData lastMove, final MovingData data,
+            final boolean debug, final AirGlideState state) {
+
+        state.allowedH += Math.sqrt(state.x * state.x + state.z * state.z) + 0.1;
+        if (debug) {
+            debug(player, "Cumulative elytra hDistance (hDist/Allowed): " + hDistance + "/" + state.allowedH
+                    + " lasthDist:" + lastHdist);
+            debug(player, "radiansPitch: " + radPitch + " yDist:" + yDistance + " lastyDist:" + lastMove.yDistance
+                    + " allowy:" + state.allowedY);
+        }
+
+        final double yDistDiffEx = yDistance - state.allowedY;
+
+        if (data.fireworksBoostDuration <= 0) {
+            if (yDistance > 0.0 && yDistance < 0.42 && thisMove.touchedGround) {
+                state.allowedY = yDistance;
+                state.allowedH = Math.max(0.35, state.allowedH * 1.35);
+                if (debug) {
+                    debug(player, "Elytra jump (hDist/Allowed): " + thisMove.hDistance + "/" + state.allowedH);
+                }
+            } else if (from.isHeadObstructed() && lastMove.yDistance > 0.0 && yDistDiffEx < 0.0
+                    && (state.allowedY > 0.0 || yDistance == 0.0)) {
+                state.allowedY = yDistance;
+            } else if (yDistance < 0.0) {
+                if (lastMove.yDistance > 0.0 && yDistance < 0.0
+                        && (lastMove.yDistance < Magic.GRAVITY_MAX + Magic.GRAVITY_MIN
+                                && yDistance > -Magic.GRAVITY_MIN
+                                || lastMove.yDistance < Magic.GRAVITY_MIN
+                                        && yDistance > -Magic.GRAVITY_MIN - Magic.GRAVITY_MAX)) {
+                    state.allowedY = yDistance;
+                }
+            }
+
+            if (yDistance > 0.0) {
+                if (state.allowedY < yDistance && !isNear(state.allowedY, yDistance, 0.001)) {
+                    tags.add("e_vasc");
+                    state.resultV = yDistance;
+                }
+            } else if (yDistance < 0.0) {
+                if (state.allowedY > yDistance && !isNear(state.allowedY, yDistance, Magic.GRAVITY_MAX)) {
+                    tags.add("e_vdesc");
+                    state.resultV = Math.abs(yDistance);
+                }
+            }
+
+            if (yDistance <= 0.0 && (to.isOnGround() || to.isResetCond() || thisMove.touchedGround)
+                    || yDistDiffEx > -Magic.GRAVITY_MAX && yDistDiffEx < 0.0
+                    || speed < 0.05 && !TrigUtil.isSamePos(lastMove.from, lastMove.to)
+                            && (hDistance == 0.0 && yDistance == 0.0 || yDistance < -Magic.GRAVITY_SPAN)) {
+                state.allowedY = yDistance;
+            } else if (Math.abs(yDistDiffEx) > (speed < 0.05 ? 0.00001 : 0.03)) {
+                tags.add("e_vdiff");
+                state.resultV = Math.max(Math.abs(yDistance - state.allowedY), state.resultV);
+            }
+        }
+    }
+
+    /**
      * Handle gliding in the air.
      *
      * @return {resultV, resultH, baseV, allowedY, allowedH}
@@ -990,58 +1053,8 @@ public class CreativeFly extends Check {
         }
 
         if (!boosted) {
-            state.allowedH += Math.sqrt(state.x * state.x + state.z * state.z) + 0.1;
-            if (debug) {
-                debug(player, "Cumulative elytra hDistance (hDist/Allowed): " + hDistance + "/" + state.allowedH
-                        + " lasthDist:" + lastHdist);
-                debug(player, "radiansPitch: " + radPitch + " yDist:" + yDistance + " lastyDist:" + lastMove.yDistance
-                        + " allowy:" + state.allowedY);
-            }
-
-            final double yDistDiffEx = yDistance - state.allowedY;
-
-            if (data.fireworksBoostDuration <= 0) {
-                if (yDistance > 0.0 && yDistance < 0.42 && thisMove.touchedGround) {
-                    state.allowedY = yDistance;
-                    state.allowedH = Math.max(0.35, state.allowedH * 1.35);
-                    if (debug) {
-                        debug(player, "Elytra jump (hDist/Allowed): " + thisMove.hDistance + "/" + state.allowedH);
-                    }
-                } else if (from.isHeadObstructed() && lastMove.yDistance > 0.0 && yDistDiffEx < 0.0
-                        && (state.allowedY > 0.0 || yDistance == 0.0)) {
-                    state.allowedY = yDistance;
-                } else if (yDistance < 0.0) {
-                    if (lastMove.yDistance > 0.0 && yDistance < 0.0
-                            && (lastMove.yDistance < Magic.GRAVITY_MAX + Magic.GRAVITY_MIN
-                                    && yDistance > -Magic.GRAVITY_MIN
-                                    || lastMove.yDistance < Magic.GRAVITY_MIN
-                                            && yDistance > -Magic.GRAVITY_MIN - Magic.GRAVITY_MAX)) {
-                        state.allowedY = yDistance;
-                    }
-                }
-
-                if (yDistance > 0.0) {
-                    if (state.allowedY < yDistance && !isNear(state.allowedY, yDistance, 0.001)) {
-                        tags.add("e_vasc");
-                        state.resultV = yDistance;
-                    }
-                } else if (yDistance < 0.0) {
-                    if (state.allowedY > yDistance && !isNear(state.allowedY, yDistance, Magic.GRAVITY_MAX)) {
-                        tags.add("e_vdesc");
-                        state.resultV = Math.abs(yDistance);
-                    }
-                }
-
-                if (yDistance <= 0.0 && (to.isOnGround() || to.isResetCond() || thisMove.touchedGround)
-                        || yDistDiffEx > -Magic.GRAVITY_MAX && yDistDiffEx < 0.0
-                        || speed < 0.05 && !TrigUtil.isSamePos(lastMove.from, lastMove.to)
-                                && (hDistance == 0.0 && yDistance == 0.0 || yDistance < -Magic.GRAVITY_SPAN)) {
-                    state.allowedY = yDistance;
-                } else if (Math.abs(yDistDiffEx) > (speed < 0.05 ? 0.00001 : 0.03)) {
-                    tags.add("e_vdiff");
-                    state.resultV = Math.max(Math.abs(yDistance - state.allowedY), state.resultV);
-                }
-            }
+            applyRegularGlideAdjustments(player, from, to, hDistance, yDistance, speed, radPitch,
+                    lastHdist, thisMove, lastMove, data, debug, state);
         }
 
         if (state.allowedH < hDistance) {
