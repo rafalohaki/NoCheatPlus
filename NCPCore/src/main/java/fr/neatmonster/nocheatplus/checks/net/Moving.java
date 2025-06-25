@@ -14,9 +14,11 @@
  */
 package fr.neatmonster.nocheatplus.checks.net;
 
+import java.util.Optional;
+
 import org.bukkit.Bukkit;
-import org.bukkit.entity.Player;
 import org.bukkit.Location;
+import org.bukkit.entity.Player;
 import org.bukkit.plugin.Plugin;
 import org.bukkit.event.EventHandler;
 import org.bukkit.event.Listener;
@@ -36,6 +38,7 @@ import fr.neatmonster.nocheatplus.checks.net.model.DataPacketFlying;
 import fr.neatmonster.nocheatplus.players.DataManager;
 import fr.neatmonster.nocheatplus.players.IPlayerData;
 import fr.neatmonster.nocheatplus.utilities.location.LocUtil;
+import fr.neatmonster.nocheatplus.utilities.location.SafeLocations;
 import fr.neatmonster.nocheatplus.utilities.location.TrigUtil;
 import fr.neatmonster.nocheatplus.logging.StaticLog;
 import fr.neatmonster.nocheatplus.logging.Streams;
@@ -86,10 +89,15 @@ public class Moving extends Check {
         // Observed: this seems to prevent long/mid distance blink cheats.
         else if (packetData.hasPos) {
             final MovingData mData = pData.getGenericInstance(MovingData.class);
-            final Location knownLocation = player.getLocation();
-            final Location packetLocation = new Location(null, packetData.getX(), packetData.getY(), packetData.getZ());
-            final double hDistanceDiff = TrigUtil.distance(knownLocation, packetLocation);
-            final double yDistanceDiff = Math.abs(knownLocation.getY() - packetLocation.getY());
+            final Optional<Location> optLocation = SafeLocations.get(player);
+            if (!optLocation.isPresent()) {
+                return false;
+            }
+            final Location knownLocation = optLocation.get();
+            final double hDistanceDiff = TrigUtil.distance(
+                    knownLocation.getX(), knownLocation.getY(), knownLocation.getZ(),
+                    packetData.getX(), packetData.getY(), packetData.getZ());
+            final double yDistanceDiff = Math.abs(knownLocation.getY() - packetData.getY());
 
             // Vertical move.
             if (yDistanceDiff > 100.0) {
