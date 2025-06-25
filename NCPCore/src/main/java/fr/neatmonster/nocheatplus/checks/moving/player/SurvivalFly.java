@@ -1305,11 +1305,8 @@ public class SurvivalFly extends Check {
      * Apply modifications for being in a web.
      */
     private void applyWebModifiers(final AllowedDistanceContext ctx, final HorizontalState state) {
-        if (state.processed) {
-            return;
-        }
         final PlayerMoveData thisMove = ctx.thisMove();
-        if (thisMove.from.inWeb) {
+        if (!state.processed && thisMove.from.inWeb) {
             tags.add("hweb");
             state.hAllowedDistance = Magic.modWeb * thisMove.walkSpeed * ctx.cc().survivalFlyWalkingSpeed / 100D;
             state.useBaseModifiersSprint = false;
@@ -1324,12 +1321,9 @@ public class SurvivalFly extends Check {
      * Apply modifications for moving in powder snow.
      */
     private void applyPowderSnowModifiers(final AllowedDistanceContext ctx, final HorizontalState state) {
-        if (state.processed) {
-            return;
-        }
         final PlayerMoveData thisMove = ctx.thisMove();
         final MovingData data = ctx.data();
-        if (thisMove.from.inPowderSnow) {
+        if (!state.processed && thisMove.from.inPowderSnow) {
             tags.add("hsnow");
             state.hAllowedDistance = Magic.modPowderSnow * thisMove.walkSpeed * ctx.cc().survivalFlyWalkingSpeed / 100D;
             if (thisMove.yDistance > data.liftOffEnvelope.getMinJumpGain(data.jumpAmplifier) - Magic.GRAVITY_SPAN
@@ -1349,15 +1343,12 @@ public class SurvivalFly extends Check {
     private void applyLiquidModifiers(final AllowedDistanceContext ctx, final HorizontalState state,
                                       final boolean sfDirty, final PlayerMoveData lastMove,
                                       final PlayerMoveData pastMove2, final long now) {
-        if (state.processed) {
-            return;
-        }
         final PlayerMoveData thisMove = ctx.thisMove();
         final Player player = ctx.player();
         final PlayerLocation from = ctx.from();
         final MovingData data = ctx.data();
         final MovingConfig cc = ctx.cc();
-        if (thisMove.from.inLiquid && thisMove.to.inLiquid) {
+        if (!state.processed && thisMove.from.inLiquid && thisMove.to.inLiquid) {
             tags.add("hliquid");
             final double modSwim = (from.isSubmerged(0.701) || thisMove.from.inLava) ? Magic.modSwim[0] : Magic.modSwim[3];
             state.hAllowedDistance = Bridge1_13.isSwimming(player)
@@ -1422,16 +1413,13 @@ public class SurvivalFly extends Check {
      */
     private void applySneakModifiers(final AllowedDistanceContext ctx, final HorizontalState state,
                                      final boolean sfDirty, final boolean actuallySneaking) {
-        if (state.processed) {
-            return;
-        }
         final PlayerMoveData thisMove = ctx.thisMove();
         final MovingData data = ctx.data();
         final IPlayerData pData = ctx.pData();
         final Player player = ctx.player();
         final MovingConfig cc = ctx.cc();
         final boolean checkPermissions = ctx.checkPermissions();
-        if (!sfDirty && thisMove.from.onGround && actuallySneaking
+        if (!state.processed && !sfDirty && thisMove.from.onGround && actuallySneaking
                 && (!checkPermissions || !pData.hasPermission(Permissions.MOVING_SURVIVALFLY_SNEAKING, player))) {
             tags.add("sneaking");
             state.hAllowedDistance = Magic.modSneak * thisMove.walkSpeed * cc.survivalFlySneakingSpeed / 100D;
@@ -1451,9 +1439,6 @@ public class SurvivalFly extends Check {
      */
     private void applyLeavingLiquidModifiers(final AllowedDistanceContext ctx, final HorizontalState state,
                                              final boolean sfDirty) {
-        if (state.processed) {
-            return;
-        }
         final PlayerMoveData thisMove = ctx.thisMove();
         final MovingData data = ctx.data();
         final IPlayerData pData = ctx.pData();
@@ -1461,7 +1446,7 @@ public class SurvivalFly extends Check {
         final MovingConfig cc = ctx.cc();
         final PlayerLocation from = ctx.from();
         final boolean checkPermissions = ctx.checkPermissions();
-        if (!sfDirty && (!checkPermissions || !pData.hasPermission(Permissions.MOVING_SURVIVALFLY_WATERWALK, player))
+        if (!state.processed && !sfDirty && (!checkPermissions || !pData.hasPermission(Permissions.MOVING_SURVIVALFLY_WATERWALK, player))
                 && (Magic.leavingLiquid(thisMove) || data.surfaceId == 1) && data.liftOffEnvelope.name().startsWith("LIMIT")
                 && !from.isInWaterLogged()) {
             tags.add("hliquidexit");
@@ -1504,16 +1489,13 @@ public class SurvivalFly extends Check {
     private void applyBlockingModifiers(final AllowedDistanceContext ctx, final HorizontalState state,
                                         final boolean sfDirty, final boolean isBlockingOrUsing,
                                         final PlayerMoveData lastMove) {
-        if (state.processed) {
-            return;
-        }
         final PlayerMoveData thisMove = ctx.thisMove();
         final MovingData data = ctx.data();
         final IPlayerData pData = ctx.pData();
         final Player player = ctx.player();
         final MovingConfig cc = ctx.cc();
         final boolean checkPermissions = ctx.checkPermissions();
-        if (!sfDirty && isBlockingOrUsing && (thisMove.from.onGround || data.noSlowHop > 0 || player.isBlocking())
+        if (!state.processed && !sfDirty && isBlockingOrUsing && (thisMove.from.onGround || data.noSlowHop > 0 || player.isBlocking())
                 && (!checkPermissions || !pData.hasPermission(Permissions.MOVING_SURVIVALFLY_BLOCKING, player))
                 && data.liftOffEnvelope == LiftOffEnvelope.NORMAL) {
             tags.add("usingitem");
@@ -1554,12 +1536,9 @@ public class SurvivalFly extends Check {
 
     /** Apply modifiers for berry bushes. */
     private void applyBerryBushModifiers(final AllowedDistanceContext ctx, final HorizontalState state) {
-        if (state.processed) {
-            return;
-        }
         final PlayerMoveData thisMove = ctx.thisMove();
         final MovingData data = ctx.data();
-        if (thisMove.from.inBerryBush) {
+        if (!state.processed && thisMove.from.inBerryBush) {
             tags.add("hbush");
             state.hAllowedDistance = Magic.modBush * thisMove.walkSpeed * ctx.cc().survivalFlyWalkingSpeed / 100D;
             if (thisMove.yDistance > data.liftOffEnvelope.getMinJumpGain(data.jumpAmplifier) - Magic.GRAVITY_SPAN
@@ -1575,13 +1554,10 @@ public class SurvivalFly extends Check {
 
     /** Apply modifiers for soulsand. */
     private void applySoulSandModifiers(final AllowedDistanceContext ctx, final HorizontalState state) {
-        if (state.processed) {
-            return;
-        }
         final PlayerMoveData thisMove = ctx.thisMove();
         final Player player = ctx.player();
         final MovingData data = ctx.data();
-        if (thisMove.from.onSoulSand) {
+        if (!state.processed && thisMove.from.onSoulSand) {
             tags.add("hsoulsand");
             state.hAllowedDistance = Magic.modSoulSand * thisMove.walkSpeed * ctx.cc().survivalFlyWalkingSpeed / 100D;
             if (BridgeEnchant.hasSoulSpeed(player)) {
@@ -1597,13 +1573,10 @@ public class SurvivalFly extends Check {
 
     /** Apply modifiers for slime blocks. */
     private void applySlimeBlockModifiers(final AllowedDistanceContext ctx, final HorizontalState state) {
-        if (state.processed) {
-            return;
-        }
         final PlayerMoveData thisMove = ctx.thisMove();
         final MovingData data = ctx.data();
         final PlayerLocation to = ctx.to();
-        if (thisMove.from.onSlimeBlock && thisMove.to.onSlimeBlock && !Magic.jumpedUpSlope(data, to, 11)) {
+        if (!state.processed && thisMove.from.onSlimeBlock && thisMove.to.onSlimeBlock && !Magic.jumpedUpSlope(data, to, 11)) {
             tags.add("hslimeblock");
             state.hAllowedDistance = Magic.modSlime * thisMove.walkSpeed * ctx.cc().survivalFlyWalkingSpeed / 100D;
             state.useSneakModifier = true;
@@ -1616,11 +1589,8 @@ public class SurvivalFly extends Check {
     /** Apply modifiers for honey blocks. */
     private void applyHoneyBlockModifiers(final AllowedDistanceContext ctx, final HorizontalState state,
                                           final double modHoneyBlock) {
-        if (state.processed) {
-            return;
-        }
         final PlayerMoveData thisMove = ctx.thisMove();
-        if (thisMove.from.onHoneyBlock) {
+        if (!state.processed && thisMove.from.onHoneyBlock) {
             tags.add("hhoneyblock");
             state.hAllowedDistance = modHoneyBlock * thisMove.walkSpeed * ctx.cc().survivalFlyWalkingSpeed / 100D;
             state.useSneakModifier = true;
@@ -1633,12 +1603,9 @@ public class SurvivalFly extends Check {
     /** Apply modifiers for stairs. */
     private void applyStairsModifiers(final AllowedDistanceContext ctx, final HorizontalState state,
                                       final double modStairs) {
-        if (state.processed) {
-            return;
-        }
         final PlayerMoveData thisMove = ctx.thisMove();
         final Player player = ctx.player();
-        if (thisMove.from.aboveStairs || thisMove.to.aboveStairs) {
+        if (!state.processed && (thisMove.from.aboveStairs || thisMove.to.aboveStairs)) {
             tags.add("hstairs");
             state.useBaseModifiers = true;
             state.useSneakModifier = true;
@@ -1653,14 +1620,11 @@ public class SurvivalFly extends Check {
 
     /** Apply modifiers for packets altering use of items. */
     private void applyNoSlowPacketModifiers(final AllowedDistanceContext ctx, final HorizontalState state) {
-        if (state.processed) {
-            return;
-        }
         final MovingData data = ctx.data();
         final IPlayerData pData = ctx.pData();
         final Player player = ctx.player();
         final boolean checkPermissions = ctx.checkPermissions();
-        if (data.isHackingRI && (!checkPermissions || !pData.hasPermission(Permissions.MOVING_SURVIVALFLY_BLOCKING, player))) {
+        if (!state.processed && data.isHackingRI && (!checkPermissions || !pData.hasPermission(Permissions.MOVING_SURVIVALFLY_BLOCKING, player))) {
             tags.add("noslowpacket");
             data.isHackingRI = false;
             state.hAllowedDistance = 0.0;
@@ -1672,14 +1636,11 @@ public class SurvivalFly extends Check {
 
     /** Apply modifiers for invalid item use packets. */
     private void applyInvalidUseModifiers(final AllowedDistanceContext ctx, final HorizontalState state) {
-        if (state.processed) {
-            return;
-        }
         final MovingData data = ctx.data();
         final IPlayerData pData = ctx.pData();
         final Player player = ctx.player();
         final boolean checkPermissions = ctx.checkPermissions();
-        if (data.invalidItemUse && (!checkPermissions || !pData.hasPermission(Permissions.MOVING_SURVIVALFLY_BLOCKING, player))) {
+        if (!state.processed && data.invalidItemUse && (!checkPermissions || !pData.hasPermission(Permissions.MOVING_SURVIVALFLY_BLOCKING, player))) {
             tags.add("invalidate_use");
             data.invalidItemUse = false;
             state.hAllowedDistance = 0.0;
@@ -1691,13 +1652,10 @@ public class SurvivalFly extends Check {
 
     /** Apply modifiers for entity collisions. */
     private void applyCollisionModifiers(final AllowedDistanceContext ctx, final HorizontalState state) {
-        if (state.processed) {
-            return;
-        }
         final PlayerMoveData thisMove = ctx.thisMove();
         final Player player = ctx.player();
         final MovingData data = ctx.data();
-        if (ServerIsAtLeast1_9 && CollisionUtil.isCollidingWithEntities(player, true)
+        if (!state.processed && ServerIsAtLeast1_9 && CollisionUtil.isCollidingWithEntities(player, true)
                 && state.hAllowedDistance < 0.35 && data.liftOffEnvelope == LiftOffEnvelope.NORMAL) {
             tags.add("hcollision");
             state.hAllowedDistance = Magic.modCollision * thisMove.walkSpeed * ctx.cc().survivalFlyWalkingSpeed / 100D;
