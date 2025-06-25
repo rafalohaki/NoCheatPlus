@@ -81,6 +81,8 @@ public abstract class ConfPaths {
     @GlobalConfig
     private static final String LOGGING                                  = "logging.";
     public static final String  LOGGING_ACTIVE                           = LOGGING + SUB_ACTIVE;
+    /** Minimum log level, e.g. INFO, WARNING, SEVERE. */
+    public static final String  LOGGING_LEVEL                            = LOGGING + "level";
     public static final String  LOGGING_MAXQUEUESIZE                     = LOGGING + "maxqueuesize";
 
     private static final String LOGGING_BACKEND                          = LOGGING + "backend.";

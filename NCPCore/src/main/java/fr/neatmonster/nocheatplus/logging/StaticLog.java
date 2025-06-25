@@ -38,6 +38,9 @@ public class StaticLog {
 
     private static StreamID streamID = Streams.INIT;
 
+    /** Minimum log level to output. */
+    private static volatile Level minimumLevel = Level.INFO;
+
     /** The Constant logOnce. */
     // TODO: Quick and dirty - should probably use an access ordered LinkedHashSet, to expire the eldest half :p.
     private static final Set<Integer> logOnce = Collections.synchronizedSet(new HashSet<Integer>());
@@ -56,6 +59,16 @@ public class StaticLog {
             throw new NullPointerException("StreamID must not be null, use setUseLogManager(false) instead.");
         }
         StaticLog.streamID = streamID;
+    }
+
+    /**
+     * Set the minimum log level to output.
+     * @param level the minimum level (null ignored)
+     */
+    public static void setMinimumLevel(Level level) {
+        if (level != null) {
+            minimumLevel = level;
+        }
     }
 
     public static void logDebug(final String msg) {
@@ -102,6 +115,9 @@ public class StaticLog {
      * @param msg
      */
     public static void log(final StreamID streamID, final Level level, final String msg) {
+        if (level.intValue() < minimumLevel.intValue()) {
+            return;
+        }
         if (useLogManager) {
             NCPAPIProvider.getNoCheatPlusAPI().getLogManager().log(streamID, level, msg);
         } else {

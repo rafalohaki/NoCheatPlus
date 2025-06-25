@@ -63,6 +63,8 @@ public class BukkitLogManager extends AbstractLogManager implements INotifyReloa
     };
 
     protected final Plugin plugin;
+    /** Minimum log level for emitted log messages. */
+    private volatile Level minLevel = Level.INFO;
 
     /**
      * This will create all default loggers as well.
@@ -72,6 +74,7 @@ public class BukkitLogManager extends AbstractLogManager implements INotifyReloa
         super(new BukkitLogNodeDispatcher(plugin), Streams.defaultPrefix, Streams.INIT);
         this.plugin = plugin;
         ConfigFile config = ConfigManager.getConfigFile();
+        updateLogLevel(config);
         createDefaultLoggers(config);
         getLogNodeDispatcher().setMaxQueueSize(config.getInt(ConfPaths.LOGGING_MAXQUEUESIZE));
     }
@@ -209,12 +212,46 @@ public class BukkitLogManager extends AbstractLogManager implements INotifyReloa
         return null;
     }
 
+    /**
+     * Update the minimum log level from configuration.
+     * @param config Configuration file to read from.
+     */
+    private void updateLogLevel(ConfigFile config) {
+        String name = config.getString(ConfPaths.LOGGING_LEVEL, "INFO");
+        Level level;
+        try {
+            level = Level.parse(name.toUpperCase());
+        } catch (Exception e) {
+            level = Level.INFO;
+        }
+        minLevel = level;
+        StaticLog.setMinimumLevel(level);
+    }
+
+    @Override
+    public void log(StreamID streamID, Level level, String message) {
+        if (level.intValue() < minLevel.intValue()) {
+            return;
+        }
+        super.log(streamID, level, message);
+    }
+
+    @Override
+    public void log(StreamID streamID, Level level, Throwable t) {
+        if (level.intValue() < minLevel.intValue()) {
+            return;
+        }
+        super.log(streamID, level, t);
+    }
+
     @Override
     public void onReload() {
         // Hard clear and re-do loggers. Might result in loss of content.
         // TODO: Register for "early onReload call", needs API addition.
         clear(0L, true); // Can not afford to wait.
-        createDefaultLoggers(ConfigManager.getConfigFile());
+        ConfigFile config = ConfigManager.getConfigFile();
+        updateLogLevel(config);
+        createDefaultLoggers(config);
     }
 
     /**
