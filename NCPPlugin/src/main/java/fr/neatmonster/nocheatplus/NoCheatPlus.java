@@ -360,9 +360,11 @@ public class NoCheatPlus extends JavaPlugin implements NoCheatPlusAPI {
     public int allowLoginAll() {
         int denied = 0;
         final long now = System.currentTimeMillis();
-        for (final String playerName : denyLoginNames.keySet()) {
-            final Long time = denyLoginNames.get(playerName);
-            if (time != null && time > now) denied ++;
+        for (final Map.Entry<String, Long> entry : denyLoginNames.entrySet()) {
+            final Long time = entry.getValue();
+            if (time != null && time > now) {
+                denied++;
+            }
         }
         denyLoginNames.clear();
         return denied;
@@ -1012,8 +1014,12 @@ public class NoCheatPlus extends JavaPlugin implements NoCheatPlusAPI {
 
         // Register the commands handler.
         final PluginCommand command = getCommand("nocheatplus");
-        final NoCheatPlusCommand commandHandler = new NoCheatPlusCommand(this, notifyReload);
-        command.setExecutor(commandHandler);
+        if (command != null) {
+            final NoCheatPlusCommand commandHandler = new NoCheatPlusCommand(this, notifyReload);
+            command.setExecutor(commandHandler);
+        } else {
+            getLogger().severe("Command 'nocheatplus' not registered; cannot set executor.");
+        }
         // (CommandHandler is TabExecutor.)
 
         // Tell the permission registry which permissions should get updated. This might be restricted by check settings later.

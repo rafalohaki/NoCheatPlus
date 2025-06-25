@@ -109,7 +109,9 @@ public class AllViolationsHook implements NCPHook, ILast, IStats {
             // TODO: Better mix the debug flag into IViolationInfo, for best performance AND consistency.
             // TODO: (If debug is not in IViolationInfo, switch to PlayerData.isDebug(CheckType).)
             final IPlayerData pData = DataManager.getPlayerData(player);
-            debugSet = pData.isDebugActive(checkType);
+            if (pData != null) {
+                debugSet = pData.isDebugActive(checkType);
+            }
             if (config.debugOnly && !debugSet) {
                 return false;
             }
@@ -127,7 +129,8 @@ public class AllViolationsHook implements NCPHook, ILast, IStats {
         builder.append("[VL] [" + checkType.toString() + "] ");
         builder.append("[" + ChatColor.YELLOW + playerName);
         builder.append(ChatColor.WHITE + "] ");
-        final String displayName = ChatColor.stripColor(player.getDisplayName()).trim();
+        final String rawDisplayName = player.getDisplayName();
+        final String displayName = rawDisplayName != null ? ChatColor.stripColor(rawDisplayName).trim() : playerName;
         if (!playerName.equals(displayName)) {
             builder.append("[->" + ChatColor.YELLOW + displayName + ChatColor.WHITE + "] ");
         }
