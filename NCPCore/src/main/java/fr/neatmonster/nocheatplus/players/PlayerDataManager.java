@@ -529,11 +529,11 @@ public class PlayerDataManager  implements IPlayerDataManager, ComponentWithName
      * @param obj component instance
      * @return {@code true} if the component was added
      */
-    public boolean addComponent(Object obj) {
-        if (obj instanceof IRemoveData) {
-            return addComponent((IRemoveData) obj);
-        }
-        return false;
+    public boolean addComponentReflectively(Object obj) {
+    if (obj instanceof IRemoveData) {
+        return addComponent((IRemoveData) obj);
+    }
+    return false;
     }
 
     @Override
