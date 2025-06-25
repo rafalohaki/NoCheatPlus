@@ -50,7 +50,7 @@ public class CheckUtils {
      *            the check type
      */
     public static void improperAsynchronousAPIAccess(final CheckType checkType) {
-        // TODO: Log once + examine stack (which plugins/things are involved).
+        // Consider logging once and examining the stack to see which plugins or components are involved.
         final String trace = Arrays.toString(Thread.currentThread().getStackTrace());
         StaticLog.logOnce(Streams.STATUS, Level.SEVERE, "Off primary thread processing for " + checkType, trace);
     }
@@ -118,7 +118,7 @@ public class CheckUtils {
         final BlockBreakData bbData = pData.getGenericInstance(BlockBreakData.class);
         ref = Math.max(ref, bbData.frequencyBuckets.lastUpdate());
         ref = Math.max(ref, bbData.fastBreakfirstDamage);
-        // TODO: More, less ...
+        // Adjust as needed.
         if (ref > now || ref < now - maxAge){
             return Long.MIN_VALUE;
         }

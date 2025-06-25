@@ -280,7 +280,7 @@ public class PrefixTree<K, N extends Node<K, N>, L extends LookupEntry<K, N>>{
 
 	public void clear() {
 		root = nodeFactory.newNode(null);
-		// TODO: maybe more unlinking ?
+                // Possibly more unlinking is needed.
 	}
 	
 	/**
