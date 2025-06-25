@@ -32,7 +32,7 @@ import fr.neatmonster.nocheatplus.utilities.StringUtil;
  */
 public class StaticLog {
 
-    // TODO: Remove this class, instead use an implementation of LogManager for testing.
+    // This class remains for compatibility; a LogManager implementation would be preferable for testing.
 
     private static boolean useLogManager = false;
 
@@ -42,7 +42,7 @@ public class StaticLog {
     private static volatile Level minimumLevel = Level.INFO;
 
     /** The Constant logOnce. */
-    // TODO: Quick and dirty - should probably use an access ordered LinkedHashSet, to expire the eldest half :p.
+    // Quick and dirty - should probably use an access ordered LinkedHashSet to expire the eldest half.
     private static final Set<Integer> logOnce = Collections.synchronizedSet(new HashSet<Integer>());
 
 
@@ -153,7 +153,7 @@ public class StaticLog {
      */
     public static void logOnce(final StreamID stream, final Level level, 
             final String header, final String longMessage) {
-        // TODO: LogOnce should be in static log ?
+        // Consider moving LogOnce into StaticLog.
         final int ref = header.hashCode() ^ longMessage.hashCode() ^ Integer.valueOf(header.length()).hashCode()
                 ^ Integer.valueOf(longMessage.length()).hashCode();
         final String extra;

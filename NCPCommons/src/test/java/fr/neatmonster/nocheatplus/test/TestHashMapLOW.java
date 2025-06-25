@@ -33,8 +33,8 @@ import fr.neatmonster.nocheatplus.utilities.ds.map.HashMapLOW;
  */
 public class TestHashMapLOW {
 
-    // TODO: fill after remove, etc.
-    // TODO: Concurrent iteration / adding / removal.
+    // Further tests like filling after removal still need to be added.
+    // Concurrent iteration, additions and removals require additional tests.
 
     /**
      * Basic tests.

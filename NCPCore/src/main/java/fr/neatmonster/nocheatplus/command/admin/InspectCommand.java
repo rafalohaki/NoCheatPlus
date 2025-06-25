@@ -157,7 +157,8 @@ public class InspectCommand extends BaseCommand {
         }
 
         if (mData.isUsingItem) {
-            builder.append("\n "+ c1 + "" + c2 + "•" + c1 + " Is using an item."); // TODO: Which item?
+            // Item details are not yet displayed here.
+            builder.append("\n "+ c1 + "" + c2 + "•" + c1 + " Is using an item.");
         }
 
         if (mData.lostSprintCount > 0) {
