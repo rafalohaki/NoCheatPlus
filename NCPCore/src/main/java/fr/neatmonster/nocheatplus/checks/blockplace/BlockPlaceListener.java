@@ -535,90 +535,96 @@ public class BlockPlaceListener extends CheckListener {
     @EventHandler(
             ignoreCancelled = true, priority = EventPriority.LOWEST)
     public void onProjectileLaunch(final ProjectileLaunchEvent event) {
-        // The shooter needs to be a player.
         final Projectile projectile = event.getEntity();
         final Player player = BridgeMisc.getShooterPlayer(projectile);
         if (player == null) {
             return;
         }
 
-        if (!DataManager.getPlayerData(player).isCheckActive(CheckType.BLOCKPLACE, player)) return;
+        final IPlayerData pData = DataManager.getPlayerData(player);
+        if (!pData.isCheckActive(CheckType.BLOCKPLACE, player)) {
+            return;
+        }
 
         if (MovingUtil.hasScheduledPlayerSetBack(player)) {
-            // Should log.
             event.setCancelled(true);
             return;
         }
 
-        // And the projectile must be one the following:
-        EntityType type = event.getEntityType();
-        if (!BridgeEntityType.PROJECTILE_CHECK_LIST.contains(type)) return;
-
-        // Do the actual check...
-        final IPlayerData pData = DataManager.getPlayerData(player);
-        final BlockPlaceConfig cc = pData.getGenericInstance(BlockPlaceConfig.class);
-        boolean cancel = false;
-        if (speed.isEnabled(player, pData)) {
-            final long now = System.currentTimeMillis();
-            final Location loc = player.getLocation(useLoc2);
-            if (Combined.checkYawRate(player, loc.getYaw(), now, loc.getWorld().getName(), pData)) {
-                // Yawrate (checked extra).
-                cancel = true;
-            }
-            if (speed.check(player, cc, pData)) {
-                // If the check was positive, cancel the event.
-                cancel = true;
-            }
-            else if (cc.speedImprobableWeight > 0.0f) {
-                if (cc.speedImprobableFeedOnly) {
-                    Improbable.feed(player, cc.speedImprobableWeight, now);
-                } 
-                else if (Improbable.check(player, cc.speedImprobableWeight, now, "blockplace.speed", pData)) {
-                    cancel = true;
-                }
-            }
+        final EntityType type = event.getEntityType();
+        if (!BridgeEntityType.PROJECTILE_CHECK_LIST.contains(type)) {
+            return;
         }
 
-        // Ender pearl glitch (ab-) use.
+        final boolean cancel = shouldCancelProjectile(projectile, player, pData, type);
+        if (cancel) {
+            event.setCancelled(true);
+        }
+
+        useLoc2.setWorld(null);
+    }
+
+    private boolean shouldCancelProjectile(final Projectile projectile, final Player player,
+            final IPlayerData pData, final EntityType type) {
+        final BlockPlaceConfig cc = pData.getGenericInstance(BlockPlaceConfig.class);
+        boolean cancel = checkProjectileSpeed(player, pData, cc);
+
         if (!cancel && type == EntityType.ENDER_PEARL) {
-            if (!pData.getGenericInstance(CombinedConfig.class).enderPearlCheck) {
-                // Do nothing !
-                // Might have further flags?
-            }
-            else if (!BlockProperties.isPassable(projectile.getLocation(useLoc2))) {
-                // Launch into a block.
-                cancel = true;
-            }
-            else {
-                if (!BlockProperties.isPassable(player.getEyeLocation(), projectile.getLocation(useLoc2))) {
-                    // (Spare a useLoc2, for this is seldom rather.)
-                    // Something between player 
-                    cancel = true;
-                }
-                else {
-                    final Material mat = player.getLocation(useLoc2).getBlock().getType();
-                    final long flags = BlockFlags.F_CLIMBABLE | BlockFlags.F_LIQUID | BlockFlags.F_IGN_PASSABLE;
-                    if (!BlockProperties.isAir(mat) && (BlockFlags.getBlockFlags(mat) & flags) == 0 && !mcAccess.getHandle().hasGravity(mat)) {
-                        // Still fails on piston traps etc.
-                        if (!BlockProperties.isPassable(player.getLocation(), projectile.getLocation()) 
-                                && !BlockProperties.isOnGroundOrResetCond(player, player.getLocation(), 
-                                        pData.getGenericInstance(MovingConfig.class).yOnGround)) {
-                            cancel = true;
-                        }
-                    }
-                }
-            }
+            cancel = checkEnderPearlGlitch(player, projectile, pData);
             if (cancel) {
                 counters.addPrimaryThread(idEnderPearl, 1);
             }
         }
+        return cancel;
+    }
 
-        // Cancelled ?
-        if (cancel) {
-            event.setCancelled(true);
+    private boolean checkProjectileSpeed(final Player player, final IPlayerData pData,
+            final BlockPlaceConfig cc) {
+        if (!speed.isEnabled(player, pData)) {
+            return false;
         }
-        // Cleanup.
-        useLoc2.setWorld(null);
+        final long now = System.currentTimeMillis();
+        final Location loc = player.getLocation(useLoc2);
+        if (Combined.checkYawRate(player, loc.getYaw(), now, loc.getWorld().getName(), pData)) {
+            return true;
+        }
+        if (speed.check(player, cc, pData)) {
+            return true;
+        }
+        if (cc.speedImprobableWeight > 0.0f) {
+            if (cc.speedImprobableFeedOnly) {
+                Improbable.feed(player, cc.speedImprobableWeight, now);
+            } else if (Improbable.check(player, cc.speedImprobableWeight, now, "blockplace.speed", pData)) {
+                return true;
+            }
+        }
+        return false;
+    }
+
+    private boolean checkEnderPearlGlitch(final Player player, final Projectile projectile,
+            final IPlayerData pData) {
+        final CombinedConfig config = pData.getGenericInstance(CombinedConfig.class);
+        if (!config.enderPearlCheck) {
+            return false;
+        }
+        if (!BlockProperties.isPassable(projectile.getLocation(useLoc2))) {
+            return true;
+        }
+        if (!BlockProperties.isPassable(player.getEyeLocation(), projectile.getLocation(useLoc2))) {
+            return true;
+        }
+        final Material mat = player.getLocation(useLoc2).getBlock().getType();
+        final long flags = BlockFlags.F_CLIMBABLE | BlockFlags.F_LIQUID | BlockFlags.F_IGN_PASSABLE;
+        if (!BlockProperties.isAir(mat)
+                && (BlockFlags.getBlockFlags(mat) & flags) == 0
+                && !mcAccess.getHandle().hasGravity(mat)) {
+            if (!BlockProperties.isPassable(player.getLocation(), projectile.getLocation())
+                    && !BlockProperties.isOnGroundOrResetCond(player, player.getLocation(),
+                            pData.getGenericInstance(MovingConfig.class).yOnGround)) {
+                return true;
+            }
+        }
+        return false;
     }
 
     // This handler might be removed in the future.
