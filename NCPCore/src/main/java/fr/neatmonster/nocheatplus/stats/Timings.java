@@ -30,12 +30,60 @@ import fr.neatmonster.nocheatplus.logging.StaticLog;
  */
 public final class Timings {
 	
-	public static final class Entry{
-		public long val = 0;
-		public long n = 0;
-		public long min = Long.MAX_VALUE;
-		public long max = Long.MIN_VALUE;
-	}
+        public static final class Entry{
+                private long val = 0;
+                private long n = 0;
+                private long min = Long.MAX_VALUE;
+                private long max = Long.MIN_VALUE;
+
+                long getVal() {
+                        return val;
+                }
+
+                void setVal(final long val) {
+                        this.val = val;
+                }
+
+                void addVal(final long delta) {
+                        this.val += delta;
+                }
+
+                long getCount() {
+                        return n;
+                }
+
+                void setCount(final long count) {
+                        this.n = count;
+                }
+
+                void incrementCount() {
+                        this.n += 1;
+                }
+
+                long getMin() {
+                        return min;
+                }
+
+                void setMin(final long value) {
+                        this.min = value;
+                }
+
+                long getMax() {
+                        return max;
+                }
+
+                void setMax(final long value) {
+                        this.max = value;
+                }
+
+                void updateRange(final long value) {
+                        if (value < min) {
+                                min = value;
+                        } else if (value > max) {
+                                max = value;
+                        }
+                }
+        }
 	
 	private long tsStats = 0;
 	private long periodStats = 12345;
@@ -75,20 +123,19 @@ public final class Timings {
 	}
 	
 	public final void addStats(final Integer key, final long value){
-		Entry entry = entries.get(key);
-		if ( entry != null){
-			entry.n += 1;
-			entry.val += value;
-			if (value < entry.min) entry.min = value;
-			else if (value > entry.max) entry.max = value;
-		} else{
-			entry = new Entry();
-			entry.val = value;
-			entry.n = 1;
-			entries.put(key,  entry);
-			entry.min = value;
-			entry.max = value;
-		}
+                Entry entry = entries.get(key);
+                if (entry != null) {
+                        entry.incrementCount();
+                        entry.addVal(value);
+                        entry.updateRange(value);
+                } else {
+                        entry = new Entry();
+                        entry.setVal(value);
+                        entry.setCount(1);
+                        entries.put(key, entry);
+                        entry.setMin(value);
+                        entry.setMax(value);
+                }
 		if (!logStats) return;
 		nDone++;
 		if ( nDone>nVerbose){
@@ -116,17 +163,22 @@ public final class Timings {
 		boolean first = true;
 		for (final Integer id : entries.keySet()){
 			if ( !first) b.append(" | ");
-			final Entry entry = entries.get(id);
-			String av = f.format(entry.val / entry.n);
-			String key = getKey(id);
-			String n = f.format(entry.n);
+                        final Entry entry = entries.get(id);
+                        String av = f.format(entry.getVal() / entry.getCount());
+                        String key = getKey(id);
+                        String n = f.format(entry.getCount());
 			if (colors){
 				key = ChatColor.GREEN + key + ChatColor.WHITE;
 				n = ChatColor.AQUA + n + ChatColor.WHITE;
 				av = ChatColor.YELLOW + av + ChatColor.WHITE;
 			}
 			b.append(key+" av="+av+" n="+n);
-			if ( showRange) b.append(" rg="+f.format(entry.min)+"..."+f.format(entry.max));
+                        if (showRange) {
+                                b.append(" rg=")
+                                 .append(f.format(entry.getMin()))
+                                 .append("..")
+                                 .append(f.format(entry.getMax()));
+                        }
 			first = false;
 		}
 		return b.toString();

@@ -36,7 +36,23 @@ public class Counters {
 
     /** Just hold a count, so copying of arrays allows keeping consistency. */
     private static final class CountEntry {
-        public int count = 0;
+        private int count = 0;
+
+        int getCount() {
+            return count;
+        }
+
+        void setCount(int count) {
+            this.count = count;
+        }
+
+        void increment() {
+            count++;
+        }
+
+        void add(int delta) {
+            count += delta;
+        }
     }
 
     /** Map strings for display/processing to "fast-access" ids. */
@@ -125,9 +141,8 @@ public class Counters {
      */
     public void add(int id, int count, boolean isPrimaryThread) {
         if (isPrimaryThread) {
-            ptCounts[id].count ++;
-        }
-        else {
+            ptCounts[id].increment();
+        } else {
             addSynchronized(id, count);
         }
     }
@@ -140,7 +155,7 @@ public class Counters {
      *            Count to add.
      */
     public void addPrimaryThread(int id, int count) {
-        ptCounts[id].count ++;
+        ptCounts[id].increment();
     }
 
     /**
@@ -158,7 +173,7 @@ public class Counters {
         }
         lock.lock();
 
-        syCounts[id].count += count;
+        syCounts[id].add(count);
 
         lock.unlock();
     }
@@ -207,7 +222,7 @@ public class Counters {
         final Map<String, Integer> counts = new LinkedHashMap<String, Integer>();
         final int length = keys.length;
         for (int i = 0; i < length; i++) {
-            counts.put(keys[i], ptCounts[i].count);
+            counts.put(keys[i], ptCounts[i].getCount());
         }
         return counts;
     }
@@ -221,7 +236,7 @@ public class Counters {
         final Map<String, Integer> counts = new LinkedHashMap<String, Integer>();
         final int length = keys.length;
         for (int i = 0; i < length; i++) {
-            counts.put(keys[i], syCounts[i].count);
+            counts.put(keys[i], syCounts[i].getCount());
         }
         return counts;
     }
@@ -237,7 +252,7 @@ public class Counters {
         final Map<String, Integer> counts = new LinkedHashMap<String, Integer>();
         final int length = keys.length;
         for (int i = 0; i < length; i++) {
-            counts.put(keys[i], syCounts[i].count + ptCounts[i].count);
+            counts.put(keys[i], syCounts[i].getCount() + ptCounts[i].getCount());
         }
         return counts;
     }
