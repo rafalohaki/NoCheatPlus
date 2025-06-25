@@ -91,74 +91,78 @@ public class FastConsume extends Check implements Listener, INotifyReload {
         }
     }
 
-    private boolean check(final Player player, final ItemStack stack, 
-            final long time, final InventoryData data, final IPlayerData pData){
-        // Uses the instant-eat data for convenience.
-        // Consistency checks...
-        if (stack == null){ // || stack.getType() != data.instantEatFood){
-            // Strict version should prevent other material (?).
+    private boolean check(final Player player, final ItemStack stack,
+            final long time, final InventoryData data, final IPlayerData pData) {
+        if (stack == null) {
             return false;
         }
+
         final long ref = data.instantEatInteract == 0 ? 0 : Math.max(data.instantEatInteract, data.lastClickTime);
-        if (time < ref){
-            // Time ran backwards.
+        if (time < ref) {
             data.instantEatInteract = data.lastClickTime = time;
             return false;
         }
-        // Check exceptions.
+
         final InventoryConfig cc = pData.getGenericInstance(InventoryConfig.class);
         final Material mat = stack.getType();
-        if (mat != null){
-            if (cc.fastConsumeWhitelist){
-                if (!cc.fastConsumeItems.contains(mat)){
-                    return false;
-                }
-            }
-            else if (cc.fastConsumeItems.contains(mat)){
-                return false;
-            }
+        if (!isConsumeAllowed(mat, cc)) {
+            return false;
         }
-        // Actually check.
-        final long timeSpent = ref == 0 ? 0 : (time - ref); // Not interact = instant.
+
+        final long timeSpent = ref == 0 ? 0 : time - ref;
+        final boolean cancel = calculateViolation(player, stack, timeSpent, data, cc);
+        resetFastConsumeState(player, cancel, data, pData);
+        data.instantEatInteract = time;
+        return cancel;
+    }
+
+    private boolean isConsumeAllowed(final Material mat, final InventoryConfig cc) {
+        if (mat == null) {
+            return true;
+        }
+        if (cc.fastConsumeWhitelist) {
+            return cc.fastConsumeItems.contains(mat);
+        }
+        return !cc.fastConsumeItems.contains(mat);
+    }
+
+    private boolean calculateViolation(final Player player, final ItemStack stack, final long timeSpent,
+            final InventoryData data, final InventoryConfig cc) {
         final long expectedDuration = cc.fastConsumeDuration;
         boolean cancel = false;
-        if (timeSpent < expectedDuration){
-            // Might need a specialized check for lag spikes here.
+        if (timeSpent < expectedDuration) {
             final float lag = TickTask.getLag(expectedDuration, true);
-            if (timeSpent * lag < expectedDuration){
+            if (timeSpent * lag < expectedDuration) {
                 final double difference = (expectedDuration - timeSpent * lag) / 100.0;
                 data.instantEatVL += difference;
-                final ViolationData vd = new ViolationData(this, player, data.instantEatVL, difference, cc.fastConsumeActions);
-                vd.setParameter(ParameterName.FOOD, "" + mat);
-                if (data.instantEatFood != mat){
+                final ViolationData vd = new ViolationData(this, player, data.instantEatVL, difference,
+                        cc.fastConsumeActions);
+                final Material mat = stack.getType();
+                vd.setParameter(ParameterName.FOOD, String.valueOf(mat));
+                if (data.instantEatFood != mat) {
                     vd.setParameter(ParameterName.TAGS, "inconsistent(" + data.instantEatFood + ")");
-                }
-                else{
+                } else {
                     vd.setParameter(ParameterName.TAGS, "");
                 }
-                if (executeActions(vd).willCancel()){
-                    cancel = true;
-                }
+                cancel = executeActions(vd).willCancel();
             }
+        } else {
+            data.instantEatVL *= 0.6;
         }
-        else{
-            data.instantEatVL *= 0.6; 
-        }
-        // Reset interaction.
+        return cancel;
+    }
+
+    private void resetFastConsumeState(final Player player, final boolean cancel,
+            final InventoryData data, final IPlayerData pData) {
         if (cancel) {
-            // Fake interaction to prevent violation loops with false positives.
             final ItemStack actualStack = InventoryUtil.getFirstConsumableItemInHand(player);
             data.instantEatFood = actualStack == null ? null : actualStack.getType();
-            // This allows some abuse: 1. try instantly eat (cancelled) 2. consume item directly when needed.
-        }
-        else  {
+        } else {
             if (pData.isDebugActive(type)) {
                 debug(player, "PlayerItemConsumeEvent, reset fastconsume: " + data.instantEatFood);
             }
             data.instantEatFood = null;
         }
-        data.instantEatInteract = time;
-        return cancel;
     }
 
     @Override
