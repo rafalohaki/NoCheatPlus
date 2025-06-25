@@ -74,14 +74,14 @@ public class PrefixTree<K, N extends Node<K, N>, L extends LookupEntry<K, N>>{
 	public static class SimpleNode<K> extends Node<K, SimpleNode<K>>{
 	}
 	
-	public static interface NodeFactory<K, N extends Node<K, N>>{
+        public static interface NodeFactory<K, N extends Node<K, N>>{
 		/**
 		 * 
 		 * @param parent Can be null (root).
 		 * @return
 		 */
-		public N newNode(N parent);
-	}
+                N newNode(N parent);
+        }
 	
 	public static class LookupEntry<K, N extends Node<K, N>>{
 		/** The node, if lookup matched.*/
@@ -101,9 +101,9 @@ public class PrefixTree<K, N extends Node<K, N>, L extends LookupEntry<K, N>>{
 		}
 	}
 	
-	public static interface LookupEntryFactory<K, N extends Node<K, N>, L extends LookupEntry<K, N>>{
-		public L newLookupEntry(N node , N insertion, int depth, boolean hasPrefix); 
-	}
+        public static interface LookupEntryFactory<K, N extends Node<K, N>, L extends LookupEntry<K, N>>{
+                L newLookupEntry(N node , N insertion, int depth, boolean hasPrefix);
+        }
 	
 	protected final NodeFactory<K, N> nodeFactory;
 	

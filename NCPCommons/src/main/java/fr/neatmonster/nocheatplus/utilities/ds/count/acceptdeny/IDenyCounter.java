@@ -25,7 +25,7 @@ public interface IDenyCounter {
     /**
      * Increase the deny count. Propagate to parent, if any.
      */
-    public void deny();
+    void deny();
 
     /**
      * Get the number of times, that deny() has been called (since last reset,
@@ -33,6 +33,6 @@ public interface IDenyCounter {
      * 
      * @return
      */
-    public int getDenyCount();
+    int getDenyCount();
 
 }

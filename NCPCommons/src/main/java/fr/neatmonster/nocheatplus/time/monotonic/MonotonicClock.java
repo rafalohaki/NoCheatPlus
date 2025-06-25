@@ -28,6 +28,6 @@ public interface MonotonicClock extends Clock {
     /**
      * Monotonic clock allow resetting for some reason.
      */
-    public void reset(long clock);
+    void reset(long clock);
     
 }
