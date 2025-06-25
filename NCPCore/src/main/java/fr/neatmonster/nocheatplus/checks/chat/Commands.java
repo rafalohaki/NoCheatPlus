@@ -86,7 +86,6 @@ public class Commands extends Check {
 
         if (violation > 0.0){
             data.commandsVL += violation;
-            // TODO: Evaluate if sync(data) is necessary or better for executeActions.
             if (captchaEnabled){
                 synchronized (data) {
                     captcha.sendNewCaptcha(player, cc, data);
@@ -101,7 +100,6 @@ public class Commands extends Check {
             data.chatWarningTime = now;
         }
         else{
-            // TODO: This might need invalidation with time.
             data.commandsVL *= 0.99;
         }
         return false;
