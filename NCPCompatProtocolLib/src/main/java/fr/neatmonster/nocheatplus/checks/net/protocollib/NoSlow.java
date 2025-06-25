@@ -144,7 +144,7 @@ public class NoSlow extends BaseAdapter {
     }
 
     private static void onItemInteract(final PlayerInteractEvent e){
-        // TODO: Add trident (Check for rain and verify if the player is exposed to it at all, might not be worth doing it...)
+        // Note: Potential improvement - add trident support. Check for rain and whether the player is actually exposed; might not be worth doing.
         if (e.getAction() != Action.RIGHT_CLICK_AIR && e.getAction() != Action.RIGHT_CLICK_BLOCK) return;
         final Player p = e.getPlayer();
         final IPlayerData pData = DataManager.getPlayerData(p);
