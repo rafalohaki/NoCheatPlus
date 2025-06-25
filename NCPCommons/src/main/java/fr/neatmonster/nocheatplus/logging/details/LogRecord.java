@@ -35,7 +35,7 @@ public class LogRecord<C> implements Runnable {
     
     @Override
     public void run() {
-        // TODO: Checks / try-catch where? 
+        // NOTE: Determine appropriate location for checks or try-catch handling.
         node.logger.log(level, content);
     }
     

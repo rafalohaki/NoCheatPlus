@@ -25,7 +25,7 @@ import fr.neatmonster.nocheatplus.utilities.map.BlockCache;
 
 public class BlockCacheCBReflect extends BlockCacheBukkit {
 
-    // TODO: Not sure if reflection can gain speed over Bukkit API anywhere (who wants to try?).
+    // NOTE: Unsure if reflection can outperform the Bukkit API; experimentation may be needed.
 
     protected final ReflectHelper helper;
 
@@ -58,7 +58,7 @@ public class BlockCacheCBReflect extends BlockCacheBukkit {
 
     @Override
     public boolean standsOnEntity(Entity entity, double minX, double minY, double minZ, double maxX, double maxY, double maxZ) {
-        // TODO: Implement once relevant.
+        // NOTE: Implementation to be added when this becomes relevant.
         return super.standsOnEntity(entity, minX, minY, minZ, maxX, maxY, maxZ);
     }
 
