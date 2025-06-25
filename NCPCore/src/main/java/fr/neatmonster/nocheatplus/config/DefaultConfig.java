@@ -53,6 +53,7 @@ public class DefaultConfig extends ConfigFile {
         //        not set(ConfPaths.CONFIGVERSION_CREATED, -1);
         //        not set(ConfPaths.CONFIGVERSION_SAVED, -1);
         set(ConfPaths.LOGGING_ACTIVE, true, 785);
+        set(ConfPaths.LOGGING_LEVEL, "INFO", 1200);
         set(ConfPaths.LOGGING_MAXQUEUESIZE, 5000, 785);
         set(ConfPaths.LOGGING_EXTENDED_STATUS, false, 785);
         set(ConfPaths.LOGGING_EXTENDED_COMMANDS_ACTIONS, false, 1090);

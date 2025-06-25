@@ -56,8 +56,10 @@ public class OutgoingPosition extends BaseAdapter {
     public void onPacketSending(PacketEvent event) {
         try {
             if (event.isPlayerTemporary()) return;
-        } catch(NoSuchMethodError e) {}
-    	if (event.isCancelled()) {
+        } catch(NoSuchMethodError e) {
+            // Ignore: method not available on older ProtocolLib versions
+        }
+        if (event.isCancelled()) {
             return;
         }
         final long time = System.currentTimeMillis();

@@ -59,7 +59,9 @@ public class KeepAliveAdapter extends BaseAdapter {
     public void onPacketReceiving(final PacketEvent event) {
         try {
             if (event.isPlayerTemporary()) return;
-        } catch(NoSuchMethodError e) {}
+        } catch(NoSuchMethodError e) {
+            // Ignore: method not available on older ProtocolLib versions
+        }
         final long time = System.currentTimeMillis();
         final Player player = event.getPlayer();
         if (player == null) {
