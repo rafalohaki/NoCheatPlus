@@ -48,11 +48,12 @@ public class IdUtil {
 		if (input == null) {
 			return null;
 		}
-		try {
-			return UUIDFromString(input);
-		} catch (IllegalArgumentException e1) {
-		}
-		return null;
+                try {
+                        return UUIDFromString(input);
+                } catch (IllegalArgumentException e1) {
+                        // Input is not a valid UUID format, return null
+                        return null;
+                }
 	}
 
 	/**
