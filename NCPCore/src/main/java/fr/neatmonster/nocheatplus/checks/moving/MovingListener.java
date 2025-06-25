@@ -1172,29 +1172,52 @@ public class MovingListener extends CheckListener implements TickListener, IRemo
     private void updateMoveStatistics(final Player player, final PlayerLocation pFrom, final PlayerLocation pTo,
             final PlayerMoveData thisMove, final PlayerMoveData lastMove, final Location from, final int tick,
             final MovingData data, final MovingConfig cc) {
-        if (data.fireworksBoostDuration > 0) {
-            if (!lastMove.valid
-                    || (cc.resetFwOnground && (lastMove.flyCheck != CheckType.MOVING_CREATIVEFLY
-                            || lastMove.modelFlying != thisMove.modelFlying))
-                    || data.fireworksBoostTickExpire < tick) {
-                data.fireworksBoostDuration = 0;
-            } else {
-                data.fireworksBoostDuration--;
-            }
+        if (data == null || lastMove == null || thisMove == null) {
+            return;
         }
 
-        if (pFrom.isInLiquid()) {
+        handleFireworkBoost(lastMove, thisMove, tick, data, cc);
+        updateLiquidTick(pFrom, data);
+        updateRiptideState(player, data);
+        updateBubbleStreamState(pFrom, pTo, thisMove, lastMove, data);
+        handleVehicleExit(from, thisMove, data);
+    }
+
+    private void handleFireworkBoost(final PlayerMoveData lastMove, final PlayerMoveData thisMove,
+            final int tick, final MovingData data, final MovingConfig cc) {
+        if (data.fireworksBoostDuration <= 0) {
+            return;
+        }
+        final boolean invalidBoost = !lastMove.valid
+                || (cc != null && cc.resetFwOnground
+                        && (lastMove.flyCheck != CheckType.MOVING_CREATIVEFLY
+                                || lastMove.modelFlying != thisMove.modelFlying))
+                || data.fireworksBoostTickExpire < tick;
+        if (invalidBoost) {
+            data.fireworksBoostDuration = 0;
+        } else {
+            data.fireworksBoostDuration--;
+        }
+    }
+
+    private void updateLiquidTick(final PlayerLocation from, final MovingData data) {
+        if (from != null && from.isInLiquid()) {
             data.liqtick = data.liqtick < 10 ? data.liqtick + 1 : data.liqtick > 0 ? data.liqtick - 1 : 0;
         } else {
             data.liqtick = data.liqtick > 0 ? data.liqtick - 2 : 0;
         }
+    }
 
-        if (Bridge1_13.isRiptiding(player)) {
+    private void updateRiptideState(final Player player, final MovingData data) {
+        if (player != null && Bridge1_13.isRiptiding(player)) {
             data.timeRiptiding = System.currentTimeMillis();
         }
+    }
 
-        if (!pFrom.isDraggedByBubbleStream() && !pTo.isDraggedByBubbleStream()
-                && (pFrom.isInBubbleStream() || pTo.isInBubbleStream()) && thisMove.yDistance > 0.0
+    private void updateBubbleStreamState(final PlayerLocation from, final PlayerLocation to,
+            final PlayerMoveData thisMove, final PlayerMoveData lastMove, final MovingData data) {
+        if (from != null && to != null && !from.isDraggedByBubbleStream() && !to.isDraggedByBubbleStream()
+                && (from.isInBubbleStream() || to.isInBubbleStream()) && thisMove.yDistance > 0.0
                 && data.insideBubbleStreamCount <= 50) {
             data.insideBubbleStreamCount++;
         }
@@ -1202,13 +1225,18 @@ public class MovingListener extends CheckListener implements TickListener, IRemo
             if (!lastMove.valid || lastMove.flyCheck != CheckType.MOVING_SURVIVALFLY
                     || !data.liftOffEnvelope.name().startsWith("LIMIT")) {
                 data.insideBubbleStreamCount = 0;
-            } else if (!pFrom.isInBubbleStream() && !pTo.isInBubbleStream() || thisMove.yDistance < 0.0) {
+            } else if ((from == null || !from.isInBubbleStream()) && (to == null || !to.isInBubbleStream())
+                    || thisMove.yDistance < 0.0) {
                 data.insideBubbleStreamCount--;
             }
         }
+    }
 
+    private void handleVehicleExit(final Location from, final PlayerMoveData thisMove, final MovingData data) {
         if (data.lastVehicleType != null && thisMove.distanceSquared < 5) {
-            data.setSetBack(from);
+            if (from != null) {
+                data.setSetBack(from);
+            }
             data.addHorizontalVelocity(new AccountEntry(thisMove.hDistance, 1, 1));
             data.addVerticalVelocity(new SimpleEntry(thisMove.yDistance, 1));
             data.lastVehicleType = null;
