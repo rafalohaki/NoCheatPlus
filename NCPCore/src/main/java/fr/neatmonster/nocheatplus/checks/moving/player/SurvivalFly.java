@@ -57,6 +57,7 @@ import fr.neatmonster.nocheatplus.compat.BridgePotionEffect;
 import fr.neatmonster.nocheatplus.compat.versions.ServerVersion;
 import fr.neatmonster.nocheatplus.compat.blocks.changetracker.BlockChangeTracker;
 import fr.neatmonster.nocheatplus.compat.blocks.changetracker.BlockChangeTracker.Direction;
+import fr.neatmonster.nocheatplus.compat.blocks.changetracker.IBlockChangeTracker;
 import fr.neatmonster.nocheatplus.components.modifier.IAttributeAccess;
 import fr.neatmonster.nocheatplus.components.registry.event.IGenericInstanceHandle;
 import fr.neatmonster.nocheatplus.logging.Streams;
@@ -94,7 +95,7 @@ public class SurvivalFly extends Check {
     private final Set<String> reallySneaking = new HashSet<String>(30);
     /** For temporary use: LocUtil.clone before passing deeply, call setWorld(null) after use. */
     private final Location useLoc = new Location(null, 0, 0, 0);
-    private final BlockChangeTracker blockChangeTracker;
+    private final IBlockChangeTracker blockChangeTracker;
     private final AuxMoving aux = NCPAPIProvider.getNoCheatPlusAPI().getGenericInstance(AuxMoving.class);
     private IGenericInstanceHandle<IAttributeAccess> attributeAccess = NCPAPIProvider.getNoCheatPlusAPI().getGenericInstanceHandle(IAttributeAccess.class);
     //private final Plugin plugin = Bukkit.getPluginManager().getPlugin("NoCheatPlus");
@@ -216,7 +217,7 @@ public class SurvivalFly extends Check {
         }
         if (isSamePos) {
             if (useBlockChangeTracker && from.isOnGroundOpportune(cc.yOnGround, 0L,
-                    blockChangeTracker, data.blockChangeRef, tick)) {
+                    (BlockChangeTracker) blockChangeTracker, data.blockChangeRef, tick)) {
                 tags.add("pastground_from");
                 return true;
             }
@@ -228,7 +229,7 @@ public class SurvivalFly extends Check {
         }
         return LostGround.lostGround(player, from, to, hDistance, yDistance, sprinting,
                 lastMove, data, cc,
-                useBlockChangeTracker ? blockChangeTracker : null, tags);
+                useBlockChangeTracker ? (BlockChangeTracker) blockChangeTracker : null, tags);
     }
 
     /** Validate player movement parameters and log if invalid. */
@@ -898,7 +899,7 @@ public class SurvivalFly extends Check {
                                          final PlayerMoveData thisMove, int tick,
                                          final MovingData data, final MovingConfig cc) {
 
-        if (to.isOnGroundOpportune(cc.yOnGround, 0L, blockChangeTracker, data.blockChangeRef, tick)) {
+        if (to.isOnGroundOpportune(cc.yOnGround, 0L, (BlockChangeTracker) blockChangeTracker, data.blockChangeRef, tick)) {
             tags.add("pastground_to");
             return true;
         }
@@ -1273,7 +1274,7 @@ public class SurvivalFly extends Check {
                  * (Full blocks: slightly more possible, ending up just above
                  * the block. Bounce allows other end positions.)
                  */
-                if (from.matchBlockChange(blockChangeTracker, data.blockChangeRef, Direction.Y_POS, Math.min(yDistance, 1.0))) {
+                if (from.matchBlockChange((BlockChangeTracker) blockChangeTracker, data.blockChangeRef, Direction.Y_POS, Math.min(yDistance, 1.0))) {
                     if (yDistance > 1.0) {
                         //
                         //                        final BlockChangeEntry entry = blockChangeTracker.getBlockChangeEntryMatchFlags(data.blockChangeRef,
@@ -1316,7 +1317,7 @@ public class SurvivalFly extends Check {
         }
         // Push (/pull) down.
         else if (yDistance < 0.0 && yDistance >= -1.0) {
-            if (from.matchBlockChange(blockChangeTracker, data.blockChangeRef, Direction.Y_NEG, -yDistance)) {
+            if (from.matchBlockChange((BlockChangeTracker) blockChangeTracker, data.blockChangeRef, Direction.Y_NEG, -yDistance)) {
                 tags.add("blkmv_y_neg");
                 final double maxDistYNeg = yDistance; // from.getY() - from.getBlockY();
                 return new double[]{maxDistYNeg, 0.0};
@@ -2673,13 +2674,13 @@ public class SurvivalFly extends Check {
             final double xDistance = to.getX() - from.getX();
             final double zDistance = to.getZ() - from.getZ();
             if (Math.abs(xDistance) > 0.485 && Math.abs(xDistance) < 1.025
-                && from.matchBlockChange(blockChangeTracker, data.blockChangeRef,
+                && from.matchBlockChange((BlockChangeTracker) blockChangeTracker, data.blockChangeRef,
                         xDistance < 0 ? Direction.X_NEG : Direction.X_POS, 0.05)) {
                 hAllowedDistance = thisMove.hDistance; // MAGIC
                 hDistanceAboveLimit = 0.0;
             }
             else if (Math.abs(zDistance) > 0.485 && Math.abs(zDistance) < 1.025
-                    && from.matchBlockChange(blockChangeTracker, data.blockChangeRef,
+                    && from.matchBlockChange((BlockChangeTracker) blockChangeTracker, data.blockChangeRef,
                         zDistance < 0 ? Direction.Z_NEG : Direction.Z_POS, 0.05)) {
                 hAllowedDistance = thisMove.hDistance; // MAGIC
                 hDistanceAboveLimit = 0.0;

@@ -76,6 +76,8 @@ import fr.neatmonster.nocheatplus.compat.Folia;
 import fr.neatmonster.nocheatplus.compat.MCAccess;
 import fr.neatmonster.nocheatplus.compat.blocks.changetracker.BlockChangeListener;
 import fr.neatmonster.nocheatplus.compat.blocks.changetracker.BlockChangeTracker;
+import fr.neatmonster.nocheatplus.compat.blocks.changetracker.IBlockChangeTracker;
+import fr.neatmonster.nocheatplus.compat.blocks.changetracker.UnmodifiableBlockChangeTracker;
 import fr.neatmonster.nocheatplus.compat.meta.BridgeCrossPluginLoader;
 import fr.neatmonster.nocheatplus.compat.registry.AttributeAccessFactory;
 import fr.neatmonster.nocheatplus.compat.registry.DefaultComponentFactory;
@@ -108,6 +110,8 @@ import fr.neatmonster.nocheatplus.config.ConfPaths;
 import fr.neatmonster.nocheatplus.config.ConfigFile;
 import fr.neatmonster.nocheatplus.config.ConfigManager;
 import fr.neatmonster.nocheatplus.event.mini.EventRegistryBukkit;
+import fr.neatmonster.nocheatplus.event.mini.IEventRegistry;
+import fr.neatmonster.nocheatplus.event.mini.EventRegistryBukkitView;
 import fr.neatmonster.nocheatplus.event.mini.MiniListener;
 import fr.neatmonster.nocheatplus.hooks.ExemptionSettings;
 import fr.neatmonster.nocheatplus.hooks.NCPExemptionManager;
@@ -1560,13 +1564,13 @@ public class NoCheatPlus extends JavaPlugin implements NoCheatPlusAPI {
     }
 
     @Override
-    public BlockChangeTracker getBlockChangeTracker() {
-        return blockChangeTracker;
+    public IBlockChangeTracker getBlockChangeTracker() {
+        return new UnmodifiableBlockChangeTracker(blockChangeTracker);
     }
 
     @Override
-    public EventRegistryBukkit getEventRegistry() {
-        return eventRegistry;
+    public IEventRegistry getEventRegistry() {
+        return new EventRegistryBukkitView(eventRegistry);
     }
 
     @Override

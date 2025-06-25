@@ -46,6 +46,7 @@ import fr.neatmonster.nocheatplus.compat.Bridge1_9;
 import fr.neatmonster.nocheatplus.compat.BridgeEnchant;
 import fr.neatmonster.nocheatplus.compat.BridgeMisc;
 import fr.neatmonster.nocheatplus.compat.blocks.changetracker.BlockChangeTracker;
+import fr.neatmonster.nocheatplus.compat.blocks.changetracker.IBlockChangeTracker;
 import fr.neatmonster.nocheatplus.components.modifier.IAttributeAccess;
 import fr.neatmonster.nocheatplus.components.registry.event.IGenericInstanceHandle;
 import fr.neatmonster.nocheatplus.permissions.Permissions;
@@ -74,7 +75,7 @@ public class CreativeFly extends Check {
      * </ul>
      */
     private final List<String> tags = new LinkedList<String>();
-    private final BlockChangeTracker blockChangeTracker;
+    private final IBlockChangeTracker blockChangeTracker;
     private IGenericInstanceHandle<IAttributeAccess> attributeAccess = NCPAPIProvider.getNoCheatPlusAPI().getGenericInstanceHandle(IAttributeAccess.class);
     /** Default result for invalid elytra handling parameters. */
     private static final double[] INVALID_ELYTRA_RESULT = new double[] {Double.NaN, Double.NaN};
@@ -248,7 +249,7 @@ public class CreativeFly extends Check {
                 }
             } else if (LostGround.lostGround(player, from, to, hDistance, yDistance, sprinting,
                     lastMove, data, cc,
-                    useBlockChangeTracker ? blockChangeTracker : null, tags)) {
+                    useBlockChangeTracker ? (BlockChangeTracker) blockChangeTracker : null, tags)) {
                 return true;
             }
         }

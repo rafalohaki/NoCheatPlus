@@ -19,6 +19,7 @@ import java.util.UUID;
 
 import fr.neatmonster.nocheatplus.compat.blocks.changetracker.BlockChangeReference;
 import fr.neatmonster.nocheatplus.compat.blocks.changetracker.BlockChangeTracker;
+import fr.neatmonster.nocheatplus.compat.blocks.changetracker.IBlockChangeTracker;
 import fr.neatmonster.nocheatplus.utilities.location.PlayerLocation;
 import fr.neatmonster.nocheatplus.utilities.map.BlockCache;
 
@@ -46,7 +47,7 @@ public interface ICollidePassable extends ICollideBlocks, ISetMargins {
      * @param worldId
      *            the UUID of the world this takes place in.
      */
-    public void setBlockChangeTracker(BlockChangeTracker blockChangeTracker, 
+    public void setBlockChangeTracker(IBlockChangeTracker blockChangeTracker,
             BlockChangeReference blockChangeReference, int tick, UUID worldId);
 
     /**

@@ -109,6 +109,7 @@ import fr.neatmonster.nocheatplus.compat.MCAccess;
 import fr.neatmonster.nocheatplus.compat.blocks.changetracker.BlockChangeTracker;
 import fr.neatmonster.nocheatplus.compat.blocks.changetracker.BlockChangeTracker.BlockChangeEntry;
 import fr.neatmonster.nocheatplus.compat.blocks.changetracker.BlockChangeTracker.Direction;
+import fr.neatmonster.nocheatplus.compat.blocks.changetracker.IBlockChangeTracker;
 import fr.neatmonster.nocheatplus.compat.versions.ServerVersion;
 import fr.neatmonster.nocheatplus.components.NoCheatPlusAPI;
 import fr.neatmonster.nocheatplus.components.data.ICheckData;
@@ -201,7 +202,7 @@ public class MovingListener extends CheckListener implements TickListener, IRemo
 
     private IGenericInstanceHandle<IAttributeAccess> attributeAccess = NCPAPIProvider.getNoCheatPlusAPI().getGenericInstanceHandle(IAttributeAccess.class);
 
-    private final BlockChangeTracker blockChangeTracker;
+    private final IBlockChangeTracker blockChangeTracker;
 
     /** Statistics / debugging counters. */
     private final Counters counters = NCPAPIProvider.getNoCheatPlusAPI().getGenericInstance(Counters.class);
@@ -1109,7 +1110,7 @@ public class MovingListener extends CheckListener implements TickListener, IRemo
                 }
                 if (verticalBounce == BounceType.NO_BOUNCE && useBlockChangeTracker && BounceUtil
                         .checkPastStateBounceDescend(player, pFrom, pTo, thisMove, lastMove, tick, data, cc,
-                                blockChangeTracker) != BounceType.NO_BOUNCE) {
+                                (BlockChangeTracker) blockChangeTracker) != BounceType.NO_BOUNCE) {
                     checkNf = false;
                 }
             }
@@ -1118,7 +1119,7 @@ public class MovingListener extends CheckListener implements TickListener, IRemo
                     && BounceUtil.onPreparedBounceSupport(player, from, to, thisMove, lastMove, tick, data))
                     || useBlockChangeTracker && thisMove.yDistance <= 1.515) {
                 verticalBounce = BounceUtil.checkPastStateBounceAscend(player, pFrom, pTo, thisMove, lastMove, tick,
-                        pData, this, data, cc, blockChangeTracker);
+                        pData, this, data, cc, (BlockChangeTracker) blockChangeTracker);
                 if (verticalBounce != BounceType.NO_BOUNCE) {
                     checkNf = false;
                 }

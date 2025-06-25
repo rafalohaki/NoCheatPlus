@@ -31,6 +31,7 @@ import org.bukkit.plugin.Plugin;
 import fr.neatmonster.nocheatplus.components.registry.feature.ComponentWithName;
 import fr.neatmonster.nocheatplus.components.registry.order.RegistrationOrder;
 import fr.neatmonster.nocheatplus.utilities.ReflectionUtil;
+import fr.neatmonster.nocheatplus.event.mini.IEventRegistry;
 
 /**
  * A MultiListenerRegistry that registers Bukkit types with a Spigot/CraftBukkit
@@ -57,7 +58,7 @@ import fr.neatmonster.nocheatplus.utilities.ReflectionUtil;
  * @author asofold
  *
  */
-public class EventRegistryBukkit extends MultiListenerRegistry<Event, EventPriority> {
+public class EventRegistryBukkit extends MultiListenerRegistry<Event, EventPriority> implements IEventRegistry {
 
     /**
      * Node for events that implement the Cancellable interface (Bukkit).

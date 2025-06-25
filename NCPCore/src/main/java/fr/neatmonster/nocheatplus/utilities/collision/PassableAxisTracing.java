@@ -18,6 +18,7 @@ import java.util.UUID;
 
 import fr.neatmonster.nocheatplus.compat.blocks.changetracker.BlockChangeReference;
 import fr.neatmonster.nocheatplus.compat.blocks.changetracker.BlockChangeTracker;
+import fr.neatmonster.nocheatplus.compat.blocks.changetracker.IBlockChangeTracker;
 import fr.neatmonster.nocheatplus.compat.blocks.changetracker.BlockChangeTracker.BlockChangeEntry;
 import fr.neatmonster.nocheatplus.utilities.location.PlayerLocation;
 import fr.neatmonster.nocheatplus.utilities.map.BlockCache;
@@ -26,7 +27,7 @@ import fr.neatmonster.nocheatplus.utilities.map.BlockProperties;
 public class PassableAxisTracing extends AxisTracing implements ICollidePassable {
 
     private BlockCache blockCache;
-    private BlockChangeTracker blockChangeTracker = null;
+    private IBlockChangeTracker blockChangeTracker = null;
     private BlockChangeReference blockChangeRef = null;
     private int tick;
     private UUID worldId;
@@ -45,7 +46,7 @@ public class PassableAxisTracing extends AxisTracing implements ICollidePassable
     }
 
     @Override
-    public void setBlockChangeTracker(BlockChangeTracker blockChangeTracker, 
+    public void setBlockChangeTracker(IBlockChangeTracker blockChangeTracker,
             BlockChangeReference blockChangeReference, int tick, UUID worldId) {
         this.blockChangeTracker = blockChangeTracker;
         this.blockChangeRef = blockChangeReference;
