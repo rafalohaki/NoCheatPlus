@@ -106,8 +106,10 @@ public class AllViolationsHook implements NCPHook, ILast, IStats {
         }
         boolean debugSet = false;
         if (config.debugOnly || config.debug) {
-            // TODO: Better mix the debug flag into IViolationInfo, for best performance AND consistency.
-            // TODO: (If debug is not in IViolationInfo, switch to PlayerData.isDebug(CheckType).)
+            // Note: consider mixing the debug flag into IViolationInfo for best
+            // performance and consistency.
+            // If debug is not in IViolationInfo, fall back to
+            // PlayerData.isDebug(CheckType).
             final IPlayerData pData = DataManager.getPlayerData(player);
             if (pData != null) {
                 debugSet = pData.isDebugActive(checkType);
@@ -122,8 +124,7 @@ public class AllViolationsHook implements NCPHook, ILast, IStats {
     }
 
     private void log(final CheckType checkType, final Player player, final IViolationInfo info, final boolean toTrace, final boolean toNotify) {
-        // Generate the message.
-        // TODO: More colors?
+        // Generate the message. Additional colors could be used here.
         final StringBuilder builder = new StringBuilder(300);
         final String playerName = player.getName();
         builder.append("[VL] [" + checkType.toString() + "] ");
