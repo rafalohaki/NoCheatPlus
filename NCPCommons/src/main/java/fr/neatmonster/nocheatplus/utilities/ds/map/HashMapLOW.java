@@ -134,15 +134,15 @@ public class HashMapLOW <K, V> {
      */
     static class LHMBucket<K, V> {
 
-        // TODO: Link non-empty buckets.
+        // Link non-empty buckets (not implemented).
 
-        // TODO: final int index;
+        // final int index; // Potentially useful
 
         int size = 0;
 
         /** Must be stored externally for iteration. */
         @SuppressWarnings("unchecked")
-        LHMEntry<K, V>[] contents = (LHMEntry<K, V>[]) new LHMEntry[3]; // TODO: Configurable
+        LHMEntry<K, V>[] contents = (LHMEntry<K, V>[]) new LHMEntry[3]; // Configurable
 
         /**
          * Called under lock.
@@ -173,7 +173,7 @@ public class HashMapLOW <K, V> {
                             break;
                         }
                         else if (entriesFound == size && emptyIndex != -1) {
-                            // TODO: Not sure this is just overhead for most cases.
+                            // Possibly overhead for most cases
                             break;
                         }
                     }
@@ -395,7 +395,7 @@ public class HashMapLOW <K, V> {
             if (lastReturnedKey == null) {
                 throw new IllegalStateException();
             }
-            map.remove(lastReturnedKey); // TODO: CAN NOT WORK, NEED INVALIDATE ENTRY OTHERWISE
+            map.remove(lastReturnedKey); // Cannot work: need to invalidate entry otherwise
             lastReturnedKey = null;
         }
 
@@ -431,9 +431,9 @@ public class HashMapLOW <K, V> {
 
     private float loadFactor = 0.75f;
 
-    // TODO: Configurable: loadFactor
-    // TODO: Configurable: initial size and resize multiplier for Buckets.
-    // TODO: Configurable: allow shrink.
+    // Configurable: loadFactor
+    // Configurable: initial size and resize multiplier for Buckets.
+    // Configurable: allow shrink.
 
     /**
      * Initialize with a ReentrantLock.
@@ -581,7 +581,7 @@ public class HashMapLOW <K, V> {
         final int hashCode = getHashCode(key);
         lock.lock();
         final V value = removeUnderLock(hashCode, key);
-        // TODO: Shrink, if necessary.
+        // Shrink if necessary (not implemented).
         lock.unlock();
         return value;
     }
