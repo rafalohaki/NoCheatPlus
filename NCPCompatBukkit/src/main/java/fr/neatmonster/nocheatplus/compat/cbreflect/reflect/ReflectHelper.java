@@ -85,56 +85,13 @@ public class ReflectHelper {
     private final double[] tempBounds = new double[6];
 
     public ReflectHelper() {
-        // Optionally store one instance of ReflectFailureException.
-        // Possibly allow some more methods to be optional.
         try {
             this.reflectBase = new ReflectBase();
-            ReflectAxisAlignedBB reflectAxisAlignedBB = null;
-            if (this.reflectBase.nmsPackageName != null) {
-                try {
-                    Class<?> aabbClass = Class.forName(this.reflectBase.nmsPackageName + ".AxisAlignedBB");
-                    boolean hasAllFields =
-                        ReflectionUtil.getField(aabbClass, "a", double.class) != null &&
-                        ReflectionUtil.getField(aabbClass, "b", double.class) != null &&
-                        ReflectionUtil.getField(aabbClass, "c", double.class) != null &&
-                        ReflectionUtil.getField(aabbClass, "d", double.class) != null &&
-                        ReflectionUtil.getField(aabbClass, "e", double.class) != null &&
-                        ReflectionUtil.getField(aabbClass, "f", double.class) != null;
-                    if (hasAllFields) {
-                        reflectAxisAlignedBB = new ReflectAxisAlignedBB(reflectBase);
-                    }
-                } catch (ClassNotFoundException ex1) {
-                    // ignore - axis aligned bounding box not present
-                }
-            }
-            this.reflectAxisAlignedBB = reflectAxisAlignedBB;
-            ReflectBlockPosition reflectBlockPosition = null;
-            try {
-                reflectBlockPosition = new ReflectBlockPosition(this.reflectBase);
-            } catch (RuntimeException ex) {
-                // BlockPosition class not available
-            }
-            this.reflectBlockPosition = reflectBlockPosition;
+            this.reflectAxisAlignedBB = initAxisAlignedBB();
+            this.reflectBlockPosition = initBlockPosition();
             this.reflectMaterial = new ReflectMaterial(this.reflectBase);
             this.reflectWorld = new ReflectWorld(reflectBase, reflectMaterial, reflectBlockPosition);
-            ReflectBlock reflectBlockLatest = null;
-            if (this.reflectBlockPosition != null) {
-                try {
-                    reflectBlockLatest = new ReflectBlock(this.reflectBase, this.reflectBlockPosition,
-                            reflectMaterial, reflectWorld);
-                }
-                catch (Throwable t) {
-                    // ignore - using ReflectBlockSix fallback
-                }
-            }
-            if (reflectBlockLatest == null) {
-                // More lenient constructor.
-                this.reflectBlock = new ReflectBlockSix(this.reflectBase, this.reflectBlockPosition);
-            }
-            else {
-                this.reflectBlock = reflectBlockLatest;
-            }
-
+            this.reflectBlock = initBlock(reflectBlockPosition, reflectMaterial, reflectWorld);
             this.reflectDamageSource = new ReflectDamageSource(this.reflectBase);
             this.reflectEntity = new ReflectEntity(this.reflectBase, this.reflectAxisAlignedBB, this.reflectDamageSource);
             this.reflectLivingEntity = new ReflectLivingEntity(this.reflectBase, this.reflectAxisAlignedBB, this.reflectDamageSource);
@@ -143,6 +100,57 @@ public class ReflectHelper {
         catch (ClassNotFoundException ex) {
             throw new ReflectFailureException(ex);
         }
+        logSetupIssues();
+    }
+
+    private ReflectAxisAlignedBB initAxisAlignedBB() {
+        if (this.reflectBase.nmsPackageName == null) {
+            return null;
+        }
+        try {
+            Class<?> aabbClass = Class.forName(this.reflectBase.nmsPackageName + ".AxisAlignedBB");
+            boolean hasAllFields =
+                    ReflectionUtil.getField(aabbClass, "a", double.class) != null &&
+                    ReflectionUtil.getField(aabbClass, "b", double.class) != null &&
+                    ReflectionUtil.getField(aabbClass, "c", double.class) != null &&
+                    ReflectionUtil.getField(aabbClass, "d", double.class) != null &&
+                    ReflectionUtil.getField(aabbClass, "e", double.class) != null &&
+                    ReflectionUtil.getField(aabbClass, "f", double.class) != null;
+            if (hasAllFields) {
+                return new ReflectAxisAlignedBB(reflectBase);
+            }
+        } catch (ClassNotFoundException ex1) {
+            // ignore - axis aligned bounding box not present
+        }
+        return null;
+    }
+
+    private ReflectBlockPosition initBlockPosition() {
+        try {
+            return new ReflectBlockPosition(this.reflectBase);
+        } catch (RuntimeException ex) {
+            return null; // BlockPosition class not available
+        }
+    }
+
+    private IReflectBlock initBlock(ReflectBlockPosition position, ReflectMaterial material,
+            ReflectWorld world) throws ClassNotFoundException {
+        ReflectBlock reflectBlockLatest = null;
+        if (position != null) {
+            try {
+                reflectBlockLatest = new ReflectBlock(this.reflectBase, position, material, world);
+            }
+            catch (Throwable t) {
+                // ignore - using ReflectBlockSix fallback
+            }
+        }
+        if (reflectBlockLatest == null) {
+            return new ReflectBlockSix(this.reflectBase, position);
+        }
+        return reflectBlockLatest;
+    }
+
+    private void logSetupIssues() {
         if (ConfigManager.getConfigFile().getBoolean(ConfPaths.LOGGING_EXTENDED_STATUS)) {
             List<String> parts = new LinkedList<String>();
             for (Field rootField : this.getClass().getDeclaredFields()) {
@@ -156,11 +164,9 @@ public class ReflectHelper {
                 Object obj = ReflectionUtil.get(rootField, this, null);
                 if (obj == null) {
                     parts.add("(Not available: " + rootField.getName() + ")");
-                    continue;
                 }
                 else if (rootField.getName().startsWith("reflect")) {
                     Class<?> clazz = obj.getClass();
-                    // Consider skipping attributes silently before 1.6.1, but not for unknown versions.
                     for (Field field : clazz.getFields()) {
                         if (field.isAnnotationPresent(MostlyHarmless.class)) {
                             continue;
