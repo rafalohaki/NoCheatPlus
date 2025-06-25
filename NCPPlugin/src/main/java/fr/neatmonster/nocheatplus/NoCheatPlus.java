@@ -155,6 +155,14 @@ import org.jetbrains.annotations.NotNull;
  * This is the main class of NoCheatPlus. The commands, events listeners and tasks are registered here.
  */
 public class NoCheatPlus extends JavaPlugin implements NoCheatPlusAPI {
+
+    /**
+     * Required public no-argument constructor for modern plugin loading.
+     */
+    public NoCheatPlus() {
+        super();
+    }
+
     protected NoCheatPlus(JavaPluginLoader loader, PluginDescriptionFile desc, File dataFolder, File file) {
         super(loader, desc, dataFolder, file);
     }
