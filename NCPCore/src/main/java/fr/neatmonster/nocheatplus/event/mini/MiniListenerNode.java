@@ -40,7 +40,7 @@ import fr.neatmonster.nocheatplus.utilities.StringUtil;
  */
 public class MiniListenerNode<E, P> {
 
-    // TODO: Pass lock and SortedItemStore(Node), lazily (?) get.
+    // Implementation note: may pass lock and SortedItemStore(Node) lazily in the future.
 
     /**
      * This is intended to be "complete" in terms of containing all information
@@ -109,7 +109,8 @@ public class MiniListenerNode<E, P> {
             if (it.next().listener == listener) {
                 it.remove();
                 changed = true;
-                break; // TODO: Ensure register once or remove all or what not.
+                // Break once a listener has been removed; listeners should only be registered once.
+                break;
             }
         }
         if (changed) {
@@ -123,8 +124,8 @@ public class MiniListenerNode<E, P> {
     }
 
     protected void generateSortedListeners() {
-        // TODO: Allow postponing sorting.
-        // TODO: Store an optimally ordered thing? (Now entries in registeredListeners are within order of registration.)
+        // Sorting is performed immediately; a postponed approach may be implemented later.
+        // Currently listeners remain stored in registration order.
         if (registeredListeners.isEmpty()) {
             clear();
         }
@@ -157,7 +158,7 @@ public class MiniListenerNode<E, P> {
                     entry.listener.onEvent(event);
                 }
                 catch (Throwable t) {
-                    // TODO: More fine grained catch.
+                    // Consider catching specific exceptions if needed.
                     logListenerException(entry, i, listeners.length, event, t);
                 }
             }
@@ -168,7 +169,7 @@ public class MiniListenerNode<E, P> {
             final int index, final int length, 
             final E event, final Throwable t) {
         // Log long part once, to keep spam slightly down.
-        // TODO: Add more info (ORDER with tags, class/wrapped class).
+        // Additional details such as order tags or wrapped class names could be added here.
         final StringBuilder builder = new StringBuilder(1024);
         builder.append(" Details:");
         builder.append(" listenerType=" + entry.listener.getClass().getName());
@@ -189,7 +190,7 @@ public class MiniListenerNode<E, P> {
             builder.append(StringUtil.throwableToString(cause));
             cause = t.getCause();
         }
-        // TODO: Add id information to compare to registry log (later).
+        // ID information may be used later for registry log comparison.
         StaticLog.logOnce(Streams.STATUS, Level.SEVERE, 
                 "Listener exception: baseType=" + baseType.getName() 
                 + " basePriority=" + this.basePriority
