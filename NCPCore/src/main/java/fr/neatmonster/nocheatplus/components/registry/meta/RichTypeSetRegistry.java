@@ -64,29 +64,35 @@ public class RichTypeSetRegistry implements IRichTypeSetRegistry {
     public <I> void addToGroups(final Class<I> itemType, 
             final Class<? super I>... groupTypes) {
         lock.lock();
-        for (final Class<? super I> groupType : groupTypes) {
-            createGroup(groupType);
+        try {
+            for (final Class<? super I> groupType : groupTypes) {
+                createGroup(groupType);
+            }
+            groupedTypes.addToGroups(itemType, groupTypes);
+        } finally {
+            lock.unlock();
         }
-        groupedTypes.addToGroups(itemType, groupTypes);
-        lock.unlock();
     }
 
     @Override
     public <I> void addToGroups(CheckType checkType, Class<I> itemType,
             Class<? super I>... groupTypes) {
         lock.lock();
-        for (final Class<? super I> groupType : groupTypes) {
-            createGroup(groupType);
+        try {
+            for (final Class<? super I> groupType : groupTypes) {
+                createGroup(groupType);
+            }
+            TypeSetRegistry reg = groupedTypesByCheckType.get(checkType);
+            if (reg == null) {
+                reg = new TypeSetRegistry(lock);
+                updateRegistry(reg);
+                groupedTypesByCheckType.put(checkType, reg);
+            }
+            reg.addToGroups(itemType, groupTypes);
+            groupedTypes.addToGroups(itemType, groupTypes);
+        } finally {
+            lock.unlock();
         }
-        TypeSetRegistry reg = groupedTypesByCheckType.get(checkType);
-        if (reg == null) {
-            reg = new TypeSetRegistry(lock);
-            updateRegistry(reg);
-            groupedTypesByCheckType.put(checkType, reg);
-        }
-        reg.addToGroups(itemType, groupTypes);
-        groupedTypes.addToGroups(itemType, groupTypes);
-        lock.unlock();
     }
 
     @Override
@@ -98,15 +104,18 @@ public class RichTypeSetRegistry implements IRichTypeSetRegistry {
     public <I> void addToExistingGroups(final CheckType checkType,
             final Class<I> itemType) {
         lock.lock();
-        TypeSetRegistry reg = groupedTypesByCheckType.get(checkType);
-        if (reg == null) {
-            reg = new TypeSetRegistry(lock);
-            updateRegistry(reg);
-            groupedTypesByCheckType.put(checkType, reg);
+        try {
+            TypeSetRegistry reg = groupedTypesByCheckType.get(checkType);
+            if (reg == null) {
+                reg = new TypeSetRegistry(lock);
+                updateRegistry(reg);
+                groupedTypesByCheckType.put(checkType, reg);
+            }
+            reg.addToExistingGroups(itemType);
+            groupedTypes.addToExistingGroups(itemType);
+        } finally {
+            lock.unlock();
         }
-        reg.addToExistingGroups(itemType);
-        groupedTypes.addToExistingGroups(itemType);
-        lock.unlock();
     }
 
     /**
@@ -131,20 +140,26 @@ public class RichTypeSetRegistry implements IRichTypeSetRegistry {
     public <I> void addToGroups(final Collection<CheckType> checkTypes,
             final Class<I> itemType, final Class<? super I>... groupTypes) {
         lock.lock();
-        for (final CheckType checkType : checkTypes) {
-            addToGroups(checkType, itemType, groupTypes);
+        try {
+            for (final CheckType checkType : checkTypes) {
+                addToGroups(checkType, itemType, groupTypes);
+            }
+        } finally {
+            lock.unlock();
         }
-        lock.unlock();
     }
 
     @Override
     public <I> void addToExistingGroups(final Collection<CheckType> checkTypes,
             final Class<I> itemType) {
         lock.lock();
-        for (final CheckType checkType : checkTypes) {
-            addToExistingGroups(checkType, itemType);
+        try {
+            for (final CheckType checkType : checkTypes) {
+                addToExistingGroups(checkType, itemType);
+            }
+        } finally {
+            lock.unlock();
         }
-        lock.unlock();
     }
 
 }

@@ -111,9 +111,12 @@ public class TeleportQueue {
      */
     public void onTeleportEvent(final double x, final double y, final double z, final float yaw, final float pitch) {
         lock.lock();
-        lastAck = null;
-        expectOutgoing = new DataLocation(x, y, z, yaw, pitch);
-        lock.unlock();
+        try {
+            lastAck = null;
+            expectOutgoing = new DataLocation(x, y, z, yaw, pitch);
+        } finally {
+            lock.unlock();
+        }
     }
 
     /**
@@ -134,53 +137,56 @@ public class TeleportQueue {
         CountableLocation res = null;
         final long time = System.currentTimeMillis();
         lock.lock();
-        lastAckReference.lastOutgoingId = teleportId;
-        if (lastAckReference.maxConfirmedId > lastAckReference.lastOutgoingId) {
-            lastAckReference.maxConfirmedId = Integer.MIN_VALUE; // Some data loss accepted here.
-        }
-        // Only register this location, if it matches the location from a Bukkit event.
-        if (expectOutgoing != null) {
-            if (expectOutgoing.isSameLocation(x, y, z, yaw, pitch)) {
-                // Add to queue.
-                if (!expectIncoming.isEmpty()) {
-                    // Lazy expiration check.
-                    final Iterator<CountableLocation> it = expectIncoming.iterator();
-                    while (it.hasNext()) {
-                        final CountableLocation ref = it.next();
-                        if (time < ref.time) {
-                            // Time ran backwards. Force keep entries.
-                            ref.time = time;
-                        }
-                        else if (time - maxAge > ref.time) {
-                            it.remove();
-                        } else {
-                            break;
-                        }
-                    }
-                    if (!expectIncoming.isEmpty()) {
-                        final CountableLocation last = expectIncoming.getLast();
-                        if (last.isSameLocation(x, y, z, yaw, pitch)) {
-                            last.time = time;
-                            last.count ++;
-                            last.teleportId = teleportId;
-                            res = last;
-                        }
-                    }
-                }
-                // Add a new entry, if not merged with last.
-                if (res == null) {
-                    res = new CountableLocation(x, y, z, yaw, pitch, 1, time, teleportId);
-                    expectIncoming.addLast(res);
-                    // Don't exceed maxQueueSize.
-                    if (expectIncoming.size() > maxQueueSize) {
-                        expectIncoming.removeFirst();
-                    }
-                }
+        try {
+            lastAckReference.lastOutgoingId = teleportId;
+            if (lastAckReference.maxConfirmedId > lastAckReference.lastOutgoingId) {
+                lastAckReference.maxConfirmedId = Integer.MIN_VALUE; // Some data loss accepted here.
             }
-            // Reset in any case.
-            expectOutgoing = null;
+            // Only register this location, if it matches the location from a Bukkit event.
+            if (expectOutgoing != null) {
+                if (expectOutgoing.isSameLocation(x, y, z, yaw, pitch)) {
+                    // Add to queue.
+                    if (!expectIncoming.isEmpty()) {
+                        // Lazy expiration check.
+                        final Iterator<CountableLocation> it = expectIncoming.iterator();
+                        while (it.hasNext()) {
+                            final CountableLocation ref = it.next();
+                            if (time < ref.time) {
+                                // Time ran backwards. Force keep entries.
+                                ref.time = time;
+                            }
+                            else if (time - maxAge > ref.time) {
+                                it.remove();
+                            } else {
+                                break;
+                            }
+                        }
+                        if (!expectIncoming.isEmpty()) {
+                            final CountableLocation last = expectIncoming.getLast();
+                            if (last.isSameLocation(x, y, z, yaw, pitch)) {
+                                last.time = time;
+                                last.count ++;
+                                last.teleportId = teleportId;
+                                res = last;
+                            }
+                        }
+                    }
+                    // Add a new entry, if not merged with last.
+                    if (res == null) {
+                        res = new CountableLocation(x, y, z, yaw, pitch, 1, time, teleportId);
+                        expectIncoming.addLast(res);
+                        // Don't exceed maxQueueSize.
+                        if (expectIncoming.size() > maxQueueSize) {
+                            expectIncoming.removeFirst();
+                        }
+                    }
+                }
+                // Reset in any case.
+                expectOutgoing = null;
+            }
+        } finally {
+            lock.unlock();
         }
-        lock.unlock();
         return res;
     }
 
@@ -203,44 +209,46 @@ public class TeleportQueue {
             return AlmostBoolean.NO;
         }
         lock.lock();
-        if (teleportId == lastAckReference.lastOutgoingId) {
-            lastAckReference.maxConfirmedId = teleportId;
-            // Abort here for efficiency.
-            expectIncoming.clear();
-            lock.unlock();
-            return AlmostBoolean.YES;
-        }
-        AlmostBoolean ackState = AlmostBoolean.NO;
-        for (CountableLocation ref : expectIncoming) {
-            // No expiration checks here.
-            if (ref.teleportId == teleportId) {
-                // Match an outdated id.
-                // Remove all preceding older entries and this one.
-                while (ref != expectIncoming.getFirst()) {
+        try {
+            if (teleportId == lastAckReference.lastOutgoingId) {
+                lastAckReference.maxConfirmedId = teleportId;
+                // Abort here for efficiency.
+                expectIncoming.clear();
+                return AlmostBoolean.YES;
+            }
+            AlmostBoolean ackState = AlmostBoolean.NO;
+            for (CountableLocation ref : expectIncoming) {
+                // No expiration checks here.
+                if (ref.teleportId == teleportId) {
+                    // Match an outdated id.
+                    // Remove all preceding older entries and this one.
+                    while (ref != expectIncoming.getFirst()) {
+                        expectIncoming.removeFirst();
+                    }
                     expectIncoming.removeFirst();
+                    // The count doesn't count anymore.
+                    ref.count = 0;
+                    ackState = AlmostBoolean.YES;
+                    break;
                 }
-                expectIncoming.removeFirst();
-                // The count doesn't count anymore.
-                ref.count = 0;
-                ackState = AlmostBoolean.YES;
-                break;
             }
-        }
-        // Update lastAckReference only if within the safe area.
-        if (teleportId < lastAckReference.lastOutgoingId 
-                && teleportId > lastAckReference.maxConfirmedId) {
-            // Allow update.
-            lastAckReference.maxConfirmedId = teleportId;
-            if (ackState == AlmostBoolean.NO) {
-                // Adjust to maybe, as long as the id is increasing within unique range.
-                ackState = AlmostBoolean.MAYBE;
+            // Update lastAckReference only if within the safe area.
+            if (teleportId < lastAckReference.lastOutgoingId
+                    && teleportId > lastAckReference.maxConfirmedId) {
+                // Allow update.
+                lastAckReference.maxConfirmedId = teleportId;
+                if (ackState == AlmostBoolean.NO) {
+                    // Adjust to maybe, as long as the id is increasing within unique range.
+                    ackState = AlmostBoolean.MAYBE;
+                }
             }
+            else {
+                lastAckReference.maxConfirmedId = Integer.MIN_VALUE;
+            }
+            return ackState;
+        } finally {
+            lock.unlock();
         }
-        else {
-            lastAckReference.maxConfirmedId = Integer.MIN_VALUE;
-        }
-        lock.unlock();
-        return ackState;
     }
 
     /**
@@ -262,14 +270,14 @@ public class TeleportQueue {
         final AckResolution res;
 
         lock.lock();
-        if (expectIncoming.isEmpty()) {
-            res = AckResolution.IDLE;
-        } else {
-            res = getAckResolution(packetData);
+        try {
+            if (expectIncoming.isEmpty()) {
+                return AckResolution.IDLE;
+            }
+            return getAckResolution(packetData);
+        } finally {
+            lock.unlock();
         }
-        lock.unlock();
-
-        return res;
     }
 
     /**
@@ -315,9 +323,12 @@ public class TeleportQueue {
 
     public void clear() {
         lock.lock();
-        expectIncoming.clear();
-        expectOutgoing = null;
-        lock.unlock();
+        try {
+            expectIncoming.clear();
+            expectOutgoing = null;
+        } finally {
+            lock.unlock();
+        }
     }
 
 }

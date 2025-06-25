@@ -99,19 +99,21 @@ public class TypeSetRegistry {
      */
     public <I> void addToGroups(final Class<I> itemType, final Class<? super I>... groupTypes) {
         lock.lock();
-        for (final Class<? super I> groupType : groupTypes) {
-            if (!groupType.isAssignableFrom(itemType)) {
-                lock.unlock();
-                throw new IllegalArgumentException("Can't assign " + itemType.getName() + " to " + groupType.getName() + "!");
+        try {
+            for (final Class<? super I> groupType : groupTypes) {
+                if (!groupType.isAssignableFrom(itemType)) {
+                    throw new IllegalArgumentException("Can't assign " + itemType.getName() + " to " + groupType.getName() + "!");
+                }
+                @SuppressWarnings("unchecked")
+                GroupNode<? super I> node = (GroupNode<? super I>) groupedTypes.get(groupType);
+                if (node == null) {
+                    node = newGroupNode(groupType);
+                }
+                node.add(groupType, itemType);
             }
-            @SuppressWarnings("unchecked")
-            GroupNode<? super I> node = (GroupNode<? super I>) groupedTypes.get(groupType);
-            if (node == null) {
-                node = newGroupNode(groupType);
-            }
-            node.add(groupType, itemType);
+        } finally {
+            lock.unlock();
         }
-        lock.unlock();
     }
 
     /**
@@ -121,10 +123,13 @@ public class TypeSetRegistry {
      */
     public <G> void createGroup(final Class<G> groupType) {
         lock.lock();
-        if (!groupedTypes.containsKey(groupType)) {
-            newGroupNode(groupType);
+        try {
+            if (!groupedTypes.containsKey(groupType)) {
+                newGroupNode(groupType);
+            }
+        } finally {
+            lock.unlock();
         }
-        lock.unlock();
     }
 
     private <G> GroupNode<G> newGroupNode(Class<G> groupType) {
@@ -140,16 +145,19 @@ public class TypeSetRegistry {
      */
     public void addToExistingGroups(final Class<?> itemType) {
         lock.lock();
-        // Sort in all existing registered group types.
-        for (final Entry<Class<?>, GroupNode<?>> entry : groupedTypes.iterable()) {
-            final Class<?> groupType = entry.getKey();
-            if (groupType.isAssignableFrom(itemType)) {
-                // Consider wrapping in a try/catch to handle unexpected issues
-                final GroupNode<?> group = entry.getValue();
-                group.add(groupType, itemType);
+        try {
+            // Sort in all existing registered group types.
+            for (final Entry<Class<?>, GroupNode<?>> entry : groupedTypes.iterable()) {
+                final Class<?> groupType = entry.getKey();
+                if (groupType.isAssignableFrom(itemType)) {
+                    // Consider wrapping in a try/catch to handle unexpected issues
+                    final GroupNode<?> group = entry.getValue();
+                    group.add(groupType, itemType);
+                }
             }
+        } finally {
+            lock.unlock();
         }
-        lock.unlock();
     }
 
     /**
@@ -171,12 +179,15 @@ public class TypeSetRegistry {
      */
     public void updateGroupTypes(TypeSetRegistry refReg) {
         lock.lock(); // Ensure no interruption - iterator is not using lock, thus no dead locks.
-        for (final Entry<Class<?>, GroupNode<?>> entry : refReg.groupedTypes.iterable()) {
-            if (!this.groupedTypes.containsKey(entry.getKey())) {
-                entry.getValue().createGroup(this);
+        try {
+            for (final Entry<Class<?>, GroupNode<?>> entry : refReg.groupedTypes.iterable()) {
+                if (!this.groupedTypes.containsKey(entry.getKey())) {
+                    entry.getValue().createGroup(this);
+                }
             }
+        } finally {
+            lock.unlock();
         }
-        lock.unlock();
     }
 
 }

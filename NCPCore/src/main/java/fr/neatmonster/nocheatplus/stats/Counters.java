@@ -157,10 +157,11 @@ public class Counters {
             lock = syLocks[id];
         }
         lock.lock();
-
-        syCounts[id].count += count;
-
-        lock.unlock();
+        try {
+            syCounts[id].count += count;
+        } finally {
+            lock.unlock();
+        }
     }
 
     /**
@@ -170,12 +171,13 @@ public class Counters {
      */
     private void addLock(final int id) {
         globalLock.lock();
-
-        if (syLocks[id] == null) {
-            syLocks[id] = new ReentrantLock();
+        try {
+            if (syLocks[id] == null) {
+                syLocks[id] = new ReentrantLock();
+            }
+        } finally {
+            globalLock.unlock();
         }
-
-        globalLock.unlock();
     }
 
     /**
@@ -187,15 +189,16 @@ public class Counters {
      */
     public void resetAll() {
         globalLock.lock();
-
-        for (int i = 0; i < ptCounts.length; i ++) {
-            ptCounts[i] = new CountEntry();
+        try {
+            for (int i = 0; i < ptCounts.length; i ++) {
+                ptCounts[i] = new CountEntry();
+            }
+            for (int i = 0; i < syCounts.length; i ++) {
+                syCounts[i] = new CountEntry();
+            }
+        } finally {
+            globalLock.unlock();
         }
-        for (int i = 0; i < syCounts.length; i ++) {
-            syCounts[i] = new CountEntry();
-        }
-
-        globalLock.unlock();
     }
 
     /**
