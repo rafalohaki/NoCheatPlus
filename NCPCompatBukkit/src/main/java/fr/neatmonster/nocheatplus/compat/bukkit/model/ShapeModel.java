@@ -33,4 +33,32 @@ public interface ShapeModel<W> {
      */
     public int getFakeData(BlockCache blockCache, W world, int x, int y, int z);
 
+    /**
+     * Fill the given cache node with shape and data if not already present.
+     *
+     * <p>This helps to avoid redundant lookups and casting operations.</p>
+     *
+     * @param blockCache the cache to use for fallback operations
+     * @param node the node to update
+     * @param world the world instance
+     * @param x block x
+     * @param y block y
+     * @param z block z
+     */
+    default void fillNode(BlockCache blockCache, BlockCache.BlockCacheNode node,
+                          W world, int x, int y, int z) {
+        if (node == null) {
+            return;
+        }
+        if (!node.isBoundsFetched()) {
+            node.setBounds(getShape(blockCache, world, x, y, z));
+        }
+        if (!node.isDataFetched()) {
+            int data = getFakeData(blockCache, world, x, y, z);
+            if (data != Integer.MAX_VALUE) {
+                node.setData(data);
+            }
+        }
+    }
+
 }
