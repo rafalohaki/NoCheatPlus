@@ -151,7 +151,13 @@ public class Visible extends Check {
                 boolean mightEdgeInteraction = true;
                 Set<BlockCoord> visited = new HashSet<BlockCoord>();
                 RichAxisData axisData = new RichAxisData(Axis.NONE, Direction.NONE);
-                if (Math.abs(face.getModX()) > 0) axisData.priority = Axis.X_AXIS; else if (Math.abs(face.getModY()) > 0) axisData.priority = Axis.Y_AXIS; else if (Math.abs(face.getModZ()) > 0) axisData.priority = Axis.Z_AXIS;
+                if (Math.abs(face.getModX()) > 0) {
+                    axisData.priority = Axis.X_AXIS;
+                } else if (Math.abs(face.getModY()) > 0) {
+                    axisData.priority = Axis.Y_AXIS;
+                } else if (Math.abs(face.getModZ()) > 0) {
+                    axisData.priority = Axis.Z_AXIS;
+                }
                 do {
                     canContinue = false;
                 for (BlockCoord neighbor : CollisionUtil.getNeighborsInDirection(bc, direction, eyeX, eyeY, eyeZ, axisData)) {

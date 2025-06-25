@@ -68,6 +68,7 @@ public class ActionFactory extends AbstractActionFactory<ViolationData, ActionLi
                 }
             }
             catch (NumberFormatException e) {
+                // Ignore: malformed percentage, fallback handled below
             }
             StaticLog.logWarning("Bad probability definition for cancel action: '" + actionDefinition + "', relay to always cancelling.");
             return new CancelAction<ViolationData, ActionList>();
