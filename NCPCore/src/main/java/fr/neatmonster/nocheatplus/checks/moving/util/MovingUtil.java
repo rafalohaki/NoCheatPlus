@@ -161,11 +161,7 @@ public class MovingUtil {
     public static boolean isGlidingWithElytraValid(final Player player, final PlayerLocation fromLocation, 
                                                    final MovingData data, final MovingConfig cc) {
 
-        // TODO: Configuration for which/if to check on either lift-off / unknown / gliding.
-        // TODO: Item durability?
-        // TODO: TEST LAVA (ordinary and boost, lift off and other).
         /*
-         * TODO: Allow if last move not touched ground (+-) after all the
          * onGround check isn't much needed, if we can test for the relevant stuff (web?).
          */
 
@@ -178,12 +174,10 @@ public class MovingUtil {
                 && !firstPastMove.toIsValid || firstPastMove.modelFlying == null 
                 || !MovingConfig.ID_JETPACK_ELYTRA.equals(firstPastMove.modelFlying.getId())) {
             // Treat as a lift off.
-            // TODO: Past map states might allow lift off (...).
             return canLiftOffWithElytra(player, fromLocation, data);
         }
 
         /*
-         * TODO: Test / verify it gets turned off if depleted during gliding,
          * provided the client doesn't help knowing. (Only shortly tested with
          * grep -r "ItemElytra.d" <- looks good.)
          */
@@ -193,7 +187,6 @@ public class MovingUtil {
         //        }
 
         /*
-         * TODO: Rather focus on abort conditions (in-medium stay time for
          * special blocks, sleeping / dead / ...)?
          */
 
@@ -214,15 +207,12 @@ public class MovingUtil {
      * @return
      */
     public static boolean canLiftOffWithElytra(final Player player, final PlayerLocation loc, final MovingData data) {
-        // TODO: Item durability here too?
-        // TODO: this/firstPast- Move not touching or not explicitly on ground would be enough?
         return 
                 loc.isPassableBox() // Full box as if standing for lift-off.
                 //&& !loc.isInWeb()
                 // Durability is checked within PlayerConnection (toggling on).
                 // && !InventoryUtil.isItemBroken(player.getInventory().getChestplate())
                 /*
-                 * TODO: Could be a problem with too high yOnGround. Actual
                  * cheating rather would have to be prevented by monitoring
                  * jumping more tightly (low jump = set back, needs
                  * false-positive-free checking (...)).
@@ -251,8 +241,6 @@ public class MovingUtil {
      * @return
      */
     public static double getEyeHeight(final Player player) {
-        // TODO: Need a variant/method to test legitimate state transitions?
-        // TODO: EntityToggleGlideEvent
         return Bridge1_9.isGlidingWithElytra(player) ? 0.4 : player.getEyeHeight();
     }
 
@@ -292,10 +280,9 @@ public class MovingUtil {
         final Location loc = player.getLocation();
         if (!restored && data.hasSetBack()) {
             /*
-             * TODO: Harmonize with MovingUtil.getApplicableSetBackLocation
              * (somehow include the desired set back type / loc / context).
              */
-            final Location setBack = data.getSetBack(loc); // TODO
+            final Location setBack = data.getSetBack(loc); 
             pLoc.set(setBack, player);
             if (!pLoc.hasIllegalCoords() && (cc.ignoreStance || !pLoc.hasIllegalStance())) {
                 event.setFrom(setBack);
@@ -316,7 +303,6 @@ public class MovingUtil {
         }
         pLoc.cleanup();
         if (!restored) {
-            // TODO: reset the bounding box of the player ?
             if (cc.tempKickIllegal) {
                 NCPAPIProvider.getNoCheatPlusAPI().denyLogin(player.getName(), 24L * 60L * 60L * 1000L);
                 StaticLog.logSevere("[NoCheatPlus] could not restore location for " + player.getName() + ", kicking them and deny login for 24 hours");
@@ -369,7 +355,6 @@ public class MovingUtil {
      * @return Corrected location, if loc is an "untracked location".
      */
     public static Location checkUntrackedLocation(final Location loc) {
-        // TODO: More efficient method to get entities at the same position (might use MCAccess).
         final Chunk toChunk = loc.getChunk();
         final Entity[] entities = toChunk.getEntities();
         MovingData untrackedData = null;
@@ -379,7 +364,6 @@ public class MovingUtil {
             }
             final Location refLoc = entity.getLocation(useLoc2);
             // Exempt world spawn.
-            // TODO: Exempt other warps -> HASH based exemption (expire by time, keep high count)?
             if (TrigUtil.isSamePos(loc, refLoc) && (entity instanceof Player)) {
                 final Player other = (Player) entity;
                 final IPlayerData otherPData = DataManager.getPlayerData(other);
@@ -387,7 +371,6 @@ public class MovingUtil {
                 final PlayerMoveData otherLastMove = otherData.playerMoves.getFirstPastMove();
                 if (!otherLastMove.toIsValid) {
                     // Data might have been removed.
-                    // TODO: Consider counting as tracked?
                     continue;
                 }
                 else if (TrigUtil.isSamePos(refLoc, otherLastMove.to.getX(), otherLastMove.to.getY(), otherLastMove.to.getZ())) {
@@ -396,8 +379,6 @@ public class MovingUtil {
                 }
                 else {
                     // Untracked location.
-                    // TODO: Discard locations in the same block, if passable.
-                    // TODO: Sanity check distance?
                     // More leniency: allow moving inside of the same block.
                     if (TrigUtil.isSameBlock(loc, otherLastMove.to.getX(), otherLastMove.to.getY(), otherLastMove.to.getZ()) && !BlockProperties.isPassable(refLoc.getWorld(), otherLastMove.to.getX(), otherLastMove.to.getY(), otherLastMove.to.getZ())) {
                         continue;
@@ -411,7 +392,6 @@ public class MovingUtil {
             return null;
         }
         else {
-            // TODO: Count and log to TRACE_FILE, if multiple locations would match (!).
             final PlayerMoveData lastMove = untrackedData.playerMoves.getFirstPastMove();
             return new Location(loc.getWorld(), lastMove.to.getX(), lastMove.to.getY(), lastMove.to.getZ(), loc.getYaw(), loc.getPitch());
         }
@@ -439,7 +419,6 @@ public class MovingUtil {
                 return Math.max(0.0, fromY - toY); // Skip to avoid exploits: + player.getFallDistance()
             }
         } else {
-            // TODO: This would ignore the first split move, if this is the second one.
             return (double) player.getFallDistance() + Math.max(0.0, fromY - toY);
         }
     }
@@ -462,10 +441,7 @@ public class MovingUtil {
         else if (data.joinOrRespawn && from.getY() > data.getSetBackY() && 
                 TrigUtil.isSamePos(from.getX(), from.getZ(), data.getSetBackX(), data.getSetBackZ()) &&
                 (from.isOnGround() || from.isResetCond())) {
-            // TODO: Move most to a method?
-            // TODO: Is a margin needed for from.isOnGround()? [bukkitapionly]
             if (pData.isDebugActive(CheckType.MOVING)) {
-                // TODO: Should this be info?
                 idp.debug(player, "Adjust set back after join/respawn: " + from.getLocation());
             }
             data.setSetBack(from);
@@ -489,7 +465,6 @@ public class MovingUtil {
         // Collect block flags.
         from.collectBlockFlags(yOnGround);
         if (from.isSamePos(to)) {
-            // TODO: Could consider pTo = pFrom, set pitch / yaw elsewhere.
             // Sets all properties, but only once.
             to.prepare(from);
         }
@@ -543,7 +518,6 @@ public class MovingUtil {
         }
         else if (lastMove.valid && lastMove.from.extraPropertiesValid
                 && cc.loadChunksOnJoin) {
-            // TODO: Might need to distinguish join/teleport/world-change later.
             if (TrigUtil.distanceSquared(lastMove.from, x0, z0) < 1.0) {
                 loadFrom = false;
             }
@@ -592,7 +566,6 @@ public class MovingUtil {
         }
         else if (lastMove.valid && lastMove.from.extraPropertiesValid
                 && cc.loadChunksOnJoin) {
-            // TODO: Might need to distinguish join/teleport/world-change later.
             if (TrigUtil.distanceSquared(lastMove.from, x0, z0) < 1.0) {
                 return;
             }
@@ -667,8 +640,6 @@ public class MovingUtil {
 
         // Post-1.9 packet level workaround.
         final MovingConfig cc = pData.getGenericInstance(MovingConfig.class);
-        // TODO: Consider to skip checking for packet level, if not available (plus optimize access).
-        // TODO: Consider a config flag, so this can be turned off (set back method).
         final PlayerSetBackMethod method = cc.playerSetBackMethod;
         if (!method.shouldNoRisk() 
                 && (method.shouldCancel() || method.shouldSetTo()) && method.shouldUpdateFrom()) {
@@ -688,7 +659,6 @@ public class MovingUtil {
              * potential for abuse.
              */
             // (CANCEL + UPDATE_FROM mean a certain teleport to the set back, still could be repeated tp.)
-            // TODO: Better method, full sync reference?
             final CountableLocation cl = pData.getGenericInstance(NetData.class).teleportQueue.getLastAck();
             if (data.isTeleportedPosition(cl)) {
                 if (debug) {
@@ -739,18 +709,15 @@ public class MovingUtil {
     public static Location getApplicableSetBackLocation(final Player player, final float refYaw, final float refPitch, 
                                                         final PlayerLocation from, final MovingData data, final MovingConfig cc) {
         /*
-         * TODO: Consider returning a context object (include if to deal fall
          * damage, otherwise / if possible use a utility method checking the
          * config and ground properties).
          */
 
-        // TODO: Implement down-to-ground.
         boolean scanForVoid = false; // If set, scan for void and teleport there (dedo).
         // Void to void.
         if (cc.sfSetBackPolicyVoid) {
             if (from.getY() < 0.0) {
                 // Set back into the void.
-                // TODO: Assume realistic falling speed somehow?
                 return new Location(from.getWorld(),
                         from.getX(), 
                         from.getY() - Magic.GRAVITY_MAX, // Safer than sorry.
@@ -763,8 +730,6 @@ public class MovingUtil {
         }
 
         if (scanForVoid) { // || scanForGround
-            // TODO: Chunk section scanning?
-            // TODO: Rather precise scanForGround method for down-to-ground policy.
             final double[] groundSpec = scanForGroundOrResetCond(player, from);
             if (groundSpec == null) {
                 // Teleport to void
@@ -774,7 +739,6 @@ public class MovingUtil {
                         from.getZ(), 
                         from.getYaw(), from.getPitch());
             }
-            // TODO: else if (scanForGround) { // Teleport there, ensure fall damage (MovingListener/override). 
         }
 
         // Ordinary handling.
@@ -797,16 +761,12 @@ public class MovingUtil {
     private static final double[] scanForGroundOrResetCond(final Player player, final PlayerLocation from) {
         // Re-check for ground - who knows where this will get called from.
         if (from.isOnGroundOrResetCond()) {
-            // TODO: + inside blocks?
             return new double[] {0.0, from.getyOnGround()};
         }
-        // TODO: Actually scan for ground (BlockProperties).
-        // TODO: standsOnEntity is not covered yet (idk flying boats etc).
         final double distToVoid = from.getY();
         if (distToVoid <= 0.0) {
             return null;
         }
-        // TODO: Add strictness flags or scanning options
         // collectFlagsSimple: Just allow air - more safe concerning false positives.
         // collides: Scan for stuff that can be stood on.
         if (BlockProperties.collectFlagsSimple(from.getBlockCache(), 
