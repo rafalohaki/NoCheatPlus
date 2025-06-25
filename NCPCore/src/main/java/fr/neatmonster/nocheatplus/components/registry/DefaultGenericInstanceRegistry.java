@@ -39,7 +39,7 @@ import fr.neatmonster.nocheatplus.utilities.ds.map.HashMapLOW;
  */
 public class DefaultGenericInstanceRegistry implements GenericInstanceRegistry, IUnregisterGenericInstanceRegistryListener {
 
-    // TODO: Test cases.
+    // NOTE: Test cases should cover registration and removal logic.
 
     /**
      * Hold registration information for a class, as well as some convenience
@@ -53,7 +53,7 @@ public class DefaultGenericInstanceRegistry implements GenericInstanceRegistry, 
         private static final long DENY_OVERRIDE_INSTANCE = 0x01;
         private static final long DENY_REMOVE_INSTANCE = 0x02;
 
-        // TODO: unique handles + use
+        // NOTE: unique handles are intended for permanent registration use
 
         private final GenericInstanceRegistry registry;
         private final Lock lock;
@@ -245,7 +245,7 @@ public class DefaultGenericInstanceRegistry implements GenericInstanceRegistry, 
         Registration<T> registration = (Registration<T>) registrations.get(registeredFor); // Re-check.
         if (registration == null) {
             try {
-                // TODO: Consider individual locks / configuration for it.
+                // NOTE: individual locks or configuration may be considered here.
                 registration = new Registration<T>(registeredFor, null, this, this, lock);
                 this.registrations.put(registeredFor, registration);
             }
@@ -327,7 +327,7 @@ public class DefaultGenericInstanceRegistry implements GenericInstanceRegistry, 
     }
 
     public void clear() {
-        // TODO: consider fire unregister or add a removal method ?
+        // NOTE: consider firing unregister or providing a removal method
         lock.lock();
         final Iterator<Entry<Class<?>, Registration<?>>> it = registrations.iterator();
         while (it.hasNext()) {
