@@ -27,14 +27,14 @@ import fr.neatmonster.nocheatplus.utilities.map.FakeBlockCache;
 
 public class TestPassableRayTracing {
     
-    // TODO: Which tests to run on ICollidePassable with PassableAxisRayTracing as well...
+    // Decide which tests to run on ICollidePassable with PassableAxisRayTracing as well...
 
-    // TODO: Moving into a block, 
-    // TODO: Moving out of a block
-    // TODO: Moving horizontally on various kinds of ground (normal, half blocks)
-    // TODO: Moving up stairs etc ?
-    // TODO: From ground and onto ground moves, onto-edge moves (block before edge, into block, etc).
-    // TODO: Randomized tests (Collide with inner sphere, not collide with outer sphere).
+    // Add tests for moving into a block
+    // Add tests for moving out of a block
+    // Add tests for moving horizontally on various kinds of ground (normal, half blocks)
+    // Add tests for moving up stairs etc ?
+    // Add tests for ground and onto-ground moves, onto-edge moves (block before edge, into block, etc).
+    // Consider randomized tests (Collide with inner sphere, not collide with outer sphere).
 
     public TestPassableRayTracing() {
         StaticLog.setUseLogManager(false);
@@ -80,7 +80,7 @@ public class TestPassableRayTracing {
                 // Through a corner.
                 {1.2, 0.5, 0.5, 0.5, 0.5, 1.2},
 
-                // TODO: More of each and other... + generic set-ups?
+                // More of each and other... + generic set-ups?
         };
         TestRayTracing.runCoordinates(rt, setups, true, false, 3.0, true);
         rt.cleanup();
@@ -106,14 +106,14 @@ public class TestPassableRayTracing {
         }
         PassableRayTracing rt = new PassableRayTracing();
         rt.setBlockCache(bc);
-        // TODO: More Directions, over a corner, sides, etc.
+        // Add more directions, over a corner, sides, etc.
         double[][] setups = new double[][] {
                 // Slightly off the middle (11, y, 11)
                 {11.4, 70.0, 10.4, 10.6, 70.0, 11.4},
                 // Going exactly through the middle (11, y, 11)
                 {11.4, 70.0, 10.6, 10.6, 70.0, 11.4},
                 {11.5, 70.0, 10.5, 10.5, 70.0, 11.5},
-                //{11.5, 70.0, 10.5, 10.99999999999, 70.0, 11.00000000001}, // TODO: Craft something here
+                //{11.5, 70.0, 10.5, 10.99999999999, 70.0, 11.00000000001}, // Example for precision handling
         };
         TestRayTracing.runCoordinates(rt, setups, true, false, 3.0, true);
         rt.cleanup();
@@ -131,7 +131,7 @@ public class TestPassableRayTracing {
         }
         PassableRayTracing rt = new PassableRayTracing();
         rt.setBlockCache(bc);
-        // TODO: More Directions, also from air underneath to ground).
+        // More directions, also from air underneath to ground.
         double[][] noCollision = new double[][] {
                 {1.3, 66.0, 2.43, 5.25, 66.0, 7.12},
         };
@@ -161,7 +161,7 @@ public class TestPassableRayTracing {
         }
         PassableRayTracing rt = new PassableRayTracing();
         rt.setBlockCache(bc);
-        // TODO: More Directions, also from air underneath to ground).
+        // More directions, also from air underneath to ground.
         double[][] noCollision = new double[][] {
                 {1.3, 65.5, 2.43, 5.25, 65.5, 7.12},
         };
