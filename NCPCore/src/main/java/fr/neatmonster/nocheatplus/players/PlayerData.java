@@ -153,11 +153,16 @@ public class PlayerData implements IPlayerData {
     private final InstanceMapLOW dataCache = new InstanceMapLOW(lock, 24);
 
     /** If is Bedrock Player. This is set if CompatNoCheatPlus is present. */
-    private boolean bedrockPlayer = false;
-    private boolean requestUpdateInventory = false;
-    private boolean requestPlayerSetBack = false;
+    private volatile boolean bedrockPlayer = false;
 
-    private boolean frequentPlayerTaskShouldBeScheduled = false;
+    /** Request to update the players inventory on the main thread. */
+    private volatile boolean requestUpdateInventory = false;
+
+    /** Request to set back the player on the main thread. */
+    private volatile boolean requestPlayerSetBack = false;
+
+    /** Indicates if a frequent player task should be scheduled. */
+    private volatile boolean frequentPlayerTaskShouldBeScheduled = false;
     /** Actually queried ones. */
     private final DualSet<RegisteredPermission> updatePermissions = new DualSet<RegisteredPermission>(lock);
     /** Possibly needed in future. */
