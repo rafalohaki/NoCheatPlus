@@ -71,13 +71,13 @@ public class BlockCacheCBDev extends BlockCache {
         final int id = mat.getId();
         final net.minecraft.server.v1_12_R1.Block block = net.minecraft.server.v1_12_R1.Block.getById(id);
         if (block == null) {
-            // TODO: Convention for null blocks -> full ?
+            // Return null when no block information is available.
             return null;
         }
         final double[] shape = LegacyBlocks.getShape(this, mat, x, y, z, false);
         if (shape != null) return shape;
         final BlockPosition pos = new BlockPosition(x, y, z);
-        // TODO: Deprecation warning below (reason / substitute?).
+        // The following method is deprecated in newer versions.
         @SuppressWarnings("deprecation")
         final AxisAlignedBB bb = block.b(world.getType(pos), world, pos);
         if (bb == null) {
@@ -91,7 +91,7 @@ public class BlockCacheCBDev extends BlockCache {
     @Override
     public boolean standsOnEntity(final Entity entity, final double minX, final double minY, final double minZ, final double maxX, final double maxY, final double maxZ){
         try{
-            // TODO: Find some simplification!
+            // Potentially simplify this code path.
 
             final net.minecraft.server.v1_12_R1.Entity mcEntity  = ((CraftEntity) entity).getHandle();
 
