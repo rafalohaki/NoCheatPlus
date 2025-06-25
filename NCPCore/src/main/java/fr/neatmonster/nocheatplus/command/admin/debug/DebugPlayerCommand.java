@@ -100,81 +100,89 @@ public class DebugPlayerCommand extends BaseCommand {
     @Override
     public boolean onCommand(CommandSender sender, Command command, String alias, String[] args) {
 
-        final String c1, c2, c3, c4, c5, c6, c7;
-        if (sender instanceof Player) {
-            c1 = ChatColor.GRAY.toString();
-            c2 = ChatColor.BOLD.toString();
-            c3 = ChatColor.RED.toString();
-            c4 = ChatColor.ITALIC.toString();
-            c5 = ChatColor.GOLD.toString();
-            c6 = ChatColor.WHITE.toString();
-            c7 = ChatColor.YELLOW.toString();
-        } else {
-            c1 = c2 = c3 = c4 = c5 = c6 = c7 = "";
-        }
+        String[] colors = prepareColorCodes(sender);
+        String c1 = colors[0];
+        String c3 = colors[2];
 
         if (args.length <= 2) {
             sender.sendMessage((sender instanceof Player ? TAG : CTAG) + "Bad setup. Command usage: /ncp debug player (playername) yes/no:(checktype).");
             return true;
         }
-        // Future: add support for wild cards to target all players.
-        // Also consider allowing to specify OverrideType.
 
-        // Note that MAYBE means to reset here, it's not the same as direct PlayerData API access.
+        Player player = resolvePlayer(sender, args[2]);
+        if (player == null) {
+            return true;
+        }
+
         DebugEntry entry = new DebugEntry();
-        Player player = null;
-        if (args.length > 2) {
-            final String input = args[2];
-            if (IdUtil.isValidMinecraftUserName(input)) {
-                player = DataManager.getPlayer(input);
-            }
-            else {
-                UUID id = IdUtil.UUIDFromStringSafe(input);
-                if (id == null) {
-                    sender.sendMessage((sender instanceof Player ? TAG : CTAG) + "Bad name or UUID: " + c3 + input);
-                    return true;
-                }
-                else {
-                    player = DataManager.getPlayer(id);
-                }
-            }
-            if (player == null) {
-                sender.sendMessage((sender instanceof Player ? TAG : CTAG) + "Not online: " + c3 + input);
-                return true;
-            }
-        }
-        
-
         if (args.length > 3) {
-            String input = args[3];
-            entry = DebugEntry.parseEntry(input);
+            entry = parseDebugEntry(sender, args[3]);
             if (entry == null) {
-                sender.sendMessage((sender instanceof Player ? TAG : CTAG) + "Bad setup: " + c3 + input);
-                // Can't continue.
                 return true;
             }
         }
 
-        // Execute for online player.
-        final Collection<CheckType> checkTypes;
-        if (entry.checkTypes.isEmpty()) {
-            // CheckType.ALL
-            checkTypes = Collections.singletonList(CheckType.ALL);
+        IPlayerData data = DataManager.getPlayerData(player);
+        applyDebugSettings(data, entry);
+
+        Collection<CheckType> checkTypes = entry.checkTypes.isEmpty() ? Collections.singletonList(CheckType.ALL) : entry.checkTypes;
+        sender.sendMessage(TAG + "Set debug: " + c3 + entry.active + c1 + " for player " + c3 + player.getName() + c1 + " for checks: " + c3 + StringUtil.join(checkTypes, ","));
+        return true;
+    }
+
+    private String[] prepareColorCodes(CommandSender sender) {
+        if (sender instanceof Player) {
+            return new String[] {
+                    ChatColor.GRAY.toString(),
+                    ChatColor.BOLD.toString(),
+                    ChatColor.RED.toString(),
+                    ChatColor.ITALIC.toString(),
+                    ChatColor.GOLD.toString(),
+                    ChatColor.WHITE.toString(),
+                    ChatColor.YELLOW.toString() };
         }
-        else {
-            checkTypes = entry.checkTypes;
+        return new String[] {"", "", "", "", "", "", ""};
+    }
+
+    private Player resolvePlayer(CommandSender sender, String input) {
+        String[] colors = prepareColorCodes(sender);
+        String c3 = colors[2];
+        Player player = null;
+        if (IdUtil.isValidMinecraftUserName(input)) {
+            player = DataManager.getPlayer(input);
+        } else {
+            UUID id = IdUtil.UUIDFromStringSafe(input);
+            if (id == null) {
+                sender.sendMessage((sender instanceof Player ? TAG : CTAG) + "Bad name or UUID: " + c3 + input);
+                return null;
+            }
+            player = DataManager.getPlayer(id);
         }
-        final IPlayerData data = DataManager.getPlayerData(player);
-        for (final CheckType checkType : checkTypes) {
+        if (player == null) {
+            sender.sendMessage((sender instanceof Player ? TAG : CTAG) + "Not online: " + c3 + input);
+        }
+        return player;
+    }
+
+    private DebugEntry parseDebugEntry(CommandSender sender, String input) {
+        String[] colors = prepareColorCodes(sender);
+        String c3 = colors[2];
+        DebugEntry entry = DebugEntry.parseEntry(input);
+        if (entry == null) {
+            sender.sendMessage((sender instanceof Player ? TAG : CTAG) + "Bad setup: " + c3 + input);
+        }
+        return entry;
+    }
+
+    private void applyDebugSettings(IPlayerData data, DebugEntry entry) {
+        Collection<CheckType> checkTypes = entry.checkTypes.isEmpty() ? Collections.singletonList(CheckType.ALL) : entry.checkTypes;
+        for (CheckType checkType : checkTypes) {
             if (entry.active == AlmostBoolean.MAYBE) {
                 data.resetDebug(checkType);
-            }
-            else {
+            } else {
                 data.overrideDebug(checkType, entry.active, OverrideType.CUSTOM, true);
             }
         }
-        sender.sendMessage(TAG + "Set debug: " +c3+ entry.active +c1+ " for player " + c3 + player.getName() +c1+ " for checks: " +c3+ StringUtil.join(checkTypes, ","));
-        return true;
     }
 
 }
