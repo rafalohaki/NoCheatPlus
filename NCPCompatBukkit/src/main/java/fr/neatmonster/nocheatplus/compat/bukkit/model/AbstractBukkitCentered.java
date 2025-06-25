@@ -35,9 +35,8 @@ public abstract class AbstractBukkitCentered implements BukkitShapeModel {
     private final double length;
     protected final boolean invertFace;
 
-    public AbstractBukkitCentered(double inset, double length, 
+    public AbstractBukkitCentered(double inset, double length,
             boolean invertFace) {
-        // TODO: Might add a signature to specify minY and maxY (attach NWSE only).
         this.minDist = inset;
         this.maxDist = 1.0 - inset;
         this.length = length;
@@ -53,10 +52,9 @@ public abstract class AbstractBukkitCentered implements BukkitShapeModel {
         final BlockState state = block.getState();
         final BlockData blockData = state.getBlockData();
 
-        final BlockFace facing = invertFace 
-                ? getFacing(blockData).getOppositeFace() 
+        final BlockFace facing = invertFace
+                ? getFacing(blockData).getOppositeFace()
                         : getFacing(blockData);
-                // TODO: Evaluate if (some) faces need to be inverted.
                 // End rod facing: the direction it points to.
                 switch (facing) {
                     case EAST:

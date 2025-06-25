@@ -61,7 +61,6 @@ public class Relog extends Check {
                 cancel = executeActions(player, (double) data.relogVL, 1D, cc.relogActions).willCancel();
             }
         }
-        // TODO: decrease relog vl ?
 
         return cancel;
     }
