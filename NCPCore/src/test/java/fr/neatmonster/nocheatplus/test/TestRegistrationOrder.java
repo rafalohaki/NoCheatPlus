@@ -72,7 +72,7 @@ public class TestRegistrationOrder {
         int repeatShuffle = 15;
         int rand1samples = BuildParameters.testLevel > 0 ? 500 : 50;
         final List<List<RegistrationOrder>> samples = new ArrayList<List<RegistrationOrder>>();
-        // TODO: Hand crafted, random, part-random (defined tags, random order).
+        // Hand crafted, random, part-random (defined tags, random order).
         for (int i = 0; i < rand1samples; i++) {
             samples.add(getSample(5, 12)); // Random-ish tests to have something in place.
         }
@@ -98,8 +98,8 @@ public class TestRegistrationOrder {
             testEquality(sample, accessRegistrationOrder, sample2, accessIGetRegistrationOrder, repeatShuffle);
 
         }
-        // TODO: Create RegistrationOrder and IGetRegistrationOrder inputs equally.
-        // TODO: Run sorting tests per input, and testEquality.
+        // Create RegistrationOrder and IGetRegistrationOrder inputs equally.
+        // Run sorting tests per input and test equality.
     }
 
     /**
@@ -193,7 +193,7 @@ public class TestRegistrationOrder {
                     // The following object is explicitly set to come before.
                     fail("Pair is wrongly ordered.");
                 }
-                // TODO: Could still consider checking i-1 versus following items, until explicit stop/end.
+                // Consider checking i-1 versus following items until explicit stop/end.
             }
         }
     }
@@ -239,7 +239,7 @@ public class TestRegistrationOrder {
     /**
      * Create a somewhat regular randomized sample, having itemsPerLevel times
      * items per priority level plus, plus a similar amount of null entries.<br>
-     * TODO: A version that guarantees every type is in?
+     * Consider providing a version that guarantees every type is included.
      * 
      * @param priorities
      * @param itemsPerLevel
@@ -308,7 +308,7 @@ public class TestRegistrationOrder {
             List<F2> items2, IAccessSort<F2> fetcher2) {
         for (int i = 0; i < items1.size(); i++) {
             if (!fetcher1.getRegistrationOrder(items1.get(i)).equals(fetcher2.getRegistrationOrder(items2.get(i)))) {
-                // TODO: Return / log outside to give context.
+                // Return or log outside to give context.
                 doFail("Lists are not the same");
             }
         }
@@ -363,7 +363,7 @@ public class TestRegistrationOrder {
     }
 
     private void doFail(String message) {
-        // TODO: Args.
+        // Use the provided message as the failure reason.
         fail(message);
     }
 
