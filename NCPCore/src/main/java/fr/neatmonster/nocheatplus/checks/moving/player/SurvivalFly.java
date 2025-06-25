@@ -135,6 +135,11 @@ public class SurvivalFly extends Check {
     private static record Distances(double x, double y, double z, double h,
             boolean hasHorizontal) {}
 
+    /** Result structure for horizontal movement handling. */
+    private static record HorizontalMoveResult(double allowedDistance,
+                                               double distanceAboveLimit,
+                                               double freedom) {}
+
     /**
      * Compute move distances between from and to locations.
      */
@@ -320,71 +325,12 @@ public class SurvivalFly extends Check {
         // Horizontal move                ///
         /////////////////////////////////////
         bufferUse = true;
-        double hAllowedDistance = 0.0, hDistanceAboveLimit = 0.0, hFreedom = 0.0;
-
-        // Run through all hDistance checks if the player has actually some horizontal distance
-        if (HasHorizontalDistance) {
-            final double attrMod = attributeAccess.getHandle().getSpeedAttributeMultiplier(player);
-            // Set the allowed distance and determine the distance above limit
-            hAllowedDistance = setAllowedhDist(new AllowedDistanceContext(player, sprinting, thisMove,
-                    data, cc, pData, from, to, true));
-            hDistanceAboveLimit = hDistance - hAllowedDistance;
-            // The player went beyond the allowed limit, execute the after failure checks.
-            if (hDistanceAboveLimit > 0.0) {
-                final double[] resultH = hDistAfterFailure(player, from, to, hAllowedDistance, hDistanceAboveLimit,
-                                                           sprinting, thisMove, lastMove, data, cc, pData, false);
-                hAllowedDistance = resultH[0];
-                hDistanceAboveLimit = resultH[1];
-                hFreedom = resultH[2];
-            }
-            // Clear active velocity if the distance is within limit (clearly not needed. :))2
-            else {
-                data.clearActiveHorVel();
-                hFreedom = 0.0;
-                // Distance is within limit and the player is coming from ground after a not too recent bunnyhop, do reset the delay
-                if (resetFrom && data.bunnyhopDelay <= 6) {
-                    data.bunnyhopDelay = 0;
-                }
-            }
-
-            // The hacc subcheck: monitor medium term speed (if enabled, always update)
-            if (cc.survivalFlyAccountingH) {
-                hDistanceAboveLimit = horizontalAccounting(data, hDistance, hDistanceAboveLimit, thisMove, from);
-            }
-
-            // Prevent players from walking on a liquid in a too simple way.
-            if (!pData.hasPermission(Permissions.MOVING_SURVIVALFLY_WATERWALK, player)) {
-                hDistanceAboveLimit = waterWalkChecks(data, player, hDistance, yDistance, thisMove, lastMove,
-                                                     fromOnGround, hDistanceAboveLimit, toOnGround, from, to);
-            }
-
-            // vDistSBLow: monitor setback distances and check if they are too low.
-            if (cc.survivalFlyAccountingStep && !pData.hasPermission(Permissions.MOVING_SURVIVALFLY_STEP, player)) {
-                hDistanceAboveLimit = vDistSBLow(yDistance, hDistanceAboveLimit, hDistance, player, cc, data, thisMove, lastMove, pData, to);
-            }
-
-            // Prevent players from illegally sprinting.
-            //if (!pData.hasPermission(Permissions.MOVING_SURVIVALFLY_SPRINTING, player)){
-            //    hDistanceAboveLimit = sprintingChecks(sprinting, data, player, hDistance, hDistanceAboveLimit, thisMove,
-            //                                          xDistance, zDistance, from);
-            //}
-
-        }
-        // No horizontal distance present
-        else {
-            // Prevent way too easy abuse by simply collecting queued entries while standing still with no-knockback on. (Experimental, likely too strict)
-            if (cc.velocityStrictInvalidation && lastMove.hAllowedDistanceBase == 0.0
-                && data.hasQueuedHorVel()) {
-                data.clearAllHorVel();
-                hFreedom = 0.0;
-            }
-            // Always clear active velocity, regardless of velocityStrictInvalidation.
-            data.clearActiveHorVel();
-            thisMove.hAllowedDistanceBase = 0.0;
-            thisMove.hAllowedDistance = 0.0;
-        }
-        // Adjust some data after horizontal checking but before vertical
-        data.setHorDataExPost();
+        final HorizontalMoveResult horResult = handleHorizontalMovement(player, from, to,
+                HasHorizontalDistance, hDistance, yDistance, fromOnGround, toOnGround,
+                resetFrom, sprinting, thisMove, lastMove, data, cc, pData);
+        double hAllowedDistance = horResult.allowedDistance();
+        double hDistanceAboveLimit = horResult.distanceAboveLimit();
+        double hFreedom = horResult.freedom();
 
 
 
@@ -791,6 +737,68 @@ public class SurvivalFly extends Check {
         }
 
         return new double[]{vAllowedDistance, vDistanceAboveLimit};
+    }
+
+    /**
+     * Handle horizontal movement calculations and return allowed values.
+     */
+    private HorizontalMoveResult handleHorizontalMovement(final Player player, final PlayerLocation from,
+                                                          final PlayerLocation to, final boolean hasHorizontal,
+                                                          final double hDistance, final double yDistance,
+                                                          final boolean fromOnGround, final boolean toOnGround,
+                                                          final boolean resetFrom, final boolean sprinting,
+                                                          final PlayerMoveData thisMove, final PlayerMoveData lastMove,
+                                                          final MovingData data, final MovingConfig cc,
+                                                          final IPlayerData pData) {
+
+        double hAllowedDistance = 0.0;
+        double hDistanceAboveLimit = 0.0;
+        double hFreedom = 0.0;
+
+        if (hasHorizontal) {
+            attributeAccess.getHandle().getSpeedAttributeMultiplier(player); // ensure update
+            hAllowedDistance = setAllowedhDist(new AllowedDistanceContext(player, sprinting, thisMove,
+                    data, cc, pData, from, to, true));
+            hDistanceAboveLimit = hDistance - hAllowedDistance;
+            if (hDistanceAboveLimit > 0.0) {
+                final double[] resultH = hDistAfterFailure(player, from, to, hAllowedDistance,
+                        hDistanceAboveLimit, sprinting, thisMove, lastMove, data, cc, pData, false);
+                hAllowedDistance = resultH[0];
+                hDistanceAboveLimit = resultH[1];
+                hFreedom = resultH[2];
+            } else {
+                data.clearActiveHorVel();
+                hFreedom = 0.0;
+                if (resetFrom && data.bunnyhopDelay <= 6) {
+                    data.bunnyhopDelay = 0;
+                }
+            }
+
+            if (cc.survivalFlyAccountingH) {
+                hDistanceAboveLimit = horizontalAccounting(data, hDistance, hDistanceAboveLimit, thisMove, from);
+            }
+
+            if (!pData.hasPermission(Permissions.MOVING_SURVIVALFLY_WATERWALK, player)) {
+                hDistanceAboveLimit = waterWalkChecks(data, player, hDistance, yDistance, thisMove, lastMove,
+                                                     fromOnGround, hDistanceAboveLimit, toOnGround, from, to);
+            }
+
+            if (cc.survivalFlyAccountingStep && !pData.hasPermission(Permissions.MOVING_SURVIVALFLY_STEP, player)) {
+                hDistanceAboveLimit = vDistSBLow(yDistance, hDistanceAboveLimit, hDistance, player, cc, data,
+                                                thisMove, lastMove, pData, to);
+            }
+        } else {
+            if (cc.velocityStrictInvalidation && lastMove.hAllowedDistanceBase == 0.0 && data.hasQueuedHorVel()) {
+                data.clearAllHorVel();
+                hFreedom = 0.0;
+            }
+            data.clearActiveHorVel();
+            thisMove.hAllowedDistanceBase = 0.0;
+            thisMove.hAllowedDistance = 0.0;
+        }
+
+        data.setHorDataExPost();
+        return new HorizontalMoveResult(hAllowedDistance, hDistanceAboveLimit, hFreedom);
     }
 
 
