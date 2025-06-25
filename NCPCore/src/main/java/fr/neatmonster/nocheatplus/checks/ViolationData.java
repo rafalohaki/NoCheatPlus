@@ -37,12 +37,11 @@ import fr.neatmonster.nocheatplus.permissions.RegisteredPermission;
  * Violation specific data, for executing actions.<br>
  * This is meant to capture a violation incident in a potentially thread safe way.
  * <hr>
- * TODO: Re-think visibility questions.
+ * Re-think visibility questions.
  * @author asofold
  */
 public class ViolationData implements IViolationInfo, ActionData {
 
-    // TODO: 
 
     /** The actions to be executed. */
     public final ActionList actions;
@@ -123,7 +122,8 @@ public class ViolationData implements IViolationInfo, ActionData {
         this.vL = vL;
         this.addedVL = addedVL;
         this.actions = actions;
-        this.applicableActions = actions.getActions(vL); // TODO: Consider storing applicableActions only if history wants it.
+        // Consider storing applicableActions only if history wants it.
+        this.applicableActions = actions.getActions(vL);
         this.penaltyList = penaltyList == null ? new DefaultPenaltyList() : penaltyList;
         boolean needsParameters = false;
 
@@ -180,20 +180,20 @@ public class ViolationData implements IViolationInfo, ActionData {
      */
     public void executeActions() {
 
-        // TODO: Still can return boolean for cancel, as it should've been evaluated on creation of ViolationData.
-        // TODO: Might be better to return ViolationData, for penalty effects etc.
+        // Still can return boolean for cancel, as it should've been evaluated on creation of ViolationData.
+        // It might be better to return ViolationData, for penalty effects etc.
 
         try {
             // Statistics.
             ViolationHistory.getHistory(player).log(check.getClass().getName(), addedVL);
-            // TODO: the time is taken here, which makes sense for delay, but otherwise ?
+            // The time is taken here, which makes sense for delay, but otherwise?
             final long time = System.currentTimeMillis() / 1000L;
-            // Execute actions, if history wants it. TODO: Consider storing applicableActions only if history wants it.
+            // Execute actions, if history wants it. Consider storing applicableActions only if history wants it.
             for (final Action<ViolationData, ActionList>  action : applicableActions) {
                 if (Check.getHistory(player).executeAction(this, action, time)) {
                     // The execution history said it really is time to execute the action, find out what it is and do
                     // what is needed.
-                    action.execute(this); // TODO: Add history as argument rather.
+                    action.execute(this); // Add history as argument rather.
                 }
             }
             // Apply player penalties here (and remove applied penalties).
@@ -222,7 +222,7 @@ public class ViolationData implements IViolationInfo, ActionData {
             // Statistics.
             ViolationHistory.getHistory(player).log(check.getClass().getName(), addedVL);
             final long time = System.currentTimeMillis() / 1000L;
-            // Execute actions, if history wants it. TODO: Consider storing applicableActions only if history wants it.
+            // Execute actions, if history wants it. Consider storing applicableActions only if history wants it.
             if (Check.getHistory(player).executeAction(this, action, time)) {
                 action.execute(this);
             }
