@@ -33,13 +33,13 @@ import fr.neatmonster.nocheatplus.utilities.location.TrigUtil;
  */
 public class SetBackStorage {
 
-    // TODO: Support a hash for locations (LocUtil.hashCode).
-    // TODO: Support for last-used set back (on retrieving a Location instance)?
+    // Support a hash for locations (LocUtil.hashCode).
+    // Potential support for last-used set back when retrieving a Location instance.
 
     final SetBackEntry[] entries;
     final int defaultIndex;
     /** Count times setting a set back. */
-    int time; // TODO: Switch to a counter/clock implementation, in order to allow the same provider for player + vehicle?
+    int time; // Consider switching to a counter/clock implementation to allow the same provider for player and vehicle.
 
     /**
      * 
@@ -198,7 +198,7 @@ public class SetBackStorage {
     }
 
     public void resetByWorldName(final String worldName) {
-        // TODO: Not needed for memory leaks, possibly tie resetAll to a global world?
+        // Not needed for memory leaks; consider tying resetAll to a global world.
         for (SetBackEntry entry : entries) {
             if (worldName.equals(entry.getWorldName())) {
                 entry.setValid(false);
@@ -276,6 +276,7 @@ public class SetBackStorage {
         return entry.isValid() ? entry.getLocation(world) : null;
     }
 
-    // TODO: Method to reset only newer entries to a certain location [a) pass a set back entry b) find it first, then compare age].
+    // Idea: method to reset only newer entries to a certain location
+    // [a) pass a set back entry b) find it first, then compare age].
 
 }
