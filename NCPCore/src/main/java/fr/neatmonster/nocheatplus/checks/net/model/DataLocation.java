@@ -25,8 +25,6 @@ import fr.neatmonster.nocheatplus.utilities.location.LocUtil;
  */
 public class DataLocation implements IGetPositionWithLook {
 
-    // TODO: equals.
-    // TODO: hashCode won't help much if sub classes will override it anyway.
 
     private final double x;
 
