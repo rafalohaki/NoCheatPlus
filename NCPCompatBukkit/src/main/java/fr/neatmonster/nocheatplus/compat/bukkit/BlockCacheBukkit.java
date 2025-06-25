@@ -49,14 +49,14 @@ public class BlockCacheBukkit extends BlockCache {
 
     @Override
     public Material fetchTypeId(final int x, final int y, final int z) {
-        // TODO: consider setting type id and data at once.
+        // Consider setting type id and data at once.
         return world.getBlockAt(x, y, z).getType();
     }
 
     @SuppressWarnings("deprecation")
     @Override
     public int fetchData(final int x, final int y, final int z) {
-        // TODO: consider setting type id and data at once.
+        // Consider setting type id and data at once.
         return Bridge1_13.hasIsSwimming() ? 0 : world.getBlockAt(x, y, z).getData();
     }
 
@@ -69,7 +69,7 @@ public class BlockCacheBukkit extends BlockCache {
         }
         // minX, minY, minZ, maxX, maxY, maxZ
 
-        // TODO: Want to maintain a list with manual entries or at least half / full blocks ?
+        // Note: maintain a list with manual entries or at least half/full blocks?
         // Always return full bounds, needs extra adaption to BlockProperties (!).
         return new double[]{0D, 0D, 0D, 1D, 1D, 1D};
     }
@@ -77,7 +77,7 @@ public class BlockCacheBukkit extends BlockCache {
     @Override
     public boolean standsOnEntity(final Entity entity, final double minX, final double minY, final double minZ, final double maxX, final double maxY, final double maxZ){
         try{
-            // TODO: Probably check other ids too before doing this ?
+            // Possibly check other ids too before doing this.
             for (final Entity other : entity.getNearbyEntities(2.0, 2.0, 2.0)){
                 final EntityType type = other.getType();
                 if (!MaterialUtil.isBoat(type) && type != EntityType.SHULKER){ //  && !(other instanceof Minecart)) 
@@ -85,7 +85,7 @@ public class BlockCacheBukkit extends BlockCache {
                 }
                 final double locY = entity.getLocation(useLoc).getY();
                 useLoc.setWorld(null);
-                // TODO: A "better" estimate is possible, though some more tolerance would be good.
+                // A "better" estimate is possible, though some more tolerance would be good.
                 return Math.abs(locY - minY) < 0.7;
             }
         }
