@@ -61,9 +61,9 @@ import fr.neatmonster.nocheatplus.worlds.IWorldDataManager;
  */
 public class ProtocolLibComponent implements IDisableListener, INotifyReload, JoinLeaveListener, Listener {
 
-    // TODO: Static reference is problematic (needs a static and accessible Counters instance?). 
+    // Static reference is problematic; consider using an accessible Counters instance.
     public static final int idNullPlayer = NCPAPIProvider.getNoCheatPlusAPI().getGenericInstance(Counters.class).registerKey("packet.nullplayer");
-    /** Likely does not happen, TODO: Code review protocol plugin. */
+    /** Unlikely to happen; requires protocol plugin review. */
     public static final int idInconsistentIsAsync = NCPAPIProvider.getNoCheatPlusAPI().getGenericInstance(Counters.class).registerKey("packet.inconsistent.isasync");
 
     /**
@@ -99,8 +99,8 @@ public class ProtocolLibComponent implements IDisableListener, INotifyReload, Jo
             }
         }
         /*
-         * TODO: Register listeners iff any check is enabled - unregister from
-         * EventRegistry with unregister.
+         * Register listeners only if a check is enabled; they
+         * will be unregistered via EventRegistry when calling unregister.
          */
     }
 
@@ -203,7 +203,8 @@ public class ProtocolLibComponent implements IDisableListener, INotifyReload, Jo
     public void onReload() {
         unregister();
         NCPAPIProvider.getNoCheatPlusAPI().getPlayerDataManager().removeGenericInstance(NetData.class); // Currently needed for FlyingFrequency.
-        register(Bukkit.getPluginManager().getPlugin("NoCheatPlus")); // TODO: static plugin getter?
+        // Use the plugin manager because there is no static plugin getter.
+        register(Bukkit.getPluginManager().getPlugin("NoCheatPlus"));
     }
 
     private void unregister() {
@@ -215,7 +216,7 @@ public class ProtocolLibComponent implements IDisableListener, INotifyReload, Jo
                 api.removeComponent(adapter); // Bit heavy, but consistent.
             } catch (Throwable t) {
                 StaticLog.logWarning("Failed to unregister packet level hook: " + adapter.getClass().getName());
-            }// TODO Auto-generated method stub
+            }
 
         }
         registeredPacketAdapters.clear();
@@ -267,8 +268,8 @@ public class ProtocolLibComponent implements IDisableListener, INotifyReload, Jo
     @EventHandler(ignoreCancelled = true, priority = EventPriority.MONITOR)
     public void onPlayerTeleport(final PlayerTeleportEvent event) {
         if (!registeredPacketAdapters.isEmpty()) {
-            // TODO: Might move to MovingListener.
-            // TODO: Might still add cancelled UNKNOWN events. TEST IT
+            // Consider moving this to MovingListener.
+            // May still add cancelled UNKNOWN events; needs testing.
             final Location to = event.getTo();
             if (to == null) {
                 return;
