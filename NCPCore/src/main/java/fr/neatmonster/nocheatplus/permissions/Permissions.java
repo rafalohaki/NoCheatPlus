@@ -29,7 +29,7 @@ public class Permissions {
     private static final Map<String, RegisteredPermission> permissions = new LinkedHashMap<String, RegisteredPermission>();
 
     private static final RegisteredPermission add(String stringRepresentation) {
-        // TODO: Other concept / lock (?) once the plugin has fetched all on load.
+        // NOTE: Consider a different concept or locking once the plugin has fetched all on load.
         RegisteredPermission permission = new RegisteredPermission(id, stringRepresentation);
         if (permissions.containsKey(permission.getLowerCaseStringRepresentation())) {
             return permissions.get(permission.getLowerCaseStringRepresentation());

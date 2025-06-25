@@ -148,7 +148,7 @@ public abstract class MultiListenerRegistry<EB, P> extends MiniListenerRegistry<
         }
         MiniListener<E> miniListener = getMiniListener(listener, method, order, basePriority);
         if (listener == null) {
-            // TODO: Throw rather.
+            // NOTE: Throw an exception instead?
             return null;
         }
         register((Class<E>) method.getParameterTypes()[0], miniListener, 
@@ -179,11 +179,11 @@ public abstract class MultiListenerRegistry<EB, P> extends MiniListenerRegistry<
                 return false;
             }
             if (!Modifier.isPublic(method.getModifiers())) {
-                // TODO: Specific log.
+                // NOTE: Add a specific log message here.
                 return false;
             }
             if (!method.isAccessible()) {
-                // TODO: Can this be minimized?
+                // NOTE: Can this step be minimized?
                 method.setAccessible(true);
             }
             return true;
@@ -220,12 +220,11 @@ public abstract class MultiListenerRegistry<EB, P> extends MiniListenerRegistry<
             order = defaultOrder;
         }
         /*
-         * TODO: Collect checked methods first. If methods fail checking, could
-         * prevent register any. Since complex hooks/plugins may register
+         * NOTE: Collect checked methods first. If methods fail checking, this could
+         * prevent registration of any. Since complex hooks/plugins may register
          * multiple listeners, it's probably better to register what works, but
-         * pass success/failure state to the caller, thinking ahead of a
-         * registry context (policy: unregister all if any listener method fails
-         * to register).
+         * pass success/failure state to the caller, thinking ahead of a registry
+         * context (policy: unregister all if any listener method fails to register).
          */
         for (Method method : listenerClass.getMethods()) {
             if (shouldBeEventHandler(method)) {
@@ -236,8 +235,8 @@ public abstract class MultiListenerRegistry<EB, P> extends MiniListenerRegistry<
                             getIgnoreCancelled(method, defaultIgnoreCancelled));
                 }
                 if (miniListener == null) {
-                    // TODO: ReflectionUtil.toStringSpecialCase(Method) -> With type parameters (simple).
-                    NCPAPIProvider.getNoCheatPlusAPI().getLogManager().severe(Streams.STATUS, 
+                    // NOTE: ReflectionUtil.toStringSpecialCase(Method) with type parameters (simple) would help here.
+                    NCPAPIProvider.getNoCheatPlusAPI().getLogManager().severe(Streams.STATUS,
                             "Could not register event listener: " + listener.getClass().getName()
                             + "#" + method.getName());
                 } else {
