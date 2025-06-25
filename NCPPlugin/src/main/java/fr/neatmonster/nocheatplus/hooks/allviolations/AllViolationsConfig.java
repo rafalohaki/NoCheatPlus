@@ -37,7 +37,7 @@ public class AllViolationsConfig {
     public final boolean debugOnly;
 
     // TODO: More config on what to print (uuid, etc., default tags). 
-    // TODO: More filtering like in TestNCP.
+    // Note: Additional filtering may be implemented similar to TestNCP.
 
     public AllViolationsConfig(ConfigFile config) {
         allToTrace = config.getBoolean(ConfPaths.LOGGING_EXTENDED_ALLVIOLATIONS_BACKEND_TRACE);

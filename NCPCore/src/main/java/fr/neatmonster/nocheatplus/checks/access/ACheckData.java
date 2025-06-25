@@ -20,7 +20,7 @@ import fr.neatmonster.nocheatplus.components.data.ICheckData;
  * Abstract implementation to do nothing.
  * 
  * @author asofold
- * @TODO: Keep/remove.
+ * Note: pending review for potential removal.
  *
  */
 public abstract class ACheckData implements ICheckData {

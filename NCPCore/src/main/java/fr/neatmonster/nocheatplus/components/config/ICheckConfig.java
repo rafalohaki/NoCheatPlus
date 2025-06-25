@@ -15,7 +15,7 @@
 package fr.neatmonster.nocheatplus.components.config;
 
 /**
- * TODO: Keep / Remove.
+ * Note: subject to revision or removal.
  * 
  * @author asofold
  */

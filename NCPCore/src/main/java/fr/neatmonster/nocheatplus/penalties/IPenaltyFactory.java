@@ -16,6 +16,6 @@ package fr.neatmonster.nocheatplus.penalties;
 
 public interface IPenaltyFactory {
 
-    // TODO: Needs a factory ? Or rather have a
+    // Note: evaluate if penalties should be constructed via a dedicated factory.
 
 }

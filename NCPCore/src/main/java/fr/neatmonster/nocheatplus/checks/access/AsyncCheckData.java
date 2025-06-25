@@ -17,7 +17,7 @@ package fr.neatmonster.nocheatplus.checks.access;
 /**
  * 
  * @author asofold
- * @TODO Keep / remove.
+ * Note: may be removed in future.
  *
  */
 public abstract class AsyncCheckData extends ACheckData {

@@ -21,6 +21,6 @@ package fr.neatmonster.nocheatplus.hooks;
  */
 public class ExemptionRegistry {
 
-    // TODO: ...
+    // Placeholder for future exemption-related logic.
 
 }
