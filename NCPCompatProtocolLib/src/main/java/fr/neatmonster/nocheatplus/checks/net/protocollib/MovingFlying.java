@@ -170,10 +170,8 @@ public class MovingFlying extends BaseAdapter {
             noConfirmTeleportPacket();
             return;
         }
-        // TODO: Cross check legacy types (if they even had an integer).
         Integer teleportId = integers.read(0);
         if (teleportId == null) {
-            // TODO: Not sure ...
             return;
         }
         final Player player = event.getPlayer();
@@ -190,7 +188,6 @@ public class MovingFlying extends BaseAdapter {
 
     private void noConfirmTeleportPacket() {
         acceptConfirmTeleportPackets = false;
-        // TODO: Attempt to unregister.
         NCPAPIProvider.getNoCheatPlusAPI().getLogManager().info(Streams.STATUS, "Confirm teleport packet not available.");
     }
 
@@ -203,12 +200,10 @@ public class MovingFlying extends BaseAdapter {
         if (!primaryThread) {
             // Count all asynchronous events extra.
             counters.addSynchronized(idAsyncFlying, 1);
-            // TODO: Detect game phase for the player?
         }
         final long time =  System.currentTimeMillis();
         final Player player = event.getPlayer();
         if (player == null) {
-            // TODO: Need config?
             counters.add(ProtocolLibComponent.idNullPlayer, 1, primaryThread);
             event.setCancelled(true);
             return;
@@ -218,7 +213,6 @@ public class MovingFlying extends BaseAdapter {
         // Always update last received time.
         final NetData data = pData.getGenericInstance(NetData.class);
         data.lastKeepAliveTime = time; // Update without much of a contract.
-        // TODO: Leniency options too (packet order inversion). -> current: flyingQueue is fetched.
         final IWorldData worldData = pData.getCurrentWorldDataSafe();
         if (!worldData.isCheckActive(CheckType.NET_FLYINGFREQUENCY)) {
             return;
@@ -234,7 +228,6 @@ public class MovingFlying extends BaseAdapter {
         if (packetData != null) {
             // Prevent processing packets with obviously malicious content.
             if (isInvalidContent(packetData)) {
-                // TODO: extra actions: log and kick (cancel state is not evaluated)
                 event.setCancelled(true);
                 if (pData.isDebugActive(this.checkType)) {
                     debug(player, "Incoming packet, cancel due to malicious content: " + packetData);
@@ -254,20 +247,18 @@ public class MovingFlying extends BaseAdapter {
                                 && ackReference.lastOutgoingId != ackReference.maxConfirmedId) {
                             // Still waiting for a 'confirm teleport' packet. More or less safe to cancel this out.
                             /*
-                             * TODO: The actual issue with this, apart from
-                             * potential freezing, also concerns gameplay experience
-                             * in case of minor set backs, which also could be
+                             * The actual issue with this, apart from potential
+                             * freezing, also concerns gameplay experience in
+                             * case of minor set backs, which also could be
                              * caused by the server, e.g. with 'moved wrongly' or
                              * setting players outside of blocks. In this case the
                              * moves sent before teleport ack would still be valid
-                             * after the teleport, because distances are small. The
-                             * actual solution should still be to a) not have false
-                             * positives b) somehow get rid all the
-                             * position-correction teleporting the server does, for
-                             * the cases a plugin can handle.
+                             * after the teleport, because distances are small.
+                             * The actual solution should still be to a) not have
+                             * false positives b) somehow get rid all the
+                             * position-correction teleporting the server does,
+                             * for the cases a plugin can handle.
                              */
-                            // TODO: Timeout -> either skip cancel or schedule a set back (to last valid pos or other).
-                            // TODO: Config?
                             cancel = true;
                         }
                     }
@@ -282,7 +273,7 @@ public class MovingFlying extends BaseAdapter {
                 }
                 default: {
                     // Continue.
-                    data.addFlyingQueue(packetData); // TODO: Not the optimal position, perhaps.
+                    data.addFlyingQueue(packetData);
                 }
             }
             // Add as valid packet (exclude invalid coordinates etc. for now).
@@ -290,8 +281,7 @@ public class MovingFlying extends BaseAdapter {
         }
 
         // Actual packet frequency check.
-        // TODO: Consider using the NetStatic check.
-        if (!cancel && !skipFlyingFrequency 
+        if (!cancel && !skipFlyingFrequency
             && !pData.hasBypass(CheckType.NET_FLYINGFREQUENCY, player)
             && flyingFrequency.check(player, packetData, time, data, cc, pData)) {
             cancel = true;
@@ -304,7 +294,6 @@ public class MovingFlying extends BaseAdapter {
         }
 
         // Cancel redundant packets, when frequency is high anyway.
-        // TODO: Recode to detect cheating in a more reliable way, normally this is not the primary thread.
         //        if (!cancel && primaryThread && packetData != null && cc.flyingFrequencyRedundantActive && checkRedundantPackets(player, packetData, allScore, time, data, cc)) {
         //            event.setCancelled(true);
         //        }
@@ -364,7 +353,6 @@ public class MovingFlying extends BaseAdapter {
                 packetMismatch(event);
                 return null;
             }
-            // TODO: before 1.8: stance (should make possible to reject in isInvalidContent).
         }
         else {
             doubles = null;
