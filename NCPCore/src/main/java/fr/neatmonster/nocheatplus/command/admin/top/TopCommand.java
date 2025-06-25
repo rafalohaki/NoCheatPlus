@@ -167,9 +167,31 @@ public class TopCommand extends BaseCommand{
     @Override
     public boolean onCommand(CommandSender sender, Command command, String alias, String[] args) {
         if (args.length < 2) {
-            sender.sendMessage((sender instanceof Player ? TAG : CTAG) + "Bad setup.\nOptional: Specify number of entries to show (once).\nObligatory: Specify check types (multiple possible).\nOptional: Specify what to sort by (multiple possible: -sumvl, -avgvl, -maxvl, -nvl, -name, -time).\nThis is a heavy operation, use with care."); // -check)
+            sender.sendMessage((sender instanceof Player ? TAG : CTAG)
+                    + "Bad setup.\nOptional: Specify number of entries to show (once).\nObligatory: Specify check types (multiple possible).\nOptional: Specify what to sort by (multiple possible: -sumvl, -avgvl, -maxvl, -nvl, -name, -time).\nThis is a heavy operation, use with care."); // -check)
             return true;
         }
+        handleTopCommand(sender, args);
+        return true;
+    }
+
+    private void handleTopCommand(CommandSender sender, String[] args) {
+        final int[] entryArgs = parseEntryArguments(sender, args);
+        final int startIndex = entryArgs[0];
+        final int n = entryArgs[1];
+
+        final Set<CheckType> checkTypes = parseCheckTypes(args, startIndex);
+        if (checkTypes.isEmpty()) {
+            sender.sendMessage((sender instanceof Player ? TAG : CTAG) + "No check types specified.");
+            return;
+        }
+
+        final Comparator<VLView> comparator = parseComparator(args, startIndex);
+
+        Folia.runSyncTask(access, (arg) -> new PrimaryThreadWorker(sender, checkTypes, comparator, n, access).run());
+    }
+
+    private int[] parseEntryArguments(CommandSender sender, String[] args) {
         int startIndex = 1;
         int n = 10;
         try {
@@ -188,9 +210,12 @@ public class TopCommand extends BaseCommand{
             sender.sendMessage((sender instanceof Player ? TAG : CTAG) + "Capping number of entries at 10000.");
             n = 10000;
         }
-        
-        Set<CheckType> checkTypes = new LinkedHashSet<CheckType>();
-        for (int i = startIndex; i < args.length; i ++) {
+        return new int[] { startIndex, n };
+    }
+
+    private Set<CheckType> parseCheckTypes(String[] args, int startIndex) {
+        final Set<CheckType> checkTypes = new LinkedHashSet<CheckType>();
+        for (int i = startIndex; i < args.length; i++) {
             CheckType type = null;
             try {
                 type = CheckType.valueOf(args[i].trim().toUpperCase().replace('-', '_').replace('.', '_'));
@@ -201,22 +226,15 @@ public class TopCommand extends BaseCommand{
                 checkTypes.addAll(CheckTypeUtil.getWithDescendants(type)); // Includes type.
             }
         }
-        if (checkTypes.isEmpty()) {
-            sender.sendMessage((sender instanceof Player ? TAG : CTAG) + "No check types specified.");
-            return false;
-        }
-        
+        return checkTypes;
+    }
+
+    private Comparator<VLView> parseComparator(String[] args, int startIndex) {
         Comparator<VLView> comparator = VLView.parseMixedComparator(args, startIndex);
         if (comparator == null) {
-            // NOTE: Fallback to a default comparator.
             comparator = new FCFSComparator<VLView>(Arrays.asList(VLView.CmpnVL, VLView.CmpSumVL), true);
         }
-        
-        // Run a worker task.
-        final Comparator<VLView> fcomparator = comparator;
-        final int fn = n;
-        Folia.runSyncTask(access, (arg) -> new PrimaryThreadWorker(sender, checkTypes, fcomparator, fn, access).run());
-        return true;
+        return comparator;
     }
 
     @Override
