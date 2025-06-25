@@ -151,61 +151,32 @@ public class ChatListener extends CheckListener implements INotifyReload, JoinLe
     @EventHandler(priority = EventPriority.LOWEST)
     public void onPlayerCommandPreprocess(final PlayerCommandPreprocessEvent event) {
         final Player player = event.getPlayer();
-
-        // Tell TickTask to update cached permissions.
-        final IPlayerData pData = DataManager.getPlayerData(player);
-        final ChatConfig cc = pData.getGenericInstance(ChatConfig.class);
-        // Left-trim is necessary because the server accepts leading spaces with commands.
-        final String message = event.getMessage();
-        final String lcMessage = StringUtil.leftTrim(message).toLowerCase();
-        // Note: namespace prefixes such as "bukkit:" may need to be removed.
-
-        final String[] split = lcMessage.split(" ", 2);
-        final String alias = split[0].substring(1);
-        final Command command = CommandUtil.getCommand(alias);
-
-        final List<String> messageVars = new ArrayList<String>(); // Could as well use an array and allow null on input of SimpleCharPrefixTree.
-        messageVars.add(lcMessage);
-        String checkMessage = message; // Message to run chat checks on.
-        if (command != null) {
-            messageVars.add("/" + command.getLabel().toLowerCase() + (split.length > 1 ? (" " + split[1]) : ""));
-        }
-        if (alias.contains(":")) {
-            final int index = message.indexOf(":") + 1;
-            if (index < message.length()) {
-                checkMessage = message.substring(index);
-                messageVars.add(checkMessage.toLowerCase());
-            }
-        }
-        // Prevent commands from being used by players (e.g. /op /deop /reload).
-        if (cc.consoleOnlyCheck && consoleOnlyCommands.hasAnyPrefixWords(messageVars)) {
-            if (command == null || command.testPermission(player)) {
-                player.sendMessage(cc.consoleOnlyMessage);
-            }
-            event.setCancelled(true);
+        if (player == null || !player.isOnline()) {
             return;
         }
 
-        // Handle as chat or command.
-        if (chatCommands.hasAnyPrefixWords(messageVars)) {
-            // Treat as chat.
-            // Note: permission updates might be requested here for consistency.
-            // Potentially trim the command text.
-            if (textChecks(player, checkMessage, cc, pData, true, false)) {
-                event.setCancelled(true);
-            }
+        final IPlayerData pData = DataManager.getPlayerData(player);
+        final ChatConfig cc = pData.getGenericInstance(ChatConfig.class);
+
+        final ParsedCommandInfo parsed = parseCommand(event.getMessage());
+
+        if (handleConsoleOnly(player, parsed, cc, event)) {
+            return;
         }
-        else if (!commandExclusions.hasAnyPrefixWords(messageVars)) {
-            // Treat as command.
-            if (commands.isEnabled(player, pData) && commands.check(player, checkMessage, cc, pData, captcha)) {
+
+        if (chatCommands.hasAnyPrefixWords(parsed.messageVars)) {
+            if (textChecks(player, parsed.checkMessage, cc, pData, true, false)) {
                 event.setCancelled(true);
             }
-            else {
-                // These commands might always require checking.
-                // Note that this checks for prefixes, not prefix words.
+        } else if (!commandExclusions.hasAnyPrefixWords(parsed.messageVars)) {
+            if (commands.isEnabled(player, pData)
+                    && commands.check(player, parsed.checkMessage, cc, pData, captcha)) {
+                event.setCancelled(true);
+            } else {
                 final MovingConfig mcc = pData.getGenericInstance(MovingConfig.class);
-                if (mcc.passableUntrackedCommandCheck && mcc.passableUntrackedCommandPrefixes.hasAnyPrefix(messageVars)) {
-                    if (checkUntrackedLocation(player, message, mcc, pData)) {
+                if (mcc.passableUntrackedCommandCheck
+                        && mcc.passableUntrackedCommandPrefixes.hasAnyPrefix(parsed.messageVars)) {
+                    if (checkUntrackedLocation(player, event.getMessage(), mcc, pData)) {
                         event.setCancelled(true);
                     }
                 }
@@ -214,6 +185,52 @@ public class ChatListener extends CheckListener implements INotifyReload, JoinLe
 
     }
 
+    private static final class ParsedCommandInfo {
+        final List<String> messageVars;
+        final String checkMessage;
+        final Command command;
+
+        ParsedCommandInfo(final List<String> messageVars, final String checkMessage, final Command command) {
+            this.messageVars = messageVars;
+            this.checkMessage = checkMessage;
+            this.command = command;
+        }
+    }
+
+    private ParsedCommandInfo parseCommand(final String message) {
+        final String safeMessage = message != null ? message : "";
+        final String lcMessage = StringUtil.leftTrim(safeMessage).toLowerCase();
+        final String[] split = lcMessage.split(" ", 2);
+        final String alias = split[0].isEmpty() ? "" : split[0].substring(1);
+        final Command command = CommandUtil.getCommand(alias);
+
+        final List<String> vars = new ArrayList<>();
+        vars.add(lcMessage);
+        String checkMessage = safeMessage;
+        if (command != null) {
+            vars.add("/" + command.getLabel().toLowerCase() + (split.length > 1 ? " " + split[1] : ""));
+        }
+        if (alias.contains(":")) {
+            final int index = safeMessage.indexOf(":") + 1;
+            if (index < safeMessage.length()) {
+                checkMessage = safeMessage.substring(index);
+                vars.add(checkMessage.toLowerCase());
+            }
+        }
+        return new ParsedCommandInfo(vars, checkMessage, command);
+    }
+
+    private boolean handleConsoleOnly(final Player player, final ParsedCommandInfo info,
+            final ChatConfig cc, final PlayerCommandPreprocessEvent event) {
+        if (cc.consoleOnlyCheck && consoleOnlyCommands.hasAnyPrefixWords(info.messageVars)) {
+            if (info.command == null || info.command.testPermission(player)) {
+                player.sendMessage(cc.consoleOnlyMessage);
+            }
+            event.setCancelled(true);
+            return true;
+        }
+        return false;
+    }
     private boolean checkUntrackedLocation(final Player player, final String message, 
             final MovingConfig mcc, final IPlayerData pData) {
         final Location loc = player.getLocation(useLoc);
