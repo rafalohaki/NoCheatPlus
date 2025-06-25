@@ -116,7 +116,7 @@ public class TestWorkarounds {
         TestAcceptDenyCounters.checkSame(accept, deny, "Just use, a=14 (s/a/p)", wacd.getAllTimeCounter(), pc);
         TestAcceptDenyCounters.checkCounts(wacd.getStageCounter(), 14, 141 - 14, "test.wacd.stage");
 
-        // TODO: Might also test getNewInstance().
+        // NOTE: Might also test getNewInstance().
 
     }
 
@@ -219,9 +219,9 @@ public class TestWorkarounds {
             TestAcceptDenyCounters.checkCounts(((IStagedWorkaround) (ws.getWorkaround(ids2.get(i)))).getStageCounter(), 1, 0, "stageCounter/" + ids2.get(i));
         }
         ws.resetConditions();
-        // TODO: Individual group reset (needs half of group.wcd).
+        // NOTE: Individual group reset (needs half of group.wcd).
 
-        // TODO: More details/cases (also failure cases, exceptions, etc).
+        // NOTE: Additional cases may be needed (failure cases, exceptions, etc).
 
     }
 

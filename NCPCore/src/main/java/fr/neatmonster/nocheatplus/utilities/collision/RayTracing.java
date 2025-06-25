@@ -121,7 +121,7 @@ public abstract class RayTracing implements ICollideBlocks {
      * @return
      */
     private static final double tDiff(final double dTotal, final double offset, final boolean isEndBlock) {
-        // TODO: endBlock check only for == not </> ?
+        // NOTE: Verify if endBlock should check only for equality (==) rather than </> comparisons.
         if (dTotal > 0.0) {
             if (offset >= 1.0) {
                 // Static block change (e.g. diagonal move).
