@@ -234,7 +234,7 @@ public class ActionFrequency {
      * Get the reference time for the transition from the first to the second bucket.
      * @return
      */
-    public final long lastAccess() { // TODO: Should rename this.
+    public final long lastAccess() {
         return time;
     }
 
@@ -267,7 +267,6 @@ public class ActionFrequency {
      * @return
      */
     public final String toLine() {
-        // TODO: Backwards-compatible lastUpdate ?
         final StringBuilder buffer = new StringBuilder(50);
         buffer.append(buckets.length + ","+durBucket+","+time);
         for (float bucket : buckets) {
@@ -312,14 +311,13 @@ public class ActionFrequency {
      * @return
      */
     public static ActionFrequency fromLine(final String line) {
-        // TODO: Backwards-compatible lastUpdate ?
         String[] split = line.split(",");
-        if (split.length < 3) throw new RuntimeException("Bad argument length."); // TODO
+        if (split.length < 3) throw new RuntimeException("Bad argument length.");
         final int n = Integer.parseInt(split[0]);
         final long durBucket = Long.parseLong(split[1]);
         final long time = Long.parseLong(split[2]);
         final float[] buckets = new float[split.length -3];
-        if (split.length - 3 != buckets.length) throw new RuntimeException("Bad argument length."); // TODO
+        if (split.length - 3 != buckets.length) throw new RuntimeException("Bad argument length.");
         for (int i = 3; i < split.length; i ++) {
             buckets[i - 3] = Float.parseFloat(split[i]);
         }
