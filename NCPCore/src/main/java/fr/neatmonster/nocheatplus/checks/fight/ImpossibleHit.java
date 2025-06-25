@@ -67,7 +67,7 @@ public class ImpossibleHit extends Check {
         
         // Meta check: Fight.direction passed, blockinteract.direction failed ->
         // this is a server-sided rotation (player is interacting with something in another direction client-side)
-        // TODO: Adapt to the new Fight.Hitbox check, once merged in master
+        // Adapt to the new Fight.Hitbox check once merged in master.
         if ((data.lookFight == -1 && biData.lookInteraction == 0)) {
             violation = true;
             // Consume the flags.
@@ -87,8 +87,8 @@ public class ImpossibleHit extends Check {
             tags.add("using/blocking");
         }
         // (While dead is canceled silentely, while sleeping shouldn't be possible...)
-        // TODO: Is there more to prevent?
-        // TODO: Might also want to prevent on packet-level
+        // Investigate if more scenarios should be prevented.
+        // Might also want to prevent on packet level.
 
         // Handle violations 
         if (violation) {

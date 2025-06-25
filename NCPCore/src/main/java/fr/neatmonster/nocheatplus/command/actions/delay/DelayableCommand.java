@@ -186,7 +186,7 @@ public abstract class DelayableCommand extends BaseCommand {
     @Override
     public List<String> onTabComplete(CommandSender sender, Command command, String alias, String[] args) {
         // Fill in players.
-        // TODO: Add altered signature for alteredArgs ?
+        // Consider adding an altered signature for alteredArgs.
         return null;
     }
 }
