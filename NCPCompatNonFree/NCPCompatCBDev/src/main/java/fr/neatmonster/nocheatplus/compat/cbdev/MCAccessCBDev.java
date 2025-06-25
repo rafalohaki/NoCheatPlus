@@ -75,7 +75,7 @@ public class MCAccessCBDev implements MCAccess {
                 new String[]{"d"}, double.class);
         ReflectionUtil.checkMethodReturnTypesNoArgs(net.minecraft.server.v1_12_R1.Material.class, 
                 new String[]{"isSolid", "isLiquid"}, boolean.class);
-        // TODO: Confine the following by types as well.
+        // Consider confining the following by types as well.
         ReflectionUtil.checkMembers("net.minecraft.server.v1_12_R1.", 
                 new String[] {"Entity" , "length", "width", "locY"});
         ReflectionUtil.checkMembers("net.minecraft.server.v1_12_R1.", 
@@ -183,7 +183,7 @@ public class MCAccessCBDev implements MCAccess {
         if (entityPlayer.dead) {
             return AlmostBoolean.NO;
         }
-        // TODO: Does this need a method call for the "real" box? Might be no problem during moving events, though.
+        // Check if a method call is required for the "real" box; might be fine during moving events.
         final AxisAlignedBB box = entityPlayer.getBoundingBox();
         if (LocUtil.isBadCoordinate(box.a, box.b, box.c, box.d, box.e, box.f)) {
             return AlmostBoolean.YES;

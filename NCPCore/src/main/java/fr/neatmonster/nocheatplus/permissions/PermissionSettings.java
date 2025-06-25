@@ -68,7 +68,7 @@ public class PermissionSettings {
         public abstract boolean matches(String permissionName);
     }
 
-    // TODO: Rules for any-start, any-end, both, regex:...
+    // Rules for any-start, any-end, both, regex:...
     public static class StartsWithRule extends PermissionRule {
         private final String startsWith;
         public StartsWithRule(String startsWith, PermissionPolicy policy) {
@@ -185,7 +185,7 @@ public class PermissionSettings {
         final Map<String, PermissionPolicy> explicitPolicy = new LinkedHashMap<String, PermissionPolicy>();
         final List<PermissionRule> implicitRules = new LinkedList<PermissionSettings.PermissionRule>();
 
-        // TODO: Change to List ! +- separators.
+        // Change to List ! +- separators.
         final List<String> defs = config.getStringList(pathRules);
         for (String def : defs) {
             String[] split = def.split("::", 2);
