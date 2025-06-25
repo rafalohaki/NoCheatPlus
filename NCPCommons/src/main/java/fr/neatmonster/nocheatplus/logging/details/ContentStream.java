@@ -25,11 +25,11 @@ package fr.neatmonster.nocheatplus.logging.details;
  */
 public interface ContentStream <C> extends ContentLogger<C> {
     
-    // TODO: Maybe also an abstract class.
+    // Could also be represented by an abstract class.
     
     // Maybe not: addFilter (filter away some stuff, e.g. by regex from config).
     
-    // TODO: Consider extra arguments for efficient registratioon with COWs.
+    // Additional arguments may allow efficient registration with copy-on-write structures.
     void addNode(LogNode<C> node);
     
     // addAdapter(ContentAdapter<C, ?> adapter) ? ID etc., attach to another stream.
