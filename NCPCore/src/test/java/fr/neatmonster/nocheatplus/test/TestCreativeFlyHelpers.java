@@ -16,10 +16,7 @@ import org.bukkit.inventory.PlayerInventory;
 import fr.neatmonster.nocheatplus.NCPAPIProvider;
 import fr.neatmonster.nocheatplus.checks.moving.MovingData;
 import fr.neatmonster.nocheatplus.checks.moving.MovingConfig;
-import fr.neatmonster.nocheatplus.checks.moving.model.PlayerMoveData;
-import fr.neatmonster.nocheatplus.checks.moving.model.MoveTrace;
 import fr.neatmonster.nocheatplus.checks.moving.player.CreativeFly;
-import fr.neatmonster.nocheatplus.checks.moving.velocity.SimpleAxisVelocity;
 import fr.neatmonster.nocheatplus.checks.moving.velocity.SimpleEntry;
 import fr.neatmonster.nocheatplus.components.modifier.IAttributeAccess;
 import fr.neatmonster.nocheatplus.components.registry.event.IGenericInstanceHandle;
@@ -29,6 +26,7 @@ import fr.neatmonster.nocheatplus.utilities.location.PlayerLocation;
 
 import org.junit.Before;
 import org.junit.Test;
+import static org.mockito.Mockito.*;
 
 public class TestCreativeFlyHelpers {
 
@@ -114,33 +112,15 @@ public class TestCreativeFlyHelpers {
         f.setAccessible(true);
         f.set(null, api);
 
-        // Minimal DataManager setup
-        sun.misc.Unsafe un = getUnsafe();
-        Object pdm = un.allocateInstance(fr.neatmonster.nocheatplus.players.PlayerDataManager.class);
-        Field eh = fr.neatmonster.nocheatplus.players.PlayerDataManager.class.getDeclaredField("executionHistories");
-        eh.setAccessible(true);
-        eh.set(pdm, new java.util.HashMap<>());
+        // Minimal DataManager setup using mocks
+        Object pdm = mock(fr.neatmonster.nocheatplus.players.PlayerDataManager.class);
         Field dm = fr.neatmonster.nocheatplus.players.DataManager.class.getDeclaredField("instance");
         dm.setAccessible(true);
         dm.set(null, pdm);
     }
 
-    private static sun.misc.Unsafe getUnsafe() throws Exception {
-        Field f = sun.misc.Unsafe.class.getDeclaredField("theUnsafe");
-        f.setAccessible(true);
-        return (sun.misc.Unsafe) f.get(null);
-    }
-
-    private static MovingData newData() throws Exception {
-        sun.misc.Unsafe u = getUnsafe();
-        MovingData data = (MovingData) u.allocateInstance(MovingData.class);
-        Field verVelF = MovingData.class.getDeclaredField("verVel");
-        verVelF.setAccessible(true);
-        verVelF.set(data, new SimpleAxisVelocity());
-        Field movesF = MovingData.class.getDeclaredField("playerMoves");
-        movesF.setAccessible(true);
-        movesF.set(data, new MoveTrace<>(PlayerMoveData::new, 2));
-        return data;
+    private static MovingData newData() {
+        return mock(MovingData.class);
     }
 
     @Before
@@ -152,10 +132,7 @@ public class TestCreativeFlyHelpers {
     public void testApplyVerticalVelocityAdjustmentWithVelocity() throws Exception {
         CreativeFly cf = new CreativeFly();
         MovingData data = newData();
-        Field verVelF = MovingData.class.getDeclaredField("verVel");
-        verVelF.setAccessible(true);
-        SimpleAxisVelocity verVel = (SimpleAxisVelocity) verVelF.get(data);
-        verVel.add(new SimpleEntry(0.3,1));
+        when(data.getOrUseVerticalVelocity(anyDouble())).thenReturn(new SimpleEntry(0.3,1));
         double[] arr = {0.3, 0.0};
         Method m = CreativeFly.class.getDeclaredMethod("applyVerticalVelocityAdjustment", MovingData.class, double.class, double.class, double[].class);
         m.setAccessible(true);
@@ -168,6 +145,7 @@ public class TestCreativeFlyHelpers {
     public void testApplyVerticalVelocityAdjustmentNoVelocity() throws Exception {
         CreativeFly cf = new CreativeFly();
         MovingData data = newData();
+        when(data.getOrUseVerticalVelocity(anyDouble())).thenReturn(null);
         double[] arr = {0.3, 0.1};
         Method m = CreativeFly.class.getDeclaredMethod("applyVerticalVelocityAdjustment", MovingData.class, double.class, double.class, double[].class);
         m.setAccessible(true);
