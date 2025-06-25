@@ -30,15 +30,15 @@ import fr.neatmonster.nocheatplus.utilities.map.BlockProperties;
  */
 public class OnGroundReference {
 
-    // TODO: More simplified opportunistic variant?
-    // TODO: Include/exclude other edge cases :p.
+    // Consider a more simplified opportunistic variant.
+    // Edge cases may be included or excluded.
 
     /*
-     * TODO: Consider adding a super interface/abstract, to make the
-     * implementation interchangeable (aiming at a very simple implementation,
-     * configurable).
+     * Consider adding a super interface or abstract class to make the
+     * implementation interchangeable, aiming at a very simple and
+     * configurable setup.
      */
-    // TODO: (Ever detach this to be used from within BlockProperties?)
+    // Possibly detach this so it can be used from within BlockProperties.
 
     private BlockCache blockCache = null;
     private BlockChangeReference ref = null;
@@ -81,7 +81,7 @@ public class OnGroundReference {
         itEntriesAbove = null; //  Gets overridden if not null.
         entryAbove = null;
         nodeAbove = node; // Gets overridden, if entriesAbove are not null.
-        // TODO: Consider to set other fields to null.
+        // Possibly set other fields to null as well.
     }
 
     public void updateSpan() {
@@ -126,8 +126,9 @@ public class OnGroundReference {
      */
     public boolean initEntries(final int x, final int y, final int z) {
 
-        // TODO: Much of cleanup + tests + delegate to auxiliary methods (shrink code size in this method).
-        // TODO: Evaluate which is the most likely most often called part(s) ?
+        // Significant cleanup and tests should delegate to auxiliary methods
+        // to shrink code size in this method.
+        // Evaluate which part is most often called.
 
         itEntries = entries == null ? null : entries.listIterator();
         itEntriesAbove = entriesAbove == null ? null : entriesAbove.listIterator();
@@ -248,9 +249,9 @@ public class OnGroundReference {
      */
     public boolean advance() {
 
-        // TODO: Evaluate which is the most likely most often called part(s) ?
+        // Evaluate which part is most often called.
 
-        if (entries == null) { // TODO: Which to test for: entries or entry?
+        if (entries == null) { // Which to test for: entries or entry?
             if (itEntriesAbove.hasNext()) {
                 entryAbove = itEntriesAbove.next();
                 nodeAbove = entryAbove.previousState;
@@ -267,7 +268,7 @@ public class OnGroundReference {
                 entry = itEntries.next();
                 node = entry.previousState;
                 if (BlockProperties.isGround(node.getType(), ignoreFlags)) {
-                    // TODO: If nodeAbove is ground too, could exclude cases here.
+                    // If nodeAbove is ground too, cases could be excluded here.
                     return true;
                 }
                 else {
@@ -321,12 +322,12 @@ public class OnGroundReference {
             if (itEntries.hasNext()) {
                 entry = itEntries.next();
                 node = entry.previousState;
-                // TODO: Skip if not ground (!).
+                // Skip if not ground (!).
                 // Rewind.
                 while (itEntriesAbove.nextIndex() > entriesAboveLockIndex) {
                     entryAbove = itEntriesAbove.previous();
                     nodeAbove = entryAbove.previousState;
-                    // TODO: Consider optimized break here.
+                    // Consider optimized break here.
                 }
                 // Advance towards next overlap.
                 if (entryAbove != null) {
@@ -346,7 +347,7 @@ public class OnGroundReference {
                             // Try next entry.
                             entryAbove = null;
                             nodeAbove = null;
-                            // TODO: Consider allow checking entry + null once.
+                              // Consider allowing a check for entry + null once.
                             break;
                         }
                     }
@@ -357,9 +358,9 @@ public class OnGroundReference {
             }
             else {
                 /*
-                 * TODO: Cover current state for entry vs. last of entriesAbove
-                 * for the very last thing? (same for current above state vs.
-                 * last of entries).
+                 * Consider covering the current state for entry versus the
+                 * last of entriesAbove for the very last step. The same applies
+                 * for the current above state versus the last of entries.
                  */
                 entry = entryAbove = null;
                 node = nodeAbove = null;
@@ -368,7 +369,7 @@ public class OnGroundReference {
 
             if (entry == null && entryAbove == null) { 
                 /*
-                 * TODO: Should be dead code, ensure all cases except for
+                 * This should be dead code. Ensure all cases except for
                  * "Try next entry." are covered above.
                  */
                 return false;
