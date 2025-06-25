@@ -26,6 +26,9 @@ import org.bukkit.event.player.AsyncPlayerChatEvent;
 import org.bukkit.event.player.PlayerCommandPreprocessEvent;
 import org.bukkit.event.player.PlayerLoginEvent;
 import org.bukkit.event.player.PlayerLoginEvent.Result;
+import org.bukkit.Bukkit;
+import org.bukkit.plugin.Plugin;
+import fr.neatmonster.nocheatplus.compat.Folia;
 
 import fr.neatmonster.nocheatplus.NCPAPIProvider;
 import fr.neatmonster.nocheatplus.checks.CheckListener;
@@ -124,19 +127,38 @@ public class ChatListener extends CheckListener implements INotifyReload, JoinLe
     public void onPlayerChat(final AsyncPlayerChatEvent event) {
 
         final Player player = event.getPlayer();
+        final String message = event.getMessage();
         final boolean alreadyCancelled = event.isCancelled();
 
-        if (!DataManager.getPlayerData(player).isCheckActive(CheckType.CHAT, player)) return;
+        final Runnable task = () -> handleChatEvent(event, player, message, alreadyCancelled);
 
-        // Tell TickTask to update cached permissions.
-        // (Might omit this if already cancelled.)
+        if (event.isAsynchronous()) {
+            final Plugin plugin = Bukkit.getPluginManager().getPlugin("NoCheatPlus");
+            Folia.runSyncTask(plugin, arg -> task.run());
+        } else {
+            task.run();
+        }
+
+    }
+
+    private void handleChatEvent(final AsyncPlayerChatEvent event, final Player player,
+            final String message, final boolean alreadyCancelled) {
+        if (player == null || message == null) {
+            return;
+        }
         final IPlayerData pData = DataManager.getPlayerData(player);
+        if (pData == null) {
+            return;
+        }
+        if (!pData.isCheckActive(CheckType.CHAT, player)) {
+            return;
+        }
         final ChatConfig cc = pData.getGenericInstance(ChatConfig.class);
+        if (cc == null) {
+            return;
+        }
 
-
-        // Then the no chat check.
-        // Note: event.isAsync() indicates if this is run asynchronously.
-        if (textChecks(player, event.getMessage(), cc, pData, false, alreadyCancelled)) {
+        if (textChecks(player, message, cc, pData, true, alreadyCancelled)) {
             event.setCancelled(true);
         }
 
