@@ -43,11 +43,11 @@ public class BridgeCrossPlugin implements IBridgeCrossPlugin, IPostRegisterRunna
         try {
             reflectBase = new ReflectBase();
         }
-        catch (NullPointerException e1) {
-            // ignore - reflection helper not available
-        }
         catch (ReflectFailureException e2) {
             // ignore - reflection helper not available
+        }
+        catch (RuntimeException e1) {
+            // ignore - reflection helper not available (includes NPE)
         }
         if (reflectBase != null) {
             this.playerClass = getEntityClass(reflectBase, "Player");
