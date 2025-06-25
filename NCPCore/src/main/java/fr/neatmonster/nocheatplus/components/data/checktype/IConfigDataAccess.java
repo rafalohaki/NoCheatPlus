@@ -59,8 +59,8 @@ public interface IConfigDataAccess extends IBaseDataAccess {
      * which get applied after reloading the raw configuration, independently of
      * what is set in there - depends on the argument overrideType.
      * <hr/>
-     * TODO: With overrideType CUSTOM this is persistent over reloading the
-     * configuration.
+     * Note: With overrideType CUSTOM this remains persistent over configuration
+     * reloads.
      * <hr/>
      * <h3>IWorldData</h3> In order to reliably override check activation for
      * all stored WorldData instances, use
@@ -80,14 +80,14 @@ public interface IConfigDataAccess extends IBaseDataAccess {
      *            Explicitly attempt to override child nodes too, if set to
      *            true. Otherwise child nodes are just updated to the current
      *            state.
-     * @TODO Registration priorities and tags to relate to, for custom
-     *       overrides.
+     * Registration priorities and tags to relate to, for custom overrides.
      */
-    // TODO: IWorldData - move to IWorldData ?
+    // Consider moving this to IWorldData.
     public void overrideCheckActivation(CheckType checkType, AlmostBoolean active,
             OverrideType overrideType, boolean overrideChildren);
 
-    // TODO: resetCheckActivation -> reset to config value, except if set to PERMANENT.
+    // Implement resetCheckActivation to revert to config values except when set
+    // to PERMANENT.
 
 
     /**

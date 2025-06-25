@@ -22,7 +22,7 @@ import java.lang.annotation.Target;
 
 /**
  * Priority for order during setup/initialization of something. <br>
- * TODO: DEPRECATE, later remove.
+ * Marked for deprecation and later removal.
  * 
  * @author asofold
  *
