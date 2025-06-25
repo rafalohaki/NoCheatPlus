@@ -22,6 +22,7 @@ import org.bukkit.entity.Entity;
 import org.bukkit.entity.EntityType;
 
 import fr.neatmonster.nocheatplus.compat.bukkit.model.BukkitShapeModel;
+import fr.neatmonster.nocheatplus.utilities.map.BlockCache.BlockCacheNode;
 import fr.neatmonster.nocheatplus.utilities.map.MaterialUtil;
 
 
@@ -48,11 +49,12 @@ public class BlockCacheBukkitModern extends BlockCacheBukkit {
     public int fetchData(int x, int y, int z) {
         Material mat = getType(x, y, z);
 
-        final BukkitShapeModel shapeModel = shapeModels.get(mat);
+        BukkitShapeModel shapeModel = shapeModels.get(mat);
         if (shapeModel != null) {
-            final int data = shapeModel.getFakeData(this, world, x, y, z);
-            if (data != Integer.MAX_VALUE) {
-                return data;
+            BlockCacheNode node = (BlockCacheNode) getOrCreateBlockCacheNode(x, y, z, false);
+            shapeModel.fillNode(this, node, world, x, y, z);
+            if (node.isDataFetched()) {
+                return node.getData();
             }
         }
         return super.fetchData(x, y, z);
@@ -71,13 +73,17 @@ public class BlockCacheBukkitModern extends BlockCacheBukkit {
         //final BlockData blockData = state.getBlockData();
         Material mat = getType(x, y, z);
 
-        final BukkitShapeModel shapeModel = shapeModels.get(mat);
+        BukkitShapeModel shapeModel = shapeModels.get(mat);
         if (shapeModel == null) {
             return super.fetchBounds(x, y, z);
         }
-        else {
-            return shapeModel.getShape(this, world, x, y, z);
+
+        BlockCacheNode node = (BlockCacheNode) getOrCreateBlockCacheNode(x, y, z, false);
+        shapeModel.fillNode(this, node, world, x, y, z);
+        if (node.isBoundsFetched()) {
+            return node.getBounds();
         }
+        return super.fetchBounds(x, y, z);
 
     }
     
