@@ -19,7 +19,6 @@ import org.bukkit.potion.PotionEffectType;
 import fr.neatmonster.nocheatplus.utilities.StringUtil;
 
 public class BridgePotionEffect {
-    @SuppressWarnings("deprecation")
     private static final PotionEffectType parsePotionEffect(final String name) {
         try {
             return PotionEffectType.getByName(name);
