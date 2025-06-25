@@ -33,7 +33,6 @@ import fr.neatmonster.nocheatplus.players.IPlayerData;
 import fr.neatmonster.nocheatplus.utilities.InventoryUtil;
 import fr.neatmonster.nocheatplus.utilities.TickTask;
 import fr.neatmonster.nocheatplus.utilities.StringUtil;
-import fr.neatmonster.nocheatplus.utilities.InventoryUtil;
 
 
 /**
@@ -68,13 +67,16 @@ public class FastClick extends Check {
     * @param pData
     * @return true, if successful
     */
-    public boolean check(final Player player, final long now, 
-                         final InventoryView view, final int slot, final ItemStack cursor, 
-                         final ItemStack clicked, final boolean isShiftClick, 
-                         final String inventoryAction, final InventoryData data, final InventoryConfig cc, 
+    public boolean check(final Player player, final long now,
+                         final InventoryView view, final int slot, final ItemStack cursor,
+                         final ItemStack clicked, final boolean isShiftClick,
+                         final String inventoryAction, final InventoryData data, final InventoryConfig cc,
                          final IPlayerData pData) {
 
-        final float amount;
+        if (player == null || view == null || inventoryAction == null) {
+            return false;
+        }
+
         final Material clickedMat = clicked == null ? Material.AIR : clicked.getType();
         final Material cursorMat;
         final int cursorAmount;
@@ -84,68 +86,46 @@ public class FastClick extends Check {
         if (cursor != null) {
             cursorMat = cursor.getType();
             cursorAmount = Math.max(1, cursor.getAmount());
-        }
-        else {
+        } else {
             cursorMat = null;
             cursorAmount = 0;
         }
 
-        if (inventoryAction != null) {
-            amount = getAmountWithAction(view, slot, clicked, clickedMat, cursorMat, cursorAmount, 
-                                        isShiftClick, inventoryAction, data, cc);
-        }
-        else if (cursor != null && cc.fastClickTweaks1_5) {
-            // Detect shift-click features indirectly.
-            amount = detectTweaks1_5(view, slot, clicked, clickedMat, cursorMat, cursorAmount, isShiftClick, data, cc);
-        }
-        else amount = 1f;
+        final float amount = computeAmount(view, slot, clicked, clickedMat, cursorMat,
+                cursorAmount, isShiftClick, inventoryAction, data, cc);
 
-        if (isShiftClick && inventoryAction.equals("MOVE_TO_OTHER_INVENTORY") && (cursorMat != null && cursorMat != Material.AIR) 
-            && clickedMat != Material.AIR) {
-            return false;
+        final boolean skipShiftMove = shouldSkipShiftMove(isShiftClick, inventoryAction, cursorMat, clickedMat);
+
+        if (!skipShiftMove) {
+            data.fastClickFreq.add(now, amount);
+
+            float shortTerm = data.fastClickFreq.bucketScore(0);
+            if (shortTerm > cc.fastClickShortTermLimit) {
+                shortTerm /= (float) TickTask.getLag(data.fastClickFreq.bucketDuration(), true);
+            }
+            shortTerm -= cc.fastClickShortTermLimit;
+
+            float normal = data.fastClickFreq.score(1f);
+            if (normal > cc.fastClickNormalLimit) {
+                normal /= (float) TickTask.getLag(data.fastClickFreq.bucketDuration()
+                        * data.fastClickFreq.numberOfBuckets(), true);
+            }
+            normal -= cc.fastClickNormalLimit;
+
+            cancel = processViolation(player, data, cc, shortTerm, normal);
         }
-        
-        data.fastClickFreq.add(now, amount);
-        
-        // Shor-term VL
-        float shortTerm = data.fastClickFreq.bucketScore(0);
-        if (shortTerm > cc.fastClickShortTermLimit) {
-            // Check for lag.
-            shortTerm /= (float) TickTask.getLag(data.fastClickFreq.bucketDuration(), true);
-        }
-        shortTerm -= cc.fastClickShortTermLimit;
-        
-        // Normal VL
-        float normal = data.fastClickFreq.score(1f);
-        if (normal > cc.fastClickNormalLimit) {
-            // Check for lag.
-            normal /= (float) TickTask.getLag(data.fastClickFreq.bucketDuration() * data.fastClickFreq.numberOfBuckets(), true);
-        }
-        normal -= cc.fastClickNormalLimit;
-        
-        // Process Violations.
-        final double violation = Math.max(shortTerm, normal);
-        if (violation > 0.0) {
-            tags.add("clickspeed");
-            data.fastClickVL += violation;
-            final ViolationData vd = new ViolationData(this, player, data.fastClickVL, violation, cc.fastClickActions);
-            if (vd.needsParameters()) vd.setParameter(ParameterName.TAGS, StringUtil.join(tags, "+"));
-            cancel = executeActions(vd).willCancel();
-        }
-        else data.fastClickVL *= 0.99;
 
         if (pData.isDebugActive(type) && pData.hasPermission(Permissions.ADMINISTRATION_DEBUG, player)) {
-            player.sendMessage("FastClick: " + data.fastClickFreq.bucketScore(0) + " | " + data.fastClickFreq.score(1f) + " | cursor=" + cursor 
-                                + " | clicked=" + clicked + " | action=" + inventoryAction);
+            player.sendMessage("FastClick: " + data.fastClickFreq.bucketScore(0) + " | "
+                    + data.fastClickFreq.score(1f) + " | cursor=" + cursor + " | clicked=" + clicked
+                    + " | action=" + inventoryAction);
         }
-        
-        // Adjust data
+
         data.fastClickLastClicked = clickedMat;
         data.fastClickLastSlot = slot;
         data.fastClickLastCursor = cursorMat;
         data.fastClickLastCursorAmount = cursorAmount;
 
-        // Lastly, always feed the improbable.
         if (cc.fastClickImprobableWeight > 0.0f) {
             Improbable.feed(player, cc.fastClickImprobableWeight * amount, now);
         }
@@ -174,6 +154,48 @@ public class FastClick extends Check {
             cancel = executeActions(vd).willCancel();  
         }
        return cancel;
+    }
+
+    private float computeAmount(final InventoryView view, final int slot,
+                                final ItemStack clicked, final Material clickedMat,
+                                final Material cursorMat, final int cursorAmount,
+                                final boolean isShiftClick, final String inventoryAction,
+                                final InventoryData data, final InventoryConfig cc) {
+
+        if (inventoryAction != null) {
+            return getAmountWithAction(view, slot, clicked, clickedMat, cursorMat,
+                    cursorAmount, isShiftClick, inventoryAction, data, cc);
+        }
+        if (cursorMat != null && cc.fastClickTweaks1_5) {
+            return detectTweaks1_5(view, slot, clicked, clickedMat, cursorMat,
+                    cursorAmount, isShiftClick, data, cc);
+        }
+        return 1f;
+    }
+
+    private boolean shouldSkipShiftMove(final boolean isShiftClick, final String inventoryAction,
+                                        final Material cursorMat, final Material clickedMat) {
+        return isShiftClick && "MOVE_TO_OTHER_INVENTORY".equals(inventoryAction)
+                && cursorMat != null && cursorMat != Material.AIR
+                && clickedMat != Material.AIR;
+    }
+
+    private boolean processViolation(final Player player, final InventoryData data,
+                                     final InventoryConfig cc, final float shortTerm,
+                                     final float normal) {
+        final double violation = Math.max(shortTerm, normal);
+        if (violation > 0.0) {
+            tags.add("clickspeed");
+            data.fastClickVL += violation;
+            final ViolationData vd = new ViolationData(this, player, data.fastClickVL,
+                    violation, cc.fastClickActions);
+            if (vd.needsParameters()) {
+                vd.setParameter(ParameterName.TAGS, StringUtil.join(tags, "+"));
+            }
+            return executeActions(vd).willCancel();
+        }
+        data.fastClickVL *= 0.99;
+        return false;
     }
     
 
