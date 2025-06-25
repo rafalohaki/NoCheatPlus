@@ -29,12 +29,10 @@ import fr.neatmonster.nocheatplus.utilities.location.TrigUtil;
 
 public class TestRayTracing {
 
-    // TODO: Add a test that fails if going beyond target block coordinate.
 
     protected static double maxFactor = 9.0;
 
     protected static int maxSteps(double dX, double dY, double dZ) {
-        // TODO: Better calculation.
         return (int) (maxFactor * (1 + Math.abs(dX) + Math.abs(dY) + Math.abs(dZ)));
     }
 
@@ -117,13 +115,11 @@ public class TestRayTracing {
 
             @Override
             protected boolean step(int blockX, int blockY, int blockZ, double oX, double oY, double oZ, double dT, boolean isPrimary) {
-                // TODO: This does not check last step for some occasions where it should.
 
                 if (dT < 0.0) {
                     doFail("dT < 0 at t = " + StringUtil.fdec3.format(t), coords);
                 }
 
-                // TODO: Check if this check makes sense at all (dT=0 happens during multi-transitions).
                 //                if (dT == 0.0 && 1.0 - (t + dT) > tol) {
                 //                    if (!ignEdge(oX, dX) && !ignEdge(oY, dY) && !ignEdge(oZ, dZ)) {
                 //                        doFail("Premature dT = 0 at t = " + StringUtil.fdec3.format(t), coords);
@@ -134,13 +130,11 @@ public class TestRayTracing {
 //                checkOffset(oY, "y");
 //                checkOffset(oZ, "z");
 
-                // TODO: check with last block coordinates
                 if (lbx == blockX && lby == blockY && lbz == blockZ) {
                     if (1.0 - (t + dT) > tol) {
                         doFail("Expect block coordinates to change with each step (step=" + step + ", t=" + StringUtil.fdec3.format(t) +").", coords);
                     }
                 }
-                // TODO: check offsets
                 // Set to current.
                 lbx = blockX;
                 lby = blockY;
@@ -172,13 +166,10 @@ public class TestRayTracing {
             private void checkBlockTarget(double target, int current, double offset, double dTotal, double dT, String name) {
                 int b = Location.locToBlock(target);
                 if (current != b) {
-                    // TODO: Might do with or without these ?
                     //					if (current == b + 1 && dTotal > 0 && offset == 0) return;
                     //					if (current == b - 1 && dTotal < 0 && offset == 1) return;
                     double diff = Math.abs(dT * dTotal + offset + (double) current - target);
                     if (diff <= 0.001) {
-                        // TODO: Test how far off this usually is...
-                        // TODO: Narrow down by edge coordinates or so.
                         return;
                     }
                     System.out.println(target + "|" +  current + "|" + offset + "|" + dT * dTotal);
@@ -189,7 +180,6 @@ public class TestRayTracing {
         };
         rt.loop();
         if (!rt.isEndBlock()) {
-            // TODO: Fix last transition not taken sometimes (with "off by x-th digit" or "t=0 transition").
 //            doFail("Incorrect end block.", coords);
         }
         return rt;
@@ -269,7 +259,6 @@ public class TestRayTracing {
             checkConsistency(randomBlockCoords(6));
         }
 
-        // TODO: Add tests for typical coordinates a with interact, passable.
     }
 
     /**
@@ -356,7 +345,6 @@ public class TestRayTracing {
                             cY,
                             cZ
                             };
-                    // TODO: Generate differing target points on/near middle as well.
                     TestRayTracing.runCoordinates(rt, coords, true, false, 3.0, false, "");
                     if (testReversed) {
                         TestRayTracing.runCoordinates(rt, coords, true, false, 3.0, true, "");
@@ -364,9 +352,7 @@ public class TestRayTracing {
                 }
             }
         }
-        // TODO: Consider running block coordinates with larger radius (potentially all within some radius?).
         for (int n = 0; n < nRandom; n ++) {
-            // TODO: Check if normalize is necessary.
             // One totally random vector.
             Vector vec = Vector.getRandom().normalize().multiply(length);
             double[] coords = new double[] {
