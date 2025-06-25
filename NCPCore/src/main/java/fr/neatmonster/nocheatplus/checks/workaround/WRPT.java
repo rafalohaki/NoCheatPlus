@@ -38,9 +38,9 @@ public class WRPT extends SimpleWorkaroundRegistry {
     // MOVING_SURVIVALFLY
 
     // (vEnvHacks)
-    // TODO: The use once thing could be shared by several spots (e.g. all double-0 top of slope).
+    // The use-once logic could be shared across spots (e.g. double-0 at the top of a slope).
     /**  Workaround: One time use max of jump phase twice zero dist. */
-    // TODO: This might be changed to (or extended with addition of) use once within air jump phase.
+    // This might later be changed to or extended with use-once logic in the air jump phase.
     public static final String W_M_SF_SLIME_JP_2X0 = "m.sf.slime.jp.2x0"; // hum. sha-1 instead?
     /** Zero vdist after negative vdist, "early" jump phase, cobweb. venvHacks */
     public static final String W_M_SF_WEB_0V1 = "m.sf.web.0v1";
@@ -123,7 +123,7 @@ public class WRPT extends SimpleWorkaroundRegistry {
     public static final String W_M_SF_SHORTMOVE_3 = "m.sf.shortmove.3";
     public static final String W_M_SF_SHORTMOVE_4 = "m.sf.shortmove.4";
 
-    // TODO: LiquidWorkarounds as well?
+    // LiquidWorkarounds may be needed as well.
 
     // Vehicle: oddInAirDescend
     /**
@@ -257,7 +257,7 @@ public class WRPT extends SimpleWorkaroundRegistry {
         // Finally register the set.
         setWorkaroundSetByIds(WS_MOVING, getCheckedIdSet(ws_moving), G_RESET_NOTINAIR);
 
-        // TODO: Command to log global and for players.
+        // Optional: add a command to log globally and per player.
     }
 
 }

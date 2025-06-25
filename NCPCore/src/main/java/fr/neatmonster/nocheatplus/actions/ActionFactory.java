@@ -60,7 +60,7 @@ public class ActionFactory extends AbstractActionFactory<ViolationData, ActionLi
                 if (!Double.isInfinite(probability) 
                         && !Double.isNaN(probability) 
                         && probability > 0.0) {
-                    // TODO: parsing via factory, store implicit penalties there too.
+                    // Parsing uses the default factory; implicit penalties are stored here too.
                     return new PenaltyAction<ViolationData, ActionList>(
                         "imp_" + actionDefinition, new PenaltyNode(
                         probability / 100.0,

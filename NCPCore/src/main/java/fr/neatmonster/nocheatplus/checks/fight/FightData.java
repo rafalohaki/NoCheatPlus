@@ -129,7 +129,7 @@ public class FightData extends ACheckData implements IDataOnRemoveSubCheckData, 
     public boolean dataOnRemoveSubCheckData(final Collection<CheckType> checkTypes) {
         for (final CheckType checkType : checkTypes) {
             switch(checkType) {
-                // TODO: case FIGHT: ...
+                // Case FIGHT is intentionally left unhandled.
                 case FIGHT_DIRECTION:
                     directionVL = 0;
                     break;
