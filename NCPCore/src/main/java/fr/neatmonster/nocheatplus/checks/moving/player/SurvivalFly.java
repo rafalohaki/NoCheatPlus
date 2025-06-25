@@ -1723,36 +1723,60 @@ public class SurvivalFly extends Check {
 
         double hAllowedDistance = st.allowed;
         final double friction = st.friction;
-        final boolean useBaseModifiers = st.useBaseModifiers;
-        final boolean useBaseModifiersSprint = st.useBaseModifiersSprint;
-        final boolean useSneakModifier = st.useSneakModifier;
 
-        if (useBaseModifiers) {
-            if (useBaseModifiersSprint && sprinting) {
-                hAllowedDistance *= data.multSprinting;
+        if (st.useBaseModifiers) {
+            hAllowedDistance = applyBaseSpeedModifiers(player, data, cc, hAllowedDistance,
+                    sprinting, st.useBaseModifiersSprint);
+        }
+
+        hAllowedDistance = applyMovementModifiers(move, from, cc, pData, player,
+                hAllowedDistance, actuallySneaking, checkPermissions, st.useSneakModifier);
+
+        hAllowedDistance = applyFrictionAdjustments(move, lastMove, data, player,
+                friction, hAllowedDistance);
+
+        move.hAllowedDistance = hAllowedDistance;
+        return move.hAllowedDistance;
+    }
+
+    private double applyBaseSpeedModifiers(final Player player, final MovingData data, final MovingConfig cc,
+            double hAllowedDistance, final boolean sprinting, final boolean useBaseModifiersSprint) {
+        if (player == null || data == null) {
+            return hAllowedDistance;
+        }
+        if (useBaseModifiersSprint && sprinting) {
+            hAllowedDistance *= data.multSprinting;
+        }
+        final double attrMod = attributeAccess.getHandle().getSpeedAttributeMultiplier(player);
+        if (attrMod == Double.MAX_VALUE) {
+            final double speedAmplifier = mcAccess.getHandle().getFasterMovementAmplifier(player);
+            if (!Double.isInfinite(speedAmplifier) && useBaseModifiersSprint) {
+                hAllowedDistance *= 1.0D + 0.2D * speedAmplifier;
             }
-            final double attrMod = attributeAccess.getHandle().getSpeedAttributeMultiplier(player);
-            if (attrMod == Double.MAX_VALUE) {
+        } else {
+            hAllowedDistance *= attrMod;
+            if (sprinting && hAllowedDistance < 0.29 && cc.sfSlownessSprintHack
+                    && (player.hasPotionEffect(BridgePotionEffect.SLOWNESS)
+                        || data.walkSpeed < Magic.DEFAULT_WALKSPEED
+                        || attrMod < 1.0)) {
+                hAllowedDistance = slownessSprintHack(player, hAllowedDistance);
+            }
+            if (!useBaseModifiersSprint) {
                 final double speedAmplifier = mcAccess.getHandle().getFasterMovementAmplifier(player);
-                if (!Double.isInfinite(speedAmplifier) && useBaseModifiersSprint) {
-                    hAllowedDistance *= 1.0D + 0.2D * speedAmplifier;
-                }
-            } else {
-                hAllowedDistance *= attrMod;
-                if (sprinting && hAllowedDistance < 0.29 && cc.sfSlownessSprintHack
-                        && (player.hasPotionEffect(BridgePotionEffect.SLOWNESS)
-                            || data.walkSpeed < Magic.DEFAULT_WALKSPEED
-                            || attrMod < 1.0)) {
-                    hAllowedDistance = slownessSprintHack(player, hAllowedDistance);
-                }
-                if (!useBaseModifiersSprint) {
-                    final double speedAmplifier = mcAccess.getHandle().getFasterMovementAmplifier(player);
-                    if (!Double.isInfinite(speedAmplifier)) {
-                        hAllowedDistance /= attrMod;
-                        hAllowedDistance *= attrMod - 0.15D * speedAmplifier;
-                    }
+                if (!Double.isInfinite(speedAmplifier)) {
+                    hAllowedDistance /= attrMod;
+                    hAllowedDistance *= attrMod - 0.15D * speedAmplifier;
                 }
             }
+        }
+        return hAllowedDistance;
+    }
+
+    private double applyMovementModifiers(final PlayerMoveData move, final PlayerLocation from, final MovingConfig cc,
+            final IPlayerData pData, final Player player, double hAllowedDistance, final boolean actuallySneaking,
+            final boolean checkPermissions, final boolean useSneakModifier) {
+        if (move == null || from == null || cc == null || player == null) {
+            return hAllowedDistance;
         }
 
         if (move.downStream && move.hDistance > move.walkSpeed * Magic.modSwim[0]
@@ -1771,8 +1795,18 @@ public class SurvivalFly extends Check {
             hAllowedDistance *= Magic.modIce;
         }
 
-        if (checkPermissions && pData.hasPermission(Permissions.MOVING_SURVIVALFLY_SPEEDING, player)) {
+        if (checkPermissions && pData != null
+                && pData.hasPermission(Permissions.MOVING_SURVIVALFLY_SPEEDING, player)) {
             hAllowedDistance *= cc.survivalFlySpeedingSpeed / 100D;
+        }
+
+        return hAllowedDistance;
+    }
+
+    private double applyFrictionAdjustments(final PlayerMoveData move, final PlayerMoveData lastMove,
+            final MovingData data, final Player player, final double friction, double hAllowedDistance) {
+        if (move == null || data == null) {
+            return hAllowedDistance;
         }
 
         move.hAllowedDistanceBase = hAllowedDistance;
@@ -1782,20 +1816,18 @@ public class SurvivalFly extends Check {
         }
 
         if (data.keepfrictiontick > 0) {
-            if (!BridgeEnchant.hasSoulSpeed(player)) {
+            if (player == null || !BridgeEnchant.hasSoulSpeed(player)) {
                 data.keepfrictiontick = 0;
-            } else if (lastMove.toIsValid) {
+            } else if (lastMove != null && lastMove.toIsValid) {
                 hAllowedDistance = Math.max(hAllowedDistance, lastMove.hAllowedDistance * 0.96);
             }
         }
 
-        if (lastMove.toIsValid && friction > 0.0) {
+        if (lastMove != null && lastMove.toIsValid && friction > 0.0) {
             tags.add("hfrict");
             hAllowedDistance = Math.max(hAllowedDistance, lastMove.hDistance * friction);
         }
-
-        move.hAllowedDistance = hAllowedDistance;
-        return move.hAllowedDistance;
+        return hAllowedDistance;
     }
 
 
