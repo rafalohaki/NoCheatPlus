@@ -143,10 +143,10 @@ public class BlockInteractListener extends CheckListener {
         data.resetLastBlock();
         // Early cancel for interact events with dead players and other.
         final int cancelId;
-        if (player.isDead() && BridgeHealth.getHealth(player) <= 0.0) { // TODO: Should be dead !?.
+        if (player.isDead() && BridgeHealth.getHealth(player) <= 0.0) { // Should be dead.
             // Auto-soup after death.
             /*
-             * TODO: Allow physical interact after death? Risks could be command
+             * Allow physical interact after death? Risks could be command
              * blocks used etc.
              */
             cancelId = idCancelDead;
@@ -172,11 +172,11 @@ public class BlockInteractListener extends CheckListener {
             return;
         }
 
-        // TODO: Re-arrange for interact spamming. (With ProtocolLib something else is in place as well.)
+        // Re-arrange for interact spamming. (With ProtocolLib something else is in place as well.)
         final Action action = event.getAction();
         final Block block = event.getClickedBlock();
         final int previousLastTick = data.getLastTick();
-        // TODO: Last block setting: better on monitor !?.
+        // Last block setting: better on monitor.
         boolean blockChecks = true;
         if (block == null) {
             data.resetLastBlock();
@@ -192,9 +192,9 @@ public class BlockInteractListener extends CheckListener {
         final ItemStack stack;
         switch(action) {
             case RIGHT_CLICK_AIR:
-                // TODO: What else to adapt?
+                // What else to adapt?
             case LEFT_CLICK_AIR:
-                // TODO: What else to adapt?
+                // What else to adapt?
             case LEFT_CLICK_BLOCK:
                 stack = null;
                 break;
@@ -216,7 +216,7 @@ public class BlockInteractListener extends CheckListener {
         if (event.isCancelled() && event.useInteractedBlock() != Result.ALLOW) {
             if (event.useItemInHand() == Result.ALLOW) {
                 blockChecks = false;
-                // TODO: Some potential for plugin features...
+                // Potential for plugin features...
             }
             else {
                 // Can't do more than prevent all (could: set to prevent on highest, if desired).
@@ -231,7 +231,7 @@ public class BlockInteractListener extends CheckListener {
         final Location loc = player.getLocation(useLoc);
         final FlyingQueueHandle flyingHandle = new FlyingQueueHandle(pData);
 
-        // TODO: Always run all checks, also for !isBlock ?
+        // Consider running all checks, also for !isBlock.
 
         // Interaction speed.
         if (!cancelled && speed.isEnabled(player, pData) 
@@ -270,7 +270,7 @@ public class BlockInteractListener extends CheckListener {
         }
         else {
             if (flyingHandle.isFlyingQueueFetched()) {
-                // TODO: Update flying queue removing failed entries? At least store index for subsequent checks.
+                // Update flying queue by removing failed entries and store index for subsequent checks.
                 final int flyingIndex = flyingHandle.getFirstIndexWithContentIfFetched();
                 final Integer cId;
                 if (flyingIndex == 0) {
@@ -330,7 +330,7 @@ public class BlockInteractListener extends CheckListener {
             }
             else {
                 // Consumable and not prevented otherwise.
-                // TODO: Ender pearl?
+                // Ender pearl?
                 event.setUseItemInHand(Result.ALLOW);
                 if (debug) {
                     genericDebug(player, block, face, event, "allow edible item use", previousLastTick, data, cc);
@@ -350,13 +350,13 @@ public class BlockInteractListener extends CheckListener {
         if (!pData.isCheckActive(CheckType.MOVING, player)) return;
 
         /*
-         * TODO: BlockDamageEvent fires before BlockInteract/MONITOR level,
+         * BlockDamageEvent fires before BlockInteract/MONITOR level,
          * BlockBreak after (!). Thus resolution is set on LOWEST already,
          * probably should be HIGHEST to account for other plugins.
          */
         // Elytra boost.
         /*
-         * TODO: Cross check with the next incoming move: has an item been used,
+         * Cross check with the next incoming move: has an item been used,
          * is gliding, reset if necessary.
          */
         //final Block block = event.getClickedBlock();
@@ -370,7 +370,7 @@ public class BlockInteractListener extends CheckListener {
                         // Water doesn't happen, block typically is null.
                         //                        || event.getAction() == Action.RIGHT_CLICK_BLOCK
                         //                        && block != null && BlockProperties.isLiquid(block.getType())
-                        // TODO: web ?
+                        // web ?
                         )
                 && event.isCancelled() && event.useItemInHand() != Result.DENY) {
             final ItemStack stack = Bridge1_9.getUsedItem(player, event);
