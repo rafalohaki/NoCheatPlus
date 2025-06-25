@@ -26,7 +26,6 @@ import fr.neatmonster.nocheatplus.utilities.ds.map.CoordHashMap;
 import fr.neatmonster.nocheatplus.utilities.ds.map.CoordMap;
 import fr.neatmonster.nocheatplus.utilities.ds.map.CoordMap.Entry;
 
-// TODO: Auto-generated Javadoc
 /**
  * Stand-alone BlockCache for setting data by access methods, for testing purposes.
  * @author dev1mc
@@ -169,7 +168,7 @@ public class FakeBlockCache extends BlockCache {
         idMapStored.put(x, y, z, typeId);
         dataMapStored.put(x, y, z, data);
         if (bounds == null) {
-            // TODO: Might store full bounds.
+            // Storing full bounds might be preferable.
             boundsMapStored.remove(x, y, z);
         } else {
             boundsMapStored.put(x, y, z, bounds);
@@ -463,7 +462,7 @@ public class FakeBlockCache extends BlockCache {
     @Override
     public boolean standsOnEntity(Entity entity, double minX, double minY,
             double minZ, double maxX, double maxY, double maxZ) {
-        // TODO: Consider adding cuboids which mean "ground" if the foot location is inside.
+        // Consider adding cuboids that represent "ground" when the foot location is inside.
         return false;
     }
 
