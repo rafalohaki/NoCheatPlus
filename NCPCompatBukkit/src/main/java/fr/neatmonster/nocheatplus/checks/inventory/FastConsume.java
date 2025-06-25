@@ -62,7 +62,7 @@ public class FastConsume extends Check implements Listener, INotifyReload {
     }
 
     private void disableInstantEat() {
-        // TODO: Do this kind of thing via registries later on.
+        // Consider handling this via registries at a later stage.
         //ConfigManager.setForAllConfigs(ConfPaths.INVENTORY_INSTANTEAT_CHECK, false);
         NCPAPIProvider.getNoCheatPlusAPI().getWorldDataManager().overrideCheckActivation(
                 CheckType.INVENTORY_INSTANTEAT, AlmostBoolean.NO, 
@@ -96,7 +96,7 @@ public class FastConsume extends Check implements Listener, INotifyReload {
         // Uses the instant-eat data for convenience.
         // Consistency checks...
         if (stack == null){ // || stack.getType() != data.instantEatFood){
-            // TODO: Strict version should prevent other material (?).
+            // Strict version should prevent other material (?).
             return false;
         }
         final long ref = data.instantEatInteract == 0 ? 0 : Math.max(data.instantEatInteract, data.lastClickTime);
@@ -123,7 +123,7 @@ public class FastConsume extends Check implements Listener, INotifyReload {
         final long expectedDuration = cc.fastConsumeDuration;
         boolean cancel = false;
         if (timeSpent < expectedDuration){
-            // TODO: Might have to do a specialized check for lag spikes here instead.
+            // Might need a specialized check for lag spikes here.
             final float lag = TickTask.getLag(expectedDuration, true);
             if (timeSpent * lag < expectedDuration){
                 final double difference = (expectedDuration - timeSpent * lag) / 100.0;
@@ -149,7 +149,7 @@ public class FastConsume extends Check implements Listener, INotifyReload {
             // Fake interaction to prevent violation loops with false positives.
             final ItemStack actualStack = InventoryUtil.getFirstConsumableItemInHand(player);
             data.instantEatFood = actualStack == null ? null : actualStack.getType();
-            // TODO: Allows some abuse: 1. try instantly eat (cancelled) 2. consume item directly when needed.
+            // This allows some abuse: 1. try instantly eat (cancelled) 2. consume item directly when needed.
         }
         else  {
             if (pData.isDebugActive(type)) {
