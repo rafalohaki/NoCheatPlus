@@ -135,164 +135,159 @@ public class BlockInteractListener extends CheckListener {
     @EventHandler(ignoreCancelled = false, priority = EventPriority.LOWEST)
     public void onPlayerInteract(final PlayerInteractEvent event) {
         final Player player = event.getPlayer();
+        if (player == null) {
+            return;
+        }
         final IPlayerData pData = DataManager.getPlayerData(player);
-        final BlockInteractData data = pData.getGenericInstance(BlockInteractData.class);
-
-        if (!pData.isCheckActive(CheckType.BLOCKINTERACT, player)) return;
-
-        data.resetLastBlock();
-        // Early cancel for interact events with dead players and other.
-        final int cancelId;
-        if (player.isDead() && BridgeHealth.getHealth(player) <= 0.0) { // Should be dead.
-            // Auto-soup after death.
-            /*
-             * Allow physical interact after death? Risks could be command
-             * blocks used etc.
-             */
-            cancelId = idCancelDead;
-        }
-        else if (!player.isOnline()) {
-            cancelId = idCancelOffline;
-        }
-        else if (MovingUtil.hasScheduledPlayerSetBack(player)) {
-            // Might log.
-            cancelId = -1; // No counters yet, but do prevent.
-        }
-        else {
-            cancelId = Integer.MIN_VALUE;
-        }
-        if (cancelId != Integer.MIN_VALUE) {
-            event.setUseInteractedBlock(Result.DENY);
-            event.setUseItemInHand(Result.DENY);
-            event.setCancelled(true);
-            data.setPlayerInteractEventResolution(event);
-            if (cancelId >= 0) {
-                counters.addPrimaryThread(cancelId, 1);
-            }
+        if (pData == null || !pData.isCheckActive(CheckType.BLOCKINTERACT, player)) {
             return;
         }
 
-        // Re-arrange for interact spamming. (With ProtocolLib something else is in place as well.)
+        final BlockInteractData data = pData.getGenericInstance(BlockInteractData.class);
+        data.resetLastBlock();
+
+        if (handleInitialCancellation(event, player, data, pData)) {
+            return;
+        }
+
+        final InteractContext ctx = prepareContext(event, player, data, pData);
+        if (ctx == null) {
+            data.setPlayerInteractEventResolution(event);
+            return;
+        }
+
+        final BlockInteractConfig cc = pData.getGenericInstance(BlockInteractConfig.class);
+        final Location loc = player.getLocation(useLoc);
+        final FlyingQueueHandle flyingHandle = new FlyingQueueHandle(pData);
+        final CheckResult result = runChecks(player, ctx, pData, data, cc, flyingHandle, loc);
+
+        if (result.cancelled()) {
+            onCancelInteract(player, ctx.block(), ctx.face(), event, ctx.previousLastTick(),
+                    result.preventUseItem(), data, cc, pData);
+        } else {
+            handleFlyingQueue(player, pData, flyingHandle);
+        }
+
+        data.setPlayerInteractEventResolution(event);
+        useLoc.setWorld(null);
+    }
+    private boolean handleInitialCancellation(final PlayerInteractEvent event, final Player player,
+            final BlockInteractData data, final IPlayerData pData) {
+        final int cancelId;
+        if (player.isDead() && BridgeHealth.getHealth(player) <= 0.0) {
+            cancelId = idCancelDead;
+        } else if (!player.isOnline()) {
+            cancelId = idCancelOffline;
+        } else if (MovingUtil.hasScheduledPlayerSetBack(player)) {
+            cancelId = -1;
+        } else {
+            cancelId = Integer.MIN_VALUE;
+        }
+        if (cancelId == Integer.MIN_VALUE) {
+            return false;
+        }
+        event.setUseInteractedBlock(Result.DENY);
+        event.setUseItemInHand(Result.DENY);
+        event.setCancelled(true);
+        data.setPlayerInteractEventResolution(event);
+        if (cancelId >= 0) {
+            counters.addPrimaryThread(cancelId, 1);
+        }
+        return true;
+    }
+
+    private InteractContext prepareContext(final PlayerInteractEvent event, final Player player,
+            final BlockInteractData data, final IPlayerData pData) {
         final Action action = event.getAction();
         final Block block = event.getClickedBlock();
         final int previousLastTick = data.getLastTick();
-        // Last block setting: better on monitor.
+
         boolean blockChecks = true;
         if (block == null) {
             data.resetLastBlock();
             blockChecks = false;
-        } 
-        //  else if (BlockProperties.isScaffolding(block.getType())) { // null check included in BlockProperties.
-        // 	   blockChecks = false;
-        //  }
-        else {
+        } else {
             data.setLastBlock(block, action);
         }
+
         final BlockFace face = event.getBlockFace();
         final ItemStack stack;
-        switch(action) {
-            case RIGHT_CLICK_AIR:
-                // What else to adapt?
-            case LEFT_CLICK_AIR:
-                // What else to adapt?
-            case LEFT_CLICK_BLOCK:
-                stack = null;
-                break;
-            case RIGHT_CLICK_BLOCK:
-                stack = Bridge1_9.getUsedItem(player, event);
-                if (stack != null && stack.getType() == Material.ENDER_PEARL) {
-                    checkEnderPearlRightClickBlock(player, block, face, event, previousLastTick, data, pData);
-                }
-                if (BlockProperties.isScaffolding(stack.getType())) {
-                	blockChecks = false;
-                }
-                break;
-            default:
-                data.setPlayerInteractEventResolution(event);
-                return;
+        switch (action) {
+        case RIGHT_CLICK_AIR:
+        case LEFT_CLICK_AIR:
+        case LEFT_CLICK_BLOCK:
+            stack = null;
+            break;
+        case RIGHT_CLICK_BLOCK:
+            stack = Bridge1_9.getUsedItem(player, event);
+            if (stack != null && stack.getType() == Material.ENDER_PEARL) {
+                checkEnderPearlRightClickBlock(player, block, face, event, previousLastTick, data, pData);
+            }
+            if (stack != null && BlockProperties.isScaffolding(stack.getType())) {
+                blockChecks = false;
+            }
+            break;
+        default:
+            return null;
         }
 
-        boolean cancelled = false;
         if (event.isCancelled() && event.useInteractedBlock() != Result.ALLOW) {
             if (event.useItemInHand() == Result.ALLOW) {
                 blockChecks = false;
-                // Potential for plugin features...
-            }
-            else {
-                // Can't do more than prevent all (could: set to prevent on highest, if desired).
-                data.setPlayerInteractEventResolution(event);
-                return;
+            } else {
+                return null;
             }
         }
+        return new InteractContext(action, block, face, stack, previousLastTick, blockChecks);
+    }
 
-        final BlockInteractConfig cc = pData.getGenericInstance(BlockInteractConfig.class);
+    private CheckResult runChecks(final Player player, final InteractContext ctx, final IPlayerData pData,
+            final BlockInteractData data, final BlockInteractConfig cc, final FlyingQueueHandle flyingHandle,
+            final Location loc) {
+        boolean cancelled = false;
         boolean preventUseItem = false;
 
-        final Location loc = player.getLocation(useLoc);
-        final FlyingQueueHandle flyingHandle = new FlyingQueueHandle(pData);
-
-        // Consider running all checks, also for !isBlock.
-
-        // Interaction speed.
-        if (!cancelled && speed.isEnabled(player, pData) 
-                && speed.check(player, data, cc)) {
+        if (speed.isEnabled(player, pData) && speed.check(player, data, cc)) {
             cancelled = true;
             preventUseItem = true;
         }
 
-        if (blockChecks) {
+        if (ctx.blockChecks()) {
             final double eyeHeight = MovingUtil.getEyeHeight(player);
-            // First the reach check.
-            if (!cancelled && reach.isEnabled(player, pData) 
-                    && reach.check(player, loc, eyeHeight, block, data, cc)) {
+            if (!cancelled && reach.isEnabled(player, pData)
+                    && reach.check(player, loc, eyeHeight, ctx.block(), data, cc)) {
                 cancelled = true;
             }
-
-            // Second the direction check
-            if (!cancelled && direction.isEnabled(player, pData) 
-                    && direction.check(player, loc, eyeHeight, block, face, flyingHandle, 
-                            data, cc, pData)) {
+            if (!cancelled && direction.isEnabled(player, pData)
+                    && direction.check(player, loc, eyeHeight, ctx.block(), ctx.face(), flyingHandle, data, cc, pData)) {
                 cancelled = true;
             }
-
-            // Ray tracing for freecam use etc.
-            if (!cancelled && visible.isEnabled(player, pData) 
-                    && visible.check(player, loc, eyeHeight, block, face, action, flyingHandle, 
+            if (!cancelled && visible.isEnabled(player, pData)
+                    && visible.check(player, loc, eyeHeight, ctx.block(), ctx.face(), ctx.action(), flyingHandle,
                             data, cc, pData)) {
                 cancelled = true;
             }
         }
-
-        // If one of the checks requested to cancel the event, do so.
-        if (cancelled) {
-            onCancelInteract(player, block, face, event, previousLastTick, preventUseItem, 
-                    data, cc, pData);
-        }
-        else {
-            if (flyingHandle.isFlyingQueueFetched()) {
-                // Update flying queue by removing failed entries and store index for subsequent checks.
-                final int flyingIndex = flyingHandle.getFirstIndexWithContentIfFetched();
-                final Integer cId;
-                if (flyingIndex == 0) {
-                    cId = idInteractLookFlyingFirst;
-                }
-                else {
-                    cId = idInteractLookFlyingOther;
-                }
-                counters.add(cId, 1);
-                if (pData.isDebugActive(CheckType.BLOCKINTERACT)) {
-                    // Log which entry was used.
-                    logUsedFlyingPacket(player, flyingHandle, flyingIndex);
-                }
-            }
-            else {
-                counters.addPrimaryThread(idInteractLookCurrent, 1);
-            }
-        }
-        // Set resolution here already:
-        data.setPlayerInteractEventResolution(event);
-        useLoc.setWorld(null);
+        return new CheckResult(cancelled, preventUseItem);
     }
+
+    private void handleFlyingQueue(final Player player, final IPlayerData pData, final FlyingQueueHandle flyingHandle) {
+        if (flyingHandle.isFlyingQueueFetched()) {
+            final int flyingIndex = flyingHandle.getFirstIndexWithContentIfFetched();
+            final Integer cId = flyingIndex == 0 ? idInteractLookFlyingFirst : idInteractLookFlyingOther;
+            counters.add(cId, 1);
+            if (pData.isDebugActive(CheckType.BLOCKINTERACT)) {
+                logUsedFlyingPacket(player, flyingHandle, flyingIndex);
+            }
+        } else {
+            counters.addPrimaryThread(idInteractLookCurrent, 1);
+        }
+    }
+
+    private record InteractContext(Action action, Block block, BlockFace face, ItemStack stack,
+            int previousLastTick, boolean blockChecks) {}
+
+    private record CheckResult(boolean cancelled, boolean preventUseItem) {}
 
     private void logUsedFlyingPacket(final Player player, final FlyingQueueHandle flyingHandle, 
             final int flyingIndex) {
