@@ -97,12 +97,11 @@ public class MCAccessFactory {
             throwables.add(t);
         }
 
-        // All went wrong.
-        // TODO: Fall-back solution (disable plugin, disable checks).
+        // All went wrong. A fall-back solution should disable the plugin or all checks.
         StaticLog.logSevere("Your version of NoCheatPlus is not compatible with the version of the server-mod (" + Bukkit.getServer().getVersion() + "). Please check for updates and consider to request support.");
         StaticLog.logSevere(">>> Failed to set up MCAccess <<<");
         log(throwables);
-        // TODO: Schedule disabling the plugin or running in circles.
+        // In future this should schedule disabling the plugin instead of continuing.
         throw new RuntimeException("Could not set up native access to the server mod, neither to the Bukkit-API.");
     }
 
@@ -119,7 +118,7 @@ public class MCAccessFactory {
      */
     private MCAccess getMCAccessCraftBukkit(List<Throwable> throwables) {
 
-        // TODO: Quick return check (note special forks and package info not being usable).
+        // Quick return might be possible here once special forks and package information can be tested.
 
         final String[] classNames = new String[] {
                 // Current DEV / LATEST: CB (Spigot)

@@ -30,7 +30,7 @@ import fr.neatmonster.nocheatplus.utilities.CheckUtils;
 
 /**
  * Thread safe "read" factory registry with additional convenience
- * functionality. (TODO: Registration might not be thread-safe.)
+ * functionality. (Registration might not be fully thread-safe.)
  * <hr>
  * Thread safety further depends on the registered factories for fetching new
  * instances.

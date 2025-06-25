@@ -28,8 +28,8 @@ package fr.neatmonster.nocheatplus.components.registry.lockable;
 public class BasicLockable implements ILockable {
 
     /*
-     * TODO: Consider switching to a settings class with chaining (then
-     * translate into flags for BasicLockable).
+     * Consider switching to a settings class with chaining and translate the
+     * result into flags for BasicLockable.
      */
 
     private static final int ALLOW_LOCK_NOSECRET = 0x01;
