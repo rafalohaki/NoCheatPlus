@@ -135,6 +135,7 @@ import fr.neatmonster.nocheatplus.players.DataManager;
 import fr.neatmonster.nocheatplus.players.IPlayerData;
 import fr.neatmonster.nocheatplus.players.IPlayerDataManager;
 import fr.neatmonster.nocheatplus.players.PlayerDataManager;
+import fr.neatmonster.nocheatplus.components.registry.feature.IRemoveData;
 import fr.neatmonster.nocheatplus.players.PlayerMessageSender;
 import fr.neatmonster.nocheatplus.stats.Counters;
 import fr.neatmonster.nocheatplus.utilities.ColorUtil;
@@ -586,12 +587,36 @@ public class NoCheatPlus extends JavaPlugin implements NoCheatPlusAPI {
     private boolean addToSubRegistries(final Object obj) {
         boolean added = false;
         for (final ComponentRegistry<?> registry : subRegistries) {
+            if (invokePlayerDataRegistry(registry, obj)) {
+                added = true;
+                continue;
+            }
             final Object res = ReflectionUtil.invokeGenericMethodOneArg(registry, "addComponent", obj);
             if (res instanceof Boolean && ((Boolean) res).booleanValue()) {
                 added = true;
             }
         }
         return added;
+    }
+
+    /**
+     * Attempt to add a component to player data registries.
+     *
+     * @param registry the registry to add to
+     * @param obj      the component
+     * @return {@code true} if added
+     */
+    private boolean invokePlayerDataRegistry(final ComponentRegistry<?> registry, final Object obj) {
+        if (registry instanceof PlayerDataManager pdm) {
+            if (obj instanceof IRemoveData) {
+                return pdm.addComponent((IRemoveData) obj);
+            }
+            return pdm.addComponentReflectively(obj);
+        }
+        if (registry instanceof IPlayerDataManager ipdm && obj instanceof IRemoveData) {
+            return ipdm.addComponent((IRemoveData) obj);
+        }
+        return false;
     }
 
     private boolean registerComponentRegistry(final Object obj) {
