@@ -34,6 +34,9 @@ public class LegacyBlocks {
     private static final BlockTrapDoor TRAPDOOR = new BlockTrapDoor();
     private static final Map<Material, Block> blocks = init(); // new HashMap<>(); //private final Map<Material, Block> block;
 
+    /** Tolerance for floating point comparisons. */
+    private static final double EPSILON = 1.0E-6;
+
     //public LegacyBlocks() {
     //    blocks = init();
     //}
@@ -502,7 +505,7 @@ public class LegacyBlocks {
             final double tdx = tmaxX - tminX;
             final double tdy = tmaxY - tminY;
             final double tdz = tmaxZ - tminZ;
-            return dx == tdx && dy == tdy && dz == tdz;
+            return Math.abs(dx - tdx) < EPSILON && Math.abs(dy - tdy) < EPSILON && Math.abs(dz - tdz) < EPSILON;
         }
     }
 }

@@ -81,6 +81,9 @@ import fr.neatmonster.nocheatplus.utilities.map.BlockCache.IBlockCacheNode;
 @SuppressWarnings("deprecation")
 public class BlockProperties {
 
+    /** Tolerance for floating point comparisons. */
+    private static final double EPSILON = 1.0E-6;
+
     /**
      * The Enum ToolType.
      *
@@ -3139,7 +3142,7 @@ public class BlockProperties {
                             continue;
                         }
                         // Hitting the max-edges (if allowed).
-                        if (minX == 1.0 + x || minY == LIQUID_HEIGHT_LOWERED + y || minZ == 1.0 + z) {
+                        if (Math.abs(minX - (1.0 + x)) < EPSILON || Math.abs(minY - (LIQUID_HEIGHT_LOWERED + y)) < EPSILON || Math.abs(minZ - (1.0 + z)) < EPSILON) {
                             continue;
                         }
                         return true;
