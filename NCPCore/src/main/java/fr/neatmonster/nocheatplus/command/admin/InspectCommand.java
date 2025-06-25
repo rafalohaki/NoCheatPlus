@@ -89,114 +89,100 @@ public class InspectCommand extends BaseCommand {
     public static String getInspectMessage(final Player player, final String c1, final String c2, final String c3, final String cI) {
 
         final StringBuilder builder = new StringBuilder(256);
+
+        if (player == null) {
+            builder.append(TAG).append(c1).append("Player is null.");
+            return builder.toString();
+        }
+
         final IPlayerData pData = DataManager.getPlayerData(player);
         final MovingData mData = pData.getGenericInstance(MovingData.class);
         final MovingConfig mCC = pData.getGenericInstance(MovingConfig.class);
         final PlayerMoveData thisMove = mData.playerMoves.getCurrentMove();
 
         // More spaghetti.
-        builder.append(TAG + c1 + "Status information for player: " + c3 + player.getName());
-        
-        builder.append("\n "+ c1 + "" + c2 + "•" + c1 + cI + (pData.isBedrockPlayer() ? " Is a Bedrock player" : " Is a Java player") + c1 + ".");
+        builder.append(TAG).append(c1).append("Status information for player: ").append(c3).append(player.getName());
 
-        if (Bukkit.getPluginManager().isPluginEnabled("ViaVersion")) {
-            builder.append("\n " + c1 + c2 + "•" + c1 + " Is playing with version " + ProtocolVersion.getProtocol(Via.getAPI().getPlayerVersion(pData.getPlayerId())));
-        }
+        final String bullet = "\n " + c1 + c2 + "•" + c1 + " ";
+
+        builder.append(bullet).append(cI).append(pData.isBedrockPlayer() ? "Is a Bedrock player" : "Is a Java player").append(c1).append('.');
+
+        appendBulletIf(builder, Bukkit.getPluginManager().isPluginEnabled("ViaVersion"), bullet,
+                "Is playing with version " + ProtocolVersion.getProtocol(Via.getAPI().getPlayerVersion(pData.getPlayerId())));
         //builder.append("\n "+ c1 + "" + c2 + "•" + c1 +" Is playing with version " + pData.getClientVersion().getReleaseName() + "(" + pData.getClientVersionID() + ")");
 
-        if (player.isOp()){
-            builder.append("\n "+ c1 + "" + c2 + "•"  + c1 + cI + " Is OP" + c1 + ".");
-        }
+        appendBulletIf(builder, player.isOp(), bullet, cI + "Is OP" + c1 + '.');
 
-        builder.append("\n "+ c1 + "" + c2 + "•" + c1 + (player.isOnline() ? " Is currently online." : " Is offline."));
-        
-        builder.append("\n "+ c1 + "" + c2 + "•" + c1 + (player.isValid() ? " Player is valid." : " Player is invalid."));
+        builder.append(bullet).append(player.isOnline() ? "Is currently online." : "Is offline.");
 
-        builder.append("\n "+ c1 + "" + c2 + "•" + c1 + " Current health: " + f1.format(BridgeHealth.getHealth(player)) + "/" + f1.format(BridgeHealth.getMaxHealth(player)));
+        builder.append(bullet).append(player.isValid() ? "Player is valid." : "Player is invalid.");
 
-        builder.append("\n "+ c1 + "" + c2 + "•" + c1 + " Current food level: " + player.getFoodLevel());
+        builder.append(bullet).append("Current health: " + f1.format(BridgeHealth.getHealth(player)) + "/" + f1.format(BridgeHealth.getMaxHealth(player)));
 
-        builder.append("\n "+ c1 + "" + c2 + "•" + c1 + " Is in " + player.getGameMode() + " gamemode.");
+        builder.append(bullet).append("Current food level: " + player.getFoodLevel());
 
-        builder.append("\n "+ c1 + "" + c2 + "•" + c1 + (mCC.assumeSprint ? " Is assumed to be sprinting." : " Assume sprint workaround disabled."));
+        builder.append(bullet).append("Is in " + player.getGameMode() + " gamemode.");
 
-        builder.append("\n "+ c1 + "" + c2 + "•" + c1 +" FlySpeed: " + player.getFlySpeed());
+        builder.append(bullet).append(mCC.assumeSprint ? "Is assumed to be sprinting." : "Assume sprint workaround disabled.");
 
-        builder.append("\n "+ c1 + "" + c2 + "•" + c1 + " WalkSpeed: " + player.getWalkSpeed());
+        builder.append(bullet).append("FlySpeed: " + player.getFlySpeed());
 
-        if (thisMove.modelFlying != null) {
-            builder.append("\n "+ c1 + "" + c2 + "•" + c1 + " Movement model for this move " + thisMove.modelFlying.getId().toString());
-        }
+        builder.append(bullet).append("WalkSpeed: " + player.getWalkSpeed());
 
-        if (player.getExp() > 0f) {
-            builder.append("\n "+ c1 + "" + c2 + "•" + c1 + " Experience Lvl: " + f1.format(player.getExpToLevel()) + "(exp=" + f1.format(player.getExp()) + ")");
-        }
+        appendBulletIf(builder, thisMove.modelFlying != null, bullet,
+                "Movement model for this move " + thisMove.modelFlying.getId().toString());
 
-        if (Bridge1_9.isGlidingWithElytra(player)) {
-            builder.append("\n "+ c1 + "" + c2 + "•" + c1 + " Is gliding with elytra.");
-        }
+        appendBulletIf(builder, player.getExp() > 0f, bullet,
+                "Experience Lvl: " + f1.format(player.getExpToLevel()) + "(exp=" + f1.format(player.getExp()) + ")");
 
-        if (Bridge1_13.isRiptiding(player)) {
-            builder.append("\n "+ c1 + "" + c2 + "•" + c1 + " Is riptiding." );
-        }
+        appendBulletIf(builder, Bridge1_9.isGlidingWithElytra(player), bullet, "Is gliding with elytra.");
 
-        if (Bridge1_13.isSwimming(player)) {
-            builder.append("\n "+ c1 + "" + c2 + "•" + c1 + " Is swimming (1.13).");
-        }
-        
-        if (player.isSneaking()) {
-            builder.append("\n "+ c1 + "" + c2 + "•" + c1 + " Is sneaking.");
-        }
+        appendBulletIf(builder, Bridge1_13.isRiptiding(player), bullet, "Is riptiding.");
 
-        if (player.isBlocking()) {
-            builder.append("\n "+ c1 + "" + c2 + "•" + c1 + " Is blocking.");
-        }
+        appendBulletIf(builder, Bridge1_13.isSwimming(player), bullet, "Is swimming (1.13).");
 
-        if (player.isSprinting()) {
-            builder.append("\n "+ c1 + "" + c2 + "•" + c1 + " Is sprinting.");
-        }
+        appendBulletIf(builder, player.isSneaking(), bullet, "Is sneaking.");
 
-        if (mData.isUsingItem) {
-            // Item details are not yet displayed here.
-            builder.append("\n "+ c1 + "" + c2 + "•" + c1 + " Is using an item.");
-        }
+        appendBulletIf(builder, player.isBlocking(), bullet, "Is blocking.");
 
-        if (mData.lostSprintCount > 0) {
-            builder.append("\n "+ c1 + "" + c2 + "•" + c1 + " Their sprint status has been lost for: " + mData.lostSprintCount + " ticks.");
-        }
+        appendBulletIf(builder, player.isSprinting(), bullet, "Is sprinting.");
 
-        if (player.isInsideVehicle()) {
-            builder.append("\n "+ c1 + "" + c2 + "•" + c1 + " Is riding a vehicle (" + player.getVehicle().getType() +") at " + locString(player.getVehicle().getLocation()));
-        }
+        appendBulletIf(builder, mData.isUsingItem, bullet, "Is using an item.");
 
-        if (player.isDead()) {
-            builder.append("\n "+ c1 + "" + c2 + "•" + c1 + " Is currently dead.");
-        }
+        appendBulletIf(builder, mData.lostSprintCount > 0, bullet,
+                "Their sprint status has been lost for: " + mData.lostSprintCount + " ticks.");
 
-        if (player.isFlying()) {
-            builder.append("\n "+ c1 + "" + c2 + "•" + c1 + " Is currently flying.");
-        }
+        appendBulletIf(builder, player.isInsideVehicle(), bullet,
+                "Is riding a vehicle (" + player.getVehicle().getType() + ") at " + locString(player.getVehicle().getLocation()));
 
-        if (player.getAllowFlight()) {
-            builder.append("\n "+ c1 + "" + c2 + "•" + c1 + " Is allowed to fly.");
-        }
+        appendBulletIf(builder, player.isDead(), bullet, "Is currently dead.");
+
+        appendBulletIf(builder, player.isFlying(), bullet, "Is currently flying.");
+
+        appendBulletIf(builder, player.getAllowFlight(), bullet, "Is allowed to fly.");
 
         // Potion effects.
         final Collection<PotionEffect> effects = player.getActivePotionEffects();
         if (!effects.isEmpty()) {
-            builder.append("\n "+ c1 + "" + c2 + "•" +c1+ "Has the following effects: ");
+            builder.append(bullet).append("Has the following effects: ");
             for (final PotionEffect effect : effects) {
-                builder.append(effect.getType() + " at level " + effect.getAmplifier() +", ");
+                builder.append(effect.getType()).append(" at level ").append(effect.getAmplifier()).append(", ");
             }
         }
         // Finally the block location.
         final Location loc = player.getLocation();
-        builder.append("\n "+ c1 + "" + c2 + "•" + c1 + " Position: " + locString(loc));
+        builder.append(bullet).append("Position: ").append(locString(loc));
         return builder.toString();
     }
 
     private static final String locString(Location loc) {
         return loc.getWorld().getName() + " at " + loc.getBlockX() + "," + loc.getBlockY() + "," + loc.getBlockZ();
+    }
+
+    private static void appendBulletIf(StringBuilder builder, boolean condition, String bulletPrefix, String text) {
+        if (condition) {
+            builder.append(bulletPrefix).append(text);
+        }
     }
 
     /* (non-Javadoc)
