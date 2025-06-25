@@ -36,8 +36,6 @@ public class AllViolationsConfig {
     /** Only log if the player is being "debugged". Currently incomplete. */
     public final boolean debugOnly;
 
-    // TODO: More config on what to print (uuid, etc., default tags). 
-    // TODO: More filtering like in TestNCP.
 
     public AllViolationsConfig(ConfigFile config) {
         allToTrace = config.getBoolean(ConfPaths.LOGGING_EXTENDED_ALLVIOLATIONS_BACKEND_TRACE);

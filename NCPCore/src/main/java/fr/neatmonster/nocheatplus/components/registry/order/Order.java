@@ -18,7 +18,6 @@ import java.util.Comparator;
 
 /**
  * Utilities for sorting out order. <br>
- * TODO: DEPRECATE and later remove.
  * 
  * @author asofold
  *

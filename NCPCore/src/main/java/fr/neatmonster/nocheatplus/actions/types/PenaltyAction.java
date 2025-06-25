@@ -46,7 +46,6 @@ public class PenaltyAction<D extends ActionData, L extends AbstractActionList<D,
     private final PenaltyNode rootNode;
     private final String penaltyId;
 
-    // TODO: executesAlways +- making sense.
 
     /**
      * 
@@ -55,7 +54,6 @@ public class PenaltyAction<D extends ActionData, L extends AbstractActionList<D,
      * @param rootNode
      */
     public PenaltyAction(String penaltyId, PenaltyNode rootNode) {
-        // TODO: name vs toString (!).
         super("penalty", 0, 0);
         this.rootNode = rootNode;
         this.penaltyId = penaltyId;

@@ -55,7 +55,6 @@ public class Streams {
      */
     public static final StreamID STATUS = new StreamID(defaultPrefix + "status");
     
-    // TODO: Consider TRACE.
     
     // Raw default streams ---
     

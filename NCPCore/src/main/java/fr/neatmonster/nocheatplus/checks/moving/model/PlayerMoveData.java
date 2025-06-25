@@ -71,7 +71,6 @@ public class PlayerMoveData extends MoveData {
     /** This move was allowed to jump. Set in SurvivalFly.check(vdistrel) */
     public boolean allowjump;
 
-    // TODO: verVel/horvel used?
 
     // Meta stuff.
 
