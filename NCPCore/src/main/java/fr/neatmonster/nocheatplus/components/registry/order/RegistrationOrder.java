@@ -170,7 +170,6 @@ public class RegistrationOrder {
              * (Due to the need for a ListIterator, you can't just use a given
              * type that merely extends Collection.)
              */
-            // TODO: Implement using an array for output with insertionIndex (less iterators etc).
             @SuppressWarnings("unchecked")
             final F[] output = (F[]) new Object[input == null ? 0 : input.size()];
             if (input == null || input.isEmpty()) {
@@ -224,7 +223,6 @@ public class RegistrationOrder {
                 }
             }
             // Combine lists into output.
-            // TODO: Perhaps could use optimized methods for sorting in later on.
             if (!aboveZeroPriority.isEmpty()) {
                 addSortedSubList(aboveZeroPriority, output, insertionIndex);
                 insertionIndex -= aboveZeroPriority.size();
@@ -281,7 +279,6 @@ public class RegistrationOrder {
          * @return
          */
         public static boolean shouldSortBefore(final RegistrationOrder order1, final RegistrationOrder order2) {
-            // TODO: Javadocs - where / how.
             final Integer basePriority1 = order1.getBasePriority();
             final String tag1 = order1.getTag();
             final String beforeTag1 = order1.getBeforeTag();
@@ -290,8 +287,6 @@ public class RegistrationOrder {
             final String tag2 = order2.getTag();
             final String beforeTag2 = order2.getBeforeTag();
             final String afterTag2 = order2.getAfterTag();
-            // TODO: Can the tag comparison be unified (simplification)?
-            // TODO: Final decision: first all tags of the first, or first 'before' each then 'after' each?
             if (basePriority1 == null) {
                 if (basePriority2 == null) {
                     if (beforeTag1 == null) {
@@ -440,7 +435,6 @@ public class RegistrationOrder {
                                 return false;
                             }
                             else {
-                                // TODO: Very complicated - explain.
                                 return afterTag2 == null && afterTag1 == null;
                             }
                         }
@@ -459,7 +453,6 @@ public class RegistrationOrder {
                                 return true;
                             }
                             else {
-                                // TODO: If correct, simplify (one condition returns true).
                                 // afterTag1 is not null.
                                 if (tag2 != null && tag2.matches(afterTag1)) {
                                     // order1 is set to come after order2.
@@ -509,15 +502,10 @@ public class RegistrationOrder {
      */
     public static final SortIGetRegistrationOrder sortIGetRegistrationOrder = new SortIGetRegistrationOrder();
 
-    /*
-     * TODO: Consider a registration id / count (meant unique, increasing with
-     * the next registration). When both priorities are 0, this id could be used
-     * to guarantee order.
-     */
     private final Integer basePriority;
     private final String tag; 
-    private final String beforeTag; // TODO: Set ?
-    private final String afterTag; // TODO: Set ?
+    private final String beforeTag;
+    private final String afterTag;
 
     /**
      * LEGACY support, to be deprecated.
@@ -533,10 +521,9 @@ public class RegistrationOrder {
      * @throws NumberFormatException, if basePriority can't be parsed.
      */
     public RegistrationOrder(RegisterWithOrder bluePrint) {
-        // TODO: InvalidOrderException via static method for parsing.
-        this(bluePrint.basePriority().isEmpty() ? null : Integer.parseInt(bluePrint.basePriority()), 
-                bluePrint.tag().isEmpty() ? null : bluePrint.tag(), 
-                        bluePrint.beforeTag().isEmpty() ? null : bluePrint.beforeTag(), 
+        this(bluePrint.basePriority().isEmpty() ? null : Integer.parseInt(bluePrint.basePriority()),
+                bluePrint.tag().isEmpty() ? null : bluePrint.tag(),
+                        bluePrint.beforeTag().isEmpty() ? null : bluePrint.beforeTag(),
                                 bluePrint.afterTag().isEmpty() ? null : bluePrint.afterTag());
     }
 
@@ -546,10 +533,9 @@ public class RegistrationOrder {
      * @throws NumberFormatException, if basePriority can't be parsed.
      */
     public RegistrationOrder(RegisterEventsWithOrder bluePrint) {
-        // TODO: InvalidOrderException via static method for parsing.
-        this(bluePrint.basePriority().isEmpty() ? null : Integer.parseInt(bluePrint.basePriority()), 
-                bluePrint.tag().isEmpty() ? null : bluePrint.tag(), 
-                        bluePrint.beforeTag().isEmpty() ? null : bluePrint.beforeTag(), 
+        this(bluePrint.basePriority().isEmpty() ? null : Integer.parseInt(bluePrint.basePriority()),
+                bluePrint.tag().isEmpty() ? null : bluePrint.tag(),
+                        bluePrint.beforeTag().isEmpty() ? null : bluePrint.beforeTag(),
                                 bluePrint.afterTag().isEmpty() ? null : bluePrint.afterTag());
     }
 
@@ -559,10 +545,9 @@ public class RegistrationOrder {
      * @throws NumberFormatException, if basePriority can't be parsed.
      */
     public RegistrationOrder(RegisterMethodWithOrder bluePrint) {
-        // TODO: InvalidOrderException via static method for parsing.
-        this(bluePrint.basePriority().isEmpty() ? null : Integer.parseInt(bluePrint.basePriority()), 
-                bluePrint.tag().isEmpty() ? null : bluePrint.tag(), 
-                        bluePrint.beforeTag().isEmpty() ? null : bluePrint.beforeTag(), 
+        this(bluePrint.basePriority().isEmpty() ? null : Integer.parseInt(bluePrint.basePriority()),
+                bluePrint.tag().isEmpty() ? null : bluePrint.tag(),
+                        bluePrint.beforeTag().isEmpty() ? null : bluePrint.beforeTag(),
                                 bluePrint.afterTag().isEmpty() ? null : bluePrint.afterTag());
     }
 
