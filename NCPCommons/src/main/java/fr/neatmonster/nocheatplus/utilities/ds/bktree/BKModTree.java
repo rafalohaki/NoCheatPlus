@@ -31,8 +31,8 @@ import fr.neatmonster.nocheatplus.utilities.ds.bktree.BKModTree.Node;
  */
 public abstract class BKModTree<V, N extends Node<V, N>, L extends LookupEntry<V, N>>{
 	
-	// TODO: Support for other value (equals) than used for lookup (distance).
-	// TODO: What with dist = 0 -> support for exact hit !
+       // Possible extension: support equality-based lookup rather than only distance.
+       // Distance 0 may be treated as an exact match.
 	
 	/**
 	 * Fat defaultimpl. it iterates over all Children
@@ -88,7 +88,7 @@ public abstract class BKModTree<V, N extends Node<V, N>, L extends LookupEntry<V
 		@Override
 		public Collection<N> getChildren(final int distance, final int range, final Collection<N> nodes){
 			if (children == null) return nodes;
-			// TODO: maybe just go for iterating till range (from 0 on) to have closest first (no keyset).
+                       // Consider iterating from 0 to range to retrieve the closest nodes first without using keySet.
 			if (children.size() > maxIterate){
 				for (int i = distance - range; i < distance + range + 1; i ++){
 					final N child = children.get(i);
@@ -96,10 +96,10 @@ public abstract class BKModTree<V, N extends Node<V, N>, L extends LookupEntry<V
 				}
 			}
 			else{
-				for (final Integer key : children.keySet()){
-					// TODO: Not sure this is faster than the EntrySet in average.
-					if (Math.abs(distance - key.intValue()) <= range) nodes.add(children.get(key));
-				}
+                               for (final Integer key : children.keySet()){
+                                       // Unclear if this approach is faster than using the EntrySet.
+                                       if (Math.abs(distance - key.intValue()) <= range) nodes.add(children.get(key));
+                               }
 			}
 			return nodes;
 		}
@@ -149,9 +149,9 @@ public abstract class BKModTree<V, N extends Node<V, N>, L extends LookupEntry<V
 	 * @param <N>
 	 */
 	public static class LookupEntry<V, N extends Node<V, N>>{
-		// TODO: What nodes are in nodes, actually? Those from the way that were in range ?
-		// TODO: This way one does not know which distance a node has. [subject to changes]
-		// TODO: Add depth and some useful info ?
+               // 'nodes' contains the visited nodes that were within range on the search path.
+               // The distance for each node is not exposed and this may change in the future.
+               // Additional fields such as depth could also be useful.
 		
 		/** All visited nodes within range of distance. */
 		public final Collection<N> nodes;
@@ -200,7 +200,7 @@ public abstract class BKModTree<V, N extends Node<V, N>, L extends LookupEntry<V
 	 * @param create
 	 * @return
 	 */
-	public L lookup(final V value, final int range, final int seekMax, final boolean create){ // TODO: signature.
+       public L lookup(final V value, final int range, final int seekMax, final boolean create){
 		final List<N> inRange = new LinkedList<N>();
 		if (root == null){
 			if (create){
@@ -211,8 +211,8 @@ public abstract class BKModTree<V, N extends Node<V, N>, L extends LookupEntry<V
 				return resultFactory.newLookupEntry(inRange, null, 0, false);
 			}
 		}
-		// TODO: best queue type.
-		final List<N> open = new ArrayList<N>();
+               // Evaluate if a different queue type would offer better performance.
+               final List<N> open = new ArrayList<N>();
 		open.add(root);
 		N insertion = null;
 		int insertionDist = 0;
@@ -228,14 +228,14 @@ public abstract class BKModTree<V, N extends Node<V, N>, L extends LookupEntry<V
 			if (create && insertion == null && !current.hasChild(distance)){
 				insertion = current;
 				insertionDist = distance;
-				// TODO: use
+                               // Potential extension: utilize this insertion point
 			}
 			// Within range ?
 			if (Math.abs(distance) <= range){
 				inRange.add(current);
 				// Check special abort conditions.
 				if (seekMax > 0 && inRange.size() >= seekMax){
-					// TODO: Keep this ?
+                                       // Revisit whether this condition is required
 					// Break if insertion point is found, or not needed.
 					if (!create || insertion != null){
 						break;
@@ -245,10 +245,10 @@ public abstract class BKModTree<V, N extends Node<V, N>, L extends LookupEntry<V
 			// Continue search with children.
 			current.getChildren(distance, range, open);
 			
-			// TODO: deterministic: always same node visited for the same value ? [Not with children = HashMap...]
+                       // Child visitation order may vary because HashMap does not guarantee iteration order.
 		} while (!open.isEmpty());
 		
-		// TODO: is the result supposed to be the closest match, if any ?
+               // Clarify whether the method should return the closest match when available.
 		
 		if (create && insertion != null){
 			final N newNode = nodeFactory.newNode(value, insertion);
