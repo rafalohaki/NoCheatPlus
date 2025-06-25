@@ -114,7 +114,7 @@ public class Text extends Check implements INotifyReload {
             boolean isMainThread, final boolean alreadyCancelled) {
 
         // Test captcha.
-        // TODO: Skip captcha for "handleaschat" commands? [controversial potential]
+        // Consider skipping captcha for "handleaschat" commands
         if (captcha.shouldCheckCaptcha(player, cc, data, pData)) {
             captcha.checkCaptcha(player, message, cc, data, isMainThread);
             return true;
@@ -151,13 +151,13 @@ public class Text extends Check implements INotifyReload {
 
         // (Following: random/made up criteria.)
 
-        // TODO: Create tests for all methods with wordlists, fake chat (refactor for that).
+        // Tests are missing for the methods using wordlists and fake chat
 
         // Full message processing. ------------
 
         // Upper case.
         if (letterCounts.fullCount.upperCase > msgLen / 3) {
-            // TODO: Regard chunks of 48 or so letters of the message for this?
+            // Possibly process chunks of roughly 48 letters for this check
             final float wUpperCase = 0.6f * letterCounts.fullCount.getUpperCaseRatio();
             score += wUpperCase  * cc.textMessageUpperCase;
         }
@@ -167,21 +167,21 @@ public class Text extends Check implements INotifyReload {
             final float fullRep = letterCounts.fullCount.getLetterCountRatio();
             // Long messages: very small and very big are bad !
             /*
-             * TODO: 128 is a quick attempt to make one long message possible on
-             * 1.11.
+             * 128 is a quick attempt to allow one long message on
+             * Minecraft 1.11.
              */
             final float wRepetition = (float) Math.min(msgLen, 128) / 15.0f * Math.abs(0.5f - fullRep);
             score += wRepetition * cc.textMessageLetterCount;
 
             // Number of words vs. length of message
             final float fnWords = (float) letterCounts.words.length / (float) msgLen;
-            if (fnWords > 0.75f) { // TODO: balance or configure or remove ?
+            if (fnWords > 0.75f) { // balance or make configurable?
                 score += fnWords  * cc.textMessagePartition;
             }
         }
 
         final CombinedData cData = pData.getGenericInstance(CombinedData.class);
-        final long timeout = 8000; // TODO: maybe set dynamically in data.
+        final long timeout = 8000; // could be set dynamically in data
         // Repetition of last message.
         if (cc.textMsgRepeatSelf != 0f && time - data.chatLastTime < timeout) {
             if (StringUtil.isSimilar(lcMessage, data.chatLastMessage, 0.8f)) {
@@ -219,7 +219,7 @@ public class Text extends Check implements INotifyReload {
         for (final WordLetterCount word: letterCounts.words) {
             float wWord = 0.0f;
             final int wLen = word.word.length();
-            // TODO: ? used letters vs. word length.
+            // Evaluate ratio of used letters versus the word length
 
             // Length of word vs. av. word length.
             final float fLenAv = Math.abs(avwLen - (float) wLen) / avwLen;
@@ -234,7 +234,7 @@ public class Text extends Check implements INotifyReload {
             notLetter *= notLetter;
             wWord += notLetter * cc.textMessageNoLetter;
 
-            wWord *= wWord; // TODO: quadratic ? (configurable)
+            wWord *= wWord; // quadratic weighting, should be configurable
             wWords += wWord;
         }
         wWords /= (float) letterCounts.words.length;
@@ -245,13 +245,13 @@ public class Text extends Check implements INotifyReload {
         }
 
         // Engine:
-        // TODO: more fine grained sync !
+        // Synchronization could be more fine grained
         float wEngine = 0f;
         final Map<String, Float> engMap;
         synchronized (engine) {
             engMap = engine.process(letterCounts, player.getName(), cc, data);
-            // TODO: more fine grained sync !s
-            // TODO: different methods (add or max or add+max or something else).
+            // Synchronization could be more fine grained here as well
+            // Choose between add, max or other combination methods
             for (final  Float res : engMap.values()) {
                 if (cc.textEngineMaximum) {
                     wEngine = Math.max(wEngine, res.floatValue());
@@ -272,7 +272,7 @@ public class Text extends Check implements INotifyReload {
 
         final float shortTermScore = Math.max(cc.textFreqShortTermMin, score);
         data.chatShortTermFrequency.add(time, shortTermScore);
-        // TODO: very short term (1st bucket) or do it indirectly.
+        // Consider a very short-term bucket or handle it indirectly
         final float shortTermAccumulated = cc.textFreqShortTermWeight * data.chatShortTermFrequency.score(cc.textFreqShortTermFactor);
         final boolean shortTermViolation = shortTermAccumulated > cc.textFreqShortTermLevel;
 
@@ -313,7 +313,7 @@ public class Text extends Check implements INotifyReload {
             data.textVL *= 0.95;
             if (cc.textAllowVLReset && normalScore < 2.0f * cc.textFreqNormWeight && shortTermScore < 2.0f * cc.textFreqShortTermWeight) {
                 // Reset the VL.
-                // TODO: maybe elaborate on resetting conditions (after some timeout just divide by two or so?).
+                // Consider elaborating on reset conditions, e.g. halve the value after a timeout
                 data.textVL = 0.0;
             }
         }
