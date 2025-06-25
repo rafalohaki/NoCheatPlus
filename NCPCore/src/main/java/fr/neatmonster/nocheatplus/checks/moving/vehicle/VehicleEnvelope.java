@@ -512,83 +512,119 @@ public class VehicleEnvelope extends Check {
     protected void prepareCheckDetails(final Entity vehicle, final VehicleMoveInfo moveInfo, final VehicleMoveData thisMove) {
 
         checkDetails.reset();
-        // These properties are tuned for boats; other vehicles may require different values.
-        checkDetails.fromIsSafeMedium = thisMove.from.inWater || thisMove.from.onGround || thisMove.from.inWeb;
-        checkDetails.toIsSafeMedium = thisMove.to.inWater || thisMove.to.onGround || thisMove.to.inWeb;
-        checkDetails.inAir = !checkDetails.fromIsSafeMedium && !checkDetails.toIsSafeMedium;
-        // Distinguish by entity class (needs future proofing at all?).
-        if (vehicle != null && MaterialUtil.isBoat(vehicle.getType())) {
-            checkDetails.simplifiedType = EntityType.BOAT;
-            checkDetails.maxAscend = MagicVehicle.maxAscend;
-        }
-        else if (vehicle instanceof Minecart) {
-            checkDetails.simplifiedType = EntityType.MINECART;
-            // Bind to rails.
-            checkDetails.canRails = true;
-            thisMove.setExtraMinecartProperties(moveInfo); // Cheating.
-            if (thisMove.fromOnRails) {
-                checkDetails.fromIsSafeMedium = true;
-                checkDetails.inAir = false;
-            }
+        setBasicMediumState(thisMove);
 
-            if (thisMove.toOnRails) {
-                checkDetails.toIsSafeMedium = true;
-                checkDetails.inAir = false;
+        if (vehicle != null) {
+            if (MaterialUtil.isBoat(vehicle.getType())) {
+                applyBoatSettings();
+            } else if (vehicle instanceof Minecart) {
+                applyMinecartSettings(moveInfo, thisMove);
+            } else if (isHorse(vehicle)) {
+                applyHorseSettings();
+            } else if (isStrider(vehicle)) {
+                applyStriderSettings(thisMove);
+            } else if (isCamel(vehicle)) {
+                applyCamelSettings();
+            } else if (vehicle instanceof Pig) {
+                applyPigSettings();
+            } else {
+                checkDetails.simplifiedType = thisMove.vehicleType;
             }
-            checkDetails.gravityTargetSpeed = 0.79;
-        }
-        else if (bestHorse != null && bestHorse.isAssignableFrom(vehicle.getClass())) {
-            // Horses currently do not appear to climb.
-            checkDetails.simplifiedType = EntityType.HORSE; // Consider using AbstractHorse from 1.11 onward.
-            checkDetails.canJump = checkDetails.canStepUpBlock = true;
-        }
-        else if (strider != null && strider.isAssignableFrom(vehicle.getClass())) {
-            //checkDetails.simplifiedType = EntityType.PIG;
-            checkDetails.canJump = false;
-            checkDetails.canStepUpBlock = true;
-            checkDetails.canClimb = true;
-            // Step problem
-            checkDetails.maxAscend = 1.1;
-            // Fall in lava
-            if (thisMove.from.inLava || thisMove.to.inLava) checkDetails.inAir = false;
-            // ....
-            if (!thisMove.from.onGround && thisMove.to.onGround) checkDetails.gravityTargetSpeed = 0.07;
-            // Updated by PlayerMoveEvent, hdist fps when a player want to ride on strider
-        }
-        else if (camel != null && camel.isAssignableFrom(vehicle.getClass())) {
-            checkDetails.canStepUpBlock = true;
-            checkDetails.canClimb = false;
-            checkDetails.canJump = false;
-        }
-        else if (vehicle instanceof Pig) {
-            // Pigs can climb certain obstacles.
-            checkDetails.simplifiedType = EntityType.PIG;
-            checkDetails.canJump = false;
-            checkDetails.canStepUpBlock = true;
-            checkDetails.canClimb = true;
-        }
-        else {
+        } else {
             checkDetails.simplifiedType = thisMove.vehicleType;
         }
 
-        // Generic settings.
-        // (maxAscend is not checked for stepping up blocks)
+        applyJumpSettings();
+        applyClimbSettings(thisMove);
+    }
+
+    private void setBasicMediumState(final VehicleMoveData thisMove) {
+        checkDetails.fromIsSafeMedium = thisMove.from.inWater || thisMove.from.onGround || thisMove.from.inWeb;
+        checkDetails.toIsSafeMedium = thisMove.to.inWater || thisMove.to.onGround || thisMove.to.inWeb;
+        checkDetails.inAir = !checkDetails.fromIsSafeMedium && !checkDetails.toIsSafeMedium;
+    }
+
+    private void applyBoatSettings() {
+        checkDetails.simplifiedType = EntityType.BOAT;
+        checkDetails.maxAscend = MagicVehicle.maxAscend;
+    }
+
+    private void applyMinecartSettings(final VehicleMoveInfo moveInfo, final VehicleMoveData thisMove) {
+        checkDetails.simplifiedType = EntityType.MINECART;
+        checkDetails.canRails = true;
+        thisMove.setExtraMinecartProperties(moveInfo); // Cheating.
+        if (thisMove.fromOnRails) {
+            checkDetails.fromIsSafeMedium = true;
+            checkDetails.inAir = false;
+        }
+        if (thisMove.toOnRails) {
+            checkDetails.toIsSafeMedium = true;
+            checkDetails.inAir = false;
+        }
+        checkDetails.gravityTargetSpeed = 0.79;
+    }
+
+    private void applyHorseSettings() {
+        checkDetails.simplifiedType = EntityType.HORSE; // Consider using AbstractHorse from 1.11 onward.
+        checkDetails.canJump = true;
+        checkDetails.canStepUpBlock = true;
+    }
+
+    private void applyStriderSettings(final VehicleMoveData thisMove) {
+        checkDetails.canJump = false;
+        checkDetails.canStepUpBlock = true;
+        checkDetails.canClimb = true;
+        checkDetails.maxAscend = 1.1;
+        if (thisMove.from.inLava || thisMove.to.inLava) {
+            checkDetails.inAir = false;
+        }
+        if (!thisMove.from.onGround && thisMove.to.onGround) {
+            checkDetails.gravityTargetSpeed = 0.07;
+        }
+    }
+
+    private void applyCamelSettings() {
+        checkDetails.canStepUpBlock = true;
+        checkDetails.canClimb = false;
+        checkDetails.canJump = false;
+    }
+
+    private void applyPigSettings() {
+        checkDetails.simplifiedType = EntityType.PIG;
+        checkDetails.canJump = false;
+        checkDetails.canStepUpBlock = true;
+        checkDetails.canClimb = true;
+    }
+
+    private void applyJumpSettings() {
         if (checkDetails.canJump) {
             checkDetails.maxAscend = 1.2; // Coarse envelope. Actual lift off gain should be checked on demand.
         }
+    }
 
-        // Climbable
+    private void applyClimbSettings(final VehicleMoveData thisMove) {
         if (checkDetails.canClimb) {
             if (thisMove.from.onClimbable) {
                 checkDetails.fromIsSafeMedium = true;
                 checkDetails.inAir = false;
             }
-
             if (thisMove.to.onClimbable) {
                 checkDetails.toIsSafeMedium = true;
                 checkDetails.inAir = false;
             }
         }
+    }
+
+    private boolean isHorse(final Entity vehicle) {
+        return bestHorse != null && bestHorse.isAssignableFrom(vehicle.getClass());
+    }
+
+    private boolean isStrider(final Entity vehicle) {
+        return strider != null && strider.isAssignableFrom(vehicle.getClass());
+    }
+
+    private boolean isCamel(final Entity vehicle) {
+        return camel != null && camel.isAssignableFrom(vehicle.getClass());
     }
 
 
