@@ -421,12 +421,9 @@ public class SurvivalFly extends Check {
                                      final MovingConfig cc, final IPlayerData pData,
                                      final HDistState state, final PlayerMoveData lastMove,
                                      final boolean sfDirty, final boolean checkPermissions) {
-        if (sfDirty || !isBlockingOrUsing || !checkPermissions && false) {
-            ; // placeholder
-        }
-        if (sfDirty || !isBlockingOrUsing ||
-                (checkPermissions && pData.hasPermission(Permissions.MOVING_SURVIVALFLY_BLOCKING, player)) ||
-                data.liftOffEnvelope != LiftOffEnvelope.NORMAL) {
+        if (sfDirty || !isBlockingOrUsing
+                || (checkPermissions && pData.hasPermission(Permissions.MOVING_SURVIVALFLY_BLOCKING, player))
+                || data.liftOffEnvelope != LiftOffEnvelope.NORMAL) {
             return false;
         }
 
@@ -1450,6 +1447,11 @@ public class SurvivalFly extends Check {
                                    final PlayerMoveData thisMove, final MovingData data,
                                    final MovingConfig cc, final IPlayerData pData, final PlayerLocation from,
                                    final PlayerLocation to, final boolean checkPermissions) {
+
+        if (player == null || thisMove == null || data == null || cc == null
+                || pData == null || from == null || to == null) {
+            return 0.0;
+        }
 
         //       - Web before liquid, because web speed can apply in water as well (same with berry bushes, despite not being able to place them underwater but you never know what plugins can do...)
         //       - Powder snow in water -> Check what movement takes precedence.
