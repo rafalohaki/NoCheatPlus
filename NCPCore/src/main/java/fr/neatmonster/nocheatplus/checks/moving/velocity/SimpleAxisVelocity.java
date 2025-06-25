@@ -49,11 +49,11 @@ public class SimpleAxisVelocity {
      * Sensitivity for tracking unused velocity (absolute amount, counts for
      * positive and negative).
      */
-    // TODO: Ignoring 0-dist velocity allows 'moving on', though.
+    /* Ignoring 0-distance velocity allows 'moving on', though. */
     private double unusedSensitivity = 0.1;
-    // TODO: Visibility of trackers, concept, etc.
+    /* Visibility of trackers, concept, etc. */
     public final UnusedTracker unusedTrackerPos = new UnusedTracker();
-    // TODO: Might do without tracking negative velocity.
+    /* Might do without tracking negative velocity. */
     public final UnusedTracker unusedTrackerNeg = new UnusedTracker();
 
     /**
@@ -129,7 +129,7 @@ public class SimpleAxisVelocity {
                     (entry.flags & VelocityFlags.SPLIT_RETAIN_ACTCOUNT) == 0 
                     ? entry.actCount : Math.max(entry.actCount, 2))
                     );
-            // TODO: For performance reasons we don't return the used amount.
+            /* For performance reasons we don't return the used amount. */
         }
         return entry;
     }
@@ -225,7 +225,7 @@ public class SimpleAxisVelocity {
         }
     }
 
-    // TODO: Might add the yDistance for a move here (and if to use it for external calls), but that needs a more complex modeling anyway!?
+    /* Might add the yDistance for a move here (and if to use it for external calls), but that needs a more complex modeling anyway!? */
     public void updateBlockedState(final int tick, final boolean posBlocked, final boolean negBlocked) {
         // Store state, ignoring the activation flag.
         unusedTrackerPos.updateState(tick, posBlocked);
@@ -244,7 +244,7 @@ public class SimpleAxisVelocity {
             return;
         }
         // Add to the tracker for the given direction.
-        // TODO: Consider evaluating activation count + have a flag to ignore an entry.
+        /* Consider evaluating activation count and adding a flag to ignore an entry. */
         if (entry.value < 0.0) {
             // Negative value.
             unusedTrackerNeg.addValue(entry.tick, -entry.value); // Add absolute amount.
