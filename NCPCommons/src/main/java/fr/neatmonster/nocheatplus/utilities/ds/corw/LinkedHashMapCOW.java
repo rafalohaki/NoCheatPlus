@@ -31,7 +31,7 @@ import java.util.Set;
  */
 public class LinkedHashMapCOW<K, V> implements Map<K, V> {
 
-    // TODO: Consider a) add removeEldest... b) add option: copyMap(K) -> only copy if needed.  
+    // Potential improvements: add removeEldest behavior or copyMap(K) only when necessary.
 
     private LinkedHashMap<K, V> map;
 
