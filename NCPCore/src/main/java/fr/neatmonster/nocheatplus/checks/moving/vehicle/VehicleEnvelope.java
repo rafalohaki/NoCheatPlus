@@ -347,65 +347,88 @@ public class VehicleEnvelope extends Check {
                                         final boolean debug, final Entity vehicle, final VehicleMoveInfo moveInfo) {
         boolean violation = false;
         if (thisMove.from.inWeb) {
-            if (debug) {
-                debugDetails.add("");
-            }
+            handleWebState(debug);
         }
         else if (checkDetails.canClimb && thisMove.from.onClimbable) {
-            checkDetails.checkAscendMuch = checkDetails.checkDescendMuch = false;
-            if (Math.abs(thisMove.yDistance) > MagicVehicle.climbSpeed) {
-                violation = true;
-                tags.add("climbspeed");
-            }
+            violation |= handleClimbableState(thisMove);
         }
         else if (checkDetails.canRails && thisMove.fromOnRails) {
-            if (Math.abs(thisMove.yDistance) < MagicVehicle.maxRailsVertical) {
-                checkDetails.checkAscendMuch = checkDetails.checkDescendMuch = false;
-            }
+            handleRailsState(thisMove);
         }
         else if (thisMove.from.inWater && thisMove.to.inWater) {
-            if (debug) {
-                debugDetails.add("water-water");
-            }
-            if (MagicVehicle.oddInWater(thisMove, checkDetails, data)) {
-                checkDetails.checkDescendMuch = checkDetails.checkAscendMuch = false;
-                violation = false;
-            }
+            handleWaterMovement(thisMove, data, debug);
         }
         else if (thisMove.from.onGround && thisMove.to.onGround) {
-            if (checkDetails.canStepUpBlock && thisMove.yDistance > 0.0 && thisMove.yDistance <= 1.0) {
-                checkDetails.checkAscendMuch = false;
-                tags.add("step_up");
-            }
-            if (thisMove.from.onBlueIce && thisMove.to.onBlueIce) {
-                if (debug) {
-                    debugDetails.add("blueIce-blueIce");
-                }
-            }
-            else if (thisMove.from.onIce && thisMove.to.onIce) {
-                if (debug) {
-                    debugDetails.add("ice-ice");
-                }
-            }
-            else {
-                if (debug) {
-                    debugDetails.add("ground-ground");
-                }
-            }
+            handleGroundMovement(thisMove, debug);
         }
         else if (checkDetails.inAir) {
-            if (checkInAir(thisMove, data, debug, vehicle, moveInfo)) {
-                violation = true;
-            }
+            violation |= handleInAirState(thisMove, data, debug, vehicle, moveInfo);
         }
         else {
-            if (debug) {
-                debugDetails.add("?-?");
-            }
-            if (!checkDetails.toIsSafeMedium) {
-            }
+            handleUnknownState(debug);
         }
         return violation;
+    }
+
+    private void handleWebState(final boolean debug) {
+        if (debug) {
+            debugDetails.add("");
+        }
+    }
+
+    private boolean handleClimbableState(final VehicleMoveData thisMove) {
+        checkDetails.checkAscendMuch = checkDetails.checkDescendMuch = false;
+        if (Math.abs(thisMove.yDistance) > MagicVehicle.climbSpeed) {
+            tags.add("climbspeed");
+            return true;
+        }
+        return false;
+    }
+
+    private void handleRailsState(final VehicleMoveData thisMove) {
+        if (Math.abs(thisMove.yDistance) < MagicVehicle.maxRailsVertical) {
+            checkDetails.checkAscendMuch = checkDetails.checkDescendMuch = false;
+        }
+    }
+
+    private void handleWaterMovement(final VehicleMoveData thisMove, final MovingData data, final boolean debug) {
+        if (debug) {
+            debugDetails.add("water-water");
+        }
+        if (MagicVehicle.oddInWater(thisMove, checkDetails, data)) {
+            checkDetails.checkDescendMuch = checkDetails.checkAscendMuch = false;
+        }
+    }
+
+    private void handleGroundMovement(final VehicleMoveData thisMove, final boolean debug) {
+        if (checkDetails.canStepUpBlock && thisMove.yDistance > 0.0 && thisMove.yDistance <= 1.0) {
+            checkDetails.checkAscendMuch = false;
+            tags.add("step_up");
+        }
+        if (thisMove.from.onBlueIce && thisMove.to.onBlueIce) {
+            if (debug) {
+                debugDetails.add("blueIce-blueIce");
+            }
+        }
+        else if (thisMove.from.onIce && thisMove.to.onIce) {
+            if (debug) {
+                debugDetails.add("ice-ice");
+            }
+        }
+        else if (debug) {
+            debugDetails.add("ground-ground");
+        }
+    }
+
+    private boolean handleInAirState(final VehicleMoveData thisMove, final MovingData data, final boolean debug,
+                                     final Entity vehicle, final VehicleMoveInfo moveInfo) {
+        return checkInAir(thisMove, data, debug, vehicle, moveInfo);
+    }
+
+    private void handleUnknownState(final boolean debug) {
+        if (debug) {
+            debugDetails.add("?-?");
+        }
     }
 
     private boolean applyLevitationModifier(final Entity vehicle) {
