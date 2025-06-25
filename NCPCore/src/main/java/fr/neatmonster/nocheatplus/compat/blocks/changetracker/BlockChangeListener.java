@@ -55,8 +55,8 @@ import fr.neatmonster.nocheatplus.utilities.map.BlockProperties.ToolType;
 
 public class BlockChangeListener implements Listener {
 
-    // TODO: Fine grained configurability (also switch flag in MovingListener to a sub-config).
-    // TODO: Coarse player activity filter?
+    // Note: fine grained configurability (also switch flag in MovingListener to a sub-config).
+    // Note: coarse player activity filter?
     public final boolean is1_13 = ServerVersion.compareMinecraftVersion("1.13") >= 0;
     public final boolean is1_9 = ServerVersion.compareMinecraftVersion("1.9") >= 0;
 
@@ -146,14 +146,14 @@ public class BlockChangeListener implements Listener {
         //            if (!enabled) {
         //                return;
         //            }
-        //            // TODO: Fine grained enabling state (pistons, doors, other).
+        //            // Note: fine grained enabling state (pistons, doors, other).
         //            final Block block = event.getBlock();
         //            if (block == null || !physicsMaterials.contains(block.getType())) {
         //                return;
         //            }
-        //            // TODO: MaterialData -> Door, upper/lower half needed ?
-        //            tracker.addBlocks(block); // TODO: Skip too fast changing states?
-        //            DebugUtil.debug("BlockPhysics: " + block); // TODO: REMOVE
+        //            // Consider MaterialData -> Door, upper/lower half needed ?
+        //            tracker.addBlocks(block); // Consider skipping too fast changing states?
+        //            DebugUtil.debug("BlockPhysics: " + block); // Remove after debugging
         //        }
     };
 
@@ -187,7 +187,7 @@ public class BlockChangeListener implements Listener {
      * Register actual listener(s).
      */
     public void register() {
-        // TODO: Replace 'if (enabled)' by actually unregistering the listeners.
+        // Consider replacing 'if (enabled)' with proper unregistering of the listeners.
         final NoCheatPlusAPI api = NCPAPIProvider.getNoCheatPlusAPI();
         for (final MiniListener<?> listener : miniListeners) {
             api.addComponent(listener);
@@ -203,7 +203,7 @@ public class BlockChangeListener implements Listener {
     }
 
     private BlockFace getDirection(final Block pistonBlock) {
-        // TODO: Register/store a fetcher thing (DirectionalFromBlock)
+        // Register or store a fetcher component (DirectionalFromBlock)
         if (is1_13) {
             final BlockData data = pistonBlock.getState().getBlockData();
             if (data instanceof org.bukkit.block.data.Directional) {
@@ -229,8 +229,8 @@ public class BlockChangeListener implements Listener {
      */
     private BlockFace getRetractDirection(final Block pistonBlock, final BlockFace eventDirection) {
         // Tested for pistons directed upwards.
-        // TODO: Test for pistons directed downwards, N, W, S, E.
-        // TODO: distinguish sticky vs. not sticky.
+        // Note: verify pistons directed downwards, north, west, south and east.
+        // Future improvement: distinguish sticky from non-sticky pistons.
         final BlockFace pistonDirection = getDirection(pistonBlock);
         if (pistonDirection == null) {
             return eventDirection;
@@ -268,7 +268,7 @@ public class BlockChangeListener implements Listener {
                 }
             }
         }
-        // TODO: Special cases (don't push upwards on retract, with the resulting location being a solid block).
+        // Note: handle special cases (avoid pushing upwards on retract if the resulting location is solid).
         final Block pistonBlock = event.getBlock();
         final BlockFace direction = getRetractDirection(pistonBlock, event.getDirection());
         tracker.addPistonBlocks(pistonBlock.getRelative(direction.getOppositeFace()), direction, blocks);
@@ -280,9 +280,9 @@ public class BlockChangeListener implements Listener {
         if (oldCurrent == newCurrent || oldCurrent > 0 && newCurrent > 0) {
             return;
         }
-        // TODO: Fine grained enabling state (pistons, doors, other).
+        // Future: support fine grained enabling state (pistons, doors, other).
         final Block block = event.getBlock();
-        // TODO: Abstract method for a block and a set of materials (redstone, interact, ...).
+        // Consider an abstract method for a block and a set of materials (redstone, interact, ...).
         if (block == null 
             || (BlockFlags.getBlockFlags(block.getType()) & BlockFlags.F_VARIABLE_REDSTONE) == 0) {
             return;
@@ -318,7 +318,7 @@ public class BlockChangeListener implements Listener {
         final Block block = event.getClickedBlock();
         if (block != null) {
             final Material type = block.getType();
-            // TODO: Consider a flag.
+            // Maybe require a specific flag.
             if (type == BridgeMaterial.FARMLAND) {
                 tracker.addBlocks(block);
             }
@@ -362,7 +362,7 @@ public class BlockChangeListener implements Listener {
     private void onBlockForm(final BlockFormEvent event) {
         final Block block = event.getBlock();
         if (block != null) {
-            // TODO: Filter by player activity.
+            // Optionally filter by player activity.
             tracker.addBlocks(block);
         }
     }
@@ -381,7 +381,7 @@ public class BlockChangeListener implements Listener {
                 org.bukkit.block.data.type.Door door = (org.bukkit.block.data.type.Door) data;
                 final Block otherBlock = block.getRelative(door.getHalf() == Half.TOP ? BlockFace.DOWN : BlockFace.UP);
                 /*
-                 * TODO: In case of redstone: Double doors... detect those too? Is it still more
+                 * In case of redstone: Double doors... detect those too? Is it still more
                  * efficient than using BlockPhysics with lazy delayed updating
                  * (TickListener...). Hinge corner... possibilities?
                  */
@@ -400,7 +400,7 @@ public class BlockChangeListener implements Listener {
                 final Door door = (Door) materialData;
                 final Block otherBlock = block.getRelative(door.isTopHalf() ? BlockFace.DOWN : BlockFace.UP);
                 /*
-                 * TODO: In case of redstone: Double doors... detect those too? Is it still more
+                 * In case of redstone: Double doors... detect those too? Is it still more
                  * efficient than using BlockPhysics with lazy delayed updating
                  * (TickListener...). Hinge corner... possibilities?
                  */
