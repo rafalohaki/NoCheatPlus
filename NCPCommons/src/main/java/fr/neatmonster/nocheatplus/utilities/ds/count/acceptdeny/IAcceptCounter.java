@@ -25,7 +25,7 @@ public interface IAcceptCounter {
     /**
      * Increase the accept count. Propagate to parent (if any).
      */
-    public void accept();
+    void accept();
 
     /**
      * Get the number of times, that accept() has been called (since last reset,
@@ -33,6 +33,6 @@ public interface IAcceptCounter {
      * 
      * @return
      */
-    public int getAcceptCount();
+    int getAcceptCount();
 
 }
