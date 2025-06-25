@@ -81,9 +81,11 @@ public class BlocksMC1_8 implements BlockPropertiesSetup {
 
         BlockInit.setAs("RED_SANDSTONE_STAIRS", Material.SANDSTONE_STAIRS);
 
-        BlockInit.setAsIfExists("DOUBLE_STONE_SLAB2", BridgeMaterial.get("double_step")); // TODO: red sandstone / prismarine ?
+        // Uses existing slab definitions; red sandstone and prismarine are not yet implemented.
+        BlockInit.setAsIfExists("DOUBLE_STONE_SLAB2", BridgeMaterial.get("double_step"));
 
-        BlockInit.setAsIfExists("STONE_SLAB2", BridgeMaterial.STONE_SLAB); // TODO: red sandstone / prismarine ?
+        // Uses STONE_SLAB for compatibility while red sandstone and prismarine variants are pending.
+        BlockInit.setAsIfExists("STONE_SLAB2", BridgeMaterial.STONE_SLAB);
 
         ConfigFile config = ConfigManager.getConfigFile();
         if (config.getBoolean(ConfPaths.BLOCKBREAK_DEBUG, config.getBoolean(ConfPaths.CHECKS_DEBUG, false)))

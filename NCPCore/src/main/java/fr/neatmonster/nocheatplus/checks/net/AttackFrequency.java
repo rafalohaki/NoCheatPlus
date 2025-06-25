@@ -37,7 +37,7 @@ public class AttackFrequency extends Check {
         double maxVL = 0.0;
         float maxLimit = 0f;
         String tags = null;
-        // TODO: option to normalize the vl / stats to per second? 
+        // Normalizing violation levels per second could be added as an option.
         // HALF
         float sum = data.attackFrequencySeconds.bucketScore(0); // HALF
         float limit = cc.attackFrequencyLimitSecondsHalf;

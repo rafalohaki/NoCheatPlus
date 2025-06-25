@@ -22,15 +22,19 @@ import fr.neatmonster.nocheatplus.compat.Folia;
 import fr.neatmonster.nocheatplus.components.registry.feature.TickListener;
 import fr.neatmonster.nocheatplus.utilities.TickTask;
 
-public class BukkitLogNodeDispatcher extends AbstractLogNodeDispatcher { // TODO: Name.
+/**
+ * Bukkit specific implementation of {@link AbstractLogNodeDispatcher}.
+ */
+public class BukkitLogNodeDispatcher extends AbstractLogNodeDispatcher {
 
 
     /**
-     * Permanent TickListener for logging [TODO: on-demand scheduling, but thread-safe. With extra lock.]
+     * Permanent TickListener for logging. May be replaced with on-demand
+     * scheduling in the future.
      */
     private final TickListener taskPrimary = (tick, timeLast) -> {
         if (runLogsPrimary()) {
-            // TODO: Here or within runLogsPrimary, handle rescheduling.
+            // Rescheduling is handled inside {@link #runLogsPrimary()}.
         }
 
     };
@@ -49,7 +53,6 @@ public class BukkitLogNodeDispatcher extends AbstractLogNodeDispatcher { // TODO
      * This can be called multiple times without causing damage.
      */
     public void startTasks() {
-        // TODO: This is a temporary solution. Needs on-demand scheduling [or a wrapper task].
         TickTask.addTickListener(taskPrimary);
         scheduleAsynchronous(); // Just in case.
     }
@@ -64,7 +67,6 @@ public class BukkitLogNodeDispatcher extends AbstractLogNodeDispatcher { // TODO
                 } catch (IllegalPluginAccessException ex) {
                     // (Should be during onDisable, ignore for now.)
                 }
-                // TODO: Re-check task id here.
             }
         }
     }

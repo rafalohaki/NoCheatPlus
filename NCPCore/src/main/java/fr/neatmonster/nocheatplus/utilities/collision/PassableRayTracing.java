@@ -46,7 +46,8 @@ public class PassableRayTracing extends RayTracing implements ICollidePassable {
     @Override
     public void set(final PlayerLocation from, final PlayerLocation to){
         set(from.getX(), from.getY(), from.getZ(), to.getX(), to.getY(), to.getZ());
-        setBlockCache(from.getBlockCache()); // TODO: This might better be done extra.
+        // Setting block cache based on the starting location.
+        setBlockCache(from.getBlockCache());
     }
 
     /* (non-Javadoc)

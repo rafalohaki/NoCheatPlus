@@ -160,11 +160,11 @@ public class DefaultComponentFactory {
         final List<Object> available = new LinkedList<Object>();
 
         // Add components (try-catch).
-        // TODO: catch ClassNotFound, incompatibleXY rather !?
+        // Consider catching ClassNotFoundException or incompatible variants instead.
 
         // Check: inventory.fastconsume.
         try{
-            // TODO: Static test methods !?
+            // Consider using static test methods here.
             FastConsume.testAvailability();
             available.add(new FastConsume());
             NCPAPIProvider.getNoCheatPlusAPI().addFeatureTags("checks", Collections.singletonList(FastConsume.class.getSimpleName()));

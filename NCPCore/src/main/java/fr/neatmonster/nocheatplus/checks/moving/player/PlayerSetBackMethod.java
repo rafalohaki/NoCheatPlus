@@ -22,8 +22,8 @@ package fr.neatmonster.nocheatplus.checks.moving.player;
  */
 public class PlayerSetBackMethod {
 
-    // TODO: Distinguish (detected/assumed) capabilities from methods to use (e.g. getFrom can be used or not)?
-    // TODO: Might use more speaking method names (cancelPlayerMoveEvent)
+    // Consider distinguishing capabilities from the methods that can be used (e.g. getFrom).
+    // More descriptive method names such as cancelPlayerMoveEvent could help clarity.
 
 
     // FLAGS (Type might change to long, if so much distinction is necessary).
@@ -72,7 +72,7 @@ public class PlayerSetBackMethod {
             return MODERN;
         }
         // Parse individual flags.
-        // TODO: Perhaps complain for incomplete/wrong content, much later.
+        // Input that cannot be parsed might warrant logging in the future.
         input = input.replaceAll("_", "");
         int flags = 0;
         if (input.contains("setto")) {

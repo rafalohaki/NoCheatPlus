@@ -895,34 +895,82 @@ public class SurvivalFly extends Check {
 
         final LiftOffEnvelope oldLiftOffEnvelope = data.liftOffEnvelope;
 
+        if (!adjustForDestinationMedium(thisMove, lastMove, to, fromOnGround, toOnGround, data)) {
+            if (resetTo) {
+                data.liftOffEnvelope = LiftOffEnvelope.NORMAL;
+            } else {
+                adjustForOriginMedium(thisMove, lastMove, to, resetFrom, resetTo, data);
+            }
+        }
+
+        updateMediumCounters(oldLiftOffEnvelope, resetFrom, resetTo, data);
+    }
+
+    /**
+     * Update the lift-off envelope based on the destination block state.
+     *
+     * @return {@code true} if the envelope was adjusted
+     */
+    private boolean adjustForDestinationMedium(final PlayerMoveData thisMove, final PlayerMoveData lastMove,
+                                               final PlayerLocation to, final boolean fromOnGround,
+                                               final boolean toOnGround, final MovingData data) {
+        if (thisMove == null || lastMove == null || to == null || data == null) {
+            return false;
+        }
+
         if (thisMove.to.inLiquid) {
             if (fromOnGround && !toOnGround && data.liftOffEnvelope == LiftOffEnvelope.NORMAL
                     && data.sfJumpPhase <= 0 && !thisMove.from.inLiquid) {
-                // KEEP
-            } else if (to.isNextToGround(0.15, 0.2)) {
+                return true; // keep
+            }
+            if (to.isNextToGround(0.15, 0.2)) {
                 data.liftOffEnvelope = LiftOffEnvelope.LIMIT_NEAR_GROUND;
             } else if (Magic.inAir(lastMove) && Magic.intoWater(thisMove)
                     && data.liftOffEnvelope == LiftOffEnvelope.LIMIT_SURFACE
                     && BlockProperties.isAir(to.getTypeIdAbove()) && !thisMove.headObstructed
                     && !thisMove.inWaterfall) {
-                // KEEP
+                return true; // keep
             } else {
                 data.liftOffEnvelope = LiftOffEnvelope.LIMIT_LIQUID;
             }
-        } else if (thisMove.to.inPowderSnow) {
+            return true;
+        }
+
+        if (thisMove.to.inPowderSnow) {
             data.liftOffEnvelope = LiftOffEnvelope.POWDER_SNOW;
-        } else if (thisMove.to.inWeb) {
+            return true;
+        }
+        if (thisMove.to.inWeb) {
             data.liftOffEnvelope = LiftOffEnvelope.NO_JUMP;
-        } else if (thisMove.to.inBerryBush) {
+            return true;
+        }
+        if (thisMove.to.inBerryBush) {
             data.liftOffEnvelope = LiftOffEnvelope.BERRY_JUMP;
-        } else if (thisMove.to.onHoneyBlock) {
+            return true;
+        }
+        if (thisMove.to.onHoneyBlock) {
             data.liftOffEnvelope = LiftOffEnvelope.HALF_JUMP;
-        } else if (resetTo) {
-            data.liftOffEnvelope = LiftOffEnvelope.NORMAL;
-        } else if (thisMove.from.inLiquid) {
+            return true;
+        }
+
+        return false;
+    }
+
+    /**
+     * Update the lift-off envelope based on the originating block state.
+     */
+    private void adjustForOriginMedium(final PlayerMoveData thisMove, final PlayerMoveData lastMove,
+                                       final PlayerLocation to, final boolean resetFrom,
+                                       final boolean resetTo, final MovingData data) {
+        if (thisMove == null || lastMove == null || to == null || data == null) {
+            return;
+        }
+
+        if (thisMove.from.inLiquid) {
             if (!resetTo && data.liftOffEnvelope == LiftOffEnvelope.NORMAL && data.sfJumpPhase <= 0) {
-                // KEEP
-            } else if (to.isNextToGround(0.15, 0.2)) {
+                return; // keep
+            }
+            if (to.isNextToGround(0.15, 0.2)) {
                 data.liftOffEnvelope = LiftOffEnvelope.LIMIT_NEAR_GROUND;
             } else if (Magic.inWater(lastMove) && Magic.leavingWater(thisMove)
                     && !thisMove.headObstructed && !Magic.recentlyInWaterfall(data, 10)) {
@@ -940,8 +988,16 @@ public class SurvivalFly extends Check {
             data.liftOffEnvelope = LiftOffEnvelope.HALF_JUMP;
         } else if (resetFrom || thisMove.touchedGround) {
             data.liftOffEnvelope = LiftOffEnvelope.NORMAL;
-        } else {
-            // Air, keep medium.
+        }
+    }
+
+    /**
+     * Update counters after adjusting the lift-off envelope.
+     */
+    private void updateMediumCounters(final LiftOffEnvelope oldLiftOffEnvelope, final boolean resetFrom,
+                                      final boolean resetTo, final MovingData data) {
+        if (data == null) {
+            return;
         }
 
         if (oldLiftOffEnvelope != data.liftOffEnvelope) {
@@ -966,44 +1022,68 @@ public class SurvivalFly extends Check {
         }
 
         if (resetTo) {
-            if (toOnGround) {
-                if (yDistance > 0.0 && to.getY() > data.getSetBackY() + 0.13
-                        && !from.isResetCond() && !to.isResetCond()) {
-                    if (data.bunnyhopDelay > 0) {
-                        if (data.bunnyhopDelay > 6) {
-                            data.lastbunnyhopDelay = data.bunnyhopDelay;
-                        }
-                        data.bunnyhopDelay = 0;
-                    }
-                    data.sfNoLowJump = true;
-                    if (debug) {
-                        debug(player, "Slope: schedule sfNoLowJump and reset bunnyfly.");
-                    }
-                } else {
-                    data.sfNoLowJump = false;
-                }
-            } else {
-                data.sfNoLowJump = false;
-            }
-            data.setSetBack(to);
-            data.sfJumpPhase = 0;
-            data.clearAccounting();
-            if (data.sfLowJump && resetFrom) {
-                data.sfLowJump = false;
-            }
-            if (hFreedom <= 0.0 && thisMove.verVelUsed == null) {
-                data.resetVelocityJumpPhase(tags);
-            }
+            handleResetTo(player, from, to, toOnGround, resetFrom, yDistance, hFreedom, debug, data, cc, thisMove);
         } else if (resetFrom) {
-            data.setSetBack(from);
-            data.sfJumpPhase = 1;
-            data.clearAccounting();
-            data.sfLowJump = false;
+            handleResetFrom(from, data);
         } else {
-            data.sfJumpPhase++;
-            if (to.getY() < 0.0 && cc.sfSetBackPolicyVoid) {
-                data.setSetBack(to);
+            handleNoReset(to, data, cc);
+        }
+    }
+
+    private void handleResetTo(final Player player, final PlayerLocation from, final PlayerLocation to,
+                               final boolean toOnGround, final boolean resetFrom,
+                               final double yDistance, final double hFreedom, final boolean debug,
+                               final MovingData data, final MovingConfig cc, final PlayerMoveData thisMove) {
+        if (toOnGround) {
+            handleGroundedReset(player, from, to, yDistance, debug, data);
+        } else {
+            data.sfNoLowJump = false;
+        }
+        data.setSetBack(to);
+        data.sfJumpPhase = 0;
+        data.clearAccounting();
+        if (data.sfLowJump && resetFrom) {
+            data.sfLowJump = false;
+        }
+        if (hFreedom <= 0.0 && thisMove.verVelUsed == null) {
+            data.resetVelocityJumpPhase(tags);
+        }
+    }
+
+    private void handleGroundedReset(final Player player, final PlayerLocation from, final PlayerLocation to,
+                                     final double yDistance, final boolean debug, final MovingData data) {
+        if (yDistance > 0.0 && to.getY() > data.getSetBackY() + 0.13
+                && !from.isResetCond() && !to.isResetCond()) {
+            updateBunnyHopDelay(data);
+            data.sfNoLowJump = true;
+            if (debug) {
+                debug(player, "Slope: schedule sfNoLowJump and reset bunnyfly.");
             }
+        } else {
+            data.sfNoLowJump = false;
+        }
+    }
+
+    private void updateBunnyHopDelay(final MovingData data) {
+        if (data.bunnyhopDelay > 0) {
+            if (data.bunnyhopDelay > 6) {
+                data.lastbunnyhopDelay = data.bunnyhopDelay;
+            }
+            data.bunnyhopDelay = 0;
+        }
+    }
+
+    private void handleResetFrom(final PlayerLocation from, final MovingData data) {
+        data.setSetBack(from);
+        data.sfJumpPhase = 1;
+        data.clearAccounting();
+        data.sfLowJump = false;
+    }
+
+    private void handleNoReset(final PlayerLocation to, final MovingData data, final MovingConfig cc) {
+        data.sfJumpPhase++;
+        if (to.getY() < 0.0 && cc.sfSetBackPolicyVoid) {
+            data.setSetBack(to);
         }
     }
 
