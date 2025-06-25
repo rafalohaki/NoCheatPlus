@@ -18,6 +18,7 @@ import java.util.ArrayList;
 import java.util.HashSet;
 import java.util.Locale;
 import java.util.Set;
+import java.util.Collection;
 
 import org.bukkit.Location;
 import org.bukkit.Material;
@@ -226,36 +227,8 @@ public class SurvivalFly extends Check {
         }
 
         // Determine if the player is actually sprinting.
-        final boolean sprinting;
-        if (data.lostSprintCount > 0) {
-            // Sprint got toggled off, though the client is still (legitimately) moving at sprinting speed.
-            // NOTE: This could extend the "sprinting grace" period, theoretically, until on ground.
-            if (resetTo && (fromOnGround || from.isResetCond()) || hDistance <= Magic.WALK_SPEED) {
-                // Invalidate.
-                data.lostSprintCount = 0;
-                tags.add("invalidate_lostsprint");
-                if (now <= data.timeSprinting + cc.sprintingGrace) {
-                    sprinting = true;
-                }
-                else sprinting = false;
-            }
-            else {
-                tags.add("lostsprint");
-                sprinting = true;
-                if (data.lostSprintCount < 3 && toOnGround || to.isResetCond()) {
-                    data.lostSprintCount = 0;
-                }
-                else data.lostSprintCount --;
-            }
-        }
-        else if (now <= data.timeSprinting + cc.sprintingGrace) {
-            // Within grace period for hunger level being too low for sprinting on server side (latency).
-            if (now != data.timeSprinting) {
-                tags.add("sprintgrace");
-            }
-            sprinting = true;
-        }
-        else sprinting = false;
+        final boolean sprinting = determineSprintingState(from, to, fromOnGround, toOnGround,
+                resetTo, hDistance, now, data, cc, tags);
 
         // Use the player-specific walk speed.
         thisMove.walkSpeed = Magic.WALK_SPEED * ((double) data.walkSpeed / Magic.DEFAULT_WALKSPEED);
@@ -1012,6 +985,56 @@ public class SurvivalFly extends Check {
                 data.momentumTick = ServerIsAtLeast1_13 ? 6 : 3;
             }
         }
+    }
+
+    /**
+     * Determine if the player should be considered sprinting.
+     *
+     * <p>Modifies {@link MovingData#lostSprintCount} and adds informational tags.</p>
+     *
+     * @param from         previous location
+     * @param to           target location
+     * @param fromOnGround whether the player was on ground
+     * @param toOnGround   whether the player is on ground
+     * @param resetTo      whether the move triggers a reset
+     * @param hDistance    horizontal distance moved
+     * @param now          current time
+     * @param data         moving data to update
+     * @param cc           moving configuration
+     * @param localTags    tag collection for debug output
+     * @return {@code true} if sprinting
+     */
+    private boolean determineSprintingState(final PlayerLocation from, final PlayerLocation to,
+            final boolean fromOnGround, final boolean toOnGround, final boolean resetTo,
+            final double hDistance, final long now, final MovingData data, final MovingConfig cc,
+            final Collection<String> localTags) {
+        if (from == null || to == null || data == null || cc == null || localTags == null) {
+            return false;
+        }
+        boolean sprinting;
+        if (data.lostSprintCount > 0) {
+            if (resetTo && (fromOnGround || from.isResetCond()) || hDistance <= Magic.WALK_SPEED) {
+                data.lostSprintCount = 0;
+                localTags.add("invalidate_lostsprint");
+                sprinting = now <= data.timeSprinting + cc.sprintingGrace;
+            } else {
+                localTags.add("lostsprint");
+                sprinting = true;
+                if (data.lostSprintCount < 3 && toOnGround || to.isResetCond()) {
+                    data.lostSprintCount = 0;
+                } else {
+                    data.lostSprintCount--;
+                }
+            }
+        } else if (now <= data.timeSprinting + cc.sprintingGrace) {
+            if (now != data.timeSprinting) {
+                localTags.add("sprintgrace");
+            }
+            sprinting = true;
+        } else {
+            sprinting = false;
+        }
+        return sprinting;
     }
 
 
