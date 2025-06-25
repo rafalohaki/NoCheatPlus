@@ -120,7 +120,7 @@ public class InteractRayTracing extends RayTracing {
         if ((flags & (BlockFlags.F_LIQUID | BlockFlags.F_IGN_PASSABLE | BlockFlags.F_STAIRS | BlockFlags.F_VARIABLE)) != 0) {
 
             // Special cases.
-            // TODO: F_VARIABLE: Bounding boxes are roughly right ?
+            // Note: bounding boxes for F_VARIABLE might be approximate.
             return false;
         }
         if (!blockCache.isFullBounds(blockX, blockY, blockZ)) {
@@ -148,17 +148,17 @@ public class InteractRayTracing extends RayTracing {
     //     * @return
     //     */
     //    private boolean allowsWorkaround(final int blockX, final int blockY, final int blockZ) {
-    //        
-    //        // TODO: Recode this/other.
-    //        
-    //        // TODO: This could allow some bypasses for "strange" setups.
-    //        // TODO: Consider using distance to target as heuristic ? [should not get smaller !?]
-    //        // TODO: Consider (min/max) offset for distance.
+    //
+    //        // Recode this or adjust the approach.
+    //
+    //        // This might allow some bypasses for unusual setups.
+    //        // Consider using distance to target as a heuristic (should not get smaller).
+    //        // Also consider minimum and maximum offset for distance.
     //        final int dX = blockX - lastBx;
     //        final int dY = blockY - lastBy;
     //        final int dZ = blockZ - lastBz;
     //        final double dSq = dX * dX + dY * dY + dZ * dZ;
-    //        // TODO: Limit distance more here !? 
+    //        // Potentially limit the distance more here.
     //        for (int i = 0; i < 6; i++) {
     //            final int[] dir = incr[i];
     //            final int rX = blockX + dir[0];
@@ -189,9 +189,9 @@ public class InteractRayTracing extends RayTracing {
 
     @Override
     protected boolean step(final int blockX, final int blockY, final int blockZ, final double oX, final double oY, final double oZ, final double dT, final boolean isPrimary) {
-        // TODO: Make an optional, more precise check (like passable) ?
-        // TODO: isEndBlock -> blockInteractedWith, because the offset edge might be on the next block.
-        // TODO: isTargetBlock checks the primary line (!, might be ok.).
+        // Consider adding a more precise check (like passable).
+        // isEndBlock might actually be blockInteractedWith, because the offset edge can be on the next block.
+        // isTargetBlock checks the primary line; that might be acceptable.
         if (isTargetBlock() || !doesCollide(blockX, blockY, blockZ)) {
             if (isPrimary) {
                 lastBx = blockX;
