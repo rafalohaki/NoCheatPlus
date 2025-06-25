@@ -112,10 +112,14 @@ public class Visible extends Check {
         rayTracing.setMaxSteps(30);
     }
 
-    public boolean check(final Player player, final Location loc, final double eyeHeight, final Block block, 
-            final BlockFace face, final Action action, final FlyingQueueHandle flyingHandle, 
+    public boolean check(final Player player, final Location loc, final double eyeHeight, final Block block,
+            final BlockFace face, final Action action, final FlyingQueueHandle flyingHandle,
             final BlockInteractData data, final BlockInteractConfig cc, final IPlayerData pData) {
-        boolean collides;
+
+        if (player == null || loc == null || block == null || loc.getWorld() == null) {
+            return false;
+        }
+
         final int blockX = block.getX();
         final int blockY = block.getY();
         final int blockZ = block.getZ();
@@ -125,90 +129,106 @@ public class Visible extends Check {
         final boolean debug = pData.isDebugActive(type);
 
         tags.clear();
+        final boolean collides;
         if (TrigUtil.isSameBlock(blockX, blockY, blockZ, eyeX, eyeY, eyeZ)) {
-            // Player is interacting with the block their head is in.
             collides = false;
-        }
-        else {
-            // Ray-tracing.
-            // Initialize.
-            final BlockCache blockCache = this.wrapBlockCache.getBlockCache();
-            blockCache.setAccess(loc.getWorld());
-            rayTracing.setBlockCache(blockCache);
-            //collides = !checker.checkFlyingQueue(eyeX, eyeY, eyeZ, loc.getYaw(), loc.getPitch(), 
-            //        blockX, blockY, blockZ, flyingHandle, face, tags, debug, player);
-            rayTracing.set(blockX, blockY, blockZ, eyeX, eyeY, eyeZ);
-            rayTracing.loop();
-            if (rayTracing.collides()) {
-                collides = true;
-                BlockCoord bc = new BlockCoord(blockX, blockY, blockZ);
-                Vector direction = new Vector(eyeX - blockX, eyeY - blockY, eyeZ - blockZ).normalize();
-                boolean canContinue;
-                boolean mightEdgeInteraction = true;
-                Set<BlockCoord> visited = new HashSet<BlockCoord>();
-                RichAxisData axisData = new RichAxisData(Axis.NONE, Direction.NONE);
-                if (Math.abs(face.getModX()) > 0) {
-                    axisData.priority = Axis.X_AXIS;
-                } else if (Math.abs(face.getModY()) > 0) {
-                    axisData.priority = Axis.Y_AXIS;
-                } else if (Math.abs(face.getModZ()) > 0) {
-                    axisData.priority = Axis.Z_AXIS;
-                }
-                do {
-                    canContinue = false;
-                for (BlockCoord neighbor : CollisionUtil.getNeighborsInDirection(bc, direction, eyeX, eyeY, eyeZ, axisData)) {
-                    if (CollisionUtil.canPassThrough(rayTracing, blockCache, bc, neighbor.getX(), neighbor.getY(), neighbor.getZ(), direction, eyeX, eyeY, eyeZ, eyeHeight, null, null, mightEdgeInteraction, axisData) && CollisionUtil.correctDir(neighbor.getY(), blockY, Location.locToBlock(eyeY)) && !visited.contains(neighbor)) {
-                        if (TrigUtil.isSameBlock(neighbor.getX(), neighbor.getY(), neighbor.getZ(), eyeX, eyeY, eyeZ)) {
-                            collides = false;
-                            break;
-                        }
-                        visited.add(neighbor);
-                        rayTracing.set(neighbor.getX(), neighbor.getY(), neighbor.getZ(), eyeX, eyeY, eyeZ);
-                        rayTracing.loop();
-                        canContinue = true;
-                        collides = rayTracing.collides();
-                        bc = new BlockCoord(neighbor.getX(), neighbor.getY(), neighbor.getZ());
-                        direction = new Vector(eyeX - neighbor.getX(), eyeY - neighbor.getY(), eyeZ - neighbor.getZ()).normalize();
-                        break;
-                    }
-                }
-                mightEdgeInteraction = false;
-                } while (collides && canContinue);
-                if (collides) tags.add("raytracing");
-            }
-            else if (rayTracing.getStepsDone() > rayTracing.getMaxSteps()) {
-                tags.add("raytracing_maxsteps");
-                collides = true;
-            }
-            else {
-                collides = false;
-            }
-            
-            checker.cleanup();
-            useLoc.setWorld(null);
-            //Cleanup.
-            rayTracing.cleanup();
-            blockCache.cleanup();
+        } else {
+            collides = performRayTracing(loc, eyeHeight, block, face, tags, debug, eyeX, eyeY, eyeZ);
         }
 
-        // Actions ?
+        return handleResult(player, loc, data, cc, debug, collides);
+    }
+
+    private boolean performRayTracing(final Location loc, final double eyeHeight, final Block block,
+            final BlockFace face, final List<String> tags, final boolean debug,
+            final double eyeX, final double eyeY, final double eyeZ) {
+        final BlockCache blockCache = this.wrapBlockCache.getBlockCache();
+        blockCache.setAccess(loc.getWorld());
+        rayTracing.setBlockCache(blockCache);
+
+        rayTracing.set(block.getX(), block.getY(), block.getZ(), eyeX, eyeY, eyeZ);
+        rayTracing.loop();
+
+        final boolean collides;
+        if (rayTracing.collides()) {
+            collides = continueRayTracing(blockCache, block, face, eyeHeight, eyeX, eyeY, eyeZ, tags);
+        } else if (rayTracing.getStepsDone() > rayTracing.getMaxSteps()) {
+            tags.add("raytracing_maxsteps");
+            collides = true;
+        } else {
+            collides = false;
+        }
+
+        checker.cleanup();
+        useLoc.setWorld(null);
+        rayTracing.cleanup();
+        blockCache.cleanup();
+
+        if (collides && !tags.contains("raytracing_maxsteps")) {
+            tags.add("raytracing");
+        }
+
+        return collides;
+    }
+
+    private boolean continueRayTracing(final BlockCache blockCache, final Block block, final BlockFace face,
+            final double eyeHeight, final double eyeX, final double eyeY, final double eyeZ,
+            final List<String> tags) {
+        BlockCoord bc = new BlockCoord(block.getX(), block.getY(), block.getZ());
+        Vector direction = new Vector(eyeX - block.getX(), eyeY - block.getY(), eyeZ - block.getZ()).normalize();
+        boolean collides = true;
+        boolean canContinue;
+        boolean mightEdgeInteraction = true;
+        final Set<BlockCoord> visited = new HashSet<>();
+        final RichAxisData axisData = new RichAxisData(Axis.NONE, Direction.NONE);
+        if (Math.abs(face.getModX()) > 0) {
+            axisData.priority = Axis.X_AXIS;
+        } else if (Math.abs(face.getModY()) > 0) {
+            axisData.priority = Axis.Y_AXIS;
+        } else if (Math.abs(face.getModZ()) > 0) {
+            axisData.priority = Axis.Z_AXIS;
+        }
+        do {
+            canContinue = false;
+            for (BlockCoord neighbor : CollisionUtil.getNeighborsInDirection(bc, direction, eyeX, eyeY, eyeZ, axisData)) {
+                if (CollisionUtil.canPassThrough(rayTracing, blockCache, bc, neighbor.getX(), neighbor.getY(),
+                        neighbor.getZ(), direction, eyeX, eyeY, eyeZ, eyeHeight, null, null, mightEdgeInteraction,
+                        axisData)
+                        && CollisionUtil.correctDir(neighbor.getY(), block.getY(), Location.locToBlock(eyeY))
+                        && !visited.contains(neighbor)) {
+                    if (TrigUtil.isSameBlock(neighbor.getX(), neighbor.getY(), neighbor.getZ(), eyeX, eyeY, eyeZ)) {
+                        return false;
+                    }
+                    visited.add(neighbor);
+                    rayTracing.set(neighbor.getX(), neighbor.getY(), neighbor.getZ(), eyeX, eyeY, eyeZ);
+                    rayTracing.loop();
+                    canContinue = true;
+                    collides = rayTracing.collides();
+                    bc = new BlockCoord(neighbor.getX(), neighbor.getY(), neighbor.getZ());
+                    direction = new Vector(eyeX - neighbor.getX(), eyeY - neighbor.getY(), eyeZ - neighbor.getZ()).normalize();
+                    break;
+                }
+            }
+            mightEdgeInteraction = false;
+        } while (collides && canContinue);
+        return collides;
+    }
+
+    private boolean handleResult(final Player player, final Location loc, final BlockInteractData data,
+            final BlockInteractConfig cc, final boolean debug, final boolean collides) {
         boolean cancel = false;
         if (collides) {
             data.visibleVL += 1;
             final ViolationData vd = new ViolationData(this, player, data.visibleVL, 1, cc.visibleActions);
-            //            if (data.debug || vd.needsParameters()) {
-            //
-            //                vd.setParameter(ParameterName.TAGS, StringUtil.join(tags, "+"));
-            //            }
             if (executeActions(vd).willCancel()) {
                 cancel = true;
             }
-        }
-        else {
+        } else {
             data.visibleVL *= 0.99;
             data.addPassedCheck(this.type);
             if (debug) {
-                debug(player, "pitch=" + loc.getPitch() + ",yaw=" + loc.getYaw() + " tags=" + StringUtil.join(tags, "+"));
+                debug(player, "pitch=" + loc.getPitch() + ",yaw=" + loc.getYaw() + " tags="
+                        + StringUtil.join(tags, "+"));
             }
         }
         return cancel;
