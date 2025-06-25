@@ -25,7 +25,7 @@ package fr.neatmonster.nocheatplus.components.registry.event;
  */
 public interface IGenericInstanceRegistryListener<T> {
 
-    // TODO: <? extends T> ?
+    // Note: using <? extends T> might be considered here
 
     /**
      * Registration, without an entry being present.

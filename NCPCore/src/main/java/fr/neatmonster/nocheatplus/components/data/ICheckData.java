@@ -23,7 +23,7 @@ package fr.neatmonster.nocheatplus.components.data;
  * objects for async access.
  * 
  * @author asofold
- * @TODO Keep/Remove
+ * NOTE: consider keeping or removing
  */
 public interface ICheckData extends IData {
 

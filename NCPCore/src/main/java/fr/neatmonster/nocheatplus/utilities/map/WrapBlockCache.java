@@ -51,7 +51,7 @@ public class WrapBlockCache implements IWrapBlockCache {
         }
         else {
             lastMCAccess = mcAccess.getHandle();
-            // TODO: This would make an initialized block cache uninitialized.
+            // Note: this would make an initialized block cache uninitialized.
             blockCache = lastMCAccess.getBlockCache();
             return blockCache;
         }

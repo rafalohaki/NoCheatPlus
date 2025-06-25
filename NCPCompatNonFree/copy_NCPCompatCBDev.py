@@ -119,7 +119,7 @@ def main_interactive(path):
         ]
     # Run.
     """
-    TODO: Factory entries. Adapt build profiles. 
+    Note: factory entries should be added and build profiles adapted.
     Perhaps just create a text file with all typical entries for copy and paste.
     """
     try:

@@ -27,7 +27,7 @@ package fr.neatmonster.nocheatplus.components.registry.event;
  */
 public interface IGenericInstanceHandle<T> extends IHandle<T> {
 
-    // TODO: <? extends T> ?
+    // Note: using <? extends T> might be considered here
 
     /**
      * Get the currently registered instance.

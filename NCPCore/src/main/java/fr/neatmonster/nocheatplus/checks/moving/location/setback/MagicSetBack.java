@@ -20,5 +20,5 @@ package fr.neatmonster.nocheatplus.checks.moving.location.setback;
  *
  */
 public class MagicSetBack {
-    // TODO: Consider flags for type of set back locations, for fast inclusion+exclusion.
+    // Note: flags for the type of set back locations could speed up inclusion and exclusion.
 }

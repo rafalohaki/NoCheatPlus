@@ -23,7 +23,7 @@ package fr.neatmonster.nocheatplus.components.registry.lockable;
  */
 public interface ILockable {
 
-    // TODO: Use own registry exceptions.
+    // Future improvement: use dedicated registry exceptions.
 
     /**
      * Final permanent locking of the item. If a secret is set, the reference
