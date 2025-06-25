@@ -35,7 +35,7 @@ public class ChatConfig extends ACheckConfig {
             // Only the permissions needed for async. checking.
             Permissions.CHAT_TEXT,
             Permissions.CHAT_CAPTCHA,
-            // NOTE: add command permissions if handleAsCommand is implemented
+            // COMMANDS might be required here in case of handleAsCommand.
     };
 
     public static RegisteredPermission[] getPreferKeepUpdatedPermissions() {
@@ -55,7 +55,7 @@ public class ChatConfig extends ACheckConfig {
     public final double       commandsShortTermLevel;
     public final ActionList   commandsActions;
 
-    // NOTE: placeholder for sub check types
+    // Potentially add sub check types
     public final boolean      textGlobalCheck;
     public final boolean      textPlayerCheck;
     public final EnginePlayerConfig textEnginePlayerConfig;

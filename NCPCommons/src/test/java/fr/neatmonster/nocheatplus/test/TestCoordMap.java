@@ -303,7 +303,7 @@ public class TestCoordMap {
             assertSize(map, 0);
         }
 
-        // TODO: test / account for identical keys.
+        // Pending: account for identical keys.
 
         // ? random sequence of actions ?
     }
@@ -326,8 +326,8 @@ public class TestCoordMap {
         // With some times resize.
         series(coords, indexMap, 1, 0.75f);
 
-        // TODO: Also test with certain sets of coords that always are the same.
-        // TODO: fill in multiple times + size, fill in new ones (careful random) + size
+        // Consider testing with certain sets of coordinates that remain constant.
+        // Additional tests could fill in multiple times, verify size, then insert new ones carefully and verify size.
     }
 
     @Test
@@ -422,7 +422,7 @@ public class TestCoordMap {
         testIterationOrder(map, halfCoords, 2);
 
 
-        // TODO: Some random mixtures.
+        // Potentially add tests with random combinations of operations.
 
     }
 
