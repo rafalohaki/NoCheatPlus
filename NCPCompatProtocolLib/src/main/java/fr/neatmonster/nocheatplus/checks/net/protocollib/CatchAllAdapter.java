@@ -46,7 +46,7 @@ public class CatchAllAdapter extends BaseAdapter {
      * @return
      */
     private static Iterable<? extends PacketType> getPacketTypes() {
-        // TODO: Config ?
+        // Configuration might make this selectable in the future.
         Set<PacketType> types = new LinkedHashSet<PacketType>();
         for (PacketType type : PacketType.Play.Client.getInstance().values()) {
             if (type.isSupported()) {
@@ -76,7 +76,7 @@ public class CatchAllAdapter extends BaseAdapter {
         final Player player = event.getPlayer();
         if (player == null) {
             counters.add(ProtocolLibComponent.idNullPlayer, 1);
-            // TODO: Is this a problem, as the server has the player so it could break a block)?
+            // Questionable: the server still knows the player, so could this break a block?
             return;
         }
         final IPlayerData pData = DataManager.getPlayerDataSafe(player);
