@@ -471,58 +471,67 @@ public class InventoryListener  extends CheckListener implements JoinLeaveListen
     @EventHandler(ignoreCancelled = false, priority = EventPriority.LOWEST)
     public final void onPlayerInteract(final PlayerInteractEvent event) {
 
-        // Only interested in right-clicks while holding an item.
-        if (event.getAction() != Action.RIGHT_CLICK_AIR && event.getAction() != Action.RIGHT_CLICK_BLOCK)
-            return;
+        if (event.getAction() == Action.RIGHT_CLICK_AIR || event.getAction() == Action.RIGHT_CLICK_BLOCK) {
+            final Player player = event.getPlayer();
+            if (player != null) {
+                final IPlayerData pData = DataManager.getPlayerData(player);
+                if (pData != null && pData.isCheckActive(CheckType.INVENTORY, player)) {
+                    final InventoryData data = pData.getGenericInstance(InventoryData.class);
 
-        final Player player = event.getPlayer();
-        final IPlayerData pData = DataManager.getPlayerData(player);
-        final InventoryData data = pData.getGenericInstance(InventoryData.class);
+                    final boolean resetAll = handleInteractItem(event, player, pData, data);
+                    if (resetAll) {
+                        resetInteractionData(player, pData, data);
+                    }
+                }
+            }
+        }
+    }
 
-        if (!pData.isCheckActive(CheckType.INVENTORY, player)) return;
-
-        boolean resetAll = false;
-
+    private boolean handleInteractItem(final PlayerInteractEvent event, final Player player,
+            final IPlayerData pData, final InventoryData data) {
+        boolean resetAll = true;
         if (event.hasItem()) {
             final ItemStack item = event.getItem();
-            final Material type = item.getType();
-            // Retrieve timing values from configuration (default: 800 ms).
-            // Cancelled or denied item use might require resetting state.
-            if (type == Material.BOW) {
-                final long now = System.currentTimeMillis();
-                // It was a bow, the player starts to pull the string, remember this time.
-                data.instantBowInteract = (data.instantBowInteract > 0 && now - data.instantBowInteract < 800) 
-                        ? Math.min(System.currentTimeMillis(), data.instantBowInteract) : System.currentTimeMillis();
-            }
-            else if (InventoryUtil.isConsumable(type)) {
-                final long now = System.currentTimeMillis();
-                // It was food, the player starts to eat some food, remember this time and the type of food.
-                data.instantEatFood = type;
-                data.instantEatInteract = (data.instantEatInteract > 0 && now - data.instantEatInteract < 800) 
-                        ? Math.min(System.currentTimeMillis(), data.instantEatInteract) : System.currentTimeMillis();
-                        data.instantBowInteract = 0; // Who's monitoring this indentation code?
-            } 
-            else resetAll = true;
+            if (item != null) {
+                final Material type = item.getType();
+                if (type == Material.BOW) {
+                    rememberBowInteract(data);
+                    resetAll = false;
+                } else if (InventoryUtil.isConsumable(type)) {
+                    rememberFoodInteract(data, type);
+                    resetAll = false;
+                }
 
-            // Illegal enchantments hotfix check.
-            if (Items.checkIllegalEnchantments(player, item, pData)) {
-                event.setCancelled(true);
-                counters.addPrimaryThread(idIllegalItem, 1);
+                if (Items.checkIllegalEnchantments(player, item, pData)) {
+                    event.setCancelled(true);
+                    counters.addPrimaryThread(idIllegalItem, 1);
+                }
             }
         }
-        else {
-            resetAll = true;
-        }
+        return resetAll;
+    }
 
-        if (resetAll) {
-            // Nothing that we are interested in, reset data.
-            if (pData.isDebugActive(CheckType.INVENTORY_INSTANTEAT) && data.instantEatFood != null) {
-                debug(player, "PlayerInteractEvent, reset fastconsume (legacy: instanteat).");
-            }
-            data.instantBowInteract = 0;
-            data.instantEatInteract = 0;
-            data.instantEatFood = null;
+    private void rememberBowInteract(final InventoryData data) {
+        final long now = System.currentTimeMillis();
+        data.instantBowInteract = (data.instantBowInteract > 0 && now - data.instantBowInteract < 800)
+                ? Math.min(System.currentTimeMillis(), data.instantBowInteract) : System.currentTimeMillis();
+    }
+
+    private void rememberFoodInteract(final InventoryData data, final Material type) {
+        final long now = System.currentTimeMillis();
+        data.instantEatFood = type;
+        data.instantEatInteract = (data.instantEatInteract > 0 && now - data.instantEatInteract < 800)
+                ? Math.min(System.currentTimeMillis(), data.instantEatInteract) : System.currentTimeMillis();
+        data.instantBowInteract = 0;
+    }
+
+    private void resetInteractionData(final Player player, final IPlayerData pData, final InventoryData data) {
+        if (pData.isDebugActive(CheckType.INVENTORY_INSTANTEAT) && data.instantEatFood != null) {
+            debug(player, "PlayerInteractEvent, reset fastconsume (legacy: instanteat).");
         }
+        data.instantBowInteract = 0;
+        data.instantEatInteract = 0;
+        data.instantEatFood = null;
     }
 
     @EventHandler(ignoreCancelled = false, priority = EventPriority.LOWEST)
