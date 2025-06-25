@@ -806,7 +806,7 @@ public class MovingUtil {
         if (distToVoid <= 0.0) {
             return null;
         }
-        // TODO: Strictness flags and/or 
+        // TODO: Add strictness flags or scanning options
         // collectFlagsSimple: Just allow air - more safe concerning false positives.
         // collides: Scan for stuff that can be stood on.
         if (BlockProperties.collectFlagsSimple(from.getBlockCache(), 

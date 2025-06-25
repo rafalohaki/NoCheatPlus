@@ -360,7 +360,7 @@ public class NoCheatPlus extends JavaPlugin implements NoCheatPlusAPI {
     public int allowLoginAll() {
         int denied = 0;
         final long now = System.currentTimeMillis();
-        for (final Entry<String, Long> entry : denyLoginNames.entrySet()) {
+        for (final Map.Entry<String, Long> entry : denyLoginNames.entrySet()) {
             final Long time = entry.getValue();
             if (time != null && time > now) {
                 denied++;
@@ -1018,7 +1018,7 @@ public class NoCheatPlus extends JavaPlugin implements NoCheatPlusAPI {
             final NoCheatPlusCommand commandHandler = new NoCheatPlusCommand(this, notifyReload);
             command.setExecutor(commandHandler);
         } else {
-            getLogger().warning("Command 'nocheatplus' not registered");
+            getLogger().severe("Command 'nocheatplus' not registered; cannot set executor.");
         }
         // (CommandHandler is TabExecutor.)
 
