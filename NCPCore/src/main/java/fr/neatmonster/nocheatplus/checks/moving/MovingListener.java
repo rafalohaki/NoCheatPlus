@@ -83,6 +83,7 @@ import fr.neatmonster.nocheatplus.checks.moving.player.NoFall;
 import fr.neatmonster.nocheatplus.checks.moving.player.Passable;
 import fr.neatmonster.nocheatplus.checks.moving.player.PlayerSetBackMethod;
 import fr.neatmonster.nocheatplus.checks.moving.player.SurvivalFly;
+import fr.neatmonster.nocheatplus.checks.moving.helper.BouncePushProcessor;
 import fr.neatmonster.nocheatplus.checks.moving.util.AuxMoving;
 import fr.neatmonster.nocheatplus.checks.moving.util.MovingUtil;
 import fr.neatmonster.nocheatplus.checks.moving.util.bounce.BounceType;
@@ -847,56 +848,19 @@ public class MovingListener extends CheckListener implements TickListener, IRemo
                 }
             }
             
-            // 5.3: Set BCT
-            // NOTE: Block change activity has to be checked *after* the extreme move checks run.
-            useBlockChangeTracker = newTo == null && cc.trackBlockMove && (checkPassable || checkSf || checkCf) && blockChangeTracker.hasActivityShuffled(from.getWorld().getUID(), pFrom, pTo, 1.5625);
+        // 5.3: Set BCT
+        // NOTE: Block change activity has to be checked *after* the extreme move checks run.
+        useBlockChangeTracker = newTo == null && cc.trackBlockMove && (checkPassable || checkSf || checkCf)
+                && blockChangeTracker.hasActivityShuffled(from.getWorld().getUID(), pFrom, pTo, 1.5625);
 
-            // 5.4: Check jumping on things like slime blocks.
-            // Detect bounce type / use prepared bounce.
-            if (newTo == null) {
-                // Mixed ground (e.g. slime blocks + slabs), specifically on pushing.
-                // More on fall damage. What with sneaking + past states?
-                // With past states: What does jump effects do here?
-                if (thisMove.yDistance < 0.0) {
-                    // Prepare bounce: The center of the player must be above the block.
-                    // Common pre-conditions.
-                    // Check if really leads to calling the method for pistons (checkBounceEnvelope vs. push).
-                    if (!survivalFly.isReallySneaking(player) && BounceUtil.checkBounceEnvelope(player, pFrom, pTo, data, cc, pData)) {
-                        // Check other side conditions (fluids, web, max. distance to the block top (!))
-                        // Classic static bounce.
-                        if ((pTo.getBlockFlags() & BlockFlags.F_BOUNCE25) != 0L) {
-                            /* May need to adapt within this method, if "push up" happened and the trigger had been ordinary */
-                            verticalBounce = BounceType.STATIC;
-                            checkNf = false; // Skip NoFall.
-                        }
-                        
-                        if (verticalBounce == BounceType.NO_BOUNCE && useBlockChangeTracker) { 
-                            if (BounceUtil.checkPastStateBounceDescend(player, pFrom, pTo, thisMove, lastMove, tick, data, cc, blockChangeTracker) != BounceType.NO_BOUNCE) {
-                                // Not set verticalBounce, as this is ascending and it's already force used.
-                                checkNf = false; // Skip NoFall.
-                            }
-                        }
-                    }
-                }
-                else {
-                    if (
-                            // Prepared bounce support.
-                            data.verticalBounce != null && BounceUtil.onPreparedBounceSupport(player, from, to, thisMove, lastMove, tick, data)
-                            // Past state bounce (includes prepending velocity / special calls).
-                            || useBlockChangeTracker 
-                            // 0-dist moves count in: && thisMove.yDistance >= 0.415 
-                            && thisMove.yDistance <= 1.515
-                        ) {
-                        verticalBounce = BounceUtil.checkPastStateBounceAscend(player, pFrom, pTo, thisMove, lastMove, tick, pData, this, data, cc, blockChangeTracker);
-                        if (verticalBounce != BounceType.NO_BOUNCE) checkNf = false;
-                    }
-                }
-
-                // Might a bit tricky when it use to ensure no bounce check is active, not noFall checking here
-                if (useBlockChangeTracker && checkNf && !checkPastStateVerticalPush(player, pFrom, pTo, thisMove, lastMove, tick, debug, data, cc)) {
-                    checkPastStateHorizontalPush(player, pFrom, pTo, thisMove, lastMove, tick, debug, data, cc);
-                }
-            }
+        // 5.4: Check jumping on things like slime blocks and piston pushes.
+        if (newTo == null) {
+            BouncePushProcessor.Result res = BouncePushProcessor.handleBounce(player, pFrom, pTo, from, to,
+                    thisMove, lastMove, tick, debug, data, cc, pData, useBlockChangeTracker, verticalBounce,
+                    checkNf, blockChangeTracker, this, survivalFly);
+            verticalBounce = res.verticalBounce;
+            checkNf = res.checkNoFall;
+        }
         }
         // No Sf or Cf check
         else {
