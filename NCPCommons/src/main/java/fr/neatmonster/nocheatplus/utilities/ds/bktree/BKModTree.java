@@ -209,64 +209,71 @@ public abstract class BKModTree<V, N extends Node<V, N>, L extends LookupEntry<V
 	 * @return
 	 */
        public L lookup(final V value, final int range, final int seekMax, final boolean create){
-		final List<N> inRange = new LinkedList<N>();
-		if (root == null){
-			if (create){
-				root = nodeFactory.newNode(value, null);
-				return resultFactory.newLookupEntry(inRange, root, 0, true);
-			}
-			else{
-				return resultFactory.newLookupEntry(inRange, null, 0, false);
-			}
-		}
-               // Evaluate if a different queue type would offer better performance.
-               final List<N> open = new ArrayList<N>();
-		open.add(root);
-		N insertion = null;
-		int insertionDist = 0;
-                do{
+                final List<N> inRange = new LinkedList<>();
+                if (root == null){
+                        if (create){
+                                root = nodeFactory.newNode(value, null);
+                                return resultFactory.newLookupEntry(inRange, root, 0, true);
+                        }
+                        return resultFactory.newLookupEntry(inRange, null, 0, false);
+                }
+               final List<N> open = new ArrayList<>();
+                open.add(root);
+                final InsertionInfo<N> insertion = new InsertionInfo<>();
+                do {
                         final N current = open.remove(open.size() - 1);
-                        int distance = distance(current.getValue(), value);
-			if (visit) visit(current, value, distance);
-			if (distance == 0){
-				// exact match.
-				return resultFactory.newLookupEntry(inRange, current, distance, false);
-			}
-			// Set node as insertion point.
-			if (create && insertion == null && !current.hasChild(distance)){
-				insertion = current;
-				insertionDist = distance;
-                               // Potential extension: utilize this insertion point
-			}
-			// Within range ?
-			if (Math.abs(distance) <= range){
-				inRange.add(current);
-				// Check special abort conditions.
-				if (seekMax > 0 && inRange.size() >= seekMax){
-                                       // Revisit whether this condition is required
-					// Break if insertion point is found, or not needed.
-					if (!create || insertion != null){
-						break;
-					}
-				}
-			}
-			// Continue search with children.
-			current.getChildren(distance, range, open);
-			
+                        final int distance = computeDistanceAndVisit(current, value);
+                        if (distance == 0) {
+                                return resultFactory.newLookupEntry(inRange, current, distance, false);
+                        }
+                        trySetInsertion(current, distance, create, insertion);
+                        if (withinRange(current, distance, range, inRange, seekMax, create, insertion.node)) {
+                                break;
+                        }
+                        current.getChildren(distance, range, open);
+
                        // Child visitation order may vary because HashMap does not guarantee iteration order.
-		} while (!open.isEmpty());
-		
-               // Clarify whether the method should return the closest match when available.
-		
-		if (create && insertion != null){
-			final N newNode = nodeFactory.newNode(value, insertion);
-			insertion.putChild(insertionDist, newNode);
-			return resultFactory.newLookupEntry(inRange, newNode, 0, true);
-		}
-		else{
-			return resultFactory.newLookupEntry(inRange, null, 0, false);
-		}
-	}
+                } while (!open.isEmpty());
+
+               if (create && insertion.node != null){
+                        final N newNode = nodeFactory.newNode(value, insertion.node);
+                        insertion.node.putChild(insertion.distance, newNode);
+                        return resultFactory.newLookupEntry(inRange, newNode, 0, true);
+                }
+                return resultFactory.newLookupEntry(inRange, null, 0, false);
+        }
+
+       protected static class InsertionInfo<N> {
+               N node;
+               int distance;
+       }
+
+       protected int computeDistanceAndVisit(N current, V value) {
+               int dist = distance(current.getValue(), value);
+               if (visit) {
+                       visit(current, value, dist);
+               }
+               return dist;
+       }
+
+       protected void trySetInsertion(N current, int distance, boolean create, InsertionInfo<N> info) {
+               if (create && info.node == null && !current.hasChild(distance)) {
+                       info.node = current;
+                       info.distance = distance;
+               }
+       }
+
+       protected boolean withinRange(N current, int distance, int range, List<N> inRange, int seekMax, boolean create, N insertion) {
+               if (Math.abs(distance) <= range) {
+                       inRange.add(current);
+                       if (seekMax > 0 && inRange.size() >= seekMax) {
+                               if (!create || insertion != null) {
+                                       return true;
+                               }
+                       }
+               }
+               return false;
+       }
 	
 	/**
 	 * Visit a node during lookup.
