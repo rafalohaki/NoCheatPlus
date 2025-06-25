@@ -98,7 +98,7 @@ public class BlocksMC1_13 implements BlockPropertiesSetup {
 
         // Wall heads.
         for (Material mat : MaterialUtil.HEADS_WALL) {
-            BlockInit.setAs(mat, BridgeMaterial.SKELETON_SKULL); // TODO: Test...
+            BlockInit.setAs(mat, BridgeMaterial.SKELETON_SKULL); // untested mapping
         }
 
         // Blue ice.
@@ -139,8 +139,8 @@ public class BlocksMC1_13 implements BlockPropertiesSetup {
         // More slabs.
         BlockProperties.setBlockProps("PRISMARINE_SLAB", BlockProperties.stoneTypeI);
         BlockInit.setAs("DARK_PRISMARINE_SLAB", "PRISMARINE_SLAB");
-        BlockInit.setAs("QUARTZ_SLAB", BridgeMaterial.STONE_SLAB); // TODO: Test.
-        BlockInit.setAs("PETRIFIED_OAK_SLAB", BridgeMaterial.STONE_SLAB); // TODO: Test.
+        BlockInit.setAs("QUARTZ_SLAB", BridgeMaterial.STONE_SLAB); // verify mapping
+        BlockInit.setAs("PETRIFIED_OAK_SLAB", BridgeMaterial.STONE_SLAB); // verify mapping
 
         // More bricks.
         BlockInit.setAs("PRISMARINE_BRICKS", BridgeMaterial.BRICKS);
