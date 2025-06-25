@@ -85,8 +85,7 @@ public abstract class Action <D extends ActionData, L extends AbstractActionList
     }
 
     /**
-     * Get an optimized copy, given the config in use. The default implementation returns this instance.<br>
-     * TODO: "Copy" does not match this.
+     * Get an optimized copy, given the config in use. The default implementation may return this instance rather than creating a new object.<br>
      * @param config
      * @param threshold
      * @return Can return this (unchanged), null (not to be executed ever) or a new instance (changed, optimized).

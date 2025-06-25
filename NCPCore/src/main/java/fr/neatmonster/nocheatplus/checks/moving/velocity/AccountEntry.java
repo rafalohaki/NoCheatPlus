@@ -42,7 +42,6 @@ public class AccountEntry {
     // Activation conditions.
     ///////////////////////////
 
-    // TODO: Add more conditions (max tick, real time?)
 
     /**
      * Maximum count before activation.
@@ -53,7 +52,6 @@ public class AccountEntry {
     // Invalidation conditions.
     ///////////////////////////
 
-    // TODO: Add more conditions (max tick, real time?)
 
     /**
      * Count .

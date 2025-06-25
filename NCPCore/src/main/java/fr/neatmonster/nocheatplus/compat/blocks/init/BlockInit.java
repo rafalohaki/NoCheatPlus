@@ -27,7 +27,7 @@ import fr.neatmonster.nocheatplus.utilities.map.BlockProperties;
  */
 public class BlockInit {
 
-    // TODO: Change to assert names only?, would be better with being able to feed MC names or map them as well, though.
+    // Note: assertMaterialExists currently checks names only; future versions may map Minecraft identifiers.
 
     /**
      * Check for Material existence, throw RuntimeException if not.

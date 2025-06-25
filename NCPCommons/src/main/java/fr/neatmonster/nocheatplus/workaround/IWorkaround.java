@@ -31,7 +31,7 @@ import fr.neatmonster.nocheatplus.utilities.ds.count.acceptdeny.IAcceptDenyCount
  */
 public interface IWorkaround {
 
-    // TODO: Add setEnabled() ? Allow to configure workarounds (-> IConfigurableThing).
+    // Potential extension: provide setEnabled() to configure workarounds via IConfigurableThing.
 
     String getId();
 

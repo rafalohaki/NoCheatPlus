@@ -30,7 +30,7 @@ public interface IDataOnLeave {
     /**
      * Called with player quit or kick.
      * <hr>
-     * (TODO / subject to fix:) Might get called twice (kick + quit).
+     * Known issue: this might get called twice (kick + quit).
      * 
      * @param player
      * @param pData

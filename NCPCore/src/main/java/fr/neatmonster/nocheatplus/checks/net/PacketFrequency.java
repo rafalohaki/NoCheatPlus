@@ -73,7 +73,7 @@ public class PacketFrequency extends Check {
      * @return
      */
     public void relax(final Player player, final NetData data, final NetConfig cc) {
-        // TODO: Concept (not more locking, instead a counter (optimistic)).
+        // Concept placeholder: consider using an optimistic counter instead of additional locking.
     }
 
 }

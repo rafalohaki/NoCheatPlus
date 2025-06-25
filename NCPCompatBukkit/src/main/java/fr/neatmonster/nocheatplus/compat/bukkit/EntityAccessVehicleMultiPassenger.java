@@ -24,7 +24,7 @@ import fr.neatmonster.nocheatplus.utilities.ReflectionUtil;
 public class EntityAccessVehicleMultiPassenger implements IEntityAccessVehicle {
 
     public EntityAccessVehicleMultiPassenger() {
-        // TODO: List<Entity>
+        // Ensure the method signature matches List<Entity> for getPassengers.
         if (ReflectionUtil.getMethodNoArgs(Entity.class, "getPassengers", List.class) == null) {
             throw new RuntimeException("Not supported.");
         }

@@ -59,7 +59,6 @@ import fr.neatmonster.nocheatplus.components.registry.feature.IRemoveData;
  */
 public interface IPlayerDataManager extends ComponentRegistry<IRemoveData>, IRichFactoryRegistry<PlayerFactoryArgument> {
 
-    // TODO: Complete (...)
 
     /**
      * Fetch a PlayerData instance. If none is present and create is set, a new

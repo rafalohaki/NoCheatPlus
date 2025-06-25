@@ -24,7 +24,6 @@ package fr.neatmonster.nocheatplus.permissions;
  */
 public class PermissionInfo extends PermissionPolicy {
 
-    // TODO: Consider IPermissionPolicy with read only access.
 
     private final RegisteredPermission registeredPermission;
 

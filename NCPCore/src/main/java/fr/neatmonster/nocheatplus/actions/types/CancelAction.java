@@ -31,7 +31,6 @@ import fr.neatmonster.nocheatplus.penalties.PenaltyNode;
  */
 public class CancelAction<D extends ActionData, L extends AbstractActionList<D, L>> extends PenaltyAction<D, L> {
 
-    // TODO: Deprecate this (let it extend penalty.CancelAction)?
 
     private static final PenaltyNode node = new PenaltyNode(CancelPenalty.CANCEL);
 

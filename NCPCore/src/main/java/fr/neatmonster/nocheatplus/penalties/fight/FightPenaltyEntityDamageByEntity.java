@@ -27,8 +27,8 @@ import fr.neatmonster.nocheatplus.penalties.AbstractPenalty;
 public abstract class FightPenaltyEntityDamageByEntity extends AbstractPenalty<EntityDamageByEntityEvent> {
 
     /*
-     * TODO: Implement PvP penalties too (!) - use a special argument created
-     * within fight listener (Player attacker, Player damaged, further).
+     * Implementation pending: extend to PvP penalties using a special argument
+     * created within the fight listener (Player attacker, Player damaged, etc.).
      */
 
     public FightPenaltyEntityDamageByEntity() {

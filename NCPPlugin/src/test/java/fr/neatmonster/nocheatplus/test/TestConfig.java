@@ -15,6 +15,7 @@
 package fr.neatmonster.nocheatplus.test;
 
 import static org.junit.Assert.fail;
+import static org.junit.Assert.assertNotNull;
 
 import org.bukkit.Material;
 import org.junit.Test;
@@ -22,7 +23,6 @@ import org.junit.Test;
 import fr.neatmonster.nocheatplus.compat.BridgeMaterial;
 import fr.neatmonster.nocheatplus.config.ConfPaths;
 import fr.neatmonster.nocheatplus.config.ConfigFile;
-import fr.neatmonster.nocheatplus.config.DefaultConfig;
 import fr.neatmonster.nocheatplus.config.PathUtils;
 import fr.neatmonster.nocheatplus.config.RawConfigFile;
 import fr.neatmonster.nocheatplus.logging.StaticLog;
@@ -36,7 +36,6 @@ public class TestConfig {
         }
     }
 
-    @SuppressWarnings("deprecation")
     @Test
     public void testReadMaterial() {
         // Some really needed parts first.
@@ -69,9 +68,7 @@ public class TestConfig {
         // Simple moved boolean.
         config.set(ConfPaths.LOGGING_FILE, false);
         config = PathUtils.processPaths(config, "test", false);
-        if (config == null) {
-            fail("Expect config to be changed at all.");
-        }
+        assertNotNull("Expect config to be changed at all.", config);
         if (config.contains(ConfPaths.LOGGING_FILE)) {
             fail("Expect path be removed: " + ConfPaths.LOGGING_FILE);
         }

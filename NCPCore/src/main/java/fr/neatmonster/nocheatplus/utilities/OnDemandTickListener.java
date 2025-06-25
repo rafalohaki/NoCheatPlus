@@ -15,8 +15,6 @@
 package fr.neatmonster.nocheatplus.utilities;
 
 import fr.neatmonster.nocheatplus.components.registry.feature.TickListener;
-
-// TODO: Auto-generated Javadoc
 /**
  * Auxiliary class for easier short term adding of TickListener. Override delegateTick.<br>
  * NOTES:

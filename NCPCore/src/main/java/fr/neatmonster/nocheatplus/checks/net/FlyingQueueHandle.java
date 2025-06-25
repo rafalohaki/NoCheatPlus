@@ -39,7 +39,7 @@ public class FlyingQueueHandle implements IHandle<DataPacketFlying[]> {
     private boolean currentLocationValid = true;
 
     public FlyingQueueHandle(IPlayerData pData) {
-        // TODO: PlayerData ?
+        // Reference to the associated player data.
         this.pData = pData;
     }
 

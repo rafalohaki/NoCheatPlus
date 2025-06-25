@@ -21,8 +21,6 @@ import fr.neatmonster.nocheatplus.permissions.RegisteredPermission;
  * A list of actions, that associates actions to thresholds. It allows to
  * retrieve all actions that match a certain threshold.
  * <hr>
- * TODO: refactor to an array of Actions entries (threshold + Action[]) + sort
- * that one.
  */
 public class ActionList extends AbstractActionList<ViolationData, ActionList>{
 

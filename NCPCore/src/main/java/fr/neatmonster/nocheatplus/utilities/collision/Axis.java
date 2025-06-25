@@ -25,7 +25,7 @@ import java.util.List;
  *
  */
 public enum Axis {
-    // TODO: name?
+    // Axis orientation names
 
     X_AXIS,
     Y_AXIS,

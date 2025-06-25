@@ -139,7 +139,6 @@ public final class PlayerMap {
         }
     }
 
-    @SuppressWarnings("deprecation")
     public Player getPlayerExact(final String exactName) {
         final PlayerInfo info = exactNameInfoMap.get(exactName);
         if (info != null) {
@@ -161,7 +160,6 @@ public final class PlayerMap {
         return getPlayerLowerCase(probableName.toLowerCase());
     }
 
-    @SuppressWarnings("deprecation")
     public Player getPlayerLowerCase(final String lowerCaseName) {
         final PlayerInfo info = lowerCaseNameInfoMap.get(lowerCaseName);
         if (info != null) {
@@ -264,7 +262,6 @@ public final class PlayerMap {
         return null;
     }
 
-    @SuppressWarnings("deprecation")
     private Player getPlayerBukkit(final PlayerInfo info) {
         if (hasGetPlayer_UUID) {
             return Bukkit.getPlayer(info.id);

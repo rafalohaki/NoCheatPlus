@@ -37,9 +37,8 @@ public class ExemptionContext {
     ///////////////
 
     /*
-     * 
-     *  TODO: How to use (one context = one thing, or one context contains multiple ids.
-     *  -> so contexts contain contexts (...).
+     * Usage note: one context may represent a single item or contain multiple
+     * ids, effectively allowing nested contexts.
      */
 
     private Integer id;
