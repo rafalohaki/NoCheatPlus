@@ -616,47 +616,44 @@ public class CollisionUtil {
             return;
         }
         if (dy != 0) {
-            if (nextBounds[1] == 0.0 && nextBounds[4] == 1.0 && nextBounds[2] == 0.0 && nextBounds[5] == 1.0
-                    && lastBounds[1] == 0.0 && lastBounds[4] == 1.0 && lastBounds[2] == 0.0 && lastBounds[5] == 1.0
-                    && rangeContains(nextBounds[0], lastBounds[0], nextBounds[3], lastBounds[3])) {
-                axisData.exclude = nextBounds[0] == 0.0 ? Direction.X_NEG
-                        : nextBounds[3] == 1.0 ? Direction.X_POS : Direction.NONE;
-            }
-            if (nextBounds[1] == 0.0 && nextBounds[4] == 1.0 && nextBounds[0] == 0.0 && nextBounds[3] == 1.0
-                    && lastBounds[1] == 0.0 && lastBounds[4] == 1.0 && lastBounds[0] == 0.0 && lastBounds[3] == 1.0
-                    && rangeContains(nextBounds[2], lastBounds[2], nextBounds[5], lastBounds[5])) {
-                axisData.exclude = nextBounds[2] == 0.0 ? Direction.Z_NEG
-                        : nextBounds[5] == 1.0 ? Direction.Z_POS : Direction.NONE;
-            }
+            applyVerticalExclude(lastBounds, nextBounds, axisData);
         }
         if (dx != 0) {
-            if (nextBounds[0] == 0.0 && nextBounds[3] == 1.0 && nextBounds[2] == 0.0 && nextBounds[5] == 1.0
-                    && lastBounds[0] == 0.0 && lastBounds[3] == 1.0 && lastBounds[2] == 0.0 && lastBounds[5] == 1.0
-                    && rangeContains(nextBounds[1], lastBounds[1], nextBounds[4], lastBounds[4])) {
-                axisData.exclude = nextBounds[1] == 0.0 ? Direction.Y_NEG
-                        : nextBounds[4] == 1.0 ? Direction.Y_POS : Direction.NONE;
-            }
-            if (nextBounds[1] == 0.0 && nextBounds[4] == 1.0 && nextBounds[0] == 0.0 && nextBounds[3] == 1.0
-                    && lastBounds[1] == 0.0 && lastBounds[4] == 1.0 && lastBounds[0] == 0.0 && lastBounds[3] == 1.0
-                    && rangeContains(nextBounds[2], lastBounds[2], nextBounds[5], lastBounds[5])) {
-                axisData.exclude = nextBounds[2] == 0.0 ? Direction.Z_NEG
-                        : nextBounds[5] == 1.0 ? Direction.Z_POS : Direction.NONE;
-            }
+            applyHorizontalXExclude(lastBounds, nextBounds, axisData);
         }
         if (dz != 0) {
-            if (nextBounds[0] == 0.0 && nextBounds[3] == 1.0 && nextBounds[2] == 0.0 && nextBounds[5] == 1.0
-                    && lastBounds[0] == 0.0 && lastBounds[3] == 1.0 && lastBounds[2] == 0.0 && lastBounds[5] == 1.0
-                    && rangeContains(nextBounds[1], lastBounds[1], nextBounds[4], lastBounds[4])) {
-                axisData.exclude = nextBounds[1] == 0.0 ? Direction.Y_NEG
-                        : nextBounds[4] == 1.0 ? Direction.Y_POS : Direction.NONE;
-            }
-            if (nextBounds[1] == 0.0 && nextBounds[4] == 1.0 && nextBounds[2] == 0.0 && nextBounds[5] == 1.0
-                    && lastBounds[1] == 0.0 && lastBounds[4] == 1.0 && lastBounds[2] == 0.0 && lastBounds[5] == 1.0
-                    && rangeContains(nextBounds[0], lastBounds[0], nextBounds[3], lastBounds[3])) {
-                axisData.exclude = nextBounds[0] == 0.0 ? Direction.X_NEG
-                        : nextBounds[3] == 1.0 ? Direction.X_POS : Direction.NONE;
-            }
+            applyHorizontalZExclude(lastBounds, nextBounds, axisData);
         }
+    }
+
+    private static void applyVerticalExclude(double[] last, double[] next, RichAxisData data) {
+        updateExclude(last, next, 1, 4, 2, 5, 0, 3, Direction.X_NEG, Direction.X_POS, data);
+        updateExclude(last, next, 1, 4, 0, 3, 2, 5, Direction.Z_NEG, Direction.Z_POS, data);
+    }
+
+    private static void applyHorizontalXExclude(double[] last, double[] next, RichAxisData data) {
+        updateExclude(last, next, 0, 3, 2, 5, 1, 4, Direction.Y_NEG, Direction.Y_POS, data);
+        updateExclude(last, next, 1, 4, 0, 3, 2, 5, Direction.Z_NEG, Direction.Z_POS, data);
+    }
+
+    private static void applyHorizontalZExclude(double[] last, double[] next, RichAxisData data) {
+        updateExclude(last, next, 0, 3, 2, 5, 1, 4, Direction.Y_NEG, Direction.Y_POS, data);
+        updateExclude(last, next, 1, 4, 2, 5, 0, 3, Direction.X_NEG, Direction.X_POS, data);
+    }
+
+    private static void updateExclude(double[] last, double[] next,
+            int c1Min, int c1Max, int c2Min, int c2Max,
+            int varMin, int varMax, Direction neg, Direction pos, RichAxisData data) {
+        if (isUnitRange(next, last, c1Min, c1Max) && isUnitRange(next, last, c2Min, c2Max)
+                && rangeContains(next[varMin], last[varMin], next[varMax], last[varMax])) {
+            data.exclude = next[varMin] == 0.0 ? neg
+                    : next[varMax] == 1.0 ? pos : Direction.NONE;
+        }
+    }
+
+    private static boolean isUnitRange(double[] next, double[] last, int minIdx, int maxIdx) {
+        return next[minIdx] == 0.0 && next[maxIdx] == 1.0
+                && last[minIdx] == 0.0 && last[maxIdx] == 1.0;
     }
 
     private static boolean isInitiallyInside(BlockCoord sCollidingBox, BlockCoord eCollidingBox, int x, int y, int z) {
