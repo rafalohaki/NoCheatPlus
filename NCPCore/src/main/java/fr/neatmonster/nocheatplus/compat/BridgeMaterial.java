@@ -32,7 +32,7 @@ import fr.neatmonster.nocheatplus.utilities.ds.prefixtree.SimpleCharPrefixTree;
 
 public class BridgeMaterial {
 
-    // TODO: Should be non static, ideally.
+    // Note: This should ideally be non static.
 
     /** Legacy Material by lower case name without preceding 'legacy_' part. */
     private static final Map<String, Material> legacy = new HashMap<String, Material>();
@@ -318,7 +318,7 @@ public class BridgeMaterial {
 
     public static final Material SUGAR_CANE = getFirstNotNull("sugar_cane_block", "sugar_cane"); // Reversed
 
-    // TODO: Which is the old long grass...
+    // Note: Which is the old long grass...
     public static final Material TALL_GRASS = getFirstNotNull("tall_grass", "long_grass");
 
     public static final Material TERRACOTTA = getFirst("terracotta", "hard_clay");

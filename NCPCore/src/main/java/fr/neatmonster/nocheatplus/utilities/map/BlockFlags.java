@@ -182,7 +182,7 @@ public class BlockFlags {
     /** Fence gate style with 0x04 being fully passable. */
     public static final long F_PASSABLE_X4                  = f_flag();
 
-    /** Like slime block: bounce back 25% of fall height without taking fall damage [TODO: Check/adjust]. */
+    /** Like slime block: bounce back 25% of fall height without taking fall damage [check or adjust]. */
     public static final long F_BOUNCE25                     = f_flag();
     
     /** Like the honey block: fall damage is / 5 when landing on this block. Also allows player to stick to its sides with slower falling speed. */
