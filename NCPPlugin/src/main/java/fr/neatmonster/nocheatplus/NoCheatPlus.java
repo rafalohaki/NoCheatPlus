@@ -1331,56 +1331,59 @@ public class NoCheatPlus extends JavaPlugin implements NoCheatPlusAPI {
      * @return
      */
     private Listener getCoreListener() {
-        return new NCPListener() {
-            @EventHandler(priority = EventPriority.NORMAL)
-            public void onPlayerLogin(final PlayerLoginEvent event) {
-                // (NORMAL to have chat checks come after this.)
-                if (event.getResult() != Result.ALLOWED) {
+        return new CoreListener();
+    }
+
+    private class CoreListener extends NCPListener {
+
+        @EventHandler(priority = EventPriority.NORMAL)
+        public void onPlayerLogin(final PlayerLoginEvent event) {
+            // (NORMAL to have chat checks come after this.)
+            if (event.getResult() != Result.ALLOWED) {
+                return;
+            }
+            final Player player = event.getPlayer();
+            // Check if login is denied (plus expiration check).
+            // Could switch to using player UUIDs and handle AsyncPlayerPreLogin.
+            if (checkDenyLoginsNames(player.getName())) {
+                if (DataManager.getPlayerData(player).hasPermission(Permissions.BYPASS_DENY_LOGIN, player)) {
                     return;
                 }
+                // An alternative would be to use the built in temporary ban feature and include the remaining duration.
+                event.setResult(Result.KICK_OTHER);
+                // Kick message is configurable independently from the checks.
+                event.setKickMessage(ColorUtil.replaceColors(ConfigManager.getConfigFile(player.getWorld().getName()).getString(ConfPaths.STRINGS + ".msgtempdenylogin")));
+            }
+        }
+
+        @EventHandler(priority = EventPriority.LOWEST) // Do update comment in NoCheatPlusAPI with changing.
+        public void onPlayerJoinLowest(final PlayerJoinEvent event) {
+            if (clearExemptionsOnJoin) {
                 final Player player = event.getPlayer();
-                // Check if login is denied (plus expiration check).
-                // Could switch to using player UUIDs and handle AsyncPlayerPreLogin.
-                if (checkDenyLoginsNames(player.getName())) {
-                    if (DataManager.getPlayerData(player).hasPermission(Permissions.BYPASS_DENY_LOGIN, player)) {
-                        return;
-                    }
-                    // An alternative would be to use the built in temporary ban feature and include the remaining duration.
-                    event.setResult(Result.KICK_OTHER);
-                    // Kick message is configurable independently from the checks.
-                    event.setKickMessage(ColorUtil.replaceColors(ConfigManager.getConfigFile(player.getWorld().getName()).getString(ConfPaths.STRINGS + ".msgtempdenylogin")));
-                }
+                NCPExemptionManager.unexempt(player);
             }
+        }
 
-            @EventHandler(priority = EventPriority.LOWEST) // Do update comment in NoCheatPlusAPI with changing.
-            public void onPlayerJoinLowest(final PlayerJoinEvent event) {
-                if (clearExemptionsOnJoin) {
-                    final Player player = event.getPlayer();
-                    NCPExemptionManager.unexempt(player);
-                }
-            }
+        @EventHandler(priority = EventPriority.LOW)
+        public void onPlayerJoinLow(final PlayerJoinEvent event) {
+            // LOWEST is for DataMan and CombinedListener.
+            onJoinLow(event.getPlayer());
+        }
 
-            @EventHandler(priority = EventPriority.LOW)
-            public void onPlayerJoinLow(final PlayerJoinEvent event) {
-                // LOWEST is for DataMan and CombinedListener.
-                onJoinLow(event.getPlayer());
-            }
+        @EventHandler(priority = EventPriority.MONITOR, ignoreCancelled = true)
+        public void onPlayerKick(final PlayerKickEvent event) {
+            onLeave(event.getPlayer());
+        }
 
-            @EventHandler(priority = EventPriority.MONITOR, ignoreCancelled = true)
-            public void onPlayerKick(final PlayerKickEvent event) {
-                onLeave(event.getPlayer());
-            }
+        @EventHandler(priority = EventPriority.MONITOR)
+        public void onPlayerQuit(final PlayerQuitEvent event) {
+            onLeave(event.getPlayer());
+        }
 
-            @EventHandler(priority = EventPriority.MONITOR)
-            public void onPlayerQuit(final PlayerQuitEvent event) {
-                onLeave(event.getPlayer());
-            }
-
-            @EventHandler(priority = EventPriority.MONITOR)
-            public void onWorldLoad(final WorldLoadEvent event) {
-                NoCheatPlus.this.onWorldLoad(event);
-            }
-        };
+        @EventHandler(priority = EventPriority.MONITOR)
+        public void onWorldLoad(final WorldLoadEvent event) {
+            NoCheatPlus.this.onWorldLoad(event);
+        }
     }
 
     private void onWorldLoad(final WorldLoadEvent event) {
