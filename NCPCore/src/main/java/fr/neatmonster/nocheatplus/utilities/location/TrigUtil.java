@@ -32,6 +32,9 @@ import fr.neatmonster.nocheatplus.components.location.IGetPositionWithLook;
  */
 public class TrigUtil {
 
+    /** Epsilon for floating point comparisons. */
+    private static final double EPSILON = 1e-6;
+
     /** Used for internal calculations, no passing on, beware of nested calls. */
     private static final Vector vec1 = new Vector();
     /** Used for internal calculations, no passing on, beware of nested calls. */
@@ -468,6 +471,17 @@ public class TrigUtil {
      */
     public static int manhattan(final int x1, final int y1, final int  z1, final Block block) {
         return manhattan(x1, y1, z1, block.getX(), block.getY(), block.getZ());
+    }
+
+    /**
+     * Check if a floating point value is effectively zero.
+     *
+     * @param val
+     *            value to test
+     * @return true if |val| is below {@link #EPSILON}
+     */
+    public static boolean isZero(final double val) {
+        return Math.abs(val) < EPSILON;
     }
 
     /**

@@ -374,7 +374,7 @@ public class CreativeFly extends Check {
                     && !(thisMove.yDistance < 0.0 && lastMove.yDistance - thisMove.yDistance < 0.0001)) {
 
                 if (lastMove.yDistance < 0.0 && thisMove.yDistance < allowY
-                        || from.getY() >= to.getY() && !(thisMove.yDistance == 0.0 && allowY < 0.0)) {
+                        || from.getY() >= to.getY() && !(TrigUtil.isZero(thisMove.yDistance) && allowY < 0.0)) {
                     resultV = Math.max(resultV, 0.1);
                     tags.add("antilevitate");
 
@@ -989,7 +989,7 @@ public class CreativeFly extends Check {
     private void handleHeadObstruction(final PlayerLocation from, final PlayerMoveData lastMove,
             final double yDistance, final double yDistDiffEx, final AirGlideState state) {
         if (from != null && from.isHeadObstructed() && lastMove.yDistance > 0.0 && yDistDiffEx < 0.0
-                && (state.allowedY > 0.0 || yDistance == 0.0)) {
+                && (state.allowedY > 0.0 || TrigUtil.isZero(yDistance))) {
             state.allowedY = yDistance;
         }
     }
@@ -1035,7 +1035,7 @@ public class CreativeFly extends Check {
         return yDistance <= 0.0 && (to.isOnGround() || to.isResetCond() || thisMove.touchedGround)
                 || yDistDiffEx > -Magic.GRAVITY_MAX && yDistDiffEx < 0.0
                 || speed < 0.05 && !TrigUtil.isSamePos(lastMove.from, lastMove.to)
-                        && (hDistance == 0.0 && yDistance == 0.0 || yDistance < -Magic.GRAVITY_SPAN);
+                        && (TrigUtil.isZero(hDistance) && TrigUtil.isZero(yDistance) || yDistance < -Magic.GRAVITY_SPAN);
     }
 
     /**
@@ -1229,7 +1229,7 @@ public class CreativeFly extends Check {
                 final double maxGain = LiftOffEnvelope.NORMAL.getMinJumpGain(data.jumpAmplifier) + 0.01;
                 if (maxGain > limitV) limitV = maxGain;
             }
-            if (limitV <= 0.0 && lastMove.yDistance == 0.0) resultV = 0.1;
+            if (limitV <= 0.0 && TrigUtil.isZero(lastMove.yDistance)) resultV = 0.1;
         }
 
         return new double[] {limitV, resultV};
