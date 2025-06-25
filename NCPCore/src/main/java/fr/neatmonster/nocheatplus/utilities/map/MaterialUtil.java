@@ -50,7 +50,7 @@ public class MaterialUtil {
     ///////////////////////
 
     private static final List<String> woodTypes = Arrays.asList(
-            "acacia", "birch", "dark_oak", "jungle", "oak", "spruce", "warped", "crimson", "mangrove", "bamboo", "cherry",
+            "acacia", "birch", "dark_oak", "jungle", "oak", "spruce", "warped", "crimson", "mangrove", "bamboo", "cherry", "pale_oak",
             "wood" // Legacy
             );
 
