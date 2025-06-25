@@ -188,6 +188,10 @@ public class BlockBreakListener extends CheckListener {
     private BreakCheckResult performBreakChecks(final Player player, final Block block,
             final IPlayerData pData) {
         final BreakCheckResult result = new BreakCheckResult();
+        if (player == null || block == null) {
+            return result;
+        }
+
         final BlockBreakConfig cc = pData.getGenericInstance(BlockBreakConfig.class);
         final BlockBreakData data = pData.getGenericInstance(BlockBreakData.class);
         result.data = data;
@@ -196,60 +200,91 @@ public class BlockBreakListener extends CheckListener {
         final boolean isInteractBlock = !bdata.getLastIsCancelled() && bdata.matchesLastBlock(tick, block);
         final GameMode gameMode = player.getGameMode();
 
-        if (wrongBlock.isEnabled(player, pData)
+        applyWrongBlockCheck(result, player, block, cc, data, pData);
+        applyFrequencyCheck(result, player, tick, cc, data, pData);
+        applyFastBreakCheck(result, player, block, gameMode, cc, data, pData);
+        applyNoSwingCheck(result, player, data, pData);
+        applyReachDirectionChecks(result, player, block, isInteractBlock, bdata, cc, data, pData);
+        applyLiquidBreakCheck(result, player, block, pData);
+
+        return result;
+    }
+
+    private void applyWrongBlockCheck(final BreakCheckResult result, final Player player,
+            final Block block, final BlockBreakConfig cc, final BlockBreakData data,
+            final IPlayerData pData) {
+        if (!result.cancelled && wrongBlock.isEnabled(player, pData)
                 && wrongBlock.check(player, block, cc, data, pData, isInstaBreak)) {
             result.cancelled = true;
         }
+    }
 
+    private void applyFrequencyCheck(final BreakCheckResult result, final Player player,
+            final int tick, final BlockBreakConfig cc, final BlockBreakData data,
+            final IPlayerData pData) {
         if (!result.cancelled && frequency.isEnabled(player, pData)
                 && frequency.check(player, tick, cc, data, pData)) {
             result.cancelled = true;
         }
+    }
 
+    private void applyFastBreakCheck(final BreakCheckResult result, final Player player,
+            final Block block, final GameMode gameMode, final BlockBreakConfig cc,
+            final BlockBreakData data, final IPlayerData pData) {
         if (!result.cancelled && gameMode != GameMode.CREATIVE
                 && fastBreak.isEnabled(player, pData)
                 && fastBreak.check(player, block, isInstaBreak, cc, data, pData)) {
             result.cancelled = true;
         }
+    }
 
+    private void applyNoSwingCheck(final BreakCheckResult result, final Player player,
+            final BlockBreakData data, final IPlayerData pData) {
         if (!result.cancelled && noSwing.isEnabled(player, pData)
                 && noSwing.check(player, data, pData)) {
             result.cancelled = true;
         }
+    }
 
+    private void applyReachDirectionChecks(final BreakCheckResult result, final Player player,
+            final Block block, final boolean isInteractBlock, final BlockInteractData bdata,
+            final BlockBreakConfig cc, final BlockBreakData data, final IPlayerData pData) {
         final boolean reachEnabled = reach.isEnabled(player, pData);
         final boolean directionEnabled = direction.isEnabled(player, pData);
-        if (reachEnabled || directionEnabled) {
-            result.flyingHandle = new FlyingQueueHandle(pData);
-            final Location loc = player.getLocation(useLoc);
-            final double eyeHeight = MovingUtil.getEyeHeight(player);
-            if (!result.cancelled) {
-                if (isInteractBlock && bdata.isPassedCheck(CheckType.BLOCKINTERACT_REACH)) {
-                    result.skippedRedundantChecks++;
-                } else if (reachEnabled && reach.check(player, eyeHeight, block, data, cc)) {
-                    result.cancelled = true;
-                }
-            }
-            if (!result.cancelled) {
-                if (isInteractBlock && (bdata.isPassedCheck(CheckType.BLOCKINTERACT_DIRECTION)
-                        || bdata.isPassedCheck(CheckType.BLOCKINTERACT_VISIBLE))) {
-                    result.skippedRedundantChecks++;
-                } else if (directionEnabled && direction.check(player, loc, eyeHeight, block, null,
-                        result.flyingHandle, data, cc, pData)) {
-                    result.cancelled = true;
-                }
-            }
-            useLoc.setWorld(null);
+        if (!(reachEnabled || directionEnabled)) {
+            return;
         }
 
+        result.flyingHandle = new FlyingQueueHandle(pData);
+        final Location loc = player.getLocation(useLoc);
+        final double eyeHeight = MovingUtil.getEyeHeight(player);
+        if (!result.cancelled) {
+            if (isInteractBlock && bdata.isPassedCheck(CheckType.BLOCKINTERACT_REACH)) {
+                result.skippedRedundantChecks++;
+            } else if (reachEnabled && reach.check(player, eyeHeight, block, data, cc)) {
+                result.cancelled = true;
+            }
+        }
+        if (!result.cancelled) {
+            if (isInteractBlock && (bdata.isPassedCheck(CheckType.BLOCKINTERACT_DIRECTION)
+                    || bdata.isPassedCheck(CheckType.BLOCKINTERACT_VISIBLE))) {
+                result.skippedRedundantChecks++;
+            } else if (directionEnabled && direction.check(player, loc, eyeHeight, block, null,
+                    result.flyingHandle, data, cc, pData)) {
+                result.cancelled = true;
+            }
+        }
+        useLoc.setWorld(null);
+    }
+
+    private void applyLiquidBreakCheck(final BreakCheckResult result, final Player player,
+            final Block block, final IPlayerData pData) {
         if (!result.cancelled && BlockProperties.isLiquid(block.getType())
                 && !BlockProperties.isWaterPlant(block.getType())
                 && !pData.hasPermission(Permissions.BLOCKBREAK_BREAK_LIQUID, player)
                 && !NCPExemptionManager.isExempted(player, CheckType.BLOCKBREAK_BREAK)) {
             result.cancelled = true;
         }
-
-        return result;
     }
 
     private void finalizeBreak(final BlockBreakEvent event, final Player player, final Block block,
