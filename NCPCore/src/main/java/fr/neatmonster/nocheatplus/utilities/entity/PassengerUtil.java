@@ -15,6 +15,8 @@
 package fr.neatmonster.nocheatplus.utilities.entity;
 
 import java.util.List;
+import java.util.concurrent.Callable;
+import java.util.concurrent.ExecutionException;
 
 import org.bukkit.Bukkit;
 import org.bukkit.Location;
@@ -163,6 +165,134 @@ public class PassengerUtil {
     //        return null;
     //    }
 
+    private static final class SetBackInfo {
+        final boolean playerIsOriginalPassenger;
+        final int otherPlayers;
+
+        SetBackInfo(final boolean playerIsOriginalPassenger, final int otherPlayers) {
+            this.playerIsOriginalPassenger = playerIsOriginalPassenger;
+            this.otherPlayers = otherPlayers;
+        }
+    }
+
+    private static final class RestoreResult {
+        final boolean playerTeleported;
+        final int otherPlayersTeleported;
+
+        RestoreResult(final boolean playerTeleported, final int otherPlayersTeleported) {
+            this.playerTeleported = playerTeleported;
+            this.otherPlayersTeleported = otherPlayersTeleported;
+        }
+    }
+
+    private SetBackInfo markPassengersForSetBack(final Entity[] passengers, final Player player,
+                                                 final IPlayerData pData) {
+        Callable<SetBackInfo> task = () -> {
+            final MovingData data = pData.getGenericInstance(MovingData.class);
+            data.isVehicleSetBack = true;
+            int others = 0;
+            boolean playerOrig = false;
+            for (Entity ent : passengers) {
+                if (ent == null) {
+                    continue;
+                }
+                if (ent.equals(player)) {
+                    playerOrig = true;
+                } else if (ent instanceof Player) {
+                    DataManager.getGenericInstance((Player) ent, MovingData.class).isVehicleSetBack = true;
+                    others++;
+                }
+            }
+            return new SetBackInfo(playerOrig, others);
+        };
+        try {
+            if (Bukkit.isPrimaryThread()) {
+                return task.call();
+            }
+            return Bukkit.getScheduler().callSyncMethod(plugin, task).get();
+        } catch (InterruptedException | ExecutionException | RuntimeException e) {
+            Thread.currentThread().interrupt();
+            return new SetBackInfo(false, 0);
+        } catch (Exception e) {
+            return new SetBackInfo(false, 0);
+        }
+    }
+
+    private boolean teleportVehicle(final Entity vehicle, final Location location, final boolean debug) {
+        Callable<Boolean> task = () -> {
+            if (vehicle.isDead() || !vehicle.isValid()) {
+                return false;
+            }
+            vehicle.eject();
+            return Folia.teleportEntity(vehicle, LocUtil.clone(location),
+                    BridgeMisc.TELEPORT_CAUSE_CORRECTION_OF_POSITION);
+        };
+        try {
+            if (Bukkit.isPrimaryThread()) {
+                return task.call();
+            }
+            return Bukkit.getScheduler().callSyncMethod(plugin, task).get();
+        } catch (InterruptedException | ExecutionException | RuntimeException e) {
+            Thread.currentThread().interrupt();
+            return false;
+        } catch (Exception e) {
+            return false;
+        }
+    }
+
+    private RestoreResult restorePassengers(final Entity vehicle, final Player player,
+                                            final Entity[] originalPassengers, final Location location,
+                                            final boolean vehicleTeleported,
+                                            final boolean playerIsOriginalPassenger,
+                                            final boolean debug,
+                                            final boolean vWorldMatchesPWorld,
+                                            final MovingData data) {
+        Callable<RestoreResult> task = () -> {
+            boolean pTeleported = false;
+            int othersTeleported = 0;
+            if (!playerIsOriginalPassenger) {
+                teleportPlayerPassenger(player, vehicle, location, vehicleTeleported, data, debug);
+            }
+            for (final Entity passenger : originalPassengers) {
+                if (passenger.isValid() && !passenger.isDead() && vWorldMatchesPWorld) {
+                    if (passenger instanceof Player) {
+                        if (teleportPlayerPassenger((Player) passenger, vehicle, location, vehicleTeleported,
+                                DataManager.getGenericInstance((Player) passenger, MovingData.class), debug)) {
+                            if (player.equals(passenger)) {
+                                pTeleported = true;
+                            } else {
+                                othersTeleported++;
+                            }
+                        }
+                    } else {
+                        if (Folia.teleportEntity(passenger, location, BridgeMisc.TELEPORT_CAUSE_CORRECTION_OF_POSITION)
+                                && vehicleTeleported && TrigUtil.distance(passenger.getLocation(useLoc2),
+                                vehicle.getLocation(useLoc)) < 1.5) {
+                            handleVehicle.getHandle().addPassenger(passenger, vehicle);
+                        }
+                    }
+                } else if (debug) {
+                    CheckUtils.debug(player, CheckType.MOVING_VEHICLE,
+                            (!vWorldMatchesPWorld)
+                                    ? "**** Prevent adding passengers to root vehicle on world change (potential exploit)"
+                                    : "Can't add passenger to vehicle: passenger is dead.");
+                }
+            }
+            return new RestoreResult(pTeleported, othersTeleported);
+        };
+        try {
+            if (Bukkit.isPrimaryThread()) {
+                return task.call();
+            }
+            return Bukkit.getScheduler().callSyncMethod(plugin, task).get();
+        } catch (InterruptedException | ExecutionException | RuntimeException e) {
+            Thread.currentThread().interrupt();
+            return new RestoreResult(false, 0);
+        } catch (Exception e) {
+            return new RestoreResult(false, 0);
+        }
+    }
+
     /**
      * Teleport the player with vehicle, might temporarily eject the passengers
      * and set teleported in MovingData. The passengers are fetched from the
@@ -200,26 +330,29 @@ public class PassengerUtil {
      *            The passengers at the time, that is to be restored. Must not be null.
      * @param CheckPassengers Set to true to compare current with original passengers.
      */
-    public void teleportWithPassengers(final Entity vehicle, final Player player, final Location location, 
+    public void teleportWithPassengers(final Entity vehicle, final Player player, final Location location,
                                        final boolean debug, final Entity[] originalPassengers, final boolean checkPassengers,
                                        final IPlayerData pData) {
-        final MovingData data = pData.getGenericInstance(MovingData.class);
-        final String pWorld = player.getWorld().getName();
-        final String vWorld = vehicle.getWorld() != null ? vehicle.getWorld().getName() : "";
-        final boolean vWorldMatchesPWorld = vWorld.equals(pWorld);
-        data.isVehicleSetBack = true;
-        int otherPlayers = 0;
-        boolean playerIsOriginalPassenger = false;
-        for (Entity originalPassenger : originalPassengers) {
-            if (originalPassenger.equals(player)) {
-                playerIsOriginalPassenger = true;
-                break;
-            } else if (originalPassenger instanceof Player) {
-                DataManager.getGenericInstance((Player) originalPassenger, MovingData.class).isVehicleSetBack = true;
-                otherPlayers++;
-            }
+        if (vehicle == null || player == null || location == null) {
+            return;
         }
-        boolean redoPassengers = true; // false; // Some time in the future a teleport might work directly.
+        final World playerWorld = player.getWorld();
+        final World vehicleWorld = vehicle.getWorld();
+        final World locWorld = location.getWorld();
+        if (playerWorld == null || vehicleWorld == null || locWorld == null) {
+            return;
+        }
+
+        final MovingData data = pData.getGenericInstance(MovingData.class);
+        final String pWorld = playerWorld.getName();
+        final String vWorld = vehicleWorld.getName();
+        final boolean vWorldMatchesPWorld = vWorld.equals(pWorld);
+
+        final SetBackInfo sbInfo = markPassengersForSetBack(originalPassengers, player, pData);
+        final boolean playerIsOriginalPassenger = sbInfo.playerIsOriginalPassenger;
+        final int otherPlayers = sbInfo.otherPlayers;
+
+        boolean redoPassengers = true; // TODO checkPassengers not yet used.
         //        if (checkPassengers) {
         //            final List<Entity> passengers = handleVehicle.getHandle().getEntityPassengers(vehicle);
         //            if (passengers.size() != originalPassengers.length) {
@@ -234,78 +367,27 @@ public class PassengerUtil {
         //                }
         //            }
         //        }
-        if (!playerIsOriginalPassenger) {
-            if (debug) {
-                CheckUtils.debug(player, CheckType.MOVING_VEHICLE, "Vehicle set back: This player is not an original passenger.");
-            }
-            //            redoPassengers = true;
+        if (!playerIsOriginalPassenger && debug) {
+            CheckUtils.debug(player, CheckType.MOVING_VEHICLE,
+                    "Vehicle setback: This player is not an original passenger.");
         }
 
-        boolean vehicleTeleported = false;
+        final boolean vehicleTeleported = teleportVehicle(vehicle, location, debug);
+
         boolean playerTeleported = false;
         int otherPlayersTeleported = 0;
-        if (vehicle.isDead() || !vehicle.isValid()) {
-            vehicleTeleported = false;
-        }
-        else {
-            // Can the vehicle teleport with passengers directly, one day?
-            // Attempt to only teleport the entity first. On failure use eject.
-            //            if (vehicle.teleport(location, 
-            //                  BridgeMisc.TELEPORT_CAUSE_CORRECTION_OF_POSITION)) {
-            //                // Check success.
-            //                    vehicleTeleported = true;
-            //                    playerTeleported = true;
-            //                    if (debug) {
-            //                        CheckUtils.debug(player, CheckType.MOVING_VEHICLE, "Direct teleport of entity with passenger succeeded.");
-            //                    }
-            //                }
-            if (redoPassengers){
-                // Teleport the vehicle independently.
-                vehicle.eject(); // NOTE: VehicleExit fires, unknown TP fires.
-                //vehicleTeleported = vehicle.teleport(LocUtil.clone(location), BridgeMisc.TELEPORT_CAUSE_CORRECTION_OF_POSITION);
-                vehicleTeleported = Folia.teleportEntity(vehicle, LocUtil.clone(location), BridgeMisc.TELEPORT_CAUSE_CORRECTION_OF_POSITION);
-            }
+
+        if (redoPassengers && vehicleTeleported) {
+            final RestoreResult restore = restorePassengers(vehicle, player, originalPassengers, location,
+                    vehicleTeleported, playerIsOriginalPassenger, debug, vWorldMatchesPWorld, data);
+            playerTeleported = restore.playerTeleported;
+            otherPlayersTeleported = restore.otherPlayersTeleported;
         }
 
-        if (redoPassengers) {
-            // Add the player first,  if not an original passenger (special case, idk, replaced by squids perhaps).
-            if (!playerIsOriginalPassenger) {
-                // (Not sure: always add first, until another case is needed.)
-                teleportPlayerPassenger(player, vehicle, location, vehicleTeleported, data, debug);
-            }
-            // Add all other original passengers in a generic way, distinguish players.
-            for (final Entity passenger : originalPassengers) {
-                if (passenger.isValid() && !passenger.isDead() && vWorldMatchesPWorld) {
-
-                    // Cross world cases? -> Seems like it :)
-                    if (passenger instanceof Player) {
-                        if (teleportPlayerPassenger((Player) passenger, vehicle, location, vehicleTeleported, DataManager.getGenericInstance((Player) passenger, MovingData.class), debug)) {
-                            if (player.equals(passenger)) {
-                                playerTeleported = true;
-                            }
-                            else {
-                                otherPlayersTeleported ++;
-                            }
-                        }
-                    }
-                    else {
-                        if (Folia.teleportEntity(passenger, location, BridgeMisc.TELEPORT_CAUSE_CORRECTION_OF_POSITION)
-                            && vehicleTeleported && TrigUtil.distance(passenger.getLocation(useLoc2), vehicle.getLocation(useLoc)) < 1.5) {
-                            handleVehicle.getHandle().addPassenger(passenger, vehicle);
-                        }
-                    }
-                }
-                else if (debug) { 
-                   CheckUtils.debug(player, CheckType.MOVING_VEHICLE, (!vWorldMatchesPWorld) ? "**** Prevent adding passengers to root vehicle on world change (potential exploit)" 
-                                    : "Can't add passenger to vehicle: passenger is dead.");
-                // Log skipped + failed non player entities.
-                }
-            }
-        }
-
-        // Log resolution.
-        if (debug) { 
-            CheckUtils.debug(player, CheckType.MOVING_VEHICLE, "Vehicle set back resolution: " + location + " pt=" + playerTeleported + " vt=" + vehicleTeleported + (otherPlayers > 0 ? (" opt=" + otherPlayersTeleported + "/" + otherPlayers) : ""));
+        if (debug) {
+            CheckUtils.debug(player, CheckType.MOVING_VEHICLE,
+                    "Vehicle set back resolution: " + location + " pt=" + playerTeleported + " vt=" + vehicleTeleported
+                            + (otherPlayers > 0 ? (" opt=" + otherPlayersTeleported + "/" + otherPlayers) : ""));
         }
         useLoc.setWorld(null);
         useLoc2.setWorld(null);
