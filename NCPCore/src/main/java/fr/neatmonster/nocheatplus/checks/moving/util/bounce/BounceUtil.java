@@ -90,13 +90,12 @@ public class BounceUtil {
         }
         if (bounceType == BounceType.STATIC_PAST_AND_PUSH) {
             /*
-             * TODO: Find out if relevant and handle here (still use maximum
-             * cap, but not by y-distance.). Could be the push part is only
-             * necessary if the player is pushed upwards without prepared
-             * bounce.
+             * Investigate if additional handling is required here. The push
+             * part might only be necessary when the player gets pushed
+             * upwards without having a prepared bounce.
              */
         }
-        // (Actually observed max. is near 3.5.) TODO: Why 3.14 then?
+        // (Actually observed max. is near 3.5.) Why 3.14 then?
         if (debug) idp.debug(player, "Set bounce effect (dY=" + fallDistance + " / " + bounceType + "): " + effect); 
         data.noFallSkipAirCheck = true;
         data.verticalBounce = new SimpleEntry(tick, effect, FLAGS_VELOCITY_BOUNCE_BLOCK, 1); // Just bounce for now.
@@ -122,7 +121,7 @@ public class BounceUtil {
             // Apply bounce.
             if (to.getY() == from.getY()) {
 
-                // TODO: Why is this needed?
+                // Clarify why this is needed
                 // Fake use velocity here.
                 //data.prependVerticalVelocity(new SimpleEntry(tick, 0.0, 1));
                 //data.getOrUseVerticalVelocity(0.0);
@@ -134,7 +133,7 @@ public class BounceUtil {
             }
             else data.useVerticalBounce(player);
             return true;
-            // TODO: Find % of verticalBounce.value or abs. value for X: yDistance > 0, deviation from effect < X -> set sfNoLowJump
+            // Determine percentage of verticalBounce.value or absolute value for X: yDistance > 0, deviation from effect < X -> set sfNoLowJump
         }
         else {
             data.verticalBounce = null;
@@ -159,28 +158,27 @@ public class BounceUtil {
                                                          final PlayerMoveData thisMove, final PlayerMoveData lastMove, final int tick, 
                                                          final MovingData data, final MovingConfig cc, BlockChangeTracker blockChangeTracker) {
 
-        // TODO: Find more preconditions.
-        // TODO: Might later need to override/adapt just the bounce effect set by the ordinary method.
+        // Additional preconditions may be required here.
+        // It might later be necessary to override or adapt only the bounce effect set by the ordinary method.
         final UUID worldId = from.getWorld().getUID();
         // Prepare (normal/extra) bounce.
         // Typical: a slime block has been there.
         final BlockChangeEntry entryBelowAny = blockChangeTracker.getBlockChangeEntryMatchFlags(data.blockChangeRef, tick, worldId, to.getBlockX(), to.getBlockY() - 1, to.getBlockZ(), null, BlockFlags.F_BOUNCE25);
         if (entryBelowAny != null) {
-            // TODO: Check preconditions for bouncing here at all (!).
+            // Verify preconditions for bouncing here at all (!).
             // Check if the/a block below the feet of the player got pushed into the feet of the player.
             final BlockChangeEntry entryBelowY_POS = entryBelowAny.direction == Direction.Y_POS ? entryBelowAny 
                                                     : blockChangeTracker.getBlockChangeEntryMatchFlags(data.blockChangeRef, tick, worldId, to.getBlockX(), to.getBlockY() - 1, to.getBlockZ(), Direction.Y_POS, BlockFlags.F_BOUNCE25);
             if (entryBelowY_POS != null) {
-                // TODO: Can't know if used... data.blockChangeRef.updateSpan(entryBelowY_POS);
-                // TODO: So far, doesn't seem to be followed by violations.
+                // Data.blockChangeRef.updateSpan(entryBelowY_POS) might not be used; so far, this doesn't seem to lead to violations.
                 return BounceType.STATIC_PAST_AND_PUSH;
             }
-            // TODO: Can't know if used... data.blockChangeRef.updateSpan(entryBelowAny);
+            // data.blockChangeRef.updateSpan(entryBelowAny) might not be used.
             else return BounceType.STATIC_PAST;
         }
         /*
-         * TODO: Can't update span here. If at all, it can be added as side
-         * condition for using the bounce effect. Probably not worth it.
+         * Updating the span here might not be useful; if needed it can be added
+         * as a side condition for using the bounce effect.
          */
         return BounceType.NO_BOUNCE; // Nothing found, return no bounce.
     }
@@ -202,14 +200,14 @@ public class BounceUtil {
                                                         final PlayerMoveData thisMove, final PlayerMoveData lastMove, final int tick, final IPlayerData pData, 
                                                         final IDebugPlayer idp, final MovingData data, final MovingConfig cc, BlockChangeTracker blockChangeTracker) {
 
-        // TODO: More preconditions.
-        // TODO: Nail down to more precise side conditions for larger jumps, if possible.
+        // More preconditions might be needed.
+        // Side conditions for larger jumps should be determined more precisely if possible.
         final UUID worldId = from.getWorld().getUID();
         final boolean debug = pData.isDebugActive(CheckType.MOVING);
         // Possibly a "lost use of slime".
-        // TODO: Might need to cover push up, after ordinary slime bounce.
-        // TODO: Work around 0-dist?
-        // TODO: Adjust amount based on side conditions (center push or off center, distance to block top).
+        // There might be cases of push up after a normal slime bounce that need to be covered.
+        // Work around zero-distance issues if necessary.
+        // Adjust the amount based on side conditions such as center or off-center push and distance to block top.
         double amount = -1.0;
         final BlockChangeEntry entryBelowY_POS = blockChangeTracker.getBlockChangeEntryMatchFlags(data.blockChangeRef, tick, worldId, from.getBlockX(), from.getBlockY() - 1, from.getBlockZ(), Direction.Y_POS, BlockFlags.F_BOUNCE25);
 
@@ -232,15 +230,15 @@ public class BounceUtil {
         // Center push while being on the top height of the pushed block already (or 0.5 above (!)).
         if (
                 amount < 0.0
-                // TODO: Not sure about y-Distance.
+                // Not sure about y-Distance.
                 && lastMove.toIsValid && lastMove.yDistance >= 0.0 && lastMove.yDistance <= 0.505
                 && Math.abs(from.getY() - (double) from.getBlockY() - lastMove.yDistance) < 0.205 // from.getY() - (double) from.getBlockY() == lastMove.yDistance
             ) {
 
             final BlockChangeEntry entry2BelowY_POS = blockChangeTracker.getBlockChangeEntryMatchFlags(data.blockChangeRef, tick, worldId, from.getBlockX(), from.getBlockY() - 2, from.getBlockZ(), Direction.Y_POS, BlockFlags.F_BOUNCE25);
             if (entry2BelowY_POS != null) {
-                // TODO: Does off center push exist with this very case?
-                amount = Math.min(Math.max(0.505, 1.0 + (double) from.getBlockY() - from.getY() + 1.515),  1.915 - lastMove.yDistance); // TODO: EXACT MAGIC.
+                // Investigate whether off-center push exists with this case.
+                amount = Math.min(Math.max(0.505, 1.0 + (double) from.getBlockY() - from.getY() + 1.515),  1.915 - lastMove.yDistance); // EXACT MAGIC value used here.
                 if (debug) {
                     idp.debug(player, "Foot position block push with bounce (" + (entry2BelowY_POS == null ? "off_center)." : "center)."));
                 }
@@ -253,21 +251,20 @@ public class BounceUtil {
         // Finally add velocity if set.
         if (amount >= 0.0) {
             /*
-             * TODO: USE EXISTING velocity with bounce flag set first, then peek
-             * / add. (might while peek -> has bounce flag: remove velocity)
+             * Use existing velocity with the bounce flag set first, then peek
+             * or add. (Might while peek -> has bounce flag: remove velocity)
              */
             data.removeLeadingQueuedVerticalVelocityByFlag(VelocityFlags.ORIGIN_BLOCK_BOUNCE);
             /*
-             * TODO: Concepts for limiting... max amount based on side
-             * conditions such as block height+1.5, max coordinate, max
-             * amount per use, ALLOW_ZERO flag/boolean and set in
-             * constructor, demand max. 1 zero dist during validity. Bind
-             * use to initial xz coordinates... Too precise = better with
-             * past move tracking, or a sub-class of SimpleEntry with better
-             * access signatures including thisMove.
+             * Concepts for limiting... max amount based on side conditions such
+             * as block height+1.5, max coordinate, max amount per use,
+             * ALLOW_ZERO flag/boolean and set in constructor, demand max. 1 zero
+             * dist during validity. Bind use to initial xz coordinates... Too
+             * precise = better with past move tracking, or a sub-class of
+             * SimpleEntry with better access signatures including thisMove.
              */
             /*
-             * TODO: Also account for current yDistance here? E.g. Add two
+             * Also account for current yDistance here? For example add two
              * entries, split based on current yDistance?
              */
             final SimpleEntry vel = new SimpleEntry(tick, amount, FLAGS_VELOCITY_BOUNCE_BLOCK_MOVE_ASCEND, 4);
@@ -280,10 +277,10 @@ public class BounceUtil {
             if (debug) {
                 idp.debug(player, "checkPastStateBounceAscend: set velocity: " + vel);
             }
-            // TODO: Exact type to return.
+            // Exact type to return is yet to be determined.
             return BounceType.STATIC_PAST_AND_PUSH;
         }
-        // TODO: There is a special case with 1.0 up on pistons pushing horizontal only (!).
+        // There is a special case with 1.0 up on pistons pushing horizontally only (!).
         return BounceType.NO_BOUNCE;
     }
 
