@@ -120,10 +120,8 @@ public class ProtocolLibComponent implements IDisableListener, INotifyReload, Jo
         if (ServerVersion.compareMinecraftVersion("1.6.4") <= 0) {
             // Don't use this listener.
             NCPAPIProvider.getNoCheatPlusAPI().getLogManager().info(Streams.STATUS, "Disable EntityUseAdapter due to incompatibilities. Use fight.speed instead of net.attackfrequency.");
-        }
-        else if (worldMan.isActiveAnywhere(CheckType.NET_ATTACKFREQUENCY)) {
-            // (Also sets lastKeepAliveTime, if enabled.)
-            register("fr.neatmonster.nocheatplus.checks.net.protocollib.UseEntityAdapter", plugin);
+        } else {
+            registerIfActive(CheckType.NET_ATTACKFREQUENCY, plugin, "fr.neatmonster.nocheatplus.checks.net.protocollib.UseEntityAdapter");
         }
         if (worldMan.isActiveAnywhere(CheckType.NET_FLYINGFREQUENCY) || worldMan.isActiveAnywhere(CheckType.NET_MOVING)) {
             // (Also sets lastKeepAliveTime, if enabled.)
@@ -134,22 +132,15 @@ public class ProtocolLibComponent implements IDisableListener, INotifyReload, Jo
             // (Set lastKeepAlive if this or fight.godmode is enabled.)
             register("fr.neatmonster.nocheatplus.checks.net.protocollib.KeepAliveAdapter", plugin);
         }
-        if (worldMan.isActiveAnywhere(CheckType.NET_SOUNDDISTANCE)) {
-            register("fr.neatmonster.nocheatplus.checks.net.protocollib.SoundDistance", plugin);
+        registerIfActive(CheckType.NET_SOUNDDISTANCE, plugin, "fr.neatmonster.nocheatplus.checks.net.protocollib.SoundDistance");
+        registerIfActive(CheckType.NET_WRONGTURN, plugin, "fr.neatmonster.nocheatplus.checks.net.protocollib.WrongTurnAdapter");
+        if (ServerVersion.compareMinecraftVersion("1.9") < 0 && worldMan.isActiveAnywhere(CheckType.NET_PACKETFREQUENCY)) {
+            register("fr.neatmonster.nocheatplus.checks.net.protocollib.CatchAllAdapter", plugin);
         }
-        if (worldMan.isActiveAnywhere(CheckType.NET_WRONGTURN)) {
-            register("fr.neatmonster.nocheatplus.checks.net.protocollib.WrongTurnAdapter", plugin);
+        if (ConfigManager.isTrueForAnyConfig(ConfPaths.MOVING_SURVIVALFLY_EXTENDED_NOSLOW) && ServerVersion.compareMinecraftVersion("1.8") >= 0) {
+            register("fr.neatmonster.nocheatplus.checks.net.protocollib.NoSlow", plugin);
         }
-        if (ServerVersion.compareMinecraftVersion("1.9") < 0) {
-            if (worldMan.isActiveAnywhere(CheckType.NET_PACKETFREQUENCY)) {
-                register("fr.neatmonster.nocheatplus.checks.net.protocollib.CatchAllAdapter", plugin);
-            }
-        }
-        if (ServerVersion.compareMinecraftVersion("1.8") >= 0) {
-        	if (ConfigManager.isTrueForAnyConfig(ConfPaths.MOVING_SURVIVALFLY_EXTENDED_NOSLOW)) 
-        	    register("fr.neatmonster.nocheatplus.checks.net.protocollib.NoSlow", plugin);
-            register("fr.neatmonster.nocheatplus.checks.net.protocollib.Fight", plugin);
-        }
+        registerIfVersionAtLeast("1.8", plugin, "fr.neatmonster.nocheatplus.checks.net.protocollib.Fight");
         if (!registeredPacketAdapters.isEmpty()) {
             List<String> names = new ArrayList<String>(registeredPacketAdapters.size());
             for (PacketAdapter adapter : registeredPacketAdapters) {
@@ -191,6 +182,33 @@ public class ProtocolLibComponent implements IDisableListener, INotifyReload, Jo
             if (t.getCause() != null) {
                 StaticLog.logWarning(t.getCause());
             }
+        }
+    }
+
+    /**
+     * Register the adapter if the given check is active anywhere.
+     *
+     * @param check the {@link CheckType} to test
+     * @param plugin the plugin instance
+     * @param adapterName fully qualified adapter class name
+     */
+    private void registerIfActive(CheckType check, Plugin plugin, String adapterName) {
+        if (NCPAPIProvider.getNoCheatPlusAPI().getWorldDataManager().isActiveAnywhere(check)) {
+            register(adapterName, plugin);
+        }
+    }
+
+    /**
+     * Register the adapter if the current server version is at least the given
+     * version.
+     *
+     * @param version minimal Minecraft version
+     * @param plugin the plugin instance
+     * @param adapterName fully qualified adapter class name
+     */
+    private void registerIfVersionAtLeast(String version, Plugin plugin, String adapterName) {
+        if (ServerVersion.compareMinecraftVersion(version) >= 0) {
+            register(adapterName, plugin);
         }
     }
 
