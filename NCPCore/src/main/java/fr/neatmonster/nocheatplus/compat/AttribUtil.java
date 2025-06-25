@@ -20,7 +20,7 @@ import org.bukkit.NamespacedKey;
 
 import fr.neatmonster.nocheatplus.utilities.IdUtil;
 
-// TODO: Auto-generated Javadoc
+// Auto-generated Javadoc
 /**
  * The Class AttribUtil.
  */
@@ -53,7 +53,7 @@ public class AttribUtil {
      *             if the modifier is not 2.
      */
     public static double getMultiplier(final int operator, final double value) {
-        // TODO: Might allow 1 too, as it should "work", despite less accurate.
+        // Might allow operator 1 as well, though results would be less accurate.
         switch(operator) {
             case 2:
                 return 1.0 + value;
