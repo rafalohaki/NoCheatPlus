@@ -18,7 +18,7 @@ import org.bukkit.World;
 
 public interface BukkitShapeModel extends ShapeModel<World> {
     /*
-     * TODO: Subject to removal/change (there might be abstract classes for some
-     * shapes later on, and then this'll be redundant interfaces).
+     * This interface may be replaced by abstract classes once shape models
+     * are reworked, leaving it here for backward compatibility.
      */
 }

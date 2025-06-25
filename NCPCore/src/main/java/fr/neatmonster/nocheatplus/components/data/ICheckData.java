@@ -21,9 +21,8 @@ package fr.neatmonster.nocheatplus.components.data;
  * One might think of making this an interface not for the internally used data,
  * but for copy of data for external use only. Then sync could go over other
  * objects for async access.
- * 
+ *
  * @author asofold
- * @TODO Keep/Remove
  */
 public interface ICheckData extends IData {
 
