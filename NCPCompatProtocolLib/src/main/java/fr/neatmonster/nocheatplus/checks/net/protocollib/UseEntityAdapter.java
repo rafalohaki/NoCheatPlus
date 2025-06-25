@@ -131,7 +131,7 @@ public class UseEntityAdapter extends BaseAdapter {
         final long time = System.currentTimeMillis();
         final Player player = event.getPlayer();
         if (player == null) {
-            // TODO: Warn once?
+            // NOTE: Consider warning once.
             return;
         }
         final IPlayerData pData = DataManager.getPlayerDataSafe(player);
@@ -170,7 +170,7 @@ public class UseEntityAdapter extends BaseAdapter {
             }
         }
         if (!packetInterpreted) {
-            // TODO: Log warning once, if the packet could not be interpreted.
+            // NOTE: Log warning once if the packet could not be interpreted.
             return;
         }
 
