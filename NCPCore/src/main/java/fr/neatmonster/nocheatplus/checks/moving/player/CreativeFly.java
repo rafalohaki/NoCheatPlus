@@ -1345,7 +1345,7 @@ public class CreativeFly extends Check {
      * @return horizontal and vertical velocity adjustments
      */
     public static VelocityAdjustment guessElytraVelocityAmount(final MoveCheckContext context) {
-        if (context == null) {
+        if (!isValidGlideContext(context)) {
             return new VelocityAdjustment(0.0, 0.0);
         }
 
@@ -1354,80 +1354,113 @@ public class CreativeFly extends Check {
         final PlayerMoveData lastMove = context.lastMove();
         final MovingData data = context.data();
 
-        if (player == null || thisMove == null || lastMove == null || data == null) {
-            return new VelocityAdjustment(0.0, 0.0);
-        }
-
-        final Location useLoc = new Location(null, 0, 0, 0);
-        useLoc.setYaw(thisMove.to.getYaw());
-        useLoc.setPitch(thisMove.to.getPitch());
-        final Vector lookvec = useLoc.getDirection();
+        final Vector lookvec = computeLookVector(thisMove);
         final float radPitch = (float) Math.toRadians(thisMove.to.getPitch());
-        final double xzlength = Math.sqrt(lookvec.getX() * lookvec.getX() + lookvec.getZ() * lookvec.getZ());
+        final double xzlength = horizontalLength(lookvec);
 
-        final double speed = getSlowFallingSpeed(player);
-        double allowedElytraYDistance = computeAllowedYDistance(lastMove);
-        double allowedElytraHDistance = 0.0;
-        final double lastHdist = lastMove.toIsValid ? lastMove.hDistance : 0.0;
-        double pitchFactor = Math.cos(radPitch);
-        pitchFactor *= pitchFactor;
+        final ElytraGuessState state = initGuessState(player, lastMove, radPitch);
+        updatePitchAdjustments(state, lookvec, radPitch, xzlength, thisMove);
+        final double resultH = applyFireworkBoost(state, lookvec, xzlength, thisMove, lastMove, data);
 
-        allowedElytraYDistance += speed * (-1.0D + pitchFactor * 0.75D);
-        double x = lastMove.to.getX() - lastMove.from.getX();
-        double z = lastMove.to.getZ() - lastMove.from.getZ();
+        final double finalH = Double.isNaN(resultH) ? finalizeHorizontal(state) : resultH;
+        return new VelocityAdjustment(finalH, state.allowedY);
+    }
 
-        if (allowedElytraYDistance < 0.0D && xzlength > 0.0) {
-            final double d = allowedElytraYDistance * -0.1 * pitchFactor;
-            x += lookvec.getX() * d / xzlength;
-            z += lookvec.getZ() * d / xzlength;
-            allowedElytraYDistance += d;
+    private static boolean isValidGlideContext(MoveCheckContext context) {
+        if (context == null) {
+            return false;
+        }
+        return context.player() != null && context.thisMove() != null
+                && context.lastMove() != null && context.data() != null;
+    }
+
+    private static Vector computeLookVector(PlayerMoveData move) {
+        final Location useLoc = new Location(null, 0, 0, 0);
+        useLoc.setYaw(move.to.getYaw());
+        useLoc.setPitch(move.to.getPitch());
+        return useLoc.getDirection();
+    }
+
+    private static double horizontalLength(Vector vec) {
+        return Math.sqrt(vec.getX() * vec.getX() + vec.getZ() * vec.getZ());
+    }
+
+    private static ElytraGuessState initGuessState(Player player, PlayerMoveData lastMove, float radPitch) {
+        ElytraGuessState state = new ElytraGuessState();
+        state.allowedY = computeAllowedYDistance(lastMove);
+        state.lastHdist = lastMove.toIsValid ? lastMove.hDistance : 0.0;
+        state.pitchFactor = Math.cos(radPitch);
+        state.pitchFactor *= state.pitchFactor;
+        state.allowedY += getSlowFallingSpeed(player) * (-1.0D + state.pitchFactor * 0.75D);
+        state.x = lastMove.to.getX() - lastMove.from.getX();
+        state.z = lastMove.to.getZ() - lastMove.from.getZ();
+        return state;
+    }
+
+    private static void updatePitchAdjustments(ElytraGuessState state, Vector lookvec, float radPitch,
+            double xzlength, PlayerMoveData thisMove) {
+        if (state.allowedY < 0.0D && xzlength > 0.0) {
+            final double d = state.allowedY * -0.1 * state.pitchFactor;
+            state.x += lookvec.getX() * d / xzlength;
+            state.z += lookvec.getZ() * d / xzlength;
+            state.allowedY += d;
         }
 
         if (radPitch < 0.0F) {
             if (thisMove.to.getPitch() == -90f
-                && isNear(thisMove.yDistance, allowedElytraYDistance * Magic.FRICTION_MEDIUM_ELYTRA_AIR, 0.01)) {
-                allowedElytraHDistance += 0.01;
+                    && isNear(thisMove.yDistance, state.allowedY * Magic.FRICTION_MEDIUM_ELYTRA_AIR, 0.01)) {
+                state.allowedH += 0.01;
             } else if (xzlength > 0.0) {
-                final double d = lastHdist * -Math.sin(radPitch) * 0.04;
-                x -= lookvec.getX() * d / xzlength;
-                z -= lookvec.getZ() * d / xzlength;
-                allowedElytraYDistance += d * 3.2;
+                final double d = state.lastHdist * -Math.sin(radPitch) * 0.04;
+                state.x -= lookvec.getX() * d / xzlength;
+                state.z -= lookvec.getZ() * d / xzlength;
+                state.allowedY += d * 3.2;
             }
         }
 
         if (xzlength > 0.0) {
-            x += (lookvec.getX() / xzlength * lastHdist - x) * 0.1D;
-            z += (lookvec.getZ() / xzlength * lastHdist - z) * 0.1D;
+            state.x += (lookvec.getX() / xzlength * state.lastHdist - state.x) * 0.1D;
+            state.z += (lookvec.getZ() / xzlength * state.lastHdist - state.z) * 0.1D;
         }
+    }
 
+    private static double applyFireworkBoost(ElytraGuessState state, Vector lookvec, double xzlength,
+            PlayerMoveData thisMove, PlayerMoveData lastMove, MovingData data) {
         double resultHDistance = Double.NaN;
-
         if (data.fireworksBoostDuration > 0) {
-            allowedElytraYDistance = Math.abs(thisMove.yDistance) < 2.0 ?
-                    thisMove.yDistance : lastMove.toIsValid ? lastMove.yDistance : 0;
+            state.allowedY = Math.abs(thisMove.yDistance) < 2.0 ? thisMove.yDistance
+                    : lastMove.toIsValid ? lastMove.yDistance : 0;
             if (Math.round(data.fireworksBoostTickNeedCheck / 4) > data.fireworksBoostDuration
-                && thisMove.hDistance < Math.sqrt(x * x + z * z)) {
-                resultHDistance = Math.sqrt(x * x + z * z);
+                    && thisMove.hDistance < Math.sqrt(state.x * state.x + state.z * state.z)) {
+                resultHDistance = Math.sqrt(state.x * state.x + state.z * state.z);
             } else {
-                x *= 0.99;
-                z *= 0.99;
-                x += lookvec.getX() * 0.1D + (lookvec.getX() * 1.5D - x) * 0.5D;
-                z += lookvec.getZ() * 0.1D + (lookvec.getZ() * 1.5D - z) * 0.5D;
+                state.x *= 0.99;
+                state.z *= 0.99;
+                state.x += lookvec.getX() * 0.1D + (lookvec.getX() * 1.5D - state.x) * 0.5D;
+                state.z += lookvec.getZ() * 0.1D + (lookvec.getZ() * 1.5D - state.z) * 0.5D;
 
                 if (thisMove.hDistance < lastMove.hAllowedDistance * 0.994) {
                     resultHDistance = lastMove.hAllowedDistance * 0.994;
                 } else {
-                    allowedElytraHDistance += 0.2;
+                    state.allowedH += 0.2;
                 }
             }
         }
+        return resultHDistance;
+    }
 
-        if (Double.isNaN(resultHDistance)) {
-            allowedElytraHDistance += Math.sqrt(x * x + z * z) + 0.1;
-            resultHDistance = allowedElytraHDistance;
-        }
+    private static double finalizeHorizontal(ElytraGuessState state) {
+        state.allowedH += Math.sqrt(state.x * state.x + state.z * state.z) + 0.1;
+        return state.allowedH;
+    }
 
-        return new VelocityAdjustment(resultHDistance, allowedElytraYDistance);
+    private static class ElytraGuessState {
+        double x;
+        double z;
+        double allowedY;
+        double allowedH;
+        double lastHdist;
+        double pitchFactor;
     }
 
 
