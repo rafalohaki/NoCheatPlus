@@ -24,19 +24,18 @@ import fr.neatmonster.nocheatplus.compat.versions.ServerVersion;
 
 /**
  * Magic workarounds for moving in liquid (SurvivalFly.vDistLiquid).
- * 
+ *
  * @author asofold
  *
  */
 public class LiquidWorkarounds {
 
     /**
-     * 
+     *
      * @param from
      * @param to
      * @param baseSpeed
      * @param frictDist
-     * @param thisMove
      * @param lastMove
      * @param data
      * @return The allowed distance for reference, in case the move is allowed.
@@ -65,7 +64,7 @@ public class LiquidWorkarounds {
                 result = upwardPastMoveCases(baseSpeed, frictDist, thisMove, lastMove, pastMove1, data, yDistance, from, to);
             }
         } else if (lastMove.toIsValid) {
-            result = downwardCases(baseSpeed, frictDist, lastMove, pastMove1, data, yDistance, from, to);
+            result = downwardCases(baseSpeed, lastMove, pastMove1, data, yDistance, from, to);
         }
         return result;
     }
@@ -77,28 +76,17 @@ public class LiquidWorkarounds {
             return yDistance;
         }
 
-                // Jump out water near edge ground
-                if (lastMove.yDistance < -0.5 && yDistance > 0.4 && yDistance < frictDist - Magic.GRAVITY_MAX && from.isOnGround(0.6)) {
-                    return frictDist - Magic.GRAVITY_MAX;
-                }
-                
-                // Asc by water level
-                if (!(data.liftOffEnvelope == LiftOffEnvelope.LIMIT_LIQUID && Double.isInfinite(Bridge1_13.getDolphinGraceAmplifier(from.getPlayer()))) 
-                    && (
-                        yDistance <= data.liftOffEnvelope.getMaxJumpGain(data.jumpAmplifier) 
-                        && !BlockProperties.isLiquid(from.getTypeIdAbove())
-                        || !to.isInLiquid() // Possibly impossible !?
-                        || (thisMove.to.onGround || lastMove.toIsValid && lastMove.yDistance - yDistance >= 0.010 || to.isAboveStairs())
-                    )) {
+        // Jump out water near edge ground
+        if (lastMove.yDistance < -0.5 && yDistance > 0.4 && yDistance < frictDist - Magic.GRAVITY_MAX && from.isOnGround(0.6)) {
+            return frictDist - Magic.GRAVITY_MAX;
+        }
 
-        // Asc by water level
-        if (!(data.liftOffEnvelope == LiftOffEnvelope.LIMIT_LIQUID && Double.isInfinite(Bridge1_13.getDolphinGraceAmplifier(from.getPlayer())))
-            && (
-                yDistance <= data.liftOffEnvelope.getMaxJumpGain(data.jumpAmplifier)
-                && !BlockProperties.isLiquid(from.getTypeIdAbove())
-                || !to.isInLiquid() // TODO: impossible !?
-                || (thisMove.to.onGround || lastMove.toIsValid && lastMove.yDistance - yDistance >= 0.010 || to.isAboveStairs())
-            )) {
+        // Ascend by water level
+        if (!(data.liftOffEnvelope == LiftOffEnvelope.LIMIT_LIQUID && Double.isInfinite(Bridge1_13.getDolphinGraceAmplifier(from.getPlayer()))) &&
+                (yDistance <= data.liftOffEnvelope.getMaxJumpGain(data.jumpAmplifier) &&
+                        !BlockProperties.isLiquid(from.getTypeIdAbove()) ||
+                        !to.isInLiquid() ||
+                        (thisMove.to.onGround || (lastMove.toIsValid && lastMove.yDistance - yDistance >= 0.010) || to.isAboveStairs()))) {
 
             double vAllowedDistance = baseSpeed + 0.397;
             double vDistanceAboveLimit = yDistance - vAllowedDistance;
@@ -115,16 +103,16 @@ public class LiquidWorkarounds {
         // Launched in liquid by a bubble column with space bar kept pressed.
         // (This is called after having used up all velocity and this move does not fit in the friction envelope)
         if (data.insideBubbleStreamCount > 0 && yDistance > 0.0 && lastMove.yDistance > 0.0
-            && !data.isVelocityJumpPhase() && yDistance < lastMove.yDistance * data.lastFrictionVertical
-            && yDistance < Magic.bubbleStreamAscend) {
+                && !data.isVelocityJumpPhase() && yDistance < lastMove.yDistance * data.lastFrictionVertical
+                && yDistance < Magic.bubbleStreamAscend) {
             return yDistance;
         }
 
         // Lenient on marginal violation if speed decreases by 'enough'.
         // (Observed on 'dirty' phase. Then why not confining by isVelocityJumpPhase?)
         if (Math.abs(frictDist - yDistance) <= 2.0 * Magic.GRAVITY_MAX
-            && yDistance < lastMove.yDistance - 4.0 * Math.abs(frictDist - yDistance)
-            && data.isVelocityJumpPhase()) {
+                && yDistance < lastMove.yDistance - 4.0 * Math.abs(frictDist - yDistance)
+                && data.isVelocityJumpPhase()) {
             return yDistance;
         }
 
@@ -137,70 +125,70 @@ public class LiquidWorkarounds {
 
         // Cases considering two past moves with moving up.
         if (pastMove1.toIsValid && pastMove1.to.extraPropertiesValid) {
-
-                    // Velocity use in lastMove, keep air friction roughly.
-                    // (Then confine it by lastMove.verVelUsed != null?)
-                    if (!Magic.resetCond(pastMove1) && lastMove.yDistance - Magic.GRAVITY_MAX > thisMove.yDistance
-                        && Magic.intoLiquid(lastMove) && Magic.leavingLiquid(thisMove) && lastMove.verVelUsed != null) {
-                        return yDistance;
-                    }
-                }
+            // Velocity use in lastMove, keep air friction roughly.
+            // (Then confine it by lastMove.verVelUsed != null?)
+            if (!Magic.resetCond(pastMove1) && lastMove.yDistance - Magic.GRAVITY_MAX > thisMove.yDistance
+                    && Magic.intoLiquid(lastMove) && Magic.leavingLiquid(thisMove) && lastMove.verVelUsed != null) {
+                return yDistance;
             }
         }
-        // Otherwise, only if last move is available.
-        else if (lastMove.toIsValid) {
-            
-            // Question: Are all these cases really for descending?
-            // Falling into water, mid-speed (second move after diving in).
-            if (yDistance > -0.9 && yDistance < lastMove.yDistance 
-                && Math.abs(yDistance - lastMove.yDistance) <= Magic.GRAVITY_MAX + Magic.GRAVITY_MIN 
+        return null;
+    }
+
+    private static Double downwardCases(final double baseSpeed, final PlayerMoveData lastMove,
+            final PlayerMoveData pastMove1, final MovingData data, final double yDistance,
+            final PlayerLocation from, final PlayerLocation to) {
+
+        // Question: Are all these cases really for descending?
+        // Falling into water, mid-speed (second move after diving in).
+        if (yDistance > -0.9 && yDistance < lastMove.yDistance
+                && Math.abs(yDistance - lastMove.yDistance) <= Magic.GRAVITY_MAX + Magic.GRAVITY_MIN
                 && yDistance - lastMove.yDistance < -Magic.GRAVITY_MIN) {
-                //&& !BlockProperties.isLiquid(to.getTypeId(to.getBlockX(), Location.locToBlock(to.getY() + to.getEyeHeight()), to.getBlockZ()))
-                return lastMove.yDistance - Magic.GRAVITY_MAX - Magic.GRAVITY_MIN;
-            }
-            // Increase speed slightly on second in-medium move (dirty flag may have been reset).
-            else if (data.insideMediumCount <= 1
-                    // (No strong decrease:)
-                    && yDistance > lastMove.yDistance - Magic.GRAVITY_MAX
-                    && (
-                        // Ordinary (some old case).
-                        // See: https://github.com/NoCheatPlus/NoCheatPlus/commit/ca7186558967d3370d1c1176929691a44a337a2d
-                        lastMove.yDistance < 0.8 && yDistance < lastMove.yDistance - Magic.GRAVITY_SPAN
+            //&& !BlockProperties.isLiquid(to.getTypeId(to.getBlockX(), Location.locToBlock(to.getY() + to.getEyeHeight()), to.getBlockZ()))
+            return lastMove.yDistance - Magic.GRAVITY_MAX - Magic.GRAVITY_MIN;
+        }
+        // Increase speed slightly on second in-medium move (dirty flag may have been reset).
+        else if (data.insideMediumCount <= 1
+                // (No strong decrease:)
+                && yDistance > lastMove.yDistance - Magic.GRAVITY_MAX
+                && (
+                // Ordinary (some old case).
+                // See: https://github.com/NoCheatPlus/NoCheatPlus/commit/ca7186558967d3370d1c1176929691a44a337a2d
+                lastMove.yDistance < 0.8 && yDistance < lastMove.yDistance - Magic.GRAVITY_SPAN
                         // Check with three moves, rather shortly touching water.
                         || lastMove.yDistance < -0.5 // Arbitrary, actually observed has been < -1.0
                         && pastMove1.toIsValid && pastMove1.to.extraPropertiesValid
                         && Math.abs(pastMove1.yDistance - lastMove.yDistance) < Magic.GRAVITY_MIN
                         && yDistance <= lastMove.yDistance
                         && Magic.inLiquid(lastMove) && Magic.intoLiquid(pastMove1)
-                    )) {
-                return yDistance;
-            }
-            // In-water rough near-0-inversion from allowed speed to a negative amount, little more than allowed (magic -0.2 roughly).
-            else if (lastMove.yDistance >= Magic.GRAVITY_MAX / 10.0 && lastMove.yDistance <= Magic.GRAVITY_MAX + Magic.GRAVITY_MIN / 2.0
-                    && yDistance < 0.0 && yDistance > -2.0 * Magic.GRAVITY_MAX - Magic.GRAVITY_MIN / 2.0
-                    && to.isInLiquid() // Might skip the liquid check, though.
-                    && lastMove.from.inLiquid && lastMove.to.extraPropertiesValid && lastMove.to.inLiquid // in water only?
-                    ) {
-                return yDistance;
-            }
-            // Lava rather.
-            else if (data.lastFrictionVertical < 0.65 // (Random, but smaller than water.) 
-                    && (
-                            // Moving downstream.
-                            lastMove.yDistance < 0.0 && yDistance > -0.5 && yDistance < lastMove.yDistance 
-                            && lastMove.yDistance - yDistance < Magic.GRAVITY_MIN && BlockProperties.isDownStream(from, to)
-                            // Mix of gravity and base speed [careful: relates to water base speed].
-                            || lastMove.yDistance < 0.0 && yDistance > -baseSpeed - Magic.GRAVITY_MAX && yDistance < lastMove.yDistance
-                            && lastMove.yDistance - yDistance > Magic.GRAVITY_SPAN
-                            && Math.abs(lastMove.yDistance + baseSpeed) < 0.25 * baseSpeed
-                            // Falling slightly too fast in lava.
-                            || data.insideMediumCount == 1 || data.insideMediumCount == 2 
-                            && lastMove.yDistance < 0.0 && yDistance < lastMove.yDistance 
-                            && yDistance - lastMove.yDistance > -Magic.GRAVITY_MIN && yDistance > -0.65
-                            )
-                    ) {
-                return yDistance;
-            }
+        )) {
+            return yDistance;
+        }
+        // In-water rough near-0-inversion from allowed speed to a negative amount, little more than allowed (magic -0.2 roughly).
+        else if (lastMove.yDistance >= Magic.GRAVITY_MAX / 10.0 && lastMove.yDistance <= Magic.GRAVITY_MAX + Magic.GRAVITY_MIN / 2.0
+                && yDistance < 0.0 && yDistance > -2.0 * Magic.GRAVITY_MAX - Magic.GRAVITY_MIN / 2.0
+                && to.isInLiquid() // Might skip the liquid check, though.
+                && lastMove.from.inLiquid && lastMove.to.extraPropertiesValid && lastMove.to.inLiquid // in water only?
+        ) {
+            return yDistance;
+        }
+        // Lava rather.
+        else if (data.lastFrictionVertical < 0.65 // (Random, but smaller than water.)
+                && (
+                // Moving downstream.
+                lastMove.yDistance < 0.0 && yDistance > -0.5 && yDistance < lastMove.yDistance
+                        && lastMove.yDistance - yDistance < Magic.GRAVITY_MIN && BlockProperties.isDownStream(from, to)
+                        // Mix of gravity and base speed [careful: relates to water base speed].
+                        || lastMove.yDistance < 0.0 && yDistance > -baseSpeed - Magic.GRAVITY_MAX && yDistance < lastMove.yDistance
+                        && lastMove.yDistance - yDistance > Magic.GRAVITY_SPAN
+                        && Math.abs(lastMove.yDistance + baseSpeed) < 0.25 * baseSpeed
+                        // Falling slightly too fast in lava.
+                        || data.insideMediumCount == 1 || data.insideMediumCount == 2
+                        && lastMove.yDistance < 0.0 && yDistance < lastMove.yDistance
+                        && yDistance - lastMove.yDistance > -Magic.GRAVITY_MIN && yDistance > -0.65
+        )
+        ) {
+            return yDistance;
         }
         // Note: Also DOWNSTREAM !?
         return null;
