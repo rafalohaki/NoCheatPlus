@@ -35,6 +35,12 @@ import fr.neatmonster.nocheatplus.utilities.StringUtil;
 
 /**
  * More handy high level methods throwing one type of exception.
+ * <p>
+ * Instances of this class are not designed for modification after use. When a
+ * {@link fr.neatmonster.nocheatplus.compat.cbreflect.BlockCacheCBReflect}
+ * is created with a {@code ReflectHelper}, that helper should be treated as
+ * immutable for the lifetime of the cache.
+ * </p>
  * @author asofold
  *
  */
