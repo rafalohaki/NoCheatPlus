@@ -45,7 +45,7 @@ public class NetConfig extends ACheckConfig {
     };
 
     public static RegisteredPermission[] getPreferKeepUpdatedPermissions() {
-        return preferKeepUpdatedPermissions;
+        return preferKeepUpdatedPermissions.clone();
     }
 
     /////////////

@@ -1125,7 +1125,7 @@ public class CreativeFly extends Check {
         }
 
         if (level > 0) {
-            allowedH *= Magic.modDepthStrider[level];
+            allowedH *= Magic.getModDepthStrider()[level];
             final double attrMod = attributeAccess.getHandle().getSpeedAttributeMultiplier(player);
             if (attrMod == Double.MAX_VALUE) {
                 final double speedAmplifier = mcAccess.getHandle().getFasterMovementAmplifier(player);
