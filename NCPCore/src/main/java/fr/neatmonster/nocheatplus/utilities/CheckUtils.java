@@ -42,6 +42,9 @@ public class CheckUtils {
 
     public static final IPrimaryThreadContextTester primaryServerThreadContextTester = Bukkit::isPrimaryThread;
 
+    /** Threshold for server lag factor before skipping violation processing. */
+    public static final float DEFAULT_LAG_VL_THRESHOLD = 1.5f;
+
     /**
      * Improper API access: Log once a message with the checkType and the
      * current stack trace. The stack trace is only logged once on repeated access.

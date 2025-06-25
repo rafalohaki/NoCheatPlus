@@ -32,6 +32,7 @@ import fr.neatmonster.nocheatplus.permissions.Permissions;
 import fr.neatmonster.nocheatplus.players.IPlayerData;
 import fr.neatmonster.nocheatplus.utilities.StringUtil;
 import fr.neatmonster.nocheatplus.utilities.TickTask;
+import fr.neatmonster.nocheatplus.utilities.CheckUtils;
 import fr.neatmonster.nocheatplus.utilities.location.TrigUtil;
 import fr.neatmonster.nocheatplus.actions.ParameterName;
 import fr.neatmonster.nocheatplus.checks.ViolationData;
@@ -119,7 +120,7 @@ public class Reach extends Check {
 
 
         if (violation > 0) {
-            if (TickTask.getLag(1000, true) < 1.5f){ // Do not increase the vl in case of server lag (1.5 is a magic value)
+            if (TickTask.getLag(1000, true) < CheckUtils.DEFAULT_LAG_VL_THRESHOLD){ // Do not increase the vl in case of server lag
                 data.reachVL += violation;
                 final ViolationData vd = new ViolationData(this, player, data.reachVL, violation, cc.reachActions);
                 vd.setParameter(ParameterName.REACH_DISTANCE, StringUtil.fdec3.format(lenpRel));
@@ -251,9 +252,14 @@ public class Reach extends Check {
      * @param cc
      * @return
      */
-    public boolean loopFinish(final Player player, final Location pLoc, final Entity damaged, 
-                              final ReachContext context, final ITraceEntry traceEntry, final boolean forceViolation, 
+    public boolean loopFinish(final Player player, final Location pLoc, final Entity damaged,
+                              final ReachContext context, final ITraceEntry traceEntry, final boolean forceViolation,
                               final FightData data, final FightConfig cc, final IPlayerData pData) {
+
+        if (player == null || pLoc == null || damaged == null || context == null
+                || data == null || cc == null || pData == null) {
+            return false;
+        }
 
         final double lenpRel = forceViolation && context.minViolation != Double.MAX_VALUE ? context.minViolation : context.minResult;
 
@@ -264,45 +270,11 @@ public class Reach extends Check {
         double violation = lenpRel - context.distanceLimit;
         boolean cancel = false;
 
-        if (violation > 0) {    
-            if (TickTask.getLag(1000, true) < 1.5f){
-                data.reachVL += violation;
-                final ViolationData vd = new ViolationData(this, player, data.reachVL, violation, cc.reachActions);
-                vd.setParameter(ParameterName.REACH_DISTANCE, StringUtil.fdec3.format(lenpRel));
-                // Execute whatever actions are associated with this check and the violation level and find out if we should
-                // cancel the event.
-                cancel = executeActions(vd).willCancel();
-            }
-            
-            //if (Improbable.check(player, (float) violation / 2f, System.currentTimeMillis(), 
-            //        "fight.reach", pData)){
-            //    cancel = true;
-            //}
-            // Future improvement: adjust improbable weight calculations so that
-            // the weight is not inverse to the configured value
-            if (cc.reachImprobableWeight > 0.0f) {
-                if (!cc.reachImprobableFeedOnly && Improbable.check(player, (float) violation / cc.reachImprobableWeight, System.currentTimeMillis(), "fight.reach", pData)) {
-                    cancel = true;
-                }
-            }
-
-            if (cancel && cc.reachPenalty > 0){
-                // Apply an attack penalty time.
-                data.attackPenalty.applyPenalty(cc.reachPenalty);
-            }
+        if (violation > 0) {
+            cancel = handleViolation(player, lenpRel, violation, data, cc, pData);
         }
         else if (lenpRel - context.distanceLimit * data.reachMod > 0){
-            // Silent cancel.
-            if (cc.reachPenalty > 0) {
-                data.attackPenalty.applyPenalty(cc.reachPenalty / 2);
-            }
-
-            cancel = true;
-
-            if (cc.reachImprobableWeight > 0.0f) {
-                Improbable.feed(player, (float) (lenpRel - context.distanceLimit * data.reachMod) / cc.reachImprobableWeight, System.currentTimeMillis());
-            }
-            // Improbable.feed(player, (float) (lenpRel - context.distanceLimit * data.reachMod) / 4f, System.currentTimeMillis());
+            cancel = handleSilentCancel(player, lenpRel, context, data, cc);
         }
         else {
             // Player passed the check, reward them.
@@ -310,18 +282,7 @@ public class Reach extends Check {
 
         }
 
-        // Adaption amount for dynamic range.
-        final double DYNAMIC_STEP = cc.reachReduceStep / cc.reachSurvivalDistance;
-
-        if (!cc.reachReduce){
-            data.reachMod = 1d;
-        }
-        else if (lenpRel > context.distanceLimit - cc.reachReduceDistance){
-            data.reachMod = Math.max(context.distanceMin, data.reachMod - DYNAMIC_STEP);
-        }
-        else {
-            data.reachMod = Math.min(1.0, data.reachMod + DYNAMIC_STEP);
-        }
+        updateReachMod(lenpRel, context, data, cc);
 
         if (pData.isDebugActive(type) && pData.hasPermission(Permissions.ADMINISTRATION_DEBUG, player)){
             // Potential enhancement: remember the successful ITraceEntry for height
@@ -329,6 +290,65 @@ public class Reach extends Check {
         }
 
         return cancel;
+    }
+
+    /**
+     * Handle violation processing.
+     */
+    protected boolean handleViolation(final Player player, final double lenpRel, final double violation,
+                                      final FightData data, final FightConfig cc, final IPlayerData pData) {
+        boolean cancel = false;
+        if (TickTask.getLag(1000, true) < CheckUtils.DEFAULT_LAG_VL_THRESHOLD) {
+            data.reachVL += violation;
+            final ViolationData vd = new ViolationData(this, player, data.reachVL, violation, cc.reachActions);
+            vd.setParameter(ParameterName.REACH_DISTANCE, StringUtil.fdec3.format(lenpRel));
+            cancel = executeActions(vd).willCancel();
+        }
+
+        if (cc.reachImprobableWeight > 0.0f) {
+            final float weight = (float) violation / cc.reachImprobableWeight;
+            if (!cc.reachImprobableFeedOnly && Improbable.check(player, weight, System.currentTimeMillis(), "fight.reach", pData)) {
+                cancel = true;
+            } else if (cc.reachImprobableFeedOnly) {
+                Improbable.feed(player, weight, System.currentTimeMillis());
+            }
+        }
+
+        if (cancel && cc.reachPenalty > 0) {
+            data.attackPenalty.applyPenalty(cc.reachPenalty);
+        }
+        return cancel;
+    }
+
+    /**
+     * Handle silent cancel logic.
+     */
+    protected boolean handleSilentCancel(final Player player, final double lenpRel, final ReachContext context,
+                                         final FightData data, final FightConfig cc) {
+        if (cc.reachPenalty > 0) {
+            data.attackPenalty.applyPenalty(cc.reachPenalty / 2);
+        }
+
+        if (cc.reachImprobableWeight > 0.0f) {
+            Improbable.feed(player, (float) (lenpRel - context.distanceLimit * data.reachMod) / cc.reachImprobableWeight,
+                    System.currentTimeMillis());
+        }
+        return true;
+    }
+
+    /**
+     * Update reach modifier based on the result distance.
+     */
+    protected void updateReachMod(final double lenpRel, final ReachContext context, final FightData data,
+                                  final FightConfig cc) {
+        final double DYNAMIC_STEP = cc.reachReduceStep / cc.reachSurvivalDistance;
+        if (!cc.reachReduce) {
+            data.reachMod = 1d;
+        } else if (lenpRel > context.distanceLimit - cc.reachReduceDistance) {
+            data.reachMod = Math.max(context.distanceMin, data.reachMod - DYNAMIC_STEP);
+        } else {
+            data.reachMod = Math.min(1.0, data.reachMod + DYNAMIC_STEP);
+        }
     }
 
 

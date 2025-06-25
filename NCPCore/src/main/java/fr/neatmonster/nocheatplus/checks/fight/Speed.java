@@ -22,6 +22,7 @@ import fr.neatmonster.nocheatplus.checks.CheckType;
 import fr.neatmonster.nocheatplus.checks.ViolationData;
 import fr.neatmonster.nocheatplus.players.IPlayerData;
 import fr.neatmonster.nocheatplus.utilities.TickTask;
+import fr.neatmonster.nocheatplus.utilities.CheckUtils;
 
 /**
  * The Speed check is used to detect players who are attacking entities too quickly.
@@ -67,7 +68,7 @@ public class Speed extends Check {
         }
         else if (tick - data.speedShortTermTick < cc.speedShortTermTicks){
             // Account for server side lag.
-            if (!lag || TickTask.getLag(50L * (tick - data.speedShortTermTick), true) < 1.5f){
+            if (!lag || TickTask.getLag(50L * (tick - data.speedShortTermTick), true) < CheckUtils.DEFAULT_LAG_VL_THRESHOLD){
                 // Within range, add.
                 data.speedShortTermCount ++;
             }

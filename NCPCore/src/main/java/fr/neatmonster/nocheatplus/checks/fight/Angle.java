@@ -32,6 +32,7 @@ import fr.neatmonster.nocheatplus.players.IPlayerData;
 import fr.neatmonster.nocheatplus.players.PlayerData;
 import fr.neatmonster.nocheatplus.utilities.StringUtil;
 import fr.neatmonster.nocheatplus.utilities.TickTask;
+import fr.neatmonster.nocheatplus.utilities.CheckUtils;
 import fr.neatmonster.nocheatplus.utilities.location.TrigUtil;
 import org.bukkit.ChatColor;
 
@@ -209,7 +210,7 @@ public class Angle extends Check {
 
 
         if (violationMove > cc.angleMove) {
-            if (TickTask.getLag(maxTimeDiff, true) < 1.5f){
+            if (TickTask.getLag(maxTimeDiff, true) < CheckUtils.DEFAULT_LAG_VL_THRESHOLD){
                 violation = violationMove;
                 data.angleVL += violation;
                 final ViolationData vd = new ViolationData(this, player, data.angleVL, violation, cc.angleActions);
@@ -218,7 +219,7 @@ public class Angle extends Check {
             } 
         }
         else if (violationTime > cc.angleTime) {
-            if (TickTask.getLag(maxTimeDiff, true) < 1.5f){
+            if (TickTask.getLag(maxTimeDiff, true) < CheckUtils.DEFAULT_LAG_VL_THRESHOLD){
                 violation = violationTime;
                 data.angleVL += violation;
                 final ViolationData vd = new ViolationData(this, player, data.angleVL, violation, cc.angleActions);
@@ -227,7 +228,7 @@ public class Angle extends Check {
             } 
         }
         else if (violationYaw > cc.angleYaw) {
-            if (TickTask.getLag(maxTimeDiff, true) < 1.5f){
+            if (TickTask.getLag(maxTimeDiff, true) < CheckUtils.DEFAULT_LAG_VL_THRESHOLD){
                 violation = violationYaw;
                 data.angleVL += violation;
                 final ViolationData vd = new ViolationData(this, player, data.angleVL, violation, cc.angleActions);
@@ -236,7 +237,7 @@ public class Angle extends Check {
             } 
         } 
         else if (violationSwitchSpeed > cc.angleSwitch) {
-            if (TickTask.getLag(maxTimeDiff, true) < 1.5f){
+            if (TickTask.getLag(maxTimeDiff, true) < CheckUtils.DEFAULT_LAG_VL_THRESHOLD){
                 violation = violationSwitchSpeed;
                 data.angleVL += violation;
                 final ViolationData vd = new ViolationData(this, player, data.angleVL, violation, cc.angleActions);
