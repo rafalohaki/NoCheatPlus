@@ -120,7 +120,13 @@ public class TestTeleportHandling {
         private DummyPlayerData() { super(null, "", null); }
         @Override public boolean isPlayerSetBackScheduled() { return flag.value; }
         @Override public boolean isDebugActive(CheckType t) { return false; }
-        @Override public <T> T getGenericInstance(Class<T> c) { if (c == CombinedData.class) return c.cast(combined); return null; }
+        @Override
+        public <T> T getGenericInstance(Class<T> c) {
+            if (c == CombinedData.class) {
+                return c.cast(combined);
+            }
+            return null;
+        }
     }
 
     private static DummyPlayerData createPlayerData(Flag flag, sun.misc.Unsafe u) throws Exception {
