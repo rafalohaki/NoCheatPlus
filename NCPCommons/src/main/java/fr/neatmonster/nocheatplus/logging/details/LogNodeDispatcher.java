@@ -21,7 +21,7 @@ import java.util.logging.Level;
  * @author dev1mc
  *
  */
-public interface LogNodeDispatcher { // TODO: Name.
+public interface LogNodeDispatcher {
     
     <C> void dispatch(LogNode<C> node, Level level, C content);
 
