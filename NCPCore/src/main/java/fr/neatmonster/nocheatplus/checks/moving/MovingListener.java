@@ -2140,11 +2140,28 @@ public class MovingListener extends CheckListener implements TickListener, IRemo
         data.onSetBack(moveInfo.from);
         aux.returnPlayerMoveInfo(moveInfo);
         // Reset stuff.
-        final Location yawSource = teleported != null ? teleported : fallbackTeleported;
-        if (yawSource != null) {
-            Combined.resetYawRate(player, yawSource.getYaw(), System.currentTimeMillis(), true, pData); // Not sure.
+        final Float yaw = yawForReset(teleported, fallbackTeleported);
+        if (yaw != null) {
+            Combined.resetYawRate(player, yaw, System.currentTimeMillis(), true, pData); // Not sure.
         }
         data.resetTeleported();
+    }
+
+    /**
+     * Determine the yaw to use when resetting yaw rate.
+     *
+     * @param teleported the teleported location, may be null
+     * @param fallbackTeleported fallback location to use if teleported is null
+     * @return the yaw angle or {@code null} if neither location is available
+     */
+    private static Float yawForReset(final Location teleported, final Location fallbackTeleported) {
+        if (teleported != null) {
+            return teleported.getYaw();
+        }
+        if (fallbackTeleported != null) {
+            return fallbackTeleported.getYaw();
+        }
+        return null;
     }
 
 
