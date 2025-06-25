@@ -48,7 +48,7 @@ public class OutgoingPosition extends BaseAdapter {
         // PacketPlayInFlying[3, legacy: 10]
         super(plugin, ListenerPriority.HIGHEST, new PacketType[] {
                 PacketType.Play.Server.POSITION
-                // TODO: POSITION_LOOK ??
+                // Additional types like POSITION_LOOK may be added later.
         });
     }
 
@@ -73,7 +73,7 @@ public class OutgoingPosition extends BaseAdapter {
             StaticLog.logWarning("Failed to fetch player data with " + event.getPacketType() + " for: " + player);
             return;
         }
-        // TODO: In future multiple checks might use this (!)
+        // Multiple checks might use this in the future.
         if (pData.isCheckActive(CheckType.NET_FLYINGFREQUENCY, player)) {
             interpretPacket(player, event.getPacket(), time, 
                     pData.getGenericInstance(NetData.class),
@@ -91,8 +91,8 @@ public class OutgoingPosition extends BaseAdapter {
             return;
         }
 
-        // TODO: Detect/skip data with relative coordinates.
-        // TODO: Concept: force KeepAlive vs. set expected coordinates in Bukkit events.
+        // Detect or skip data that uses relative coordinates.
+        // Concept: force KeepAlive vs. set expected coordinates in Bukkit events.
 
         final double x = doubles.read(indexX);
         final double y = doubles.read(indexY);
@@ -126,7 +126,7 @@ public class OutgoingPosition extends BaseAdapter {
         final CountableLocation packetData = data.teleportQueue.onOutgoingTeleport(x, y, z, yaw, pitch, teleportId);
         if (packetData == null) {
             // Add counter for untracked (by Bukkit API) outgoing teleport.
-            // TODO: There may be other cases which are indicated by Bukkit API events.
+            // There may be other cases indicated by Bukkit API events.
             counters.add(ID_OUTGOING_POSITION_UNTRACKED, 1);
             if (debug) {
                 debug(player, "Untracked outgoing position: " + x + ", " + y + ", " + z + " (yaw=" + yaw + ", pitch=" + pitch + ").");
@@ -140,7 +140,7 @@ public class OutgoingPosition extends BaseAdapter {
     }
 
     private void packetMismatch(PacketContainer packet) {
-        // TODO: What? Add to counters?
+        // Consider adding information about this mismatch to counters.
     }
 
 }
