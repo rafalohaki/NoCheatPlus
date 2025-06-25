@@ -33,6 +33,7 @@ import org.bukkit.inventory.EquipmentSlot;
 import org.bukkit.inventory.ItemStack;
 import org.bukkit.inventory.PlayerInventory;
 import org.bukkit.inventory.meta.CrossbowMeta;
+import org.bukkit.inventory.meta.ItemMeta;
 import org.bukkit.plugin.Plugin;
 
 import com.comphenix.protocol.PacketType;
@@ -145,72 +146,107 @@ public class NoSlow extends BaseAdapter {
 
     private static void onItemInteract(final PlayerInteractEvent e){
         // Note: Potential improvement - add trident support. Check for rain and whether the player is actually exposed; might not be worth doing.
-        if (e.getAction() != Action.RIGHT_CLICK_AIR && e.getAction() != Action.RIGHT_CLICK_BLOCK) return;
-        final Player p = e.getPlayer();
-        final IPlayerData pData = DataManager.getPlayerData(p);
+        if (!isRightClick(e.getAction())) {
+            return;
+        }
+
+        final Player player = e.getPlayer();
+        if (player == null) {
+            return;
+        }
+
+        final IPlayerData pData = DataManager.getPlayerData(player);
+        if (pData == null) {
+            return;
+        }
+
         final MovingData data = pData.getGenericInstance(MovingData.class);
-        // Reset
         data.offHandUse = false;
-        if (!data.mightUseItem) return;
+        if (!data.mightUseItem) {
+            return;
+        }
         data.mightUseItem = false;
 
-        if (e.useItemInHand().equals(Event.Result.DENY)) return;
-
-        if (p.getGameMode() == GameMode.CREATIVE) {
+        if (e.useItemInHand().equals(Event.Result.DENY) || player.getGameMode() == GameMode.CREATIVE) {
             data.isUsingItem = false;
             return;
         }
 
+        boolean usingItem = false;
         if (e.hasItem()) {
             final ItemStack item = e.getItem();
-            if (item == null) {
-                return;
+            if (item != null) {
+                usingItem = evaluateItemUse(player, e, item, data);
             }
-            final Material m = item.getType();
-            if (Bridge1_9.hasElytra() && p.hasCooldown(m)) {
-                return;
+        } else {
+            data.isUsingItem = false;
+        }
+
+        data.isUsingItem = usingItem;
+    }
+
+    private static boolean evaluateItemUse(final Player player, final PlayerInteractEvent event,
+                                           final ItemStack item, final MovingData data) {
+        final Material type = item.getType();
+
+        if (Bridge1_9.hasElytra() && player.hasCooldown(type)) {
+            return false;
+        }
+
+        if (InventoryUtil.isConsumable(item)) {
+            if (!Bridge1_9.hasElytra() && item.getDurability() > 16384) {
+                return false;
             }
 
-            if (InventoryUtil.isConsumable(item)) {
-                // pre1.9 splash potion
-                if (!Bridge1_9.hasElytra() && item.getDurability() > 16384) return;
-                if (m == Material.POTION || m == Material.MILK_BUCKET || m.toString().endsWith("_APPLE") || m.name().startsWith("HONEY_BOTTLE")) {
-                    data.isUsingItem = true;
-                    data.offHandUse = Bridge1_9.hasGetItemInOffHand() && e.getHand() == EquipmentSlot.OFF_HAND;
-                    return;
+        if (type == Material.POTION || type == Material.MILK_BUCKET || type.toString().endsWith("_APPLE")
+                || type.name().startsWith("HONEY_BOTTLE")) {
+            final EquipmentSlot slot = event.getHand();
+            data.offHandUse = Bridge1_9.hasGetItemInOffHand() && slot != null && slot == EquipmentSlot.OFF_HAND;
+            return true;
+        }
+
+        if (type.isEdible() && player.getFoodLevel() < 20) {
+            final EquipmentSlot slot = event.getHand();
+            data.offHandUse = Bridge1_9.hasGetItemInOffHand() && slot != null && slot == EquipmentSlot.OFF_HAND;
+            return true;
+        }
+        }
+
+        if (type == Material.BOW && hasArrow(player.getInventory(), false)) {
+            final EquipmentSlot slot = event.getHand();
+            data.offHandUse = Bridge1_9.hasGetItemInOffHand() && slot != null && slot == EquipmentSlot.OFF_HAND;
+            return true;
+        }
+
+        if (Bridge1_9.hasElytra() && type == Material.SHIELD) {
+            final EquipmentSlot slot = event.getHand();
+            data.offHandUse = slot != null && slot == EquipmentSlot.OFF_HAND;
+            return false;
+        }
+
+        if (Bridge1_13.hasIsRiptiding() && type == Material.TRIDENT) {
+            final EquipmentSlot slot = event.getHand();
+            data.offHandUse = slot != null && slot == EquipmentSlot.OFF_HAND;
+            return false;
+        }
+
+        if (type.toString().equals("CROSSBOW")) {
+            final ItemMeta rawMeta = item.getItemMeta();
+            if (rawMeta instanceof CrossbowMeta) {
+                final CrossbowMeta meta = (CrossbowMeta) rawMeta;
+                if (!meta.hasChargedProjectiles() && hasArrow(player.getInventory(), true)) {
+                    final EquipmentSlot slot = event.getHand();
+                    data.offHandUse = slot != null && slot == EquipmentSlot.OFF_HAND;
+                    return true;
                 }
-                if (item.getType().isEdible() && p.getFoodLevel() < 20) {
-                    data.isUsingItem = true;
-                    data.offHandUse = Bridge1_9.hasGetItemInOffHand() && e.getHand() == EquipmentSlot.OFF_HAND;
-                    return;
-                }
             }
+        }
 
-            if (m == Material.BOW && hasArrow(p.getInventory(), false)) {
-                data.isUsingItem = true;
-                data.offHandUse = Bridge1_9.hasGetItemInOffHand() && e.getHand() == EquipmentSlot.OFF_HAND;
-                return;
-            }
+        return false;
+    }
 
-            if (Bridge1_9.hasElytra() && m == Material.SHIELD) {
-                //data.isUsingItem = true;
-                data.offHandUse = e.getHand() == EquipmentSlot.OFF_HAND;
-                return;
-            }
-
-            if (Bridge1_13.hasIsRiptiding() && m == Material.TRIDENT) {
-                //data.isUsingItem = true;
-                data.offHandUse = e.getHand() == EquipmentSlot.OFF_HAND;
-                return;
-            }
-
-            if (m.toString().equals("CROSSBOW")) {
-                if (!((CrossbowMeta) item.getItemMeta()).hasChargedProjectiles() && hasArrow(p.getInventory(), true)) {
-                    data.isUsingItem = true;
-                    data.offHandUse = e.getHand() == EquipmentSlot.OFF_HAND;
-                }
-            }
-        } else data.isUsingItem = false;        
+    private static boolean isRightClick(final Action action) {
+        return action == Action.RIGHT_CLICK_AIR || action == Action.RIGHT_CLICK_BLOCK;
     }
 
     private static void onChangeSlot(final PlayerItemHeldEvent e) {
