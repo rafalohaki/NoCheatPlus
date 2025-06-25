@@ -17,6 +17,7 @@ package fr.neatmonster.nocheatplus.compat.registry;
 import fr.neatmonster.nocheatplus.compat.MCAccess;
 import fr.neatmonster.nocheatplus.components.entity.IEntityAccessLastPositionAndLook;
 import fr.neatmonster.nocheatplus.components.entity.IEntityAccessVehicle;
+import fr.neatmonster.nocheatplus.compat.bukkit.EntityAccessVehicleMultiPassenger;
 
 /**
  * Set up more fine grained entity access providers, registered as generic
@@ -52,10 +53,11 @@ public class EntityAccessFactory {
         //}, IEntityAccessLastPositionAndLook.class, config, false);
 
         // IEntityAccessVehicle
-        RegistryHelper.registerFirstAvailable(new String[] {
-                "fr.neatmonster.nocheatplus.compat.bukkit.EntityAccessVehicleMultiPassenger",
-                "fr.neatmonster.nocheatplus.compat.bukkit.EntityAccessVehicleLegacy",
-        }, IEntityAccessVehicle.class, false);
+        IEntityAccessVehicle vehicleAccess = EntityAccessVehicleMultiPassenger.createIfSupported();
+        if (vehicleAccess == null) {
+            vehicleAccess = new fr.neatmonster.nocheatplus.compat.bukkit.EntityAccessVehicleLegacy();
+        }
+        RegistryHelper.registerGenericInstance(IEntityAccessVehicle.class, vehicleAccess);
     }
 
 }

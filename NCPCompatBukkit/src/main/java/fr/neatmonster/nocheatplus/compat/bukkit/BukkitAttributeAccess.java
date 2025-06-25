@@ -28,10 +28,20 @@ import fr.neatmonster.nocheatplus.utilities.ReflectionUtil;
 
 public class BukkitAttributeAccess implements IAttributeAccess {
 
-    public BukkitAttributeAccess() {
+    private BukkitAttributeAccess() {
+        // Empty constructor.
+    }
+
+    /**
+     * Create an instance if supported by the running server implementation.
+     *
+     * @return Instance or {@code null} if not supported.
+     */
+    public static BukkitAttributeAccess createIfSupported() {
         if (ReflectionUtil.getClass("org.bukkit.attribute.AttributeInstance") == null) {
-            throw new RuntimeException("Service not available.");
+            return null;
         }
+        return new BukkitAttributeAccess();
     }
 
     private int operationToInt(final Operation operation) {

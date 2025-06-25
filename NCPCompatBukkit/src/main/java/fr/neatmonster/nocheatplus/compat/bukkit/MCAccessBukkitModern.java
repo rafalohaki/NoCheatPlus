@@ -51,19 +51,19 @@ public class MCAccessBukkitModern extends MCAccessBukkit {
     private static final BukkitShapeModel MODEL_AUTO_FETCH_LEGACY = new BukkitFetchableBound();
 
     // Blocks that are formed from multiple bounding boxes
-    private static final BukkitShapeModel MODEL_BREWING_STAND = new BukkitStatic(
+    private static final BukkitShapeModel MODEL_BREWING_STAND = BukkitStatic.ofBounds(
         // Bottom rod
         0.0625, 0.0, 0.0625, 0.9375, 0.125, 0.9375,
         // Rod
         0.4375, 0.125, 0.4375, 0.5625, 0.875, 0.5625
     );
-    private static final BukkitShapeModel MODEL_CANDLE_CAKE = new BukkitStatic(
+    private static final BukkitShapeModel MODEL_CANDLE_CAKE = BukkitStatic.ofBounds(
         // Cake
         0.0625, 0.0, 0.0625, 0.9375, 0.5, 0.9375,
         // Candle
         0.4375, 0.5, 0.4375, 0.5625, 0.875, 0.5625
     );
-    private static final BukkitShapeModel MODEL_LECTERN = new BukkitStatic(
+    private static final BukkitShapeModel MODEL_LECTERN = BukkitStatic.ofBounds(
         // Post
         0.0, 0.0, 0.0, 1.0, 0.125, 1.0,
         // Lectern
@@ -109,29 +109,29 @@ public class MCAccessBukkitModern extends MCAccessBukkit {
     private static final BukkitShapeModel MODEL_WALL_HEAD = new BukkitWallHead();
 
     // Static blocks (various height and inset values).
-    private static final BukkitShapeModel MODEL_CAMPFIRE = new BukkitStatic(0.0, 0.4375);
+    private static final BukkitShapeModel MODEL_CAMPFIRE = BukkitStatic.ofInsetAndHeight(0.0, 0.4375);
     private static final BukkitShapeModel MODEL_BAMBOO = new BukkitBamboo();
     private static final BukkitShapeModel MODEL_WATER_PLANTS = new BukkitWaterPlant();
-    private static final BukkitShapeModel MODEL_LILY_PAD = new BukkitStatic(0.0625, 0.09375);
-    private static final BukkitShapeModel MODEL_FLOWER_POT = new BukkitStatic(0.3125, 0.375);
+    private static final BukkitShapeModel MODEL_LILY_PAD = BukkitStatic.ofInsetAndHeight(0.0625, 0.09375);
+    private static final BukkitShapeModel MODEL_FLOWER_POT = BukkitStatic.ofInsetAndHeight(0.3125, 0.375);
     private static final BukkitShapeModel MODEL_LANTERN = new BukkitLantern();
-    private static final BukkitShapeModel MODEL_CONDUIT = new BukkitStatic(0.3125, 0.3125, 0.3125, 0.6875, 0.6875, 0.6875);
-    private static final BukkitShapeModel MODEL_GROUND_HEAD = new BukkitStatic(0.25, 0.5);
-    private static final BukkitShapeModel MODEL_SINGLE_CHEST = new BukkitStatic(0.0625, 0.875);
-    private static final BukkitShapeModel MODEL_HONEY_BLOCK = new BukkitStatic(0.0625, 0.9375);
-    private static final BukkitShapeModel MODEL_SCULK_SHRIEKER = new BukkitStatic(0.0, 0.5);
+    private static final BukkitShapeModel MODEL_CONDUIT = BukkitStatic.ofBounds(0.3125, 0.3125, 0.3125, 0.6875, 0.6875, 0.6875);
+    private static final BukkitShapeModel MODEL_GROUND_HEAD = BukkitStatic.ofInsetAndHeight(0.25, 0.5);
+    private static final BukkitShapeModel MODEL_SINGLE_CHEST = BukkitStatic.ofInsetAndHeight(0.0625, 0.875);
+    private static final BukkitShapeModel MODEL_HONEY_BLOCK = BukkitStatic.ofInsetAndHeight(0.0625, 0.9375);
+    private static final BukkitShapeModel MODEL_SCULK_SHRIEKER = BukkitStatic.ofInsetAndHeight(0.0, 0.5);
 
     // Static blocks with full height sorted by inset.
-    private static final BukkitShapeModel MODEL_INSET16_1_HEIGHT100 = new BukkitStatic(0.0625, 1.0);
+    private static final BukkitShapeModel MODEL_INSET16_1_HEIGHT100 = BukkitStatic.ofInsetAndHeight(0.0625, 1.0);
 
     // Static blocks with full xz-bounds sorted by height.
-    private static final BukkitShapeModel MODEL_XZ100_HEIGHT16_1 = new BukkitStatic(0.0625);
-    private static final BukkitShapeModel MODEL_XZ100_HEIGHT8_1 = new BukkitStatic(0.125);
-    private static final BukkitShapeModel MODEL_XZ100_HEIGHT8_3 = new BukkitStatic(0.375);
-    private static final BukkitShapeModel MODEL_XZ100_HEIGHT16_9 = new BukkitStatic(0.5625);
-    private static final BukkitShapeModel MODEL_XZ100_HEIGHT4_3 = new BukkitStatic(0.75);
-    private static final BukkitShapeModel MODEL_XZ100_HEIGHT16_15 = new BukkitStatic(0.9375);
-    private static final BukkitShapeModel MODEL_XZ100_HEIGHT8_7 = new BukkitStatic(0.875);
+    private static final BukkitShapeModel MODEL_XZ100_HEIGHT16_1 = BukkitStatic.ofHeight(0.0625);
+    private static final BukkitShapeModel MODEL_XZ100_HEIGHT8_1 = BukkitStatic.ofHeight(0.125);
+    private static final BukkitShapeModel MODEL_XZ100_HEIGHT8_3 = BukkitStatic.ofHeight(0.375);
+    private static final BukkitShapeModel MODEL_XZ100_HEIGHT16_9 = BukkitStatic.ofHeight(0.5625);
+    private static final BukkitShapeModel MODEL_XZ100_HEIGHT4_3 = BukkitStatic.ofHeight(0.75);
+    private static final BukkitShapeModel MODEL_XZ100_HEIGHT16_15 = BukkitStatic.ofHeight(0.9375);
+    private static final BukkitShapeModel MODEL_XZ100_HEIGHT8_7 = BukkitStatic.ofHeight(0.875);
 
     public MCAccessBukkitModern() {
         super();

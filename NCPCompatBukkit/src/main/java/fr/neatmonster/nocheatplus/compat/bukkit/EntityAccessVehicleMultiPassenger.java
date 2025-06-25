@@ -23,11 +23,21 @@ import fr.neatmonster.nocheatplus.utilities.ReflectionUtil;
 
 public class EntityAccessVehicleMultiPassenger implements IEntityAccessVehicle {
 
-    public EntityAccessVehicleMultiPassenger() {
+    private EntityAccessVehicleMultiPassenger() {
+        // Empty constructor.
+    }
+
+    /**
+     * Create an instance if supported by the running server implementation.
+     *
+     * @return Instance or {@code null} if not supported.
+     */
+    public static EntityAccessVehicleMultiPassenger createIfSupported() {
         // Ensure the method signature matches List<Entity> for getPassengers.
         if (ReflectionUtil.getMethodNoArgs(Entity.class, "getPassengers", List.class) == null) {
-            throw new RuntimeException("Not supported.");
+            return null;
         }
+        return new EntityAccessVehicleMultiPassenger();
     }
 
     @Override

@@ -27,10 +27,20 @@ import fr.neatmonster.nocheatplus.utilities.ReflectionUtil;
 
 public class NSBukkitAttributeAccess implements IAttributeAccess {
 
-    public NSBukkitAttributeAccess() {
+    private NSBukkitAttributeAccess() {
+        // Empty constructor.
+    }
+
+    /**
+     * Create an instance if supported by the running server implementation.
+     *
+     * @return Instance or {@code null} if not supported.
+     */
+    public static NSBukkitAttributeAccess createIfSupported() {
         if (ReflectionUtil.getClass("org.bukkit.attribute.AttributeInstance") == null) {
-            throw new RuntimeException("Service not available.");
+            return null;
         }
+        return new NSBukkitAttributeAccess();
     }
 
     private int operationToInt(final Operation operation) {
