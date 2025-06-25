@@ -14,10 +14,15 @@
  */
 package fr.neatmonster.nocheatplus.checks.net;
 
+import java.util.Map;
+import java.util.UUID;
+import java.util.concurrent.ConcurrentHashMap;
+
 import org.bukkit.entity.Player;
 import org.bukkit.event.EventHandler;
 import org.bukkit.event.Listener;
 import org.bukkit.event.player.PlayerJoinEvent;
+import org.bukkit.event.player.PlayerQuitEvent;
 
 import fr.neatmonster.nocheatplus.checks.Check;
 import fr.neatmonster.nocheatplus.checks.CheckType;
@@ -30,8 +35,11 @@ public class KeepAliveFrequency extends Check implements Listener {
     public KeepAliveFrequency() {
         super(CheckType.NET_KEEPALIVEFREQUENCY);
     }
-    
-    long timeJoin;
+
+    /**
+     * Join timestamps per player for delaying checks after login.
+     */
+    private final Map<UUID, Long> joinTimes = new ConcurrentHashMap<>();
 
     /**
      * Checks hasBypass on violation only.
@@ -44,23 +52,39 @@ public class KeepAliveFrequency extends Check implements Listener {
     public boolean check(final Player player, final long time, final NetData data, final NetConfig cc, final IPlayerData pData) {
         data.keepAliveFreq.add(time, 1f);
         final float first = data.keepAliveFreq.bucketScore(0);
-	final long now = System.currentTimeMillis();
-    	
-    	if (now - timeJoin < cc.keepAliveFrequencyStartupDelay) return false;
-        if (first > 1f) {
-            // Trigger a violation.
+        final long now = System.currentTimeMillis();
+
+        boolean cancel = false;
+        if (!isWithinJoinDelay(player, now, cc.keepAliveFrequencyStartupDelay) && first > 1f) {
             final double vl = Math.max(first - 1f, data.keepAliveFreq.score(1f) - data.keepAliveFreq.numberOfBuckets());
-            if (executeActions(player, vl, 1.0, cc.keepAliveFrequencyActions).willCancel()) {
-                return true;
-            }
+            cancel = executeActions(player, vl, 1.0, cc.keepAliveFrequencyActions).willCancel();
         }
-        return false;
+        return cancel;
     }
     // Event listener probably shouldn't be used here, but I don't think it will be
     // needed to make another class just for this.
     @EventHandler
     public void playerJoin(PlayerJoinEvent e) {
-    timeJoin = System.currentTimeMillis();
+        final Player player = e.getPlayer();
+        if (player != null) {
+            joinTimes.put(player.getUniqueId(), System.currentTimeMillis());
+        }
+    }
+
+    @EventHandler
+    public void playerQuit(PlayerQuitEvent e) {
+        final Player player = e.getPlayer();
+        if (player != null) {
+            joinTimes.remove(player.getUniqueId());
+        }
+    }
+
+    private boolean isWithinJoinDelay(Player player, long now, long delay) {
+        if (player == null) {
+            return false;
+        }
+        final Long joinTime = joinTimes.get(player.getUniqueId());
+        return joinTime != null && now - joinTime < delay;
     }
 
 }
