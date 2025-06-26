@@ -252,7 +252,10 @@ public class MovingData extends ACheckData implements IDataOnRemoveSubCheckData,
     public double sfHorizontalBuffer = 0.0;
     /** Event-counter to cover up for sprinting resetting server side only. Set in the FighListener. */
     public int lostSprintCount = 0;
-    /** Count how long the player has been in the air, resets when landing on ground. */
+    /**
+     * Number of ticks spent in the current jump phase for the
+     * survival fly check. Resets when touching ground.
+     */
     public int sfJumpPhase = 0;
     /** Count how many times in a row yDistance has been zero, only for in-air moves, updated on not cancelled moves (aimed at in-air workarounds) */
     public int sfZeroVdistRepeat = 0;
@@ -276,9 +279,11 @@ public class MovingData extends ACheckData implements IDataOnRemoveSubCheckData,
     public final ActionAccumulator vDistAcc = new ActionAccumulator(3, 3); // 3 buckets with max capacity of 3 events
     /** Horizontal accounting: tracker of actual speed / allowed base speed */
     public final ActionAccumulator hDistAcc = new ActionAccumulator(1, 100); // 1 bucket capable of holding a maximum of 100 events.
-    /** Workarounds (AirWorkarounds,LiquidWorkarounds). */
+    /**
+     * Per-player set of workaround counters used by the
+     * movement checks.
+     */
     public final WorkaroundSet ws;
-    /** Bed-flying flag */
     public boolean wasInBed = false;
 
     // *----------Data of the vehicles checks----------*
@@ -325,6 +330,7 @@ public class MovingData extends ACheckData implements IDataOnRemoveSubCheckData,
     public final DefaultSetBackStorage vehicleSetBacks = new DefaultSetBackStorage();
 
 
+    /** Reference to the owning player's data. */
     private final IPlayerData pData;
     public MovingData(final MovingConfig config, final IPlayerData pData) {
         this.pData = pData;

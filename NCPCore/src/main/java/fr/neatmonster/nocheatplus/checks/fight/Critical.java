@@ -44,6 +44,7 @@ import fr.neatmonster.nocheatplus.utilities.map.BlockFlags;
 public class Critical extends Check {
 
 
+    /** Utility helper providing movement-related methods. */
     private final AuxMoving auxMoving = NCPAPIProvider.getNoCheatPlusAPI().getGenericInstance(AuxMoving.class);
 
 
