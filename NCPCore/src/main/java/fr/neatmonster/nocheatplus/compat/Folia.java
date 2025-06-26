@@ -76,10 +76,7 @@ public class Folia {
                 return Bukkit.getScheduler().runTaskAsynchronously(plugin,
                         () -> run.accept(null));
             } catch (Exception ex) {
-                LogManager logManager = NCPAPIProvider.getNoCheatPlusAPI().getLogManager();
-                logManager.warning(Streams.STATUS,
-                        "Failed to schedule async task: " + ex.getClass().getSimpleName());
-                logManager.warning(Streams.STATUS, ex);
+                logScheduleFailure("Failed to schedule async task", plugin, null, null, ex);
             }
             return null;
         //}
@@ -112,7 +109,7 @@ public class Folia {
             Object taskInfo = executeMethod.invoke(syncScheduler, plugin, run, delay, period);
             return taskInfo;
         } catch (Exception e) {
-            e.printStackTrace();
+            logScheduleFailure("Failed to schedule repeating task", plugin, delay, period, e);
         }
         return null;
     }
@@ -145,7 +142,7 @@ public class Folia {
             Object taskInfo = executeMethod.invoke(syncScheduler, plugin, run);
             return taskInfo;
         } catch (Exception e) {
-            e.printStackTrace();
+            logScheduleFailure("Failed to schedule task", plugin, null, null, e);
         }
         return null;
     }
@@ -176,9 +173,7 @@ public class Folia {
             Object taskInfo = executeMethod.invoke(syncScheduler, plugin, run, delay);
             return taskInfo;
         } catch (Exception e) {
-            LogManager logManager = NCPAPIProvider.getNoCheatPlusAPI().getLogManager();
-            logManager.warning(Streams.STATUS, "Failed to schedule delayed task: " + e.getClass().getSimpleName());
-            logManager.warning(Streams.STATUS, e);
+            logScheduleFailure("Failed to schedule delayed task", plugin, delay, null, e);
         }
         return null;
     }
@@ -223,9 +218,7 @@ public class Folia {
             Object taskInfo = executeMethod.invoke(syncEntityScheduler, plugin, run, retired, delay);
             return taskInfo;
         } catch (Exception e) {
-            LogManager logManager = NCPAPIProvider.getNoCheatPlusAPI().getLogManager();
-            logManager.warning(Streams.STATUS, "Failed to schedule entity task: " + e.getClass().getSimpleName());
-            logManager.warning(Streams.STATUS, e);
+            logScheduleFailure("Failed to schedule entity task", plugin, delay, null, e);
         }
         return null;
     }
@@ -272,6 +265,21 @@ public class Folia {
                 e.printStackTrace();
             }
         }
+    }
+
+    private static void logScheduleFailure(String message, Plugin plugin, Long delay, Long period, Exception e) {
+        LogManager logManager = NCPAPIProvider.getNoCheatPlusAPI().getLogManager();
+        StringBuilder sb = new StringBuilder(message).append(" plugin=")
+                .append(plugin != null ? plugin.getName() : "null");
+        if (delay != null) {
+            sb.append(" delay=").append(delay);
+        }
+        if (period != null) {
+            sb.append(" period=").append(period);
+        }
+        sb.append(": ").append(e.getClass().getSimpleName());
+        logManager.warning(Streams.STATUS, sb.toString());
+        logManager.warning(Streams.STATUS, e);
     }
 
     public static boolean teleportEntity(Entity entity, Location loc, TeleportCause cause) {
