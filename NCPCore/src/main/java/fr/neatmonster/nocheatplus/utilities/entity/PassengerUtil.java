@@ -361,7 +361,9 @@ public class PassengerUtil {
                 if (Folia.teleportEntity(passenger, location, BridgeMisc.TELEPORT_CAUSE_CORRECTION_OF_POSITION)
                         && vehicleTeleported
                         && TrigUtil.distance(passenger.getLocation(useLoc2), vehicle.getLocation(useLoc)) < 1.5) {
-                    handleVehicle.getHandle().addPassenger(passenger, vehicle);
+                    if (!handleVehicle.getHandle().addPassenger(passenger, vehicle) && debug) {
+                        CheckUtils.debug(player, CheckType.MOVING_VEHICLE, "Failed to add passenger after teleport.");
+                    }
                 }
             }
         }
@@ -384,6 +386,10 @@ public class PassengerUtil {
         if (data.vehicleSetPassengerTaskId == null) {
             if (vehicle.getType() == EntityType.BOAT) {
                 if (!handleVehicle.getHandle().addPassenger(player, vehicle)) {
+                    if (debug) {
+                        CheckUtils.debug(player, CheckType.MOVING_VEHICLE,
+                                "Failed to add passenger to boat.");
+                    }
                     vehicle.eject();
                     // Not schedule set passenger for boat due to location async
                 }
@@ -407,7 +413,10 @@ public class PassengerUtil {
                     CheckUtils.debug(player, CheckType.MOVING_VEHICLE,
                             "Attempt set passenger directly");
                 }
-                handleVehicle.getHandle().addPassenger(player, vehicle);
+                if (!handleVehicle.getHandle().addPassenger(player, vehicle) && debug) {
+                    CheckUtils.debug(player, CheckType.MOVING_VEHICLE,
+                            "Failed to add passenger directly");
+                }
             }
         } else if (debug) {
             CheckUtils.debug(player, CheckType.MOVING_VEHICLE,

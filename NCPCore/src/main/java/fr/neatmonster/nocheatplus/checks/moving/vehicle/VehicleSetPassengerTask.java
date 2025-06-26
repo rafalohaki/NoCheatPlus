@@ -23,6 +23,8 @@ import fr.neatmonster.nocheatplus.components.registry.event.IHandle;
 import fr.neatmonster.nocheatplus.logging.StaticLog;
 import fr.neatmonster.nocheatplus.players.DataManager;
 import fr.neatmonster.nocheatplus.players.IPlayerData;
+import fr.neatmonster.nocheatplus.utilities.CheckUtils;
+import fr.neatmonster.nocheatplus.checks.CheckType;
 
 /**
  * Task for scheduling a passenger set back. Resets the vehicleSetPassengerTaskId in
@@ -58,6 +60,11 @@ public class VehicleSetPassengerTask implements Runnable{
         try {
             if (player.getWorld() != vehicle.getWorld()) return;
             if (!handleVehicle.getHandle().addPassenger(player, vehicle)) {
+                final boolean debug = pData.isDebugActive(CheckType.MOVING_VEHICLE);
+                if (debug) {
+                    CheckUtils.debug(player, CheckType.MOVING_VEHICLE,
+                            "Failed to add passenger for scheduled task.");
+                }
                 // Passenger could not be added, log for debugging purposes.
                 StaticLog.logWarning("Failed to add passenger for scheduled task.");
             }

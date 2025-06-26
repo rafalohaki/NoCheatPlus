@@ -17,6 +17,13 @@ import fr.neatmonster.nocheatplus.components.registry.event.IHandle;
 import fr.neatmonster.nocheatplus.components.entity.IEntityAccessVehicle;
 import fr.neatmonster.nocheatplus.checks.moving.MovingConfig;
 import fr.neatmonster.nocheatplus.checks.moving.MovingData;
+import fr.neatmonster.nocheatplus.logging.LogManager;
+import fr.neatmonster.nocheatplus.logging.LoggerID;
+import fr.neatmonster.nocheatplus.logging.StreamID;
+import fr.neatmonster.nocheatplus.logging.Streams;
+import fr.neatmonster.nocheatplus.utilities.CheckUtils;
+import fr.neatmonster.nocheatplus.NCPAPIProvider;
+import fr.neatmonster.nocheatplus.components.NoCheatPlusAPI;
 
 public class PassengerUtilTest {
 
@@ -34,6 +41,53 @@ public class PassengerUtilTest {
         public boolean addPassenger(Entity entity, Entity vehicle) {
             called = true;
             return true;
+        }
+    }
+
+    private static class CollectingLogManager implements LogManager {
+        final java.util.List<String> debugMessages = new java.util.ArrayList<>();
+        @Override public void debug(StreamID streamID, String message) { debugMessages.add(message); }
+        @Override public void debug(StreamID streamID, Throwable t) {}
+        @Override public void info(StreamID streamID, String message) {}
+        @Override public void info(StreamID streamID, Throwable t) {}
+        @Override public void warning(StreamID streamID, String message) {}
+        @Override public void warning(StreamID streamID, Throwable t) {}
+        @Override public void severe(StreamID streamID, String message) {}
+        @Override public void severe(StreamID streamID, Throwable t) {}
+        @Override public void log(StreamID streamID, java.util.logging.Level level, String message) {}
+        @Override public void log(StreamID streamID, java.util.logging.Level level, Throwable t) {}
+        @Override public StreamID getVoidStreamID() { return Streams.STATUS; }
+        @Override public StreamID getInitStreamID() { return Streams.INIT; }
+        @Override public String getDefaultPrefix() { return Streams.defaultPrefix; }
+        @Override public boolean hasLogger(String name) { return false; }
+        @Override public boolean hasLogger(LoggerID loggerID) { return false; }
+        @Override public LoggerID getLoggerID(String name) { return null; }
+        @Override public boolean hasStream(String name) { return false; }
+        @Override public boolean hasStream(StreamID streamID) { return false; }
+        @Override public StreamID getStreamID(String name) { return null; }
+    }
+
+    private static class LoggingAPI implements java.lang.reflect.InvocationHandler {
+        final CollectingLogManager logManager = new CollectingLogManager();
+        NoCheatPlusAPI create() {
+            return (NoCheatPlusAPI) java.lang.reflect.Proxy.newProxyInstance(
+                    LoggingAPI.class.getClassLoader(),
+                    new Class[]{fr.neatmonster.nocheatplus.components.NoCheatPlusAPI.class}, this);
+        }
+        @Override public Object invoke(Object proxy, Method method, Object[] args) {
+            if ("getLogManager".equals(method.getName())) return logManager;
+            Class<?> ret = method.getReturnType();
+            if (ret.isPrimitive()) {
+                if (ret == boolean.class) return false;
+                if (ret == int.class) return 0;
+                if (ret == long.class) return 0L;
+                if (ret == double.class) return 0D;
+                if (ret == float.class) return 0F;
+                if (ret == short.class) return (short) 0;
+                if (ret == byte.class) return (byte) 0;
+                if (ret == char.class) return (char) 0;
+            }
+            return null;
         }
     }
 
@@ -91,5 +145,34 @@ public class PassengerUtilTest {
         MovingData data = newData();
         sched.invoke(util, player, vehicle, cfg, data, false);
         assertTrue(access.called);
+    }
+
+    @Test
+    public void testScheduleSetPassengerDebugLogging() throws Exception {
+        DummyVehicleAccess access = new DummyVehicleAccess() {
+            @Override public boolean addPassenger(Entity entity, Entity vehicle) {
+                called = true; return false; }
+        };
+        LoggingAPI apiHandler = new LoggingAPI();
+        fr.neatmonster.nocheatplus.components.NoCheatPlusAPI api = apiHandler.create();
+        java.lang.reflect.Method setApi = NCPAPIProvider.class.getDeclaredMethod("setNoCheatPlusAPI", fr.neatmonster.nocheatplus.components.NoCheatPlusAPI.class);
+        setApi.setAccessible(true);
+        setApi.invoke(null, api);
+
+        PassengerUtil util = newUtil(access);
+        Method sched = PassengerUtil.class.getDeclaredMethod("handlePassengerScheduling", Player.class,
+                Entity.class, MovingConfig.class, MovingData.class, boolean.class);
+        sched.setAccessible(true);
+        Player player = mock(Player.class);
+        Entity vehicle = mock(Entity.class);
+        when(vehicle.getType()).thenReturn(EntityType.MINECART);
+        MovingConfig cfg = newConfig();
+        MovingData data = newData();
+        sched.invoke(util, player, vehicle, cfg, data, true);
+
+        assertTrue(access.called);
+        assertFalse(apiHandler.logManager.debugMessages.isEmpty());
+
+        setApi.invoke(null, (Object) null);
     }
 }
