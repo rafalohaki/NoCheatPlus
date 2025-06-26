@@ -614,7 +614,7 @@ private static boolean oddLiquid(final double yDistance, final double yDistDiffE
 
     private static boolean isFireworkBoostTransition(final MovingData data, final PlayerMoveData lastMove,
                                                      final double yDistance) {
-        return data.fireworksBoostDuration > 0 && data.keepfrictiontick < 0
+        return data.hasFireworkBoost && data.keepfrictiontick < 0
                 && lastMove.toIsValid && yDistance - lastMove.yDistance > -0.7;
     }
 
@@ -683,7 +683,7 @@ private static boolean oddLiquid(final double yDistance, final double yDistDiffE
                                               final double maxJumpGain, double vAllowedDistance, 
                                               final Player player, final PlayerMoveData thisMove) {
 
-        if (data.fireworksBoostDuration > 0 
+        if (data.hasFireworkBoost
             && data.keepfrictiontick < 0 && lastMove.toIsValid) {
             data.keepfrictiontick = 0;
             return true;

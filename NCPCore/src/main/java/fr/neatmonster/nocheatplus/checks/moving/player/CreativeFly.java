@@ -832,7 +832,7 @@ public class CreativeFly extends Check {
      */
     private boolean handleFireworkBoostAscend(final double yDistance, final double limitV,
             final PlayerMoveData lastMove, final MovingData data) {
-        if (yDistance > limitV && data.fireworksBoostDuration > 0 && lastMove.toIsValid
+        if (yDistance > limitV && data.hasFireworkBoost && lastMove.toIsValid
                 && (
                         yDistance >= lastMove.yDistance
                                 || yDistance - lastMove.yDistance < Magic.GRAVITY_MAX
@@ -1081,7 +1081,7 @@ public class CreativeFly extends Check {
                 squaredCos, debug, state);
 
         boolean boosted = false;
-        if (data.fireworksBoostDuration > 0) {
+        if (data.hasFireworkBoost) {
             boosted = handleFireworkBoost(player, hDistance, yDistance, lookvec, xzlength, thisMove,
                     lastMove, data, debug, state);
         }
@@ -1141,7 +1141,7 @@ public class CreativeFly extends Check {
             allowedH = lastMove.hAllowedDistance + 0.07;
         }
 
-        if (data.fireworksBoostDuration > 0) allowedH = Math.max(allowedH, 1.8);
+        if (data.hasFireworkBoost) allowedH = Math.max(allowedH, 1.8);
 
         if (hDistance < lastMove.hAllowedDistance * (data.liqtick < 5 ? 1.0 : Magic.FRICTION_MEDIUM_WATER)) {
             allowedH = lastMove.hAllowedDistance * (data.liqtick < 5 ? 1.0 : Magic.FRICTION_MEDIUM_WATER);
@@ -1474,7 +1474,7 @@ public class CreativeFly extends Check {
     private static double applyFireworkBoost(ElytraGuessState state, Vector lookvec, double xzlength,
             PlayerMoveData thisMove, PlayerMoveData lastMove, MovingData data) {
         double resultHDistance = Double.NaN;
-        if (data.fireworksBoostDuration > 0) {
+        if (data.hasFireworkBoost) {
             state.allowedY = Math.abs(thisMove.yDistance) < 2.0 ? thisMove.yDistance
                     : lastMove.toIsValid ? lastMove.yDistance : 0;
             if (Math.round(data.fireworksBoostTickNeedCheck / 4) > data.fireworksBoostDuration
@@ -1706,7 +1706,7 @@ public class CreativeFly extends Check {
         if (thisMove.verVelUsed != null) {
             builder.append(" , vVelUsed: " + thisMove.verVelUsed);
         }
-        if (data.fireworksBoostDuration > 0 && MovingConfig.ID_JETPACK_ELYTRA.equals(model.getId())) {
+        if (data.hasFireworkBoost && MovingConfig.ID_JETPACK_ELYTRA.equals(model.getId())) {
             builder.append(" , boost: " + data.fireworksBoostDuration);
         }
         if (thisMove.elytrafly) {

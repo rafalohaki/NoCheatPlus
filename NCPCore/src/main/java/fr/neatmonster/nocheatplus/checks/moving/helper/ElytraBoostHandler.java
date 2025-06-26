@@ -33,6 +33,7 @@ public final class ElytraBoostHandler {
         final MovingData mData = context.data();
         final int ticks = Math.max((1 + power) * 20, 30);
         mData.fireworksBoostDuration = ticks;
+        mData.hasFireworkBoost = true;
         mData.fireworksBoostTickNeedCheck = ticks - 1;
         mData.fireworksBoostTickExpire = tick + ticks;
         return true;

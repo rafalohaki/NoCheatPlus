@@ -1191,6 +1191,7 @@ public class MovingListener extends CheckListener implements TickListener, IRemo
     private void handleFireworkBoost(final PlayerMoveData lastMove, final PlayerMoveData thisMove,
             final int tick, final MovingData data, final MovingConfig cc) {
         if (data.fireworksBoostDuration <= 0) {
+            data.hasFireworkBoost = false;
             return;
         }
         final boolean invalidBoost = !lastMove.valid
@@ -1200,8 +1201,10 @@ public class MovingListener extends CheckListener implements TickListener, IRemo
                 || data.fireworksBoostTickExpire < tick;
         if (invalidBoost) {
             data.fireworksBoostDuration = 0;
+            data.hasFireworkBoost = false;
         } else {
             data.fireworksBoostDuration--;
+            data.hasFireworkBoost = data.fireworksBoostDuration > 0;
         }
     }
 

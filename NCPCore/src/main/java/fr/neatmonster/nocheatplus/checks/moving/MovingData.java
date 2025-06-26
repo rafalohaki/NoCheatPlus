@@ -217,6 +217,8 @@ public class MovingData extends ACheckData implements IDataOnRemoveSubCheckData,
     // *----------Data of the CreativeFly check----------*
     /** Duration of the boost effect in ticks. Set in the BlockInteractListener. */
     public int fireworksBoostDuration = 0;
+    /** True while a firework boost is active. */
+    public boolean hasFireworkBoost = false;
     /** This firework boost tick needs to be checked. Aimed at solving vanilla bugs when boosting with elytra. */
     public int fireworksBoostTickNeedCheck = 0;
     /** Expire at this tick. */
@@ -936,8 +938,9 @@ public class MovingData extends ACheckData implements IDataOnRemoveSubCheckData,
         // Velocity
         removeAllVelocity();
         // Elytra boost best fits velocity / effects.
-        fireworksBoostDuration = 0; 
+        fireworksBoostDuration = 0;
         fireworksBoostTickExpire = 0;
+        hasFireworkBoost = false;
         // Horizontal buffer.
         sfHorizontalBuffer = 0.0;
     }
