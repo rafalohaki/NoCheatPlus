@@ -320,9 +320,8 @@ public class PassengerUtil {
         }
         if (redoPassengers) {
             vehicle.eject();
-            return Folia.teleportEntity(vehicle, LocUtil.clone(location), BridgeMisc.TELEPORT_CAUSE_CORRECTION_OF_POSITION);
         }
-        return false;
+        return Folia.teleportEntity(vehicle, LocUtil.clone(location), BridgeMisc.TELEPORT_CAUSE_CORRECTION_OF_POSITION);
     }
 
     private TeleportResult teleportPassengers(final Entity vehicle, final Player player, final Location location,
