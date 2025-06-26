@@ -3438,6 +3438,10 @@ public class BlockProperties {
             bmaxY = b[4];
         }
 
+        if (bmaxY > 1.0) {
+            bmaxY = 1.0;
+        }
+
         // Fake bounds for thin-glass and similar oddities.
         if ((flags & BlockFlags.F_FAKEBOUNDS) != 0) {
             double dz = bmaxZ - bminZ;
@@ -3504,9 +3508,13 @@ public class BlockProperties {
         }
         // Start at index 1 since index 0 represents the primary box.
         for (int i = 1; i < rawBounds.length / 6; i++) {
+            double capMaxY = rawBounds[i * 6 + 4];
+            if (capMaxY > 1.0) {
+                capMaxY = 1.0;
+            }
             BoundingBox sub = new BoundingBox(
                     rawBounds[i*6],     rawBounds[i*6+1], rawBounds[i*6+2],
-                    rawBounds[i*6+3],   rawBounds[i*6+4], rawBounds[i*6+5]);
+                    rawBounds[i*6+3],   capMaxY, rawBounds[i*6+5]);
             if (sub.intersects(minX, minY, minZ, maxX, maxY, maxZ, x, y, z, allowEdge)) {
                 return true;
             }
