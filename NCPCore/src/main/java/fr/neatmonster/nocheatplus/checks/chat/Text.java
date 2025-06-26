@@ -52,6 +52,11 @@ public class Text extends Check implements INotifyReload {
     private String lastGlobalMessage = "";
     private long lastGlobalTime = 0;
 
+    /**
+     * Dampening factor for uppercase ratio to prevent over-penalization.
+     */
+    private static final float UPPERCASE_WEIGHT_FACTOR = 0.6f;
+
     public Text() {
         super(CheckType.CHAT_TEXT);
         init();
@@ -206,25 +211,25 @@ public class Text extends Check implements INotifyReload {
     }
 
     private float computeCaseScore(final MessageLetterCount letterCounts, final int msgLen, final ChatConfig cc) {
+        float score = 0f;
         if (letterCounts.fullCount.upperCase > msgLen / 3) {
-            final float wUpperCase = 0.6f * letterCounts.fullCount.getUpperCaseRatio();
-            return wUpperCase * cc.textMessageUpperCase;
+            final float wUpperCase = UPPERCASE_WEIGHT_FACTOR * letterCounts.fullCount.getUpperCaseRatio();
+            score += wUpperCase * cc.textMessageUpperCase;
         }
-        return 0f;
+        return score;
     }
 
     private float computeRepetitionScore(final MessageLetterCount letterCounts, final int msgLen, final ChatConfig cc) {
-        if (msgLen <= 4) {
-            return 0f;
-        }
         float score = 0f;
-        final float fullRep = letterCounts.fullCount.getLetterCountRatio();
-        final float wRepetition = (float) Math.min(msgLen, 128) / 15.0f * Math.abs(0.5f - fullRep);
-        score += wRepetition * cc.textMessageLetterCount;
+        if (msgLen > 4) {
+            final float fullRep = letterCounts.fullCount.getLetterCountRatio();
+            final float wRepetition = (float) Math.min(msgLen, 128) / 15.0f * Math.abs(0.5f - fullRep);
+            score += wRepetition * cc.textMessageLetterCount;
 
-        final float fnWords = (float) letterCounts.words.length / (float) msgLen;
-        if (fnWords > 0.75f) {
-            score += fnWords * cc.textMessagePartition;
+            final float fnWords = (float) letterCounts.words.length / (float) msgLen;
+            if (fnWords > 0.75f) {
+                score += fnWords * cc.textMessagePartition;
+            }
         }
         return score;
     }
