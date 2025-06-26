@@ -77,12 +77,8 @@ public final class Timings {
                 }
 
                 void updateRange(final long value) {
-                        if (value < min) {
-                                min = value;
-                        }
-                        if (value > max) {
-                                max = value;
-                        }
+                        min = Math.min(min, value);
+                        max = Math.max(max, value);
                 }
         }
 	
