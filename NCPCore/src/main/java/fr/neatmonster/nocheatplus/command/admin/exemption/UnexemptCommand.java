@@ -62,11 +62,16 @@ public class UnexemptCommand extends BaseCommand {
         }
 
         final UUID id = resolveTargetId(targetName, sender);
-        if (id != null) {
-            final Player player = DataManager.getPlayer(targetName);
-            final String name = player != null ? player.getName() : targetName;
-            unexemptPlayer(id, name, checkType, sender);
+        if (id == null) {
+            final boolean player = sender instanceof Player;
+            final String tag = player ? TAG : CTAG;
+            final String c3 = player ? ChatColor.RED.toString() : "";
+            sender.sendMessage(tag + "Not an online player nor a UUID: " + c3 + targetName);
+            return true;
         }
+        final Player player = DataManager.getPlayer(targetName);
+        final String name = player != null ? player.getName() : targetName;
+        unexemptPlayer(id, name, checkType, sender);
         return true;
     }
 
