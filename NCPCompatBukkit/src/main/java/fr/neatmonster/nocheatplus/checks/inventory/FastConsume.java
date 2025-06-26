@@ -93,26 +93,25 @@ public class FastConsume extends Check implements Listener, INotifyReload {
 
     private boolean check(final Player player, final ItemStack stack,
             final long time, final InventoryData data, final IPlayerData pData) {
-        if (stack == null) {
-            return false;
+        boolean cancel = false;
+        if (stack != null) {
+            final long ref = data.instantEatInteract == 0 ? 0
+                    : Math.max(data.instantEatInteract, data.lastClickTime);
+            if (time < ref) {
+                data.instantEatInteract = data.lastClickTime = time;
+            } else {
+                final InventoryConfig cc = pData.getGenericInstance(
+                        InventoryConfig.class);
+                final Material mat = stack.getType();
+                if (isConsumeAllowed(mat, cc)) {
+                    final long timeSpent = ref == 0 ? 0 : time - ref;
+                    cancel = calculateViolation(player, stack, timeSpent, data,
+                            cc);
+                    resetFastConsumeState(player, cancel, data, pData);
+                    data.instantEatInteract = time;
+                }
+            }
         }
-
-        final long ref = data.instantEatInteract == 0 ? 0 : Math.max(data.instantEatInteract, data.lastClickTime);
-        if (time < ref) {
-            data.instantEatInteract = data.lastClickTime = time;
-            return false;
-        }
-
-        final InventoryConfig cc = pData.getGenericInstance(InventoryConfig.class);
-        final Material mat = stack.getType();
-        if (!isConsumeAllowed(mat, cc)) {
-            return false;
-        }
-
-        final long timeSpent = ref == 0 ? 0 : time - ref;
-        final boolean cancel = calculateViolation(player, stack, timeSpent, data, cc);
-        resetFastConsumeState(player, cancel, data, pData);
-        data.instantEatInteract = time;
         return cancel;
     }
 
