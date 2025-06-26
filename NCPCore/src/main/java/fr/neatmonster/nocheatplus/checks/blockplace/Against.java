@@ -50,21 +50,39 @@ public class Against extends Check {
 
 
     /**
-     * Checks a player
-     * @param player
-     * @param block
-     * @param placedMat 
-     *               The material in hand that has been placed.
-     * @param blockAgainst 
-     * @param isInteractBlock
-     * @param data
-     * @param cc
-     * @param pData
+     * Perform the core check.
      *
+     * <p>If {@code player}, {@code block}, or {@code blockAgainst} are
+     * {@code null}, a debug entry is written and {@code false} is returned.</p>
+     *
+     * @param player
+     *            The player placing the block. May be {@code null}.
+     * @param block
+     *            The block that was placed. May be {@code null}.
+     * @param placedMat
+     *            The material in hand that has been placed.
+     * @param blockAgainst
+     *            The block interacted with. May be {@code null}.
+     * @param isInteractBlock
+     *            Whether the block placed is an interact block.
+     * @param data
+     *            Player block place data.
+     * @param cc
+     *            Check configuration.
+     * @param pData
+     *            The player data instance.
+     * @return {@code true} if actions should cancel the event, otherwise
+     *         {@code false}.
      */
-    public boolean check(final Player player, final Block block, final Material placedMat, 
-                         final Block blockAgainst, final boolean isInteractBlock, 
+    public boolean check(final Player player, final Block block, final Material placedMat,
+                         final Block blockAgainst, final boolean isInteractBlock,
                          final BlockPlaceData data, final BlockPlaceConfig cc, final IPlayerData pData) {
+
+        if (player == null || block == null || blockAgainst == null) {
+            debug(player, "check called with null argument(s): player=" + player
+                    + ", block=" + block + ", blockAgainst=" + blockAgainst);
+            return false;
+        }
         
         boolean violation = false;
         final BlockInteractData bIData = pData.getGenericInstance(BlockInteractData.class); // Should eventually be passed as argument.
