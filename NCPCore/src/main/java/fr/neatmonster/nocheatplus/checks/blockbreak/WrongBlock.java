@@ -24,6 +24,7 @@ import fr.neatmonster.nocheatplus.compat.AlmostBoolean;
 import fr.neatmonster.nocheatplus.permissions.Permissions;
 import fr.neatmonster.nocheatplus.players.IPlayerData;
 import fr.neatmonster.nocheatplus.utilities.location.TrigUtil;
+import fr.neatmonster.nocheatplus.time.monotonic.Monotonic;
 
 public class WrongBlock extends Check {
 
@@ -50,7 +51,7 @@ public class WrongBlock extends Check {
         boolean cancel = false;
 
         if (player != null && block != null && cc != null && data != null && pData != null) {
-            final long now = System.currentTimeMillis();
+            final long now = Monotonic.millis();
             final boolean wrongTime = data.fastBreakfirstDamage < data.fastBreakBreakTime;
             final int dist = Math.min(4,
                     data.clickedX == Integer.MAX_VALUE ? 100

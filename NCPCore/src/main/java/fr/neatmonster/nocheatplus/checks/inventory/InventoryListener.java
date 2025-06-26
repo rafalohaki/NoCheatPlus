@@ -151,8 +151,7 @@ public class InventoryListener  extends CheckListener implements JoinLeaveListen
         if (event.getEntity() instanceof Player) {
 
             final Player player = (Player) event.getEntity();
-            if (player != null) {
-                final IPlayerData pData = DataManager.getPlayerData(player);
+            final IPlayerData pData = DataManager.getPlayerData(player);
                 if (instantBow.isEnabled(player, pData)) {
                     final long now = System.currentTimeMillis();
                     final Location loc = player.getLocation(useLoc);
@@ -177,7 +176,6 @@ public class InventoryListener  extends CheckListener implements JoinLeaveListen
                     }
                     useLoc.setWorld(null);
                 }
-            }
         }
     }
 
@@ -194,8 +192,7 @@ public class InventoryListener  extends CheckListener implements JoinLeaveListen
         // Only if a player ate food.
         if (event.getEntity() instanceof Player) {
             final Player player = (Player) event.getEntity();
-            if (player != null) {
-                final IPlayerData pData = DataManager.getPlayerData(player);
+            final IPlayerData pData = DataManager.getPlayerData(player);
                 if (instantEat.isEnabled(player, pData)
                         && instantEat.check(player, event.getFoodLevel())) {
                     event.setCancelled(true);
@@ -205,7 +202,6 @@ public class InventoryListener  extends CheckListener implements JoinLeaveListen
                     event.setCancelled(true);
                     counters.addPrimaryThread(idCancelDead, 1);
                 }
-            }
         }
     }
 
@@ -345,12 +341,10 @@ public class InventoryListener  extends CheckListener implements JoinLeaveListen
         if (entity instanceof Player) {
 
             final Player player = (Player) entity;
-            if (player != null) {
-                final IPlayerData pData = DataManager.getPlayerData(player);
-                final InventoryData data = pData.getGenericInstance(InventoryData.class);
-                data.firstClickTime = 0;
-                data.containerOpenTime = 0;
-            }
+            final IPlayerData pData = DataManager.getPlayerData(player);
+            final InventoryData data = pData.getGenericInstance(InventoryData.class);
+            data.firstClickTime = 0;
+            data.containerOpenTime = 0;
         }
         keepCancel = false;
     }
@@ -479,15 +473,13 @@ public class InventoryListener  extends CheckListener implements JoinLeaveListen
 
         if (event.getAction() == Action.RIGHT_CLICK_AIR || event.getAction() == Action.RIGHT_CLICK_BLOCK) {
             final Player player = event.getPlayer();
-            if (player != null) {
-                final IPlayerData pData = DataManager.getPlayerData(player);
-                if (pData != null && pData.isCheckActive(CheckType.INVENTORY, player)) {
-                    final InventoryData data = pData.getGenericInstance(InventoryData.class);
+            final IPlayerData pData = DataManager.getPlayerData(player);
+            if (pData.isCheckActive(CheckType.INVENTORY, player)) {
+                final InventoryData data = pData.getGenericInstance(InventoryData.class);
 
-                    final boolean resetAll = handleInteractItem(event, player, pData, data);
-                    if (resetAll) {
-                        resetInteractionData(player, pData, data);
-                    }
+                final boolean resetAll = handleInteractItem(event, player, pData, data);
+                if (resetAll) {
+                    resetInteractionData(player, pData, data);
                 }
             }
         }
@@ -586,13 +578,11 @@ public class InventoryListener  extends CheckListener implements JoinLeaveListen
         if (entity instanceof Player) {
 
             final Player player = (Player) entity;
-            if (player != null) {
-                final IPlayerData pData = DataManager.getPlayerData(player);
-                final InventoryData data = pData.getGenericInstance(InventoryData.class);
-                if (data.firstClickTime == 0) data.firstClickTime = now;
-                if (MovingUtil.hasScheduledPlayerSetBack(player)) {
-                    event.setCancelled(true);
-                }
+            final IPlayerData pData = DataManager.getPlayerData(player);
+            final InventoryData data = pData.getGenericInstance(InventoryData.class);
+            if (data.firstClickTime == 0) data.firstClickTime = now;
+            if (MovingUtil.hasScheduledPlayerSetBack(player)) {
+                event.setCancelled(true);
             }
         }
     }
@@ -681,13 +671,11 @@ public class InventoryListener  extends CheckListener implements JoinLeaveListen
         if (entity instanceof Player) {
 
             final Player player = (Player) entity;
-            if (player != null) {
-                final IPlayerData pData = DataManager.getPlayerData(player);
-                final InventoryData data = pData.getGenericInstance(InventoryData.class);
-                open.check(player);
-                data.firstClickTime = 0;
-                data.containerOpenTime = 0;
-            }
+            final IPlayerData pData = DataManager.getPlayerData(player);
+            final InventoryData data = pData.getGenericInstance(InventoryData.class);
+            open.check(player);
+            data.firstClickTime = 0;
+            data.containerOpenTime = 0;
         }
     }
     
@@ -749,7 +737,6 @@ public class InventoryListener  extends CheckListener implements JoinLeaveListen
         final Location to = event.getTo();
         final boolean PoYdiff = from.getPitch() != to.getPitch() || from.getYaw() != to.getYaw();
         final IPlayerData pData = DataManager.getPlayerData(player);
-        if (pData == null) return;
 
         if (!pData.isCheckActive(CheckType.INVENTORY, player)) return;
 

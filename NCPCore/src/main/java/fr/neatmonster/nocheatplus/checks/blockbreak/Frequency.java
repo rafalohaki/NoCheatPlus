@@ -21,6 +21,7 @@ import fr.neatmonster.nocheatplus.checks.Check;
 import fr.neatmonster.nocheatplus.checks.CheckType;
 import fr.neatmonster.nocheatplus.players.IPlayerData;
 import fr.neatmonster.nocheatplus.utilities.TickTask;
+import fr.neatmonster.nocheatplus.time.monotonic.Monotonic;
 
 /**
  * This checks just limits the number of blocks broken per time frame.
@@ -38,7 +39,7 @@ public class Frequency extends Check {
             final IPlayerData pData){
 
         final float interval = (float) ((player.getGameMode() == GameMode.CREATIVE)?(cc.frequencyIntervalCreative):(cc.frequencyIntervalSurvival));
-        data.frequencyBuckets.add(System.currentTimeMillis(), interval);
+        data.frequencyBuckets.add(Monotonic.millis(), interval);
 
         // Full period frequency.
         final float fullScore = data.frequencyBuckets.score(cc.frequencyBucketFactor);

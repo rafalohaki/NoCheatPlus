@@ -32,6 +32,7 @@ import fr.neatmonster.nocheatplus.players.IPlayerData;
 import fr.neatmonster.nocheatplus.utilities.PotionUtil;
 import fr.neatmonster.nocheatplus.utilities.TickTask;
 import fr.neatmonster.nocheatplus.utilities.map.BlockProperties;
+import fr.neatmonster.nocheatplus.time.monotonic.Monotonic;
 
 /**
  * A check used to verify if the player isn't breaking blocks faster than possible.
@@ -60,7 +61,7 @@ public class FastBreak extends Check {
      */
     public boolean check(final Player player, final Block block, final AlmostBoolean isInstaBreak, 
             final BlockBreakConfig cc, final BlockBreakData data, final IPlayerData pData) {
-        final long now = System.currentTimeMillis();
+        final long now = Monotonic.millis();
         boolean cancel = false;
 
         // Determine expected breaking time by block type.

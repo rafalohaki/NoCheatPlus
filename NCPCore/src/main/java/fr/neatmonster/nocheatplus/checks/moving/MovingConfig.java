@@ -135,13 +135,13 @@ public class MovingConfig extends ACheckConfig {
     public boolean    survivalFlyVLFreezeInAir;
     // Set back policy.
     public boolean    sfSetBackPolicyVoid;
-    public boolean    sfSetBackPolicyFallDamage;
+    public boolean    sfSetBackPolicyApplyFallDamage;
     public ActionList survivalFlyActions;
 
     public boolean 	sfHoverCheck; // Placeholder for potential sub check
     public int 		sfHoverTicks;
     public int		sfHoverLoginTicks;
-    public boolean    sfHoverFallDamage;
+    public boolean    sfHoverTakeFallDamage;
     public double		sfHoverViolation;
 
     // Special tolerance values:
@@ -363,7 +363,7 @@ public class MovingConfig extends ACheckConfig {
         survivalFlyAccountingV = config.getBoolean(ConfPaths.MOVING_SURVIVALFLY_EXTENDED_VACC);
         survivalFlyAccountingStep = config.getBoolean(ConfPaths.MOVING_SURVIVALFLY_EXTENDED_STEP);
         survivalFlyResetItem = config.getBoolean(ConfPaths.MOVING_SURVIVALFLY_EXTENDED_RESETITEM);
-        sfSetBackPolicyFallDamage = config.getBoolean(ConfPaths.MOVING_SURVIVALFLY_SETBACKPOLICY_FALLDAMAGE);
+        sfSetBackPolicyApplyFallDamage = config.getBoolean(ConfPaths.MOVING_SURVIVALFLY_SETBACKPOLICY_APPLYFALLDAMAGE);
         sfSetBackPolicyVoid = config.getBoolean(ConfPaths.MOVING_SURVIVALFLY_SETBACKPOLICY_VOIDTOVOID);
         final double sfStepHeight = config.getDouble(ConfPaths.MOVING_SURVIVALFLY_STEPHEIGHT, Double.MAX_VALUE);
         if (sfStepHeight == Double.MAX_VALUE) {
@@ -386,7 +386,7 @@ public class MovingConfig extends ACheckConfig {
         sfHoverCheck = config.getBoolean(ConfPaths.MOVING_SURVIVALFLY_HOVER_CHECK);
         sfHoverTicks = config.getInt(ConfPaths.MOVING_SURVIVALFLY_HOVER_TICKS);
         sfHoverLoginTicks = Math.max(0, config.getInt(ConfPaths.MOVING_SURVIVALFLY_HOVER_LOGINTICKS));
-        sfHoverFallDamage = config.getBoolean(ConfPaths.MOVING_SURVIVALFLY_HOVER_FALLDAMAGE);
+        sfHoverTakeFallDamage = config.getBoolean(ConfPaths.MOVING_SURVIVALFLY_HOVER_TAKEFALLDAMAGE);
         sfHoverViolation = config.getDouble(ConfPaths.MOVING_SURVIVALFLY_HOVER_SFVIOLATION);
     }
 
