@@ -173,8 +173,10 @@ public class Against extends Check {
         }
         if (BlockProperties.isLiquid(ncpAgainst)) {
             final boolean isLilyPadOrFrog = isLilyPadOrFrogspawn(placedMat);
-            final boolean blockBelowLiquid = block != null && BlockProperties.isLiquid(block.getRelative(BlockFace.DOWN).getType());
-            if ((!isLilyPadOrFrog || !blockBelowLiquid)
+            final boolean airAbove = block != null
+                    && BlockProperties.isAir(block.getRelative(BlockFace.UP).getType());
+            final boolean allowShallowWaterPlant = isLilyPadOrFrog && airAbove;
+            if ((!allowShallowWaterPlant)
                     && !BlockProperties.isWaterPlant(ncpAgainst)
                     && !pData.hasPermission(Permissions.BLOCKPLACE_AGAINST_LIQUIDS, player)) {
                 return true;
