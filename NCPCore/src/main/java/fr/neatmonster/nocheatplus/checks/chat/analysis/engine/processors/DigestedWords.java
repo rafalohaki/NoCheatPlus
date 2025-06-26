@@ -101,7 +101,7 @@ public abstract class DigestedWords extends AbstractWordProcessor{
 		other.clear();
 		Collection<Character> chars;
 		if (compress) chars = word.counts.keySet();
-		else{
+		else {
 			// Add all.
 			chars = new ArrayList<Character>(word.word.length());
 			for (int i = 0; i < word.word.length(); i++){

@@ -196,7 +196,7 @@ public abstract class AbstractCoordHashMap<V, E extends fr.neatmonster.nocheatpl
                     if (used < 0) {
                         newBucket = new LinkedList<E>();
                     }
-                    else{
+                    else {
                         newBucket = entries[used];
                         entries[used] = null;
                         used--;

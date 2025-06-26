@@ -427,7 +427,7 @@ public final class NCPHookManager {
                     return applyHooks(type, violationData.player, violationData, hooksCheck);
                 }
             }
-            else{
+            else {
                 return applyHooks(type, violationData.player, violationData, hooksCheck);
             }
         }   

@@ -58,13 +58,13 @@ public class Frequency extends Check {
                 // Within range, add.
                 data.frequencyShortTermCount ++;
             }
-            else{
+            else {
                 // Too much lag, reset.
                 data.frequencyShortTermTick = tick;
                 data.frequencyShortTermCount = 1;
             }
         }
-        else{
+        else {
             data.frequencyShortTermTick = tick;
             data.frequencyShortTermCount = 1;
         }

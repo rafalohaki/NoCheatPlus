@@ -349,7 +349,7 @@ public class TrigUtil {
         else if  (x < 0.0) {
             a = Math.atan(z / x) + Math.PI;
         }
-        else{
+        else {
             if (z < 0.0) {
                 a = 3.0 * Math.PI / 2.0;
             }

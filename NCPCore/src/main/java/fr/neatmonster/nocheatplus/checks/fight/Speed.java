@@ -71,13 +71,13 @@ public class Speed extends Check {
                 // Within range, add.
                 data.speedShortTermCount ++;
             }
-            else{
+            else {
                 // Too much lag, reset.
                 data.speedShortTermTick = tick;
                 data.speedShortTermCount = 1;
             }
         }
-        else{
+        else {
             data.speedShortTermTick = tick;
             data.speedShortTermCount = 1;
         }

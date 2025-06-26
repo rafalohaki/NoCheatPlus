@@ -328,7 +328,7 @@ public class ReflectionUtil {
                             }
                         }
                     }
-                    else{
+                    else {
                         // Check if the return type is preferred over previously found ones.
                         for (int i = 0; i < returnTypeIndex; i++){
                             if (returnTypePreference[i] == returnType){

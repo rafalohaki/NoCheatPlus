@@ -80,7 +80,7 @@ public class Direction extends Check {
         /*if (cc.directionStrict){
             off = CollisionUtil.combinedDirectionCheck(loc, player.getEyeHeight(), direction, dLoc.getX(), dLoc.getY() + height / 2D, dLoc.getZ(), width, height, TrigUtil.DIRECTION_PRECISION, 80.0, isPlayer);
         }
-        else{
+        else {
             // Also take into account the angle.
             off = CollisionUtil.directionCheck(loc, player.getEyeHeight(), direction, dLoc.getX(), dLoc.getY() + height / 2D, dLoc.getZ(), width, height, TrigUtil.DIRECTION_PRECISION);
         } */

@@ -66,13 +66,13 @@ public class FastPlace extends Check {
                 // Within range, add.
                 data.fastPlaceShortTermCount ++;
             }
-            else{
+            else {
                 // Too much lag, reset.
                 data.fastPlaceShortTermTick = tick;
                 data.fastPlaceShortTermCount = 1;
             }
         }
-        else{
+        else {
             data.fastPlaceShortTermTick = tick;
             data.fastPlaceShortTermCount = 1;
         }
@@ -84,11 +84,11 @@ public class FastPlace extends Check {
             if (lag) {
                 fullViolation = fullScore / TickTask.getLag(data.fastPlaceBuckets.bucketDuration() * data.fastPlaceBuckets.numberOfBuckets(), true) - cc.fastPlaceLimit;
             }
-            else{
+            else {
                 fullViolation = fullScore - cc.fastPlaceLimit;
             }	
         }
-        else{
+        else {
             fullViolation = 0;
         }
         final float shortTermViolation = data.fastPlaceShortTermCount - cc.fastPlaceShortTermLimit; 

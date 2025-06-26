@@ -66,7 +66,7 @@ public class ManagedMap<K, V>{
             map.put(key, new ValueWrap(value));
             return null;
         }
-        else{
+        else {
             final V res = wrap.getValue();
             wrap.setValue(value);
             wrap.ts = System.currentTimeMillis();
@@ -77,7 +77,7 @@ public class ManagedMap<K, V>{
     public V get(final K key){
         final ValueWrap wrap = map.get(key);
         if (wrap == null) return null;
-        else{
+        else {
             wrap.ts = System.currentTimeMillis();
             return wrap.getValue();
         }

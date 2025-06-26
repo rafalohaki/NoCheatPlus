@@ -61,7 +61,7 @@ public class ColorUtil {
 				// Skip this one;
 				srcIndex ++;
 			}
-			else{
+			else {
 				newChars[tgtIndex] = chars[srcIndex];
 				tgtIndex++;
 			}

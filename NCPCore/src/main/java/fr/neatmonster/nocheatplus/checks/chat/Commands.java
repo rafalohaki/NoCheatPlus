@@ -69,13 +69,13 @@ public class Commands extends Check {
                 // Add up.
                 data.commandsShortTermWeight += weight;
             }
-            else{
+            else {
                 // Reset, too much lag.
                 data.commandsShortTermTick = tick;
                 data.commandsShortTermWeight = 1.0;
             }
         }
-        else{
+        else {
             // Reset.
             data.commandsShortTermTick = tick;
             data.commandsShortTermWeight = 1.0;
@@ -99,7 +99,7 @@ public class Commands extends Check {
             player.sendMessage(ColorUtil.replaceColors(cc.chatWarningMessage));
             data.chatWarningTime = now;
         }
-        else{
+        else {
             data.commandsVL *= 0.99;
         }
         return false;

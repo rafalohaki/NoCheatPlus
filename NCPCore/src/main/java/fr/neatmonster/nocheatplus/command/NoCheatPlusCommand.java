@@ -181,7 +181,7 @@ public class NoCheatPlusCommand extends BaseCommand {
             sender.sendMessage(ColorUtil.replaceColors(config.getString(ConfPaths.PROTECT_PLUGINS_HIDE_NOCOMMAND_MSG)));
             return true; 
         }
-        else{
+        else {
             return false;
         }
     }
@@ -223,7 +223,7 @@ public class NoCheatPlusCommand extends BaseCommand {
     //				// Also check aliases for matches.
     //				return getTabMatches(sender, commands.keySet(), subLabel);
     //			}
-    //			else{
+    //			else {
     //				final NCPCommand cmd = commands.get(subLabel);
     //				if (cmd.testPermission...){
     //					// Delegate the tab-completion.

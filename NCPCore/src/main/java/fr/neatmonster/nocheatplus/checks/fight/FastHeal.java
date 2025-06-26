@@ -47,7 +47,7 @@ public class FastHeal extends Check {
             // Only add a predefined amount to the buffer.
             data.fastHealBuffer = Math.min(cc.fastHealBuffer, data.fastHealBuffer + 50L);
         }
-        else{
+        else {
             // Violation.
             final double correctedDiff = ((double) time - data.fastHealRefTime) * TickTask.getLag(cc.fastHealInterval, true);
             if (correctedDiff < cc.fastHealInterval){

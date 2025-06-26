@@ -54,7 +54,7 @@ public class Speed extends Check {
                 data.addPassedCheck(this.type); // Not sure.
             }
         }
-        else{
+        else {
             data.speedVL *= 0.99;
             data.addPassedCheck(this.type);
         }

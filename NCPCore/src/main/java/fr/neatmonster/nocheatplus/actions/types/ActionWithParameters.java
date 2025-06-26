@@ -70,7 +70,7 @@ public abstract class ActionWithParameters<D extends ParameterHolder, L extends 
             if (part instanceof String)
                 log.append((String) part);
             else if (part == null) log.append("[???]");
-            else{
+            else {
             	try{
             		log.append(violationData.getParameter((ParameterName) part));
             	}

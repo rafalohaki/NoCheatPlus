@@ -169,7 +169,7 @@ public class RawConfigFile  extends YamlConfiguration {
             if (mat == null){
                 StaticLog.logWarning("Bad material entry (" + path +"): " + entry);
             }
-            else{
+            else {
                 target.add(mat);
             }
         }

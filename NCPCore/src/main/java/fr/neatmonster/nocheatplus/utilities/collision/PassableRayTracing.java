@@ -78,7 +78,7 @@ public class PassableRayTracing extends RayTracing implements ICollidePassable {
         if (BlockProperties.isPassableRay(blockCache, blockX, blockY, blockZ, oX, oY, oZ, dX, dY, dZ, dT)){
             return true;
         }
-        else{
+        else {
             collides = true;
             return false;
         }

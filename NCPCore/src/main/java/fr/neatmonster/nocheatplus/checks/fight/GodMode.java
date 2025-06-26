@@ -127,7 +127,7 @@ public class GodMode extends Check {
         if (dState.tick < data.godModeHealthDecreaseTick){
             data.godModeHealthDecreaseTick = 0;
         }
-        else{
+        else {
             final int dht = dState.tick - data.godModeHealthDecreaseTick;
             if (dht <= 20) {
                 return false;
@@ -156,7 +156,7 @@ public class GodMode extends Check {
                 cancel = false;
             }
         }
-        else{
+        else {
             cancel = false;
         }
 

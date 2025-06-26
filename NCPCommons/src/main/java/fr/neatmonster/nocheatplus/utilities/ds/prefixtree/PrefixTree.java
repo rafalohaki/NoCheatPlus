@@ -169,7 +169,7 @@ public class PrefixTree<K, N extends Node<K, N>, L extends LookupEntry<K, N>>{
 				} 
 				else break;
 			}
-			else{
+			else {
 				// A node already exists, set as insertion point.
 				insertion = current = child;
 				depth ++;

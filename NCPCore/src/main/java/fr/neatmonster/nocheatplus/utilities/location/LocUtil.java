@@ -174,7 +174,7 @@ public class LocUtil {
         if (setBack == null){
             return clone(ref);
         }
-        else{
+        else {
             return clone(setBack, ref.getYaw(), ref.getPitch());
         }
     }
@@ -191,7 +191,7 @@ public class LocUtil {
         if (setBack == null) {
             return ref.getLocation();
         }
-        else{
+        else {
             return clone(setBack, ref.getYaw(), ref.getPitch());
         }
     }

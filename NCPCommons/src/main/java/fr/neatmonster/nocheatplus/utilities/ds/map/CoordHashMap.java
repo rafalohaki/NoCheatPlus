@@ -109,7 +109,7 @@ public class CoordHashMap<V> extends AbstractCoordHashMap<V, fr.neatmonster.noch
                         }
                         return res;
                     }
-                    else{
+                    else {
                         // Inconsistent state; bucket might be empty.
                         slot++;
                         index = 0;

@@ -89,12 +89,12 @@ public class BridgeHealth {
         if (o1 instanceof Number) {
             return ((Number) o1).doubleValue();
         }
-        else{
+        else {
             String message = "Expect method " + methodName + " in " + obj.getClass() + " with return type double or int, returned instead: " + ((o1 == null ? "null" : o1.getClass().getName()));
             if (reason == null) {
                 throw new RuntimeException(message);
             }
-            else{
+            else {
                 throw new RuntimeException(message, reason);
             }
         }

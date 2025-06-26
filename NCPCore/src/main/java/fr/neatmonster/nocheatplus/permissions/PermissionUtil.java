@@ -145,7 +145,7 @@ public class PermissionUtil {
                 command.setPermission(cmdPermName);
                 cmdHadPerm = false;
             }
-            else{
+            else {
                 cmdHadPerm = true;
             }
             // Set permission default behavior.

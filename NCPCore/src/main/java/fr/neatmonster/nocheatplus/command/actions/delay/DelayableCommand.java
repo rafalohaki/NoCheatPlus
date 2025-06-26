@@ -148,7 +148,7 @@ public abstract class DelayableCommand extends BaseCommand {
             alteredArgs = args;
             return true;
         }
-        else{
+        else {
             boolean hasDef = args[delayIndex].startsWith("delay=") && delay != -1;
             alteredArgs = new String[args.length + (hasDef ? -1 : 0)];
             if (alteredArgs.length > 0){

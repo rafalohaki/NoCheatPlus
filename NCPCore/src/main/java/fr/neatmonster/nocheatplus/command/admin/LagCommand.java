@@ -70,7 +70,7 @@ public class LagCommand extends BaseCommand {
                 else if (i < spikeDurations.length - 1){
                     builder.append(cG + "\n• " + cGO +""+ (spikes[i] - spikes[i + 1]) + cG + "spike(s) x " + cGO +""+ cGO +""+ spikeDurations[i] + cG + "ms -> " + cGO +""+ spikeDurations[i + 1] + cG + ". ");
                 }
-                else{
+                else {
                     builder.append(cG + "\n• " + cGO +""+ spikes[i] + cG + "spike(s) x " + cGO +""+ cGO +""+ spikeDurations[i] +"ms"+ cG + ".");
                 }
             }

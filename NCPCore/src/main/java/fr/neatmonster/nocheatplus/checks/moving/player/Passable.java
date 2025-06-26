@@ -253,7 +253,7 @@ public class Passable extends Check {
             newTo.setPitch(to.getPitch());
             return newTo;
         }
-        else{
+        else {
             // No cancel action set.
             return null;
         }
