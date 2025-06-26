@@ -47,13 +47,23 @@ public class WrongBlock extends Check {
             final BlockBreakConfig cc, final BlockBreakData data,
             final IPlayerData pData, final AlmostBoolean isInstaBreak) {
 
-        boolean cancel = false;
-
-        if (player != null && block != null && cc != null && data != null && pData != null) {
-            cancel = handleCheck(player, block, cc, data, pData);
+        if (player == null) {
+            return false;
+        }
+        if (block == null) {
+            return false;
+        }
+        if (cc == null) {
+            return false;
+        }
+        if (data == null) {
+            return false;
+        }
+        if (pData == null) {
+            return false;
         }
 
-        return cancel;
+        return handleCheck(player, block, cc, data, pData);
     }
 
     private boolean handleCheck(final Player player, final Block block,
