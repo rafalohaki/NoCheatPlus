@@ -41,13 +41,13 @@ public class ExemptionsCommand extends BaseCommand {
 
 
         final String[] colors = getColorCodes(sender);
-        final String c1 = colors[0];
-        final String c2 = colors[1];
-        final String c3 = colors[2];
-        final String c4 = colors[3];
-        final String c5 = colors[4];
-        final String c6 = colors[5];
-        final String c7 = colors[6];
+        final String c1 = colors[COLOR_PRIMARY];
+        final String c2 = colors[STYLE_BOLD];
+        final String c3 = colors[COLOR_ERROR];
+        final String c4 = colors[STYLE_SECONDARY];
+        final String c5 = colors[COLOR_HIGHLIGHT];
+        final String c6 = colors[COLOR_DEFAULT];
+        final String c7 = colors[COLOR_VALUE];
 
         if (args.length != 2) {
             sender.sendMessage((sender instanceof Player ? TAG : CTAG) + "Please specify a player.");

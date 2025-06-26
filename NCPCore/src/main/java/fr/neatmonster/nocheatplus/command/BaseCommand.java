@@ -33,6 +33,15 @@ public abstract class BaseCommand extends AbstractCommand<JavaPlugin>{
     /** The prefix of every message sent by NoCheatPlus. */
     public static final String TAG = ChatColor.GRAY +""+ ChatColor.BOLD + "[" + ChatColor.RED + "NC+" + ChatColor.GRAY +""+ ChatColor.BOLD + "] " + ChatColor.GRAY;
     public static final String CTAG = "[NoCheatPlus] ";
+
+    /** Index constants for the color code array returned by {@link #getColorCodes(CommandSender)}. */
+    protected static final int COLOR_PRIMARY = 0;
+    protected static final int STYLE_BOLD = 1;
+    protected static final int COLOR_ERROR = 2;
+    protected static final int STYLE_SECONDARY = 3;
+    protected static final int COLOR_HIGHLIGHT = 4;
+    protected static final int COLOR_DEFAULT = 5;
+    protected static final int COLOR_VALUE = 6;
 	
 	public BaseCommand(JavaPlugin plugin, String label, RegisteredPermission permission){
 		this(plugin, label, permission, null);
