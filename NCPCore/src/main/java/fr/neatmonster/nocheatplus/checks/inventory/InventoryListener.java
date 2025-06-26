@@ -151,31 +151,33 @@ public class InventoryListener  extends CheckListener implements JoinLeaveListen
         if (event.getEntity() instanceof Player) {
 
             final Player player = (Player) event.getEntity();
-            final IPlayerData pData = DataManager.getPlayerData(player);
-            if (instantBow.isEnabled(player, pData)) {
-                final long now = System.currentTimeMillis();
-                final Location loc = player.getLocation(useLoc);
-                if (Combined.checkYawRate(player, loc.getYaw(), now, loc.getWorld().getName(), pData)) {
-                    // No else if with this, could be cancelled due to other checks feeding, does not have actions.
-                    event.setCancelled(true);
-                }
-
-                final InventoryConfig cc = pData.getGenericInstance(InventoryConfig.class);
-                // Still check instantBow, whatever yawrate says.
-                if (instantBow.check(player, event.getForce(), now)) {
-                    event.setCancelled(true);
-                }
-                else if (cc.instantBowImprobableWeight > 0.0f) {
-                    if (cc.instantBowImprobableFeedOnly) {
-                        Improbable.feed(player, cc.instantBowImprobableWeight, now);
-                    }
-                    else if (Improbable.check(player, cc.instantBowImprobableWeight, now, "inventory.instantbow", pData)) {
-                        // Combined fighting speed (Else if: Matter of taste, preventing extreme cascading and actions spam).
+            if (player != null) {
+                final IPlayerData pData = DataManager.getPlayerData(player);
+                if (instantBow.isEnabled(player, pData)) {
+                    final long now = System.currentTimeMillis();
+                    final Location loc = player.getLocation(useLoc);
+                    if (Combined.checkYawRate(player, loc.getYaw(), now, loc.getWorld().getName(), pData)) {
+                        // No else if with this, could be cancelled due to other checks feeding, does not have actions.
                         event.setCancelled(true);
                     }
+
+                    final InventoryConfig cc = pData.getGenericInstance(InventoryConfig.class);
+                    // Still check instantBow, whatever yawrate says.
+                    if (instantBow.check(player, event.getForce(), now)) {
+                        event.setCancelled(true);
+                    }
+                    else if (cc.instantBowImprobableWeight > 0.0f) {
+                        if (cc.instantBowImprobableFeedOnly) {
+                            Improbable.feed(player, cc.instantBowImprobableWeight, now);
+                        }
+                        else if (Improbable.check(player, cc.instantBowImprobableWeight, now, "inventory.instantbow", pData)) {
+                            // Combined fighting speed (Else if: Matter of taste, preventing extreme cascading and actions spam).
+                            event.setCancelled(true);
+                        }
+                    }
+                    useLoc.setWorld(null);
                 }
-                useLoc.setWorld(null);
-            }  
+            }
         }
     }
 
@@ -192,15 +194,17 @@ public class InventoryListener  extends CheckListener implements JoinLeaveListen
         // Only if a player ate food.
         if (event.getEntity() instanceof Player) {
             final Player player = (Player) event.getEntity();
-            final IPlayerData pData = DataManager.getPlayerData(player);
-            if (instantEat.isEnabled(player, pData) 
-                    && instantEat.check(player, event.getFoodLevel())) {
-                event.setCancelled(true);
-            }
-            else if (player.isDead() && BridgeHealth.getHealth(player) <= 0.0) {
-                // Eat after death.
-                event.setCancelled(true);
-                counters.addPrimaryThread(idCancelDead, 1);
+            if (player != null) {
+                final IPlayerData pData = DataManager.getPlayerData(player);
+                if (instantEat.isEnabled(player, pData)
+                        && instantEat.check(player, event.getFoodLevel())) {
+                    event.setCancelled(true);
+                }
+                else if (player.isDead() && BridgeHealth.getHealth(player) <= 0.0) {
+                    // Eat after death.
+                    event.setCancelled(true);
+                    counters.addPrimaryThread(idCancelDead, 1);
+                }
             }
         }
     }

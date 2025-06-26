@@ -30,6 +30,8 @@ import fr.neatmonster.nocheatplus.utilities.TickTask;
 public class InstantBow extends Check {
 
     private static final float maxTime = 800f;
+    /** Mutable holder to avoid repeated allocations. */
+    private final long[] pullDurationHolder = new long[1];
 
     /**
      * Instantiates a new instant bow check.
@@ -49,62 +51,86 @@ public class InstantBow extends Check {
      */
     public boolean check(final Player player, final float force, final long now) {
 
-        final IPlayerData pData = DataManager.getPlayerData(player);
-        final InventoryData data = pData.getGenericInstance(InventoryData.class);
-        final InventoryConfig cc = pData.getGenericInstance(InventoryConfig.class);
-
         boolean cancel = false;
+        if (player != null) {
+            final IPlayerData pData = DataManager.getPlayerData(player);
+            final InventoryData data = pData.getGenericInstance(InventoryData.class);
+            final InventoryConfig cc = pData.getGenericInstance(InventoryConfig.class);
 
-        // Rough estimation of how long pulling the string should've taken.
-        final long expectedPullDuration = (long) (maxTime - maxTime * (1f - force) * (1f - force)) - cc.instantBowDelay;
+            final long expectedPullDuration = computeExpectedPullDuration(force, cc);
+            final boolean valid = isValidBowPull(cc, data, now, pullDurationHolder);
+            final long pullDuration = pullDurationHolder[0];
 
-        // Time taken to pull the string.
-        final long pullDuration;
-        final boolean valid;
-        if (cc.instantBowStrict) {
-            // The interact time is invalid, if set to 0.
-            valid = data.instantBowInteract != 0; 
-            pullDuration = valid ? (now - data.instantBowInteract) : 0L;
-        } else {
-            valid = true;
-            pullDuration = now - data.instantBowShoot;
+            cancel = handlePullTiming(player, pData, cc, data,
+                    expectedPullDuration, valid, pullDuration, now);
+
+            debugOutput(player, pData, cc, force, pullDuration, expectedPullDuration);
+
+            data.instantBowInteract = 0;
+            data.instantBowShoot = now;
         }
-
-        if (valid && (!cc.instantBowStrict || data.instantBowInteract > 0L) && pullDuration >= expectedPullDuration) {
-            // The player was slow enough, reward them by lowering their violation level.
-            data.instantBowVL *= 0.9D;
-        }
-        else if (valid && data.instantBowInteract > now) {
-            // Security check if time ran backwards.
-            // Potentially removable as TickTask resets slightly later.
-        }
-        else {
-            // Account for server side lag.
-            // (Do not apply correction to invalid pulling.)
-            final long correctedPullduration = valid ? 
-                    (pData.getCurrentWorldData().shouldAdjustToLag(type)
-                            ? (long) (TickTask.getLag(expectedPullDuration, true) * pullDuration) 
-                            : pullDuration) : 0;
-            if (correctedPullduration < expectedPullDuration) {
-                // Consider allowing one fast shot but apply yawrate penalty timing.
-                final double difference = (expectedPullDuration - pullDuration) / 100D;
-
-                // Player was too fast, increase their violation level.
-                data.instantBowVL += difference;
-
-                // Execute whatever actions are associated with this check and the
-                // violation level and find out if we should cancel the event
-                cancel = executeActions(player, data.instantBowVL, difference, cc.instantBowActions).willCancel();
-            }
-        }
-
-        if (pData.isDebugActive(type) && pData.hasPermission(Permissions.ADMINISTRATION_DEBUG, player)) {
-            player.sendMessage(ChatColor.YELLOW + "NCP: " + ChatColor.GRAY + "Bow shot - force: " + force +", " + (cc.instantBowStrict || pullDuration < 2 * expectedPullDuration ? ("pull time: " + pullDuration) : "") + "(" + expectedPullDuration +")");
-        }
-
-        // Reset data here.
-        data.instantBowInteract = 0;
-        data.instantBowShoot = now;
         return cancel;
+    }
+
+    private long computeExpectedPullDuration(final float force, final InventoryConfig cc) {
+        return (long) (maxTime - maxTime * (1f - force) * (1f - force)) - cc.instantBowDelay;
+    }
+
+    private boolean isValidBowPull(final InventoryConfig cc, final InventoryData data,
+            final long now, final long[] durationHolder) {
+        if (cc.instantBowStrict) {
+            final boolean valid = data.instantBowInteract != 0;
+            durationHolder[0] = valid ? (now - data.instantBowInteract) : 0L;
+            return valid;
+        }
+        durationHolder[0] = now - data.instantBowShoot;
+        return true;
+    }
+
+    private boolean handlePullTiming(final Player player, final IPlayerData pData,
+            final InventoryConfig cc, final InventoryData data,
+            final long expectedPullDuration, final boolean valid,
+            final long pullDuration, final long now) {
+        if (valid && (!cc.instantBowStrict || data.instantBowInteract > 0L)
+                && pullDuration >= expectedPullDuration) {
+            data.instantBowVL *= 0.9D;
+            return false;
+        }
+        if (valid && data.instantBowInteract > now) {
+            return false;
+        }
+        return handleInstantBowViolation(player, pData, cc, data,
+                expectedPullDuration, valid, pullDuration);
+    }
+
+    private boolean handleInstantBowViolation(final Player player, final IPlayerData pData,
+            final InventoryConfig cc, final InventoryData data,
+            final long expectedPullDuration, final boolean valid,
+            final long pullDuration) {
+        final long correctedPullduration = valid
+                ? (pData.getCurrentWorldData().shouldAdjustToLag(type)
+                        ? (long) (TickTask.getLag(expectedPullDuration, true) * pullDuration)
+                        : pullDuration)
+                : 0;
+        if (correctedPullduration >= expectedPullDuration) {
+            return false;
+        }
+        final double difference = (expectedPullDuration - pullDuration) / 100D;
+        data.instantBowVL += difference;
+        return executeActions(player, data.instantBowVL, difference,
+                cc.instantBowActions).willCancel();
+    }
+
+    private void debugOutput(final Player player, final IPlayerData pData,
+            final InventoryConfig cc, final float force, final long pullDuration,
+            final long expectedPullDuration) {
+        if (pData.isDebugActive(type)
+                && pData.hasPermission(Permissions.ADMINISTRATION_DEBUG, player)) {
+            player.sendMessage(ChatColor.YELLOW + "NCP: " + ChatColor.GRAY +
+                    "Bow shot - force: " + force + ", " +
+                    (cc.instantBowStrict || pullDuration < 2 * expectedPullDuration
+                        ? ("pull time: " + pullDuration)
+                        : "") + "(" + expectedPullDuration + ")");
+        }
     }
 }
