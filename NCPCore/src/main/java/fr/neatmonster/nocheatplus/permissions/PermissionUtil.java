@@ -63,10 +63,8 @@ public class PermissionUtil {
             this.permissionMessage = permissionMessage;
         }
 
+        // Restore stored command parameters.
         public void restore() {
-            // (Don't skip resetting, as there could be fall-back aliases.)
-            //			Command registered = CommandUtil.getCommand(label);
-            //			if (registered == null || registered != command) return;
             if (!label.equalsIgnoreCase(command.getLabel().trim().toLowerCase())) {
                 command.setLabel(label);
             }

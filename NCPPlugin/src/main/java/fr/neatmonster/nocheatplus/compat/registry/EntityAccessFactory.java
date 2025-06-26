@@ -42,15 +42,7 @@ public class EntityAccessFactory {
      */
     public void setupEntityAccess(final MCAccess mcAccess, final MCAccessConfig config) {
 
-        // IEntityAccessLastPositionAndLook
-        //RegistryHelper.setupGenericInstance(new String[] {
-        //        "fr.neatmonster.nocheatplus.compat.cbdev.EntityAccessLastPositionAndLook",
-        //        "fr.neatmonster.nocheatplus.compat.spigotcb1_10_R1.EntityAccessLastPositionAndLook",
-        //        "fr.neatmonster.nocheatplus.compat.spigotcb1_9_R2.EntityAccessLastPositionAndLook",
-        //        "fr.neatmonster.nocheatplus.compat.spigotcb1_9_R1.EntityAccessLastPositionAndLook",
-        //}, new String[] {
-        //        "fr.neatmonster.nocheatplus.compat.cbreflect.reflect.ReflectEntityLastPositionAndLook",
-        //}, IEntityAccessLastPositionAndLook.class, config, false);
+        // Register implementation for IEntityAccessLastPositionAndLook if available.
 
         // IEntityAccessVehicle
         IEntityAccessVehicle vehicleAccess = EntityAccessVehicleMultiPassenger.createIfSupported();

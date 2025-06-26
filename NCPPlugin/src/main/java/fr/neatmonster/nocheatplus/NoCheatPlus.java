@@ -197,9 +197,6 @@ public class NoCheatPlus extends JavaPlugin implements NoCheatPlusAPI {
     /** Configuration problems (send to log files). */
     private String configProblemsFile = null;
 
-    //    /** Is a new update available? */
-    //    private boolean              updateAvailable = false;
-
     // Permission registry is currently global; per-world entries might be introduced later.
     private final PermissionRegistry permissionRegistry = new PermissionRegistry(10000);
     /** Per world data. */
@@ -1110,23 +1107,11 @@ public class NoCheatPlus extends JavaPlugin implements NoCheatPlusAPI {
         allViolationsHook.setConfig(new AllViolationsConfig(config));
         vlFrequencyHook.setConfig(new ViolationFrequencyConfig(config));
 
-        //        if (config.getBoolean(ConfPaths.MISCELLANEOUS_CHECKFORUPDATES)) {
-        //            // Is a new update available?
-        //            final int timeout = config.getInt(ConfPaths.MISCELLANEOUS_UPDATETIMEOUT, 4) * 1000;
-        //            getServer().getScheduler().scheduleAsyncDelayedTask(this, new Runnable() {
-        //                @Override
-        //                public void run() {
-        //                    updateAvailable = Updates.checkForUpdates(getDescription().getVersion(), timeout);
-        //                }
-        //            });
-        //        }
-
         // Log other notes.
         logOtherNotes(config);
 
         // Is the version the configuration was created with consistent with the current one?
         if (configProblemsFile != null && config.getBoolean(ConfPaths.CONFIGVERSION_NOTIFY)) {
-            // Could use custom prefix from logging, however ncp should be mentioned then.
             logManager.warning(Streams.INIT, "" + configProblemsFile);
         }
 
@@ -1409,8 +1394,6 @@ public class NoCheatPlus extends JavaPlugin implements NoCheatPlusAPI {
         if (data.hasPermission(Permissions.NOTIFY, player)) { // Updates the cache.
             // Login notifications...
             //            // Update available.
-            //            if (updateAvailable) player.sendMessage(ChatColor.RED + "NCP: " + ChatColor.WHITE + "A new update of NoCheatPlus is available.\n" + "Download it at http://nocheatplus.org/update");
-
             // Inconsistent config version.
             if (configProblemsChat != null && ConfigManager.getConfigFile().getBoolean(ConfPaths.CONFIGVERSION_NOTIFY)) {
                 // Could use custom prefix from logging, however ncp should be mentioned then.
