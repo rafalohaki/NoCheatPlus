@@ -57,7 +57,7 @@ public final class MovePreChecks {
                     || player.isFlying()) {
                 data.timeSprinting = time;
                 data.multSprinting = attributeAccess.getSprintAttributeMultiplier(player);
-                if (data.multSprinting == Double.MAX_VALUE) {
+                if (Double.isNaN(data.multSprinting)) {
                     data.multSprinting = 1.30000002;
                 } else if (cc.assumeSprint && data.multSprinting == 1.0) {
                     data.multSprinting = 1.30000002;
