@@ -134,10 +134,10 @@ public class BlockBreakListener extends CheckListener {
      * Validate the block for processing.
      *
      * @param block the block to validate
-     * @return {@code true} if the block is not null and not scaffolding
+     * @return {@code true} if the block is not scaffolding
      */
     private boolean isBlockValid(final Block block) {
-        return block != null && !BlockProperties.isScaffolding(block.getType());
+        return !BlockProperties.isScaffolding(block.getType());
     }
 
     /**
