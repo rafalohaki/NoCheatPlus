@@ -62,72 +62,120 @@ public class Against extends Check {
      * @param pData
      *
      */
-    public boolean check(final Player player, final Block block, final Material placedMat, 
-                         final Block blockAgainst, final boolean isInteractBlock, 
+    public boolean check(final Player player, final Block block, final Material placedMat,
+                         final Block blockAgainst, final boolean isInteractBlock,
                          final BlockPlaceData data, final BlockPlaceConfig cc, final IPlayerData pData) {
-        
+
         boolean violation = false;
-        final BlockInteractData bIData = pData.getGenericInstance(BlockInteractData.class); // Should eventually be passed as argument.
-        /** 
-         * Do not use this to check for cheating: Bukkit will return the placed material if the placement is not possible.
-         * i.e.: Attempting to place dirt against air will return DIRT, not air as against type.
-         */
-        final Material bukkitAgainst = blockAgainst.getType();
-        /** NoCheatPlus' tracked block last interacted with. */
-        final Material ncpAgainst = bIData.getLastType();
+        final BlockInteractData bIData = pData == null ? null : pData.getGenericInstance(BlockInteractData.class);
+        final Material bukkitAgainst = blockAgainst == null ? null : blockAgainst.getType();
+        final Material ncpAgainst = bIData == null ? null : bIData.getLastType();
 
-        if (pData.isDebugActive(this.type)) {
-            debug(player, "Placed " + placedMat.toString() + " against: " + bukkitAgainst +" (bukkit) / "+ (ncpAgainst == null ? "null" : ncpAgainst.toString()) + " (nc+)");
+        if (pData != null && pData.isDebugActive(this.type)) {
+            debug(player, "Placed " + placedMat + " against: " + bukkitAgainst + " (bukkit) / "
+                    + (ncpAgainst == null ? "null" : ncpAgainst.toString()) + " (nc+)");
         }
 
-        if (bIData.isConsumedCheck(this.type) && !bIData.isPassedCheck(this.type)) {
-            // Implement awareness of repeated violation here in the future.
+        if (handleConsumedCheck(player, bIData, pData)) {
             violation = true;
-            if (pData.isDebugActive(this.type)) {
-                debug(player, "Cancel due to block having been consumed by this check.");
-            }
+        } else if (handleInteractBlock(player, isInteractBlock, ncpAgainst, pData)) {
+            // nothing, allowed interact case
+        } else if (handleAirCase(player, placedMat, bukkitAgainst, ncpAgainst, pData)) {
+            violation = true;
+        } else if (handleLiquidCase(player, placedMat, block, ncpAgainst, pData)) {
+            violation = true;
         }
-        else if (isInteractBlock && !BlockProperties.isAir(ncpAgainst) && !BlockProperties.isLiquid(ncpAgainst)) {
-            if (pData.isDebugActive(this.type)) {
-                debug(player, "Block was placed against something, allow it.");
-            }
+
+        if (bIData != null) {
+            bIData.addConsumedCheck(this.type);
         }
-        else if (BlockProperties.isAir(ncpAgainst)) { // Holds true for null blocks.
-            if (MaterialUtil.isFarmable(placedMat) && MaterialUtil.isFarmable(bukkitAgainst)) {
-                // Server - client desync: place a seed/plant down -> fully grow it with bone meal -> quickly harvest/break it while also trying to place down the next seed/plant (possibly with both hands to further speed up the process)
-                // Sometimes, the client sends a block placement packet which seemingly attempts to plant the seed down on the crop instead of the farmland.
-                // This isn't possible, so NCP's lastType check won't register the last interacted block (= AIR, remember), resulting in a false positive.
-                if (pData.isDebugActive(this.type)) {
-                    debug(player, "Ignore player attempting to place a seed/plant on a crop/plant (assume desync due to fast-farming).");        
-                }
-            }
-            else if (!pData.hasPermission(Permissions.BLOCKPLACE_AGAINST_AIR, player)
-                     && placedMat != BridgeMaterial.LILY_PAD
-                     && placedMat != BridgeMaterial.FROGSPAWN) {
-                violation = true;
-                // Attempted to place a block against a null one (air)
-            }
-        }
-        else if (BlockProperties.isLiquid(ncpAgainst)) {
-            if (((placedMat != BridgeMaterial.LILY_PAD && placedMat != BridgeMaterial.FROGSPAWN) || !BlockProperties.isLiquid(block.getRelative(BlockFace.DOWN).getType()))
-                && !BlockProperties.isWaterPlant(ncpAgainst)
-                && !pData.hasPermission(Permissions.BLOCKPLACE_AGAINST_LIQUIDS, player)) {
-                violation = true;
-            }
-        }
-        
-        // Handle violation and return.
-        bIData.addConsumedCheck(this.type);
         if (violation) {
             data.againstVL += 1.0;
             final ViolationData vd = new ViolationData(this, player, data.againstVL, 1, cc.againstActions);
             vd.setParameter(ParameterName.BLOCK_TYPE, ncpAgainst == null ? "air" : ncpAgainst.toString());
             return executeActions(vd).willCancel();
-        }
-        else {
+        } else {
             data.againstVL *= 0.99; // Assume one false positive every 100 blocks.
-            bIData.addPassedCheck(this.type);
+            if (bIData != null) {
+                bIData.addPassedCheck(this.type);
+            }
             return false;
         }
+    }
+
+    private boolean handleConsumedCheck(final Player player, final BlockInteractData bIData, final IPlayerData pData) {
+        if (player == null || pData == null || bIData == null) {
+            return false;
+        }
+        if (pData.hasBypass(this.type, player) || pData.isExempted(this.type)) {
+            return false;
+        }
+        if (bIData.isConsumedCheck(this.type) && !bIData.isPassedCheck(this.type)) {
+            if (pData.isDebugActive(this.type)) {
+                debug(player, "Cancel due to block having been consumed by this check.");
+            }
+            return true;
+        }
+        return false;
+    }
+
+    private boolean handleInteractBlock(final Player player, final boolean isInteractBlock,
+            final Material ncpAgainst, final IPlayerData pData) {
+        if (player == null || pData == null) {
+            return false;
+        }
+        if (pData.hasBypass(this.type, player) || pData.isExempted(this.type)) {
+            return false;
+        }
+        if (isInteractBlock && !BlockProperties.isAir(ncpAgainst) && !BlockProperties.isLiquid(ncpAgainst)) {
+            if (pData.isDebugActive(this.type)) {
+                debug(player, "Block was placed against something, allow it.");
+            }
+            return true;
+        }
+        return false;
+    }
+
+    private boolean handleAirCase(final Player player, final Material placedMat, final Material bukkitAgainst,
+            final Material ncpAgainst, final IPlayerData pData) {
+        if (player == null || pData == null) {
+            return false;
+        }
+        if (pData.hasBypass(this.type, player) || pData.isExempted(this.type)) {
+            return false;
+        }
+        if (BlockProperties.isAir(ncpAgainst)) {
+            if (MaterialUtil.isFarmable(placedMat) && MaterialUtil.isFarmable(bukkitAgainst)) {
+                if (pData.isDebugActive(this.type)) {
+                    debug(player,
+                            "Ignore player attempting to place a seed/plant on a crop/plant (assume desync due to fast-farming).");
+                }
+                return false;
+            }
+            return !pData.hasPermission(Permissions.BLOCKPLACE_AGAINST_AIR, player)
+                    && placedMat != BridgeMaterial.LILY_PAD
+                    && placedMat != BridgeMaterial.FROGSPAWN;
+        }
+        return false;
+    }
+
+    private boolean handleLiquidCase(final Player player, final Material placedMat, final Block block,
+            final Material ncpAgainst, final IPlayerData pData) {
+        if (player == null || pData == null) {
+            return false;
+        }
+        if (pData.hasBypass(this.type, player) || pData.isExempted(this.type)) {
+            return false;
+        }
+        if (BlockProperties.isLiquid(ncpAgainst)) {
+            final boolean lilyPadOrFrog = placedMat != BridgeMaterial.LILY_PAD || placedMat != BridgeMaterial.FROGSPAWN;
+            final boolean blockBelowLiquid = block != null && BlockProperties.isLiquid(block.getRelative(BlockFace.DOWN).getType());
+            if ((lilyPadOrFrog || !blockBelowLiquid)
+                    && !BlockProperties.isWaterPlant(ncpAgainst)
+                    && !pData.hasPermission(Permissions.BLOCKPLACE_AGAINST_LIQUIDS, player)) {
+                return true;
+            }
+        }
+        return false;
     }
 }
