@@ -65,18 +65,9 @@ public class RemovePlayerCommand extends BaseCommand {
             return true;
         }
         String playerName = args[1];
-        final CheckType checkType;
-
-        if (args.length == 3){
-            checkType = parseCheckType(args[2]);
-            if (checkType == null){
-                sender.sendMessage((sender instanceof Player ? TAG : CTAG) + "Could not interpret: " + args[2]);
-                sender.sendMessage((sender instanceof Player ? TAG : CTAG) + "Check type should be one of: " + StringUtil.join(Arrays.asList(CheckType.values()), c6 + ", " + c3));
-                return true;
-            }
-        }
-        else {
-            checkType = CheckType.ALL;
+        final CheckType checkType = parseCheckType(args.length == 3 ? args[2] : null, sender);
+        if (checkType == null) {
+            return true;
         }
 
         if (playerName.equals("*")){
@@ -116,13 +107,24 @@ public class RemovePlayerCommand extends BaseCommand {
     /**
      * Parse the check type argument.
      *
-     * @param arg the argument to parse
+     * @param input the argument to parse, or {@code null} for {@link CheckType#ALL}
+     * @param sender the command sender
      * @return the matching {@link CheckType} or {@code null} if not found
      */
-    private CheckType parseCheckType(String arg) {
+    private CheckType parseCheckType(String input, CommandSender sender) {
+        if (input == null) {
+            return CheckType.ALL;
+        }
         try {
-            return CheckType.valueOf(arg.toUpperCase().replace('-', '_').replace('.', '_'));
+            return CheckType.valueOf(input.toUpperCase().replace('-', '_').replace('.', '_'));
         } catch (Exception e) {
+            final boolean player = sender instanceof Player;
+            final String tag = player ? TAG : CTAG;
+            final String c3 = player ? ChatColor.RED.toString() : "";
+            final String c6 = player ? ChatColor.WHITE.toString() : "";
+            sender.sendMessage(tag + "Could not interpret: " + c3 + input);
+            sender.sendMessage(tag + "Check type should be one of: " + c3
+                    + StringUtil.join(Arrays.asList(CheckType.values()), c6 + ", " + c3));
             return null;
         }
     }
