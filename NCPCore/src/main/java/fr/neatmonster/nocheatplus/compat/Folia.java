@@ -112,7 +112,9 @@ public class Folia {
             Object taskInfo = executeMethod.invoke(syncScheduler, plugin, run, delay, period);
             return taskInfo;
         } catch (Exception e) {
-            e.printStackTrace();
+            LogManager logManager = NCPAPIProvider.getNoCheatPlusAPI().getLogManager();
+            logManager.warning(Streams.STATUS, "Failed to schedule repeating task: " + e.getClass().getSimpleName());
+            logManager.warning(Streams.STATUS, e);
         }
         return null;
     }
@@ -145,7 +147,9 @@ public class Folia {
             Object taskInfo = executeMethod.invoke(syncScheduler, plugin, run);
             return taskInfo;
         } catch (Exception e) {
-            e.printStackTrace();
+            LogManager logManager = NCPAPIProvider.getNoCheatPlusAPI().getLogManager();
+            logManager.warning(Streams.STATUS, "Failed to schedule task: " + e.getClass().getSimpleName());
+            logManager.warning(Streams.STATUS, e);
         }
         return null;
     }
@@ -269,7 +273,9 @@ public class Folia {
                 //executeMethod = schedulerClass.getMethod("cancelTasks", Plugin.class);
                 //executeMethod.invoke(asyncScheduler, plugin);
             } catch (Exception e) {
-                e.printStackTrace();
+                LogManager logManager = NCPAPIProvider.getNoCheatPlusAPI().getLogManager();
+                logManager.warning(Streams.STATUS, "Failed to cancel tasks: " + e.getClass().getSimpleName());
+                logManager.warning(Streams.STATUS, e);
             }
         }
     }
@@ -284,7 +290,9 @@ public class Folia {
             CompletableFuture<Boolean> res = (CompletableFuture<Boolean>) result;
             return res.join();
         } catch (Exception e) {
-            e.printStackTrace();
+            LogManager logManager = NCPAPIProvider.getNoCheatPlusAPI().getLogManager();
+            logManager.warning(Streams.STATUS, "Failed to teleport entity: " + e.getClass().getSimpleName());
+            logManager.warning(Streams.STATUS, e);
         }
         return false;
     }

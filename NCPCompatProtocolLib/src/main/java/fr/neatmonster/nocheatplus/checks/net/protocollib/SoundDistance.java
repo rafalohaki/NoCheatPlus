@@ -37,6 +37,9 @@ import fr.neatmonster.nocheatplus.compat.versions.ServerVersion;
 import fr.neatmonster.nocheatplus.players.DataManager;
 import fr.neatmonster.nocheatplus.players.IPlayerData;
 import fr.neatmonster.nocheatplus.utilities.location.TrigUtil;
+import fr.neatmonster.nocheatplus.NCPAPIProvider;
+import fr.neatmonster.nocheatplus.logging.LogManager;
+import fr.neatmonster.nocheatplus.logging.Streams;
 
 public class SoundDistance extends BaseAdapter {
 
@@ -183,7 +186,9 @@ public class SoundDistance extends BaseAdapter {
         try {
             handleSoundPacket(event);
         } catch(Throwable t) {
-            t.printStackTrace();
+            LogManager logManager = NCPAPIProvider.getNoCheatPlusAPI().getLogManager();
+            logManager.warning(Streams.STATUS, "Unexpected error handling sound packet: " + t.getClass().getSimpleName());
+            logManager.warning(Streams.STATUS, t);
             ProtocolLibComponent.unregister(this);
         }
     }
