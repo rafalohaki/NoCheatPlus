@@ -61,6 +61,7 @@ public class DefaultConfig extends ConfigFile {
         set(ConfPaths.LOGGING_EXTENDED_ALLVIOLATIONS_DEBUGONLY, false, 785);
         set(ConfPaths.LOGGING_EXTENDED_ALLVIOLATIONS_BACKEND_TRACE, false, 785);
         set(ConfPaths.LOGGING_EXTENDED_ALLVIOLATIONS_BACKEND_NOTIFY, false, 785);
+        set(ConfPaths.LOGGING_EXTENDED_ELYTRABOOST, false, 785);
         set(ConfPaths.LOGGING_BACKEND_CONSOLE_ACTIVE, true, 785);
         set(ConfPaths.LOGGING_BACKEND_CONSOLE_ASYNCHRONOUS, true, 785);
         set(ConfPaths.LOGGING_BACKEND_FILE_ACTIVE, true, 785);

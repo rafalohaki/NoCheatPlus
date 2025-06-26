@@ -106,6 +106,7 @@ public abstract class ConfPaths {
     public static final String  LOGGING_EXTENDED_ALLVIOLATIONS_DEBUGONLY = LOGGING_EXTENDED_ALLVIOLATIONS + "debugonly";
     private static final String LOGGING_EXTENDED_ALLVIOLATIONS_BACKEND   = LOGGING_EXTENDED_ALLVIOLATIONS + "backend.";
     public static final String  LOGGING_EXTENDED_ALLVIOLATIONS_BACKEND_TRACE     = LOGGING_EXTENDED_ALLVIOLATIONS_BACKEND + "trace";
+    public static final String  LOGGING_EXTENDED_ELYTRABOOST = LOGGING_EXTENDED + "elytraboost";
     public static final String  LOGGING_EXTENDED_ALLVIOLATIONS_BACKEND_NOTIFY    = LOGGING_EXTENDED_ALLVIOLATIONS_BACKEND + "notify";
 
     @GlobalConfig
