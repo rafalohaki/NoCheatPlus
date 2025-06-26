@@ -204,7 +204,8 @@ public class BasicLockable implements ILockable {
             throw new UnsupportedOperationException();
         }
         if (!furtherLockingRestrictions(null, false)) {
-            throw new IllegalStateException();
+            throw new IllegalStateException("Lock failed: restrictions disallow locking (locked="
+                    + isLocked + ")");
         }
         isLocked = true;
         // Change to permanently locked.
@@ -248,7 +249,7 @@ public class BasicLockable implements ILockable {
     @Override
     public void throwIfLocked() {
         if (isLocked) {
-            throw new IllegalStateException();
+            throw new IllegalStateException("Lock failed: object is locked (locked=" + isLocked + ")");
         }
     }
 

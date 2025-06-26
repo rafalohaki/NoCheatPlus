@@ -393,7 +393,8 @@ public class HashMapLOW <K, V> {
         @Override
         public void remove() {
             if (lastReturnedKey == null) {
-                throw new IllegalStateException();
+                throw new IllegalStateException(
+                        "Lock failed: no current entry to remove (lastReturnedKey is null)");
             }
             map.remove(lastReturnedKey); // Cannot work: need to invalidate entry otherwise
             lastReturnedKey = null;
