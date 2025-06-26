@@ -29,6 +29,7 @@ import fr.neatmonster.nocheatplus.worlds.WorldFactoryArgument;
  * @author asofold
  *
  * @param <T>
+ *            Data type to register.
  */
 public class RegisterDataWorld<T extends IData> extends RegisterInstanceWorld<T> {
 
