@@ -70,6 +70,8 @@ import fr.neatmonster.nocheatplus.components.registry.feature.JoinLeaveListener;
 import fr.neatmonster.nocheatplus.players.DataManager;
 import fr.neatmonster.nocheatplus.players.IPlayerData;
 import fr.neatmonster.nocheatplus.stats.Counters;
+import fr.neatmonster.nocheatplus.permissions.Permissions;
+import fr.neatmonster.nocheatplus.logging.Streams;
 import fr.neatmonster.nocheatplus.utilities.InventoryUtil;
 import fr.neatmonster.nocheatplus.utilities.ReflectionUtil;
 import fr.neatmonster.nocheatplus.utilities.map.BlockProperties;
@@ -216,15 +218,21 @@ public class InventoryListener  extends CheckListener implements JoinLeaveListen
      *            the event
      */
     @EventHandler(ignoreCancelled = true, priority = EventPriority.LOWEST)
-    
+
     public void onInventoryClick(final InventoryClickEvent event) {
         final HumanEntity entity = event.getWhoClicked();
-        if (entity instanceof Player) {
-            final Player player = (Player) entity;
-            final IPlayerData pData = DataManager.getPlayerData(player);
-            if (pData.isCheckActive(CheckType.INVENTORY, player)) {
-                handleInventoryClick(event, player, pData);
-            }
+        if (!(entity instanceof Player)) {
+            return;
+        }
+        final Player player = (Player) entity;
+        final IPlayerData pData = DataManager.getPlayerData(player);
+        if (!hasInventoryAccess(pData, player)) {
+            event.setCancelled(true);
+            warnInventoryAccessDenied(player);
+            return;
+        }
+        if (pData.isCheckActive(CheckType.INVENTORY, player)) {
+            handleInventoryClick(event, player, pData);
         }
     }
     private void handleInventoryClick(final InventoryClickEvent event, final Player player, final IPlayerData pData) {
@@ -330,6 +338,17 @@ public class InventoryListener  extends CheckListener implements JoinLeaveListen
         data.lastClickTime = now;
         if (data.firstClickTime == 0) {
             data.firstClickTime = now;
+        }
+    }
+
+    private boolean hasInventoryAccess(final IPlayerData pData, final Player player) {
+        return pData != null && player != null && pData.hasPermission(Permissions.INVENTORY_ACCESS, player);
+    }
+
+    private void warnInventoryAccessDenied(final Player player) {
+        if (player != null) {
+            NCPAPIProvider.getNoCheatPlusAPI().getLogManager()
+                    .warning(Streams.STATUS, "Inventory click blocked for " + player.getName());
         }
     }
    /** 

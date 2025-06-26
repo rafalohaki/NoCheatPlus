@@ -439,7 +439,11 @@ permissions:
         children:
             nocheatplus.bypass.denylogin:
                 description: Bypass the login denial, such as exists with the ncp denylogin command.
-    
+
+    nocheatplus.inventory.access:
+        description: Permission required to interact with inventories.
+        default: true
+
     # Various shortcuts:
     nocheatplus.shortcut:
         description: 'Shortcut permissions designed to be somewhat "safe" to give (see children permissions).'

@@ -159,6 +159,7 @@ public class Permissions {
     public static final RegisteredPermission  INVENTORY_MOREINVENTORY      = add(INVENTORY + ".moreinventory");
     public static final RegisteredPermission  INVENTORY_ITEMS              = add(INVENTORY + ".items");
     public static final RegisteredPermission  INVENTORY_OPEN               = add(INVENTORY + ".open");
+    public static final RegisteredPermission  INVENTORY_ACCESS             = add(NOCHEATPLUS + ".inventory.access");
 
     public static final RegisteredPermission  NET                          = add(CHECKS + ".net");
     public static final RegisteredPermission  NET_ATTACKFREQUENCY          = add(NET + ".attackfrequency");
