@@ -18,6 +18,8 @@ import java.util.Collections;
 import java.util.LinkedList;
 import java.util.List;
 import java.util.Map;
+import java.util.concurrent.atomic.AtomicLong;
+import java.util.concurrent.atomic.AtomicReference;
 
 import org.bukkit.entity.Player;
 
@@ -49,8 +51,8 @@ public class Text extends Check implements INotifyReload {
     private String lastCancelledMessage = "";
     private long lastCancelledTime = 0;
 
-    private String lastGlobalMessage = "";
-    private long lastGlobalTime = 0;
+    private final AtomicReference<String> lastGlobalMessage = new AtomicReference<>("");
+    private final AtomicLong lastGlobalTime = new AtomicLong(0L);
 
     public Text() {
         super(CheckType.CHAT_TEXT);
@@ -165,8 +167,10 @@ public class Text extends Check implements INotifyReload {
             debugParts.clear();
         }
 
-        lastGlobalMessage = data.chatLastMessage = lcMessage;
-        lastGlobalTime = data.chatLastTime = time;
+        data.chatLastMessage = lcMessage;
+        data.chatLastTime = time;
+        lastGlobalMessage.set(lcMessage);
+        lastGlobalTime.set(time);
 
         return cancel;
     }
@@ -221,9 +225,11 @@ public class Text extends Check implements INotifyReload {
                 score += cc.textMsgRepeatSelf * timeWeight;
             }
         }
-        if (cc.textMsgRepeatGlobal != 0f && time - lastGlobalTime < timeout) {
-            if (StringUtil.isSimilar(lcMessage, lastGlobalMessage, 0.8f)) {
-                final float timeWeight = (float) (timeout - (time - lastGlobalTime)) / (float) timeout;
+        if (cc.textMsgRepeatGlobal != 0f) {
+            final long gTime = lastGlobalTime.get();
+            final String gMessage = lastGlobalMessage.get();
+            if (time - gTime < timeout && StringUtil.isSimilar(lcMessage, gMessage, 0.8f)) {
+                final float timeWeight = (float) (timeout - (time - gTime)) / (float) timeout;
                 score += cc.textMsgRepeatGlobal * timeWeight;
             }
         }
