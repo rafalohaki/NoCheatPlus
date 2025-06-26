@@ -18,12 +18,9 @@ import java.util.LinkedList;
 import java.util.List;
 
 import org.bukkit.Material;
-import org.bukkit.entity.Boat;
 import org.bukkit.entity.Entity;
 import org.bukkit.entity.EntityType;
 import org.bukkit.entity.LivingEntity;
-import org.bukkit.entity.Minecart;
-import org.bukkit.entity.Pig;
 import org.bukkit.entity.Player;
 import org.bukkit.potion.PotionEffectType;
 
@@ -558,25 +555,8 @@ public class VehicleEnvelope extends Check {
         checkDetails.reset();
         setBasicMediumState(thisMove);
 
-        if (vehicle != null) {
-            if (MaterialUtil.isBoat(vehicle.getType())) {
-                applyBoatSettings();
-            } else if (vehicle instanceof Minecart) {
-                applyMinecartSettings(moveInfo, thisMove);
-            } else if (isHorse(vehicle)) {
-                applyHorseSettings();
-            } else if (isStrider(vehicle)) {
-                applyStriderSettings(thisMove);
-            } else if (isCamel(vehicle)) {
-                applyCamelSettings();
-            } else if (vehicle instanceof Pig) {
-                applyPigSettings();
-            } else {
-                checkDetails.simplifiedType = thisMove.vehicleType;
-            }
-        } else {
-            checkDetails.simplifiedType = thisMove.vehicleType;
-        }
+        VehicleBehavior.fromEntity(vehicle, this)
+                .apply(this, vehicle, moveInfo, thisMove);
 
         applyJumpSettings();
         applyClimbSettings(thisMove);
@@ -588,12 +568,12 @@ public class VehicleEnvelope extends Check {
         checkDetails.inAir = !checkDetails.fromIsSafeMedium && !checkDetails.toIsSafeMedium;
     }
 
-    private void applyBoatSettings() {
+    void applyBoatSettings() {
         checkDetails.simplifiedType = EntityType.BOAT;
         checkDetails.maxAscend = MagicVehicle.maxAscend;
     }
 
-    private void applyMinecartSettings(final VehicleMoveInfo moveInfo, final VehicleMoveData thisMove) {
+    void applyMinecartSettings(final VehicleMoveInfo moveInfo, final VehicleMoveData thisMove) {
         checkDetails.simplifiedType = EntityType.MINECART;
         checkDetails.canRails = true;
         thisMove.setExtraMinecartProperties(moveInfo); // Cheating.
@@ -608,13 +588,13 @@ public class VehicleEnvelope extends Check {
         checkDetails.gravityTargetSpeed = 0.79;
     }
 
-    private void applyHorseSettings() {
+    void applyHorseSettings() {
         checkDetails.simplifiedType = EntityType.HORSE; // Consider using AbstractHorse from 1.11 onward.
         checkDetails.canJump = true;
         checkDetails.canStepUpBlock = true;
     }
 
-    private void applyStriderSettings(final VehicleMoveData thisMove) {
+    void applyStriderSettings(final VehicleMoveData thisMove) {
         checkDetails.canJump = false;
         checkDetails.canStepUpBlock = true;
         checkDetails.canClimb = true;
@@ -627,18 +607,22 @@ public class VehicleEnvelope extends Check {
         }
     }
 
-    private void applyCamelSettings() {
+    void applyCamelSettings() {
         checkDetails.simplifiedType = EntityType.CAMEL;
         checkDetails.canStepUpBlock = true;
         checkDetails.canClimb = false;
         checkDetails.canJump = false;
     }
 
-    private void applyPigSettings() {
+    void applyPigSettings() {
         checkDetails.simplifiedType = EntityType.PIG;
         checkDetails.canJump = false;
         checkDetails.canStepUpBlock = true;
         checkDetails.canClimb = true;
+    }
+
+    void useGenericSettings(final EntityType type) {
+        checkDetails.simplifiedType = type;
     }
 
     private void applyJumpSettings() {
@@ -660,15 +644,15 @@ public class VehicleEnvelope extends Check {
         }
     }
 
-    private boolean isHorse(final Entity vehicle) {
+    boolean isHorse(final Entity vehicle) {
         return bestHorse != null && bestHorse.isAssignableFrom(vehicle.getClass());
     }
 
-    private boolean isStrider(final Entity vehicle) {
+    boolean isStrider(final Entity vehicle) {
         return strider != null && strider.isAssignableFrom(vehicle.getClass());
     }
 
-    private boolean isCamel(final Entity vehicle) {
+    boolean isCamel(final Entity vehicle) {
         return camel != null && camel.isAssignableFrom(vehicle.getClass());
     }
 
