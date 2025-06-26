@@ -106,11 +106,13 @@ public class NetStatic {
         int empty = 0;
         boolean used = false;
         for (burnStart = 1; burnStart < winNum; burnStart ++) {
-            if (packetFreq.bucketScore(burnStart) > 0f) {
+            final float bucket = packetFreq.bucketScore(burnStart);
+            if (bucket > 0f) {
                 // Evaluate whether burnStart should increment for partially filled windows.
                 if (used) {
                     for (int j = burnStart; j < winNum; j ++) {
-                        if (packetFreq.bucketScore(j) == 0f) {
+                        final float bucketJ = packetFreq.bucketScore(j);
+                        if (bucketJ == 0f) {
                             empty += 1;
                         }
                     }

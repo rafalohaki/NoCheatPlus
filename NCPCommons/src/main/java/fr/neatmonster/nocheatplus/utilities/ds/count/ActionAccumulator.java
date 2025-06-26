@@ -65,7 +65,8 @@ public class ActionAccumulator {
      */
     public float score() {
         float score = 0;
-        for (float bucket : buckets) {
+        final float[] localBuckets = this.buckets;
+        for (float bucket : localBuckets) {
             score += bucket;
         }
         return score;
@@ -77,7 +78,8 @@ public class ActionAccumulator {
      */
     public int count() {
         int count = 0;
-        for (int j : counts) {
+        final int[] localCounts = this.counts;
+        for (int j : localCounts) {
             count += j;
         }
         return count;
@@ -88,9 +90,11 @@ public class ActionAccumulator {
      * @return 
      */
     public void clear() {
-        for (int i = 0; i < buckets.length; i++) {
-            counts[i] = 0;
-            buckets[i] = 0;
+        final int[] localCounts = this.counts;
+        final float[] localBuckets = this.buckets;
+        for (int i = 0; i < localBuckets.length; i++) {
+            localCounts[i] = 0;
+            localBuckets[i] = 0;
         }
     }
     
@@ -123,10 +127,12 @@ public class ActionAccumulator {
      * @return
      */
     public String toInformalString() {
-        StringBuilder b = new StringBuilder(buckets.length * 10);
+        final float[] localBuckets = this.buckets;
+        final int[] localCounts = this.counts;
+        StringBuilder b = new StringBuilder(localBuckets.length * 10);
         b.append("|");
-        for (int i = 0; i < buckets.length; i++){
-            b.append(StringUtil.fdec3.format(buckets[i]) + "/" + counts[i] + "|");
+        for (int i = 0; i < localBuckets.length; i++){
+            b.append(StringUtil.fdec3.format(localBuckets[i]) + "/" + localCounts[i] + "|");
         }
         return b.toString();
     }
