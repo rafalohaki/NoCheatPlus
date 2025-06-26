@@ -20,6 +20,8 @@ import java.util.LinkedList;
 import java.util.List;
 import java.util.Set;
 
+import org.bukkit.permissions.PermissionAttachment;
+
 import org.bukkit.Bukkit;
 import org.bukkit.command.Command;
 import org.bukkit.permissions.Permission;
@@ -47,6 +49,7 @@ public class PermissionUtil {
         public final String permission;
         public final PermissionDefault permissionDefault;
         public final  String permissionMessage;
+        public final PermissionAttachment attachment;
         /**
          *
          * @param command
@@ -54,13 +57,15 @@ public class PermissionUtil {
          * @param permission
          * @param permissionDefault
          * @param permissionMessage
+         * @param attachment permission attachment added for the command, may be null
          */
-        public CommandProtectionEntry(Command command, String label, String permission, PermissionDefault permissionDefault, String permissionMessage) {
+        public CommandProtectionEntry(Command command, String label, String permission, PermissionDefault permissionDefault, String permissionMessage, PermissionAttachment attachment) {
             this.command = command;
             this.label = label;
             this.permission = permission;
             this.permissionDefault = permissionDefault;
             this.permissionMessage = permissionMessage;
+            this.attachment = attachment;
         }
 
         public void restore() {
@@ -78,6 +83,9 @@ public class PermissionUtil {
                 }
             }
             command.setPermissionMessage(permissionMessage);
+            if (attachment != null) {
+                attachment.remove();
+            }
         }
     }
 
@@ -159,18 +167,21 @@ public class PermissionUtil {
                 } // else: permission was present, but not registered.
                 pm.addPermission(cmdPerm);
             }
+            final PermissionDefault oldDefault = permRegistered ? cmdPerm.getDefault() : null;
+            final String oldMessage = command.getPermissionMessage();
+            cmdPerm.setDefault(ops ? PermissionDefault.OP : PermissionDefault.FALSE);
+            PermissionAttachment attachment = null;
+            if (!ops) {
+                attachment = Bukkit.getServer().getConsoleSender().addAttachment(plugin, cmdPermName, true);
+            }
+            command.setPermissionMessage(permissionMessage);
             // Create change history entry.
             if (cmdHadPerm && permRegistered) {
-                changed.add(new CommandProtectionEntry(command, lcLabel, cmdPermName, cmdPerm.getDefault(), command.getPermissionMessage()));
-            }
-            else {
+                changed.add(new CommandProtectionEntry(command, lcLabel, cmdPermName, oldDefault, oldMessage, attachment));
+            } else {
                 // (New Permission instances will not be touched on restore.)
-                changed.add(new CommandProtectionEntry(command, lcLabel, null, null, command.getPermissionMessage()));
+                changed.add(new CommandProtectionEntry(command, lcLabel, null, null, oldMessage, attachment));
             }
-            // Change 
-            cmdPerm.setDefault(ops ? PermissionDefault.OP : PermissionDefault.FALSE);
-            if (!ops) Bukkit.getServer().getConsoleSender().addAttachment(plugin, cmdPermName, true);
-            command.setPermissionMessage(permissionMessage);
         }
         return changed;
     }

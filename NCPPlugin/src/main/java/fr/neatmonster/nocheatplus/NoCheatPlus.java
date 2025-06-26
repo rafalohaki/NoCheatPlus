@@ -877,7 +877,11 @@ public class NoCheatPlus extends JavaPlugin implements NoCheatPlusAPI {
         if (!changedCommands.isEmpty()) {
             final Iterator<CommandProtectionEntry> it = changedCommands.descendingIterator();
             while (it.hasNext()) {
-                it.next().restore();
+                CommandProtectionEntry entry = it.next();
+                entry.restore();
+                if (entry.attachment != null) {
+                    entry.attachment.remove();
+                }
             }
             changedCommands.clear();
         }
