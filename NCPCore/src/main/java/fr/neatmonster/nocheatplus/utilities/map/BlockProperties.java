@@ -88,7 +88,13 @@ public class BlockProperties {
      * The Enum ToolType.
      *
      * @author asofold
-     * @deprecated Will be replaced by a generic way to define tools.
+     * @deprecated Will be replaced by the new
+     *             {@code ToolDefinition} concept provided by the history
+     *             service. Removal planned for version 2.0.
+     *             <p>
+     *             Migration: create a {@code ToolDefinition} via the history
+     *             service and use it when resolving block interactions.
+     *             </p>
      */
     public static enum ToolType {
         /** The none. */
@@ -111,7 +117,13 @@ public class BlockProperties {
      * The Enum MaterialBase.
      *
      * @author asofold
-     * @deprecated Will be replaced by a generic way to define tools.
+     * @deprecated Will be replaced by {@code ToolDefinition} from the history
+     *             service. Scheduled for removal in 2.0.
+     *             <p>
+     *             Migration: obtain material properties from the history
+     *             service and refer to {@code ToolDefinition} instead of this
+     *             enum.
+     *             </p>
      */
     public static enum MaterialBase {
         /** The none. */
@@ -154,7 +166,12 @@ public class BlockProperties {
          * @param id
          *            the id
          * @return the by id
-         * @deprecated Nothing to do with ids.
+         * @deprecated Nothing to do with ids. Use the history service to obtain
+         *             material bases. Removal planned for version 2.0.
+         *             <p>
+         *             Migration: call
+         *             {@code HistoryService#getMaterialBaseById(int)} instead.
+         *             </p>
          */
         @Deprecated
         public static final MaterialBase getById(final int id) {
@@ -181,7 +198,13 @@ public class BlockProperties {
     /**
      * Properties of a tool.
      * 
-     * @deprecated Will be replaced by a generic way to define tools.
+     * @deprecated Will be replaced by {@code ToolDefinition}. Scheduled for
+     *             removal in 2.0.
+     *             <p>
+     *             Migration: transition your code to use
+     *             {@code ToolDefinition} objects fetched from the history
+     *             service.
+     *             </p>
      */
     public static class ToolProps {
         
@@ -227,7 +250,12 @@ public class BlockProperties {
     /**
      * Properties of a block.
      * 
-     * @deprecated Will be replaced by a generic way to define tools.
+     * @deprecated Will be replaced by the {@code BlockDefinition} API in the
+     *             history service. Will be removed in version 2.0.
+     *             <p>
+     *             Migration: use {@code BlockDefinition} from the history
+     *             service instead of this class.
+     *             </p>
      */
     public static class BlockProps{
 
@@ -1540,10 +1568,16 @@ public class BlockProperties {
      * @param inWater
      * @param aquaAffinity
      * @param efficiency
-     * @return
-     * @deprecated Public method not containing haste, fatigue.
+     * @return the breaking duration
+     * @deprecated Public method not containing haste, fatigue. Use
+     *             {@link fr.neatmonster.nocheatplus.history.HistoryService#getBreakingDuration(Material, BlockProps, ToolProps, boolean, boolean, boolean, int, int, int, int)}
+     *             instead. Removal scheduled for 2.0.
+     *             <p>
+     *             Migration: call the history service method providing haste,
+     *             fatigue and other modifiers as needed.
+     *             </p>
      */
-    public static long getBreakingDuration(final Material blockId, final BlockProps blockProps, final ToolProps toolProps, 
+    public static long getBreakingDuration(final Material blockId, final BlockProps blockProps, final ToolProps toolProps,
                                            final  boolean onGround, final boolean inWater, boolean aquaAffinity, int efficiency) {
         return getBreakingDuration(blockId, blockProps, toolProps, onGround, inWater, aquaAffinity, efficiency, 0, 0, 0);
     }

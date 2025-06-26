@@ -118,7 +118,13 @@ public class Folia {
     }
 
     /**
-     * @deprecated Use {@link #runSyncRepeatingTask(Plugin, Consumer, long, long)} instead.
+     * @deprecated Use
+     *             {@link #runSyncRepeatingTask(Plugin, Consumer, long, long)}
+     *             instead. Removal scheduled for version 2.0.
+     *             <p>
+     *             Migration: replace invocations of this method with
+     *             {@code runSyncRepeatingTask}.
+     *             </p>
      */
     @Deprecated
     public static Object runSyncRepatingTask(Plugin plugin, Consumer<Object> run, long delay, long period) {

@@ -28,11 +28,17 @@ import fr.neatmonster.nocheatplus.checks.access.IViolationInfo;
  */
 public abstract class AbstractNCPHook implements NCPHook {
     /**
-     * 
-     * @deprecated See new signature in NCPHook.
+     *
+     * @deprecated See new signature in {@link NCPHook}. This bridge method will
+     *             be removed with version 2.0.
+     *             <p>
+     *             Migration: implement the new
+     *             {@code onCheckFailure(CheckType, Player, ViolationInfo)}
+     *             method defined in {@code NCPHook}.
+     *             </p>
      * @param checkType
      * @param player
-     * @return
+     * @return {@code false} by default
      */
     public boolean onCheckFailure(CheckType checkType, Player player){
         // Implemented because of API change.
