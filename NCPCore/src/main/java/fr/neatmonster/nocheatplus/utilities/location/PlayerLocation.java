@@ -179,8 +179,13 @@ public class PlayerLocation extends RichEntityLocation {
      * Check absolute coordinates and stance for (typical) exploits.
      *
      * @return true, if is illegal
-     * @deprecated Not used anymore (hasIllegalCoords and hasIllegalStance are
-     *             used individually instead).
+     * @deprecated Replaced by individual checks
+     *             {@link #hasIllegalCoords()} and {@link #hasIllegalStance()}.
+     *             This method will be removed in version 2.0.
+     *             <p>
+     *             Migration: call {@code hasIllegalCoords()} and/or
+     *             {@code hasIllegalStance()} depending on the desired check.
+     *             </p>
      */
     public boolean isIllegal() {
         if (hasIllegalCoords()) {
