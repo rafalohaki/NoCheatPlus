@@ -683,14 +683,7 @@ private static boolean oddLiquid(final double yDistance, final double yDistDiffE
                                               final double maxJumpGain, double vAllowedDistance, 
                                               final Player player, final PlayerMoveData thisMove) {
 
-        if (data.fireworksBoostDuration > 0 
-            && data.keepfrictiontick < 0 && lastMove.toIsValid) {
-            data.keepfrictiontick = 0;
-            return true;
-            // Early return: transition from CreativeFly to SurvivalFly having been in a gliding phase.
-        }
-
-        return 
+        final boolean allow =
                 // 0: Allow jumping less high, unless within "strict envelope". 4
                 (!strictVdistRel || Math.abs(yDistDiffEx) <= Magic.GRAVITY_SPAN || vAllowedDistance <= 0.2)
                 && data.ws.use(WRPT.W_M_SF_SHORTMOVE_1)
@@ -705,12 +698,20 @@ private static boolean oddLiquid(final double yDistance, final double yDistDiffE
                 // 0: Allow too strong decrease
                 || thisMove.yDistance < 1.0 && thisMove.yDistance > 0.9 
                 && lastMove.yDistance >= 1.5 && data.sfJumpPhase <= 2
-                && lastMove.verVelUsed != null 
+                && lastMove.verVelUsed != null
                 && (lastMove.verVelUsed.flags & (VelocityFlags.ORIGIN_BLOCK_MOVE | VelocityFlags.ORIGIN_BLOCK_BOUNCE)) != 0
                 && data.ws.use(WRPT.W_M_SF_SHORTMOVE_4)
         ;
-        
+
+        if (!allow && isFireworkBoostTransition(data, lastMove, yDistance)) {
+            data.keepfrictiontick = 0;
+            return true;
+        }
+
+        return allow;
+
     }
+
 
 
     /**
