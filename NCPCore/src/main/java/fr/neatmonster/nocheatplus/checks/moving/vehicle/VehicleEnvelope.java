@@ -207,23 +207,24 @@ public class VehicleEnvelope extends Check {
     * @param type
     * @param cc
     * @param thisMove
-    * @param data
-    *
-    */
-    private double getHDistCap(final EntityType type, final MovingConfig cc, final VehicleMoveData thisMove, final MovingData data) {
+     * @param data
+     * @param debug whether debug logging is active
+     */
+    private double getHDistCap(final EntityType type, final MovingConfig cc, final VehicleMoveData thisMove,
+                               final MovingData data, final boolean debug) {
 
         final Double cap = cc.vehicleEnvelopeHorizontalSpeedCap.get(type);
         final Double globalcap = cc.vehicleEnvelopeHorizontalSpeedCap.get(null);
 
         if (cap == null) {
             if(MaterialUtil.isBoat(type)){
-                return getHDistCapBoats(thisMove,data,1.0,globalcap);
+                return getHDistCapBoats(thisMove, data, 1.0, globalcap, debug);
             }
             return globalcap;
         }
         else {
             if(MaterialUtil.isBoat(type)) {
-                return getHDistCapBoats(thisMove,data,cap,globalcap);
+                return getHDistCapBoats(thisMove, data, cap, globalcap, debug);
             }
             return cap;
         }
@@ -233,17 +234,20 @@ public class VehicleEnvelope extends Check {
      * @param thisMove
      * @param data
      * @param multiplier
-     *
+     * @param debug whether debug logging is active
      */
     private double getHDistCapBoats(final VehicleMoveData thisMove, final MovingData data,
-                                    final double multiplier, final double globalcap) {
+                                    final double multiplier, final double globalcap,
+                                    final boolean debug) {
         updateBoatIceVelocityTicks(thisMove, data);
 
         final double terrainMultiplier = calcBoatTerrainMultiplier(thisMove, data, multiplier);
         if (!Double.isNaN(terrainMultiplier)) {
             return terrainMultiplier;
         }
-
+        if (debug) {
+            debugDetails.add("No terrain multiplier applied");
+        }
         return multiplier == 1.0 ? globalcap : multiplier;
     }
 
@@ -313,7 +317,7 @@ public class VehicleEnvelope extends Check {
             data.timeVehicletoss = System.currentTimeMillis();
         }
 
-        violation |= checkHorizontalSpeed(vehicle, thisMove, data, cc);
+        violation |= checkHorizontalSpeed(vehicle, thisMove, data, cc, debug);
         violation |= evaluateMediumState(thisMove, data, debug, vehicle, moveInfo);
 
         if (applyLevitationModifier(vehicle)) {
@@ -344,10 +348,20 @@ public class VehicleEnvelope extends Check {
         return violation;
     }
 
+    /**
+     * Check horizontal movement speed limits.
+     *
+     * @param vehicle    the vehicle being moved
+     * @param thisMove   current vehicle movement data
+     * @param data       cached moving data
+     * @param cc         moving configuration
+     * @param debug      whether debug logging is active
+     */
     private boolean checkHorizontalSpeed(final Entity vehicle, final VehicleMoveData thisMove,
-                                         final MovingData data, final MovingConfig cc) {
+                                         final MovingData data, final MovingConfig cc,
+                                         final boolean debug) {
         boolean violation = false;
-        double cap = getHDistCap(checkDetails.simplifiedType, cc, thisMove, data);
+        double cap = getHDistCap(checkDetails.simplifiedType, cc, thisMove, data, debug);
         if (vehicle instanceof LivingEntity) {
             Double speed = PotionUtil.getPotionEffectAmplifier((LivingEntity) vehicle, PotionEffectType.SPEED);
             if (camel != null && camel.isAssignableFrom(vehicle.getClass())) {
