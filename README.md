@@ -51,6 +51,8 @@ Links
 ###### Developers
 * [License (GPLv3)](https://github.com/Updated-NoCheatPlus/NoCheatPlus/blob/master/LICENSE.txt)
 * [API](https://github.com/Updated-NoCheatPlus/Docs/blob/master/Development/API.md)
+* When switching `BlockCache` implementations, call `setBlockCache(null)` or
+  invoke `cleanup()` on the previous instance to avoid memory leaks.
 * [Contribute](https://github.com/Updated-NoCheatPlus/NoCheatPlus/blob/master/CONTRIBUTING.md)
 
 ###### Related Plugins

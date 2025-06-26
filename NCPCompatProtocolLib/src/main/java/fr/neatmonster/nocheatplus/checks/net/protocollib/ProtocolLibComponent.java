@@ -68,12 +68,13 @@ public class ProtocolLibComponent implements IDisableListener, INotifyReload, Jo
 
     /**
      * Auxiliary method for suppressing exceptions.
-     * 
+     *
      * @param protocol
      * @param sender
      * @param name
      *            PacketType if available, null otherwise.
-     * @return
+     * @return The matching {@link PacketType} or {@code null} if none is
+     *         found.
      */
     public static PacketType findPacketTypeByName(Protocol protocol, Sender sender, String name) {
         try {

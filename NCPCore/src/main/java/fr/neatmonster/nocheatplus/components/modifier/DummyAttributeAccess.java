@@ -26,12 +26,12 @@ public class DummyAttributeAccess implements IAttributeAccess {
 
     @Override
     public double getSpeedAttributeMultiplier(Player player) {
-        return Double.MAX_VALUE;
+        return ATTRIBUTE_UNAVAILABLE;
     }
 
     @Override
     public double getSprintAttributeMultiplier(Player player) {
-        return Double.MAX_VALUE;
+        return ATTRIBUTE_UNAVAILABLE;
     }
 
 }

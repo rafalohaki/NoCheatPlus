@@ -36,6 +36,8 @@ import org.bukkit.block.BlockFace;
 import org.bukkit.block.data.BlockData;
 import org.bukkit.block.data.Waterlogged;
 import org.bukkit.block.data.type.BubbleColumn;
+
+import fr.neatmonster.nocheatplus.utilities.InventoryUtil;
 import org.bukkit.configuration.ConfigurationSection;
 import org.bukkit.entity.Player;
 import org.bukkit.inventory.ItemStack;
@@ -83,6 +85,9 @@ public class BlockProperties {
 
     /** Tolerance for floating point comparisons. */
     private static final double EPSILON = 1.0E-6;
+
+    /** Cached Material values from InventoryUtil. */
+    private static final Material[] ALL_MATERIALS = InventoryUtil.ALL_MATERIALS;
 
     /**
      * The Enum ToolType.
@@ -1133,7 +1138,7 @@ public class BlockProperties {
         // Initialize block flags                           //
         //////////////////////////////////////////////////////
         // Generic initialization.
-        for (Material mat : Material.values()) {
+        for (Material mat : ALL_MATERIALS) {
             BlockFlags.blockFlags.put(mat, 0L);
             if (mcAccess.isBlockLiquid(mat).decide()) {
                 // NOTE: do not set BlockFlags.F_GROUND for liquids ?
@@ -1255,7 +1260,7 @@ public class BlockProperties {
             allBlocks.add("--- Present entries -------------------------------");
         }
         List<String> tags = new ArrayList<String>();
-        for (Material temp : Material.values()) {
+        for (Material temp : ALL_MATERIALS) {
             String mat;
             try {
                 if (!temp.isBlock()) {
@@ -3472,6 +3477,10 @@ public class BlockProperties {
             bmaxY = b[4];
         }
 
+        if (bmaxY > 1.0) {
+            bmaxY = 1.0;
+        }
+
         // Fake bounds for thin-glass and similar oddities.
         if ((flags & BlockFlags.F_FAKEBOUNDS) != 0) {
             double dz = bmaxZ - bminZ;
@@ -3538,9 +3547,13 @@ public class BlockProperties {
         }
         // Start at index 1 since index 0 represents the primary box.
         for (int i = 1; i < rawBounds.length / 6; i++) {
+            double capMaxY = rawBounds[i * 6 + 4];
+            if (capMaxY > 1.0) {
+                capMaxY = 1.0;
+            }
             BoundingBox sub = new BoundingBox(
                     rawBounds[i*6],     rawBounds[i*6+1], rawBounds[i*6+2],
-                    rawBounds[i*6+3],   rawBounds[i*6+4], rawBounds[i*6+5]);
+                    rawBounds[i*6+3],   capMaxY, rawBounds[i*6+5]);
             if (sub.intersects(minX, minY, minZ, maxX, maxY, maxZ, x, y, z, allowEdge)) {
                 return true;
             }
@@ -4444,7 +4457,7 @@ public class BlockProperties {
         for (final Material mat : MaterialUtil.RAILS) {
             BlockFlags.setFlag(mat, BlockFlags.F_RAILS);
         }
-        for (Material material : Material.values()) {
+        for (Material material : ALL_MATERIALS) {
             if (material.isBlock()) {
                 final String name = material.name().toLowerCase();
                 if (name.endsWith("_door") || name.endsWith("_trapdoor") || name.endsWith("fence_gate")) {

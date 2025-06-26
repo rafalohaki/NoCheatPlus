@@ -878,7 +878,13 @@ public class CollisionUtil {
     }
 
     private static int getStep(double value) {
-        return value > 0 ? 1 : value < 0 ? -1 : 0;
+        if (value > 0) {
+            return 1;
+        } else if (value < 0) {
+            return -1;
+        } else {
+            return 0;
+        }
     }
 
     private static AxisContext prepareAxisContext(RichAxisData axisData, int stepX, int stepY, int stepZ) {

@@ -77,6 +77,13 @@ public class RawConfigFile  extends YamlConfiguration {
     // Not static.
     ////////////////
 
+    /**
+     * Cache of material names encountered during configuration loading. The
+     * key is the prepared, upper-case name as used by
+     * {@link #prepareMatchMaterial(String)}.
+     */
+    private final Map<String, Material> materialLookup = new HashMap<>();
+
     /** Meta data: The build number of the last significant change of a value. */
     protected final Map<String, Integer> lastChangedBuildNumbers = new HashMap<String, Integer>();
 
@@ -179,13 +186,19 @@ public class RawConfigFile  extends YamlConfiguration {
      */
     public void readMaterialFromList(final String path, final Collection<Material> target) {
         final List<String> content = getStringList(path);
-        if (content == null || content.isEmpty()) return;
-        for (final String entry : content){
-            final Material mat = parseMaterial(entry);
-            if (mat == null){
-                StaticLog.logWarning("Bad material entry (" + path +"): " + entry);
+        if (content == null || content.isEmpty()) {
+            return;
+        }
+        for (final String entry : content) {
+            final String key = prepareMatchMaterial(entry.trim().toUpperCase());
+            Material mat = materialLookup.get(key);
+            if (!materialLookup.containsKey(key)) {
+                mat = parseMaterial(entry);
+                materialLookup.put(key, mat);
             }
-            else{
+            if (mat == null) {
+                StaticLog.logWarning("Bad material entry (" + path + "): " + entry);
+            } else {
                 target.add(mat);
             }
         }

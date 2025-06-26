@@ -23,6 +23,7 @@ import fr.neatmonster.nocheatplus.components.registry.GenericInstanceRegistry;
  * @author asofold
  *
  * @param <T>
+ *            Type of the registered instance.
  */
 public class GenericInstanceHandle<T> implements IGenericInstanceRegistryListener<T>, IGenericInstanceHandle<T> {
 
@@ -35,6 +36,7 @@ public class GenericInstanceHandle<T> implements IGenericInstanceRegistryListene
      * @author asofold
      *
      * @param <T>
+     *            Type of the registered instance.
      */
     public static class ParentDelegateHandle<T> implements IGenericInstanceHandle<T> {
 
@@ -75,6 +77,7 @@ public class GenericInstanceHandle<T> implements IGenericInstanceRegistryListene
      * @author asofold
      *
      * @param <T>
+     *            Type of the registered instance.
      */
     public static class ReferenceCountHandle<T> extends GenericInstanceHandle<T> {
 

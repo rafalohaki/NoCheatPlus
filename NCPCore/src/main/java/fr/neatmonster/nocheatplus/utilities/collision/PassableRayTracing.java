@@ -33,8 +33,20 @@ public class PassableRayTracing extends RayTracing implements ICollidePassable {
         return blockCache;
     }
 
+    /**
+     * Set the block cache to use for ray tracing.
+     * <p>
+     * If another cache was previously set, it will be {@link BlockCache#cleanup()}
+     * before the new cache is assigned to avoid leaking stale references.
+     * </p>
+     *
+     * @param blockCache the new block cache, may be {@code null}
+     */
     @Override
     public void setBlockCache(BlockCache blockCache) {
+        if (this.blockCache != null && this.blockCache != blockCache) {
+            this.blockCache.cleanup();
+        }
         this.blockCache = blockCache;
     }
 

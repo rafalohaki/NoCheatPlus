@@ -86,6 +86,7 @@ public class MagicBunny {
         final double baseSpeed = thisMove.hAllowedDistanceBase;
         final boolean headObstructed = thisMove.headObstructed || lastMove.headObstructed && lastMove.toIsValid;
         /** Catch-all multiplier for all those cases where bunnyhop activation can happen at lower accelerations.*/
+        // speedAmplifier is NEGATIVE_INFINITY when the speed effect is absent.
         final boolean needLowerMultiplier = Magic.wasOnIceRecently(data) || Magic.wasOnBouncyBlockRecently(data) || headObstructed || !Double.isInfinite(speedAmplifier);
         final PlayerMoveData pastMove2 = data.playerMoves.getSecondPastMove();
         final PlayerMoveData pastMove3 = data.playerMoves.getThirdPastMove();

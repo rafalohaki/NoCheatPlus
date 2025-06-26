@@ -98,7 +98,7 @@ public class RegistrationOrder {
         } else if (p2 == null) {
             return 1; // o2 to front.
         } else {
-            return p1.compareTo(p2);
+            return p2.compareTo(p1); // Higher priority (numerically bigger) first.
         }
     };
 
@@ -237,7 +237,7 @@ public class RegistrationOrder {
         }
 
         /**
-         * Sort, reverse and then add the subList to the output via
+         * Sort and then add the subList to the output via
          * sortInFromStart.
          * 
          * @param subList
@@ -245,7 +245,6 @@ public class RegistrationOrder {
          */
         private void addSortedSubList(final List<F> subList, final F[] output, int insertionIndex) {
             subList.sort(cmp);
-            Collections.reverse(subList);
             for (final F item : subList) {
                 sortInFromStart(item, output, insertionIndex);
                 insertionIndex --;
