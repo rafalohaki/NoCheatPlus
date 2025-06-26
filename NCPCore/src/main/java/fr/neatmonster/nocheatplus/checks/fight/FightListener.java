@@ -137,6 +137,9 @@ public class FightListener extends CheckListener implements JoinLeaveListener{
     // Assume it to stay the same all time.
     private final IGenericInstanceHandle<IBridgeCrossPlugin> crossPlugin = NCPAPIProvider.getNoCheatPlusAPI().getGenericInstanceHandle(IBridgeCrossPlugin.class);
 
+    /** Maximum age of attack data (ticks). */
+    private static final int MAX_COMBAT_TICK_GAP = 20;
+
     @SuppressWarnings("unchecked")
     public FightListener() {
         super(CheckType.FIGHT);
@@ -374,7 +377,7 @@ public class FightListener extends CheckListener implements JoinLeaveListener{
             return new TargetMoveInfo(0, 0.0, 0, 0.0);
         }
         if (data.lastAttackedX == Double.MAX_VALUE || tick < data.lastAttackTick
-                || worldChanged || tick - data.lastAttackTick > 20) {
+                || worldChanged || tick - data.lastAttackTick > MAX_COMBAT_TICK_GAP) {
             return new TargetMoveInfo(0, 0.0, 0, 0.0);
         }
         final int age = tick - data.lastAttackTick;
