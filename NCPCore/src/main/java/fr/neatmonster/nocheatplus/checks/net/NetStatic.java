@@ -80,6 +80,19 @@ public class NetStatic {
         return Math.max(0.0, violation);
     }
 
+    /**
+     * Smooth packet bursts after shifting the sliding window.
+     *
+     * <p>This redistributes overflow in the first bucket across following
+     * buckets to keep overall packet counts consistent.</p>
+     *
+     * @param packetFreq The packet frequency structure to adjust.
+     * @param tDiff Time since the last update in milliseconds.
+     * @param winDur Duration of a single bucket in the sliding window.
+     * @param winNum Number of buckets in the sliding window.
+     * @param totalDur Combined duration of all buckets.
+     * @param maxPackets Maximum allowed packets per bucket.
+     */
     private static void relaxBurstBuckets(final ActionFrequency packetFreq, final long tDiff,
             final long winDur, final int winNum, final long totalDur, final float maxPackets) {
         if (tDiff >= winDur && tDiff < totalDur) {
@@ -104,6 +117,23 @@ public class NetStatic {
         }
     }
 
+    /**
+     * Compute violation levels for general packet spam and burst patterns.
+     *
+     * @param packetFreq Packet frequency data.
+     * @param winDur Duration of a bucket in milliseconds.
+     * @param winNum Number of buckets in the window.
+     * @param totalDur Total window duration in milliseconds.
+     * @param idealPackets Ideal packets per second used to fill gaps.
+     * @param maxPackets Allowed packets per second before a violation occurs.
+     * @param burstFreq Rolling frequency for detected bursts.
+     * @param burstPackets Packet count considered a burst in the first bucket.
+     * @param burstDirect Direct burst threshold.
+     * @param burstEPM Allowed bursts per minute.
+     * @param time Current timestamp used for updating burstFreq.
+     * @param tags Collection to record violation tags.
+     * @return Calculated violation amount, may be negative.
+     */
     private static double calculateViolation(final ActionFrequency packetFreq, final long winDur,
             final int winNum, final long totalDur, final float idealPackets, final float maxPackets,
             final ActionFrequency burstFreq, final float burstPackets, final double burstDirect,
