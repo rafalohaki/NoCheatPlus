@@ -75,63 +75,90 @@ public class InventoryMove extends Check {
 
         boolean cancel = false;
         boolean violation = false;
-        List<String> tags = new LinkedList<String>();
+        final List<String> tags = new LinkedList<String>();
 
-        if (player != null && data != null && pData != null && cc != null) {
-            // NOTES: 1) NoCheatPlus provides a base speed at which players can move without taking into account any mechanic:
-            //        the idea is that if the base speed does not equal to the finally allowed speed then the player is being moved by friction or other means.
-            //        2) Important: MC allows players to swim (and keep the status) when on ground, but this is not *consistently* reflected back to the server
-            //        (while still allowing them to move at swimming speed) instead, isSprinting() will return. Observed in both Spigot and PaperMC around MC 1.13/14
-            //        -> Seems fixed in latest versions (opening an inventory will end the swimming phase, if on ground)
-            // Shortcuts:
-            final MovingData mData = pData.getGenericInstance(MovingData.class);
-            final PlayerMoveData thisMove = mData.playerMoves.getCurrentMove();
-            final PlayerMoveData lastMove = mData.playerMoves.getFirstPastMove();
-            final PlayerMoveData pastMove3 = mData.playerMoves.getThirdPastMove();
-            final boolean fullLiquidMove = thisMove.from.inLiquid && thisMove.to.inLiquid;
-            final long currentEvent = System.currentTimeMillis();
-            final boolean isCollidingWithEntities = CollisionUtil.isCollidingWithEntities(player, true) && ServerVersion.compareMinecraftVersion("1.9") >= 0;
-            final double minHDistance = thisMove.hAllowedDistanceBase / Math.max(1.1, cc.invMoveHdistDivisor); // Just in case admins input a too low value.
-            final boolean creative = player.getGameMode() == GameMode.CREATIVE && ((type == SlotType.QUICKBAR) || cc.invMoveDisableCreative);
-            final boolean isMerchant = player.getOpenInventory() != null
-                    && player.getOpenInventory().getTopInventory() != null
-                    && player.getOpenInventory().getTopInventory().getType() == InventoryType.MERCHANT;
-            final boolean movingOnSurface = (thisMove.from.inLiquid && !thisMove.to.inLiquid || mData.surfaceId == 1) && mData.liftOffEnvelope.name().startsWith("LIMIT");
-
-            // Debug first.
+        final MoveContext context = createContext(player, data, pData, cc, type);
+        if (context != null) {
             if (pData.isDebugActive(CheckType.INVENTORY_INVENTORYMOVE)) {
-                player.sendMessage("\nyDistance= " + StringUtil.fdec3.format(thisMove.yDistance)
-                    + "\nhDistance= " + StringUtil.fdec3.format(thisMove.hDistance)
-                    + "\nhDistMin(" + cc.invMoveHdistDivisor + ")=" + StringUtil.fdec3.format(minHDistance)
-                    + "\nhAllowedDistance= " + StringUtil.fdec3.format(thisMove.hAllowedDistance)
-                    + "\nhAllowedDistanceBase= " + StringUtil.fdec3.format(thisMove.hAllowedDistanceBase)
-                    + "\ntouchedGround= " + thisMove.touchedGround + "(" + (thisMove.from.onGround ? "ground -> " : "---- -> ") + (thisMove.to.onGround ? "ground" : "----") + ")"
-                    + "\nmovingOnSurface=" + movingOnSurface + " fullLiquidMove= " + fullLiquidMove
-                );
+                sendDebugMessage(player, cc, context);
             }
 
-    
             final boolean[] cancelHolder = new boolean[1];
 
-            violation = determineViolation(player, data, cc, pData, mData, thisMove, lastMove,
-                    pastMove3, minHDistance, currentEvent, isCollidingWithEntities,
-                    fullLiquidMove, movingOnSurface, isMerchant, tags, cancelHolder);
+            violation = determineViolation(player, data, cc, pData, context.mData, context.thisMove, context.lastMove,
+                    context.pastMove3, context.minHDistance, context.currentEvent, context.isCollidingWithEntities,
+                    context.fullLiquidMove, context.movingOnSurface, context.isMerchant, tags, cancelHolder);
 
             cancel = cancelHolder[0];
-    
-        // Handle violations 
-        if (violation && !creative) {
-            data.invMoveVL += 1D;
-            final ViolationData vd = new ViolationData(this, player, data.invMoveVL, 1D, cc.invMoveActionList);
-            if (vd.needsParameters()) vd.setParameter(ParameterName.TAGS, StringUtil.join(tags, "+"));
-            cancel = executeActions(vd).willCancel();
-        }
-        // Cooldown
-        else {
-            data.invMoveVL *= 0.96D;
-        }
+
+            if (violation && !context.creative) {
+                data.invMoveVL += 1D;
+                final ViolationData vd = new ViolationData(this, player, data.invMoveVL, 1D, cc.invMoveActionList);
+                if (vd.needsParameters()) {
+                    vd.setParameter(ParameterName.TAGS, StringUtil.join(tags, "+"));
+                }
+                cancel = executeActions(vd).willCancel();
+            } else {
+                data.invMoveVL *= 0.96D;
+            }
         }
         return cancel;
+    }
+
+    private static final class MoveContext {
+        MovingData mData;
+        PlayerMoveData thisMove;
+        PlayerMoveData lastMove;
+        PlayerMoveData pastMove3;
+        boolean fullLiquidMove;
+        long currentEvent;
+        boolean isCollidingWithEntities;
+        double minHDistance;
+        boolean creative;
+        boolean isMerchant;
+        boolean movingOnSurface;
+    }
+
+    private MoveContext createContext(final Player player, final InventoryData data, final IPlayerData pData,
+            final InventoryConfig cc, final SlotType type) {
+        if (player == null || data == null || pData == null || cc == null) {
+            return null;
+        }
+
+        final MoveContext context = new MoveContext();
+        context.mData = pData.getGenericInstance(MovingData.class);
+        context.thisMove = context.mData.playerMoves.getCurrentMove();
+        context.lastMove = context.mData.playerMoves.getFirstPastMove();
+        context.pastMove3 = context.mData.playerMoves.getThirdPastMove();
+        context.fullLiquidMove = context.thisMove.from.inLiquid && context.thisMove.to.inLiquid;
+        context.currentEvent = System.currentTimeMillis();
+        context.isCollidingWithEntities = CollisionUtil.isCollidingWithEntities(player, true)
+                && ServerVersion.compareMinecraftVersion("1.9") >= 0;
+        context.minHDistance = context.thisMove.hAllowedDistanceBase / Math.max(1.1, cc.invMoveHdistDivisor);
+        context.creative = player.getGameMode() == GameMode.CREATIVE
+                && ((type == SlotType.QUICKBAR) || cc.invMoveDisableCreative);
+        context.isMerchant = player.getOpenInventory() != null
+                && player.getOpenInventory().getTopInventory() != null
+                && player.getOpenInventory().getTopInventory().getType() == InventoryType.MERCHANT;
+        context.movingOnSurface = (context.thisMove.from.inLiquid && !context.thisMove.to.inLiquid
+                || context.mData.surfaceId == 1) && context.mData.liftOffEnvelope.name().startsWith("LIMIT");
+
+        return context;
+    }
+
+    private void sendDebugMessage(final Player player, final InventoryConfig cc, final MoveContext context) {
+        if (player == null || cc == null || context == null) {
+            return;
+        }
+        player.sendMessage("\nyDistance= " + StringUtil.fdec3.format(context.thisMove.yDistance)
+                + "\nhDistance= " + StringUtil.fdec3.format(context.thisMove.hDistance)
+                + "\nhDistMin(" + cc.invMoveHdistDivisor + ")=" + StringUtil.fdec3.format(context.minHDistance)
+                + "\nhAllowedDistance= " + StringUtil.fdec3.format(context.thisMove.hAllowedDistance)
+                + "\nhAllowedDistanceBase= " + StringUtil.fdec3.format(context.thisMove.hAllowedDistanceBase)
+                + "\ntouchedGround= " + context.thisMove.touchedGround + "("
+                + (context.thisMove.from.onGround ? "ground -> " : "---- -> ")
+                + (context.thisMove.to.onGround ? "ground" : "----") + ")"
+                + "\nmovingOnSurface=" + context.movingOnSurface + " fullLiquidMove= " + context.fullLiquidMove);
     }
 
     private boolean determineViolation(final Player player, final InventoryData data, final InventoryConfig cc,
