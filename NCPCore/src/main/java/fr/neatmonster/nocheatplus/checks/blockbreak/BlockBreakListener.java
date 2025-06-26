@@ -300,8 +300,7 @@ public class BlockBreakListener extends CheckListener {
 
     private void finalizeBreak(final BlockBreakEvent event, final Player player, final Block block,
             final IPlayerData pData, final BreakCheckResult result, final long now) {
-        final BlockBreakData data = result.data != null ? result.data
-                : pData.getGenericInstance(BlockBreakData.class);
+        final BlockBreakData data = result.data;
         if (result.cancelled) {
             event.setCancelled(true);
             data.clickedX = block.getX();
