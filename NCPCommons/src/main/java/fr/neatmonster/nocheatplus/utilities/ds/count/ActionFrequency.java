@@ -140,7 +140,13 @@ public class ActionFrequency {
     }
 
     /**
-     * @deprecated Use instead: score(float).
+     * @deprecated Use {@link fr.neatmonster.nocheatplus.history.HistoryService#score(float)}
+     *             instead. Scheduled for removal in version 2.0.
+     *             <p>
+     *             Migration: obtain the {@code HistoryService} from the
+     *             {@code NCPAPIProvider} and invoke {@code score(float)} with the
+     *             same parameters.
+     *             </p>
      * @param factor
      * @return
      */
@@ -149,7 +155,12 @@ public class ActionFrequency {
     }
 
     /**
-     * @deprecated Use instead: score(float).
+     * @deprecated Use {@link fr.neatmonster.nocheatplus.history.HistoryService#score(float)}
+     *             instead. Scheduled for removal in version 2.0.
+     *             <p>
+     *             Migration: obtain the {@code HistoryService} and call
+     *             {@code bucketScore(int)} if direct bucket access is required.
+     *             </p>
      * @param factor
      * @return
      */

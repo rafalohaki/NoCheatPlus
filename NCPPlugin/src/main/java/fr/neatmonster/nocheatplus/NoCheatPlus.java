@@ -178,8 +178,15 @@ public class NoCheatPlus extends JavaPlugin implements NoCheatPlusAPI {
 
     /**
      * Convenience method.
-     * @deprecated Use fr.neatmonster.nocheatplus.utilities.NCPAPIProvider.getNoCheatPlusAPI() instead, this method might get removed.
-     * @return
+     *
+     * @deprecated Use
+     *             {@link fr.neatmonster.nocheatplus.utilities.NCPAPIProvider#getNoCheatPlusAPI()}
+     *             instead. Scheduled for removal in version 2.0.
+     *             <p>
+     *             Migration: replace calls to this method with
+     *             {@code NCPAPIProvider.getNoCheatPlusAPI()}.
+     *             </p>
+     * @return the API instance
      */
     public static NoCheatPlusAPI getAPI() {
         return NCPAPIProvider.getNoCheatPlusAPI();
@@ -875,7 +882,11 @@ public class NoCheatPlus extends JavaPlugin implements NoCheatPlusAPI {
      * 
      * @deprecated Leads to compatibility issues with NPC plugins such as
      *             Citizens 2, due to recalculation of permissions (specifically
-     *             during disabling).
+     *             during disabling). This helper will be removed in version 2.0.
+     *             <p>
+     *             Migration: avoid calling this method and rely on the command
+     *             state stored by the history service instead.
+     *             </p>
      */
     public void undoCommandChanges() {
         if (!changedCommands.isEmpty()) {

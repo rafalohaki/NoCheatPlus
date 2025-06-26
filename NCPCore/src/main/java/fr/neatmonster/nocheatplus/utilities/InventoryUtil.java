@@ -59,6 +59,9 @@ public class InventoryUtil {
             getAll("chest", "ender_chest", "dispenser", "dropper", "hopper", "barrel", "shulker_box", "chiseled_bookshelf")
             );
 
+    /** Cached array of all Material values to avoid repeated allocation. */
+    public static final Material[] ALL_MATERIALS = Material.values();
+
     public static Set<InventoryType> getAll(String... names) {
         final LinkedHashSet<InventoryType> res = new LinkedHashSet<InventoryType>();
         for (final String name : names) {
@@ -78,7 +81,7 @@ public class InventoryUtil {
     public static List<Material> collectItemsBySuffix(String suffix) {
         suffix = suffix.toLowerCase();
         final List<Material> res = new LinkedList<Material>();
-        for (final Material mat : Material.values()) {
+        for (final Material mat : ALL_MATERIALS) {
             if (!mat.isBlock() && mat.name().toLowerCase().endsWith(suffix)) {
                 res.add(mat);
             }
@@ -94,7 +97,7 @@ public class InventoryUtil {
     public static List<Material> collectItemsByPrefix(String prefix) {
         prefix = prefix.toLowerCase();
         final List<Material> res = new LinkedList<Material>();
-        for (final Material mat : Material.values()) {
+        for (final Material mat : ALL_MATERIALS) {
             if (!mat.isBlock() && mat.name().toLowerCase().startsWith(prefix)) {
                 res.add(mat);
             }

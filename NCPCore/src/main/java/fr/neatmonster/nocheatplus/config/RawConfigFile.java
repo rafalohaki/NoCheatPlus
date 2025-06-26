@@ -20,6 +20,8 @@ import java.util.Collections;
 import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
+import java.util.Set;
+import java.util.concurrent.ConcurrentHashMap;
 
 import org.bukkit.Material;
 import org.bukkit.configuration.ConfigurationSection;
@@ -30,10 +32,17 @@ import org.yaml.snakeyaml.DumperOptions;
 import fr.neatmonster.nocheatplus.NCPAPIProvider;
 import fr.neatmonster.nocheatplus.compat.AlmostBoolean;
 import fr.neatmonster.nocheatplus.compat.versions.ServerVersion;
+import fr.neatmonster.nocheatplus.logging.LogManager;
 import fr.neatmonster.nocheatplus.logging.StaticLog;
 import fr.neatmonster.nocheatplus.logging.Streams;
 
 public class RawConfigFile  extends YamlConfiguration {
+
+    /**
+     * Keep track of already logged invalid materials to avoid log spam.
+     */
+    private static final Set<String> PARSE_MATERIAL_WARNED =
+            Collections.newSetFromMap(new ConcurrentHashMap<String, Boolean>());
 
     private static String prepareMatchMaterial(String content) {
         return content.replace(' ', '_').replace('-', '_').replace('.', '_');
@@ -52,7 +61,14 @@ public class RawConfigFile  extends YamlConfiguration {
             return Material.matchMaterial(prepareMatchMaterial(content));
         }
         catch (Exception e) {
-            // ignore - invalid material name
+            final LogManager logManager = NCPAPIProvider.getNoCheatPlusAPI().getLogManager();
+            if (PARSE_MATERIAL_WARNED.add(content)) {
+                logManager.warning(Streams.STATUS, "Invalid material name: " + content);
+                logManager.warning(Streams.STATUS, e);
+                if (PARSE_MATERIAL_WARNED.size() > 1000) {
+                    PARSE_MATERIAL_WARNED.clear();
+                }
+            }
         }
         return null;
     }
@@ -60,6 +76,13 @@ public class RawConfigFile  extends YamlConfiguration {
     ////////////////
     // Not static.
     ////////////////
+
+    /**
+     * Cache of material names encountered during configuration loading. The
+     * key is the prepared, upper-case name as used by
+     * {@link #prepareMatchMaterial(String)}.
+     */
+    private final Map<String, Material> materialLookup = new HashMap<>();
 
     /** Meta data: The build number of the last significant change of a value. */
     protected final Map<String, Integer> lastChangedBuildNumbers = new HashMap<String, Integer>();
@@ -163,13 +186,19 @@ public class RawConfigFile  extends YamlConfiguration {
      */
     public void readMaterialFromList(final String path, final Collection<Material> target) {
         final List<String> content = getStringList(path);
-        if (content == null || content.isEmpty()) return;
-        for (final String entry : content){
-            final Material mat = parseMaterial(entry);
-            if (mat == null){
-                StaticLog.logWarning("Bad material entry (" + path +"): " + entry);
+        if (content == null || content.isEmpty()) {
+            return;
+        }
+        for (final String entry : content) {
+            final String key = prepareMatchMaterial(entry.trim().toUpperCase());
+            Material mat = materialLookup.get(key);
+            if (!materialLookup.containsKey(key)) {
+                mat = parseMaterial(entry);
+                materialLookup.put(key, mat);
             }
-            else{
+            if (mat == null) {
+                StaticLog.logWarning("Bad material entry (" + path + "): " + entry);
+            } else {
                 target.add(mat);
             }
         }

@@ -24,6 +24,7 @@ import fr.neatmonster.nocheatplus.components.registry.IGetGenericInstance;
 import fr.neatmonster.nocheatplus.stats.Timings;
 import fr.neatmonster.nocheatplus.utilities.ds.count.ActionFrequency;
 import fr.neatmonster.nocheatplus.utilities.map.BlockProperties;
+import fr.neatmonster.nocheatplus.time.monotonic.Monotonic;
 
 /**
  * Player specific data for the block break checks.
@@ -53,9 +54,9 @@ public class BlockBreakData extends ACheckData implements IDataOnReload {
 
     // Data of the fast break check.
     public final ActionFrequency fastBreakPenalties;
-    public long    fastBreakBreakTime  = System.currentTimeMillis() - 1000L;
+    public long    fastBreakBreakTime  = Monotonic.millis() - 1000L;
     /** First time interaction with a block. */
-    public long    fastBreakfirstDamage = System.currentTimeMillis();
+    public long    fastBreakfirstDamage = Monotonic.millis();
 
     public final ActionFrequency frequencyBuckets;
     public int     frequencyShortTermCount;
