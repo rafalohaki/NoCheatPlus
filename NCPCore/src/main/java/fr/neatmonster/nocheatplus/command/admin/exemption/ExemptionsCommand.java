@@ -22,7 +22,6 @@ import org.bukkit.command.Command;
 import org.bukkit.command.CommandSender;
 import org.bukkit.entity.Player;
 import org.bukkit.plugin.java.JavaPlugin;
-import org.bukkit.ChatColor;
 
 import fr.neatmonster.nocheatplus.checks.CheckType;
 import fr.neatmonster.nocheatplus.command.BaseCommand;
@@ -41,18 +40,14 @@ public class ExemptionsCommand extends BaseCommand {
     public boolean onCommand(CommandSender sender, Command command, String label, String[] args) {
 
 
-        final String c1, c2, c3, c4, c5, c6, c7;
-        if (sender instanceof Player) {
-            c1 = ChatColor.GRAY.toString();
-            c2 = ChatColor.BOLD.toString();
-            c3 = ChatColor.RED.toString();
-            c4 = ChatColor.ITALIC.toString();
-            c5 = ChatColor.GOLD.toString();
-            c6 = ChatColor.WHITE.toString();
-            c7 = ChatColor.YELLOW.toString();
-        } else {
-            c1 = c2 = c3 = c4 = c5 = c6 = c7 = "";
-        }
+        final String[] colors = getColorCodes(sender);
+        final String c1 = colors[0];
+        final String c2 = colors[1];
+        final String c3 = colors[2];
+        final String c4 = colors[3];
+        final String c5 = colors[4];
+        final String c6 = colors[5];
+        final String c7 = colors[6];
 
         if (args.length != 2) {
             sender.sendMessage((sender instanceof Player ? TAG : CTAG) + "Please specify a player.");
