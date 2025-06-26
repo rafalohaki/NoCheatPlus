@@ -73,26 +73,31 @@ public class FastConsume extends Check implements Listener, INotifyReload {
     @EventHandler(priority = EventPriority.LOWEST, ignoreCancelled = true)
     public void onItemConsume(final PlayerItemConsumeEvent event){
         final Player player = event.getPlayer();
-        if (player.isDead() && BridgeHealth.getHealth(player) <= 0.0) {
-            // Eat after death.
-            event.setCancelled(true);
-            counters.addPrimaryThread(idCancelDead, 1);
+        if (shouldCancelForDeath(event, player)) {
             return;
         }
         final IPlayerData pData = DataManager.getPlayerData(player);
-        if (pData == null) {
+        if (pData == null || !pData.isCheckActive(type, player)) {
             return;
         }
-        if (!pData.isCheckActive(type, player)) {
-            return;
+        handleFastConsume(event, player, pData);
+    }
+
+    private boolean shouldCancelForDeath(final PlayerItemConsumeEvent event, final Player player) {
+        if (player.isDead() && BridgeHealth.getHealth(player) <= 0.0) {
+            event.setCancelled(true);
+            counters.addPrimaryThread(idCancelDead, 1);
+            return true;
         }
+        return false;
+    }
+
+    private void handleFastConsume(final PlayerItemConsumeEvent event, final Player player, final IPlayerData pData) {
         final InventoryData data = pData.getGenericInstance(InventoryData.class);
         final long time = System.currentTimeMillis();
-        if (check(player, event.getItem(), time, data, pData)){
+        if (check(player, event.getItem(), time, data, pData)) {
             event.setCancelled(true);
-            if (pData != null) {
-                pData.requestUpdateInventory();
-            }
+            pData.requestUpdateInventory();
         }
     }
 
