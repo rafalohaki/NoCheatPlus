@@ -228,10 +228,11 @@ public class MCAccessCBReflect extends MCAccessBukkit {
     }
 
     /**
-     * Validate a bounds array.
+     * Validate a bounds array containing min/max coordinates
+     * {@code [xMin, yMin, zMin, xMax, yMax, zMax]}.
      *
      * @param bounds the bounds array to validate
-     * @return true if the array is usable
+     * @return true if the array has valid length and coordinates
      */
     static boolean isValidBounds(final double[] bounds) {
         if (bounds == null || bounds.length < 6) {
