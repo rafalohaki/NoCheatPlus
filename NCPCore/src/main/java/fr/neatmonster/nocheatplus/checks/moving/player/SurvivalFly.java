@@ -144,6 +144,10 @@ public class SurvivalFly extends Check {
                                                double distanceAboveLimit,
                                                double freedom) {}
 
+    /** Result structure for vertical movement handling. */
+    private static record VerticalDistance(double allowed,
+                                           double excess) {}
+
     /**
      * Internal container for values initialized at the start of a check.
      */
@@ -348,11 +352,11 @@ public class SurvivalFly extends Check {
         /////////////////////////////////////
         // Vertical move                  ///
         /////////////////////////////////////
-        final double[] vResult = computeVerticalMovement(player, from, to,
+        final VerticalDistance vResult = computeVerticalMovement(player, from, to,
                 thisMove, lastMove, fromOnGround, toOnGround, resetFrom, resetTo,
                 yDistance, hDistanceAboveLimit, now, multiMoveCount, data, cc, pData);
-        double vAllowedDistance = vResult[0];
-        double vDistanceAboveLimit = vResult[1];
+        double vAllowedDistance = vResult.allowed();
+        double vDistanceAboveLimit = vResult.excess();
 
 
 
@@ -360,10 +364,10 @@ public class SurvivalFly extends Check {
         // Vertical push/pull. (Horizontal is done in hDistanceAfterFailure)//
         //////////////////////////////////////////////////////////////////////
         if (useBlockChangeTracker && vDistanceAboveLimit > 0.0) {
-            double[] blockMoveResult = getVerticalBlockMoveResult(yDistance, from, to, tick, data);
+            VerticalDistance blockMoveResult = getVerticalBlockMoveResult(yDistance, from, to, tick, data);
             if (blockMoveResult != null) {
-                vAllowedDistance = blockMoveResult[0];
-                vDistanceAboveLimit = blockMoveResult[1];
+                vAllowedDistance = blockMoveResult.allowed();
+                vDistanceAboveLimit = blockMoveResult.excess();
             }
         }
 
@@ -744,7 +748,7 @@ public class SurvivalFly extends Check {
      *
      * @return array containing the allowed distance and the distance above the limit
      */
-    private double[] computeVerticalMovement(final Player player, final PlayerLocation from,
+    private VerticalDistance computeVerticalMovement(final Player player, final PlayerLocation from,
                                              final PlayerLocation to, final PlayerMoveData thisMove,
                                              final PlayerMoveData lastMove, final boolean fromOnGround,
                                              final boolean toOnGround, final boolean resetFrom,
@@ -755,7 +759,7 @@ public class SurvivalFly extends Check {
 
         if (!validateMoveInputs(player, from, to, "computeVerticalMovement") ||
                 thisMove == null || lastMove == null || data == null || cc == null || pData == null) {
-            return new double[]{0.0, 0.0};
+            return new VerticalDistance(0.0, 0.0);
         }
 
         double vAllowedDistance = 0.0;
@@ -818,7 +822,7 @@ public class SurvivalFly extends Check {
             vDistanceAboveLimit = resultAir[1];
         }
 
-        return new double[]{vAllowedDistance, vDistanceAboveLimit};
+        return new VerticalDistance(vAllowedDistance, vDistanceAboveLimit);
     }
 
     /**
@@ -1260,7 +1264,7 @@ public class SurvivalFly extends Check {
      * @param data
      * @return
      */
-    private double[] getVerticalBlockMoveResult(final double yDistance,
+    private VerticalDistance getVerticalBlockMoveResult(final double yDistance,
                                                 final PlayerLocation from, final PlayerLocation to,
                                                 final int tick, final MovingData data) {
         /*
@@ -1293,7 +1297,7 @@ public class SurvivalFly extends Check {
                     }
                     tags.add("blkmv_y_pos");
                     final double maxDistYPos = yDistance; //1.0 - (from.getY() - from.getBlockY());
-                    return new double[]{maxDistYPos, 0.0};
+                    return new VerticalDistance(maxDistYPos, 0.0);
                 }
             }
             // (No else.)
@@ -1320,7 +1324,7 @@ public class SurvivalFly extends Check {
             if (from.matchBlockChange((BlockChangeTracker) blockChangeTracker, data.blockChangeRef, Direction.Y_NEG, -yDistance)) {
                 tags.add("blkmv_y_neg");
                 final double maxDistYNeg = yDistance; // from.getY() - from.getBlockY();
-                return new double[]{maxDistYNeg, 0.0};
+                return new VerticalDistance(maxDistYNeg, 0.0);
             }
         }
         // Nothing found.
