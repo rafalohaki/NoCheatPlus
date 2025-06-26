@@ -18,6 +18,7 @@ import java.util.Arrays;
 import java.util.List;
 import java.util.UUID;
 
+import org.bukkit.ChatColor; // ✅ FIXED: Missing import added here
 import org.bukkit.command.Command;
 import org.bukkit.command.CommandSender;
 import org.bukkit.entity.Player;
@@ -43,11 +44,11 @@ public class UnexemptCommand extends BaseCommand {
         if (args.length < 2) {
             sender.sendMessage((sender instanceof Player ? TAG : CTAG) + "Please specify a player to unexempt.");
             return true;
-        }
-        else if (args.length > 3) {
+        } else if (args.length > 3) {
             sender.sendMessage((sender instanceof Player ? TAG : CTAG) + "Too many arguments. Command usage: /ncp unexempt (playername) (checktype).");
             return true;
         }
+
         final CheckType checkType = parseCheckType(args.length > 2 ? args[2] : null, sender);
         if (checkType == null) {
             return true;
@@ -67,6 +68,7 @@ public class UnexemptCommand extends BaseCommand {
             sender.sendMessage(tag + "Not an online player nor a UUID: " + c3 + targetName);
             return true;
         }
+
         final Player player = DataManager.getPlayer(targetName);
         final String name = player != null ? player.getName() : targetName;
         unexemptPlayer(id, name, checkType, sender);
@@ -74,21 +76,18 @@ public class UnexemptCommand extends BaseCommand {
     }
 
     @Override
-    public List<String> onTabComplete(CommandSender sender, Command command, String alias, String[] args)
-    {
-        // At least complete CheckType
-        if (args.length == 3) return CommandUtil.getCheckTypeTabMatches(args[2]);
+    public List<String> onTabComplete(CommandSender sender, Command command, String alias, String[] args) {
+        if (args.length == 3) {
+            return CommandUtil.getCheckTypeTabMatches(args[2]);
+        }
         return null;
     }
 
-    /* (non-Javadoc)
-     * @see fr.neatmonster.nocheatplus.command.AbstractCommand#testPermission(org.bukkit.command.CommandSender, org.bukkit.command.Command, java.lang.String, java.lang.String[])
-     */
     @Override
     public boolean testPermission(CommandSender sender, Command command, String alias, String[] args) {
         return super.testPermission(sender, command, alias, args)
-                || args.length >= 2 && args[1].trim().equalsIgnoreCase(sender.getName())
-                && sender.hasPermission(Permissions.COMMAND_UNEXEMPT_SELF.getBukkitPermission());
+                || (args.length >= 2 && args[1].trim().equalsIgnoreCase(sender.getName())
+                && sender.hasPermission(Permissions.COMMAND_UNEXEMPT_SELF.getBukkitPermission()));
     }
 
     private CheckType parseCheckType(String input, CommandSender sender) {
@@ -132,5 +131,4 @@ public class UnexemptCommand extends BaseCommand {
         final String c3 = colors[2];
         sender.sendMessage(tag + "Removed exemptions for " + c3 + playerName + c1 + " for checks: " + c3 + type);
     }
-
 }
