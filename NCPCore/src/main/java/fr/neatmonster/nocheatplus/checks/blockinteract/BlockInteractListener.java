@@ -211,25 +211,26 @@ public class BlockInteractListener extends CheckListener {
         }
 
         final BlockFace face = event.getBlockFace();
-        final ItemStack stack;
+        final ActionResult aResult;
         switch (action) {
         case RIGHT_CLICK_AIR:
+            aResult = handleRightClickAir(blockChecks);
+            break;
         case LEFT_CLICK_AIR:
+            aResult = handleLeftClickAir(blockChecks);
+            break;
         case LEFT_CLICK_BLOCK:
-            stack = null;
+            aResult = handleLeftClickBlock(blockChecks);
             break;
         case RIGHT_CLICK_BLOCK:
-            stack = Bridge1_9.getUsedItem(player, event);
-            if (stack != null && stack.getType() == Material.ENDER_PEARL) {
-                checkEnderPearlRightClickBlock(player, block, face, event, previousLastTick, data, pData);
-            }
-            if (stack != null && BlockProperties.isScaffolding(stack.getType())) {
-                blockChecks = false;
-            }
+            aResult = handleRightClickBlock(player, block, face, event, previousLastTick, data, pData,
+                    blockChecks);
             break;
         default:
             return null;
         }
+        final ItemStack stack = aResult.stack();
+        blockChecks = aResult.blockChecks();
 
         if (event.isCancelled() && event.useInteractedBlock() != Result.ALLOW) {
             if (event.useItemInHand() == Result.ALLOW) {
@@ -288,6 +289,33 @@ public class BlockInteractListener extends CheckListener {
             int previousLastTick, boolean blockChecks) {}
 
     private record CheckResult(boolean cancelled, boolean preventUseItem) {}
+
+    record ActionResult(ItemStack stack, boolean blockChecks) {}
+
+    private ActionResult handleRightClickAir(final boolean blockChecks) {
+        return new ActionResult(null, blockChecks);
+    }
+
+    private ActionResult handleLeftClickAir(final boolean blockChecks) {
+        return new ActionResult(null, blockChecks);
+    }
+
+    private ActionResult handleLeftClickBlock(final boolean blockChecks) {
+        return new ActionResult(null, blockChecks);
+    }
+
+    private ActionResult handleRightClickBlock(final Player player, final Block block, final BlockFace face,
+            final PlayerInteractEvent event, final int previousLastTick, final BlockInteractData data,
+            final IPlayerData pData, boolean blockChecks) {
+        final ItemStack stack = Bridge1_9.getUsedItem(player, event);
+        if (stack != null && stack.getType() == Material.ENDER_PEARL) {
+            checkEnderPearlRightClickBlock(player, block, face, event, previousLastTick, data, pData);
+        }
+        if (stack != null && BlockProperties.isScaffolding(stack.getType())) {
+            blockChecks = false;
+        }
+        return new ActionResult(stack, blockChecks);
+    }
 
     private void logUsedFlyingPacket(final Player player, final FlyingQueueHandle flyingHandle, 
             final int flyingIndex) {
