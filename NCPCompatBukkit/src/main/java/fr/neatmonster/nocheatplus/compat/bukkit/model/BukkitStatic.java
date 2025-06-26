@@ -20,6 +20,11 @@ import fr.neatmonster.nocheatplus.utilities.map.BlockCache;
 
 public class BukkitStatic implements BukkitShapeModel {
 
+    /**
+     * Bounding box coordinates. Every six consecutive values describe one box
+     * in the order {@code {minX, minY, minZ, maxX, maxY, maxZ}}. If multiple
+     * boxes are used, they are stored sequentially in this array.
+     */
     private final double[] bounds;
 
     private BukkitStatic(double... bounds) {
