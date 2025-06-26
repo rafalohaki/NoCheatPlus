@@ -43,65 +43,74 @@ public class WrongBlock extends Check {
      * @return
      */
     
-    public boolean check(final Player player, final Block block, 
+    public boolean check(final Player player, final Block block,
             final BlockBreakConfig cc, final BlockBreakData data, final IPlayerData pData,
             final AlmostBoolean isInstaBreak) {
 
         boolean cancel = false;
 
-        final boolean wrongTime = data.fastBreakfirstDamage < data.fastBreakBreakTime;
-        final int dist = Math.min(4, data.clickedX == Integer.MAX_VALUE ? 100 : TrigUtil.manhattan(data.clickedX, data.clickedY, data.clickedZ, block));
-        final boolean wrongBlock;
-        final long now = System.currentTimeMillis();
-        final boolean debug = pData.isDebugActive(type);
-        // The isInstaBreak argument should either be removed or utilized.
-        if (dist == 0) {
-            if (wrongTime) {
-                data.fastBreakBreakTime = now;
-                data.fastBreakfirstDamage = now;
-                // Could set to wrong block, but prefer to transform it into a quasi insta break.
-            }
-            wrongBlock = false;
-        }
-        else if (dist == 1) {
-            // One might to a concession in case of instant breaking.
-            // Reason for this concession is not documented.
-            if (now - data.wasInstaBreak < 60) {
-                if (debug) {
-                    debug(player, "Skip on Manhattan 1 and wasInstaBreak within 60 ms.");
-                }
-                wrongBlock = false;
-            }
-            else {
-                wrongBlock = true;
-            }
-        }
-        else {
-            // Note that the maximally counted distance is set above.
-            wrongBlock = true;
-        }
+        if (player != null && block != null && cc != null && data != null && pData != null) {
+            final long now = System.currentTimeMillis();
+            final boolean wrongTime = data.fastBreakfirstDamage < data.fastBreakBreakTime;
+            final int dist = Math.min(4,
+                    data.clickedX == Integer.MAX_VALUE ? 100
+                            : TrigUtil.manhattan(data.clickedX, data.clickedY, data.clickedZ, block));
+            final boolean debug = pData.isDebugActive(type);
 
-        if (wrongBlock) {
-            if ((debug) && pData.hasPermission(Permissions.ADMINISTRATION_DEBUG, player)) {
-                player.sendMessage("WrongBlock failure with dist: " + dist);
-            }
-            data.wrongBlockVL.add(now, (float) (dist + 1) / 2f);
-            final float score = data.wrongBlockVL.score(0.9f);
-            if (score > cc.wrongBLockLevel) {
-                if (executeActions(player, score, 1D, cc.wrongBlockActions).willCancel()) {
-                    cancel = true;
-                }
-                if (cc.wrongBlockImprobableWeight > 0.0f) {
-                	if (cc.wrongBlockImprobableFeedOnly) {
-                		Improbable.feed(player, cc.wrongBlockImprobableWeight, now);
-                	} else if (Improbable.check(player, cc.wrongBlockImprobableWeight, now, "blockbreak.wrongblock", pData)) {
-                		cancel = true;
-                	}
-                }
+            final boolean wrongBlock = isWrongBlock(dist, wrongTime, now, data, pData, player, debug);
+
+            if (wrongBlock) {
+                cancel = handleWrongBlockViolation(player, cc, data, pData, dist, now, debug);
             }
         }
 
         return cancel;
+    }
+
+    private boolean isWrongBlock(final int dist, final boolean wrongTime, final long now,
+            final BlockBreakData data, final IPlayerData pData, final Player player,
+            final boolean debug) {
+        if (dist == 0) {
+            if (wrongTime) {
+                data.fastBreakBreakTime = now;
+                data.fastBreakfirstDamage = now;
+            }
+            return false;
+        } else if (dist == 1) {
+            if (now - data.wasInstaBreak < 60) {
+                if (debug) {
+                    debug(player, "Skip on Manhattan 1 and wasInstaBreak within 60 ms.");
+                }
+                return false;
+            }
+            return true;
+        }
+        // Note that the maximally counted distance is set above.
+        return true;
+    }
+
+    private boolean handleWrongBlockViolation(final Player player, final BlockBreakConfig cc,
+            final BlockBreakData data, final IPlayerData pData, final int dist, final long now,
+            final boolean debug) {
+        if (debug && pData.hasPermission(Permissions.ADMINISTRATION_DEBUG, player)) {
+            player.sendMessage("WrongBlock failure with dist: " + dist);
+        }
+        data.wrongBlockVL.add(now, (float) (dist + 1) / 2f);
+        final float score = data.wrongBlockVL.score(0.9f);
+        if (score > cc.wrongBLockLevel) {
+            if (executeActions(player, score, 1D, cc.wrongBlockActions).willCancel()) {
+                return true;
+            }
+            if (cc.wrongBlockImprobableWeight > 0.0f) {
+                if (cc.wrongBlockImprobableFeedOnly) {
+                    Improbable.feed(player, cc.wrongBlockImprobableWeight, now);
+                } else if (Improbable.check(player, cc.wrongBlockImprobableWeight, now,
+                        "blockbreak.wrongblock", pData)) {
+                    return true;
+                }
+            }
+        }
+        return false;
     }
 
 }
