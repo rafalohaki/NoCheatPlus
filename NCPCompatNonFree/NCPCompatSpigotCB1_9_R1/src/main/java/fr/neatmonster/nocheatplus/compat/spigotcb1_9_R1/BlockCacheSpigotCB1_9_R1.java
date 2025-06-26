@@ -88,7 +88,8 @@ public class BlockCacheSpigotCB1_9_R1 extends BlockCache {
     private static boolean isBoundsValid(AxisAlignedBB bb) {
         return !(bb.a < -1.0D || bb.d > 2.0D
                 || bb.b < -1.0D || bb.e > 2.0D
-                || bb.c < -1.0D || bb.f > 2.0D);
+                || bb.c < -1.0D || bb.f > 2.0D
+                || bb.a > bb.d || bb.b > bb.e || bb.c > bb.f);
     }
 
     @Override
