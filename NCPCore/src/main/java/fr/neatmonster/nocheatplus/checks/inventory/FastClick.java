@@ -184,16 +184,32 @@ public class FastClick extends Check {
         final double violation = Math.max(shortTerm, normal);
         if (violation > 0.0) {
             tags.add("clickspeed");
-            data.fastClickVL += violation;
-            final ViolationData vd = new ViolationData(this, player, data.fastClickVL,
-                    violation, cc.fastClickActions);
-            if (vd.needsParameters()) {
-                vd.setParameter(ParameterName.TAGS, StringUtil.join(tags, "+"));
-            }
-            return executeActions(vd).willCancel();
+            updateViolationLevel(data, violation);
+            return createAndExecuteViolationData(player, data, cc, violation);
         }
-        data.fastClickVL *= 0.99;
+        if (data != null) {
+            data.fastClickVL *= 0.99;
+        }
         return false;
+    }
+
+    private void updateViolationLevel(final InventoryData data, final double amount) {
+        if (data != null) {
+            data.fastClickVL += amount;
+        }
+    }
+
+    private boolean createAndExecuteViolationData(final Player player, final InventoryData data,
+                                                  final InventoryConfig cc, final double violation) {
+        if (data == null || cc == null) {
+            return false;
+        }
+        final ViolationData vd = new ViolationData(this, player, data.fastClickVL,
+                violation, cc.fastClickActions);
+        if (vd.needsParameters()) {
+            vd.setParameter(ParameterName.TAGS, StringUtil.join(tags, "+"));
+        }
+        return executeActions(vd).willCancel();
     }
     
 
