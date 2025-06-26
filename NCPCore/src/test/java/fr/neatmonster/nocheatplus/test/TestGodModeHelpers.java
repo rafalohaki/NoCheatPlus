@@ -140,9 +140,8 @@ public class TestGodModeHelpers {
             java.lang.reflect.Field eh = fr.neatmonster.nocheatplus.players.PlayerDataManager.class.getDeclaredField("executionHistories");
             eh.setAccessible(true);
             eh.set(pdm, new java.util.HashMap<>());
-            java.lang.reflect.Field dm = fr.neatmonster.nocheatplus.players.DataManager.class.getDeclaredField("instance");
-            dm.setAccessible(true);
-            dm.set(null, pdm);
+            fr.neatmonster.nocheatplus.players.DataManager.setInstance(
+                    new fr.neatmonster.nocheatplus.players.DataManager((fr.neatmonster.nocheatplus.players.PlayerDataManager) pdm));
         } catch (Exception e) {
             throw new RuntimeException(e);
         }

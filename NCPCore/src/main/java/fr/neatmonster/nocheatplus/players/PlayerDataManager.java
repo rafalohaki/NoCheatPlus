@@ -275,7 +275,7 @@ public class PlayerDataManager  implements IPlayerDataManager, ComponentWithName
      * @param permissionRegistry
      */
     public PlayerDataManager(final WorldDataManager worldDataManager, final PermissionRegistry permissionRegistry) {
-        DataManager.instance = this; // NOTE: NoCheatPlus should handle this and return an ILockable.
+        new DataManager(this); // NOTE: NoCheatPlus should handle this and return an ILockable.
         if (ServerVersion.isMinecraftVersionUnknown()) {
             // True hacks.
             BukkitVersion.init();

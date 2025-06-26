@@ -42,14 +42,38 @@ public class DataManager {
      * could share locks for efficiency.
      */
 
-    static PlayerDataManager instance = null;
+    private static DataManager instance;
+
+    /** Underlying player data manager. */
+    private final PlayerDataManager playerDataManager;
+
+    public DataManager(final PlayerDataManager playerDataManager) {
+        this.playerDataManager = playerDataManager;
+        setInstance(this);
+    }
+
+    /**
+     * Set the singleton instance. Mainly used during plugin initialization.
+     */
+    public static void setInstance(final DataManager dataManager) {
+        instance = dataManager;
+    }
+
+    /**
+     * Access the singleton instance for legacy callers. New code should obtain
+     * a DataManager instance via dependency injection.
+     */
+    @Deprecated
+    public static DataManager getInstance() {
+        return instance;
+    }
 
     /**
      * Get the exact player name, stored internally.
      * @param playerId
      */
     public static String getPlayerName(final UUID playerId) {
-        return instance.getPlayerName(playerId);
+        return instance.playerDataManager.getPlayerName(playerId);
     }
 
     /**
@@ -61,7 +85,7 @@ public class DataManager {
      * @deprecated New implementation pending.
      */
     public static void registerExecutionHistory(CheckType type, Map<String, ExecutionHistory> histories) {
-        instance.registerExecutionHistory(type, histories);
+        instance.playerDataManager.registerExecutionHistory(type, histories);
     }
 
     /**
@@ -74,7 +98,7 @@ public class DataManager {
      * @deprecated New implementation pending.
      */
     public static ExecutionHistory getExecutionHistory(final CheckType type, final String playerName) {
-        return instance.getExecutionHistory(type, playerName);
+        return instance.playerDataManager.getExecutionHistory(type, playerName);
     }
 
     /**
@@ -86,7 +110,7 @@ public class DataManager {
      * @deprecated New implementation pending.
      */
     public static boolean removeExecutionHistory(final CheckType type, final String playerName) {
-        return instance.removeExecutionHistory(type, playerName);
+        return instance.playerDataManager.removeExecutionHistory(type, playerName);
     }
 
     /**
@@ -97,7 +121,7 @@ public class DataManager {
      */
     public static void clearData(final CheckType checkType) {
         NCPAPIProvider.getNoCheatPlusAPI().getWorldDataManager().clearData(checkType);
-        instance.clearData(checkType);
+        instance.playerDataManager.clearData(checkType);
     }
 
     /**
@@ -109,7 +133,7 @@ public class DataManager {
     public static void handleSystemTimeRanBackwards() {
         // This is currently called through the static API. Refactoring may
         // invoke the underlying manager directly from the core plugin.
-        instance.handleSystemTimeRanBackwards();
+        instance.playerDataManager.handleSystemTimeRanBackwards();
     }
 
     /**
@@ -122,7 +146,7 @@ public class DataManager {
      * from the configuration in a future refactoring.
      */
     public static void restoreDefaultDebugFlags() {
-        instance.restoreDefaultDebugFlags();
+        instance.playerDataManager.restoreDefaultDebugFlags();
     }
 
     /**
@@ -136,7 +160,7 @@ public class DataManager {
      * @return If any data was present (not strict).
      */
     public static boolean removeData(final String playerName, CheckType checkType) {
-        return instance.removeData(playerName, checkType);
+        return instance.playerDataManager.removeData(playerName, checkType);
     }
 
     /**
@@ -151,7 +175,7 @@ public class DataManager {
     public static boolean clearComponentData(final CheckType checkType, final String PlayerName) {
         // This method still relies on player names. Refactoring should switch
         // to UUID based lookups to avoid ambiguity.
-        return instance.clearComponentData(checkType, PlayerName);
+        return instance.playerDataManager.clearComponentData(checkType, PlayerName);
     }
 
     /**
@@ -162,7 +186,7 @@ public class DataManager {
      * @return
      */
     public static Player getPlayerExact(final String playerName) {
-        return instance.getPlayerExact(playerName);
+        return instance.playerDataManager.getPlayerExact(playerName);
     }
 
     /**
@@ -174,7 +198,7 @@ public class DataManager {
      * @return
      */
     public static UUID getUUID(final String input) {
-        return instance.getUUID(input);
+        return instance.playerDataManager.getUUID(input);
     }
 
     /**
@@ -184,7 +208,7 @@ public class DataManager {
      * @return
      */
     public static Player getPlayer(final UUID id) {
-        return instance.getPlayer(id);
+        return instance.playerDataManager.getPlayer(id);
     }
 
     /**
@@ -195,7 +219,7 @@ public class DataManager {
      * @return
      */
     public static Player getPlayer(final String playerName) {
-        return instance.getPlayer(playerName);
+        return instance.playerDataManager.getPlayer(playerName);
     }
 
     /**
@@ -207,7 +231,7 @@ public class DataManager {
      * @return
      */
     public static IPlayerData getPlayerData(final Player player) {
-        return instance.getPlayerData(player, true);
+        return instance.playerDataManager.getPlayerData(player, true);
     }
 
     /**
@@ -217,7 +241,7 @@ public class DataManager {
      * @return The PlayerData instance if present, null otherwise.
      */
     public static IPlayerData getPlayerData(final String playerName) {
-        return instance.getPlayerData(playerName);
+        return instance.playerDataManager.getPlayerData(playerName);
     }
 
     /**
@@ -227,26 +251,26 @@ public class DataManager {
      * @return The PlayerData instance if present, null otherwise.
      */
     public static IPlayerData getPlayerData(final UUID playerId) {
-        return instance.getPlayerData(playerId);
+        return instance.playerDataManager.getPlayerData(playerId);
     }
 
     static boolean isFrequentPlayerTaskScheduled(final UUID playerId) {
-        return instance.isFrequentPlayerTaskScheduled(playerId);
+        return instance.playerDataManager.isFrequentPlayerTaskScheduled(playerId);
     }
 
     static void registerFrequentPlayerTaskPrimaryThread(final UUID playerId) {
-        instance.registerFrequentPlayerTaskPrimaryThread(playerId);
+        instance.playerDataManager.registerFrequentPlayerTaskPrimaryThread(playerId);
     }
 
     static void registerFrequentPlayerTaskAsynchronous(final UUID playerId) {
-        instance.registerFrequentPlayerTaskAsynchronous(playerId);
+        instance.playerDataManager.registerFrequentPlayerTaskAsynchronous(playerId);
     }
 
     /**
      * 
      */
     public static void clearAllExemptions() {
-        instance.clearAllExemptions();
+        instance.playerDataManager.clearAllExemptions();
     }
 
     /**
@@ -257,12 +281,12 @@ public class DataManager {
      * @return
      */
     public static <T> T getGenericInstance(final Player player, final Class<T> registeredFor) {
-        return instance.getPlayerData(player).getGenericInstance(registeredFor);
+        return instance.playerDataManager.getPlayerData(player).getGenericInstance(registeredFor);
     }
 
     static <T> T getFromFactory(final Class<T> registeredFor, 
             final PlayerFactoryArgument arg) {
-        return instance.getNewInstance(registeredFor, arg);
+        return instance.playerDataManager.getNewInstance(registeredFor, arg);
     }
 
     /**

@@ -114,9 +114,8 @@ public class TestCreativeFlyHelpers {
 
         // Minimal DataManager setup using mocks
         Object pdm = mock(fr.neatmonster.nocheatplus.players.PlayerDataManager.class);
-        Field dm = fr.neatmonster.nocheatplus.players.DataManager.class.getDeclaredField("instance");
-        dm.setAccessible(true);
-        dm.set(null, pdm);
+        fr.neatmonster.nocheatplus.players.DataManager.setInstance(
+                new fr.neatmonster.nocheatplus.players.DataManager((fr.neatmonster.nocheatplus.players.PlayerDataManager) pdm));
     }
 
     private static MovingData newData() {

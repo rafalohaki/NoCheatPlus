@@ -109,7 +109,7 @@ public class TestCreativeFlyHDist {
         f.setAccessible(true);
         f.set(null, api);
 
-        // Set DataManager.instance
+        // Set DataManager instance
         Field uf = sun.misc.Unsafe.class.getDeclaredField("theUnsafe");
         uf.setAccessible(true);
         sun.misc.Unsafe un = (sun.misc.Unsafe) uf.get(null);
@@ -117,9 +117,8 @@ public class TestCreativeFlyHDist {
         Field eh = fr.neatmonster.nocheatplus.players.PlayerDataManager.class.getDeclaredField("executionHistories");
         eh.setAccessible(true);
         eh.set(pdm, new HashMap<>());
-        Field dm = fr.neatmonster.nocheatplus.players.DataManager.class.getDeclaredField("instance");
-        dm.setAccessible(true);
-        dm.set(null, pdm);
+        fr.neatmonster.nocheatplus.players.DataManager.setInstance(
+                new fr.neatmonster.nocheatplus.players.DataManager((fr.neatmonster.nocheatplus.players.PlayerDataManager) pdm));
     }
 
     @Before

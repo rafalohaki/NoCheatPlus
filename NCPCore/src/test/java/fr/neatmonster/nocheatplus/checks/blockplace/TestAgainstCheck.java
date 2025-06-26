@@ -34,9 +34,8 @@ public class TestAgainstCheck {
         java.lang.reflect.Field eh = PlayerDataManager.class.getDeclaredField("executionHistories");
         eh.setAccessible(true);
         eh.set(pdm, new java.util.HashMap<>());
-        java.lang.reflect.Field dm = DataManager.class.getDeclaredField("instance");
-        dm.setAccessible(true);
-        dm.set(null, pdm);
+        fr.neatmonster.nocheatplus.players.DataManager.setInstance(
+                new fr.neatmonster.nocheatplus.players.DataManager((fr.neatmonster.nocheatplus.players.PlayerDataManager) pdm));
     }
 
     static class DummyAgainst extends Against {
