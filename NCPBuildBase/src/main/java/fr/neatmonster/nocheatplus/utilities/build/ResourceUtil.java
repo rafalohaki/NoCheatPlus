@@ -25,6 +25,12 @@ import java.util.Map;
 
 public class ResourceUtil {
 
+    /**
+     * Separator used in jar URLs to delimit the archive from the internal
+     * resource path (e.g. {@code "jar:file:/plugin.jar!/path"}).
+     */
+    private static final String JAR_URL_SEPARATOR = "!";
+
     private ResourceUtil() {
     }
 
@@ -45,15 +51,16 @@ public class ResourceUtil {
         if (codeSource == null) {
             return null;
         }
-        final String csPath = codeSource.getLocation().getPath();
-        final String csLower = csPath.toLowerCase();
-        if (!csLower.endsWith(".jar") && !csLower.contains(".jar!")) {
+        final String codeSourcePath = codeSource.getLocation().getPath();
+        final String codeSourcePathLower = codeSourcePath.toLowerCase();
+        if (!codeSourcePathLower.endsWith(".jar") && !codeSourcePathLower.contains(".jar" + JAR_URL_SEPARATOR)) {
             return null;
         }
         if (!classPath.startsWith("jar")) {
             return null;
         }
-        final String absPath = classPath.substring(0, classPath.lastIndexOf('!') + 1)
+        // JAR URLs place the resource path after "!" following the archive path.
+        final String absPath = classPath.substring(0, classPath.lastIndexOf(JAR_URL_SEPARATOR) + JAR_URL_SEPARATOR.length())
                 + "/" + path;
         try {
             final URL url = new URL(absPath);
