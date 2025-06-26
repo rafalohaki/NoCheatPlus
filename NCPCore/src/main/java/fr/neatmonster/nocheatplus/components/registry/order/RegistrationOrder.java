@@ -260,7 +260,7 @@ public class RegistrationOrder {
                     output[i] = item;
                     return;
                 }
-                else  {
+                else {
                     output[i] = output[i + 1];
                 }
             }

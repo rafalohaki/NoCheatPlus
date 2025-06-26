@@ -129,7 +129,7 @@ public class MiniListenerNode<E, P> {
         if (registeredListeners.isEmpty()) {
             clear();
         }
-        else  {
+        else {
             final Object[] sortedOdd = typedSort.getSortedArray(registeredListeners);
             @SuppressWarnings("unchecked")
             final ListenerEntry<E>[] sortedListeners = new ListenerEntry[sortedOdd.length];

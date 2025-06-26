@@ -131,7 +131,7 @@ public final class PlayerMap {
             if (storePlayerInstances) {
                 info.player = getPlayerBukkit(info);
                 return info.player;
-            } else  {
+            } else {
                 return getPlayerBukkit(info);
             }
         } else {
@@ -148,7 +148,7 @@ public final class PlayerMap {
             if (storePlayerInstances) {
                 info.player = getPlayerBukkit(info);
                 return info.player;
-            } else  {
+            } else {
                 return getPlayerBukkit(info);
             }
         } else {
@@ -169,7 +169,7 @@ public final class PlayerMap {
             if (storePlayerInstances) {
                 info.player = getPlayerBukkit(info);
                 return info.player;
-            } else  {
+            } else {
                 return getPlayerBukkit(info);
             }
         } else {

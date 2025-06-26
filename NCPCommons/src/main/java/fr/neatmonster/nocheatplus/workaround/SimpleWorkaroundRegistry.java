@@ -202,7 +202,7 @@ public class SimpleWorkaroundRegistry implements IWorkaroundRegistry {
             if (bluePrint == null) {
                 throw new IllegalArgumentException("No blueprint registered for: " + workaround.getId());
             }
-            else  {
+            else {
                 ids.add(bluePrint.getId());
             }
         }
