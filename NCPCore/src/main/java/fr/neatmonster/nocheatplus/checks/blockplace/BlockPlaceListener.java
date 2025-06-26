@@ -592,9 +592,8 @@ public class BlockPlaceListener extends CheckListener {
             return true;
         }
         if (cc.speedImprobableWeight > 0.0f) {
-            if (cc.speedImprobableFeedOnly) {
-                Improbable.feed(player, cc.speedImprobableWeight, now);
-            } else if (Improbable.check(player, cc.speedImprobableWeight, now, "blockplace.speed", pData)) {
+            Improbable.feed(player, cc.speedImprobableWeight, now);
+            if (!cc.speedImprobableFeedOnly && Improbable.checkOnly(player, now, "blockplace.speed", pData)) {
                 return true;
             }
         }
