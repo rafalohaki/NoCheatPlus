@@ -44,7 +44,9 @@ public class EntityAccessLastPositionAndLook implements IEntityAccessLastPositio
         catch (Throwable t) {
             NCPAPIProvider.getNoCheatPlusAPI().getLogManager().warning(Streams.STATUS,
                     "Could not retrieve last position and look for Entity: "
-                    + (entity != null ? entity.getClass().getName() : "null"));
+                            + (entity != null ? entity.getClass().getName() : "null")
+                            + ". Error: " + t.getMessage());
+            NCPAPIProvider.getNoCheatPlusAPI().getLogManager().warning(Streams.STATUS, t);
         }
     }
 
@@ -69,7 +71,9 @@ public class EntityAccessLastPositionAndLook implements IEntityAccessLastPositio
         catch (Throwable t) {
             NCPAPIProvider.getNoCheatPlusAPI().getLogManager().warning(Streams.STATUS,
                     "Could not set last position and look for Entity: "
-                    + (entity != null ? entity.getClass().getName() : "null"));
+                            + (entity != null ? entity.getClass().getName() : "null")
+                            + ". Error: " + t.getMessage());
+            NCPAPIProvider.getNoCheatPlusAPI().getLogManager().warning(Streams.STATUS, t);
         }
     }
 

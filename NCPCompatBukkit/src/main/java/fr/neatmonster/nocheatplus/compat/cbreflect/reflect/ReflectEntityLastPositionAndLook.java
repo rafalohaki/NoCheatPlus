@@ -62,7 +62,11 @@ public class ReflectEntityLastPositionAndLook extends ReflectGetHandleBase<Entit
             performGet(entity, location);
         }
         catch (Throwable t) {
-            NCPAPIProvider.getNoCheatPlusAPI().getLogManager().warning(Streams.STATUS, "Could not retrieve last position and look for Entity: " + entity.getClass().getName());
+            NCPAPIProvider.getNoCheatPlusAPI().getLogManager().warning(Streams.STATUS,
+                    "Could not retrieve last position and look for Entity: "
+                            + (entity != null ? entity.getClass().getName() : "null")
+                            + ". Error: " + t.getMessage());
+            NCPAPIProvider.getNoCheatPlusAPI().getLogManager().warning(Streams.STATUS, t);
         }
     }
 
@@ -81,7 +85,11 @@ public class ReflectEntityLastPositionAndLook extends ReflectGetHandleBase<Entit
             performSet(entity, location);
         }
         catch (Throwable t) {
-            NCPAPIProvider.getNoCheatPlusAPI().getLogManager().warning(Streams.STATUS, "Could not set last position and look for Entity: " + entity.getClass().getName());
+            NCPAPIProvider.getNoCheatPlusAPI().getLogManager().warning(Streams.STATUS,
+                    "Could not set last position and look for Entity: "
+                            + (entity != null ? entity.getClass().getName() : "null")
+                            + ". Error: " + t.getMessage());
+            NCPAPIProvider.getNoCheatPlusAPI().getLogManager().warning(Streams.STATUS, t);
         }
     }
 
