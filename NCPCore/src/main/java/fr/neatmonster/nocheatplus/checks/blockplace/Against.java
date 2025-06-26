@@ -159,6 +159,10 @@ public class Against extends Check {
         return false;
     }
 
+    private static boolean isLilyPadOrFrogspawn(final Material material) {
+        return material == BridgeMaterial.LILY_PAD || material == BridgeMaterial.FROGSPAWN;
+    }
+
     private boolean handleLiquidCase(final Player player, final Material placedMat, final Block block,
             final Material ncpAgainst, final IPlayerData pData) {
         if (player == null || pData == null) {
@@ -168,9 +172,9 @@ public class Against extends Check {
             return false;
         }
         if (BlockProperties.isLiquid(ncpAgainst)) {
-            final boolean lilyPadOrFrog = placedMat != BridgeMaterial.LILY_PAD && placedMat != BridgeMaterial.FROGSPAWN;
+            final boolean isLilyPadOrFrog = isLilyPadOrFrogspawn(placedMat);
             final boolean blockBelowLiquid = block != null && BlockProperties.isLiquid(block.getRelative(BlockFace.DOWN).getType());
-            if ((lilyPadOrFrog || !blockBelowLiquid)
+            if ((!isLilyPadOrFrog || !blockBelowLiquid)
                     && !BlockProperties.isWaterPlant(ncpAgainst)
                     && !pData.hasPermission(Permissions.BLOCKPLACE_AGAINST_LIQUIDS, player)) {
                 return true;
