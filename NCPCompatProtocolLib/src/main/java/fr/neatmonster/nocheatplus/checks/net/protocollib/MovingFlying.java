@@ -383,7 +383,8 @@ public class MovingFlying extends BaseAdapter {
         if (hasPos) {
             return new DataPacketFlying(onGround, doubles.get(indexX), doubles.get(indexY), doubles.get(indexZ), time);
         }
-        throw new IllegalStateException("Can't be, it can't be!");
+        throw new IllegalStateException(
+                "Unexpected state: neither hasPos nor hasLook is true, but they were checked earlier");
     }
 
     /**

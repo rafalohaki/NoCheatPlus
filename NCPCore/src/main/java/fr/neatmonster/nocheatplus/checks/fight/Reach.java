@@ -306,6 +306,7 @@ public class Reach extends Check {
      * @param cc
      * @return
      */
+<<<<<<< codex/fix-behavioral-change-in-improbable-check-logic -- Incoming Change
     public boolean loopFinish(final Player player, final Location pLoc, final Entity damaged, 
                               final ReachContext context, final ITraceEntry traceEntry, final boolean forceViolation, 
                               final FightData data, final FightConfig cc, final IPlayerData pData) {
@@ -384,9 +385,63 @@ public class Reach extends Check {
         if (pData.isDebugActive(type) && pData.hasPermission(Permissions.ADMINISTRATION_DEBUG, player)){
             // Potential enhancement: remember the successful ITraceEntry for height
             player.sendMessage("NC+: Attack/reach " + damaged.getType()+ (traceEntry == null ? "" : (" height=" + traceEntry.getBoxMarginVertical())) + " dist=" + StringUtil.fdec3.format(lenpRel) +" @" + StringUtil.fdec3.format(data.reachMod));
+=======
+    public boolean loopFinish(final Player player, final Location pLoc, final Entity damaged,
+                              final ReachContext context, final ITraceEntry traceEntry, final boolean forceViolation,
+                              final FightData data, final FightConfig cc, final IPlayerData pData) {
+
+        final double lenpRel = forceViolation && context.minViolation != Double.MAX_VALUE
+                ? context.minViolation : context.minResult;
+
+        if (lenpRel == Double.MAX_VALUE) {
+            return false;
+>>>>>>> master -- Current Change
         }
 
+        final double violation = lenpRel - context.distanceLimit;
+        boolean cancel = false;
+
+        if (violation > 0) {
+            cancel = handleViolation(player, lenpRel, violation, data, cc, pData);
+        } else if (lenpRel - context.distanceLimit * data.reachMod > 0) {
+            cancel = handleSilentViolation(player, lenpRel, context.distanceLimit,
+                    data.reachMod, cc, data);
+        } else {
+            data.reachVL *= 0.8D;
+        }
+
+        updateReachModifier(lenpRel, context, data, cc);
+        sendDebugInfo(player, damaged, traceEntry, lenpRel, data, pData);
+
         return cancel;
+    }
+
+    /**
+     * Update the dynamic reach modifier based on the last result.
+     */
+    private void updateReachModifier(final double lenpRel, final ReachContext context,
+                                     final FightData data, final FightConfig cc) {
+        final double dynamicStep = cc.reachReduceStep / cc.reachSurvivalDistance;
+        if (!cc.reachReduce) {
+            data.reachMod = 1d;
+        } else if (lenpRel > context.distanceLimit - cc.reachReduceDistance) {
+            data.reachMod = Math.max(context.distanceMin, data.reachMod - dynamicStep);
+        } else {
+            data.reachMod = Math.min(1.0, data.reachMod + dynamicStep);
+        }
+    }
+
+    /**
+     * Send debug information about the reach calculation.
+     */
+    private void sendDebugInfo(final Player player, final Entity damaged, final ITraceEntry traceEntry,
+                               final double lenpRel, final FightData data, final IPlayerData pData) {
+        if (pData.isDebugActive(type) && pData.hasPermission(Permissions.ADMINISTRATION_DEBUG, player)) {
+            final String heightInfo = traceEntry == null ? "" : " height=" + traceEntry.getBoxMarginVertical();
+            player.sendMessage("NC+: Attack/reach " + damaged.getType() + heightInfo
+                    + " dist=" + StringUtil.fdec3.format(lenpRel)
+                    + " @" + StringUtil.fdec3.format(data.reachMod));
+        }
     }
 
 
