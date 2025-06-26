@@ -106,50 +106,99 @@ public class ProtocolLibComponent implements IDisableListener, INotifyReload, Jo
 
     private void register(Plugin plugin) {
         final IWorldDataManager worldMan = NCPAPIProvider.getNoCheatPlusAPI().getWorldDataManager();
-        if (!worldMan.isActiveAnywhere(CheckType.NET)) {
+        if (worldMan.isActiveAnywhere(CheckType.NET)) {
+            StaticLog.logInfo("Adding packet level hooks for ProtocolLib (MC "
+                    + ProtocolLibrary.getProtocolManager().getMinecraftVersion().getVersion() + ")...");
+            registerDebugAdapterIfNeeded(plugin);
+            registerUseEntityAdapterIfNeeded(plugin, worldMan);
+            registerMovementAdaptersIfNeeded(plugin, worldMan);
+            registerKeepAliveAdapterIfNeeded(plugin, worldMan);
+            registerIfActive(CheckType.NET_SOUNDDISTANCE, plugin,
+                    "fr.neatmonster.nocheatplus.checks.net.protocollib.SoundDistance");
+            registerIfActive(CheckType.NET_WRONGTURN, plugin,
+                    "fr.neatmonster.nocheatplus.checks.net.protocollib.WrongTurnAdapter");
+            registerCatchAllAdapterIfNeeded(plugin, worldMan);
+            registerNoSlowAdapterIfNeeded(plugin);
+            registerFightAdapterIfSupported(plugin);
+            logActivationSummary();
+        } else {
             StaticLog.logInfo("No packet level checks activated.");
-            return;
         }
-        StaticLog.logInfo("Adding packet level hooks for ProtocolLib (MC " + ProtocolLibrary.getProtocolManager().getMinecraftVersion().getVersion() + ")...");
-        //Special purpose.
-        if (ConfigManager.isTrueForAnyConfig(ConfPaths.NET + ConfPaths.SUB_DEBUG) || ConfigManager.isTrueForAnyConfig(ConfPaths.CHECKS_DEBUG) ) {
-            // (Debug logging. Only activates if debug is set for checks or checks.net, not on the fly.)
+    }
+
+    /** Register the debug adapter if debugging is enabled. */
+    private void registerDebugAdapterIfNeeded(Plugin plugin) {
+        if (ConfigManager.isTrueForAnyConfig(ConfPaths.NET + ConfPaths.SUB_DEBUG)
+                || ConfigManager.isTrueForAnyConfig(ConfPaths.CHECKS_DEBUG)) {
+            // Debug logging. Only activates if debug is set for checks or checks.net, not on the fly.
             register("fr.neatmonster.nocheatplus.checks.net.protocollib.DebugAdapter", plugin);
         }
-        // Actual checks.
+    }
+
+    /** Register UseEntityAdapter depending on server version and check state. */
+    private void registerUseEntityAdapterIfNeeded(Plugin plugin, IWorldDataManager worldMan) {
         if (ServerVersion.compareMinecraftVersion("1.6.4") <= 0) {
             // Don't use this listener.
-            NCPAPIProvider.getNoCheatPlusAPI().getLogManager().info(Streams.STATUS, "Disable EntityUseAdapter due to incompatibilities. Use fight.speed instead of net.attackfrequency.");
+            NCPAPIProvider.getNoCheatPlusAPI().getLogManager().info(Streams.STATUS,
+                    "Disable EntityUseAdapter due to incompatibilities. Use fight.speed instead of net.attackfrequency.");
         } else {
-            registerIfActive(CheckType.NET_ATTACKFREQUENCY, plugin, "fr.neatmonster.nocheatplus.checks.net.protocollib.UseEntityAdapter");
+            registerIfActive(CheckType.NET_ATTACKFREQUENCY, plugin,
+                    "fr.neatmonster.nocheatplus.checks.net.protocollib.UseEntityAdapter");
         }
-        if (worldMan.isActiveAnywhere(CheckType.NET_FLYINGFREQUENCY) || worldMan.isActiveAnywhere(CheckType.NET_MOVING)) {
+    }
+
+    /** Register adapters related to moving/flying packets. */
+    private void registerMovementAdaptersIfNeeded(Plugin plugin, IWorldDataManager worldMan) {
+        if (worldMan.isActiveAnywhere(CheckType.NET_FLYINGFREQUENCY)
+                || worldMan.isActiveAnywhere(CheckType.NET_MOVING)) {
             // (Also sets lastKeepAliveTime, if enabled.)
             register("fr.neatmonster.nocheatplus.checks.net.protocollib.MovingFlying", plugin);
             register("fr.neatmonster.nocheatplus.checks.net.protocollib.OutgoingPosition", plugin);
         }
-        if (worldMan.isActiveAnywhere(CheckType.NET_KEEPALIVEFREQUENCY) || worldMan.isActiveAnywhere(CheckType.FIGHT_GODMODE)) {
+    }
+
+    /** Register KeepAliveAdapter if relevant checks are enabled. */
+    private void registerKeepAliveAdapterIfNeeded(Plugin plugin, IWorldDataManager worldMan) {
+        if (worldMan.isActiveAnywhere(CheckType.NET_KEEPALIVEFREQUENCY)
+                || worldMan.isActiveAnywhere(CheckType.FIGHT_GODMODE)) {
             // (Set lastKeepAlive if this or fight.godmode is enabled.)
             register("fr.neatmonster.nocheatplus.checks.net.protocollib.KeepAliveAdapter", plugin);
         }
-        registerIfActive(CheckType.NET_SOUNDDISTANCE, plugin, "fr.neatmonster.nocheatplus.checks.net.protocollib.SoundDistance");
-        registerIfActive(CheckType.NET_WRONGTURN, plugin, "fr.neatmonster.nocheatplus.checks.net.protocollib.WrongTurnAdapter");
-        if (ServerVersion.compareMinecraftVersion("1.9") < 0 && worldMan.isActiveAnywhere(CheckType.NET_PACKETFREQUENCY)) {
+    }
+
+    /** Register CatchAllAdapter if supported by the server version. */
+    private void registerCatchAllAdapterIfNeeded(Plugin plugin, IWorldDataManager worldMan) {
+        if (ServerVersion.compareMinecraftVersion("1.9") < 0
+                && worldMan.isActiveAnywhere(CheckType.NET_PACKETFREQUENCY)) {
             register("fr.neatmonster.nocheatplus.checks.net.protocollib.CatchAllAdapter", plugin);
         }
-        if (ConfigManager.isTrueForAnyConfig(ConfPaths.MOVING_SURVIVALFLY_EXTENDED_NOSLOW) && ServerVersion.compareMinecraftVersion("1.8") >= 0) {
+    }
+
+    /** Register NoSlow adapter if configured and supported. */
+    private void registerNoSlowAdapterIfNeeded(Plugin plugin) {
+        if (ConfigManager.isTrueForAnyConfig(ConfPaths.MOVING_SURVIVALFLY_EXTENDED_NOSLOW)
+                && ServerVersion.compareMinecraftVersion("1.8") >= 0) {
             register("fr.neatmonster.nocheatplus.checks.net.protocollib.NoSlow", plugin);
         }
-        registerIfVersionAtLeast("1.8", plugin, "fr.neatmonster.nocheatplus.checks.net.protocollib.Fight");
+    }
+
+    /** Always register the fight adapter for supported server versions. */
+    private void registerFightAdapterIfSupported(Plugin plugin) {
+        registerIfVersionAtLeast("1.8", plugin,
+                "fr.neatmonster.nocheatplus.checks.net.protocollib.Fight");
+    }
+
+    /** Log a summary of activated packet listeners. */
+    private void logActivationSummary() {
         if (!registeredPacketAdapters.isEmpty()) {
             List<String> names = new ArrayList<String>(registeredPacketAdapters.size());
             for (PacketAdapter adapter : registeredPacketAdapters) {
                 names.add(adapter.getClass().getSimpleName());
             }
-            StaticLog.logInfo("Available (and activated) packet level hooks: " + StringUtil.join(names, " | "));
+            StaticLog.logInfo("Available (and activated) packet level hooks: "
+                    + StringUtil.join(names, " | "));
             NCPAPIProvider.getNoCheatPlusAPI().addFeatureTags("packet-listeners", names);
-        } 
-        else {
+        } else {
             StaticLog.logInfo("No packet level hooks activated.");
         }
     }

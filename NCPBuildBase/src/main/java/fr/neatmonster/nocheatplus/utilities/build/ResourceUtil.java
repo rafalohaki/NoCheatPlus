@@ -20,6 +20,7 @@ import java.io.InputStream;
 import java.io.InputStreamReader;
 import java.nio.charset.StandardCharsets;
 import java.net.URL;
+import java.security.CodeSource;
 import java.util.Map;
 
 public class ResourceUtil {
@@ -40,6 +41,15 @@ public class ResourceUtil {
     public static String fetchResource(final Class<?> clazz, final String path) {
         final String className = clazz.getSimpleName() + ".class";
         final String classPath = clazz.getResource(className).toString();
+        final CodeSource codeSource = clazz.getProtectionDomain().getCodeSource();
+        if (codeSource == null) {
+            return null;
+        }
+        final String csPath = codeSource.getLocation().getPath();
+        final String csLower = csPath.toLowerCase();
+        if (!csLower.endsWith(".jar") && !csLower.contains(".jar!")) {
+            return null;
+        }
         if (!classPath.startsWith("jar")) {
             return null;
         }

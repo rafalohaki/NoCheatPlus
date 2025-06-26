@@ -52,6 +52,11 @@ public class Text extends Check implements INotifyReload {
     private String lastGlobalMessage = "";
     private long lastGlobalTime = 0;
 
+    /**
+     * Dampening factor for uppercase ratio to prevent over-penalization.
+     */
+    private static final float UPPERCASE_WEIGHT_FACTOR = 0.6f;
+
     public Text() {
         super(CheckType.CHAT_TEXT);
         init();
@@ -193,15 +198,29 @@ public class Text extends Check implements INotifyReload {
     private ScoreResult calculateScore(final String message, final String lcMessage, final long time,
             final ChatConfig cc, final ChatData data, final IPlayerData pData,
             final boolean debug, final List<String> debugParts) {
-        float score = 0f;
         final MessageLetterCount letterCounts = new MessageLetterCount(message);
         final int msgLen = message.length();
 
-        if (letterCounts.fullCount.upperCase > msgLen / 3) {
-            final float wUpperCase = 0.6f * letterCounts.fullCount.getUpperCaseRatio();
-            score += wUpperCase  * cc.textMessageUpperCase;
-        }
+        float score = 0f;
+        score += computeCaseScore(letterCounts, msgLen, cc);
+        score += computeRepetitionScore(letterCounts, msgLen, cc);
+        score += computeTimeBasedScore(lcMessage, time, cc, data, pData);
+        score += computeWordScore(letterCounts, msgLen, cc);
 
+        return new ScoreResult(score, letterCounts);
+    }
+
+    private float computeCaseScore(final MessageLetterCount letterCounts, final int msgLen, final ChatConfig cc) {
+        float score = 0f;
+        if (letterCounts.fullCount.upperCase > msgLen / 3) {
+            final float wUpperCase = UPPERCASE_WEIGHT_FACTOR * letterCounts.fullCount.getUpperCaseRatio();
+            score += wUpperCase * cc.textMessageUpperCase;
+        }
+        return score;
+    }
+
+    private float computeRepetitionScore(final MessageLetterCount letterCounts, final int msgLen, final ChatConfig cc) {
+        float score = 0f;
         if (msgLen > 4) {
             final float fullRep = letterCounts.fullCount.getLetterCountRatio();
             final float wRepetition = (float) Math.min(msgLen, 128) / 15.0f * Math.abs(0.5f - fullRep);
@@ -209,41 +228,53 @@ public class Text extends Check implements INotifyReload {
 
             final float fnWords = (float) letterCounts.words.length / (float) msgLen;
             if (fnWords > 0.75f) {
-                score += fnWords  * cc.textMessagePartition;
+                score += fnWords * cc.textMessagePartition;
             }
         }
+        return score;
+    }
 
-        final CombinedData cData = pData.getGenericInstance(CombinedData.class);
+    private float computeTimeBasedScore(final String lcMessage, final long time, final ChatConfig cc,
+            final ChatData data, final IPlayerData pData) {
+        float score = 0f;
+        final CombinedData cData = pData != null ? pData.getGenericInstance(CombinedData.class) : null;
         final long timeout = 8000;
-        if (cc.textMsgRepeatSelf != 0f && time - data.chatLastTime < timeout) {
-            if (StringUtil.isSimilar(lcMessage, data.chatLastMessage, 0.8f)) {
-                final float timeWeight = (float) (timeout - (time - data.chatLastTime)) / (float) timeout;
-                score += cc.textMsgRepeatSelf * timeWeight;
-            }
-        }
-        if (cc.textMsgRepeatGlobal != 0f && time - lastGlobalTime < timeout) {
-            if (StringUtil.isSimilar(lcMessage, lastGlobalMessage, 0.8f)) {
-                final float timeWeight = (float) (timeout - (time - lastGlobalTime)) / (float) timeout;
-                score += cc.textMsgRepeatGlobal * timeWeight;
-            }
-        }
-        if (cc.textMsgRepeatCancel != 0f && time - lastCancelledTime < timeout) {
-            if (StringUtil.isSimilar(lcMessage, lastCancelledMessage, 0.8f)) {
-                final float timeWeight = (float) (timeout - (time - lastCancelledTime)) / (float) timeout;
-                score += cc.textMsgRepeatCancel * timeWeight;
-            }
-        }
-        if (cc.textMsgAfterJoin != 0f && time - cData.lastJoinTime < timeout) {
-            final float timeWeight = (float) (timeout - (time - cData.lastJoinTime)) / (float) timeout;
-            score += cc.textMsgAfterJoin * timeWeight;
-        }
-        if (cc.textMsgNoMoving != 0f && time - cData.lastMoveTime > timeout) {
-            score += cc.textMsgNoMoving;
+
+        if (cc.textMsgRepeatSelf != 0f && time - data.chatLastTime < timeout
+                && StringUtil.isSimilar(lcMessage, data.chatLastMessage, 0.8f)) {
+            final float timeWeight = (float) (timeout - (time - data.chatLastTime)) / (float) timeout;
+            score += cc.textMsgRepeatSelf * timeWeight;
         }
 
+        if (cc.textMsgRepeatGlobal != 0f && time - lastGlobalTime < timeout
+                && StringUtil.isSimilar(lcMessage, lastGlobalMessage, 0.8f)) {
+            final float timeWeight = (float) (timeout - (time - lastGlobalTime)) / (float) timeout;
+            score += cc.textMsgRepeatGlobal * timeWeight;
+        }
+
+        if (cc.textMsgRepeatCancel != 0f && time - lastCancelledTime < timeout
+                && StringUtil.isSimilar(lcMessage, lastCancelledMessage, 0.8f)) {
+            final float timeWeight = (float) (timeout - (time - lastCancelledTime)) / (float) timeout;
+            score += cc.textMsgRepeatCancel * timeWeight;
+        }
+
+        if (cData != null) {
+            if (cc.textMsgAfterJoin != 0f && time - cData.lastJoinTime < timeout) {
+                final float timeWeight = (float) (timeout - (time - cData.lastJoinTime)) / (float) timeout;
+                score += cc.textMsgAfterJoin * timeWeight;
+            }
+            if (cc.textMsgNoMoving != 0f && time - cData.lastMoveTime > timeout) {
+                score += cc.textMsgNoMoving;
+            }
+        }
+
+        return score;
+    }
+
+    private float computeWordScore(final MessageLetterCount letterCounts, final int msgLen, final ChatConfig cc) {
         float wWords = 0.0f;
         final float avwLen = (float) msgLen / (float) letterCounts.words.length;
-        for (final WordLetterCount word: letterCounts.words) {
+        for (final WordLetterCount word : letterCounts.words) {
             float wWord = 0.0f;
             final int wLen = word.word.length();
             final float fLenAv = Math.abs(avwLen - (float) wLen) / avwLen;
@@ -257,9 +288,7 @@ public class Text extends Check implements INotifyReload {
             wWords += wWord;
         }
         wWords /= (float) letterCounts.words.length;
-        score += wWords;
-
-        return new ScoreResult(score, letterCounts);
+        return wWords;
     }
 
     private static final class EngineResult {

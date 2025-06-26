@@ -44,11 +44,15 @@ public class ReflectBlockSix implements IReflectBlock {
 
     /** Obfuscated nms names, allowing to find the order in the source code under certain circumstances. */
     private static final List<String> possibleNames = new ArrayList<String>();
+    private static final java.util.Map<String, Integer> possibleNameIndices = new java.util.HashMap<String, Integer>();
 
     static {
         // These might suffice for a while.
+        int index = 0;
         for (char c : "abcdefghijklmnopqrstuvwxyzABCDEFGHIJKLMNOPQRSTUVWXYZ".toCharArray()) {
-            possibleNames.add("" + c);
+            String name = "" + c;
+            possibleNames.add(name);
+            possibleNameIndices.put(name, index++);
         }
     }
 
@@ -162,61 +166,67 @@ public class ReflectBlockSix implements IReflectBlock {
      *         resolved
      */
     private String[] guessBoundsMethodNames(Class<?> clazz) {
-        // Collect valid candidate names.
-        List<String> names = new ArrayList<String>();
-        for (Method method : clazz.getMethods()) {
-            if (method.getReturnType() == double.class && method.getParameterTypes().length == 0 && possibleNames.contains(method.getName())) {
-                names.add(method.getName());
-            }
-        }
+        List<String> names = collectCandidateNames(clazz);
         if (names.size() < 6) {
             return null;
         }
-        // Sort according to possibleNames order.
-        names.sort(Comparator.comparingInt(possibleNames::indexOf));
-        // Check for six consecutive names.
-        int startIndex = 0;
-        if (names.size() > 6) {
-            // Attempt to locate the start index (future versions may have more).
-            startIndex = -1; // start index within candidate list
-            int lastIndex = -2; // index of last name within possibleNames
-            int currentStart = -1; // temporary start index
-            for (int i = 0; i < names.size(); i++) {
-                String name = names.get(i);
-                int nameIndex = possibleNames.indexOf(name);
-                if (nameIndex - lastIndex == 1) {
-                    if (currentStart == -1) {
-                        currentStart = nameIndex - 1;
-                    } else {
-                        int length = nameIndex - currentStart + 1;
-                        if (length > 6) {
-                            // ambiguous
-                            return null;
-                        }
-                        else if (length == 6) {
-                            if (startIndex != -1) {
-                                // ambiguous
-                                return null;
-                            } else {
-                                startIndex = i + 1 - length;
-                                // keep to detect long sequences
-                            }
-                        }
-                    }
-                } else {
-                    currentStart = -1;
-                }
-                lastIndex = nameIndex;
-            }
-            if (startIndex == -1) {
-                return null;
-            }
+        names.sort(Comparator.comparingInt(possibleNameIndices::get));
+        int startIndex = findConsecutiveStart(names);
+        if (startIndex == -1) {
+            return null;
         }
         String[] res = new String[6];
         for (int i = 0; i < 6; i++) {
             res[i] = names.get(startIndex + i);
         }
         return res;
+    }
+
+    private List<String> collectCandidateNames(Class<?> clazz) {
+        List<String> names = new ArrayList<String>();
+        for (Method method : clazz.getMethods()) {
+            boolean hasCorrectSignature = method.getReturnType() == double.class
+                    && method.getParameterTypes().length == 0;
+            if (hasCorrectSignature && possibleNames.contains(method.getName())) {
+                names.add(method.getName());
+            }
+        }
+        return names;
+    }
+
+    private int findConsecutiveStart(List<String> names) {
+        if (names.size() == 6) {
+            return 0;
+        }
+        int startIndex = -1;
+        int lastIndex = -2;
+        int currentStart = -1;
+        for (int i = 0; i < names.size(); i++) {
+            Integer nameIndexObj = possibleNameIndices.get(names.get(i));
+            if (nameIndexObj == null) {
+                continue;
+            }
+            int nameIndex = nameIndexObj.intValue();
+            if (nameIndex - lastIndex == 1) {
+                if (currentStart == -1) {
+                    currentStart = nameIndex - 1;
+                } else {
+                    int length = nameIndex - currentStart + 1;
+                    if (length > 6) {
+                        return -1;
+                    } else if (length == 6) {
+                        if (startIndex != -1) {
+                            return -1;
+                        }
+                        startIndex = i + 1 - length;
+                    }
+                }
+            } else {
+                currentStart = -1;
+            }
+            lastIndex = nameIndex;
+        }
+        return startIndex;
     }
 
     /**
