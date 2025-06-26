@@ -306,84 +306,61 @@ public class Reach extends Check {
      * @param cc
      * @return
      */
-    public boolean loopFinish(final Player player, final Location pLoc, final Entity damaged, 
-                              final ReachContext context, final ITraceEntry traceEntry, final boolean forceViolation, 
+    public boolean loopFinish(final Player player, final Location pLoc, final Entity damaged,
+                              final ReachContext context, final ITraceEntry traceEntry, final boolean forceViolation,
                               final FightData data, final FightConfig cc, final IPlayerData pData) {
 
-        final double lenpRel = forceViolation && context.minViolation != Double.MAX_VALUE ? context.minViolation : context.minResult;
+        final double lenpRel = forceViolation && context.minViolation != Double.MAX_VALUE
+                ? context.minViolation : context.minResult;
 
         if (lenpRel == Double.MAX_VALUE) {
             return false;
         }
 
-        double violation = lenpRel - context.distanceLimit;
+        final double violation = lenpRel - context.distanceLimit;
         boolean cancel = false;
 
-        if (violation > 0) {    
-            if (TickTask.getLag(1000, true) < 1.5f){
-                data.reachVL += violation;
-                final ViolationData vd = new ViolationData(this, player, data.reachVL, violation, cc.reachActions);
-                vd.setParameter(ParameterName.REACH_DISTANCE, StringUtil.fdec3.format(lenpRel));
-                // Execute whatever actions are associated with this check and the violation level and find out if we should
-                // cancel the event.
-                cancel = executeActions(vd).willCancel();
-            }
-            
-            //if (Improbable.check(player, (float) violation / 2f, System.currentTimeMillis(), 
-            //        "fight.reach", pData)){
-            //    cancel = true;
-            //}
-            // Future improvement: adjust improbable weight calculations so that
-            // the weight is not inverse to the configured value
-            if (cc.reachImprobableWeight > 0.0f) {
-                if (!cc.reachImprobableFeedOnly && Improbable.check(player, (float) violation / cc.reachImprobableWeight, System.currentTimeMillis(), "fight.reach", pData)) {
-                    cancel = true;
-                }
-            }
-
-            if (cancel && cc.reachPenalty > 0){
-                // Apply an attack penalty time.
-                data.attackPenalty.applyPenalty(cc.reachPenalty);
-            }
-        }
-        else if (lenpRel - context.distanceLimit * data.reachMod > 0){
-            // Silent cancel.
-            if (cc.reachPenalty > 0) {
-                data.attackPenalty.applyPenalty(cc.reachPenalty / 2);
-            }
-
-            cancel = true;
-
-            if (cc.reachImprobableWeight > 0.0f) {
-                Improbable.feed(player, (float) (lenpRel - context.distanceLimit * data.reachMod) / cc.reachImprobableWeight, System.currentTimeMillis());
-            }
-            // Improbable.feed(player, (float) (lenpRel - context.distanceLimit * data.reachMod) / 4f, System.currentTimeMillis());
-        }
-        else {
-            // Player passed the check, reward them.
+        if (violation > 0) {
+            cancel = handleViolation(player, lenpRel, violation, data, cc, pData);
+        } else if (lenpRel - context.distanceLimit * data.reachMod > 0) {
+            cancel = handleSilentViolation(player, lenpRel, context.distanceLimit,
+                    data.reachMod, cc, data);
+        } else {
             data.reachVL *= 0.8D;
-
         }
 
-        // Adaption amount for dynamic range.
-        final double DYNAMIC_STEP = cc.reachReduceStep / cc.reachSurvivalDistance;
-
-        if (!cc.reachReduce){
-            data.reachMod = 1d;
-        }
-        else if (lenpRel > context.distanceLimit - cc.reachReduceDistance){
-            data.reachMod = Math.max(context.distanceMin, data.reachMod - DYNAMIC_STEP);
-        }
-        else {
-            data.reachMod = Math.min(1.0, data.reachMod + DYNAMIC_STEP);
-        }
-
-        if (pData.isDebugActive(type) && pData.hasPermission(Permissions.ADMINISTRATION_DEBUG, player)){
-            // Potential enhancement: remember the successful ITraceEntry for height
-            player.sendMessage("NC+: Attack/reach " + damaged.getType()+ (traceEntry == null ? "" : (" height=" + traceEntry.getBoxMarginVertical())) + " dist=" + StringUtil.fdec3.format(lenpRel) +" @" + StringUtil.fdec3.format(data.reachMod));
-        }
+        updateReachModifier(lenpRel, context, data, cc);
+        sendDebugInfo(player, damaged, traceEntry, lenpRel, data, pData);
 
         return cancel;
+    }
+
+    /**
+     * Update the dynamic reach modifier based on the last result.
+     */
+    private void updateReachModifier(final double lenpRel, final ReachContext context,
+                                     final FightData data, final FightConfig cc) {
+        final double dynamicStep = cc.reachReduceStep / cc.reachSurvivalDistance;
+        if (!cc.reachReduce) {
+            data.reachMod = 1d;
+        } else if (lenpRel > context.distanceLimit - cc.reachReduceDistance) {
+            data.reachMod = Math.max(context.distanceMin, data.reachMod - dynamicStep);
+        } else {
+            data.reachMod = Math.min(1.0, data.reachMod + dynamicStep);
+        }
+    }
+
+    /**
+     * Send debug information about the reach calculation.
+     */
+    private void sendDebugInfo(final Player player, final Entity damaged, final ITraceEntry traceEntry,
+                               final double lenpRel, final FightData data, final IPlayerData pData) {
+        if (pData.isDebugActive(type) && pData.hasPermission(Permissions.ADMINISTRATION_DEBUG, player)) {
+            final String heightInfo = traceEntry == null ? "" : " height=" + traceEntry.getBoxMarginVertical();
+            player.sendMessage("NC+: Attack/reach " + damaged.getType() + heightInfo
+                    + " dist=" + StringUtil.fdec3.format(lenpRel)
+                    + " @" + StringUtil.fdec3.format(data.reachMod));
+        }
     }
 
 
