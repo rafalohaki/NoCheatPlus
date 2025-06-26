@@ -22,6 +22,13 @@ import fr.neatmonster.nocheatplus.components.data.IDataOnRemoveSubCheckData;
 import fr.neatmonster.nocheatplus.utilities.PenaltyTime;
 import fr.neatmonster.nocheatplus.utilities.ds.count.ActionFrequency;
 
+/**
+ * Stores runtime data for the combined checks. When the {@link CheckType#COMBINED}
+ * group is removed the entire data instance gets discarded. Therefore the
+ * {@code COMBINED} case in {@link #dataOnRemoveSubCheckData(Collection)} does
+ * not reset fields explicitly, but simply signals removal by returning
+ * {@code true}.
+ */
 public class CombinedData extends ACheckData implements IDataOnRemoveSubCheckData {
 
     // VLs
@@ -56,7 +63,7 @@ public class CombinedData extends ACheckData implements IDataOnRemoveSubCheckDat
         for (final CheckType checkType : checkTypes)
         {
             switch(checkType) {
-                // Case COMBINED not implemented yet
+                // Reset only the fields relevant for the individual sub checks.
                 case COMBINED_IMPROBABLE:
                     improbableVL = 0;
                     improbableCount.clear(System.currentTimeMillis()); // Note: Document here which timestamp source should be used.
@@ -68,6 +75,8 @@ public class CombinedData extends ACheckData implements IDataOnRemoveSubCheckDat
                     munchHausenVL = 0;
                     break;
                 case COMBINED:
+                    // The entire data instance will be removed, so no explicit
+                    // field reset is required here.
                     return true;
                 default:
                     break;

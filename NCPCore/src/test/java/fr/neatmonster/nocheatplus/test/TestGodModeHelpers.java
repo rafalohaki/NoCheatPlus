@@ -38,6 +38,7 @@ import fr.neatmonster.nocheatplus.components.registry.ComponentRegistry;
 import fr.neatmonster.nocheatplus.components.registry.setup.RegistrationContext;
 import fr.neatmonster.nocheatplus.actions.ActionFactoryFactory;
 import fr.neatmonster.nocheatplus.actions.ActionFactory;
+import fr.neatmonster.nocheatplus.time.monotonic.Monotonic;
 import fr.neatmonster.nocheatplus.players.IPlayerDataManager;
 import fr.neatmonster.nocheatplus.config.ConfigFile;
 import fr.neatmonster.nocheatplus.compat.AlmostBoolean;
@@ -195,11 +196,11 @@ public class TestGodModeHelpers {
         when(worldData.getRawConfiguration()).thenReturn(new DefaultConfig());
         FightConfig cfg = new FightConfig(worldData);
         FightData fData = new FightData(cfg);
-        fData.speedBuckets.clear(System.currentTimeMillis());
+        fData.speedBuckets.clear(Monotonic.synchMillis());
         BlockBreakConfig bbCfg = new BlockBreakConfig(worldData);
         BlockBreakData bbData = new BlockBreakData(bbCfg);
         bbData.fastBreakfirstDamage = 0;
-        bbData.frequencyBuckets.clear(System.currentTimeMillis());
+        bbData.frequencyBuckets.clear(Monotonic.synchMillis());
         CombinedData cData = new CombinedData();
         cData.lastMoveTime = 0;
         InventoryData iData = new InventoryData();
@@ -215,7 +216,7 @@ public class TestGodModeHelpers {
         when(pData.getGenericInstance(NetData.class)).thenReturn(netData);
 
         long diff = (cfg.godModeLagMinAge + cfg.godModeLagMaxAge) / 2;
-        netData.lastKeepAliveTime = System.currentTimeMillis() - diff;
+        netData.lastKeepAliveTime = Monotonic.synchMillis() - diff;
         Player player = mock(Player.class);
         GodMode gm = new GodMode();
 
