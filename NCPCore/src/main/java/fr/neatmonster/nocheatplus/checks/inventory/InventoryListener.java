@@ -72,6 +72,8 @@ import fr.neatmonster.nocheatplus.players.IPlayerData;
 import fr.neatmonster.nocheatplus.stats.Counters;
 import fr.neatmonster.nocheatplus.utilities.InventoryUtil;
 import fr.neatmonster.nocheatplus.utilities.ReflectionUtil;
+import fr.neatmonster.nocheatplus.logging.LogManager;
+import fr.neatmonster.nocheatplus.logging.Streams;
 import fr.neatmonster.nocheatplus.utilities.map.BlockProperties;
 import fr.neatmonster.nocheatplus.utilities.map.MaterialUtil;
 
@@ -245,7 +247,7 @@ public class InventoryListener  extends CheckListener implements JoinLeaveListen
         final ItemStack cursor = event.getCursor();
         final ItemStack clicked = event.getCurrentItem();
 
-        boolean cancel = checkIllegalEnchantments(player, cursor, clicked, pData);
+        boolean cancel = checkIllegalEnchantments(player, cursor, clicked, pData, slot);
         cancel |= checkFastClick(event, player, pData, now, slot, cursor, clicked, action, data);
         cancel |= checkInventoryMove(event, player, pData, data);
 
@@ -264,26 +266,33 @@ public class InventoryListener  extends CheckListener implements JoinLeaveListen
     }
 
     private boolean checkIllegalEnchantments(final Player player, final ItemStack cursor,
-            final ItemStack clicked, final IPlayerData pData) {
+            final ItemStack clicked, final IPlayerData pData, final int slot) {
         try {
             if (Items.checkIllegalEnchantments(player, clicked, pData)) {
                 counters.addPrimaryThread(idIllegalItem, 1);
                 return true;
             }
-        } catch (final ArrayIndexOutOfBoundsException ignore) {
-            // Safe to ignore - CraftBukkit issue where slot can sometimes be out of range
-            // See: https://hub.spigotmc.org/jira/browse/SPIGOT-123
+        } catch (final ArrayIndexOutOfBoundsException ex) {
+            logSlotWarning(player, slot, ex);
         }
         try {
             if (Items.checkIllegalEnchantments(player, cursor, pData)) {
                 counters.addPrimaryThread(idIllegalItem, 1);
                 return true;
             }
-        } catch (final ArrayIndexOutOfBoundsException ignore) {
-            // Safe to ignore - CraftBukkit issue where slot can sometimes be out of range
-            // See: https://hub.spigotmc.org/jira/browse/SPIGOT-123
+        } catch (final ArrayIndexOutOfBoundsException ex) {
+            logSlotWarning(player, slot, ex);
         }
         return false;
+    }
+
+    private void logSlotWarning(final Player player, final int slot,
+            final ArrayIndexOutOfBoundsException ex) {
+        final String playerName = player != null ? player.getName() : "null";
+        final LogManager logManager = NCPAPIProvider.getNoCheatPlusAPI().getLogManager();
+        logManager.warning(Streams.PLUGIN_LOGGER,
+                "Slot out of range while checking illegal enchantments: player="
+                        + playerName + " slot=" + slot + " (" + ex.getMessage() + ")");
     }
 
     private boolean checkFastClick(final InventoryClickEvent event, final Player player, final IPlayerData pData,
