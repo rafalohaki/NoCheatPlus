@@ -5,6 +5,7 @@ import static org.mockito.Mockito.*;
 
 import java.lang.reflect.Method;
 import java.lang.reflect.Proxy;
+import java.util.ArrayList;
 import java.util.Arrays;
 import java.util.HashSet;
 import java.util.List;
@@ -36,7 +37,7 @@ public class TestPermissionUtil {
         @Override public List<String> getAliases() { return aliases; }
         @Override
         public Command setAliases(List<String> a) {
-            this.aliases = a;
+            this.aliases = (a != null) ? new ArrayList<>(a) : null;
             return this;
         }
         @Override public String getPermission() { return permission; }
