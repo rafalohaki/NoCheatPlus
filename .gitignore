@@ -90,3 +90,5 @@ dummy/
 !NCPBuildBase/src/test/java/fr/neatmonster/nocheatplus/utilities/build/ResourceUtilTest.java
 !NCPBuildBase/src/main/java/fr/neatmonster/nocheatplus/utilities/build/URLUtil.java
 !NCPBuildBase/src/test/java/fr/neatmonster/nocheatplus/utilities/build/URLUtilTest.java
+
+essa.patch
