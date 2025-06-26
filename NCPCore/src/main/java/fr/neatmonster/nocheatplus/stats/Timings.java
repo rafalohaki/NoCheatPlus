@@ -79,7 +79,8 @@ public final class Timings {
                 void updateRange(final long value) {
                         if (value < min) {
                                 min = value;
-                        } else if (value > max) {
+                        }
+                        if (value > max) {
                                 max = value;
                         }
                 }
