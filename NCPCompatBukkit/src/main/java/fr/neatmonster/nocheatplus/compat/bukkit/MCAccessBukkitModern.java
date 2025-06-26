@@ -21,6 +21,8 @@ import java.util.HashMap;
 import java.util.Map;
 import java.util.Arrays;
 
+import fr.neatmonster.nocheatplus.utilities.InventoryUtil;
+
 import org.bukkit.Material;
 import org.bukkit.entity.Player;
 
@@ -47,6 +49,9 @@ public class MCAccessBukkitModern extends MCAccessBukkit {
     protected ReflectDamageSources reflectDamageSources = null;
     protected ReflectLivingEntity reflectLivingEntity = null;
     protected final Map<Material, BukkitShapeModel> shapeModels = new HashMap<Material, BukkitShapeModel>();
+
+    /** Cached Material values from InventoryUtil. */
+    private static final Material[] ALL_MATERIALS = InventoryUtil.ALL_MATERIALS;
 
     // Blocks that can be fetched automatically from from the Bukkit API
     private static final BukkitShapeModel MODEL_AUTO_FETCH = new BukkitFetchableBounds();
@@ -375,7 +380,7 @@ public class MCAccessBukkitModern extends MCAccessBukkit {
     }
 
     private void registerFlagBasedModels() {
-        for (final Material mat : Material.values()) {
+        for (final Material mat : ALL_MATERIALS) {
             final long flags = BlockFlags.getBlockFlags(mat);
             if (BlockFlags.hasAnyFlag(flags, BlockFlags.F_STAIRS)) {
                 addModel(mat, MODEL_STAIRS);
