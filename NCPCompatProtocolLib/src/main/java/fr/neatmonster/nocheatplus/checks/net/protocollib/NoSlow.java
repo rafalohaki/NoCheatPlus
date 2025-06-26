@@ -187,62 +187,109 @@ public class NoSlow extends BaseAdapter {
 
     private static boolean evaluateItemUse(final Player player, final PlayerInteractEvent event,
                                            final ItemStack item, final MovingData data) {
-        final Material type = item.getType();
-
-        if (Bridge1_9.hasElytra() && player.hasCooldown(type)) {
+        if (player == null || event == null || item == null || data == null) {
             return false;
         }
 
-        if (InventoryUtil.isConsumable(item)) {
-            if (!Bridge1_9.hasElytra() && item.getDurability() > 16384) {
-                return false;
-            }
+        final Material type = item.getType();
 
-        if (type == Material.POTION || type == Material.MILK_BUCKET || type.toString().endsWith("_APPLE")
-                || type.name().startsWith("HONEY_BOTTLE")) {
-            final EquipmentSlot slot = event.getHand();
-            data.offHandUse = Bridge1_9.hasGetItemInOffHand() && slot != null && slot == EquipmentSlot.OFF_HAND;
+        if (playerHasCooldown(player, type)) {
+            return false;
+        }
+
+        if (checkConsumableUse(player, event, item, data)) {
+            return true;
+        }
+
+        if (isBowUsage(player, event, type, data)) {
+            return true;
+        }
+
+        if (isShieldOrTrident(event, type, data)) {
+            return false;
+        }
+
+        if (checkCrossbowUse(player, event, item, data)) {
+            return true;
+        }
+
+        return false;
+    }
+
+    private static boolean playerHasCooldown(final Player player, final Material type) {
+        return Bridge1_9.hasElytra() && player.hasCooldown(type);
+    }
+
+    private static boolean checkConsumableUse(final Player player, final PlayerInteractEvent event,
+                                              final ItemStack item, final MovingData data) {
+        if (!InventoryUtil.isConsumable(item)) {
+            return false;
+        }
+        if (!Bridge1_9.hasElytra() && item.getDurability() > 16384) {
+            return false;
+        }
+
+        final Material type = item.getType();
+        if (isDrinkable(type)) {
+            markOffHandUse(event, data, true);
             return true;
         }
 
         if (type.isEdible() && player.getFoodLevel() < 20) {
-            final EquipmentSlot slot = event.getHand();
-            data.offHandUse = Bridge1_9.hasGetItemInOffHand() && slot != null && slot == EquipmentSlot.OFF_HAND;
+            markOffHandUse(event, data, true);
             return true;
-        }
-        }
-
-        if (type == Material.BOW && hasArrow(player.getInventory(), false)) {
-            final EquipmentSlot slot = event.getHand();
-            data.offHandUse = Bridge1_9.hasGetItemInOffHand() && slot != null && slot == EquipmentSlot.OFF_HAND;
-            return true;
-        }
-
-        if (Bridge1_9.hasElytra() && type == Material.SHIELD) {
-            final EquipmentSlot slot = event.getHand();
-            data.offHandUse = slot != null && slot == EquipmentSlot.OFF_HAND;
-            return false;
-        }
-
-        if (Bridge1_13.hasIsRiptiding() && type == Material.TRIDENT) {
-            final EquipmentSlot slot = event.getHand();
-            data.offHandUse = slot != null && slot == EquipmentSlot.OFF_HAND;
-            return false;
-        }
-
-        if (type.toString().equals("CROSSBOW")) {
-            final ItemMeta rawMeta = item.getItemMeta();
-            if (rawMeta instanceof CrossbowMeta) {
-                final CrossbowMeta meta = (CrossbowMeta) rawMeta;
-                if (!meta.hasChargedProjectiles() && hasArrow(player.getInventory(), true)) {
-                    final EquipmentSlot slot = event.getHand();
-                    data.offHandUse = slot != null && slot == EquipmentSlot.OFF_HAND;
-                    return true;
-                }
-            }
         }
 
         return false;
+    }
+
+    private static boolean isDrinkable(final Material type) {
+        return type == Material.POTION || type == Material.MILK_BUCKET || type.toString().endsWith("_APPLE")
+                || type.name().startsWith("HONEY_BOTTLE");
+    }
+
+    private static boolean isBowUsage(final Player player, final PlayerInteractEvent event, final Material type,
+                                      final MovingData data) {
+        if (type == Material.BOW && hasArrow(player.getInventory(), false)) {
+            markOffHandUse(event, data, true);
+            return true;
+        }
+        return false;
+    }
+
+    private static boolean isShieldOrTrident(final PlayerInteractEvent event, final Material type,
+                                             final MovingData data) {
+        if (Bridge1_9.hasElytra() && type == Material.SHIELD) {
+            markOffHandUse(event, data, false);
+            return true;
+        }
+        if (Bridge1_13.hasIsRiptiding() && type == Material.TRIDENT) {
+            markOffHandUse(event, data, false);
+            return true;
+        }
+        return false;
+    }
+
+    private static boolean checkCrossbowUse(final Player player, final PlayerInteractEvent event,
+                                            final ItemStack item, final MovingData data) {
+        if (!"CROSSBOW".equals(item.getType().toString())) {
+            return false;
+        }
+        final ItemMeta rawMeta = item.getItemMeta();
+        if (rawMeta instanceof CrossbowMeta) {
+            final CrossbowMeta meta = (CrossbowMeta) rawMeta;
+            if (!meta.hasChargedProjectiles() && hasArrow(player.getInventory(), true)) {
+                markOffHandUse(event, data, false);
+                return true;
+            }
+        }
+        return false;
+    }
+
+    private static void markOffHandUse(final PlayerInteractEvent event, final MovingData data, final boolean requireBridge) {
+        final EquipmentSlot slot = event.getHand();
+        final boolean offHand = slot != null && slot == EquipmentSlot.OFF_HAND;
+        data.offHandUse = (requireBridge ? Bridge1_9.hasGetItemInOffHand() : true) && offHand;
     }
 
     private static boolean isRightClick(final Action action) {
