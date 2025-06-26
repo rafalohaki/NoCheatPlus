@@ -155,7 +155,7 @@ public class Counters {
      *            Count to add.
      */
     public void addPrimaryThread(int id, int count) {
-        ptCounts[id].increment();
+        ptCounts[id].add(count);
     }
 
     /**
