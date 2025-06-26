@@ -52,6 +52,7 @@ import fr.neatmonster.nocheatplus.players.IPlayerData;
 import fr.neatmonster.nocheatplus.players.PlayerFactoryArgument;
 import fr.neatmonster.nocheatplus.stats.Counters;
 import fr.neatmonster.nocheatplus.utilities.TickTask;
+import fr.neatmonster.nocheatplus.time.monotonic.Monotonic;
 import fr.neatmonster.nocheatplus.utilities.map.BlockProperties;
 import fr.neatmonster.nocheatplus.worlds.WorldFactoryArgument;
 
@@ -148,7 +149,7 @@ public class BlockBreakListener extends CheckListener {
      */
     @EventHandler(ignoreCancelled = false, priority = EventPriority.LOWEST)
     public void onBlockBreak(final BlockBreakEvent event) {
-        final long now = System.currentTimeMillis();
+        final long now = Monotonic.millis();
         final Player player = event.getPlayer();
         final IPlayerData pData = player != null ? DataManager.getPlayerData(player) : null;
         final Block block = event.getBlock();
@@ -404,7 +405,7 @@ public class BlockBreakListener extends CheckListener {
     }
 
     private void checkBlockDamage(final Player player, final Block block, final Cancellable event){
-        final long now = System.currentTimeMillis();
+        final long now = Monotonic.millis();
         final IPlayerData pData = DataManager.getPlayerData(player);
         final BlockBreakData data = pData.getGenericInstance(BlockBreakData.class);
 
