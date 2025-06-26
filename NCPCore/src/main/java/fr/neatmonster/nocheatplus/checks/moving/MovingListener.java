@@ -91,6 +91,7 @@ import fr.neatmonster.nocheatplus.checks.moving.util.bounce.BounceUtil;
 import fr.neatmonster.nocheatplus.checks.moving.helper.MoveCheckContext;
 import fr.neatmonster.nocheatplus.checks.moving.helper.ExtremeMoveHandler;
 import fr.neatmonster.nocheatplus.checks.moving.helper.VelocityAdjustment;
+import fr.neatmonster.nocheatplus.checks.moving.helper.ElytraBoostHandler;
 import fr.neatmonster.nocheatplus.checks.moving.vehicle.VehicleChecks;
 import fr.neatmonster.nocheatplus.checks.moving.velocity.AccountEntry;
 import fr.neatmonster.nocheatplus.checks.moving.velocity.SimpleEntry;
@@ -329,7 +330,7 @@ public class MovingListener extends CheckListener implements TickListener, IRemo
                 newTo = LocUtil.clone(loc);
             }
 
-            if (sfCheck && cc.sfSetBackPolicyFallDamage && noFall.isEnabled(player, pData)) {
+            if (sfCheck && cc.sfSetBackPolicyApplyFallDamage && noFall.isEnabled(player, pData)) {
                 // Check if to deal damage.
                 double y = loc.getY();
                 if (data.hasSetBack()) y = Math.min(y, data.getSetBackY());
@@ -1181,18 +1182,19 @@ public class MovingListener extends CheckListener implements TickListener, IRemo
             return;
         }
 
-        handleFireworkBoost(lastMove, thisMove, tick, data, cc);
+        handleFireworkBoost(player, lastMove, thisMove, tick, data, cc);
         updateLiquidTick(pFrom, data);
         updateRiptideState(player, data);
         updateBubbleStreamState(pFrom, pTo, thisMove, lastMove, data);
         handleVehicleExit(from, thisMove, data);
     }
 
-    private void handleFireworkBoost(final PlayerMoveData lastMove, final PlayerMoveData thisMove,
-            final int tick, final MovingData data, final MovingConfig cc) {
+    private void handleFireworkBoost(final Player player, final PlayerMoveData lastMove,
+            final PlayerMoveData thisMove, final int tick, final MovingData data, final MovingConfig cc) {
         if (data.fireworksBoostDuration <= 0) {
             return;
         }
+        final int remaining = data.fireworksBoostDuration;
         final boolean invalidBoost = !lastMove.valid
                 || (cc != null && cc.resetFwOnground
                         && (lastMove.flyCheck != CheckType.MOVING_CREATIVEFLY
@@ -1200,8 +1202,12 @@ public class MovingListener extends CheckListener implements TickListener, IRemo
                 || data.fireworksBoostTickExpire < tick;
         if (invalidBoost) {
             data.fireworksBoostDuration = 0;
+            ElytraBoostHandler.logBoostEvent(player, "reset", tick, remaining);
         } else {
             data.fireworksBoostDuration--;
+            if (data.fireworksBoostDuration == 0) {
+                ElytraBoostHandler.logBoostEvent(player, "ended", tick, remaining);
+            }
         }
     }
 
@@ -1348,7 +1354,7 @@ public class MovingListener extends CheckListener implements TickListener, IRemo
             final PlayerLocation pFrom, final PlayerLocation pTo, final boolean checkNf,
             final double previousSetBackY, final MovingData data, final MovingConfig cc,
             final IPlayerData pData) {
-        if (checkNf && cc.sfSetBackPolicyFallDamage) {
+        if (checkNf && cc.sfSetBackPolicyApplyFallDamage) {
             boolean skip = !noFall.willDealFallDamage(player, from.getY(), previousSetBackY, data);
             if (!skip && (!pFrom.isOnGround() && !pFrom.isResetCond())) {
                 skip = false;
@@ -3133,7 +3139,7 @@ public class MovingListener extends CheckListener implements TickListener, IRemo
                                       final MovingConfig cc, final MovingData data, final IPlayerData pData) {
 
         // Check nofall damage (!).
-        if (cc.sfHoverFallDamage && noFall.isEnabled(player, pData)) {
+        if (cc.sfHoverTakeFallDamage && noFall.isEnabled(player, pData)) {
             // Consider adding 3/3.5 to fall distance if fall distance > 0?
             noFall.checkDamage(player, loc.getY(), data, pData);
         }

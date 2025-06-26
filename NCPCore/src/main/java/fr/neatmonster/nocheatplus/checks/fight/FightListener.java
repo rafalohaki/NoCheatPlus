@@ -366,16 +366,23 @@ public class FightListener extends CheckListener implements JoinLeaveListener{
 
     /**
      * Calculate relative movement of the damaged entity since last attack.
+     * <p>
+     * The {@code tick} parameter must represent the current server tick at the
+     * moment of the attack. It must be non-negative and monotonically
+     * increasing. If the tick is older than the last known attack tick or if the
+     * provided values are otherwise invalid, a default {@link TargetMoveInfo} is
+     * returned.
+     * </p>
      */
     private TargetMoveInfo computeTargetMoveInfo(final FightData data, final Location damagedLoc,
                                                  final int tick, final boolean worldChanged) {
 
-        if (data == null || damagedLoc == null) {
-            return new TargetMoveInfo(0, 0.0, 0, 0.0);
+        if (tick < 0) {
+            throw new IllegalArgumentException("tick must be >= 0");
         }
-        if (data.lastAttackedX == Double.MAX_VALUE || tick < data.lastAttackTick
-                || worldChanged || tick - data.lastAttackTick > 20) {
-            return new TargetMoveInfo(0, 0.0, 0, 0.0);
+
+        if (isInvalidMoveInfo(data, damagedLoc, tick, worldChanged)) {
+            return DEFAULT_TARGET_MOVE_INFO;
         }
         final int age = tick - data.lastAttackTick;
         final double move = TrigUtil.distance(data.lastAttackedX, data.lastAttackedZ,
@@ -383,6 +390,15 @@ public class FightListener extends CheckListener implements JoinLeaveListener{
         final long msAge = (long) (50f * TickTask.getLag(50L * age, true) * (float) age);
         final double normalized = msAge == 0 ? move : move * Math.min(20.0, 1000.0 / (double) msAge);
         return new TargetMoveInfo(age, move, msAge, normalized);
+    }
+
+    private static boolean isInvalidMoveInfo(final FightData data, final Location damagedLoc,
+                                             final int tick, final boolean worldChanged) {
+        return data == null || damagedLoc == null
+                || data.lastAttackedX == Double.MAX_VALUE
+                || tick < data.lastAttackTick
+                || worldChanged
+                || tick - data.lastAttackTick > 20;
     }
 
     /**
@@ -420,6 +436,8 @@ public class FightListener extends CheckListener implements JoinLeaveListener{
         }
         auxMoving.returnPlayerMoveInfo(moveInfo);
     }
+
+    private static final TargetMoveInfo DEFAULT_TARGET_MOVE_INFO = new TargetMoveInfo(0, 0.0, 0, 0.0);
 
     private static final class TargetMoveInfo {
         final int tickAge;
