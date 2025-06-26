@@ -78,9 +78,7 @@ public class Against extends Check {
                          final Block blockAgainst, final boolean isInteractBlock,
                          final BlockPlaceData data, final BlockPlaceConfig cc, final IPlayerData pData) {
 
-        if (player == null || block == null || blockAgainst == null) {
-            debug(player, "check called with null argument(s): player=" + player
-                    + ", block=" + block + ", blockAgainst=" + blockAgainst);
+        if (logIfMissingArgs(player, block, blockAgainst)) {
             return false;
         }
         
@@ -147,5 +145,25 @@ public class Against extends Check {
             bIData.addPassedCheck(this.type);
             return false;
         }
+    }
+
+    /**
+     * Validate arguments for {@link #check(Player, Block, Material, Block, boolean, BlockPlaceData, BlockPlaceConfig, IPlayerData)}.
+     *
+     * @param player
+     *            the player who placed the block
+     * @param block
+     *            the block that was placed
+     * @param blockAgainst
+     *            the targeted block
+     * @return {@code true} if any argument is {@code null}
+     */
+    private boolean logIfMissingArgs(final Player player, final Block block, final Block blockAgainst) {
+        if (player == null || block == null || blockAgainst == null) {
+            debug(player, "check called with null argument(s): player=" + player
+                    + ", block=" + block + ", blockAgainst=" + blockAgainst);
+            return true;
+        }
+        return false;
     }
 }
