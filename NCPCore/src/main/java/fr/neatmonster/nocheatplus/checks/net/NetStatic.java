@@ -134,7 +134,9 @@ public class NetStatic {
                     return i;
                 }
                 used = true;
-            } else if (used) {
+            } else if (!used) {
+                continue;
+            } else {
                 return winNum;
             }
         }
