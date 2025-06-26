@@ -434,6 +434,11 @@ public class NoFall extends Check {
                 || cc == null || pData == null) {
             return;
         }
+        // Callers usually check bypass and exemption beforehand, but guard here
+        // to avoid processing if invoked directly without those checks.
+        if (pData.hasBypass(type, player) || pData.isExempted(type)) {
+            return;
+        }
 
         final boolean debug = pData.isDebugActive(type);
         final PlayerMoveData thisMove = data.playerMoves.getCurrentMove();
