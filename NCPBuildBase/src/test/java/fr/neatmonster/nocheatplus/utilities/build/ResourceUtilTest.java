@@ -6,6 +6,7 @@ import java.io.InputStream;
 import java.net.URL;
 import java.net.URLClassLoader;
 import java.nio.charset.StandardCharsets;
+import java.io.File;
 import java.nio.file.Files;
 import java.nio.file.Path;
 import java.nio.file.Paths;
@@ -20,10 +21,13 @@ public class ResourceUtilTest {
         Path jar = Files.createTempFile("resource", ".jar");
         try (JarOutputStream jos = new JarOutputStream(Files.newOutputStream(jar))) {
             // Add ResourceUtil class from build output
-            String classPath = "fr/neatmonster/nocheatplus/utilities/build/ResourceUtil.class";
-            jos.putNextEntry(new JarEntry(classPath));
+            String[] segments = {"fr", "neatmonster", "nocheatplus", "utilities", "build", "ResourceUtil.class"};
+            // Jar entries must always use '/' as separator
+            String classEntry = String.join("/", segments);
+            jos.putNextEntry(new JarEntry(classEntry));
+            // Use the platform separator for file system paths
             Path base = Paths.get(ResourceUtil.class.getProtectionDomain().getCodeSource().getLocation().toURI());
-            Path classFile = base.resolve(classPath);
+            Path classFile = base.resolve(String.join(File.separator, segments));
             Files.copy(classFile, jos);
             jos.closeEntry();
             // Add test resource
@@ -51,5 +55,18 @@ public class ResourceUtilTest {
         Class<?> clazz = createJarWithResource();
         String res = ResourceUtil.fetchResource(clazz, "missing.txt");
         assertNull(res);
+    }
+
+    /**
+     * Verify that the jar entry path uses '/' while the file system path uses
+     * {@link File#separator}.
+     */
+    @Test
+    public void pathFormat() {
+        String[] segments = {"fr", "neatmonster", "nocheatplus", "utilities", "build", "ResourceUtil.class"};
+        String entry = String.join("/", segments);
+        assertEquals("fr/neatmonster/nocheatplus/utilities/build/ResourceUtil.class", entry);
+        String fsPath = String.join(File.separator, segments);
+        assertTrue(fsPath.endsWith(File.separator + "ResourceUtil.class"));
     }
 }
