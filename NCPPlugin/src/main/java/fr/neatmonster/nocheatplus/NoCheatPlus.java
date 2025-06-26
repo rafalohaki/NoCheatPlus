@@ -27,6 +27,7 @@ import java.util.List;
 import java.util.Map;
 import java.util.Map.Entry;
 import java.util.Set;
+import java.util.UUID;
 
 import net.kyori.adventure.platform.bukkit.BukkitAudiences;
 import org.bukkit.Bukkit;
@@ -241,6 +242,9 @@ public class NoCheatPlus extends JavaPlugin implements NoCheatPlusAPI {
 
     /** Listeners for players joining and leaving (monitor level) */
     private final List<JoinLeaveListener> joinLeaveListeners = new ArrayList<JoinLeaveListener>();
+
+    /** Players for which {@link #onLeave(Player)} has run. */
+    private final Set<UUID> processedLeave = new HashSet<UUID>();
 
     /** Sub component registries. */
     private final List<ComponentRegistry<?>> subRegistries = new ArrayList<ComponentRegistry<?>>();
@@ -1377,6 +1381,7 @@ public class NoCheatPlus extends JavaPlugin implements NoCheatPlusAPI {
                 final Player player = event.getPlayer();
                 NCPExemptionManager.unexempt(player);
             }
+            clearLeaveProcessed(event.getPlayer());
         }
 
         @EventHandler(priority = EventPriority.LOW)
@@ -1387,12 +1392,20 @@ public class NoCheatPlus extends JavaPlugin implements NoCheatPlusAPI {
 
         @EventHandler(priority = EventPriority.MONITOR, ignoreCancelled = true)
         public void onPlayerKick(final PlayerKickEvent event) {
-            onLeave(event.getPlayer());
+            final Player player = event.getPlayer();
+            markLeaveProcessed(player);
+            onLeave(player);
         }
 
         @EventHandler(priority = EventPriority.MONITOR)
         public void onPlayerQuit(final PlayerQuitEvent event) {
-            onLeave(event.getPlayer());
+            final Player player = event.getPlayer();
+            if (isLeaveProcessed(player)) {
+                clearLeaveProcessed(player);
+            } else {
+                markLeaveProcessed(player);
+                onLeave(player);
+            }
         }
 
         @EventHandler(priority = EventPriority.MONITOR)
@@ -1456,6 +1469,25 @@ public class NoCheatPlus extends JavaPlugin implements NoCheatPlusAPI {
         }
         if (clearExemptionsOnLeave) {
             NCPExemptionManager.unexempt(player);
+        }
+    }
+
+    private void markLeaveProcessed(Player player) {
+        if (player != null) {
+            processedLeave.add(player.getUniqueId());
+        }
+    }
+
+    private boolean isLeaveProcessed(Player player) {
+        if (player == null) {
+            return false;
+        }
+        return processedLeave.contains(player.getUniqueId());
+    }
+
+    private void clearLeaveProcessed(Player player) {
+        if (player != null) {
+            processedLeave.remove(player.getUniqueId());
         }
     }
 
