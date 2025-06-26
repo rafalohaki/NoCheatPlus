@@ -32,6 +32,7 @@ import fr.neatmonster.nocheatplus.compat.MCAccess;
 import fr.neatmonster.nocheatplus.utilities.ReflectionUtil;
 import fr.neatmonster.nocheatplus.utilities.location.LocUtil;
 import fr.neatmonster.nocheatplus.utilities.map.BlockCache;
+import fr.neatmonster.nocheatplus.logging.StaticLog;
 import net.minecraft.server.v1_11_R1.AxisAlignedBB;
 import net.minecraft.server.v1_11_R1.Block;
 import net.minecraft.server.v1_11_R1.BlockPosition;
@@ -128,15 +129,26 @@ public class MCAccessSpigotCB1_11_R1 implements MCAccess {
 
     @Override
     public double getHeight(final Entity entity) {
-        // (entity.getHeight() returns the length field, but we access nms anyway.)
-        final net.minecraft.server.v1_11_R1.Entity mcEntity = ((CraftEntity) entity).getHandle();
+        final net.minecraft.server.v1_11_R1.Entity mcEntity = getHandleIfCraft(entity);
+        if (mcEntity == null) {
+            return entity != null ? entity.getHeight() : 0.0;
+        }
         final AxisAlignedBB boundingBox = mcEntity.getBoundingBox();
-        final double entityHeight = Math.max(mcEntity.length, Math.max(mcEntity.getHeadHeight(), boundingBox.e - boundingBox.b));
+        final double entityHeight = Math.max(mcEntity.length,
+                Math.max(mcEntity.getHeadHeight(), boundingBox.e - boundingBox.b));
         if (entity instanceof LivingEntity) {
             return Math.max(((LivingEntity) entity).getEyeHeight(), entityHeight);
         } else {
             return entityHeight;
         }
+    }
+
+    private net.minecraft.server.v1_11_R1.Entity getHandleIfCraft(final Entity entity) {
+        if (entity instanceof CraftEntity) {
+            return ((CraftEntity) entity).getHandle();
+        }
+        StaticLog.logWarning("Expected CraftEntity but got " + entity);
+        return null;
     }
 
     private net.minecraft.server.v1_11_R1.Material getMaterial(int blockId) {
@@ -174,7 +186,11 @@ public class MCAccessSpigotCB1_11_R1 implements MCAccess {
 
     @Override
     public double getWidth(final Entity entity) {
-        return ((CraftEntity) entity).getHandle().width;
+        final net.minecraft.server.v1_11_R1.Entity mcEntity = getHandleIfCraft(entity);
+        if (mcEntity == null) {
+            return 0.6;
+        }
+        return mcEntity.width;
     }
 
     @Override
