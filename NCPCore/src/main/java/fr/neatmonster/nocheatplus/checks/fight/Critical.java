@@ -56,95 +56,110 @@ public class Critical extends Check {
 
 
     /**
-     * Checks a player.
-     * 
-     * @param player
-     *            the player
-     * @return true, if successful
+     * Checks if the player's attack should count as a critical hit violation.
+     * The caller must ensure that {@link #isEnabled(Player, IPlayerData)} has
+     * been verified before invoking this method.
+     *
+     * @param player the attacking player (may be {@code null})
+     * @param loc a trusted location representing the player
+     * @return {@code true} if the event should be cancelled
      */
-    public boolean check(final Player player, final Location loc, final FightData data, final FightConfig cc, 
+    public boolean check(final Player player, final Location loc, final FightData data, final FightConfig cc,
                          final IPlayerData pData, final IPenaltyList penaltyList) {
 
-        boolean cancel = false;
-        boolean violation = false;
-        final List<String> tags = new ArrayList<String>();
+        if (player == null || loc == null) {
+            return false;
+        }
+
         final MovingData mData = pData.getGenericInstance(MovingData.class);
         final MovingConfig mCC = pData.getGenericInstance(MovingConfig.class);
         final PlayerMoveData thisMove = mData.playerMoves.getCurrentMove();
         final double mcFallDistance = (double) player.getFallDistance();
         final double ncpFallDistance = mData.noFallFallDistance;
-        final double realisticFallDistance = MovingUtil.getRealisticFallDistance(player, thisMove.from.getY(), thisMove.to.getY(), mData, pData);
 
-
-        // Check if the hit was a critical hit (very small fall-distance, not on ladder, not in vehicle, and without blindness effect).
-        if (mcFallDistance > 0.0 && !player.isInsideVehicle() && !player.hasPotionEffect(PotionEffectType.BLINDNESS)) {
-
-            if (pData.isDebugActive(type)) {
-                debug(player, 
-                    "Fall distances: MC(" + StringUtil.fdec3.format(mcFallDistance) +") | NCP("+ StringUtil.fdec3.format(ncpFallDistance) +") | R("+ StringUtil.fdec3.format(realisticFallDistance) +")"
-                    + "\nfD diff: " + StringUtil.fdec3.format(Math.abs(ncpFallDistance - mcFallDistance))
-                    + "\nJumpPhase: " + mData.sfJumpPhase + " | LowJump: " + mData.sfLowJump + " | NCP onGround: " + (thisMove.from.onGround ? "ground -> " : "--- -> ") + (thisMove.to.onGround ? "ground" : "---") + " | MC onGround: " + player.isOnGround()
-                ); // + ", packet onGround: " + packet.onGround); 
-            }
-
-            // Detect silent jumping (might be redundant with the mismatch check below)
-            if (Math.abs(ncpFallDistance - mcFallDistance) > cc.criticalFallDistLeniency 
-                && mcFallDistance <= cc.criticalFallDistance 
-                && mData.sfJumpPhase <= 1
-                && !BlockProperties.isResetCond(player, loc, mCC.yOnGround)) {
-               tags.add("fakejump");
-               violation = true;
-            }
-            // Detect lowjumping
-            else if (mData.sfLowJump) {
-                tags.add("lowjump");
-                violation = true;
-            }
-            // Player is on ground with server-side fall distance; we are going to force a violation here :)
-            else if (Math.abs(ncpFallDistance - mcFallDistance) > 1e-5 && thisMove.from.onGround && thisMove.to.onGround 
-                    && !BlockProperties.isResetCond(player, loc, mCC.yOnGround)) {
-                tags.add("falldist_mismatch");
-                violation = true;
-            }
-            // In these media players cannot perform critical hits, but they can be faked. Always invalidate them, if so.
-            else if ((thisMove.from.inBerryBush || thisMove.from.inWeb 
-                    || thisMove.from.inPowderSnow) && mData.insideMediumCount > 1) { // mcFallDistance > 0.0 is checked above.
-                tags.add("fakefall");
-                violation = true;
-                // (Cannot fake in liquid)
-            }
-                   
-            // Handle violations
-            if (violation) {
-
-                final PlayerMoveInfo moveInfo = auxMoving.usePlayerMoveInfo();
-                moveInfo.set(player, loc, null, mCC.yOnGround);
-                // False positives with medium counts reset all nofall data when nearby boat
-                // Note: isOnGroundDueToStandingOnAnEntity() currently fails if the entity is not nearby
-                if (MovingUtil.shouldCheckSurvivalFly(player, moveInfo.from, null, mData, mCC, pData) 
-                    && !moveInfo.from.isOnGroundDueToStandingOnAnEntity()) {
-
-                    moveInfo.from.collectBlockFlags(0.4);
-                    if ((moveInfo.from.getBlockFlags() & BlockFlags.F_BOUNCE25) != 0 
-                        && !thisMove.from.onGround && !thisMove.to.onGround) {
-                        // Slime blocks (see Discord discussion for removal details)
-                    }   
-                    else {
-
-                        data.criticalVL += 1.0;
-                        // Execute whatever actions are associated with this check and 
-                        //  the violation level and find out if we should cancel the event.
-                        final ViolationData vd = new ViolationData(this, player, data.criticalVL, 1.0, cc.criticalActions);
-                        if (vd.needsParameters()) vd.setParameter(ParameterName.TAGS, StringUtil.join(tags, "+"));
-                        cancel = executeActions(vd).willCancel();
-                        // Consider introducing a penalty instead of canceling
-                    }
-                    auxMoving.returnPlayerMoveInfo(moveInfo);
-                }
-            }
-            // Crit was legit, reward the player.
-            else data.criticalVL *= 0.96D;
+        if (mcFallDistance <= 0.0 || player.isInsideVehicle() || player.hasPotionEffect(PotionEffectType.BLINDNESS)) {
+            return false;
         }
+
+        final double realisticFallDistance = MovingUtil.getRealisticFallDistance(player, thisMove.from.getY(),
+                thisMove.to.getY(), mData, pData);
+
+        if (pData.isDebugActive(type)) {
+            debug(player,
+                    "Fall distances: MC(" + StringUtil.fdec3.format(mcFallDistance) + ") | NCP(" + StringUtil.fdec3.format(ncpFallDistance)
+                            + ") | R(" + StringUtil.fdec3.format(realisticFallDistance) + ")"
+                            + "\nfD diff: " + StringUtil.fdec3.format(Math.abs(ncpFallDistance - mcFallDistance))
+                            + "\nJumpPhase: " + mData.sfJumpPhase + " | LowJump: " + mData.sfLowJump
+                            + " | NCP onGround: " + (thisMove.from.onGround ? "ground -> " : "--- -> ")
+                            + (thisMove.to.onGround ? "ground" : "---") + " | MC onGround: " + player.isOnGround());
+        }
+
+        final List<String> tags = new ArrayList<String>();
+        final boolean violation = shouldInvalidateCritical(player, loc, mcFallDistance, ncpFallDistance,
+                mData, mCC, thisMove, cc, tags);
+
+        boolean cancel = false;
+        if (violation) {
+            cancel = handleCriticalViolation(player, loc, data, cc, pData, penaltyList, tags, mData, mCC, thisMove);
+        } else {
+            rewardLegitCritical(data);
+        }
+
         return cancel;
+    }
+
+    private boolean shouldInvalidateCritical(final Player player, final Location loc, final double mcFallDistance,
+            final double ncpFallDistance, final MovingData mData, final MovingConfig mCC, final PlayerMoveData thisMove,
+            final FightConfig cc, final List<String> tags) {
+        if (Math.abs(ncpFallDistance - mcFallDistance) > cc.criticalFallDistLeniency
+                && mcFallDistance <= cc.criticalFallDistance && mData.sfJumpPhase <= 1
+                && !BlockProperties.isResetCond(player, loc, mCC.yOnGround)) {
+            tags.add("fakejump");
+            return true;
+        } else if (mData.sfLowJump) {
+            tags.add("lowjump");
+            return true;
+        } else if (Math.abs(ncpFallDistance - mcFallDistance) > 1e-5 && thisMove.from.onGround && thisMove.to.onGround
+                && !BlockProperties.isResetCond(player, loc, mCC.yOnGround)) {
+            tags.add("falldist_mismatch");
+            return true;
+        } else if ((thisMove.from.inBerryBush || thisMove.from.inWeb || thisMove.from.inPowderSnow)
+                && mData.insideMediumCount > 1) { // mcFallDistance > 0.0 is checked above.
+            tags.add("fakefall");
+            return true;
+        }
+        return false;
+    }
+
+    private boolean handleCriticalViolation(final Player player, final Location loc, final FightData data,
+            final FightConfig cc, final IPlayerData pData, final IPenaltyList penaltyList, final List<String> tags,
+            final MovingData mData, final MovingConfig mCC, final PlayerMoveData thisMove) {
+
+        final PlayerMoveInfo moveInfo = auxMoving.usePlayerMoveInfo();
+        moveInfo.set(player, loc, null, mCC.yOnGround);
+
+        if (MovingUtil.shouldCheckSurvivalFly(player, moveInfo.from, null, mData, mCC, pData)
+                && !moveInfo.from.isOnGroundDueToStandingOnAnEntity()) {
+
+            moveInfo.from.collectBlockFlags(0.4);
+            if ((moveInfo.from.getBlockFlags() & BlockFlags.F_BOUNCE25) == 0 || thisMove.from.onGround
+                    || thisMove.to.onGround) {
+
+                data.criticalVL += 1.0;
+                final ViolationData vd = new ViolationData(this, player, data.criticalVL, 1.0, cc.criticalActions);
+                if (vd.needsParameters()) {
+                    vd.setParameter(ParameterName.TAGS, StringUtil.join(tags, "+"));
+                }
+                final boolean cancel = executeActions(vd).willCancel();
+                auxMoving.returnPlayerMoveInfo(moveInfo);
+                return cancel;
+            }
+        }
+        auxMoving.returnPlayerMoveInfo(moveInfo);
+        return false;
+    }
+
+    private void rewardLegitCritical(final FightData data) {
+        data.criticalVL *= 0.96D;
     }
 }

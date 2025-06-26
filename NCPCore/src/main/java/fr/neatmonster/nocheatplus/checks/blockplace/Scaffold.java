@@ -43,7 +43,7 @@ public class Scaffold extends Check {
     public List<String> tags = new LinkedList<>();
     
    /*
-    * Instanties a new Scaffold check
+    * Instantiates a new Scaffold check
     *
     */
     public Scaffold() {

@@ -15,6 +15,8 @@
 package fr.neatmonster.nocheatplus.command;
 
 import org.bukkit.ChatColor;
+import org.bukkit.command.CommandSender;
+import org.bukkit.entity.Player;
 import org.bukkit.plugin.java.JavaPlugin;
 
 import fr.neatmonster.nocheatplus.permissions.RegisteredPermission;
@@ -36,8 +38,29 @@ public abstract class BaseCommand extends AbstractCommand<JavaPlugin>{
 		this(plugin, label, permission, null);
 	}
 
-	public BaseCommand(JavaPlugin access, String label, RegisteredPermission permission, String[] aliases){
-		super(access, label, permission, aliases);
-	}
+        public BaseCommand(JavaPlugin access, String label, RegisteredPermission permission, String[] aliases){
+                super(access, label, permission, aliases);
+        }
+
+        /**
+         * Convenience method to retrieve the color codes used for player messages.
+         *
+         * @param sender the command sender
+         * @return an array containing seven color code strings
+         */
+        protected String[] getColorCodes(CommandSender sender) {
+                if (sender instanceof Player) {
+                        return new String[] {
+                                        ChatColor.GRAY.toString(),
+                                        ChatColor.BOLD.toString(),
+                                        ChatColor.RED.toString(),
+                                        ChatColor.ITALIC.toString(),
+                                        ChatColor.GOLD.toString(),
+                                        ChatColor.WHITE.toString(),
+                                        ChatColor.YELLOW.toString()
+                        };
+                }
+                return new String[] {"", "", "", "", "", "", ""};
+        }
 
 }
