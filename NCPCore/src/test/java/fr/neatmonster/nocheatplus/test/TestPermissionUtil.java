@@ -34,7 +34,11 @@ public class TestPermissionUtil {
         @Override public boolean execute(CommandSender sender, String label, String[] args) { return false; }
         @Override public List<String> tabComplete(CommandSender sender, String alias, String[] args) { return null; }
         @Override public List<String> getAliases() { return aliases; }
-        @Override public Command setAliases(List<String> a) { this.aliases = a; return this; }
+        @Override
+        public Command setAliases(List<String> a) {
+            this.aliases = a;
+            return this;
+        }
         @Override public String getPermission() { return permission; }
         @Override public void setPermission(String perm) { this.permission = perm; }
     }
