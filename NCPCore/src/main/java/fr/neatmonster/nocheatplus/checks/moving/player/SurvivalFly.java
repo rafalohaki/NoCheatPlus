@@ -2033,7 +2033,7 @@ public class SurvivalFly extends Check {
             hAllowedDistance *= data.multSprinting;
         }
         final double attrMod = attributeAccess.getHandle().getSpeedAttributeMultiplier(player);
-        if (attrMod == Double.MAX_VALUE) {
+        if (Double.isNaN(attrMod)) {
             final double speedAmplifier = mcAccess.getHandle().getFasterMovementAmplifier(player);
             if (!Double.isInfinite(speedAmplifier) && useBaseModifiersSprint) {
                 hAllowedDistance *= 1.0D + 0.2D * speedAmplifier;

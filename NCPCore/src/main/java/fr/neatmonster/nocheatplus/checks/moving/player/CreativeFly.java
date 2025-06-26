@@ -1128,7 +1128,7 @@ public class CreativeFly extends Check {
         if (level > 0) {
             allowedH *= Magic.getModDepthStrider()[level];
             final double attrMod = attributeAccess.getHandle().getSpeedAttributeMultiplier(player);
-            if (attrMod == Double.MAX_VALUE) {
+            if (Double.isNaN(attrMod)) {
                 final double speedAmplifier = mcAccess.getHandle().getFasterMovementAmplifier(player);
                 if (!Double.isInfinite(speedAmplifier)) {
                     allowedH *= 1.0D + 0.2D * (speedAmplifier + 1);
@@ -1565,7 +1565,7 @@ public class CreativeFly extends Check {
             }
             else {
                 final double attrMod = attributeAccess.getHandle().getSpeedAttributeMultiplier(player);
-                if (attrMod != Double.MAX_VALUE) fSpeed *= attrMod;
+                if (!Double.isNaN(attrMod)) fSpeed *= attrMod;
                 fSpeed *= data.walkSpeed / Magic.DEFAULT_WALKSPEED;
             }
         }
