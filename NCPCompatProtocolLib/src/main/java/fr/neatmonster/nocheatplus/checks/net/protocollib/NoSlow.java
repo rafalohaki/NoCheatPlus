@@ -94,6 +94,9 @@ public class NoSlow extends BaseAdapter {
         }
     };
 
+    // Durability threshold for consumable items in legacy versions (pre-1.9),
+    // values above this are considered invalid or special (e.g., custom items).
+    private static final int LEGACY_CONSUMABLE_DURABILITY_THRESHOLD = 16384;
     private static int timeBetweenRL = 70;
     private static PacketType[] initPacketTypes() {
         final List<PacketType> types = new LinkedList<PacketType>(Arrays.asList(
@@ -225,7 +228,7 @@ public class NoSlow extends BaseAdapter {
         if (!InventoryUtil.isConsumable(item)) {
             return false;
         }
-        if (!Bridge1_9.hasElytra() && item.getDurability() > 16384) {
+        if (!Bridge1_9.hasElytra() && item.getDurability() > LEGACY_CONSUMABLE_DURABILITY_THRESHOLD) {
             return false;
         }
 
@@ -272,7 +275,7 @@ public class NoSlow extends BaseAdapter {
 
     private static boolean checkCrossbowUse(final Player player, final PlayerInteractEvent event,
                                             final ItemStack item, final MovingData data) {
-        if (!"CROSSBOW".equals(item.getType().toString())) {
+        if (item.getType() != Material.CROSSBOW) {
             return false;
         }
         final ItemMeta rawMeta = item.getItemMeta();
