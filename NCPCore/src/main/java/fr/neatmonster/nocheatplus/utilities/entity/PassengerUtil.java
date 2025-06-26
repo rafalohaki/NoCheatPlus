@@ -361,11 +361,25 @@ public class PassengerUtil {
                 if (Folia.teleportEntity(passenger, location, BridgeMisc.TELEPORT_CAUSE_CORRECTION_OF_POSITION)
                         && vehicleTeleported
                         && TrigUtil.distance(passenger.getLocation(useLoc2), vehicle.getLocation(useLoc)) < 1.5) {
-                    handleVehicle.getHandle().addPassenger(passenger, vehicle);
+                    if (vehicle.getType() == EntityType.BOAT) {
+                        addPassengerWithRetry(passenger, vehicle, 2);
+                    } else {
+                        handleVehicle.getHandle().addPassenger(passenger, vehicle);
+                    }
                 }
             }
         }
         return result;
+    }
+
+    private boolean addPassengerWithRetry(final Entity passenger, final Entity vehicle, final int retries) {
+        if (handleVehicle.getHandle().addPassenger(passenger, vehicle)) {
+            return true;
+        }
+        if (retries > 0 && plugin != null) {
+            Folia.runSyncDelayedTask(plugin, (arg) -> addPassengerWithRetry(passenger, vehicle, retries - 1), 1L);
+        }
+        return false;
     }
 
     private void logTeleportResult(final Player player, final Location location, final boolean debug,
@@ -383,9 +397,8 @@ public class PassengerUtil {
         boolean scheduleDelay = cc.schedulevehicleSetPassenger;
         if (data.vehicleSetPassengerTaskId == null) {
             if (vehicle.getType() == EntityType.BOAT) {
-                if (!handleVehicle.getHandle().addPassenger(player, vehicle)) {
+                if (!addPassengerWithRetry(player, vehicle, 2)) {
                     vehicle.eject();
-                    // Not schedule set passenger for boat due to location async
                 }
             } else if (scheduleDelay) {
                 data.vehicleSetPassengerTaskId = Folia.runSyncDelayedTaskForEntity(player, plugin,
