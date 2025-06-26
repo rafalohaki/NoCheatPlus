@@ -107,9 +107,9 @@ public class FastConsume extends Check implements Listener, INotifyReload {
                     final long timeSpent = ref == 0 ? 0 : time - ref;
                     cancel = calculateViolation(player, stack, timeSpent, data,
                             cc);
+                    resetFastConsumeState(player, cancel, data, pData);
+                    data.instantEatInteract = time;
                 }
-                resetFastConsumeState(player, cancel, data, pData);
-                data.instantEatInteract = time;
             }
         }
         return cancel;
