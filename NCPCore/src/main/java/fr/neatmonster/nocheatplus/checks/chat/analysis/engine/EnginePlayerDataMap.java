@@ -18,6 +18,7 @@ import java.util.Collection;
 
 import fr.neatmonster.nocheatplus.checks.chat.ChatConfig;
 import fr.neatmonster.nocheatplus.checks.chat.analysis.engine.processors.WordProcessor;
+import fr.neatmonster.nocheatplus.checks.chat.analysis.engine.WordProcessorFactory;
 import fr.neatmonster.nocheatplus.utilities.ds.map.ManagedMap;
 
 /**
@@ -27,7 +28,10 @@ import fr.neatmonster.nocheatplus.utilities.ds.map.ManagedMap;
  */
 public class EnginePlayerDataMap extends ManagedMap<String, EnginePlayerData> {
 
-	protected long durExpire;
+        protected long durExpire;
+
+        /** Factory for creating player word processors. */
+        protected final WordProcessorFactory factory;
 	
 	/** Timestamp of last time get was called.*/
 	protected long lastAccess = System.currentTimeMillis();
@@ -35,10 +39,11 @@ public class EnginePlayerDataMap extends ManagedMap<String, EnginePlayerData> {
 	/** Timestamp of last time an entry was removed. */
 	protected long lastExpired = lastAccess;
 
-	public EnginePlayerDataMap(long durExpire, int defaultCapacity, float loadFactor) {
-		super(defaultCapacity, loadFactor);
-		this.durExpire = durExpire;
-	}
+        public EnginePlayerDataMap(long durExpire, int defaultCapacity, float loadFactor, WordProcessorFactory factory) {
+                super(defaultCapacity, loadFactor);
+                this.durExpire = durExpire;
+                this.factory = factory;
+        }
 
 	/**
 	 * 
@@ -46,12 +51,12 @@ public class EnginePlayerDataMap extends ManagedMap<String, EnginePlayerData> {
 	 * @param cc
 	 * @return
 	 */
-	public EnginePlayerData get(final String key, final ChatConfig cc) {
-		EnginePlayerData data = super.get(key);
-		if (data == null){
-			data = new EnginePlayerData(cc);
-			put(key, data);
-		}
+        public EnginePlayerData get(final String key, final ChatConfig cc) {
+                EnginePlayerData data = super.get(key);
+                if (data == null){
+                        data = new EnginePlayerData(cc, factory);
+                        put(key, data);
+                }
 		final long ts = System.currentTimeMillis();
 		if (ts < lastExpired){
 			lastExpired = ts;
