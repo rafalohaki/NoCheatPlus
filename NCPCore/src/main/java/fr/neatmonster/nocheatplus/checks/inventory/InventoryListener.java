@@ -267,6 +267,7 @@ public class InventoryListener  extends CheckListener implements JoinLeaveListen
 
     private boolean checkIllegalEnchantments(final Player player, final ItemStack cursor,
             final ItemStack clicked, final IPlayerData pData, final int slot) {
+        boolean logged = false;
         try {
             if (Items.checkIllegalEnchantments(player, clicked, pData)) {
                 counters.addPrimaryThread(idIllegalItem, 1);
@@ -274,6 +275,7 @@ public class InventoryListener  extends CheckListener implements JoinLeaveListen
             }
         } catch (final ArrayIndexOutOfBoundsException ex) {
             logSlotWarning(player, slot, ex);
+            logged = true;
         }
         try {
             if (Items.checkIllegalEnchantments(player, cursor, pData)) {
@@ -281,7 +283,9 @@ public class InventoryListener  extends CheckListener implements JoinLeaveListen
                 return true;
             }
         } catch (final ArrayIndexOutOfBoundsException ex) {
-            logSlotWarning(player, slot, ex);
+            if (!logged) {
+                logSlotWarning(player, slot, ex);
+            }
         }
         return false;
     }
@@ -290,9 +294,13 @@ public class InventoryListener  extends CheckListener implements JoinLeaveListen
             final ArrayIndexOutOfBoundsException ex) {
         final String playerName = player != null ? player.getName() : "null";
         final LogManager logManager = NCPAPIProvider.getNoCheatPlusAPI().getLogManager();
+        final String invType = player != null && player.getOpenInventory() != null
+                ? player.getOpenInventory().getType().name()
+                : "unknown";
         logManager.warning(Streams.PLUGIN_LOGGER,
                 "Slot out of range while checking illegal enchantments: player="
-                        + playerName + " slot=" + slot + " (" + ex.getMessage() + ")");
+                        + playerName + " inventory=" + invType + " slot=" + slot
+                        + " (" + ex.getMessage() + ")");
     }
 
     private boolean checkFastClick(final InventoryClickEvent event, final Player player, final IPlayerData pData,
