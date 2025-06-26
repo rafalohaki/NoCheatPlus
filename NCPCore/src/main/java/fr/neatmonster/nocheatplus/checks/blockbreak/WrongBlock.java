@@ -43,60 +43,72 @@ public class WrongBlock extends Check {
      * @return
      */
     
-    public boolean check(final Player player, final Block block, 
+    public boolean check(final Player player, final Block block,
             final BlockBreakConfig cc, final BlockBreakData data, final IPlayerData pData,
             final AlmostBoolean isInstaBreak) {
 
-        boolean cancel = false;
+        if (player == null || block == null) {
+            return false;
+        }
+
+        final long now = System.currentTimeMillis();
+        final int dist = calculateWrongBlockDistance(player, block, data, isInstaBreak, now, pData);
+        if (dist < 0) {
+            return false;
+        }
+
+        return applyWrongBlockPenalty(player, dist, now, cc, data, pData);
+    }
+
+    private int calculateWrongBlockDistance(final Player player, final Block block,
+            final BlockBreakData data, final AlmostBoolean isInstaBreak, final long now,
+            final IPlayerData pData) {
+        if (block == null || data == null) {
+            return -1;
+        }
 
         final boolean wrongTime = data.fastBreakfirstDamage < data.fastBreakBreakTime;
-        final int dist = Math.min(4, data.clickedX == Integer.MAX_VALUE ? 100 : TrigUtil.manhattan(data.clickedX, data.clickedY, data.clickedZ, block));
-        final boolean wrongBlock;
-        final long now = System.currentTimeMillis();
-        final boolean debug = pData.isDebugActive(type);
-        // The isInstaBreak argument should either be removed or utilized.
+        final int dist = Math.min(4, data.clickedX == Integer.MAX_VALUE ? 100
+                : TrigUtil.manhattan(data.clickedX, data.clickedY, data.clickedZ, block));
+        final boolean debug = pData != null && pData.isDebugActive(type);
+
         if (dist == 0) {
             if (wrongTime) {
                 data.fastBreakBreakTime = now;
                 data.fastBreakfirstDamage = now;
-                // Could set to wrong block, but prefer to transform it into a quasi insta break.
             }
-            wrongBlock = false;
+            return -1;
         }
-        else if (dist == 1) {
-            // One might to a concession in case of instant breaking.
-            // Reason for this concession is not documented.
-            if (now - data.wasInstaBreak < 60) {
-                if (debug) {
-                    debug(player, "Skip on Manhattan 1 and wasInstaBreak within 60 ms.");
-                }
-                wrongBlock = false;
+        if (dist == 1 && now - data.wasInstaBreak < 60) {
+            if (debug && player != null && pData.hasPermission(Permissions.ADMINISTRATION_DEBUG, player)) {
+                debug(player, "Skip on Manhattan 1 and wasInstaBreak within 60 ms.");
             }
-            else {
-                wrongBlock = true;
-            }
+            return -1;
         }
-        else {
-            // Note that the maximally counted distance is set above.
-            wrongBlock = true;
+        return dist;
+    }
+
+    private boolean applyWrongBlockPenalty(final Player player, final int dist, final long now,
+            final BlockBreakConfig cc, final BlockBreakData data, final IPlayerData pData) {
+
+        boolean cancel = false;
+
+        if (pData.isDebugActive(type) && pData.hasPermission(Permissions.ADMINISTRATION_DEBUG, player)) {
+            player.sendMessage("WrongBlock failure with dist: " + dist);
         }
 
-        if (wrongBlock) {
-            if ((debug) && pData.hasPermission(Permissions.ADMINISTRATION_DEBUG, player)) {
-                player.sendMessage("WrongBlock failure with dist: " + dist);
+        data.wrongBlockVL.add(now, (float) (dist + 1) / 2f);
+        final float score = data.wrongBlockVL.score(0.9f);
+        if (score > cc.wrongBLockLevel) {
+            if (executeActions(player, score, 1D, cc.wrongBlockActions).willCancel()) {
+                cancel = true;
             }
-            data.wrongBlockVL.add(now, (float) (dist + 1) / 2f);
-            final float score = data.wrongBlockVL.score(0.9f);
-            if (score > cc.wrongBLockLevel) {
-                if (executeActions(player, score, 1D, cc.wrongBlockActions).willCancel()) {
+            if (cc.wrongBlockImprobableWeight > 0.0f) {
+                if (cc.wrongBlockImprobableFeedOnly) {
+                    Improbable.feed(player, cc.wrongBlockImprobableWeight, now);
+                } else if (Improbable.check(player, cc.wrongBlockImprobableWeight, now,
+                        "blockbreak.wrongblock", pData)) {
                     cancel = true;
-                }
-                if (cc.wrongBlockImprobableWeight > 0.0f) {
-                	if (cc.wrongBlockImprobableFeedOnly) {
-                		Improbable.feed(player, cc.wrongBlockImprobableWeight, now);
-                	} else if (Improbable.check(player, cc.wrongBlockImprobableWeight, now, "blockbreak.wrongblock", pData)) {
-                		cancel = true;
-                	}
                 }
             }
         }
