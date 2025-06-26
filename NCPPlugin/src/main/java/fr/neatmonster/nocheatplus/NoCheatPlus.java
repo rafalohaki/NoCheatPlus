@@ -709,8 +709,8 @@ public class NoCheatPlus extends JavaPlugin implements NoCheatPlusAPI {
      * this might get shifted still.</li>
      * <li><b>Call onDisable for IDisableListener instances, in reversed
      * order of registration.</b> This includes clearing all data.</li>
-     * <li>TODO: implement priority based sorting for IDisableListener instances
-     * using the component registry. Configuration should allow overriding via
+     * <li>Implement priority based sorting for IDisableListener instances using
+     * the component registry. Configuration should allow overriding via
      * {@code components.disable-priority}. Contributors can track progress in
      * issue&nbsp;<a href="https://github.com/Updated-NoCheatPlus/NoCheatPlus/issues/388">#388</a>.</li>
      * <li>Random sequence of cleanup calls for other registries and logging
