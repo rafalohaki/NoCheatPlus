@@ -88,22 +88,26 @@ public class RegistryHelper {
         T res = null;
 
         // Reference by class name (dedicated/native access).
-        if (config.enableCBDedicated && cbDedicatedNames != null) {
+        final boolean useDedicatedAccess = config.enableCBDedicated && cbDedicatedNames != null;
+        if (useDedicatedAccess) {
             res = getFirstAvailable(cbDedicatedNames, registerFor, logDebug);
         }
 
         // Fall back (after dedicated/native).
-        if (res == null && fallBackDedicatedInstance != null) {
+        final boolean useFallbackDedicated = res == null && fallBackDedicatedInstance != null;
+        if (useFallbackDedicated) {
             res = fallBackDedicatedInstance;
         }
 
         // Reflection based.
-        if (res == null && config.enableCBReflect && cbReflectNames != null) {
+        final boolean useReflectAccess = res == null && config.enableCBReflect && cbReflectNames != null;
+        if (useReflectAccess) {
             res = getFirstAvailable(cbReflectNames, registerFor, logDebug);
         }
 
         // Fall back (after reflection).
-        if (res == null && fallBackReflectInstance != null) {
+        final boolean useFallbackReflect = res == null && fallBackReflectInstance != null;
+        if (useFallbackReflect) {
             res = fallBackReflectInstance;
         }
 
