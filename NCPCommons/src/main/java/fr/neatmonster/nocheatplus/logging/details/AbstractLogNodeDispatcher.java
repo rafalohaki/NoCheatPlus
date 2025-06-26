@@ -92,11 +92,20 @@ public abstract class AbstractLogNodeDispatcher implements LogNodeDispatcher { /
     protected ContentLogger<String> initLogger = null;
 
     public <C> void dispatch(LogNode<C> node, Level level, C content) {
-        // NOTE: Try/catch ?
+        if (node == null || node.logger == null) {
+            logFallback(level, content);
+            return;
+        }
         if (isWithinContext(node)) {
             node.logger.log(level, content);
         } else {
             scheduleLog(node, level, content);
+        }
+    }
+
+    private <C> void logFallback(Level level, C content) {
+        if (initLogger != null) {
+            initLogger.log(level, content != null ? content.toString() : "null");
         }
     }
 

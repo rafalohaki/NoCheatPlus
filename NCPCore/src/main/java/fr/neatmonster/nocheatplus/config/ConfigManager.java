@@ -100,8 +100,15 @@ public class ConfigManager {
 
     /**
      * (Synchronized version).
-     * @return
-     * @deprecated getConfigFile() is thread-safe now.
+     *
+     * @return the configuration file
+     * @deprecated getConfigFile() is thread-safe now. Use
+     *             {@link #getConfigFile()} or the upcoming history service
+     *             instead. Removal scheduled for 2.0.
+     *             <p>
+     *             Migration: switch all synchronous calls to the non-synchronized
+     *             variant or retrieve configuration via the history service.
+     *             </p>
      */
     @Deprecated
     public static synchronized ConfigFile getConfigFileSync() {
@@ -121,9 +128,16 @@ public class ConfigManager {
 
     /**
      * (Synchronized version).
-     * @param worldName
-     * @return
-     * @deprecated getConfigFile() is thread-safe now.
+     *
+     * @param worldName the world name
+     * @return the configuration file
+     * @deprecated getConfigFile() is thread-safe now. Use
+     *             {@link #getConfigFile(String)} or the history service. This
+     *             method will be removed in version 2.0.
+     *             <p>
+     *             Migration: update code to call the unsynchronized variant and
+     *             consider caching results if needed.
+     *             </p>
      */
     @Deprecated
     public static synchronized ConfigFile getConfigFileSync(final String worldName) {
@@ -360,10 +374,16 @@ public class ConfigManager {
     /**
      * Set a property for all configurations. Might use with
      * DataManager.clearConfigs if check-configurations might already be in use.
-     * 
+     *
      * @param path
      * @param value
-     * @deprecated For activation flags use the WorldDataManager.
+     * @deprecated For activation flags use the WorldDataManager. This helper will
+     *             be removed in version 2.0.
+     *             <p>
+     *             Migration: use
+     *             {@link fr.neatmonster.nocheatplus.api.IWorldDataManager#setFlag(String, Object)}
+     *             from the new history service to modify activation flags.
+     *             </p>
      */
     @Deprecated
     public static synchronized void setForAllConfigs(String path, Object value){

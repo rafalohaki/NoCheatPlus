@@ -370,7 +370,13 @@ public class TickTask implements Runnable {
      * duration).
      *
      * @return the moderate lag spikes
-     * @deprecated What is moderate :) ?
+     * @deprecated Replaced by {@link fr.neatmonster.nocheatplus.history.HistoryService#getModerateLagSpikes()}.
+     *             Will be removed in version 2.0.
+     *             <p>
+     *             Migration: obtain the history service via
+     *             {@code NCPAPIProvider.getHistoryService()} and call
+     *             {@code getModerateLagSpikes()}.
+     *             </p>
      */
     public static final int getModerateLagSpikes() {
         spikes[0].update(System.currentTimeMillis());
@@ -382,7 +388,12 @@ public class TickTask implements Runnable {
      * duration bigger than 150 ms).
      *
      * @return the heavy lag spikes
-     * @deprecated What is heavy :) ?
+     * @deprecated Replaced by {@link fr.neatmonster.nocheatplus.history.HistoryService#getHeavyLagSpikes()}.
+     *             Will be removed in version 2.0.
+     *             <p>
+     *             Migration: obtain the history service and use
+     *             {@code getHeavyLagSpikes()}.
+     *             </p>
      */
     public static final int getHeavyLagSpikes() {
         spikes[1].update(System.currentTimeMillis());
