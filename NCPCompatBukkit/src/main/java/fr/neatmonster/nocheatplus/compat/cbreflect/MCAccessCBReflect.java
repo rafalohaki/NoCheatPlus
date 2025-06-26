@@ -199,21 +199,21 @@ public class MCAccessCBReflect extends MCAccessBukkit {
 
     @Override
     public AlmostBoolean isIllegalBounds(final Player player) {
+        if (player == null) {
+            return AlmostBoolean.MAYBE;
+        }
         if (player.isDead()) {
             return AlmostBoolean.NO;
         }
         try {
             final double[] bounds = helper.getBoundsTemp(player);
-            if (bounds == null) {
+            if (!isValidBounds(bounds)) {
                 return AlmostBoolean.MAYBE;
-            }
-            if (LocUtil.isBadCoordinate(bounds)) {
-                return AlmostBoolean.YES;
             }
             if (!player.isSleeping()) {
                 final double dY = Math.abs(bounds[4] - bounds[1]);
                 if (dY > 1.8) {
-                    return AlmostBoolean.YES; // dY > 1.65D || 
+                    return AlmostBoolean.YES; // dY > 1.65D ||
                 }
                 // Should retrieve height/length from ReflectEntity.
                 if (dY < 0.1D && getHeight(player) >= 0.1) {
@@ -225,6 +225,23 @@ public class MCAccessCBReflect extends MCAccessBukkit {
             // Ignore.
         }
         return AlmostBoolean.MAYBE;
+    }
+
+    /**
+     * Validate a bounds array containing min/max coordinates
+     * {@code [xMin, yMin, zMin, xMax, yMax, zMax]}.
+     *
+     * @param bounds the bounds array to validate
+     * @return true if the array has valid length and coordinates
+     */
+    static boolean isValidBounds(final double[] bounds) {
+        if (bounds == null || bounds.length < 6) {
+            return false;
+        }
+        if (LocUtil.isBadCoordinate(bounds)) {
+            return false;
+        }
+        return bounds[0] <= bounds[3] && bounds[1] <= bounds[4] && bounds[2] <= bounds[5];
     }
 
     // ---- Missing (probably ok with Bukkit only) ----
