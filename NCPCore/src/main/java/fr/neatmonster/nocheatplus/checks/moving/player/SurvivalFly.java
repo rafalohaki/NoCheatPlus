@@ -3073,6 +3073,9 @@ public class SurvivalFly extends Check {
                                      final MovingData data) {
 
         final double yDistance = thisMove.yDistance;
+        if (thisMove.from.draggedByBubbleStream) {
+            return vDistBubbleWebDrag(yDistance, lastMove.yDistance);
+        }
         final double vAllowedDistance;
 
         // Lenient on first move(s) in web.
@@ -3088,6 +3091,21 @@ public class SurvivalFly extends Check {
 
         if (vDistanceAboveLimit > 0.0) {
             tags.add("vwebdesc");
+        }
+        return new double[]{vAllowedDistance, vDistanceAboveLimit};
+    }
+
+    private double[] vDistBubbleWebDrag(final double yDistance, final double lastYDistance) {
+        double vAllowedDistance = lastYDistance * Magic.FRICTION_MEDIUM_WATER;
+        final double limit = -Magic.bubbleStreamDescend * Magic.FRICTION_MEDIUM_WATER;
+        if (vAllowedDistance > limit) {
+            vAllowedDistance = limit;
+        }
+        final double vDistanceAboveLimit = yDistance < vAllowedDistance
+                ? Math.abs(yDistance - vAllowedDistance) : 0.0;
+        tags.add("bubbleweb_drag");
+        if (vDistanceAboveLimit > 0.0) {
+            tags.add("vwebdrag");
         }
         return new double[]{vAllowedDistance, vDistanceAboveLimit};
     }
