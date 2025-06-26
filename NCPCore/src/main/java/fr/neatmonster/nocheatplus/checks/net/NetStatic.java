@@ -71,11 +71,12 @@ public class NetStatic {
         // Smooth excessive first-bucket burst into following buckets.
         relaxBurst(packetFreq, time, maxPackets, winDur, winNum, totalDur);
 
-        // Add packet to frequency count.
+        // Add packet to frequency count and cache current scores.
         packetFreq.add(time, packets);
+        final float[] scores = cacheScores(packetFreq, winNum);
 
-        final int burnStart = findSecondUsedBucket(packetFreq, winNum);
-        int empty = burnStart < winNum ? countEmptyAfter(packetFreq, burnStart, winNum) : 0;
+        final int burnStart = findSecondUsedBucket(scores, winNum);
+        int empty = burnStart < winNum ? countEmptyAfter(scores, burnStart, winNum) : 0;
         final float burnScore = idealPackets * winDur / 1000f;
 
         // Future: burn time windows based on other activity counting, such as matching ActinFrequency with keep-alive packets.
@@ -86,9 +87,9 @@ public class NetStatic {
             empty = Math.min(empty, (int) Math.round((lag - 1f) * winNum));
         }
 
-        final double fullCount = computeFullCount(packetFreq, burnStart, empty, burnScore, winNum);
+        final double fullCount = computeFullCount(scores, burnStart, empty, burnScore, winNum);
 
-        return computeViolation(packetFreq, burstFreq, time, burstPackets, burstDirect, burstEPM, fullCount,
+        return computeViolation(scores, burstFreq, time, burstPackets, burstDirect, burstEPM, fullCount,
                 maxPackets, winDur, winNum, tags);
     }
 
@@ -96,14 +97,14 @@ public class NetStatic {
             final long winDur, final int winNum, final long totalDur) {
         final long tDiff = time - packetFreq.lastAccess();
         if (tDiff >= winDur && tDiff < totalDur) {
-            float sc0 = packetFreq.bucketScore(0);
-            if (sc0 > maxPackets) {
-                sc0 -= maxPackets;
+            float firstBucketScore = packetFreq.bucketScore(0);
+            if (firstBucketScore > maxPackets) {
+                firstBucketScore -= maxPackets;
                 for (int i = 1; i < winNum; i++) {
                     final float sci = packetFreq.bucketScore(i);
                     if (sci < maxPackets) {
-                        final float consume = Math.min(sc0, maxPackets - sci);
-                        sc0 -= consume;
+                        final float consume = Math.min(firstBucketScore, maxPackets - sci);
+                        firstBucketScore -= consume;
                         packetFreq.setBucket(i, sci + consume);
                         if (sci > 0f) {
                             break;
@@ -112,46 +113,68 @@ public class NetStatic {
                         break;
                     }
                 }
-                packetFreq.setBucket(0, maxPackets + sc0);
+                packetFreq.setBucket(0, maxPackets + firstBucketScore);
             }
         }
     }
 
-    private static int findSecondUsedBucket(final ActionFrequency packetFreq, final int winNum) {
-        boolean foundFirst = false;
+    private static float[] cacheScores(final ActionFrequency packetFreq, final int winNum) {
+        final float[] scores = new float[winNum];
+        for (int i = 0; i < winNum; i++) {
+            scores[i] = packetFreq.bucketScore(i);
+        }
+        return scores;
+    }
+
+    private static int findSecondUsedBucket(final float[] scores, final int winNum) {
+        boolean used = false;
         for (int i = 1; i < winNum; i++) {
-            if (packetFreq.bucketScore(i) > 0f) {
-                if (foundFirst) {
+            if (scores[i] > 0f) {
+                if (used) {
                     return i;
                 }
-                foundFirst = true;
+                used = true;
+            } else if (used) {
+                return winNum;
             }
         }
         return winNum;
     }
 
-    private static int countEmptyAfter(final ActionFrequency packetFreq, final int startIndex, final int winNum) {
+    private static int countEmptyAfter(final float[] scores, final int startIndex, final int winNum) {
         int empty = 0;
         for (int j = startIndex; j < winNum; j++) {
-            if (packetFreq.bucketScore(j) == 0f) {
+            if (scores[j] == 0f) {
                 empty += 1;
             }
         }
         return empty;
     }
 
-    private static double computeFullCount(final ActionFrequency packetFreq, final int burnStart, final int empty,
+    private static double computeFullCount(final float[] scores, final int burnStart, final int empty,
             final float burnScore, final int winNum) {
         if (burnStart < winNum) {
-            final float trailing = Math.max(packetFreq.trailingScore(burnStart, 1f),
-                    burnScore * (winNum - burnStart - empty));
-            final float leading = packetFreq.leadingScore(burnStart, 1f);
+            float trailing = 0f;
+            for (int i = burnStart; i < winNum; i++) {
+                trailing += scores[i];
+            }
+            trailing = Math.max(trailing, burnScore * (winNum - burnStart - empty));
+
+            float leading = 0f;
+            for (int i = 0; i < burnStart; i++) {
+                leading += scores[i];
+            }
             return leading + trailing;
         }
-        return packetFreq.score(1f);
+
+        float total = 0f;
+        for (float score : scores) {
+            total += score;
+        }
+        return total;
     }
 
-    private static double computeViolation(final ActionFrequency packetFreq, final ActionFrequency burstFreq,
+    private static double computeViolation(final float[] scores, final ActionFrequency burstFreq,
             final long time, final float burstPackets, final double burstDirect, final double burstEPM,
             final double fullCount, final float maxPackets, final long winDur, final int winNum,
             final List<String> tags) {
@@ -162,7 +185,7 @@ public class NetStatic {
             tags.add("epsacc");
         }
 
-        float burst = packetFreq.bucketScore(0);
+        float burst = scores[0];
         if (burst > burstPackets) {
             burst /= TickTask.getLag(winDur, true);
             if (burst > burstPackets) {
