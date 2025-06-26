@@ -614,6 +614,7 @@ public class VehicleEnvelope extends Check {
     }
 
     private void applyCamelSettings() {
+        checkDetails.simplifiedType = EntityType.CAMEL;
         checkDetails.canStepUpBlock = true;
         checkDetails.canClimb = false;
         checkDetails.canJump = false;
