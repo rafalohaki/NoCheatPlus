@@ -80,12 +80,17 @@ public class BlockCacheSpigotCB1_10_R1 extends BlockCache {
         // Deprecation warning below (reason / substitute?).
         @SuppressWarnings("deprecation")
         final AxisAlignedBB bb = block.a(world.getType(pos), world, pos);
-        if (bb == null) {
+        if (bb == null || !isBoundsValid(bb)) {
             return new double[] {0.0, 0.0, 0.0, 1.0, 1.0, 1.0}; // Special case.
-            //return null;
         }
         // minX, minY, minZ, maxX, maxY, maxZ
-        return new double[]{bb.a, bb.b, bb.c, bb.d,  bb.e, bb.f};
+        return new double[] {bb.a, bb.b, bb.c, bb.d, bb.e, bb.f};
+    }
+
+    private static boolean isBoundsValid(AxisAlignedBB bb) {
+        return !(bb.a < -1.0D || bb.d > 2.0D
+                || bb.b < -1.0D || bb.e > 2.0D
+                || bb.c < -1.0D || bb.f > 2.0D);
     }
 
     @Override

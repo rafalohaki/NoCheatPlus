@@ -78,12 +78,17 @@ public class BlockCacheSpigotCB1_9_R1 extends BlockCache {
         if (shape != null) return shape;
         final BlockPosition pos = new BlockPosition(x, y, z);
         final AxisAlignedBB bb = block.a(world.getType(pos), world, pos);
-        if (bb == null) {
+        if (bb == null || !isBoundsValid(bb)) {
             return new double[] {0.0, 0.0, 0.0, 1.0, 1.0, 1.0}; // Special case.
-            //return null;
         }
         // minX, minY, minZ, maxX, maxY, maxZ
-        return new double[]{bb.a, bb.b, bb.c, bb.d,  bb.e, bb.f};
+        return new double[] {bb.a, bb.b, bb.c, bb.d, bb.e, bb.f};
+    }
+
+    private static boolean isBoundsValid(AxisAlignedBB bb) {
+        return !(bb.a < -1.0D || bb.d > 2.0D
+                || bb.b < -1.0D || bb.e > 2.0D
+                || bb.c < -1.0D || bb.f > 2.0D);
     }
 
     @Override
