@@ -80,6 +80,9 @@ public class FastConsume extends Check implements Listener, INotifyReload {
             return;
         }
         final IPlayerData pData = DataManager.getPlayerData(player);
+        if (pData == null) {
+            return;
+        }
         if (!pData.isCheckActive(type, player)) {
             return;
         }
@@ -87,7 +90,9 @@ public class FastConsume extends Check implements Listener, INotifyReload {
         final long time = System.currentTimeMillis();
         if (check(player, event.getItem(), time, data, pData)){
             event.setCancelled(true);
-            DataManager.getPlayerData(player).requestUpdateInventory();
+            if (pData != null) {
+                pData.requestUpdateInventory();
+            }
         }
     }
 
