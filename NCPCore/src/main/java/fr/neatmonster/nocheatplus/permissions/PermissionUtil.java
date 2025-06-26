@@ -127,49 +127,27 @@ public class PermissionUtil {
         final List<CommandProtectionEntry> changed = new LinkedList<CommandProtectionEntry>();
         // Apply protection based on white-list or black-list.
         for (final Command command : CommandUtil.getCommands()) {
-            final String lcLabel = command.getLabel().trim().toLowerCase();
-            if (checked.contains(lcLabel) || containsAnyAliases(checked, command)) {
-                if (!invertIgnored) {
-                    continue;
-                }
-            }
-            else if (invertIgnored) {
+            if (!shouldProtectCommand(command, checked, invertIgnored)) {
                 continue;
             }
-            // Set the permission for the command.
+            final String lcLabel = command.getLabel().trim().toLowerCase();
             String cmdPermName = command.getPermission();
-            final boolean cmdHadPerm;
-            if (cmdPermName == null) {
-                // Set a permission.
+            final boolean cmdHadPerm = cmdPermName != null;
+            if (!cmdHadPerm) {
                 cmdPermName = permissionBase + "." + lcLabel;
                 command.setPermission(cmdPermName);
-                cmdHadPerm = false;
             }
-            else{
-                cmdHadPerm = true;
-            }
-            // Set permission default behavior.
             Permission cmdPerm = pm.getPermission(cmdPermName);
             final boolean permRegistered = cmdPerm != null;
             if (!permRegistered) {
                 cmdPerm = new Permission(cmdPermName);
                 if (!cmdHadPerm) {
-                    // NCP added the permission, allow root.
                     cmdPerm.addParent(rootPerm, true);
-                } // else: permission was present, but not registered.
+                }
                 pm.addPermission(cmdPerm);
             }
-            // Create change history entry.
-            if (cmdHadPerm && permRegistered) {
-                changed.add(new CommandProtectionEntry(command, lcLabel, cmdPermName, cmdPerm.getDefault(), command.getPermissionMessage()));
-            }
-            else {
-                // (New Permission instances will not be touched on restore.)
-                changed.add(new CommandProtectionEntry(command, lcLabel, null, null, command.getPermissionMessage()));
-            }
-            // Change 
-            cmdPerm.setDefault(ops ? PermissionDefault.OP : PermissionDefault.FALSE);
-            if (!ops) Bukkit.getServer().getConsoleSender().addAttachment(plugin, cmdPermName, true);
+            recordChangeHistory(changed, command, lcLabel, cmdPermName, cmdHadPerm, permRegistered, cmdPerm);
+            registerCommandPermission(plugin, pm, rootPerm, command, cmdPermName, cmdPerm, permRegistered, cmdHadPerm, ops);
             command.setPermissionMessage(permissionMessage);
         }
         return changed;
@@ -191,6 +169,32 @@ public class PermissionUtil {
             }
         }
         return false;
+    }
+
+    private static boolean shouldProtectCommand(final Command command, final Set<String> checked, final boolean invertIgnored) {
+        final String lcLabel = command.getLabel().trim().toLowerCase();
+        final boolean contained = checked.contains(lcLabel) || containsAnyAliases(checked, command);
+        return invertIgnored ? contained : !contained;
+    }
+
+    private static void registerCommandPermission(final Plugin plugin, final PluginManager pm,
+            final Permission rootPerm, final Command command, final String permissionName,
+            Permission permission, final boolean existed, final boolean hadPerm, final boolean ops) {
+        permission.setDefault(ops ? PermissionDefault.OP : PermissionDefault.FALSE);
+        if (!ops) {
+            Bukkit.getServer().getConsoleSender().addAttachment(plugin, permissionName, true);
+        }
+    }
+
+    private static void recordChangeHistory(final List<CommandProtectionEntry> changed, final Command command,
+            final String lcLabel, final String permissionName, final boolean hadPerm, final boolean existed,
+            final Permission permission) {
+        if (hadPerm && existed) {
+            changed.add(new CommandProtectionEntry(command, lcLabel, permissionName, permission.getDefault(),
+                    command.getPermissionMessage()));
+        } else {
+            changed.add(new CommandProtectionEntry(command, lcLabel, null, null, command.getPermissionMessage()));
+        }
     }
 
     /**
