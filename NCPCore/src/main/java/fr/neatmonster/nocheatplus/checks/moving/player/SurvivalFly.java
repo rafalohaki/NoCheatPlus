@@ -1403,7 +1403,6 @@ public class SurvivalFly extends Check {
         final boolean isBlockingOrUsing   = isBlockingOrUsing(player, data);
         final PlayerMoveData lastMove     = data.playerMoves.getFirstPastMove();
         final PlayerMoveData pastMove2    = data.playerMoves.getSecondPastMove();
-        final long now                    = System.currentTimeMillis();
         final double modHoneyBlock        = Magic.modSoulSand * (thisMove.to.onGround ? 0.8 : 1.75);
         final double modStairs            = calcModStairs(isMovingBackwards, thisMove);
         final double modHopSprint         = calcModHopSprint(data, thisMove, to);
@@ -1418,38 +1417,48 @@ public class SurvivalFly extends Check {
         final DistanceState state = new DistanceState(hAllowedDistance, friction,
                 useBaseModifiers, useBaseModifiersSprint, useSneakModifier);
 
-        boolean handled = applyWebModifiers(ctx, state)
+        boolean handled = applyBaseEnvironmentModifiers(ctx, state, modHoneyBlock, modStairs);
+
+        if (!handled) {
+            handled = applyConditionalModifiers(ctx, state, lastMove, pastMove2, sprinting,
+                    sfDirty, actuallySneaking, isBlockingOrUsing, modHopSprint);
+        }
+
+        return finalizeAllowedDistance(ctx, state, lastMove, sprinting, actuallySneaking);
+    }
+
+    private boolean applyBaseEnvironmentModifiers(final AllowedDistanceContext ctx,
+            final DistanceState state, final double modHoneyBlock, final double modStairs) {
+        return applyWebModifiers(ctx, state)
                 || applyPowderSnowModifiers(ctx, state)
                 || applyBerryBushModifiers(ctx, state)
                 || applySoulSandModifiers(ctx, state)
                 || applySlimeBlockModifiers(ctx, state)
                 || applyHoneyBlockModifiers(ctx, state, modHoneyBlock)
-                || applyStairsModifiers(ctx, state, modStairs);
+                || applyStairsModifiers(ctx, state, modStairs)
+                || applyNoSlowPacket(ctx, state)
+                || applyInvalidUsePacket(ctx, state)
+                || applyCollisionModifiers(ctx, state);
+    }
 
-        handled |= applyNoSlowPacket(ctx, state);
-        handled |= applyInvalidUsePacket(ctx, state);
-        handled |= applyCollisionModifiers(ctx, state);
-
-        if (!handled && applyInLiquidModifiers(ctx, state, lastMove, pastMove2, sprinting, sfDirty)) {
-            handled = true;
+    private boolean applyConditionalModifiers(final AllowedDistanceContext ctx,
+            final DistanceState state, final PlayerMoveData lastMove, final PlayerMoveData pastMove2,
+            final boolean sprinting, final boolean sfDirty, final boolean actuallySneaking,
+            final boolean isBlockingOrUsing, final double modHopSprint) {
+        if (applyInLiquidModifiers(ctx, state, lastMove, pastMove2, sprinting, sfDirty)) {
+            return true;
         }
-
-        if (!handled && applyLiquidExitModifiers(ctx, state, sfDirty)) {
-            handled = true;
+        if (applyLiquidExitModifiers(ctx, state, sfDirty)) {
+            return true;
         }
-
-        if (!handled && applySneakingModifiers(ctx, state, sfDirty, actuallySneaking)) {
-            handled = true;
+        if (applySneakingModifiers(ctx, state, sfDirty, actuallySneaking)) {
+            return true;
         }
-
-        if (!handled && applyUsingItemModifiers(ctx, state, lastMove, sfDirty, isBlockingOrUsing)) {
-            handled = true;
+        if (applyUsingItemModifiers(ctx, state, lastMove, sfDirty, isBlockingOrUsing)) {
+            return true;
         }
-        if (!handled) {
-            applyDefaultSpeed(ctx, state, modHopSprint);
-        }
-
-        return finalizeAllowedDistance(ctx, state, lastMove, sprinting, actuallySneaking);
+        applyDefaultSpeed(ctx, state, modHopSprint);
+        return false;
     }
 
     private boolean applyWebModifiers(final AllowedDistanceContext ctx, final DistanceState st) {
