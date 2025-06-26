@@ -305,44 +305,66 @@ public class MovingListener extends CheckListener implements TickListener, IRemo
      */
     @EventHandler(priority = EventPriority.MONITOR)
     public void onPlayerBedLeave(final PlayerBedLeaveEvent event) {
-
         final Player player = event.getPlayer();
+        if (player == null) {
+            return;
+        }
         final IPlayerData pData = DataManager.getPlayerData(player);
-        if (!pData.isCheckActive(CheckType.MOVING, player)) return;
+        if (pData == null) {
+            return;
+        }
+
         final MovingData data = pData.getGenericInstance(MovingData.class);
         final MovingConfig cc = pData.getGenericInstance(MovingConfig.class);
-    
-        if (pData.isCheckActive(CheckType.MOVING_SURVIVALFLY, player) && survivalFly.checkBed(player, pData, cc, data)) {
 
-            // Check if the player has to be reset.
-            // To "cancel" the event, we teleport the player.
-            Location newTo = null;
-            final Location loc = player.getLocation(useBedLeaveLoc);
-            final PlayerMoveInfo moveInfo = aux.usePlayerMoveInfo();
-            moveInfo.set(player, loc, null, cc.yOnGround);
-            final boolean sfCheck = MovingUtil.shouldCheckSurvivalFly(player, moveInfo.from, moveInfo.to, data, cc, pData);
-            aux.returnPlayerMoveInfo(moveInfo);
-            if (sfCheck) {
-                newTo = MovingUtil.getApplicableSetBackLocation(player, loc.getYaw(), loc.getPitch(), moveInfo.from, data, cc);
-            }
-            if (newTo == null) {
-                newTo = LocUtil.clone(loc);
-            }
-
-            if (sfCheck && cc.sfSetBackPolicyFallDamage && noFall.isEnabled(player, pData)) {
-                // Check if to deal damage.
-                double y = loc.getY();
-                if (data.hasSetBack()) y = Math.min(y, data.getSetBackY());
-                noFall.checkDamage(player, y, data, pData);
-            }
-            // Cleanup
-            useBedLeaveLoc.setWorld(null);
-            // Teleport.
-            data.prepareSetBack(newTo); // Should be enough. 
-            player.teleport(newTo, BridgeMisc.TELEPORT_CAUSE_CORRECTION_OF_POSITION);
+        if (pData.isCheckActive(CheckType.MOVING, player)) {
+            handleBedLeave(player, pData, data, cc);
+        } else {
+            data.wasInBed = false;
         }
-        // Reset bed ...
-        else data.wasInBed = false;
+    }
+
+    /**
+     * Handle bed leave logic.
+     */
+    private void handleBedLeave(final Player player, final IPlayerData pData,
+                                final MovingData data, final MovingConfig cc) {
+
+        if (!pData.isCheckActive(CheckType.MOVING_SURVIVALFLY, player)
+                || !survivalFly.checkBed(player, pData, cc, data)) {
+            data.wasInBed = false;
+            return;
+        }
+
+        applyBedLeaveSetback(player, pData, data, cc);
+    }
+
+    private void applyBedLeaveSetback(final Player player, final IPlayerData pData,
+                                      final MovingData data, final MovingConfig cc) {
+
+        Location newTo = null;
+        final Location loc = player.getLocation(useBedLeaveLoc);
+        final PlayerMoveInfo moveInfo = aux.usePlayerMoveInfo();
+        moveInfo.set(player, loc, null, cc.yOnGround);
+        final boolean sfCheck = MovingUtil.shouldCheckSurvivalFly(player, moveInfo.from, moveInfo.to, data, cc, pData);
+        aux.returnPlayerMoveInfo(moveInfo);
+        if (sfCheck) {
+            newTo = MovingUtil.getApplicableSetBackLocation(player, loc.getYaw(), loc.getPitch(), moveInfo.from, data, cc);
+        }
+        if (newTo == null) {
+            newTo = LocUtil.clone(loc);
+        }
+
+        if (sfCheck && cc.sfSetBackPolicyFallDamage && noFall.isEnabled(player, pData)) {
+            double y = loc.getY();
+            if (data.hasSetBack()) {
+                y = Math.min(y, data.getSetBackY());
+            }
+            noFall.checkDamage(player, y, data, pData);
+        }
+        useBedLeaveLoc.setWorld(null);
+        data.prepareSetBack(newTo);
+        player.teleport(newTo, BridgeMisc.TELEPORT_CAUSE_CORRECTION_OF_POSITION);
     }
 
 
