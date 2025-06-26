@@ -41,6 +41,10 @@ Links
 * [Issues/Tickets](https://github.com/Updated-NoCheatPlus/NoCheatPlus/issues)
 * [Wiki](https://github.com/Updated-NoCheatPlus/Docs)
 * [Configuration](https://github.com/Updated-NoCheatPlus/Docs#configuration)
+* The paths `checks.moving.survivalfly.setbackpolicy.falldamage` and
+  `checks.moving.survivalfly.hover.falldamage` are now
+  `checks.moving.survivalfly.setbackpolicy.applyfalldamage` and
+  `checks.moving.survivalfly.hover.takefalldamage`.
 * [Permissions](https://github.com/Updated-NoCheatPlus/Docs/blob/master/Settings/Permissions.md)
 * [Commands](https://github.com/Updated-NoCheatPlus/Docs/blob/master/Settings/Commands.md)
 
