@@ -57,8 +57,8 @@ public class UnusedVelocity {
             final CheckType checkType, final MovingData data, final MovingConfig cc) {
         boolean violation = false;
         final SimpleAxisVelocity verVel = data.getVerticalVelocityTracker();
-        violation |= quickCheckDirection(player, verVel.unusedTrackerPos, checkType, "vert/pos", data, cc);
-        violation |= quickCheckDirection(player, verVel.unusedTrackerNeg, checkType, "vert/neg", data, cc);
+        violation = violation || quickCheckDirection(player, verVel.unusedTrackerPos, checkType, "vert/pos", data, cc);
+        violation = violation || quickCheckDirection(player, verVel.unusedTrackerNeg, checkType, "vert/neg", data, cc);
         return violation;
     }
 

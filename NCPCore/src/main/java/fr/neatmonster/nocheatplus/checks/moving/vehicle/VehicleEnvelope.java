@@ -317,15 +317,15 @@ public class VehicleEnvelope extends Check {
             data.timeVehicletoss = System.currentTimeMillis();
         }
 
-        violation |= checkHorizontalSpeed(vehicle, thisMove, data, cc, debug);
-        violation |= evaluateMediumState(thisMove, data, debug, vehicle, moveInfo);
+        violation = violation || checkHorizontalSpeed(vehicle, thisMove, data, cc, debug);
+        violation = violation || evaluateMediumState(thisMove, data, debug, vehicle, moveInfo);
 
         if (applyLevitationModifier(vehicle)) {
             violation = false;
         }
 
-        violation |= checkVerticalLimits(thisMove, now, data);
-        violation |= checkLiquidSpecialCases(vehicle, thisMove, data);
+        violation = violation || checkVerticalLimits(thisMove, now, data);
+        violation = violation || checkLiquidSpecialCases(vehicle, thisMove, data);
 
         if (!violation) {
             if (checkDetails.inAir) {
@@ -397,7 +397,7 @@ public class VehicleEnvelope extends Check {
             handleWebState(debug);
         }
         else if (checkDetails.canClimb && thisMove.from.onClimbable) {
-            violation |= handleClimbableState(thisMove);
+            violation = violation || handleClimbableState(thisMove);
         }
         else if (checkDetails.canRails && thisMove.fromOnRails) {
             handleRailsState(thisMove);
@@ -409,7 +409,7 @@ public class VehicleEnvelope extends Check {
             handleGroundMovement(thisMove, debug);
         }
         else if (checkDetails.inAir) {
-            violation |= handleInAirState(thisMove, data, debug, vehicle, moveInfo);
+            violation = violation || handleInAirState(thisMove, data, debug, vehicle, moveInfo);
         }
         else {
             handleUnknownState(debug);

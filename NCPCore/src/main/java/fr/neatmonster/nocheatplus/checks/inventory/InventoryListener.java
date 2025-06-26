@@ -246,8 +246,8 @@ public class InventoryListener  extends CheckListener implements JoinLeaveListen
         final ItemStack clicked = event.getCurrentItem();
 
         boolean cancel = checkIllegalEnchantments(player, cursor, clicked, pData);
-        cancel |= checkFastClick(event, player, pData, now, slot, cursor, clicked, action, data);
-        cancel |= checkInventoryMove(event, player, pData, data);
+        cancel = cancel || checkFastClick(event, player, pData, now, slot, cursor, clicked, action, data);
+        cancel = cancel || checkInventoryMove(event, player, pData, data);
 
         updateClickTimes(data, now);
 

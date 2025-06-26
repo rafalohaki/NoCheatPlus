@@ -466,7 +466,7 @@ public class PlayerDataManager  implements IPlayerDataManager, ComponentWithName
          *  ICheckData vs IData (...), except if registered for per check 
          *  type removal.
          */
-        somethingFound |= clearComponentData(checkType, playerName);
+        somethingFound = somethingFound || clearComponentData(checkType, playerName);
 
         if (pData != null) {
             final CheckRemovalSpec removalSpec = new CheckRemovalSpec(checkType, true, this);

@@ -202,14 +202,14 @@ public class FightListener extends CheckListener implements JoinLeaveListener{
                 pData, cc, data, debug);
         final Player damagedPlayer = dmgInfo.player;
         final LocationTrace damagedTrace = dmgInfo.trace;
-        cancelled |= dmgInfo.cancelled;
+        cancelled = cancelled || dmgInfo.cancelled;
 
         // Log generic properties of this attack.
         if (debug) {
             debug(player, "Attacks " + (damagedPlayer == null ? ("entity " + damaged.getType()) : ("player" + damagedPlayer.getName())) + " damage=" + (finalDamage == originalDamage ? finalDamage : (originalDamage + "/" + finalDamage)));
         }
 
-        cancelled |= applyDeadChecks(cc, player, damaged, data);
+        cancelled = cancelled || applyDeadChecks(cc, player, damaged, data);
 
         if (handleSweepAttack(player, originalDamage, loc, tick, data, debug)) {
             cleanupLocations();
@@ -223,10 +223,10 @@ public class FightListener extends CheckListener implements JoinLeaveListener{
 
 
 
-        cancelled |= runCombatChecks(player, damaged, damagedIsFake, loc, damagedLoc, data, pData, cc, mCc,
+        cancelled = cancelled || runCombatChecks(player, damaged, damagedIsFake, loc, damagedLoc, data, pData, cc, mCc,
                 mData, penaltyList, now, normalizedMove, debug, damagedTrace, tick);
 
-        cancelled |= checkAngle(player, loc, damaged, worldChanged, data, cc, pData, worldName, now, debug);
+        cancelled = cancelled || checkAngle(player, loc, damaged, worldChanged, data, cc, pData, worldName, now, debug);
 
         updateLastAttackData(data, worldName, tick, damagedLoc);
         // Care for the "lost sprint problem": sprint resets, client moves as if still...
@@ -239,7 +239,7 @@ public class FightListener extends CheckListener implements JoinLeaveListener{
             checkLostSprint(player, loc, damagedLoc, now, mData, mCc, pData, debug);
         }
 
-        cancelled |= applyAttackPenalty(player, data, now, debug);
+        cancelled = cancelled || applyAttackPenalty(player, data, now, debug);
 
         cleanupLocations();
         return cancelled;
@@ -523,26 +523,26 @@ public class FightListener extends CheckListener implements JoinLeaveListener{
 
         boolean cancelled = false;
 
-        cancelled |= checkSpeed(player, data, cc, pData, normalizedMove, now);
+        cancelled = cancelled || checkSpeed(player, data, cc, pData, normalizedMove, now);
 
         if (!cancelled) {
-            cancelled |= checkCritical(player, loc, data, cc, pData, penaltyList);
+            cancelled = cancelled || checkCritical(player, loc, data, cc, pData, penaltyList);
         }
 
         if (!cancelled) {
-            cancelled |= checkNoSwing(player, mData, pData, cc, now, data);
+            cancelled = cancelled || checkNoSwing(player, mData, pData, cc, now, data);
         }
 
         if (!cancelled) {
-            cancelled |= checkImpossibleHit(player, mCc, data, cc, pData);
+            cancelled = cancelled || checkImpossibleHit(player, mCc, data, cc, pData);
         }
 
         if (!cancelled) {
-            cancelled |= checkVisibility(player, loc, damaged, damagedIsFake, damagedLoc, data, cc, pData);
+            cancelled = cancelled || checkVisibility(player, loc, damaged, damagedIsFake, damagedLoc, data, cc, pData);
         }
 
         if (!cancelled) {
-            cancelled |= checkReachAndDirection(player, damaged, damagedIsFake, loc, damagedLoc, data, pData,
+            cancelled = cancelled || checkReachAndDirection(player, damaged, damagedIsFake, loc, damagedLoc, data, pData,
                     cc, mData, damagedTrace, tick, now, debug);
         }
 

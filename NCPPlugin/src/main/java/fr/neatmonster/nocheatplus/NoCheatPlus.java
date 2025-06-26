@@ -519,14 +519,14 @@ public class NoCheatPlus extends JavaPlugin implements NoCheatPlusAPI {
             registerGenericInstance(obj);
         }
 
-        added |= registerInterfaces(obj);
-        added |= addToSubRegistries(obj);
+        added = added || registerInterfaces(obj);
+        added = added || addToSubRegistries(obj);
 
         if (allowComponentRegistry) {
-            added |= registerComponentRegistry(obj);
+            added = added || registerComponentRegistry(obj);
         }
 
-        added |= handleSubComponentHolder(obj);
+        added = added || handleSubComponentHolder(obj);
 
         if (added) {
             allComponents.add(obj);

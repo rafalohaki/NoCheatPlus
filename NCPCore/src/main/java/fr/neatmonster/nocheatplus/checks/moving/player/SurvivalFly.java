@@ -1426,9 +1426,9 @@ public class SurvivalFly extends Check {
                 || applyHoneyBlockModifiers(ctx, state, modHoneyBlock)
                 || applyStairsModifiers(ctx, state, modStairs);
 
-        handled |= applyNoSlowPacket(ctx, state);
-        handled |= applyInvalidUsePacket(ctx, state);
-        handled |= applyCollisionModifiers(ctx, state);
+        handled = handled || applyNoSlowPacket(ctx, state);
+        handled = handled || applyInvalidUsePacket(ctx, state);
+        handled = handled || applyCollisionModifiers(ctx, state);
 
         if (!handled && applyInLiquidModifiers(ctx, state, lastMove, pastMove2, sprinting, sfDirty)) {
             handled = true;
