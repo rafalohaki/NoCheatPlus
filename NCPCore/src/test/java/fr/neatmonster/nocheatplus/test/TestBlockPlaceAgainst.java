@@ -14,6 +14,7 @@
  */
 package fr.neatmonster.nocheatplus.test;
 
+import static org.junit.Assert.assertEquals;
 import static org.junit.Assert.assertFalse;
 import static org.junit.Assert.assertTrue;
 import static org.mockito.ArgumentMatchers.any;
@@ -46,6 +47,7 @@ import fr.neatmonster.nocheatplus.permissions.PermissionRegistry;
 import fr.neatmonster.nocheatplus.permissions.RegisteredPermission;
 import fr.neatmonster.nocheatplus.players.IPlayerData;
 import fr.neatmonster.nocheatplus.players.PlayerDataManager;
+import fr.neatmonster.nocheatplus.players.DataManager;
 import fr.neatmonster.nocheatplus.worlds.WorldDataManager;
 
 public class TestBlockPlaceAgainst {
@@ -84,30 +86,31 @@ public class TestBlockPlaceAgainst {
         // 1. Create dependencies for PlayerDataManager.
         WorldDataManager wdm = mock(WorldDataManager.class);
         PermissionRegistry pr = mock(PermissionRegistry.class);
-        
-        // 2. Create the real PlayerDataManager instance.
-        PlayerDataManager realDataManager = new PlayerDataManager(wdm, pr);
 
-        // 3. Use reflection to set the static field: 'Check.dataManager'.
-        Field dataManagerField = Check.class.getDeclaredField("dataManager");
-        dataManagerField.setAccessible(true);
-        
-        // Remove the 'final' modifier from the static field to allow setting it.
-        Field modifiersField = Field.class.getDeclaredField("modifiers");
-        modifiersField.setAccessible(true);
-        modifiersField.setInt(dataManagerField, dataManagerField.getModifiers() & ~Modifier.FINAL);
-        
-        dataManagerField.set(null, realDataManager);
+        // 2. Create the real PlayerDataManager instance without invoking the constructor.
+        PlayerDataManager realDataManager = (PlayerDataManager) unsafe.allocateInstance(PlayerDataManager.class);
+        Field execHist = PlayerDataManager.class.getDeclaredField("executionHistories");
+        execHist.setAccessible(true);
+        execHist.set(realDataManager, new java.util.HashMap<>());
+
+        // 3. Set the static DataManager.instance field.
+        Field dmField = DataManager.class.getDeclaredField("instance");
+        dmField.setAccessible(true);
+        dmField.set(null, realDataManager);
         
         // 4. Now that the static dependency is met, we can safely create the check.
         this.against = new TestableAgainst();
     }
 
-    private boolean runCheck(Material placedMat, Material baseMat) {
+    private boolean runCheck(Material placedMat, Material baseMat, Material belowMat,
+            Material aboveMat) {
         Block placed = mock(Block.class);
         Block below = mock(Block.class);
+        Block above = mock(Block.class);
         when(placed.getRelative(BlockFace.DOWN)).thenReturn(below);
-        when(below.getType()).thenReturn(baseMat);
+        when(placed.getRelative(BlockFace.UP)).thenReturn(above);
+        when(below.getType()).thenReturn(belowMat);
+        when(above.getType()).thenReturn(aboveMat);
 
         Block againstBlock = mock(Block.class);
         when(againstBlock.getType()).thenReturn(baseMat);
@@ -127,16 +130,31 @@ public class TestBlockPlaceAgainst {
 
         boolean isInteract = !biData.getLastIsCancelled() && biData.matchesLastBlock(againstBlock);
 
-        try (MockedStatic<fr.neatmonster.nocheatplus.utilities.map.BlockProperties> bpMock = mockStatic(fr.neatmonster.nocheatplus.utilities.map.BlockProperties.class)) {
+        try (MockedStatic<fr.neatmonster.nocheatplus.utilities.map.BlockProperties> bpMock =
+                mockStatic(fr.neatmonster.nocheatplus.utilities.map.BlockProperties.class)) {
             bpMock.when(() -> fr.neatmonster.nocheatplus.utilities.map.BlockProperties.isLiquid(any(Material.class)))
                   .thenAnswer(inv -> inv.getArgument(0) == Material.WATER);
             bpMock.when(() -> fr.neatmonster.nocheatplus.utilities.map.BlockProperties.isWaterPlant(any(Material.class)))
                   .thenReturn(false);
             bpMock.when(() -> fr.neatmonster.nocheatplus.utilities.map.BlockProperties.isAir(any(Material.class)))
-                  .thenReturn(false);
+                  .thenAnswer(inv -> inv.getArgument(0) == Material.AIR);
 
             return against.check(player, placed, placedMat, againstBlock, isInteract, data, config, pData);
         }
+    }
+
+    @Test
+    public void testLilyPadShallowWaterAllowed() {
+        boolean result = runCheck(BridgeMaterial.LILY_PAD, Material.WATER, Material.DIRT, Material.AIR);
+        assertFalse(result);
+        assertEquals(0.0, data.againstVL, 0.0001);
+    }
+
+    @Test
+    public void testFrogspawnShallowWaterAllowed() {
+        boolean result = runCheck(BridgeMaterial.FROGSPAWN, Material.WATER, Material.STONE, Material.AIR);
+        assertFalse(result);
+        assertEquals(0.0, data.againstVL, 0.0001);
     }
 
 }
