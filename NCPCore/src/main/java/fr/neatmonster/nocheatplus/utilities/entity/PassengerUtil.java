@@ -390,7 +390,6 @@ public class PassengerUtil {
                         CheckUtils.debug(player, CheckType.MOVING_VEHICLE,
                                 "Failed to add passenger to boat.");
                     }
-                    vehicle.eject();
                     // Not schedule set passenger for boat due to location async
                 }
             } else if (scheduleDelay) {
