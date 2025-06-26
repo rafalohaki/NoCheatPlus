@@ -36,6 +36,8 @@ import org.bukkit.block.BlockFace;
 import org.bukkit.block.data.BlockData;
 import org.bukkit.block.data.Waterlogged;
 import org.bukkit.block.data.type.BubbleColumn;
+
+import fr.neatmonster.nocheatplus.utilities.InventoryUtil;
 import org.bukkit.configuration.ConfigurationSection;
 import org.bukkit.entity.Player;
 import org.bukkit.inventory.ItemStack;
@@ -83,6 +85,9 @@ public class BlockProperties {
 
     /** Tolerance for floating point comparisons. */
     private static final double EPSILON = 1.0E-6;
+
+    /** Cached Material values from InventoryUtil. */
+    private static final Material[] ALL_MATERIALS = InventoryUtil.ALL_MATERIALS;
 
     /**
      * The Enum ToolType.
@@ -1105,7 +1110,7 @@ public class BlockProperties {
         // Initialize block flags                           //
         //////////////////////////////////////////////////////
         // Generic initialization.
-        for (Material mat : Material.values()) {
+        for (Material mat : ALL_MATERIALS) {
             BlockFlags.blockFlags.put(mat, 0L);
             if (mcAccess.isBlockLiquid(mat).decide()) {
                 // NOTE: do not set BlockFlags.F_GROUND for liquids ?
@@ -1227,7 +1232,7 @@ public class BlockProperties {
             allBlocks.add("--- Present entries -------------------------------");
         }
         List<String> tags = new ArrayList<String>();
-        for (Material temp : Material.values()) {
+        for (Material temp : ALL_MATERIALS) {
             String mat;
             try {
                 if (!temp.isBlock()) {
@@ -4410,7 +4415,7 @@ public class BlockProperties {
         for (final Material mat : MaterialUtil.RAILS) {
             BlockFlags.setFlag(mat, BlockFlags.F_RAILS);
         }
-        for (Material material : Material.values()) {
+        for (Material material : ALL_MATERIALS) {
             if (material.isBlock()) {
                 final String name = material.name().toLowerCase();
                 if (name.endsWith("_door") || name.endsWith("_trapdoor") || name.endsWith("fence_gate")) {
