@@ -77,35 +77,31 @@ public class TestWorldDataManager {
         }
     }
 
-    @Test
-    public void BasicTests() {
-
-        //PluginTests.setUnitTestNoCheatPlusAPI(false);
+    private WorldDataManager newManager() {
         StaticLog.setUseLogManager(false);
+        return getWorldDataManager();
+    }
 
-        WorldDataManager worldMan = getWorldDataManager();
-
-        Map<String, ConfigFile> rawWorldConfigs = new LinkedHashMap<String, ConfigFile>();
-
-        // (Implicitly create configurations via set).
-        // Default.
+    private Map<String, ConfigFile> createBaseConfig() {
+        Map<String, ConfigFile> rawWorldConfigs = new LinkedHashMap<>();
         set(rawWorldConfigs, null, ConfPaths.COMBINED + ConfPaths.SUB_ACTIVE, "yes");
-        // All existing.
         setup(rawWorldConfigs, null, "Exist1", "Exist2");
         set(rawWorldConfigs, ConfPaths.COMBINED_MUNCHHAUSEN_CHECK, "default");
-
-        // Exist1
         set(rawWorldConfigs, "Exist1", ConfPaths.COMBINED + ConfPaths.SUB_ACTIVE, "no");
-
-        // Exist2
         set(rawWorldConfigs, "Exist2", ConfPaths.COMBINED_MUNCHHAUSEN_CHECK, false);
+        return rawWorldConfigs;
+    }
 
-        // (Might set some particularly interesting values here.)
+    private Map<String, ConfigFile> createDummyConfig() {
+        Map<String, ConfigFile> rawWorldConfigs = new LinkedHashMap<>();
+        set(rawWorldConfigs, null, "dummy", "dummy");
+        return rawWorldConfigs;
+    }
 
-
-        /////////////////////////
-        // Apply configuration
-        /////////////////////////
+    @Test
+    public void testApplyConfiguration() {
+        WorldDataManager worldMan = newManager();
+        Map<String, ConfigFile> rawWorldConfigs = createBaseConfig();
         worldMan.applyConfiguration(rawWorldConfigs);
 
         for (String worldName : Arrays.asList("Exist1", "Exist2")) {
@@ -117,58 +113,53 @@ public class TestWorldDataManager {
         if (!worldMan.getWorldData("notExist1").isCheckActive(CheckType.COMBINED_MUNCHHAUSEN)) {
             fail("Inherited from default: COMBINED_MUNCHHAUSEN should be active (-> COMBINED is)");
         }
-
         if (!worldMan.getDefaultWorldData().isCheckActive(CheckType.COMBINED_MUNCHHAUSEN)) {
             fail("Default: COMBINED_MUNCHHAUSEN should be active (-> COMBINED is)");
         }
-
         if (worldMan.getWorldData("Exist1").isCheckActive(CheckType.COMBINED_MUNCHHAUSEN)) {
             fail("Specific: COMBINED_MUNCHHAUSEN should not be active (-> COMBINED is not)");
         }
-
         if (worldMan.getWorldData("Exist2").isCheckActive(CheckType.COMBINED_MUNCHHAUSEN)) {
             fail("Specific: COMBINED_MUNCHHAUSEN should not be active (directly set)");
         }
-
         if (!worldMan.getWorldData("notExist2").isCheckActive(CheckType.COMBINED_MUNCHHAUSEN)) {
             fail("Inherited from default: COMBINED_MUNCHHAUSEN should be active (-> COMBINED is)");
         }
+    }
 
+    @Test
+    public void testOverrideBehaviour() {
+        WorldDataManager worldMan = newManager();
+        Map<String, ConfigFile> rawWorldConfigs = createBaseConfig();
+        worldMan.applyConfiguration(rawWorldConfigs);
 
-        ////////////////
-        // Override
-        ////////////////
-
-        // Override via config "reload":
         set(rawWorldConfigs, "Exist2", ConfPaths.COMBINED_MUNCHHAUSEN_CHECK, true);
         worldMan.applyConfiguration(rawWorldConfigs);
         if (!worldMan.getWorldData("Exist2").isCheckActive(CheckType.COMBINED_MUNCHHAUSEN)) {
             fail("Specific: COMBINED_MUNCHHAUSEN should be active (directly set)");
         }
 
-        // Specific override (mild).
-        worldMan.overrideCheckActivation(CheckType.COMBINED, AlmostBoolean.NO, 
-                OverrideType.SPECIFIC, false);
+        worldMan.overrideCheckActivation(CheckType.COMBINED, AlmostBoolean.NO, OverrideType.SPECIFIC, false);
         if (worldMan.getWorldData("notExist2").isCheckActive(CheckType.COMBINED_MUNCHHAUSEN)) {
             fail("Overridden (inherited from default): COMBINED_MUNCHHAUSEN should not be active (-> COMBINED is not)");
         }
-        worldMan.overrideCheckActivation(CheckType.COMBINED, AlmostBoolean.NO, 
-                OverrideType.SPECIFIC, true);
+        worldMan.overrideCheckActivation(CheckType.COMBINED, AlmostBoolean.NO, OverrideType.SPECIFIC, true);
         if (worldMan.getWorldData("notExist2").isCheckActive(CheckType.COMBINED_MUNCHHAUSEN)) {
             fail("Overridden (inherited from default): COMBINED_MUNCHHAUSEN should not be active (overrideChildren from COMBINED should explicitly set this)");
         }
+    }
 
-
-        ///////////////////
-        // Fake reload 1
-        ///////////////////
-        /*
-         * NOTE: With this testing scenario, ConfigFile instances within
-         * rawWorldConfigs stay identical, which would not be the case with a
-         * ConfigManager based reload.
-         */
+    @Test
+    public void testReloadHandling() {
+        WorldDataManager worldMan = newManager();
+        Map<String, ConfigFile> rawWorldConfigs = createBaseConfig();
         worldMan.applyConfiguration(rawWorldConfigs);
 
+        set(rawWorldConfigs, "Exist2", ConfPaths.COMBINED_MUNCHHAUSEN_CHECK, true);
+        worldMan.applyConfiguration(rawWorldConfigs);
+        worldMan.overrideCheckActivation(CheckType.COMBINED, AlmostBoolean.NO, OverrideType.SPECIFIC, true);
+
+        worldMan.applyConfiguration(rawWorldConfigs);
         if (!worldMan.getWorldData("notExist2").isCheckActive(CheckType.COMBINED)) {
             fail("Inherited from default: COMBINED should be active after reload.");
         }
@@ -176,65 +167,42 @@ public class TestWorldDataManager {
             fail("Inherited from default: COMBINED_MUNCHHAUSEN should be active (-> COMBINED is)");
         }
 
-
-        ////////////////
-        // Override 2
-        ////////////////
-
-        worldMan.getWorldData("NotExist3").overrideCheckActivation(CheckType.COMBINED_MUNCHHAUSEN, 
-                AlmostBoolean.NO, OverrideType.SPECIFIC, false);
+        worldMan.getWorldData("NotExist3").overrideCheckActivation(CheckType.COMBINED_MUNCHHAUSEN, AlmostBoolean.NO, OverrideType.SPECIFIC, false);
         if (worldMan.getWorldData("notExist3").isCheckActive(CheckType.COMBINED_MUNCHHAUSEN)) {
             fail("Overridden (SPECIFIC): COMBINED_MUNCHHAUSEN should not be active (-directly set)");
         }
 
-
-        ///////////////////
-        // Fake reload 2
-        ///////////////////
         worldMan.applyConfiguration(rawWorldConfigs);
-
         if (!worldMan.getWorldData("notExist3").isCheckActive(CheckType.COMBINED_MUNCHHAUSEN)) {
             fail("Overridden (SPECIFIC): COMBINED_MUNCHHAUSEN should be active after reload (COMBINED is)");
         }
+    }
 
-        //////////////////////////////////////////////////////////////////////
-
-        ///////////////////
-        // Reset
-        ///////////////////
-
-        worldMan = getWorldDataManager();
-        rawWorldConfigs = new LinkedHashMap<String, ConfigFile>();
-        set(rawWorldConfigs, null, "dummy", "dummy");
+    @Test
+    public void testResetAndGlobalOverride() {
+        WorldDataManager worldMan = newManager();
+        Map<String, ConfigFile> rawWorldConfigs = createDummyConfig();
         worldMan.applyConfiguration(rawWorldConfigs);
 
         IWorldData defaultWorldData = worldMan.getDefaultWorldData();
-
-        // Set all to NO.
-        defaultWorldData.overrideCheckActivation(CheckType.ALL, AlmostBoolean.NO, 
-                OverrideType.VOLATILE, true);
+        defaultWorldData.overrideCheckActivation(CheckType.ALL, AlmostBoolean.NO, OverrideType.VOLATILE, true);
         for (CheckType checkType : CheckType.values()) {
             if (defaultWorldData.isCheckActive(checkType)) {
                 fail("Expect check not to be active: " + checkType);
             }
         }
 
-        // Set all to YES.
-        defaultWorldData.overrideCheckActivation(CheckType.ALL, AlmostBoolean.YES, 
-                OverrideType.VOLATILE, true);
+        defaultWorldData.overrideCheckActivation(CheckType.ALL, AlmostBoolean.YES, OverrideType.VOLATILE, true);
         for (CheckType checkType : CheckType.values()) {
             if (!defaultWorldData.isCheckActive(checkType)) {
                 fail("Expect check to be active: " + checkType);
             }
         }
 
-        // Set FastHeal to NO
-        defaultWorldData.overrideCheckActivation(CheckType.FIGHT_FASTHEAL, AlmostBoolean.NO, 
-                OverrideType.VOLATILE, true);
+        defaultWorldData.overrideCheckActivation(CheckType.FIGHT_FASTHEAL, AlmostBoolean.NO, OverrideType.VOLATILE, true);
         if (defaultWorldData.isCheckActive(CheckType.FIGHT_FASTHEAL)) {
             fail("Expect FIGHT_FASTHEAL not to be active.");
         }
-
     }
 
 }

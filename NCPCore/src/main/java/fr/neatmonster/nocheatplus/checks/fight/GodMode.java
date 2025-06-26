@@ -50,63 +50,48 @@ public class GodMode extends Check {
      * @param damage
      * @return
      */
-    public boolean check(final Player player, final boolean playerIsFake, 
+    public boolean check(final Player player, final boolean playerIsFake,
             final double damage, final FightData data, final IPlayerData pData){
-        final int tick = TickTask.getTick();
+        final DamageState dState = computePlayerDamageState(player, data);
 
-        final int noDamageTicks = Math.max(0, player.getNoDamageTicks());
-        final int invulnerabilityTicks = playerIsFake ? 0 : mcAccess.getHandle().getInvulnerableTicks(player);
+        final Decision decision = new Decision();
 
-        // NOTE: consider cleaning up the surrounding logic
-
-        boolean legit = false; // Return, reduce vl.
-        boolean set = false; // Set tick/ndt and return
-        boolean resetAcc = false; // Reset acc counter.
-        boolean resetAll = false; // Reset all and return
-
-        // Check difference to expectation:
-        final int dTick = tick - data.lastDamageTick;
-        final int dNDT = data.lastNoDamageTicks - noDamageTicks;
-        final int delta = dTick - dNDT;
-
-        final double health = BridgeHealth.getHealth(player);
-
-        // NOTE: adjust to double values
-
-        if (data.godModeHealth > health ){
-            data.godModeHealthDecreaseTick = tick;
-            legit = set = resetAcc = true;
+        if (dState.healthDecreased){
+            data.godModeHealthDecreaseTick = dState.tick;
+            decision.markLegit();
+            decision.markSetTicks();
+            decision.markResetAcc();
         }
 
-        // NOTE: account for ndt/2 on regain health
-
-        // Invulnerable or inconsistent.
-        // NOTE: check if NCP manages invulnerable ticks for this player
-        if (invulnerabilityTicks != Integer.MAX_VALUE && invulnerabilityTicks > 0 || tick < data.lastDamageTick){
-            // (Second criteria is for MCAccessBukkit.)
-            legit = set = resetAcc = true;
+        final boolean ignoreInvul = shouldIgnoreInvulnerability(player, playerIsFake, data, dState.tick);
+        if (ignoreInvul) {
+            decision.markLegit();
+            decision.markSetTicks();
+            decision.markResetAcc();
         }
 
         // Reset accumulator.
-        if (20 + data.godModeAcc < dTick || dTick > 40){
-            legit = resetAcc = true;
-            set = true; // force tick update
+        if (20 + data.godModeAcc < dState.dTick || dState.dTick > 40){
+            decision.markLegit();
+            decision.markResetAcc();
+            decision.markSetTicks();
         }
 
         // Check if reduced more than expected or new/count down fully.
         // NOTE: remove workaround logic
-        if (delta <= 0  || data.lastNoDamageTicks <= player.getMaximumNoDamageTicks() / 2 || dTick > data.lastNoDamageTicks || damage > BridgeHealth.getLastDamage(player)|| damage == 0.0){
-            // Not resetting acc.
-            legit = set = true;
+        if (dState.delta <= 0  || data.lastNoDamageTicks <= player.getMaximumNoDamageTicks() / 2 ||
+                dState.dTick > data.lastNoDamageTicks || damage > BridgeHealth.getLastDamage(player) || damage == 0.0){
+            decision.markLegit();
+            decision.markSetTicks();
         }
 
-        if (dTick == 1 && noDamageTicks < 19){
-            set = true;
+        if (dState.dTick == 1 && dState.noDamageTicks < 19){
+            decision.markSetTicks();
         }
 
-        if (delta == 1){
+        if (dState.delta == 1){
             // Ignore these, but keep reference value from before.
-            legit = true;
+            decision.markLegit();
         }
 
         //    	Bukkit.getServer().broadcastMessage("God " + player.getName() + " delta=" + delta + " dt=" + dTick + " dndt=" + dNDT + " acc=" + data.godModeAcc + " d=" + damage + " ndt=" + noDamageTicks + " h=" + health + " slag=" + TickTask.getLag(dTick, true));
@@ -114,66 +99,56 @@ public class GodMode extends Check {
         // NOTE: check last damage taken as well
 
         // Resetting
-        data.godModeHealth = health;
+        data.godModeHealth = dState.health;
 
-        if (resetAcc || resetAll){
+        if (decision.shouldResetAcc() || decision.shouldResetAll()){
             data.godModeAcc = 0;
         }
-        if (legit){
+        if (decision.isLegit()){
             data.godModeVL *= 0.97;
         }
-        if (resetAll){
+        if (decision.shouldResetAll()){
             // Reset all.
             data.lastNoDamageTicks = 0;
             data.lastDamageTick = 0;
             return false;
         }
-        else if (set){
+        else if (decision.shouldSetTicks()){
             // Only set the tick values.
-            data.lastNoDamageTicks = noDamageTicks;
-            data.lastDamageTick = tick;
+            data.lastNoDamageTicks = dState.noDamageTicks;
+            data.lastDamageTick = dState.tick;
             return false;
         }
-        else if (legit){
+        else if (decision.isLegit()){
             // Just return;
             return false;
         }
 
-        if (tick < data.godModeHealthDecreaseTick){
+        if (dState.tick < data.godModeHealthDecreaseTick){
             data.godModeHealthDecreaseTick = 0;
         }
         else{
-            final int dht = tick - data.godModeHealthDecreaseTick;
+            final int dht = dState.tick - data.godModeHealthDecreaseTick;
             if (dht <= 20) {
-                return false; 
+                return false;
             }
         }
 
-        final FightConfig cc = pData.getGenericInstance(FightConfig.class); 
+        final FightConfig cc = pData.getGenericInstance(FightConfig.class);
 
-        // Check for client side lag.
-        final long now = System.currentTimeMillis();
-        final long maxAge = cc.godModeLagMaxAge;
-        long keepAlive = Long.MIN_VALUE;
-        if (NCPAPIProvider.getNoCheatPlusAPI().hasFeatureTag("checks", "KeepAliveFrequency")) {
-            keepAlive = pData.getGenericInstance(NetData.class).lastKeepAliveTime;
-        }
-        keepAlive = Math.max(keepAlive, CheckUtils.guessKeepAliveTime(player, now, maxAge, pData));
-
-        if (keepAlive != Long.MIN_VALUE && now - keepAlive > cc.godModeLagMinAge && now - keepAlive < maxAge){
-            // Assume lag.
+        if (shouldIgnoreLag(player, pData, cc)) {
             return false;
         }
 
         // Violation probably.
-        data.godModeAcc += delta;
+        data.godModeAcc += dState.delta;
 
         boolean cancel = false;
         // NOTE: implement bounds
         if (data.godModeAcc > 2){
             // NOTE: adjust vl scaling to match legacy actions
-            data.godModeVL += delta;
-            if (executeActions(player, data.godModeVL, delta, 
+            data.godModeVL += dState.delta;
+            if (executeActions(player, data.godModeVL, dState.delta,
                     pData.getGenericInstance(FightConfig.class).godModeActions).willCancel()){
                 cancel = true;
             }
@@ -186,10 +161,74 @@ public class GodMode extends Check {
         }
 
         // Set tick values.
-        data.lastNoDamageTicks = noDamageTicks;
-        data.lastDamageTick = tick;
+        data.lastNoDamageTicks = dState.noDamageTicks;
+        data.lastDamageTick = dState.tick;
 
         return cancel;
+    }
+
+    private DamageState computePlayerDamageState(Player player, FightData data) {
+        final int tick = TickTask.getTick();
+        final int noDamageTicks = Math.max(0, player.getNoDamageTicks());
+        final int dTick = tick - data.lastDamageTick;
+        final int dNDT = data.lastNoDamageTicks - noDamageTicks;
+        final int delta = dTick - dNDT;
+        final double health = BridgeHealth.getHealth(player);
+        final boolean healthDecreased = data.godModeHealth > health;
+        return new DamageState(tick, noDamageTicks, dTick, dNDT, delta, health, healthDecreased);
+    }
+
+    private boolean shouldIgnoreInvulnerability(Player player, boolean playerIsFake, FightData data, int tick) {
+        final int invulnerabilityTicks = playerIsFake ? 0 : mcAccess.getHandle().getInvulnerableTicks(player);
+        return (invulnerabilityTicks != Integer.MAX_VALUE && invulnerabilityTicks > 0) || tick < data.lastDamageTick;
+    }
+
+    private boolean shouldIgnoreLag(Player player, IPlayerData pData, FightConfig cc) {
+        final long now = System.currentTimeMillis();
+        final long maxAge = cc.godModeLagMaxAge;
+        long keepAlive = Long.MIN_VALUE;
+        if (NCPAPIProvider.getNoCheatPlusAPI().hasFeatureTag("checks", "KeepAliveFrequency")) {
+            keepAlive = pData.getGenericInstance(NetData.class).lastKeepAliveTime;
+        }
+        keepAlive = Math.max(keepAlive, CheckUtils.guessKeepAliveTime(player, now, maxAge, pData));
+        return keepAlive != Long.MIN_VALUE && now - keepAlive > cc.godModeLagMinAge && now - keepAlive < maxAge;
+    }
+
+    private static final class DamageState {
+        final int tick;
+        final int noDamageTicks;
+        final int dTick;
+        final int dNDT;
+        final int delta;
+        final double health;
+        final boolean healthDecreased;
+
+        DamageState(int tick, int noDamageTicks, int dTick, int dNDT, int delta, double health, boolean healthDecreased) {
+            this.tick = tick;
+            this.noDamageTicks = noDamageTicks;
+            this.dTick = dTick;
+            this.dNDT = dNDT;
+            this.delta = delta;
+            this.health = health;
+            this.healthDecreased = healthDecreased;
+        }
+    }
+
+    private static final class Decision {
+        private boolean legit;
+        private boolean setTicks;
+        private boolean resetAcc;
+        private boolean resetAll;
+
+        void markLegit() { this.legit = true; }
+        void markSetTicks() { this.setTicks = true; }
+        void markResetAcc() { this.resetAcc = true; }
+        void markResetAll() { this.resetAll = true; }
+
+        boolean isLegit() { return legit; }
+        boolean shouldSetTicks() { return setTicks; }
+        boolean shouldResetAcc() { return resetAcc; }
+        boolean shouldResetAll() { return resetAll; }
     }
 
     /**

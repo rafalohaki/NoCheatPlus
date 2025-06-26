@@ -114,7 +114,7 @@ public class VehicleEnvelope extends Check {
     
    /*
     *
-    * Instanties a new VehicleEnvelope check
+    * Instantiates a new VehicleEnvelope check
     *
     */
     public VehicleEnvelope() {
