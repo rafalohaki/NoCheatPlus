@@ -20,8 +20,13 @@ import fr.neatmonster.nocheatplus.checks.CheckType;
 import fr.neatmonster.nocheatplus.utilities.CheckTypeUtil;
 
 /**
- * @deprecated Use fr.neatmonster.utilities.CheckTypeUtil instead.
- * 
+ * @deprecated Use {@link fr.neatmonster.nocheatplus.utilities.CheckTypeUtil}
+ *             instead. Scheduled for removal in version 2.0.
+ *             <p>
+ *             Migration: replace references to this class with the methods of
+ *             {@code CheckTypeUtil}.
+ *             </p>
+ *
  * @author asofold
  */
 @Deprecated
