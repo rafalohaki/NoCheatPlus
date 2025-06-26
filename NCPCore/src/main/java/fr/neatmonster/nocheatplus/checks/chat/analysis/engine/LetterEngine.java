@@ -32,6 +32,8 @@ import fr.neatmonster.nocheatplus.checks.chat.analysis.engine.processors.Similar
 import fr.neatmonster.nocheatplus.checks.chat.analysis.engine.processors.WordPrefixes;
 import fr.neatmonster.nocheatplus.checks.chat.analysis.engine.processors.WordPrefixes.WordPrefixesSettings;
 import fr.neatmonster.nocheatplus.checks.chat.analysis.engine.processors.WordProcessor;
+import fr.neatmonster.nocheatplus.checks.chat.analysis.engine.ConfiguredWordProcessorFactory;
+import fr.neatmonster.nocheatplus.checks.chat.analysis.engine.WordProcessorFactory;
 import fr.neatmonster.nocheatplus.components.data.IData;
 import fr.neatmonster.nocheatplus.components.registry.feature.ConsistencyChecker;
 import fr.neatmonster.nocheatplus.components.registry.feature.IHaveCheckType;
@@ -50,6 +52,11 @@ public class LetterEngine implements IRemoveData, IHaveCheckType, ConsistencyChe
 
     /** Global processors */
     protected final List<WordProcessor> processors = new ArrayList<WordProcessor>();
+
+    /**
+     * Factory for creating per-player word processors.
+     */
+    protected final WordProcessorFactory factory;
 
     /**
      * Mapping players to data.
@@ -77,8 +84,10 @@ public class LetterEngine implements IRemoveData, IHaveCheckType, ConsistencyChe
             settings.applyConfig(config, ConfPaths.CHAT_TEXT_GL_SIMILARITY);
             processors.add(new SimilarWordsBKL("glSimilarity", settings));
         }
-        // Future improvement: make expiration duration configurable (currently 10 minutes).
-        dataMap = new EnginePlayerDataMap(600000L, 100, 0.75f);
+        // Configure expiration for player caches.
+        long expirationDuration = config.getLong(ConfPaths.CHAT_TEXT_EXPIRATION_TIME, 600000L);
+        factory = new ConfiguredWordProcessorFactory();
+        dataMap = new EnginePlayerDataMap(expirationDuration, 100, 0.75f, factory);
     }
 
     public Map<String, Float> process(final MessageLetterCount letterCount, final String playerName, final ChatConfig cc, final ChatData data){
