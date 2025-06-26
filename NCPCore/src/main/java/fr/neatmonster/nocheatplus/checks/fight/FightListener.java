@@ -572,18 +572,17 @@ public class FightListener extends CheckListener implements JoinLeaveListener{
         if (player == null || pData == null || !speed.isEnabled(player, pData)) {
             return false;
         }
+        if (cc.speedImprobableWeight > 0.0f) {
+            Improbable.feed(player, cc.speedImprobableWeight, now);
+        }
         if (speed.check(player, now, data, cc, pData)) {
-            if (data.speedVL > 50) {
-                if (cc.speedImprobableWeight > 0.0f && !cc.speedImprobableFeedOnly) {
-                    Improbable.check(player, cc.speedImprobableWeight, now, "fight.speed", pData);
-                }
-            } else if (cc.speedImprobableWeight > 0.0f) {
-                Improbable.feed(player, cc.speedImprobableWeight, now);
+            if (data.speedVL > 50 && cc.speedImprobableWeight > 0.0f && !cc.speedImprobableFeedOnly) {
+                Improbable.checkOnly(player, now, "fight.speed", pData);
             }
             return true;
         }
         if (normalizedMove > 2.0 && cc.speedImprobableWeight > 0.0f && !cc.speedImprobableFeedOnly
-                && Improbable.check(player, cc.speedImprobableWeight, now, "fight.speed", pData)) {
+                && Improbable.checkOnly(player, now, "fight.speed", pData)) {
             return true;
         }
         return false;

@@ -85,6 +85,11 @@ public class FightConfig extends ACheckConfig {
 
     public final int        speedShortTermLimit;
     public final int        speedShortTermTicks;
+    /**
+     * If set, only feed the Improbable system with speed related events and do
+     * not evaluate violations here. Useful when another plugin handles speed
+     * checks.
+     */
     public final boolean    speedImprobableFeedOnly;
     public final float      speedImprobableWeight;
     public final ActionList speedActions;

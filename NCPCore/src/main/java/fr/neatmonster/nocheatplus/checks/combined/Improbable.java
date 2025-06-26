@@ -43,9 +43,34 @@ public class Improbable extends Check implements IDisableListener{
      * @param now
      * @return
      */
-    public static final boolean check(final Player player, final float weight, final long now, 
+    /**
+     * Feed weight and run the improbable check.
+     *
+     * @param player
+     * @param weight
+     * @param now
+     * @param tags
+     * @param pData
+     * @return true if actions request to cancel
+     */
+    public static final boolean check(final Player player, final float weight, final long now,
             final String tags, final IPlayerData pData){
-        return instance.checkImprobable(player, weight, now, tags, pData);
+        feed(player, weight, now, pData);
+        return instance.checkImprobableOnly(player, now, tags, pData);
+    }
+
+    /**
+     * Only run the improbable check without adding new input.
+     *
+     * @param player
+     * @param now
+     * @param tags
+     * @param pData
+     * @return true if actions request to cancel
+     */
+    public static final boolean checkOnly(final Player player, final long now, final String tags,
+            final IPlayerData pData) {
+        return instance.checkImprobableOnly(player, now, tags, pData);
     }
 
     /**
@@ -79,14 +104,13 @@ public class Improbable extends Check implements IDisableListener{
         instance = this;
     }
 
-    private boolean checkImprobable(final Player player, final float weight, final long now, 
+    private boolean checkImprobableOnly(final Player player, final long now,
             final String tags, final IPlayerData pData) {
         if (!pData.isCheckActive(type, player)) {
             return false;
         }
         final CombinedData data = pData.getGenericInstance(CombinedData.class);
         final CombinedConfig cc = pData.getGenericInstance(CombinedConfig.class);
-        data.improbableCount.add(now, weight);
         final float shortTerm = data.improbableCount.bucketScore(0);
         double violation = 0;
         boolean violated = false;
