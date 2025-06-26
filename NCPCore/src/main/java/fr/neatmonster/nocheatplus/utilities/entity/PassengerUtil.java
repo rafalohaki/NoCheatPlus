@@ -362,9 +362,8 @@ public class PassengerUtil {
         if (data.vehicleSetPassengerTaskId == null) {
             if (vehicle.getType() == EntityType.BOAT) {
                 if (!handleVehicle.getHandle().addPassenger(player, vehicle)) {
-                    // Not schedule set passenger for boat due to location async
-                } else {
                     vehicle.eject();
+                    // Not schedule set passenger for boat due to location async
                 }
             } else if (scheduleDelay) {
                 data.vehicleSetPassengerTaskId = Folia.runSyncDelayedTaskForEntity(player, plugin,
