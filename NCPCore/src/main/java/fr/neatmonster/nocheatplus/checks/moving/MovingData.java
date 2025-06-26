@@ -574,9 +574,10 @@ public class MovingData extends ACheckData implements IDataOnRemoveSubCheckData,
 
 
     /**
-     * Invalidate all past player moves data and set last position if not null.
-     * 
-     * @param loc
+     * Invalidate the recorded player move history and reset temporary state.
+     * The given location will be stored as the last known move when not {@code null}.
+     *
+     * @param loc the new last position or {@code null}
      */
     public void resetPlayerPositions(final PlayerLocation loc) {
         resetPlayerPositions();
@@ -586,10 +587,21 @@ public class MovingData extends ACheckData implements IDataOnRemoveSubCheckData,
             lastMove.setWithExtraProperties(loc);
         }
     }
-
-
     /**
-     * Invalidate all past moves data (player).
+     * Invalidate the recorded player move history and clear temporary movement state.
+     * <p>Resets:
+     * <ul>
+     * <li>{@link #sfZeroVdistRepeat}</li>
+     * <li>{@link #sfDirty}</li>
+     * <li>{@link #sfLowJump}</li>
+     * <li>{@link #liftOffEnvelope}</li>
+     * <li>{@link #insideMediumCount}</li>
+     * <li>{@link #lastFrictionHorizontal}</li>
+     * <li>{@link #lastFrictionVertical}</li>
+     * <li>{@link #verticalBounce}</li>
+     * <li>{@link #blockChangeRef}</li>
+     * </ul>
+     * Vehicle consistency is left unchanged.
      */
     private void resetPlayerPositions() {
         playerMoves.invalidate();
