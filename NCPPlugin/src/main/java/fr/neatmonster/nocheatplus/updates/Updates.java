@@ -17,13 +17,14 @@ package fr.neatmonster.nocheatplus.updates;
 public class Updates {
 
     /**
-     * To be called from an async task.
-     * @param versionString Current version string (getDescription().getVersion()).
-     * @param updateTimeout
-     * @return
+     * Checks for updates.
+     * <p>
+     * Update checks have been removed, so this always returns {@code false}.
+     * This method is kept for API compatibility.
+     *
+     * @return always {@code false}
      */
-    public static boolean checkForUpdates(String versionString, int updateTimeout) {
-        // Update checks have been removed. Always return false.
+    public static boolean checkForUpdates() {
         return false;
     }
 }

@@ -15,7 +15,6 @@
 package fr.neatmonster.nocheatplus.compat.registry;
 
 import fr.neatmonster.nocheatplus.compat.MCAccess;
-import fr.neatmonster.nocheatplus.components.entity.IEntityAccessLastPositionAndLook;
 import fr.neatmonster.nocheatplus.components.entity.IEntityAccessVehicle;
 import fr.neatmonster.nocheatplus.compat.bukkit.EntityAccessVehicleMultiPassenger;
 
@@ -41,8 +40,6 @@ public class EntityAccessFactory {
      * @param config
      */
     public void setupEntityAccess(final MCAccess mcAccess, final MCAccessConfig config) {
-
-        // Register implementation for IEntityAccessLastPositionAndLook if available.
 
         // IEntityAccessVehicle
         IEntityAccessVehicle vehicleAccess = EntityAccessVehicleMultiPassenger.createIfSupported();
