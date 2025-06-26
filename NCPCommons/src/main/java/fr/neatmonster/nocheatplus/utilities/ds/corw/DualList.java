@@ -24,6 +24,7 @@ import java.util.concurrent.locks.Lock;
  * @author asofold
  *
  * @param <T>
+ *            Element type stored in this list.
  */
 public class DualList<T> extends DualCollection<T, List<T>> {
 
