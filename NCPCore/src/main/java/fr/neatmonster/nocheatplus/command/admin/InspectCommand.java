@@ -87,114 +87,131 @@ public class InspectCommand extends BaseCommand {
     }
 
     public static String getInspectMessage(final Player player, final String c1, final String c2, final String c3, final String cI) {
+        if (player == null) {
+            return TAG + c3 + "Player not found.";
+        }
 
         final StringBuilder builder = new StringBuilder(256);
         final IPlayerData pData = DataManager.getPlayerData(player);
-        final MovingData mData = pData.getGenericInstance(MovingData.class);
-        final MovingConfig mCC = pData.getGenericInstance(MovingConfig.class);
-        final PlayerMoveData thisMove = mData.playerMoves.getCurrentMove();
+        final MovingData mData = pData != null ? pData.getGenericInstance(MovingData.class) : null;
+        final MovingConfig mCC = pData != null ? pData.getGenericInstance(MovingConfig.class) : null;
+        final PlayerMoveData thisMove = mData != null ? mData.playerMoves.getCurrentMove() : null;
 
-        // More spaghetti.
-        builder.append(TAG + c1 + "Status information for player: " + c3 + player.getName());
-        
-        builder.append("\n "+ c1 + "" + c2 + "•" + c1 + cI + (pData.isBedrockPlayer() ? " Is a Bedrock player" : " Is a Java player") + c1 + ".");
-
-        if (Bukkit.getPluginManager().isPluginEnabled("ViaVersion")) {
-            builder.append("\n " + c1 + c2 + "•" + c1 + " Is playing with version " + ProtocolVersion.getProtocol(Via.getAPI().getPlayerVersion(pData.getPlayerId())));
-        }
-        //builder.append("\n "+ c1 + "" + c2 + "•" + c1 +" Is playing with version " + pData.getClientVersion().getReleaseName() + "(" + pData.getClientVersionID() + ")");
-
-        if (player.isOp()){
-            builder.append("\n "+ c1 + "" + c2 + "•"  + c1 + cI + " Is OP" + c1 + ".");
-        }
-
-        builder.append("\n "+ c1 + "" + c2 + "•" + c1 + (player.isOnline() ? " Is currently online." : " Is offline."));
-        
-        builder.append("\n "+ c1 + "" + c2 + "•" + c1 + (player.isValid() ? " Player is valid." : " Player is invalid."));
-
-        builder.append("\n "+ c1 + "" + c2 + "•" + c1 + " Current health: " + f1.format(BridgeHealth.getHealth(player)) + "/" + f1.format(BridgeHealth.getMaxHealth(player)));
-
-        builder.append("\n "+ c1 + "" + c2 + "•" + c1 + " Current food level: " + player.getFoodLevel());
-
-        builder.append("\n "+ c1 + "" + c2 + "•" + c1 + " Is in " + player.getGameMode() + " gamemode.");
-
-        builder.append("\n "+ c1 + "" + c2 + "•" + c1 + (mCC.assumeSprint ? " Is assumed to be sprinting." : " Assume sprint workaround disabled."));
-
-        builder.append("\n "+ c1 + "" + c2 + "•" + c1 +" FlySpeed: " + player.getFlySpeed());
-
-        builder.append("\n "+ c1 + "" + c2 + "•" + c1 + " WalkSpeed: " + player.getWalkSpeed());
-
-        if (thisMove.modelFlying != null) {
-            builder.append("\n "+ c1 + "" + c2 + "•" + c1 + " Movement model for this move " + thisMove.modelFlying.getId().toString());
-        }
-
-        if (player.getExp() > 0f) {
-            builder.append("\n "+ c1 + "" + c2 + "•" + c1 + " Experience Lvl: " + f1.format(player.getExpToLevel()) + "(exp=" + f1.format(player.getExp()) + ")");
-        }
-
-        if (Bridge1_9.isGlidingWithElytra(player)) {
-            builder.append("\n "+ c1 + "" + c2 + "•" + c1 + " Is gliding with elytra.");
-        }
-
-        if (Bridge1_13.isRiptiding(player)) {
-            builder.append("\n "+ c1 + "" + c2 + "•" + c1 + " Is riptiding." );
-        }
-
-        if (Bridge1_13.isSwimming(player)) {
-            builder.append("\n "+ c1 + "" + c2 + "•" + c1 + " Is swimming (1.13).");
-        }
-        
-        if (player.isSneaking()) {
-            builder.append("\n "+ c1 + "" + c2 + "•" + c1 + " Is sneaking.");
-        }
-
-        if (player.isBlocking()) {
-            builder.append("\n "+ c1 + "" + c2 + "•" + c1 + " Is blocking.");
-        }
-
-        if (player.isSprinting()) {
-            builder.append("\n "+ c1 + "" + c2 + "•" + c1 + " Is sprinting.");
-        }
-
-        if (mData.isUsingItem) {
-            // Item details are not yet displayed here.
-            builder.append("\n "+ c1 + "" + c2 + "•" + c1 + " Is using an item.");
-        }
-
-        if (mData.lostSprintCount > 0) {
-            builder.append("\n "+ c1 + "" + c2 + "•" + c1 + " Their sprint status has been lost for: " + mData.lostSprintCount + " ticks.");
-        }
-
-        if (player.isInsideVehicle()) {
-            builder.append("\n "+ c1 + "" + c2 + "•" + c1 + " Is riding a vehicle (" + player.getVehicle().getType() +") at " + locString(player.getVehicle().getLocation()));
-        }
-
-        if (player.isDead()) {
-            builder.append("\n "+ c1 + "" + c2 + "•" + c1 + " Is currently dead.");
-        }
-
-        if (player.isFlying()) {
-            builder.append("\n "+ c1 + "" + c2 + "•" + c1 + " Is currently flying.");
-        }
-
-        if (player.getAllowFlight()) {
-            builder.append("\n "+ c1 + "" + c2 + "•" + c1 + " Is allowed to fly.");
-        }
-
-        // Potion effects.
-        final Collection<PotionEffect> effects = player.getActivePotionEffects();
-        if (!effects.isEmpty()) {
-            builder.append("\n "+ c1 + "" + c2 + "•" +c1+ "Has the following effects: ");
-            for (final PotionEffect effect : effects) {
-                builder.append(effect.getType() + " at level " + effect.getAmplifier() +", ");
-            }
-        }
-        // Finally the block location.
-        final Location loc = player.getLocation();
-        builder.append("\n "+ c1 + "" + c2 + "•" + c1 + " Position: " + locString(loc));
+        builder.append(TAG).append(c1).append("Status information for player: ").append(c3).append(player.getName());
+        appendPlayerMeta(builder, player, pData, c1, c2, cI);
+        appendMovementSettings(builder, player, mCC, thisMove, c1, c2);
+        appendStateFlags(builder, player, mData, c1, c2);
+        appendExtraStates(builder, player, c1, c2);
+        appendPotionEffects(builder, player, c1, c2);
+        appendLocationInfo(builder, player, c1, c2);
         return builder.toString();
     }
 
+    private static void appendPlayerMeta(final StringBuilder builder, final Player player, final IPlayerData pData,
+            final String c1, final String c2, final String cI) {
+        appendBullet(builder, c1, c2, cI + ((pData != null && pData.isBedrockPlayer()) ? " Is a Bedrock player" : " Is a Java player") + c1 + ".");
+        if (pData != null && Bukkit.getPluginManager().isPluginEnabled("ViaVersion")) {
+            appendBullet(builder, c1, c2, " Is playing with version "
+                    + ProtocolVersion.getProtocol(Via.getAPI().getPlayerVersion(pData.getPlayerId())));
+        }
+        if (player.isOp()) {
+            appendBullet(builder, c1, c2, cI + " Is OP" + c1 + ".");
+        }
+        appendBullet(builder, c1, c2, player.isOnline() ? " Is currently online." : " Is offline.");
+        appendBullet(builder, c1, c2, player.isValid() ? " Player is valid." : " Player is invalid.");
+        appendBullet(builder, c1, c2,
+                " Current health: " + f1.format(BridgeHealth.getHealth(player)) + "/" + f1.format(BridgeHealth.getMaxHealth(player)));
+        appendBullet(builder, c1, c2, " Current food level: " + player.getFoodLevel());
+        appendBullet(builder, c1, c2, " Is in " + player.getGameMode() + " gamemode.");
+    }
+
+    private static void appendMovementSettings(final StringBuilder builder, final Player player,
+            final MovingConfig mCC, final PlayerMoveData thisMove, final String c1, final String c2) {
+        if (mCC != null) {
+            appendBullet(builder, c1, c2,
+                    mCC.assumeSprint ? " Is assumed to be sprinting." : " Assume sprint workaround disabled.");
+        }
+        appendBullet(builder, c1, c2, " FlySpeed: " + player.getFlySpeed());
+        appendBullet(builder, c1, c2, " WalkSpeed: " + player.getWalkSpeed());
+        if (thisMove != null && thisMove.modelFlying != null) {
+            appendBullet(builder, c1, c2, " Movement model for this move " + thisMove.modelFlying.getId().toString());
+        }
+        if (player.getExp() > 0f) {
+            appendBullet(builder, c1, c2,
+                    " Experience Lvl: " + f1.format(player.getExpToLevel()) + "(exp=" + f1.format(player.getExp()) + ")");
+        }
+    }
+
+    private static void appendStateFlags(final StringBuilder builder, final Player player, final MovingData mData,
+            final String c1, final String c2) {
+        if (Bridge1_9.isGlidingWithElytra(player)) {
+            appendBullet(builder, c1, c2, " Is gliding with elytra.");
+        }
+        if (Bridge1_13.isRiptiding(player)) {
+            appendBullet(builder, c1, c2, " Is riptiding.");
+        }
+        if (Bridge1_13.isSwimming(player)) {
+            appendBullet(builder, c1, c2, " Is swimming (1.13).");
+        }
+        if (player.isSneaking()) {
+            appendBullet(builder, c1, c2, " Is sneaking.");
+        }
+        if (player.isBlocking()) {
+            appendBullet(builder, c1, c2, " Is blocking.");
+        }
+        if (player.isSprinting()) {
+            appendBullet(builder, c1, c2, " Is sprinting.");
+        }
+        if (mData != null) {
+            if (mData.isUsingItem) {
+                appendBullet(builder, c1, c2, " Is using an item.");
+            }
+            if (mData.lostSprintCount > 0) {
+                appendBullet(builder, c1, c2,
+                        " Their sprint status has been lost for: " + mData.lostSprintCount + " ticks.");
+            }
+        }
+    }
+
+    private static void appendExtraStates(final StringBuilder builder, final Player player, final String c1,
+            final String c2) {
+        if (player.isInsideVehicle()) {
+            appendBullet(builder, c1, c2,
+                    " Is riding a vehicle (" + player.getVehicle().getType() + ") at "
+                            + locString(player.getVehicle().getLocation()));
+        }
+        if (player.isDead()) {
+            appendBullet(builder, c1, c2, " Is currently dead.");
+        }
+        if (player.isFlying()) {
+            appendBullet(builder, c1, c2, " Is currently flying.");
+        }
+        if (player.getAllowFlight()) {
+            appendBullet(builder, c1, c2, " Is allowed to fly.");
+        }
+    }
+
+    private static void appendPotionEffects(final StringBuilder builder, final Player player, final String c1,
+            final String c2) {
+        final Collection<PotionEffect> effects = player.getActivePotionEffects();
+        if (!effects.isEmpty()) {
+            appendBullet(builder, c1, c2, "Has the following effects: ");
+            for (final PotionEffect effect : effects) {
+                builder.append(effect.getType()).append(" at level ").append(effect.getAmplifier()).append(", ");
+            }
+        }
+    }
+
+    private static void appendLocationInfo(final StringBuilder builder, final Player player, final String c1,
+            final String c2) {
+        final Location loc = player.getLocation();
+        appendBullet(builder, c1, c2, " Position: " + locString(loc));
+    }
+
+    private static void appendBullet(final StringBuilder builder, final String c1, final String c2,
+            final String message) {
+        builder.append("\n ").append(c1).append(c2).append('•').append(c1).append(message);
+    }
     private static final String locString(Location loc) {
         return loc.getWorld().getName() + " at " + loc.getBlockX() + "," + loc.getBlockY() + "," + loc.getBlockZ();
     }
