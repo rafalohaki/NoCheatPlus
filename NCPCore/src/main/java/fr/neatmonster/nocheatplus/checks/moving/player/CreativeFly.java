@@ -18,6 +18,7 @@ import java.util.LinkedList;
 import java.util.List;
 import java.util.Locale;
 import java.util.Arrays;
+import java.util.OptionalDouble;
 
 import org.bukkit.GameMode;
 import org.bukkit.Location;
@@ -1407,9 +1408,9 @@ public class CreativeFly extends Check {
 
         final ElytraGuessState state = initGuessState(player, lastMove, radPitch);
         updatePitchAdjustments(state, lookvec, radPitch, xzlength, thisMove);
-        final double resultH = applyFireworkBoost(state, lookvec, xzlength, thisMove, lastMove, data);
+        final OptionalDouble resultH = applyFireworkBoost(state, lookvec, xzlength, thisMove, lastMove, data);
 
-        final double finalH = Double.isNaN(resultH) ? finalizeHorizontal(state) : resultH;
+        final double finalH = resultH.isPresent() ? resultH.getAsDouble() : finalizeHorizontal(state);
         return new VelocityAdjustment(finalH, state.allowedY);
     }
 
@@ -1471,15 +1472,31 @@ public class CreativeFly extends Check {
         }
     }
 
-    private static double applyFireworkBoost(ElytraGuessState state, Vector lookvec, double xzlength,
+    /**
+     * Apply a firework boost to the current guess state.
+     *
+     * <p>Returning {@code OptionalDouble.empty()} indicates that no horizontal
+     * adjustment should be made. Previously this method returned
+     * {@link Double#NaN} for that purpose.</p>
+     *
+     * @param state the state tracking the guessed movement data
+     * @param lookvec the look vector of the player
+     * @param xzlength the horizontal length of the look vector
+     * @param thisMove information about the current move
+     * @param lastMove information about the last move
+     * @param data    moving data which may contain boost information
+     * @return an {@code OptionalDouble} containing the adjusted horizontal
+     *         distance or empty if none should be applied
+     */
+    private static OptionalDouble applyFireworkBoost(ElytraGuessState state, Vector lookvec, double xzlength,
             PlayerMoveData thisMove, PlayerMoveData lastMove, MovingData data) {
-        double resultHDistance = Double.NaN;
+        OptionalDouble resultHDistance = OptionalDouble.empty();
         if (data.fireworksBoostDuration > 0) {
             state.allowedY = Math.abs(thisMove.yDistance) < 2.0 ? thisMove.yDistance
                     : lastMove.toIsValid ? lastMove.yDistance : 0;
             if (Math.round(data.fireworksBoostTickNeedCheck / 4) > data.fireworksBoostDuration
                     && thisMove.hDistance < Math.sqrt(state.x * state.x + state.z * state.z)) {
-                resultHDistance = Math.sqrt(state.x * state.x + state.z * state.z);
+                resultHDistance = OptionalDouble.of(Math.sqrt(state.x * state.x + state.z * state.z));
             } else {
                 state.x *= 0.99;
                 state.z *= 0.99;
@@ -1487,7 +1504,7 @@ public class CreativeFly extends Check {
                 state.z += lookvec.getZ() * 0.1D + (lookvec.getZ() * 1.5D - state.z) * 0.5D;
 
                 if (thisMove.hDistance < lastMove.hAllowedDistance * 0.994) {
-                    resultHDistance = lastMove.hAllowedDistance * 0.994;
+                    resultHDistance = OptionalDouble.of(lastMove.hAllowedDistance * 0.994);
                 } else {
                     state.allowedH += 0.2;
                 }
