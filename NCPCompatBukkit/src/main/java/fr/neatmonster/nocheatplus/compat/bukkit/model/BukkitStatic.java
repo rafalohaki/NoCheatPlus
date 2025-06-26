@@ -55,8 +55,14 @@ public class BukkitStatic implements BukkitShapeModel {
 
     /**
      * Create a shape model from the given bounds.
+     * <p>
+     * The {@code bounds} array defines one or more axis aligned bounding boxes.
+     * Each bounding box is described by six doubles in the order
+     * {@code minX}, {@code minY}, {@code minZ}, {@code maxX}, {@code maxY} and
+     * {@code maxZ}. Consequently the length of the array must be a multiple of
+     * six.
      *
-     * @param bounds The bounds, length must be a multiple of 6.
+     * @param bounds The bounding box values.
      * @return New instance.
      */
     public static BukkitStatic ofBounds(double... bounds) {
