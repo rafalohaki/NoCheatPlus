@@ -82,6 +82,7 @@ public class LiquidWorkarounds {
         }
 
         // Ascend by water level
+        // Dolphin's Grace amplifier is NEGATIVE_INFINITY when absent.
         if (!(data.liftOffEnvelope == LiftOffEnvelope.LIMIT_LIQUID && Double.isInfinite(Bridge1_13.getDolphinGraceAmplifier(from.getPlayer()))) &&
                 (yDistance <= data.liftOffEnvelope.getMaxJumpGain(data.jumpAmplifier) &&
                         !BlockProperties.isLiquid(from.getTypeIdAbove()) ||

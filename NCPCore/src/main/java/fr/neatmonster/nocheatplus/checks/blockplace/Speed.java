@@ -44,12 +44,13 @@ public class Speed extends Check {
             final BlockPlaceConfig cc, final IPlayerData pData) {
         final BlockPlaceData data = pData.getGenericInstance(BlockPlaceData.class);
 
+        final long now = System.currentTimeMillis();
         boolean cancel = false;
 
         // Has the player thrown items too quickly?
-        if (data.speedLastTime != 0 && System.currentTimeMillis() - data.speedLastTime < cc.speedInterval) {
+        if (data.speedLastTime != 0 && now - data.speedLastTime < cc.speedInterval) {
             if (data.speedLastRefused) {
-                final double difference = cc.speedInterval - System.currentTimeMillis() + data.speedLastTime;
+                final double difference = cc.speedInterval - now + data.speedLastTime;
 
                 // They failed, increase this violation level.
                 data.speedVL += difference;
@@ -67,7 +68,7 @@ public class Speed extends Check {
             data.speedLastRefused = false;
         }
 
-        data.speedLastTime = System.currentTimeMillis();
+        data.speedLastTime = now;
 
         return cancel;
     }

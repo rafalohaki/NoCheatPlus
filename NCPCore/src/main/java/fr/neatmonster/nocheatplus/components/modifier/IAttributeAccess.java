@@ -27,12 +27,20 @@ import org.bukkit.entity.Player;
 public interface IAttributeAccess {
 
     /**
+     * Sentinel value used when an attribute can not be determined.
+     * <p>
+     * {@link Double#NaN} is used rather than {@link Double#MAX_VALUE} to
+     * simplify checks and avoid comparisons with large numbers.
+     */
+    double ATTRIBUTE_UNAVAILABLE = Double.NaN;
+
+    /**
      * Generic speed modifier as a multiplier.
      * 
      * @param player
      * @return A multiplier for the allowed speed, excluding the sprint boost
-     *         modifier (!). If not possible to determine, it should
-     *         Double.MAX_VALUE.
+     *         modifier (!). If not possible to determine,
+     *         {@link #ATTRIBUTE_UNAVAILABLE} is returned.
      */
     public double getSpeedAttributeMultiplier(Player player);
 
@@ -41,7 +49,7 @@ public interface IAttributeAccess {
      * 
      * @param player
      * @return The sprint boost modifier as a multiplier. If not possible to
-     *         determine, it should be Double.MAX_VALUE.
+     *         determine, {@link #ATTRIBUTE_UNAVAILABLE} is returned.
      */
     public double getSprintAttributeMultiplier(Player player);
 

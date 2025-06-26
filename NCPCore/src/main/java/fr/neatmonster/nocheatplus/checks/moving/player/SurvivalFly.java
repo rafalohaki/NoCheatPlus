@@ -1581,6 +1581,7 @@ public class SurvivalFly extends Check {
             st.useSneakModifier = true;
             st.allowed = modStairs * move.walkSpeed * cc.survivalFlyWalkingSpeed / 100D;
             st.friction = 0.0;
+            // If the player has a speed effect (NEGATIVE_INFINITY means none).
             if (!Double.isInfinite(mcAccess.getHandle().getFasterMovementAmplifier(player))) {
                 st.allowed *= 0.88;
             }
@@ -1888,6 +1889,7 @@ public class SurvivalFly extends Check {
                     st.allowed += 0.051 * BridgeEnchant.getSwiftSneakLevel(player);
                     st.useBaseModifiers = true;
                     st.friction = 0.0;
+                    // Only reduce if a speed potion effect is present.
                     if (!Double.isInfinite(mcAccess.getHandle().getFasterMovementAmplifier(player))) {
                         st.allowed *= 0.88;
                         st.useBaseModifiersSprint = true;
@@ -1941,6 +1943,7 @@ public class SurvivalFly extends Check {
             final MovingData data, final MovingConfig cc, final Player player, final DistanceState st) {
         if (!move.to.onGround) {
             final double speedAmplifier = mcAccess.getHandle().getFasterMovementAmplifier(player);
+            // The amplifier is NEGATIVE_INFINITY when no speed effect is active.
             st.allowed = (lastMove.hDistance > 0.23 ? 0.4 : 0.23 + (ServerIsAtLeast1_13 ? 0.155 : 0.0))
                     + 0.02 * (Double.isInfinite(speedAmplifier) ? 0 : speedAmplifier + 1.0);
             st.allowed *= cc.survivalFlyBlockingSpeed / 100D;
@@ -2033,8 +2036,9 @@ public class SurvivalFly extends Check {
             hAllowedDistance *= data.multSprinting;
         }
         final double attrMod = attributeAccess.getHandle().getSpeedAttributeMultiplier(player);
-        if (attrMod == Double.MAX_VALUE) {
+        if (Double.isNaN(attrMod)) {
             final double speedAmplifier = mcAccess.getHandle().getFasterMovementAmplifier(player);
+            // speedAmplifier is NEGATIVE_INFINITY if the effect is not present.
             if (!Double.isInfinite(speedAmplifier) && useBaseModifiersSprint) {
                 hAllowedDistance *= 1.0D + 0.2D * speedAmplifier;
             }
@@ -2048,6 +2052,7 @@ public class SurvivalFly extends Check {
             }
             if (!useBaseModifiersSprint) {
                 final double speedAmplifier = mcAccess.getHandle().getFasterMovementAmplifier(player);
+                // NEGATIVE_INFINITY indicates no speed potion effect.
                 if (!Double.isInfinite(speedAmplifier)) {
                     hAllowedDistance /= attrMod;
                     hAllowedDistance *= attrMod - 0.15D * speedAmplifier;
@@ -2544,6 +2549,7 @@ public class SurvivalFly extends Check {
                                        final boolean skipPermChecks) {
 
         final double speedAmplifier = mcAccess.getHandle().getFasterMovementAmplifier(player);
+        // Speed amplifier may be NEGATIVE_INFINITY when no potion is active.
 
         // 1: Attempt to reset item on NoSlow Violation, if set so in the configuration.
         final double[] reset = attemptItemReset(player, from, to, hAllowedDistance, hDistanceAboveLimit,

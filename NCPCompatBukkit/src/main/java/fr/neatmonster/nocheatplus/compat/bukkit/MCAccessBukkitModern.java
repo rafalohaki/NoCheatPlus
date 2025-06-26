@@ -21,6 +21,8 @@ import java.util.HashMap;
 import java.util.Map;
 import java.util.Arrays;
 
+import fr.neatmonster.nocheatplus.utilities.InventoryUtil;
+
 import org.bukkit.Material;
 import org.bukkit.entity.Player;
 
@@ -47,6 +49,9 @@ public class MCAccessBukkitModern extends MCAccessBukkit {
     protected ReflectDamageSources reflectDamageSources = null;
     protected ReflectLivingEntity reflectLivingEntity = null;
     protected final Map<Material, BukkitShapeModel> shapeModels = new HashMap<Material, BukkitShapeModel>();
+
+    /** Cached Material values from InventoryUtil. */
+    private static final Material[] ALL_MATERIALS = InventoryUtil.ALL_MATERIALS;
 
     // Blocks that can be fetched automatically from from the Bukkit API
     private static final BukkitShapeModel MODEL_AUTO_FETCH = new BukkitFetchableBounds();
@@ -121,6 +126,7 @@ public class MCAccessBukkitModern extends MCAccessBukkit {
     private static final BukkitShapeModel MODEL_GROUND_HEAD = BukkitStatic.ofInsetAndHeight(0.25, 0.5);
     private static final BukkitShapeModel MODEL_SINGLE_CHEST = BukkitStatic.ofInsetAndHeight(0.0625, 0.875);
     private static final BukkitShapeModel MODEL_HONEY_BLOCK = BukkitStatic.ofInsetAndHeight(0.0625, 0.9375);
+    private static final BukkitShapeModel MODEL_CACTUS = BukkitStatic.ofBounds(0.0625, 0.0, 0.0625, 0.9375, 0.9375, 0.9375);
     private static final BukkitShapeModel MODEL_SCULK_SHRIEKER = BukkitStatic.ofInsetAndHeight(0.0, 0.5);
 
     // Static blocks with full height sorted by inset.
@@ -299,7 +305,7 @@ public class MCAccessBukkitModern extends MCAccessBukkit {
         addModel(Material.LADDER, MODEL_LADDER);
         addModel(Material.BREWING_STAND, MODEL_BREWING_STAND);
         addModel(Material.DRAGON_EGG, MODEL_INSET16_1_HEIGHT100);
-        addModel(Material.CACTUS, MODEL_HONEY_BLOCK);
+        addModel(Material.CACTUS, MODEL_CACTUS);
     }
 
     private void registerMiscModelCollections() {
@@ -374,7 +380,7 @@ public class MCAccessBukkitModern extends MCAccessBukkit {
     }
 
     private void registerFlagBasedModels() {
-        for (final Material mat : Material.values()) {
+        for (final Material mat : ALL_MATERIALS) {
             final long flags = BlockFlags.getBlockFlags(mat);
             if (BlockFlags.hasAnyFlag(flags, BlockFlags.F_STAIRS)) {
                 addModel(mat, MODEL_STAIRS);

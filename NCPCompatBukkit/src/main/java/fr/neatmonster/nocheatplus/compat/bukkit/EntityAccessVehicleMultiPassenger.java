@@ -15,6 +15,7 @@
 package fr.neatmonster.nocheatplus.compat.bukkit;
 
 import java.util.List;
+import java.lang.reflect.Method;
 
 import org.bukkit.entity.Entity;
 
@@ -37,7 +38,15 @@ public class EntityAccessVehicleMultiPassenger implements IEntityAccessVehicle {
         if (ReflectionUtil.getMethodNoArgs(Entity.class, "getPassengers", List.class) == null) {
             return null;
         }
+        if (!hasAddPassenger()) {
+            return null;
+        }
         return new EntityAccessVehicleMultiPassenger();
+    }
+
+    private static boolean hasAddPassenger() {
+        Method method = ReflectionUtil.getMethod(Entity.class, "addPassenger", Entity.class);
+        return method != null && method.getReturnType() == boolean.class;
     }
 
     @Override

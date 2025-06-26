@@ -878,7 +878,17 @@ public class CollisionUtil {
     }
 
     private static int getStep(double value) {
+<<<<<<< codex/update-getstep-method-in-collisionutil -- Incoming Change
         return Integer.compare((int) Math.signum(value), 0);
+=======
+        if (value > 0) {
+            return 1;
+        } else if (value < 0) {
+            return -1;
+        } else {
+            return 0;
+        }
+>>>>>>> master -- Current Change
     }
 
     private static AxisContext prepareAxisContext(RichAxisData axisData, int stepX, int stepY, int stepZ) {

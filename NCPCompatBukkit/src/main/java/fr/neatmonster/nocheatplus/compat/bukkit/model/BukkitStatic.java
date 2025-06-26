@@ -20,6 +20,11 @@ import fr.neatmonster.nocheatplus.utilities.map.BlockCache;
 
 public class BukkitStatic implements BukkitShapeModel {
 
+    /**
+     * Bounding box coordinates. Every six consecutive values describe one box
+     * in the order {@code {minX, minY, minZ, maxX, maxY, maxZ}}. If multiple
+     * boxes are used, they are stored sequentially in this array.
+     */
     private final double[] bounds;
 
     private BukkitStatic(double... bounds) {
@@ -33,6 +38,9 @@ public class BukkitStatic implements BukkitShapeModel {
      * @return New instance.
      */
     public static BukkitStatic ofHeight(double height) {
+        if (height <= 0.0) {
+            throw new IllegalArgumentException("Height must be positive: " + height);
+        }
         return ofInsetAndHeight(0.0, height);
     }
 
@@ -44,13 +52,22 @@ public class BukkitStatic implements BukkitShapeModel {
      * @return New instance.
      */
     public static BukkitStatic ofInsetAndHeight(double xzInset, double height) {
+        if (height <= 0.0) {
+            throw new IllegalArgumentException("Height must be positive: " + height);
+        }
         return ofBounds(xzInset, 0.0, xzInset, 1.0 - xzInset, height, 1.0 - xzInset);
     }
 
     /**
      * Create a shape model from the given bounds.
+     * <p>
+     * The {@code bounds} array defines one or more axis aligned bounding boxes.
+     * Each bounding box is described by six doubles in the order
+     * {@code minX}, {@code minY}, {@code minZ}, {@code maxX}, {@code maxY} and
+     * {@code maxZ}. Consequently the length of the array must be a multiple of
+     * six.
      *
-     * @param bounds The bounds, length must be a multiple of 6.
+     * @param bounds The bounding box values.
      * @return New instance.
      */
     public static BukkitStatic ofBounds(double... bounds) {
