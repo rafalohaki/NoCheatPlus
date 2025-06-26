@@ -41,7 +41,16 @@ public class PassableAxisTracing extends AxisTracing implements ICollidePassable
         return blockCache;
     }
 
+    /**
+     * Assign a block cache for collision checks. Any previously set cache will
+     * be cleaned up to prevent stale references.
+     *
+     * @param blockCache the new block cache, may be {@code null}
+     */
     public void setBlockCache(BlockCache blockCache) {
+        if (this.blockCache != null && this.blockCache != blockCache) {
+            this.blockCache.cleanup();
+        }
         this.blockCache = blockCache;
     }
 

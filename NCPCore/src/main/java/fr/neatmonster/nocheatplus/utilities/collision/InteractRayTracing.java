@@ -62,7 +62,16 @@ public class InteractRayTracing extends RayTracing {
         return blockCache;
     }
 
+    /**
+     * Set the block cache used for interaction tracing.
+     * Existing caches are cleaned up before assignment to avoid memory leaks.
+     *
+     * @param blockCache the new cache, may be {@code null}
+     */
     public void setBlockCache(BlockCache blockCache) {
+        if (this.blockCache != null && this.blockCache != blockCache) {
+            this.blockCache.cleanup();
+        }
         this.blockCache = blockCache;
     }
 
