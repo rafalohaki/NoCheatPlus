@@ -436,7 +436,7 @@ public class NoFall extends Check {
         }
         // Callers usually check bypass and exemption beforehand, but guard here
         // to avoid processing if invoked directly without those checks.
-        if (pData.hasBypass(type, player) || pData.isExempted(type)) {
+        if (shouldSkipCheck(pData, player)) {
             return;
         }
 
@@ -499,6 +499,13 @@ public class NoFall extends Check {
             debug(player, "NoFall: mc=" + mcFallDistance +" / nf=" + data.noFallFallDistance + (oldNFDist < data.noFallFallDistance ? " (+" + (data.noFallFallDistance - oldNFDist) + ")" : "") + " | ymax=" + data.noFallMaxY);
         }
 
+    }
+
+    /**
+     * Decide if the check should return early due to bypass or exemption.
+     */
+    private boolean shouldSkipCheck(final IPlayerData pData, final Player player) {
+        return pData.hasBypass(type, player) || pData.isExempted(type);
     }
 
     private void handleGroundTransitions(final Player player, final double previousSetBackY,
