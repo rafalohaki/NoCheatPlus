@@ -22,6 +22,7 @@ import fr.neatmonster.nocheatplus.NCPAPIProvider;
 import fr.neatmonster.nocheatplus.components.entity.IEntityAccessLastPositionAndLook;
 import fr.neatmonster.nocheatplus.components.location.IGetPositionWithLook;
 import fr.neatmonster.nocheatplus.components.location.ISetPositionWithLook;
+import fr.neatmonster.nocheatplus.logging.LogManager;
 import fr.neatmonster.nocheatplus.logging.Streams;
 import fr.neatmonster.nocheatplus.utilities.ReflectionUtil;
 import fr.neatmonster.nocheatplus.utilities.Validate;
@@ -62,7 +63,11 @@ public class ReflectEntityLastPositionAndLook extends ReflectGetHandleBase<Entit
             performGet(entity, location);
         }
         catch (Throwable t) {
-            NCPAPIProvider.getNoCheatPlusAPI().getLogManager().warning(Streams.STATUS, "Could not retrieve last position and look for Entity: " + entity.getClass().getName());
+            final LogManager logManager = NCPAPIProvider.getNoCheatPlusAPI().getLogManager();
+            logManager.warning(Streams.STATUS,
+                    "Could not retrieve last position and look for Entity: "
+                            + entity.getClass().getName() + " | Error: " + t.getMessage());
+            logManager.warning(Streams.STATUS, t);
         }
     }
 
@@ -81,7 +86,11 @@ public class ReflectEntityLastPositionAndLook extends ReflectGetHandleBase<Entit
             performSet(entity, location);
         }
         catch (Throwable t) {
-            NCPAPIProvider.getNoCheatPlusAPI().getLogManager().warning(Streams.STATUS, "Could not set last position and look for Entity: " + entity.getClass().getName());
+            final LogManager logManager = NCPAPIProvider.getNoCheatPlusAPI().getLogManager();
+            logManager.warning(Streams.STATUS,
+                    "Could not set last position and look for Entity: "
+                            + entity.getClass().getName() + " | Error: " + t.getMessage());
+            logManager.warning(Streams.STATUS, t);
         }
     }
 

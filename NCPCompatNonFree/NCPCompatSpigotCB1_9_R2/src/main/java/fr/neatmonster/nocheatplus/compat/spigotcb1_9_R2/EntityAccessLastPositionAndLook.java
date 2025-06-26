@@ -21,6 +21,7 @@ import fr.neatmonster.nocheatplus.NCPAPIProvider;
 import fr.neatmonster.nocheatplus.components.entity.IEntityAccessLastPositionAndLook;
 import fr.neatmonster.nocheatplus.components.location.IGetPositionWithLook;
 import fr.neatmonster.nocheatplus.components.location.ISetPositionWithLook;
+import fr.neatmonster.nocheatplus.logging.LogManager;
 import fr.neatmonster.nocheatplus.logging.Streams;
 import fr.neatmonster.nocheatplus.utilities.ReflectionUtil;
 import fr.neatmonster.nocheatplus.utilities.Validate;
@@ -42,9 +43,12 @@ public class EntityAccessLastPositionAndLook implements IEntityAccessLastPositio
             performGet(entity, location);
         }
         catch (Throwable t) {
-            NCPAPIProvider.getNoCheatPlusAPI().getLogManager().warning(Streams.STATUS,
+            final LogManager logManager = NCPAPIProvider.getNoCheatPlusAPI().getLogManager();
+            logManager.warning(Streams.STATUS,
                     "Could not retrieve last position and look for Entity: "
-                    + (entity != null ? entity.getClass().getName() : "null"));
+                            + (entity != null ? entity.getClass().getName() : "null")
+                            + " | Error: " + t.getMessage());
+            logManager.warning(Streams.STATUS, t);
         }
     }
 
@@ -67,9 +71,12 @@ public class EntityAccessLastPositionAndLook implements IEntityAccessLastPositio
             performSet(entity, location);
         }
         catch (Throwable t) {
-            NCPAPIProvider.getNoCheatPlusAPI().getLogManager().warning(Streams.STATUS,
+            final LogManager logManager = NCPAPIProvider.getNoCheatPlusAPI().getLogManager();
+            logManager.warning(Streams.STATUS,
                     "Could not set last position and look for Entity: "
-                    + (entity != null ? entity.getClass().getName() : "null"));
+                            + (entity != null ? entity.getClass().getName() : "null")
+                            + " | Error: " + t.getMessage());
+            logManager.warning(Streams.STATUS, t);
         }
     }
 
