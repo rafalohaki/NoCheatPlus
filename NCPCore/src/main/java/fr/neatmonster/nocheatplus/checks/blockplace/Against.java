@@ -168,7 +168,7 @@ public class Against extends Check {
             return false;
         }
         if (BlockProperties.isLiquid(ncpAgainst)) {
-            final boolean lilyPadOrFrog = placedMat != BridgeMaterial.LILY_PAD || placedMat != BridgeMaterial.FROGSPAWN;
+            final boolean lilyPadOrFrog = placedMat != BridgeMaterial.LILY_PAD && placedMat != BridgeMaterial.FROGSPAWN;
             final boolean blockBelowLiquid = block != null && BlockProperties.isLiquid(block.getRelative(BlockFace.DOWN).getType());
             if ((lilyPadOrFrog || !blockBelowLiquid)
                     && !BlockProperties.isWaterPlant(ncpAgainst)
