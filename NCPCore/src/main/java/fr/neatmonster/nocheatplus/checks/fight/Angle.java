@@ -116,8 +116,16 @@ public class Angle extends Check {
         data.angleHits.add(new AttackLocation(loc, damagedEntity.getUniqueId(), currentTime, lastLoc));
     }
 
-    /** Calculate averages based on stored attack history. */
-    private Averages calculateAverages(final FightData data, final long currentTime) {
+    /**
+     * Calculate averages based on stored attack history.
+     *
+     * @param data
+     * @param currentTime
+     * @param pData       Optional player data for debug output
+     * @return Averages for movement, time, yaw, and target switch count
+     */
+    private Averages calculateAverages(final FightData data, final long currentTime,
+                                       final IPlayerData pData) {
         double deltaMove = 0D;
         long deltaTime = 0L;
         float deltaYaw = 0f;
@@ -139,6 +147,9 @@ public class Angle extends Check {
         }
         final double n = (double) (data.angleHits.size() - 1);
         if (n <= 0D) {
+            if (pData != null && pData.isDebugActive(type)) {
+                debug(null, "Insufficient data points to calculate averages");
+            }
             return new Averages(0D, 0D, 0D, 0D);
         }
         return new Averages(deltaMove / n, ((double) deltaTime) / n,
@@ -226,7 +237,7 @@ public class Angle extends Check {
         updateAttackHistory(player, loc, damagedEntity, data, time);
 
         if (data.angleHits.size() >= 2) {
-            final Averages avg = calculateAverages(data, time);
+            final Averages avg = calculateAverages(data, time, pData);
 
             if (pData.isDebugActive(type) && pData.hasPermission(Permissions.ADMINISTRATION_DEBUG, player)) {
                 player.sendMessage(ChatColor.RED + "NC+ Debug: " + ChatColor.RESET

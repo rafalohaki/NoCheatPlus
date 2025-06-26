@@ -55,7 +55,8 @@ public class BukkitStatic implements BukkitShapeModel {
      */
     public static BukkitStatic ofBounds(double... bounds) {
         if (bounds.length % 6 != 0) {
-            throw new IllegalArgumentException("The length must be a multiple of 6");
+            throw new IllegalArgumentException(
+                    "The length must be a multiple of 6, but was: " + bounds.length);
         }
         return new BukkitStatic(bounds);
     }

@@ -178,9 +178,10 @@ public class AirWorkarounds {
 
 
     /**
-     * Jump after leaving the liquid near ground / jumping through liquid or simply leaving liquid in general
+     * Jump after leaving the liquid near ground or jumping through liquid
      * (rather friction envelope, problematic). Needs last move data.
-     * 
+     * Jump phase checks are handled in the invoked helper methods.
+     *
      * @return If the exemption condition applies.
      */
 private static boolean oddLiquid(final double yDistance, final double yDistDiffEx, final double maxJumpGain,
@@ -191,9 +192,6 @@ private static boolean oddLiquid(final double yDistance, final double yDistDiffE
                 || data.liftOffEnvelope == LiftOffEnvelope.LIMIT_NEAR_GROUND
                 || data.liftOffEnvelope == LiftOffEnvelope.LIMIT_SURFACE;
         final int blockData = from.getData(from.getBlockX(), from.getBlockY(), from.getBlockZ());
-        if (data.sfJumpPhase != 1 && data.sfJumpPhase != 2) {
-            return false;
-        }
         return isFallingTooFast(yDistance, yDistDiffEx, thisMove, lastMove, data, liquidEnvelope)
                 || isLimitLiquidVdistInversion(yDistance, yDistDiffEx, resetTo, lastMove, data, resetFrom)
                 || isLiquidEnvelopeBehavior(yDistance, yDistDiffEx, maxJumpGain, liquidEnvelope,
