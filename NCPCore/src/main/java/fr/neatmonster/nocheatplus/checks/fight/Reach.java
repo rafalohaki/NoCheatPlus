@@ -336,8 +336,11 @@ public class Reach extends Check {
             // Future improvement: adjust improbable weight calculations so that
             // the weight is not inverse to the configured value
             if (cc.reachImprobableWeight > 0.0f) {
-                if (!cc.reachImprobableFeedOnly && Improbable.check(player, (float) violation / cc.reachImprobableWeight, System.currentTimeMillis(), "fight.reach", pData)) {
-                    cancel = true;
+                final float weight = (float) violation / cc.reachImprobableWeight;
+                if (!cc.reachImprobableFeedOnly) {
+                    if (Improbable.check(player, weight, System.currentTimeMillis(), "fight.reach", pData)) {
+                        cancel = true;
+                    }
                 }
             }
 
