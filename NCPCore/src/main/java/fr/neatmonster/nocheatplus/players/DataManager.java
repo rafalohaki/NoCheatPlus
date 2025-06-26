@@ -55,10 +55,16 @@ public class DataManager {
     /**
      * Used by checks to register the history for external access.<br>
      * NOTE: This method is not really meant ot be used from outside NCP.
-     * 
+     *
      * @param type
      * @param histories
-     * @deprecated New implementation pending.
+     * @deprecated Replaced by the history service API. Will be removed in
+     *             version 2.0.
+     *             <p>
+     *             Migration: call
+     *             {@code HistoryService#registerExecutionHistory(CheckType, Map)}
+     *             instead of this utility method.
+     *             </p>
      */
     public static void registerExecutionHistory(CheckType type, Map<String, ExecutionHistory> histories) {
         instance.registerExecutionHistory(type, histories);
@@ -66,12 +72,17 @@ public class DataManager {
 
     /**
      * Access method to the the execution history for check type for a player.
-     * 
+     *
      * @param type
      * @param playerName
      *            Exact case for player name.
      * @return null if not present.
-     * @deprecated New implementation pending.
+     * @deprecated Superseded by the history service. Removal scheduled for
+     *             version 2.0.
+     *             <p>
+     *             Migration: query the history service instead of calling this
+     *             utility method.
+     *             </p>
      */
     public static ExecutionHistory getExecutionHistory(final CheckType type, final String playerName) {
         return instance.getExecutionHistory(type, playerName);
@@ -79,11 +90,16 @@ public class DataManager {
 
     /**
      * Remove the execution history for a player for the given check type.
-     * 
+     *
      * @param type
      * @param playerName
-     * @return
-     * @deprecated New implementation pending.
+     * @return {@code true} if any history was removed
+     * @deprecated Moved to the history service. This will be removed in 2.0.
+     *             <p>
+     *             Migration: call
+     *             {@code HistoryService#removeExecutionHistory(CheckType, String)}
+     *             instead.
+     *             </p>
      */
     public static boolean removeExecutionHistory(final CheckType type, final String playerName) {
         return instance.removeExecutionHistory(type, playerName);

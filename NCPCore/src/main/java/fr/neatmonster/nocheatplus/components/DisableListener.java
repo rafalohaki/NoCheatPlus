@@ -15,10 +15,15 @@
 package fr.neatmonster.nocheatplus.components;
 
 /**
- * @deprecated To be removed, use instead:
- *             fr.neatmonster.nocheatplus.components.registry.feature.IDisableListener
- * @author asofold
+ * @deprecated Superseded by
+ *             {@link fr.neatmonster.nocheatplus.components.registry.feature.IDisableListener}.
+ *             Removal planned for version 2.0.
+ *             <p>
+ *             Migration: implement the interface from the registry feature
+ *             package instead of this one.
+ *             </p>
  *
+ * @author asofold
  */
 @Deprecated
 public interface DisableListener extends fr.neatmonster.nocheatplus.components.registry.feature.IDisableListener {
