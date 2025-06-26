@@ -39,31 +39,19 @@ public class WrongBlock extends Check {
      * @param block
      * @param data 
      * @param cc 
-     * @param isInstaBreak 
-     * @return
+     * @return {@code true} if the event should be cancelled
      */
-    
+
     public boolean check(final Player player, final Block block,
             final BlockBreakConfig cc, final BlockBreakData data,
-            final IPlayerData pData, final AlmostBoolean isInstaBreak) {
+            final IPlayerData pData) {
 
-        if (player == null) {
-            return false;
+        boolean cancel = false;
+        if (player != null && block != null && cc != null
+                && data != null && pData != null) {
+            cancel = handleCheck(player, block, cc, data, pData);
         }
-        if (block == null) {
-            return false;
-        }
-        if (cc == null) {
-            return false;
-        }
-        if (data == null) {
-            return false;
-        }
-        if (pData == null) {
-            return false;
-        }
-
-        return handleCheck(player, block, cc, data, pData);
+        return cancel;
     }
 
     private boolean handleCheck(final Player player, final Block block,
