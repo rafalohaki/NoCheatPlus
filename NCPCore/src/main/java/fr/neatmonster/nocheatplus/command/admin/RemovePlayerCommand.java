@@ -68,48 +68,23 @@ public class RemovePlayerCommand extends BaseCommand {
         final CheckType checkType;
 
         if (args.length == 3){
-            try{
-                checkType = CheckType.valueOf(args[2].toUpperCase().replace('-', '_').replace('.', '_'));
-            } catch (Exception e){
+            checkType = parseCheckType(args[2]);
+            if (checkType == null){
                 sender.sendMessage((sender instanceof Player ? TAG : CTAG) + "Could not interpret: " + args[2]);
                 sender.sendMessage((sender instanceof Player ? TAG : CTAG) + "Check type should be one of: " + StringUtil.join(Arrays.asList(CheckType.values()), c6 + ", " + c3));
                 return true;
             }
         }
-        else checkType = CheckType.ALL;
+        else {
+            checkType = CheckType.ALL;
+        }
 
         if (playerName.equals("*")){
-            DataManager.clearData(checkType);
-            sender.sendMessage((sender instanceof Player ? TAG : CTAG) + "Removed all data and history: " + c3 + checkType);
+            removeAllData(sender, checkType);
             return true;
         }
 
-        final Player player = DataManager.getPlayer(playerName);
-        if (player != null) playerName = player.getName();
-
-        ViolationHistory hist = ViolationHistory.getHistory(playerName, false);
-        boolean somethingFound = false;
-        if (hist != null){
-            somethingFound = hist.remove(checkType);
-            if (checkType == CheckType.ALL){
-                somethingFound = true;
-                ViolationHistory.removeHistory(playerName);
-            }
-        }
-
-        if (DataManager.removeExecutionHistory(checkType, playerName)) {
-            somethingFound = true;
-        }
-
-        if (DataManager.removeData(playerName, checkType)) {
-            somethingFound = true;
-        }
-
-        if (somethingFound){
-            sender.sendMessage((sender instanceof Player ? TAG : CTAG) + "Issued history and data removal (" + c3 + checkType + c1 +"): " + c3 + playerName + c1);
-        }
-        else
-            sender.sendMessage((sender instanceof Player ? TAG : CTAG) + "Nothing found (" + c3 + checkType + c1 +"): " + c3 + playerName + c1 + " (spelled correctly?)");
+        removePlayerData(sender, playerName, checkType);
         return true;
     }
 
@@ -133,9 +108,81 @@ public class RemovePlayerCommand extends BaseCommand {
      */
     @Override
     public boolean testPermission(CommandSender sender, Command command, String alias, String[] args) {
-        return super.testPermission(sender, command, alias, args) 
-                || args.length >= 2 && args[1].trim().equalsIgnoreCase(sender.getName()) 
+        return super.testPermission(sender, command, alias, args)
+                || args.length >= 2 && args[1].trim().equalsIgnoreCase(sender.getName())
                 && sender.hasPermission(Permissions.COMMAND_REMOVEPLAYER_SELF.getBukkitPermission());
+    }
+
+    /**
+     * Parse the check type argument.
+     *
+     * @param arg the argument to parse
+     * @return the matching {@link CheckType} or {@code null} if not found
+     */
+    private CheckType parseCheckType(String arg) {
+        try {
+            return CheckType.valueOf(arg.toUpperCase().replace('-', '_').replace('.', '_'));
+        } catch (Exception e) {
+            return null;
+        }
+    }
+
+    /**
+     * Handle removing all data for all players.
+     *
+     * @param sender the command sender
+     * @param type the check type
+     */
+    private void removeAllData(CommandSender sender, CheckType type) {
+        DataManager.clearData(type);
+        final String c3 = sender instanceof Player ? ChatColor.RED.toString() : "";
+        sender.sendMessage((sender instanceof Player ? TAG : CTAG) + "Removed all data and history: " + c3 + type);
+    }
+
+    /**
+     * Remove data and history for a specific player.
+     *
+     * @param sender the command sender
+     * @param playerName the name of the player
+     * @param type the check type
+     */
+    private void removePlayerData(CommandSender sender, String playerName, CheckType type) {
+        final String c1, c3;
+        if (sender instanceof Player) {
+            c1 = ChatColor.GRAY.toString();
+            c3 = ChatColor.RED.toString();
+        } else {
+            c1 = c3 = "";
+        }
+
+        final Player player = DataManager.getPlayer(playerName);
+        if (player != null) {
+            playerName = player.getName();
+        }
+
+        ViolationHistory hist = ViolationHistory.getHistory(playerName, false);
+        boolean somethingFound = false;
+        if (hist != null) {
+            somethingFound = hist.remove(type);
+            if (type == CheckType.ALL) {
+                somethingFound = true;
+                ViolationHistory.removeHistory(playerName);
+            }
+        }
+
+        if (DataManager.removeExecutionHistory(type, playerName)) {
+            somethingFound = true;
+        }
+
+        if (DataManager.removeData(playerName, type)) {
+            somethingFound = true;
+        }
+
+        if (somethingFound) {
+            sender.sendMessage((sender instanceof Player ? TAG : CTAG) + "Issued history and data removal (" + c3 + type + c1 + "): " + c3 + playerName + c1);
+        } else {
+            sender.sendMessage((sender instanceof Player ? TAG : CTAG) + "Nothing found (" + c3 + type + c1 + "): " + c3 + playerName + c1 + " (spelled correctly?)");
+        }
     }
 
 }
