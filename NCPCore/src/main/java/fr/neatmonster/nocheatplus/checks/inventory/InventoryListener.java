@@ -72,6 +72,9 @@ import fr.neatmonster.nocheatplus.players.IPlayerData;
 import fr.neatmonster.nocheatplus.stats.Counters;
 import fr.neatmonster.nocheatplus.utilities.InventoryUtil;
 import fr.neatmonster.nocheatplus.utilities.ReflectionUtil;
+import fr.neatmonster.nocheatplus.utilities.CheckUtils;
+import fr.neatmonster.nocheatplus.logging.LogManager;
+import fr.neatmonster.nocheatplus.logging.Streams;
 import fr.neatmonster.nocheatplus.utilities.map.BlockProperties;
 import fr.neatmonster.nocheatplus.utilities.map.MaterialUtil;
 
@@ -300,9 +303,13 @@ public class InventoryListener  extends CheckListener implements JoinLeaveListen
         }
 
         boolean check = true;
+        String title = null;
         try {
-            check = !cc.inventoryExemptions.contains(ChatColor.stripColor(event.getView().getTitle()));
+            final InventoryView view = event.getView();
+            title = view != null ? view.getTitle() : null;
+            check = !cc.inventoryExemptions.contains(ChatColor.stripColor(title));
         } catch (final IllegalStateException e) {
+            logInventoryTitleError(player, title, e);
             check = true;
         }
 
@@ -331,6 +338,17 @@ public class InventoryListener  extends CheckListener implements JoinLeaveListen
         if (data.firstClickTime == 0) {
             data.firstClickTime = now;
         }
+    }
+
+    private void logInventoryTitleError(final Player player, final String title,
+            final IllegalStateException e) {
+        final String prefix = CheckUtils.getLogMessagePrefix(player, checkType);
+        final String safeTitle = title != null ? title : "(unknown)";
+        final String playerName = player != null ? player.getName() : "(unknown)";
+        final LogManager logManager = NCPAPIProvider.getNoCheatPlusAPI().getLogManager();
+        logManager.warning(Streams.STATUS, prefix + "Failed to read inventory title '" + safeTitle
+                + "' for player '" + playerName + "'. " + e.getMessage());
+        logManager.warning(Streams.STATUS, e);
     }
    /** 
     * Listens for when a player closes a chest.
