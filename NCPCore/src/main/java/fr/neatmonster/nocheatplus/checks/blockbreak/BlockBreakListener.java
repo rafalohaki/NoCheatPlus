@@ -188,7 +188,7 @@ public class BlockBreakListener extends CheckListener {
     private BreakCheckResult performBreakChecks(final Player player, final Block block,
             final IPlayerData pData) {
         final BreakCheckResult result = new BreakCheckResult();
-        if (player == null || block == null) {
+        if (player == null) {
             return result;
         }
 
@@ -197,7 +197,8 @@ public class BlockBreakListener extends CheckListener {
         result.data = data;
         final BlockInteractData bdata = pData.getGenericInstance(BlockInteractData.class);
         final int tick = TickTask.getTick();
-        final boolean isInteractBlock = !bdata.getLastIsCancelled() && bdata.matchesLastBlock(tick, block);
+        final boolean isInteractBlock = block != null && !bdata.getLastIsCancelled()
+                && bdata.matchesLastBlock(tick, block);
         final GameMode gameMode = player.getGameMode();
 
         applyWrongBlockCheck(result, player, block, cc, data, pData);
@@ -231,6 +232,9 @@ public class BlockBreakListener extends CheckListener {
     private void applyFastBreakCheck(final BreakCheckResult result, final Player player,
             final Block block, final GameMode gameMode, final BlockBreakConfig cc,
             final BlockBreakData data, final IPlayerData pData) {
+        if (block == null) {
+            return;
+        }
         if (!result.cancelled && gameMode != GameMode.CREATIVE
                 && fastBreak.isEnabled(player, pData)
                 && fastBreak.check(player, block, isInstaBreak, cc, data, pData)) {
@@ -249,6 +253,9 @@ public class BlockBreakListener extends CheckListener {
     private void applyReachDirectionChecks(final BreakCheckResult result, final Player player,
             final Block block, final boolean isInteractBlock, final BlockInteractData bdata,
             final BlockBreakConfig cc, final BlockBreakData data, final IPlayerData pData) {
+        if (block == null) {
+            return;
+        }
         final boolean reachEnabled = reach.isEnabled(player, pData);
         final boolean directionEnabled = direction.isEnabled(player, pData);
         if (!(reachEnabled || directionEnabled)) {
@@ -279,6 +286,9 @@ public class BlockBreakListener extends CheckListener {
 
     private void applyLiquidBreakCheck(final BreakCheckResult result, final Player player,
             final Block block, final IPlayerData pData) {
+        if (block == null) {
+            return;
+        }
         if (!result.cancelled && BlockProperties.isLiquid(block.getType())
                 && !BlockProperties.isWaterPlant(block.getType())
                 && !pData.hasPermission(Permissions.BLOCKBREAK_BREAK_LIQUID, player)
