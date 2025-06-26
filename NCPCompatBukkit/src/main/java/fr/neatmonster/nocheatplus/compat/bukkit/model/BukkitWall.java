@@ -30,6 +30,14 @@ import org.bukkit.Bukkit;
 import org.bukkit.util.BoundingBox;
 import fr.neatmonster.nocheatplus.utilities.map.BlockCache;
 
+/**
+ * Shape model for walls. Not thread-safe.
+ * <p>
+ * Calls to {@link #getShape(BlockCache, World, int, int, int)} may originate
+ * from asynchronous threads. In such cases this class schedules a synchronous
+ * task to cache the result and returns a default shape immediately.
+ * </p>
+ */
 public class BukkitWall implements BukkitShapeModel {
 
     private final double minXZ;
@@ -64,6 +72,13 @@ public class BukkitWall implements BukkitShapeModel {
         southnorth = new double[] {sideInset, 0.0, 0.0, 1.0 - sideInset, height, 1.0};
     }
 
+    /**
+     * Retrieve the bounding shape for the given block.
+     *
+     * <p>If called from an asynchronous thread this schedules a synchronous
+     * computation to update the {@link BlockCache} and returns a default
+     * bounding box.</p>
+     */
     @Override
     public double[] getShape(final BlockCache blockCache,
             final World world, final int x, final int y, final int z) {
@@ -71,29 +86,58 @@ public class BukkitWall implements BukkitShapeModel {
         // Relevant: https://bugs.mojang.com/browse/MC-9565
 
         if (!Bukkit.isPrimaryThread()) {
-            try {
-                return Bukkit.getScheduler().callSyncMethod(
-                        JavaPlugin.getProvidingPlugin(getClass()),
-                        () -> computeShape(blockCache, world, x, y, z)).get();
-            } catch (Exception e) {
-                return new double[] {0.0, 0.0, 0.0, 1.0, 1.0, 1.0};
-            }
+            // Schedule caching on the primary thread and fall back to a
+            // default shape. Modifying the cache is not thread-safe.
+            cacheShapeAsync(blockCache, world, x, y, z);
+            return new double[] {0.0, 0.0, 0.0, 1.0, 1.0, 1.0};
         }
 
-        return computeShape(blockCache, world, x, y, z);
+        return computeAndCacheShape(blockCache, world, x, y, z);
     }
 
-    private double[] computeShape(final BlockCache blockCache,
+    private double[] computeAndCacheShape(final BlockCache blockCache,
             final World world, final int x, final int y, final int z) {
         final Block block = world.getBlockAt(x, y, z);
         final BlockState state = block.getState();
         final BlockData blockData = state.getBlockData();
         if (blockData instanceof MultipleFacing) {
-            return getShapeForMultipleFacing((MultipleFacing) blockData);
+            final double[] shape = getShapeForMultipleFacing((MultipleFacing) blockData);
+            cacheBounds(blockCache, x, y, z, shape);
+            return shape;
         } else if (blockData instanceof Wall) {
-            return getShapeForWall((Wall) blockData);
+            final double[] shape = getShapeForWall((Wall) blockData);
+            cacheBounds(blockCache, x, y, z, shape);
+            return shape;
         }
-        return new double[] {0.0, 0.0, 0.0, 1.0, 1.0, 1.0};
+        final double[] shape = new double[] {0.0, 0.0, 0.0, 1.0, 1.0, 1.0};
+        cacheBounds(blockCache, x, y, z, shape);
+        return shape;
+    }
+
+    private void cacheShapeAsync(final BlockCache blockCache, final World world,
+            final int x, final int y, final int z) {
+        Bukkit.getScheduler().runTask(
+                JavaPlugin.getProvidingPlugin(getClass()),
+                () -> computeAndCacheShape(blockCache, world, x, y, z));
+    }
+
+    /**
+     * Cache the computed bounds in the given {@link BlockCache} node.
+     * <p>
+     * This method must only be called from the primary server thread as
+     * {@link BlockCache.BlockCacheNode} is not thread-safe.
+     * </p>
+     */
+    private void cacheBounds(final BlockCache blockCache, final int x,
+            final int y, final int z, final double[] bounds) {
+        final BlockCache.IBlockCacheNode node =
+                blockCache.getOrCreateBlockCacheNode(x, y, z, false);
+        if (node instanceof BlockCache.BlockCacheNode) {
+            final BlockCache.BlockCacheNode bcNode = (BlockCache.BlockCacheNode) node;
+            if (!bcNode.isBoundsFetched()) {
+                bcNode.setBounds(bounds);
+            }
+        }
     }
 
     @Override
