@@ -14,6 +14,16 @@
  */
 package fr.neatmonster.nocheatplus.compat.spigotcb1_10_R1;
 
+/**
+ * Spigot compatibility implementation for Minecraft 1.10 (1_10_R1).
+ * <p>
+ * Methods that return potion effect amplifiers will yield
+ * {@link Double#NEGATIVE_INFINITY} when the effect is not active. Calling code
+ * checks using {@code Double.isInfinite(value)} and thus the sentinel must stay
+ * intact.
+ * </p>
+ */
+
 import org.bukkit.Bukkit;
 import org.bukkit.Material;
 import org.bukkit.World;
