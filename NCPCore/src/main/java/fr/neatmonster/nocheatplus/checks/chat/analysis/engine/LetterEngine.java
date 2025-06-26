@@ -84,9 +84,10 @@ public class LetterEngine implements IRemoveData, IHaveCheckType, ConsistencyChe
             settings.applyConfig(config, ConfPaths.CHAT_TEXT_GL_SIMILARITY);
             processors.add(new SimilarWordsBKL("glSimilarity", settings));
         }
-        // Future improvement: make expiration duration configurable (currently 10 minutes).
+        // Configure expiration for player caches.
+        long expirationDuration = config.getLong(ConfPaths.CHAT_TEXT_EXPIRATION_TIME, 600000L);
         factory = new ConfiguredWordProcessorFactory();
-        dataMap = new EnginePlayerDataMap(600000L, 100, 0.75f, factory);
+        dataMap = new EnginePlayerDataMap(expirationDuration, 100, 0.75f, factory);
     }
 
     public Map<String, Float> process(final MessageLetterCount letterCount, final String playerName, final ChatConfig cc, final ChatData data){

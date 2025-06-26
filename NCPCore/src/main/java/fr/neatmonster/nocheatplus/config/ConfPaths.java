@@ -342,6 +342,10 @@ public abstract class ConfPaths {
     public static final String CHAT_TEXT_DEBUG                           = CHAT_TEXT + "debug";
     public static final String CHAT_TEXT_ENGINE_MAXIMUM                  = CHAT_TEXT + "maximum";
     public static final String CHAT_TEXT_ALLOWVLRESET                    = CHAT_TEXT + "allowvlreset";
+    /**
+     * Expiration time for per-player word processor data in milliseconds.
+     */
+    public static final String CHAT_TEXT_EXPIRATION_TIME                 = CHAT_TEXT + "expirationtime";
     public static final String CHAT_TEXT_FREQ                            = CHAT_TEXT + "frequency.";
     public static final String CHAT_TEXT_FREQ_NORM                       = CHAT_TEXT_FREQ + "normal.";
     public static final String CHAT_TEXT_FREQ_NORM_FACTOR                = CHAT_TEXT_FREQ_NORM + "factor";

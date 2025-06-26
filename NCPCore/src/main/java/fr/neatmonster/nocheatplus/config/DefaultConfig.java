@@ -239,6 +239,8 @@ public class DefaultConfig extends ConfigFile {
         // Normal
         set(ConfPaths.CHAT_TEXT_CHECK, "default", 785);
         set(ConfPaths.CHAT_TEXT_ALLOWVLRESET, true, 785);
+        // Expiration duration for per-player cache in milliseconds.
+        set(ConfPaths.CHAT_TEXT_EXPIRATION_TIME, 600000L, 785);
         set(ConfPaths.CHAT_TEXT_FREQ_NORM_MIN, 0.0, 785);
         set(ConfPaths.CHAT_TEXT_FREQ_NORM_FACTOR, 0.9D, 785);
         set(ConfPaths.CHAT_TEXT_FREQ_NORM_WEIGHT, 6, 785);
