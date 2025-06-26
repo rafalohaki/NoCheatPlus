@@ -105,6 +105,26 @@ public class RemovePlayerCommand extends BaseCommand {
     }
 
     /**
+     * Format a message with a list of colors.
+     *
+     * @param message the message to color
+     * @param colors the colors to prepend, ignored if {@code null}
+     * @return the colored message
+     */
+    private String formatMessage(String message, ChatColor... colors) {
+        if (colors == null || colors.length == 0) {
+            return message;
+        }
+        final StringBuilder result = new StringBuilder();
+        for (ChatColor color : colors) {
+            if (color != null) {
+                result.append(color);
+            }
+        }
+        return result.append(message).toString();
+    }
+
+    /**
      * Parse the check type argument.
      *
      * @param input the argument to parse, or {@code null} for {@link CheckType#ALL}
@@ -120,11 +140,11 @@ public class RemovePlayerCommand extends BaseCommand {
         } catch (Exception e) {
             final boolean player = sender instanceof Player;
             final String tag = player ? TAG : CTAG;
-            final String c3 = player ? ChatColor.RED.toString() : "";
-            final String c6 = player ? ChatColor.WHITE.toString() : "";
-            sender.sendMessage(tag + "Could not interpret: " + c3 + input);
-            sender.sendMessage(tag + "Check type should be one of: " + c3
-                    + StringUtil.join(Arrays.asList(CheckType.values()), c6 + ", " + c3));
+            sender.sendMessage(tag + "Could not interpret: "
+                    + formatMessage(input, player ? ChatColor.RED : null));
+            final String list = StringUtil.join(Arrays.asList(CheckType.values()), ", ");
+            sender.sendMessage(tag + "Check type should be one of: "
+                    + formatMessage(list, player ? ChatColor.RED : null));
             return null;
         }
     }
@@ -137,8 +157,9 @@ public class RemovePlayerCommand extends BaseCommand {
      */
     private void removeAllData(CommandSender sender, CheckType type) {
         DataManager.clearData(type);
-        final String c3 = sender instanceof Player ? ChatColor.RED.toString() : "";
-        sender.sendMessage((sender instanceof Player ? TAG : CTAG) + "Removed all data and history: " + c3 + type);
+        final boolean player = sender instanceof Player;
+        sender.sendMessage((player ? TAG : CTAG) + "Removed all data and history: "
+                + formatMessage(type.toString(), player ? ChatColor.RED : null));
     }
 
     /**
@@ -149,17 +170,13 @@ public class RemovePlayerCommand extends BaseCommand {
      * @param type the check type
      */
     private void removePlayerData(CommandSender sender, String playerName, CheckType type) {
-        final String c1, c3;
-        if (sender instanceof Player) {
-            c1 = ChatColor.GRAY.toString();
-            c3 = ChatColor.RED.toString();
-        } else {
-            c1 = c3 = "";
-        }
+        final boolean isPlayer = sender instanceof Player;
+        final String c1 = isPlayer ? ChatColor.GRAY.toString() : "";
+        final ChatColor red = isPlayer ? ChatColor.RED : null;
 
-        final Player player = DataManager.getPlayer(playerName);
-        if (player != null) {
-            playerName = player.getName();
+        final Player exact = DataManager.getPlayer(playerName);
+        if (exact != null) {
+            playerName = exact.getName();
         }
 
         ViolationHistory hist = ViolationHistory.getHistory(playerName, false);
@@ -181,9 +198,13 @@ public class RemovePlayerCommand extends BaseCommand {
         }
 
         if (somethingFound) {
-            sender.sendMessage((sender instanceof Player ? TAG : CTAG) + "Issued history and data removal (" + c3 + type + c1 + "): " + c3 + playerName + c1);
+            sender.sendMessage((isPlayer ? TAG : CTAG) + "Issued history and data removal ("
+                    + formatMessage(type.toString(), red) + c1 + "): "
+                    + formatMessage(playerName, red) + c1);
         } else {
-            sender.sendMessage((sender instanceof Player ? TAG : CTAG) + "Nothing found (" + c3 + type + c1 + "): " + c3 + playerName + c1 + " (spelled correctly?)");
+            sender.sendMessage((isPlayer ? TAG : CTAG) + "Nothing found ("
+                    + formatMessage(type.toString(), red) + c1 + "): "
+                    + formatMessage(playerName, red) + c1 + " (spelled correctly?)");
         }
     }
 
