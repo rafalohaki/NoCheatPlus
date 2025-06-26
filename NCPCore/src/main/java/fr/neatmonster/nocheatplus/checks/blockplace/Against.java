@@ -41,7 +41,7 @@ public class Against extends Check {
 
 
    /**
-    * Instanties a new Against check.
+    * Instantiates a new Against check.
     *
     */
     public Against() {

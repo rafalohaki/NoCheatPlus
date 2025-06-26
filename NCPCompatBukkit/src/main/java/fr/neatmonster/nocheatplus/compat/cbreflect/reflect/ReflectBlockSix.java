@@ -151,8 +151,18 @@ public class ReflectBlockSix implements IReflectBlock {
         return methods;
     }
 
+    /**
+     * Determine the getter method names for the block bounds. Candidate names
+     * are taken from {@link #possibleNames} and sorted by their position within
+     * that list. The assumption is that {@code possibleNames} contains every
+     * possible obfuscated name used for these methods.
+     *
+     * @param clazz the Block class to inspect
+     * @return the ordered method names or {@code null} if the order cannot be
+     *         resolved
+     */
     private String[] guessBoundsMethodNames(Class<?> clazz) {
-        // Filter accepted method names.
+        // Collect valid candidate names.
         List<String> names = new ArrayList<String>();
         for (Method method : clazz.getMethods()) {
             if (method.getReturnType() == double.class && method.getParameterTypes().length == 0 && possibleNames.contains(method.getName())) {
@@ -162,15 +172,15 @@ public class ReflectBlockSix implements IReflectBlock {
         if (names.size() < 6) {
             return null;
         }
-        // Sort in the expected order.
+        // Sort according to possibleNames order.
         names.sort(Comparator.comparingInt(possibleNames::indexOf));
-        // Test for a sequence of exactly 6 consecutive entries.
+        // Check for six consecutive names.
         int startIndex = 0;
         if (names.size() > 6) {
-            // Attempt to guess the start index. Currently FUTURE, as there are only six such methods.
-            startIndex = -1; // Start index within list (!).
-            int lastIndex = -2; // Index of a sequence within possibleNames.
-            int currentStart = -1; // Possibly incomplete sequence.
+            // Attempt to locate the start index (future versions may have more).
+            startIndex = -1; // start index within candidate list
+            int lastIndex = -2; // index of last name within possibleNames
+            int currentStart = -1; // temporary start index
             for (int i = 0; i < names.size(); i++) {
                 String name = names.get(i);
                 int nameIndex = possibleNames.indexOf(name);
@@ -180,16 +190,16 @@ public class ReflectBlockSix implements IReflectBlock {
                     } else {
                         int length = nameIndex - currentStart + 1;
                         if (length > 6) {
-                            // Can't decide (too many).
+                            // ambiguous
                             return null;
                         }
                         else if (length == 6) {
                             if (startIndex != -1) {
-                                // Can't decide (too many).
+                                // ambiguous
                                 return null;
                             } else {
                                 startIndex = i + 1 - length;
-                                // (Not reset currentStart to allow detecting too long sequences.)
+                                // keep to detect long sequences
                             }
                         }
                     }

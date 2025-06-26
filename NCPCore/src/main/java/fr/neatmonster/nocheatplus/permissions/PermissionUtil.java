@@ -81,6 +81,21 @@ public class PermissionUtil {
         }
     }
 
+    private static class CommandPermissionInfo {
+        final String permissionName;
+        final Permission permission;
+        final boolean commandHadPermission;
+        final boolean permissionRegistered;
+
+        CommandPermissionInfo(String permissionName, Permission permission, boolean commandHadPermission,
+                boolean permissionRegistered) {
+            this.permissionName = permissionName;
+            this.permission = permission;
+            this.commandHadPermission = commandHadPermission;
+            this.permissionRegistered = permissionRegistered;
+        }
+    }
+
     /**
      *
      * @param commands Command white-list.
@@ -128,48 +143,12 @@ public class PermissionUtil {
         // Apply protection based on white-list or black-list.
         for (final Command command : CommandUtil.getCommands()) {
             final String lcLabel = command.getLabel().trim().toLowerCase();
-            if (checked.contains(lcLabel) || containsAnyAliases(checked, command)) {
-                if (!invertIgnored) {
-                    continue;
-                }
-            }
-            else if (invertIgnored) {
+            if (!shouldProtectCommand(command, checked, invertIgnored)) {
                 continue;
             }
-            // Set the permission for the command.
-            String cmdPermName = command.getPermission();
-            final boolean cmdHadPerm;
-            if (cmdPermName == null) {
-                // Set a permission.
-                cmdPermName = permissionBase + "." + lcLabel;
-                command.setPermission(cmdPermName);
-                cmdHadPerm = false;
-            }
-            else{
-                cmdHadPerm = true;
-            }
-            // Set permission default behavior.
-            Permission cmdPerm = pm.getPermission(cmdPermName);
-            final boolean permRegistered = cmdPerm != null;
-            if (!permRegistered) {
-                cmdPerm = new Permission(cmdPermName);
-                if (!cmdHadPerm) {
-                    // NCP added the permission, allow root.
-                    cmdPerm.addParent(rootPerm, true);
-                } // else: permission was present, but not registered.
-                pm.addPermission(cmdPerm);
-            }
-            // Create change history entry.
-            if (cmdHadPerm && permRegistered) {
-                changed.add(new CommandProtectionEntry(command, lcLabel, cmdPermName, cmdPerm.getDefault(), command.getPermissionMessage()));
-            }
-            else {
-                // (New Permission instances will not be touched on restore.)
-                changed.add(new CommandProtectionEntry(command, lcLabel, null, null, command.getPermissionMessage()));
-            }
-            // Change 
-            cmdPerm.setDefault(ops ? PermissionDefault.OP : PermissionDefault.FALSE);
-            if (!ops) Bukkit.getServer().getConsoleSender().addAttachment(plugin, cmdPermName, true);
+            final CommandPermissionInfo info = registerCommandPermission(plugin, pm, rootPerm, command, lcLabel,
+                    permissionBase, ops);
+            recordChangeHistory(changed, command, lcLabel, info);
             command.setPermissionMessage(permissionMessage);
         }
         return changed;
@@ -191,6 +170,51 @@ public class PermissionUtil {
             }
         }
         return false;
+    }
+
+    private static boolean shouldProtectCommand(final Command command, final Set<String> checked,
+            final boolean invertIgnored) {
+        final String lcLabel = command.getLabel().trim().toLowerCase();
+        final boolean match = checked.contains(lcLabel) || containsAnyAliases(checked, command);
+        return invertIgnored ? match : !match;
+    }
+
+    private static CommandPermissionInfo registerCommandPermission(final Plugin plugin, final PluginManager pm,
+            final Permission rootPerm, final Command command, final String lcLabel, final String permissionBase,
+            final boolean ops) {
+        String cmdPermName = command.getPermission();
+        final boolean cmdHadPerm;
+        if (cmdPermName == null) {
+            cmdPermName = permissionBase + "." + lcLabel;
+            command.setPermission(cmdPermName);
+            cmdHadPerm = false;
+        } else {
+            cmdHadPerm = true;
+        }
+        Permission cmdPerm = pm.getPermission(cmdPermName);
+        final boolean permRegistered = cmdPerm != null;
+        if (!permRegistered) {
+            cmdPerm = new Permission(cmdPermName);
+            if (!cmdHadPerm) {
+                cmdPerm.addParent(rootPerm, true);
+            }
+            pm.addPermission(cmdPerm);
+        }
+        cmdPerm.setDefault(ops ? PermissionDefault.OP : PermissionDefault.FALSE);
+        if (!ops) {
+            Bukkit.getServer().getConsoleSender().addAttachment(plugin, cmdPermName, true);
+        }
+        return new CommandPermissionInfo(cmdPermName, cmdPerm, cmdHadPerm, permRegistered);
+    }
+
+    private static void recordChangeHistory(final List<CommandProtectionEntry> changed, final Command command,
+            final String lcLabel, final CommandPermissionInfo info) {
+        if (info.commandHadPermission && info.permissionRegistered) {
+            changed.add(new CommandProtectionEntry(command, lcLabel, info.permissionName,
+                    info.permission.getDefault(), command.getPermissionMessage()));
+        } else {
+            changed.add(new CommandProtectionEntry(command, lcLabel, null, null, command.getPermissionMessage()));
+        }
     }
 
     /**

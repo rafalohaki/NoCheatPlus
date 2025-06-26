@@ -30,7 +30,11 @@ public class PassengerUtilTest {
     private static class DummyVehicleAccess implements IEntityAccessVehicle {
         boolean called;
         @Override public java.util.List<Entity> getEntityPassengers(Entity e) { return Collections.emptyList(); }
-        @Override public boolean addPassenger(Entity entity, Entity vehicle) { called = true; return true; }
+        @Override
+        public boolean addPassenger(Entity entity, Entity vehicle) {
+            called = true;
+            return true;
+        }
     }
 
     private sun.misc.Unsafe unsafe;
