@@ -14,6 +14,15 @@
  */
 package fr.neatmonster.nocheatplus.compat.spigotcb1_8_R3;
 
+/**
+ * Spigot compatibility implementation for Minecraft 1.8.8 (1_8_R3).
+ * <p>
+ * When no potion effect is present the amplifier methods return
+ * {@link Double#NEGATIVE_INFINITY}. Callers check with
+ * {@code Double.isInfinite(value)} and depend on this sentinel remaining.
+ * </p>
+ */
+
 import org.bukkit.Bukkit;
 import org.bukkit.Material;
 import org.bukkit.World;

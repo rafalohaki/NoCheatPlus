@@ -20,6 +20,7 @@ package fr.neatmonster.nocheatplus.components.registry.event;
  * @author asofold
  *
  * @param <T>
+ *            Type of the wrapped instance.
  */
 public interface IHandle<T> {
 

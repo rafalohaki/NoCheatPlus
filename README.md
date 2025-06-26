@@ -41,12 +41,18 @@ Links
 * [Issues/Tickets](https://github.com/Updated-NoCheatPlus/NoCheatPlus/issues)
 * [Wiki](https://github.com/Updated-NoCheatPlus/Docs)
 * [Configuration](https://github.com/Updated-NoCheatPlus/Docs#configuration)
+* The paths `checks.moving.survivalfly.setbackpolicy.falldamage` and
+  `checks.moving.survivalfly.hover.falldamage` are now
+  `checks.moving.survivalfly.setbackpolicy.applyfalldamage` and
+  `checks.moving.survivalfly.hover.takefalldamage`.
 * [Permissions](https://github.com/Updated-NoCheatPlus/Docs/blob/master/Settings/Permissions.md)
 * [Commands](https://github.com/Updated-NoCheatPlus/Docs/blob/master/Settings/Commands.md)
 
 ###### Developers
 * [License (GPLv3)](https://github.com/Updated-NoCheatPlus/NoCheatPlus/blob/master/LICENSE.txt)
 * [API](https://github.com/Updated-NoCheatPlus/Docs/blob/master/Development/API.md)
+* When switching `BlockCache` implementations, call `setBlockCache(null)` or
+  invoke `cleanup()` on the previous instance to avoid memory leaks.
 * [Contribute](https://github.com/Updated-NoCheatPlus/NoCheatPlus/blob/master/CONTRIBUTING.md)
 
 ###### Related Plugins

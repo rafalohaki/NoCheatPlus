@@ -24,6 +24,7 @@ import java.util.concurrent.locks.Lock;
  * @author asofold
  *
  * @param <T>
+ *            Element type stored in this set.
  */
 public class DualSet<T> extends DualCollection<T, Set<T>>{
 

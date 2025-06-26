@@ -27,6 +27,7 @@ import java.util.List;
 import java.util.Map;
 import java.util.Map.Entry;
 import java.util.Set;
+import java.util.UUID;
 
 import net.kyori.adventure.platform.bukkit.BukkitAudiences;
 import org.bukkit.Bukkit;
@@ -177,8 +178,15 @@ public class NoCheatPlus extends JavaPlugin implements NoCheatPlusAPI {
 
     /**
      * Convenience method.
-     * @deprecated Use fr.neatmonster.nocheatplus.utilities.NCPAPIProvider.getNoCheatPlusAPI() instead, this method might get removed.
-     * @return
+     *
+     * @deprecated Use
+     *             {@link fr.neatmonster.nocheatplus.utilities.NCPAPIProvider#getNoCheatPlusAPI()}
+     *             instead. Scheduled for removal in version 2.0.
+     *             <p>
+     *             Migration: replace calls to this method with
+     *             {@code NCPAPIProvider.getNoCheatPlusAPI()}.
+     *             </p>
+     * @return the API instance
      */
     public static NoCheatPlusAPI getAPI() {
         return NCPAPIProvider.getNoCheatPlusAPI();
@@ -234,6 +242,9 @@ public class NoCheatPlus extends JavaPlugin implements NoCheatPlusAPI {
 
     /** Listeners for players joining and leaving (monitor level) */
     private final List<JoinLeaveListener> joinLeaveListeners = new ArrayList<JoinLeaveListener>();
+
+    /** Players for which {@link #onLeave(Player)} has run. */
+    private final Set<UUID> processedLeave = new HashSet<UUID>();
 
     /** Sub component registries. */
     private final List<ComponentRegistry<?>> subRegistries = new ArrayList<ComponentRegistry<?>>();
@@ -708,8 +719,11 @@ public class NoCheatPlus extends JavaPlugin implements NoCheatPlusAPI {
      * <li>Prevent further registration. For now also disable listeners, though
      * this might get shifted still.</li>
      * <li><b>Call onDisable for IDisableListener instances, in reversed
-     * order of registration.</b> This includes clearing all data (Needs extensions for sorting
-     * by priority for IDisableListener instances.).</li>
+     * order of registration.</b> This includes clearing all data.</li>
+     * <li>Implement priority based sorting for IDisableListener instances using
+     * the component registry. Configuration should allow overriding via
+     * {@code components.disable-priority}. Contributors can track progress in
+     * issue&nbsp;<a href="https://github.com/Updated-NoCheatPlus/NoCheatPlus/issues/388">#388</a>.</li>
      * <li>Random sequence of cleanup calls for other registries and logging
      * statistics.</li>
      * <li>Call removeComponent for all registered components.</li>
@@ -871,7 +885,11 @@ public class NoCheatPlus extends JavaPlugin implements NoCheatPlusAPI {
      * 
      * @deprecated Leads to compatibility issues with NPC plugins such as
      *             Citizens 2, due to recalculation of permissions (specifically
-     *             during disabling).
+     *             during disabling). This helper will be removed in version 2.0.
+     *             <p>
+     *             Migration: avoid calling this method and rely on the command
+     *             state stored by the history service instead.
+     *             </p>
      */
     public void undoCommandChanges() {
         if (!changedCommands.isEmpty()) {
@@ -1366,6 +1384,7 @@ public class NoCheatPlus extends JavaPlugin implements NoCheatPlusAPI {
                 final Player player = event.getPlayer();
                 NCPExemptionManager.unexempt(player);
             }
+            clearLeaveProcessed(event.getPlayer());
         }
 
         @EventHandler(priority = EventPriority.LOW)
@@ -1376,12 +1395,20 @@ public class NoCheatPlus extends JavaPlugin implements NoCheatPlusAPI {
 
         @EventHandler(priority = EventPriority.MONITOR, ignoreCancelled = true)
         public void onPlayerKick(final PlayerKickEvent event) {
-            onLeave(event.getPlayer());
+            final Player player = event.getPlayer();
+            markLeaveProcessed(player);
+            onLeave(player);
         }
 
         @EventHandler(priority = EventPriority.MONITOR)
         public void onPlayerQuit(final PlayerQuitEvent event) {
-            onLeave(event.getPlayer());
+            final Player player = event.getPlayer();
+            if (isLeaveProcessed(player)) {
+                clearLeaveProcessed(player);
+            } else {
+                markLeaveProcessed(player);
+                onLeave(player);
+            }
         }
 
         @EventHandler(priority = EventPriority.MONITOR)
@@ -1445,6 +1472,25 @@ public class NoCheatPlus extends JavaPlugin implements NoCheatPlusAPI {
         }
         if (clearExemptionsOnLeave) {
             NCPExemptionManager.unexempt(player);
+        }
+    }
+
+    private void markLeaveProcessed(Player player) {
+        if (player != null) {
+            processedLeave.add(player.getUniqueId());
+        }
+    }
+
+    private boolean isLeaveProcessed(Player player) {
+        if (player == null) {
+            return false;
+        }
+        return processedLeave.contains(player.getUniqueId());
+    }
+
+    private void clearLeaveProcessed(Player player) {
+        if (player != null) {
+            processedLeave.remove(player.getUniqueId());
         }
     }
 

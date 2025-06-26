@@ -452,6 +452,8 @@ public class MovingUtil {
 
     public static double getJumpAmplifier(final Player player, final MCAccess mcAccess) {
         final double amplifier = mcAccess.getJumpAmplifier(player);
+        // Missing potion effects are indicated by Double.NEGATIVE_INFINITY in
+        // MCAccess implementations (see their class JavaDocs).
         if (Double.isInfinite(amplifier)) {
             return 0.0;
         }

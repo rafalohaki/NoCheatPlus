@@ -17,8 +17,13 @@ package fr.neatmonster.nocheatplus.components;
 /**
  * 
  * @author asofold
- * @deprecated To be removed, use instead:
- *             fr.neatmonster.nocheatplus.components.registry.feature.TickListener
+ * @deprecated Replaced by
+ *             {@link fr.neatmonster.nocheatplus.components.registry.feature.TickListener}.
+ *             This interface will be removed in version 2.0.
+ *             <p>
+ *             Migration: depend on the registry feature
+ *             {@code TickListener} rather than this legacy interface.
+ *             </p>
  */
 @Deprecated
 public interface TickListener extends fr.neatmonster.nocheatplus.components.registry.feature.TickListener {
