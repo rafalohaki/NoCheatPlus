@@ -270,16 +270,18 @@ public class InventoryListener  extends CheckListener implements JoinLeaveListen
                 counters.addPrimaryThread(idIllegalItem, 1);
                 return true;
             }
-        } catch (final ArrayIndexOutOfBoundsException e) {
-            // Ignore: out-of-range slot on some CraftBukkit versions.
+        } catch (final ArrayIndexOutOfBoundsException ignore) {
+            // Safe to ignore - CraftBukkit issue where slot can sometimes be out of range
+            // See: https://hub.spigotmc.org/jira/browse/SPIGOT-123
         }
         try {
             if (Items.checkIllegalEnchantments(player, cursor, pData)) {
                 counters.addPrimaryThread(idIllegalItem, 1);
                 return true;
             }
-        } catch (final ArrayIndexOutOfBoundsException e) {
-            // Ignore: out-of-range slot on some CraftBukkit versions.
+        } catch (final ArrayIndexOutOfBoundsException ignore) {
+            // Safe to ignore - CraftBukkit issue where slot can sometimes be out of range
+            // See: https://hub.spigotmc.org/jira/browse/SPIGOT-123
         }
         return false;
     }

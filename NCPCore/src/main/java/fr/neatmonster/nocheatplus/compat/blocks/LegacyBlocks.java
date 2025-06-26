@@ -97,7 +97,8 @@ public class LegacyBlocks {
             }
 
             if (bounds.length % 6 != 0) {
-                throw new IllegalArgumentException("The length must be a multiple of 6");
+                throw new IllegalArgumentException(
+                        "The length must be a multiple of 6, but was: " + bounds.length);
             }
             this.bounds = bounds;
         }
