@@ -49,123 +49,34 @@ public class GodMode extends Check {
      * @param player
      * @param damage
      * @return
-     */
+*/
     public boolean check(final Player player, final boolean playerIsFake,
             final double damage, final FightData data, final IPlayerData pData){
-        final DamageState dState = computePlayerDamageState(player, data);
-
-        final Decision decision = new Decision();
-
-        if (dState.healthDecreased){
-            data.godModeHealthDecreaseTick = dState.tick;
-            decision.markLegit();
-            decision.markSetTicks();
-            decision.markResetAcc();
-        }
-
-        final boolean ignoreInvul = shouldIgnoreInvulnerability(player, playerIsFake, data, dState.tick);
-        if (ignoreInvul) {
-            decision.markLegit();
-            decision.markSetTicks();
-            decision.markResetAcc();
-        }
-
-        // Reset accumulator.
-        if (20 + data.godModeAcc < dState.dTick || dState.dTick > 40){
-            decision.markLegit();
-            decision.markResetAcc();
-            decision.markSetTicks();
-        }
-
-        // Check if reduced more than expected or new/count down fully.
-        // NOTE: remove workaround logic
-        if (dState.delta <= 0  || data.lastNoDamageTicks <= player.getMaximumNoDamageTicks() / 2 ||
-                dState.dTick > data.lastNoDamageTicks || damage > BridgeHealth.getLastDamage(player) || damage == 0.0){
-            decision.markLegit();
-            decision.markSetTicks();
-        }
-
-        if (dState.dTick == 1 && dState.noDamageTicks < 19){
-            decision.markSetTicks();
-        }
-
-        if (dState.delta == 1){
-            // Ignore these, but keep reference value from before.
-            decision.markLegit();
-        }
-
-        //    	Bukkit.getServer().broadcastMessage("God " + player.getName() + " delta=" + delta + " dt=" + dTick + " dndt=" + dNDT + " acc=" + data.godModeAcc + " d=" + damage + " ndt=" + noDamageTicks + " h=" + health + " slag=" + TickTask.getLag(dTick, true));
-
-        // NOTE: check last damage taken as well
-
-        // Resetting
-        data.godModeHealth = dState.health;
-
-        if (decision.shouldResetAcc() || decision.shouldResetAll()){
-            data.godModeAcc = 0;
-        }
-        if (decision.isLegit()){
-            data.godModeVL *= 0.97;
-        }
-        if (decision.shouldResetAll()){
-            // Reset all.
-            data.lastNoDamageTicks = 0;
-            data.lastDamageTick = 0;
+        if (player == null || data == null || pData == null) {
             return false;
         }
-        else if (decision.shouldSetTicks()){
-            // Only set the tick values.
+
+        final DamageState dState = computePlayerDamageState(player, data);
+        final Decision decision = evaluateDecision(player, playerIsFake, damage, data, dState);
+
+        if (applyDecision(data, decision, dState)) {
+            return false;
+        }
+
+        if (withinHealthDecreaseWindow(dState, data)) {
             data.lastNoDamageTicks = dState.noDamageTicks;
             data.lastDamageTick = dState.tick;
             return false;
         }
-        else if (decision.isLegit()){
-            // Just return;
-            return false;
-        }
 
-        if (dState.tick < data.godModeHealthDecreaseTick){
-            data.godModeHealthDecreaseTick = 0;
-        }
-        else{
-            final int dht = dState.tick - data.godModeHealthDecreaseTick;
-            if (dht <= 20) {
-                return false;
-            }
-        }
+        final boolean cancel = handleViolation(player, pData, data, dState);
 
-        final FightConfig cc = pData.getGenericInstance(FightConfig.class);
-
-        if (shouldIgnoreLag(player, pData, cc)) {
-            return false;
-        }
-
-        // Violation probably.
-        data.godModeAcc += dState.delta;
-
-        boolean cancel = false;
-        // NOTE: implement bounds
-        if (data.godModeAcc > 2){
-            // NOTE: adjust vl scaling to match legacy actions
-            data.godModeVL += dState.delta;
-            if (executeActions(player, data.godModeVL, dState.delta,
-                    pData.getGenericInstance(FightConfig.class).godModeActions).willCancel()){
-                cancel = true;
-            }
-            else {
-                cancel = false;
-            }
-        }
-        else{
-            cancel = false;
-        }
-
-        // Set tick values.
         data.lastNoDamageTicks = dState.noDamageTicks;
         data.lastDamageTick = dState.tick;
 
         return cancel;
     }
+
 
     private DamageState computePlayerDamageState(Player player, FightData data) {
         final int tick = TickTask.getTick();
@@ -194,6 +105,91 @@ public class GodMode extends Check {
         return keepAlive != Long.MIN_VALUE && now - keepAlive > cc.godModeLagMinAge && now - keepAlive < maxAge;
     }
 
+    private Decision evaluateDecision(Player player, boolean playerIsFake, double damage, FightData data, DamageState dState) {
+        final Decision decision = new Decision();
+
+        if (dState.healthDecreased){
+            data.godModeHealthDecreaseTick = dState.tick;
+            decision.markLegit();
+            decision.markSetTicks();
+            decision.markResetAcc();
+        }
+
+        if (shouldIgnoreInvulnerability(player, playerIsFake, data, dState.tick)) {
+            decision.markLegit();
+            decision.markSetTicks();
+            decision.markResetAcc();
+        }
+
+        if (20 + data.godModeAcc < dState.dTick || dState.dTick > 40){
+            decision.markLegit();
+            decision.markResetAcc();
+            decision.markSetTicks();
+        }
+
+        if (dState.delta <= 0  || data.lastNoDamageTicks <= player.getMaximumNoDamageTicks() / 2 ||
+                dState.dTick > data.lastNoDamageTicks || damage > BridgeHealth.getLastDamage(player) || damage == 0.0){
+            decision.markLegit();
+            decision.markSetTicks();
+        }
+
+        if (dState.dTick == 1 && dState.noDamageTicks < 19){
+            decision.markSetTicks();
+        }
+
+        if (dState.delta == 1){
+            decision.markLegit();
+        }
+
+        data.godModeHealth = dState.health;
+        return decision;
+    }
+
+    private boolean applyDecision(FightData data, Decision decision, DamageState dState) {
+        if (decision.shouldResetAcc() || decision.shouldResetAll()){
+            data.godModeAcc = 0;
+        }
+        if (decision.isLegit()){
+            data.godModeVL *= 0.97;
+        }
+        if (decision.shouldResetAll()){
+            data.lastNoDamageTicks = 0;
+            data.lastDamageTick = 0;
+            return true;
+        }
+        if (decision.shouldSetTicks()){
+            data.lastNoDamageTicks = dState.noDamageTicks;
+            data.lastDamageTick = dState.tick;
+            return true;
+        }
+        return decision.isLegit();
+    }
+
+    private boolean withinHealthDecreaseWindow(DamageState dState, FightData data) {
+        if (dState.tick < data.godModeHealthDecreaseTick){
+            data.godModeHealthDecreaseTick = 0;
+            return false;
+        }
+        final int dht = dState.tick - data.godModeHealthDecreaseTick;
+        return dht <= 20;
+    }
+
+    private boolean handleViolation(Player player, IPlayerData pData, FightData data, DamageState dState) {
+        final FightConfig cc = pData.getGenericInstance(FightConfig.class);
+
+        if (shouldIgnoreLag(player, pData, cc)) {
+            return false;
+        }
+
+        data.godModeAcc += dState.delta;
+
+        if (data.godModeAcc > 2){
+            data.godModeVL += dState.delta;
+            return executeActions(player, data.godModeVL, dState.delta,
+                    pData.getGenericInstance(FightConfig.class).godModeActions).willCancel();
+        }
+        return false;
+    }
     private static final class DamageState {
         final int tick;
         final int noDamageTicks;
