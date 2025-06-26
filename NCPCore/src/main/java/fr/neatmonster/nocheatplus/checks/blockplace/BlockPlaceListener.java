@@ -81,6 +81,7 @@ import java.util.List;
  */
 public class BlockPlaceListener extends CheckListener {
 
+    /** Prime numbers used for coordinate hashing. */
     private static final int p1 = 73856093;
     private static final int p2 = 19349663;
     private static final int p3 = 83492791;
