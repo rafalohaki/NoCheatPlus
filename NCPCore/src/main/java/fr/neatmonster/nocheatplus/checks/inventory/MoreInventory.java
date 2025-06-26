@@ -30,7 +30,7 @@ import fr.neatmonster.nocheatplus.players.IPlayerData;
 public class MoreInventory extends Check{
 
   /**
-    * Instanties a new MoreInventory check
+    * Instantiates a new MoreInventory check
     *
     */
     public MoreInventory() {

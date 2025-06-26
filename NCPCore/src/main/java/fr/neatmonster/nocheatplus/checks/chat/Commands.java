@@ -32,24 +32,24 @@ public class Commands extends Check {
         super(CheckType.CHAT_COMMANDS);
     }
 
-    public boolean check(final Player player, final String message, 
-            final ChatConfig cc, final IPlayerData pData, 
+    public boolean check(final Player player, final String message,
+            final ChatConfig cc, final IPlayerData pData,
             final ICaptcha captcha) {
+
+        if (player == null || message == null) {
+            return false;
+        }
 
         final long now = System.currentTimeMillis();
         final int tick = TickTask.getTick();
 
         final ChatData data = pData.getGenericInstance(ChatData.class);
 
-        final boolean captchaEnabled = !cc.captchaSkipCommands 
-                && pData.isCheckActive(CheckType.CHAT_CAPTCHA, player); 
-        if (captchaEnabled){
-            synchronized (data) {
-                if (captcha.shouldCheckCaptcha(player, cc, data, pData)){
-                    captcha.checkCaptcha(player, message, cc, data, true);
-                    return true;
-                }
-            }
+        final boolean captchaEnabled = !cc.captchaSkipCommands
+                && pData.isCheckActive(CheckType.CHAT_CAPTCHA, player);
+
+        if (handleCaptcha(player, message, captcha, cc, data, pData, captchaEnabled)) {
+            return true;
         }
 
         // Rest of the check is done without sync, because the data is only used by this check.
@@ -57,49 +57,75 @@ public class Commands extends Check {
         // Weight might later be read from some prefix tree (also known / unknown).
         final float weight = 1f;
 
+        updateCommandWeights(data, cc, pData, weight, now, tick);
+
+        final float nw = data.commandsWeights.score(1f);
+        final double violation = Math.max(nw - cc.commandsLevel,
+                data.commandsShortTermWeight - cc.commandsShortTermLevel);
+
+        return processCommandViolation(player, data, cc, captcha, captchaEnabled,
+                violation, nw, now);
+    }
+
+    private boolean handleCaptcha(final Player player, final String message,
+            final ICaptcha captcha, final ChatConfig cc, final ChatData data,
+            final IPlayerData pData, final boolean captchaEnabled) {
+        if (captchaEnabled) {
+            synchronized (data) {
+                if (captcha.shouldCheckCaptcha(player, cc, data, pData)) {
+                    captcha.checkCaptcha(player, message, cc, data, true);
+                    return true;
+                }
+            }
+        }
+        return false;
+    }
+
+    private void updateCommandWeights(final ChatData data, final ChatConfig cc,
+            final IPlayerData pData, final float weight, final long now,
+            final int tick) {
         data.commandsWeights.add(now, weight);
-        if (tick < data.commandsShortTermTick){
-            // TickTask got reset.
+        if (tick < data.commandsShortTermTick) {
             data.commandsShortTermTick = tick;
             data.commandsShortTermWeight = 1.0;
-        }
-        else if (tick - data.commandsShortTermTick < cc.commandsShortTermTicks){
-            if (!pData.getCurrentWorldData().shouldAdjustToLag(type) 
-                    || TickTask.getLag(50L * (tick - data.commandsShortTermTick), true) < 1.3f){
-                // Add up.
+        } else if (tick - data.commandsShortTermTick < cc.commandsShortTermTicks) {
+            if (!pData.getCurrentWorldData().shouldAdjustToLag(type)
+                    || TickTask.getLag(50L * (tick - data.commandsShortTermTick),
+                            true) < 1.3f) {
                 data.commandsShortTermWeight += weight;
-            }
-            else{
-                // Reset, too much lag.
+            } else {
                 data.commandsShortTermTick = tick;
                 data.commandsShortTermWeight = 1.0;
             }
-        }
-        else{
-            // Reset.
+        } else {
             data.commandsShortTermTick = tick;
             data.commandsShortTermWeight = 1.0;
         }
+    }
 
-        final float nw = data.commandsWeights.score(1f);
-        final double violation = Math.max(nw - cc.commandsLevel, data.commandsShortTermWeight - cc.commandsShortTermLevel);
-
-        if (violation > 0.0){
+    private boolean processCommandViolation(final Player player,
+            final ChatData data, final ChatConfig cc, final ICaptcha captcha,
+            final boolean captchaEnabled, final double violation, final float nw,
+            final long now) {
+        if (violation > 0.0) {
             data.commandsVL += violation;
-            if (captchaEnabled){
+            if (captchaEnabled) {
                 synchronized (data) {
                     captcha.sendNewCaptcha(player, cc, data);
                 }
                 return true;
             }
-            else if (executeActions(player, data.commandsVL, violation, cc.commandsActions).willCancel())
+            if (executeActions(player, data.commandsVL, violation,
+                    cc.commandsActions).willCancel()) {
                 return true;
-        }
-        else if (cc.chatWarningCheck && now - data.chatWarningTime > cc.chatWarningTimeout && (100f * nw / cc.commandsLevel > cc.chatWarningLevel || 100f * data.commandsShortTermWeight / cc.commandsShortTermLevel > cc.chatWarningLevel)){
+            }
+        } else if (cc.chatWarningCheck
+                && now - data.chatWarningTime > cc.chatWarningTimeout
+                && (100f * nw / cc.commandsLevel > cc.chatWarningLevel || 100f
+                        * data.commandsShortTermWeight / cc.commandsShortTermLevel > cc.chatWarningLevel)) {
             player.sendMessage(ColorUtil.replaceColors(cc.chatWarningMessage));
             data.chatWarningTime = now;
-        }
-        else{
+        } else {
             data.commandsVL *= 0.99;
         }
         return false;

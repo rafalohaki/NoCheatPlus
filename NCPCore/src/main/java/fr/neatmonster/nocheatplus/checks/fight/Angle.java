@@ -29,7 +29,6 @@ import fr.neatmonster.nocheatplus.checks.CheckType;
 import fr.neatmonster.nocheatplus.checks.ViolationData;
 import fr.neatmonster.nocheatplus.permissions.Permissions;
 import fr.neatmonster.nocheatplus.players.IPlayerData;
-import fr.neatmonster.nocheatplus.players.PlayerData;
 import fr.neatmonster.nocheatplus.utilities.StringUtil;
 import fr.neatmonster.nocheatplus.utilities.TickTask;
 import fr.neatmonster.nocheatplus.utilities.location.TrigUtil;
@@ -41,9 +40,6 @@ import org.bukkit.ChatColor;
  * Thanks @asofold for the original idea!
  */
 public class Angle extends Check {
-
-
-  private final List<String> tags = new LinkedList<String>();
 
     /** Container for calculated averages. */
     private static final class Averages {
@@ -224,7 +220,7 @@ public class Angle extends Check {
         }
 
         boolean cancel = false;
-        tags.clear();
+        final List<String> tags = new LinkedList<String>();
 
         final long time = System.currentTimeMillis();
         updateAttackHistory(player, loc, damagedEntity, data, time);
