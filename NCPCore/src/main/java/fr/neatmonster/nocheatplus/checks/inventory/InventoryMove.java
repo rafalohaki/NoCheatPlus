@@ -53,7 +53,7 @@ public class InventoryMove extends Check {
 
 
    /**
-    * Instanties a new InventoryMove check
+    * Instantiates a new InventoryMove check
     *
     */
     public InventoryMove() {
