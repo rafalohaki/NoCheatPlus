@@ -109,7 +109,7 @@ public class Against extends Check {
             }
         }
         else if (BlockProperties.isLiquid(ncpAgainst)) {
-            if (((placedMat != BridgeMaterial.LILY_PAD || placedMat != BridgeMaterial.FROGSPAWN) || !BlockProperties.isLiquid(block.getRelative(BlockFace.DOWN).getType()))
+            if (((placedMat != BridgeMaterial.LILY_PAD && placedMat != BridgeMaterial.FROGSPAWN) || !BlockProperties.isLiquid(block.getRelative(BlockFace.DOWN).getType()))
                 && !BlockProperties.isWaterPlant(ncpAgainst)
                 && !pData.hasPermission(Permissions.BLOCKPLACE_AGAINST_LIQUIDS, player)) {
                 violation = true;
