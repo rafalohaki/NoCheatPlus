@@ -13,7 +13,6 @@ import java.lang.reflect.Proxy;
 
 import fr.neatmonster.nocheatplus.checks.CheckType;
 import fr.neatmonster.nocheatplus.checks.inventory.InventoryData;
-import sun.misc.Unsafe;
 import fr.neatmonster.nocheatplus.players.DataManager;
 import fr.neatmonster.nocheatplus.players.IPlayerData;
 import fr.neatmonster.nocheatplus.permissions.Permissions;
@@ -44,11 +43,6 @@ public class InventoryListenerPermissionTest {
         f.set(null, api);
     }
 
-    private static Unsafe getUnsafe() throws Exception {
-        Field f = Unsafe.class.getDeclaredField("theUnsafe");
-        f.setAccessible(true);
-        return (Unsafe) f.get(null);
-    }
 
     private static Object defaultValue(Class<?> type) {
         if (!type.isPrimitive()) return null;
@@ -61,14 +55,23 @@ public class InventoryListenerPermissionTest {
         return null;
     }
 
-    @Test
-    public void unauthorizedClickIsCancelled() {
-        InventoryListener listener;
+    @SuppressWarnings("unchecked")
+    private static <T> T allocate(Class<T> clazz) {
         try {
-            listener = (InventoryListener) getUnsafe().allocateInstance(InventoryListener.class);
+            Class<?> unsafeClass = Class.forName("sun.misc.Unsafe");
+            Field f = unsafeClass.getDeclaredField("theUnsafe");
+            f.setAccessible(true);
+            Object unsafe = f.get(null);
+            return (T) unsafeClass.getMethod("allocateInstance", Class.class)
+                    .invoke(unsafe, clazz);
         } catch (Exception e) {
             throw new RuntimeException(e);
         }
+    }
+
+    @Test
+    public void unauthorizedClickIsCancelled() {
+        InventoryListener listener = allocate(InventoryListener.class);
         InventoryClickEvent event = mock(InventoryClickEvent.class);
         Player player = mock(Player.class);
         when(event.getWhoClicked()).thenReturn(player);
@@ -88,12 +91,7 @@ public class InventoryListenerPermissionTest {
 
     @Test
     public void authorizedClickProceeds() {
-        InventoryListener listener;
-        try {
-            listener = (InventoryListener) getUnsafe().allocateInstance(InventoryListener.class);
-        } catch (Exception e) {
-            throw new RuntimeException(e);
-        }
+        InventoryListener listener = allocate(InventoryListener.class);
         InventoryClickEvent event = mock(InventoryClickEvent.class);
         Player player = mock(Player.class);
         when(event.getWhoClicked()).thenReturn(player);
