@@ -1130,6 +1130,7 @@ public class CreativeFly extends Check {
             final double attrMod = attributeAccess.getHandle().getSpeedAttributeMultiplier(player);
             if (Double.isNaN(attrMod)) {
                 final double speedAmplifier = mcAccess.getHandle().getFasterMovementAmplifier(player);
+                // NEGATIVE_INFINITY from MCAccess means no speed potion effect.
                 if (!Double.isInfinite(speedAmplifier)) {
                     allowedH *= 1.0D + 0.2D * (speedAmplifier + 1);
                 }
@@ -1553,6 +1554,7 @@ public class CreativeFly extends Check {
         double fSpeed;
         if (model.getApplyModifiers()) {
             final double speedModifier = mcAccess.getHandle().getFasterMovementAmplifier(player);
+            // NEGATIVE_INFINITY signals that the speed effect is absent.
             if (Double.isInfinite(speedModifier)) fSpeed = 1.0;
             else fSpeed = 1.0 + 0.2 * (speedModifier + 1.0);
             if (flying) {

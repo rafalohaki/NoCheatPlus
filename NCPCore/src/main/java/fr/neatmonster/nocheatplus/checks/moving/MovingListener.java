@@ -3247,6 +3247,7 @@ public class MovingListener extends CheckListener implements TickListener, IRemo
     private void appendPotionEffectDetails(final Player player, final MCAccess mcAccess,
             final StringBuilder builder) {
         final double speed = mcAccess.getFasterMovementAmplifier(player);
+        // See MCAccessSpigotCB class JavaDocs for the meaning of NEGATIVE_INFINITY.
         if (!Double.isInfinite(speed)) {
             builder.append("(e_speed=" + (speed + 1) + ")");
         }
@@ -3255,6 +3256,7 @@ public class MovingListener extends CheckListener implements TickListener, IRemo
             builder.append("(e_slow=" + (slow + 1) + ")");
         }
         final double jump = mcAccess.getJumpAmplifier(player);
+        // Sentinel NEGATIVE_INFINITY indicates no jump potion effect.
         if (!Double.isInfinite(jump)) {
             builder.append("(e_jump=" + (jump + 1) + ")");
         }
