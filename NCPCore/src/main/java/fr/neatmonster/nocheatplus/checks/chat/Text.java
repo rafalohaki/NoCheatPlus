@@ -53,6 +53,13 @@ public class Text extends Check implements INotifyReload {
     private long lastGlobalTime = 0;
 
     /**
+     * Lock used for updates of global chat state.
+     * Protects {@link #lastGlobalMessage}, {@link #lastGlobalTime},
+     * {@link #lastCancelledMessage} and {@link #lastCancelledTime}.
+     */
+    private final Object globalLock = new Object();
+
+    /**
      * Dampening factor for uppercase ratio to prevent over-penalization.
      */
     private static final float UPPERCASE_WEIGHT_FACTOR = 0.6f;
@@ -78,9 +85,9 @@ public class Text extends Check implements INotifyReload {
             final ICaptcha captcha, boolean isMainThread, final boolean alreadyCancelled) {
         final ChatData data = pData.getGenericInstance(ChatData.class);
 
-        synchronized (data) {
-            return unsafeCheck(player, message, captcha, cc, data, pData, isMainThread, alreadyCancelled);
-        }
+        // Synchronization is handled within {@link #unsafeCheck} to keep the
+        // expensive analysis outside of locked sections.
+        return unsafeCheck(player, message, captcha, cc, data, pData, isMainThread, alreadyCancelled);
     }
 
     private void init() {
@@ -118,12 +125,33 @@ public class Text extends Check implements INotifyReload {
             final ChatConfig cc, final ChatData data, final IPlayerData pData,
             boolean isMainThread, final boolean alreadyCancelled) {
 
-        if (handleCaptcha(player, message, captcha, cc, data, pData, isMainThread, alreadyCancelled)) {
-            return true;
+        synchronized (data) {
+            if (captcha.shouldCheckCaptcha(player, cc, data, pData)) {
+                captcha.checkCaptcha(player, message, cc, data, isMainThread);
+                return true;
+            }
         }
 
         final long time = System.currentTimeMillis();
         final String lcMessage = message.trim().toLowerCase();
+
+        final String lastMessage;
+        final long lastTime;
+        synchronized (data) {
+            data.chatFrequency.update(time);
+            lastMessage = data.chatLastMessage;
+            lastTime = data.chatLastTime;
+        }
+        final String lastGlMessage;
+        final long lastGlTime;
+        final String lastCancMessage;
+        final long lastCancTime;
+        synchronized (globalLock) {
+            lastGlMessage = lastGlobalMessage;
+            lastGlTime = lastGlobalTime;
+            lastCancMessage = lastCancelledMessage;
+            lastCancTime = lastCancelledTime;
+        }
 
         final boolean debug = pData.isDebugActive(type);
         final List<String> debugParts = debug ? new LinkedList<String>() : null;
@@ -131,9 +159,8 @@ public class Text extends Check implements INotifyReload {
             debugParts.add("Message (length=" + message.length()+"): ");
         }
 
-        data.chatFrequency.update(time);
-
-        final ScoreResult scoreResult = calculateScore(message, lcMessage, time, cc, data, pData, debug, debugParts);
+        final ScoreResult scoreResult = calculateScore(message, lcMessage, time, cc, pData, debug, debugParts,
+                lastMessage, lastTime, lastGlMessage, lastGlTime, lastCancMessage, lastCancTime);
         float score = scoreResult.score;
         final MessageLetterCount letterCounts = scoreResult.letterCounts;
 
@@ -146,7 +173,16 @@ public class Text extends Check implements INotifyReload {
         final Map<String, Float> engMap = engineResult.engMap;
         score += wEngine;
 
-        final EvalResult evalResult = evaluateFrequencyAndViolations(player, captcha, cc, data, pData, lcMessage, time, score);
+        final EvalResult evalResult;
+        synchronized (data) {
+            evalResult = evaluateFrequencyAndViolations(player, captcha, cc, data, pData, lcMessage, time, score);
+            data.chatLastMessage = lcMessage;
+            data.chatLastTime = time;
+        }
+        synchronized (globalLock) {
+            lastGlobalMessage = lcMessage;
+            lastGlobalTime = time;
+        }
         boolean cancel = evalResult.cancel;
         float accumulated = evalResult.accumulated;
         float shortTermAccumulated = evalResult.shortTermAccumulated;
@@ -169,9 +205,6 @@ public class Text extends Check implements INotifyReload {
             debug(player, StringUtil.join(debugParts, " | "));
             debugParts.clear();
         }
-
-        lastGlobalMessage = data.chatLastMessage = lcMessage;
-        lastGlobalTime = data.chatLastTime = time;
 
         return cancel;
     }
@@ -196,15 +229,19 @@ public class Text extends Check implements INotifyReload {
     }
 
     private ScoreResult calculateScore(final String message, final String lcMessage, final long time,
-            final ChatConfig cc, final ChatData data, final IPlayerData pData,
-            final boolean debug, final List<String> debugParts) {
+            final ChatConfig cc, final IPlayerData pData, final boolean debug, final List<String> debugParts,
+            final String lastMessage, final long lastTime, final String lastGlobalMessage, final long lastGlobalTime,
+            final String lastCancelledMessage, final long lastCancelledTime) {
         final MessageLetterCount letterCounts = new MessageLetterCount(message);
         final int msgLen = message.length();
+
+        final CombinedData cData = pData != null ? pData.getGenericInstance(CombinedData.class) : null;
 
         float score = 0f;
         score += computeCaseScore(letterCounts, msgLen, cc);
         score += computeRepetitionScore(letterCounts, msgLen, cc);
-        score += computeTimeBasedScore(lcMessage, time, cc, data, pData);
+        score += computeTimeBasedScore(lcMessage, time, cc, lastMessage, lastTime,
+                lastGlobalMessage, lastGlobalTime, lastCancelledMessage, lastCancelledTime, cData);
         score += computeWordScore(letterCounts, msgLen, cc);
 
         return new ScoreResult(score, letterCounts);
@@ -235,14 +272,14 @@ public class Text extends Check implements INotifyReload {
     }
 
     private float computeTimeBasedScore(final String lcMessage, final long time, final ChatConfig cc,
-            final ChatData data, final IPlayerData pData) {
+            final String lastMessage, final long lastTime, final String lastGlobalMessage, final long lastGlobalTime,
+            final String lastCancelledMessage, final long lastCancelledTime, final CombinedData cData) {
         float score = 0f;
-        final CombinedData cData = pData != null ? pData.getGenericInstance(CombinedData.class) : null;
         final long timeout = 8000;
 
-        if (cc.textMsgRepeatSelf != 0f && time - data.chatLastTime < timeout
-                && StringUtil.isSimilar(lcMessage, data.chatLastMessage, 0.8f)) {
-            final float timeWeight = (float) (timeout - (time - data.chatLastTime)) / (float) timeout;
+        if (cc.textMsgRepeatSelf != 0f && time - lastTime < timeout
+                && StringUtil.isSimilar(lcMessage, lastMessage, 0.8f)) {
+            final float timeWeight = (float) (timeout - (time - lastTime)) / (float) timeout;
             score += cc.textMsgRepeatSelf * timeWeight;
         }
 
@@ -343,8 +380,10 @@ public class Text extends Check implements INotifyReload {
 
         boolean cancel = false;
         if (normalViolation || shortTermViolation) {
-            lastCancelledMessage = lcMessage;
-            lastCancelledTime = time;
+            synchronized (globalLock) {
+                lastCancelledMessage = lcMessage;
+                lastCancelledTime = time;
+            }
 
             final double added = shortTermViolation ? (shortTermAccumulated - cc.textFreqShortTermLevel) / 3.0
                     : (accumulated - cc.textFreqNormLevel) / 10.0;
