@@ -101,7 +101,7 @@ public class FastPlace extends Check {
             cancel = executeActions(player, data.fastPlaceVL, change, cc.fastPlaceActions).willCancel();
         }
         else if (data.fastPlaceVL > 0d && fullScore < cc.fastPlaceLimit * .75) {
-            data.fastPlaceVL *= 0.95;
+            data.fastPlaceVL *= cc.fastPlaceVLDecay;
         }
 
         return cancel;

@@ -171,7 +171,7 @@ public class VehicleEnvelope extends Check {
             }
         }
         else {
-            data.vehicleEnvelopeVL *= 0.99; // Random cool down for now.
+            data.vehicleEnvelopeVL *= cc.vehicleEnvelopeVLDecay; // Random cool down for now.
             // Do not set a set back here.
         }
         return null;

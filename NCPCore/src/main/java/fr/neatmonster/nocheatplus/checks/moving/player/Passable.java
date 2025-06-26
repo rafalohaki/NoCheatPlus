@@ -103,7 +103,7 @@ public class Passable extends Check {
         // Finally handle violations.
         if (newTag == null) {
             // (Might consider if vl>=1: only decrease if from and loc are passable too, though micro...)
-            data.passableVL *= 0.99;
+            data.passableVL *= cc.passableVLDecay;
             return null;
         }
         else {

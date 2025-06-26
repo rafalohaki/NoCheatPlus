@@ -192,7 +192,7 @@ public class FastClick extends Check {
             }
             return executeActions(vd).willCancel();
         }
-        data.fastClickVL *= 0.99;
+        data.fastClickVL *= cc.fastClickVLDecay;
         return false;
     }
     

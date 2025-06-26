@@ -80,6 +80,8 @@ public class FightConfig extends ACheckConfig {
 
     public final int        speedLimit;
     public final int        speedBuckets;
+    /** Factor applied each tick to decay the selfhit violation level. */
+    public final double selfHitVLDecay;
     public final long       speedBucketDur;
     public final float      speedBucketFactor;  
 
@@ -166,6 +168,7 @@ public class FightConfig extends ACheckConfig {
         reachActions = config.getOptimizedActionList(ConfPaths.FIGHT_REACH_ACTIONS, Permissions.FIGHT_REACH);
 
         selfHitActions = config.getOptimizedActionList(ConfPaths.FIGHT_SELFHIT_ACTIONS, Permissions.FIGHT_SELFHIT);
+        selfHitVLDecay = config.getDouble(ConfPaths.FIGHT_SELFHIT_VL_DECAY, 0.99);
 
         speedLimit = config.getInt(ConfPaths.FIGHT_SPEED_LIMIT);
         speedBuckets = config.getInt(ConfPaths.FIGHT_SPEED_BUCKETS_N, 6);

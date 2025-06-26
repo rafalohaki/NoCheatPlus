@@ -48,6 +48,8 @@ public class InventoryConfig extends ACheckConfig {
     public final ActionList fastClickActions;
 
     public final long		fastConsumeDuration;
+    /** Factor applied each tick to decay the fastclick violation level. */
+    public final double fastClickVLDecay;
     public final boolean    fastConsumeWhitelist;
     public final Set<Material> fastConsumeItems = new HashSet<Material>();
     public final ActionList fastConsumeActions;
@@ -93,6 +95,7 @@ public class InventoryConfig extends ACheckConfig {
         data.readStringlFromList(ConfPaths.INVENTORY_FASTCLICK_EXCLUDE, inventoryExemptions);
         fastClickImprobableWeight = (float) data.getDouble(ConfPaths.INVENTORY_FASTCLICK_IMPROBABLE_WEIGHT);
         fastClickActions = data.getOptimizedActionList(ConfPaths.INVENTORY_FASTCLICK_ACTIONS, Permissions.INVENTORY_FASTCLICK);
+        fastClickVLDecay = data.getDouble(ConfPaths.INVENTORY_FASTCLICK_VL_DECAY, 0.99);
 
         if (ServerVersion.compareMinecraftVersion("1.9") >= 0) {
             /** Note: Disable check should use

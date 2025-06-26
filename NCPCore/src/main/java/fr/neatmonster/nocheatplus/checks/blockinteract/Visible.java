@@ -224,7 +224,7 @@ public class Visible extends Check {
                 cancel = true;
             }
         } else {
-            data.visibleVL *= 0.99;
+            data.visibleVL *= cc.visibleVLDecay;
             data.addPassedCheck(this.type);
             if (debug) {
                 debug(player, "pitch=" + loc.getPitch() + ",yaw=" + loc.getYaw() + " tags="

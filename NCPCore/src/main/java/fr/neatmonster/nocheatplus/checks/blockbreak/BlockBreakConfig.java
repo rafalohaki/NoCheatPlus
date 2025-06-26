@@ -48,6 +48,8 @@ public class BlockBreakConfig extends ACheckConfig {
     public final int        frequencyShortTermLimit;
     public final int        frequencyShortTermTicks;
     public final ActionList frequencyActions;
+    /** Factor applied each tick to decay frequency violation level. */
+    public final double     frequencyVLDecay;
 
     public boolean          improbableFastBreakCheck;
 
@@ -91,6 +93,7 @@ public class BlockBreakConfig extends ACheckConfig {
         frequencyShortTermLimit = config.getInt(ConfPaths.BLOCKBREAK_FREQUENCY_SHORTTERM_LIMIT);
         frequencyShortTermTicks = config.getInt(ConfPaths.BLOCKBREAK_FREQUENCY_SHORTTERM_TICKS);
         frequencyActions = config.getOptimizedActionList(ConfPaths.BLOCKBREAK_FREQUENCY_ACTIONS, Permissions.BLOCKBREAK_FREQUENCY);
+        frequencyVLDecay = config.getDouble(ConfPaths.BLOCKBREAK_FREQUENCY_VL_DECAY, 0.95);
 
         noSwingActions = config.getOptimizedActionList(ConfPaths.BLOCKBREAK_NOSWING_ACTIONS, Permissions.BLOCKBREAK_NOSWING);
 

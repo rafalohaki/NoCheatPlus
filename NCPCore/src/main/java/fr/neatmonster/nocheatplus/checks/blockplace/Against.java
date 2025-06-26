@@ -95,7 +95,7 @@ public class Against extends Check {
             vd.setParameter(ParameterName.BLOCK_TYPE, ncpAgainst == null ? "air" : ncpAgainst.toString());
             return executeActions(vd).willCancel();
         } else {
-            data.againstVL *= 0.99; // Assume one false positive every 100 blocks.
+            data.againstVL *= cc.againstVLDecay; // Assume one false positive every 100 blocks.
             if (bIData != null) {
                 bIData.addPassedCheck(this.type);
             }

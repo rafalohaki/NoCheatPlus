@@ -487,7 +487,7 @@ public class SurvivalFly extends Check {
                     && lastMove.toIsValid
                     && lastMove.yDistance < -Magic.GRAVITY_MIN
                     && thisMove.yDistance - lastMove.yDistance < -Magic.GRAVITY_MIN)) {
-            data.survivalFlyVL *= 0.95;
+            data.survivalFlyVL *= cc.survivalFlyVLDecay;
             if (hDistanceAboveLimit < 0.0 && result <= 0.0 && !isSamePos && data.sfHorizontalBuffer < cc.hBufMax
                     && !data.sfLowJump) {
                 hBufRegain(hDistance, Math.min(0.2, Math.abs(hDistanceAboveLimit)), data, cc);

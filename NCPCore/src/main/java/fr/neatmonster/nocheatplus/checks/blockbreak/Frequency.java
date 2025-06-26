@@ -90,7 +90,7 @@ public class Frequency extends Check {
                     cancel = executeActions(player, data.frequencyVL, change, cc.frequencyActions).willCancel();
                 }
                 else if (data.frequencyVL > 0d && fullScore < fullTime * .75)
-                    data.frequencyVL *= 0.95;
+                    data.frequencyVL *= cc.frequencyVLDecay;
 
                 return cancel;
     }
