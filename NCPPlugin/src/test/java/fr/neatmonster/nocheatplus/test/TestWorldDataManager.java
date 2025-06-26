@@ -92,6 +92,12 @@ public class TestWorldDataManager {
         return rawWorldConfigs;
     }
 
+    private WorldDataManager initWithConfig(Map<String, ConfigFile> rawConfig) {
+        WorldDataManager worldMan = newManager();
+        worldMan.applyConfiguration(rawConfig);
+        return worldMan;
+    }
+
     private Map<String, ConfigFile> createDummyConfig() {
         Map<String, ConfigFile> rawWorldConfigs = new LinkedHashMap<>();
         set(rawWorldConfigs, null, "dummy", "dummy");
@@ -100,9 +106,8 @@ public class TestWorldDataManager {
 
     @Test
     public void testApplyConfiguration() {
-        WorldDataManager worldMan = newManager();
         Map<String, ConfigFile> rawWorldConfigs = createBaseConfig();
-        worldMan.applyConfiguration(rawWorldConfigs);
+        WorldDataManager worldMan = initWithConfig(rawWorldConfigs);
 
         for (String worldName : Arrays.asList("Exist1", "Exist2")) {
             if (rawWorldConfigs.get(worldName) != worldMan.getWorldData(worldName).getRawConfiguration()) {
@@ -129,9 +134,8 @@ public class TestWorldDataManager {
 
     @Test
     public void testOverrideBehaviour() {
-        WorldDataManager worldMan = newManager();
         Map<String, ConfigFile> rawWorldConfigs = createBaseConfig();
-        worldMan.applyConfiguration(rawWorldConfigs);
+        WorldDataManager worldMan = initWithConfig(rawWorldConfigs);
 
         set(rawWorldConfigs, "Exist2", ConfPaths.COMBINED_MUNCHHAUSEN_CHECK, true);
         worldMan.applyConfiguration(rawWorldConfigs);
@@ -151,9 +155,8 @@ public class TestWorldDataManager {
 
     @Test
     public void testReloadHandling() {
-        WorldDataManager worldMan = newManager();
         Map<String, ConfigFile> rawWorldConfigs = createBaseConfig();
-        worldMan.applyConfiguration(rawWorldConfigs);
+        WorldDataManager worldMan = initWithConfig(rawWorldConfigs);
 
         set(rawWorldConfigs, "Exist2", ConfPaths.COMBINED_MUNCHHAUSEN_CHECK, true);
         worldMan.applyConfiguration(rawWorldConfigs);
@@ -180,9 +183,8 @@ public class TestWorldDataManager {
 
     @Test
     public void testResetAndGlobalOverride() {
-        WorldDataManager worldMan = newManager();
         Map<String, ConfigFile> rawWorldConfigs = createDummyConfig();
-        worldMan.applyConfiguration(rawWorldConfigs);
+        WorldDataManager worldMan = initWithConfig(rawWorldConfigs);
 
         IWorldData defaultWorldData = worldMan.getDefaultWorldData();
         defaultWorldData.overrideCheckActivation(CheckType.ALL, AlmostBoolean.NO, OverrideType.VOLATILE, true);
