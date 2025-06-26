@@ -340,11 +340,13 @@ public class PassengerUtil {
             if (passenger == null) {
                 continue;
             }
+            // Skip passengers that are invalid or located in a different world than the vehicle
             if (!passenger.isValid() || passenger.isDead() || !vWorldMatchesPWorld) {
                 if (debug) {
+                    final String reason = !vWorldMatchesPWorld ? "world mismatch" : "invalid state";
                     CheckUtils.debug(player, CheckType.MOVING_VEHICLE,
-                            (!vWorldMatchesPWorld) ? "**** Prevent adding passengers to root vehicle on world change (potential exploit)"
-                                    : "Can't add passenger to vehicle: passenger is dead.");
+                            "Skipping passenger due to " + reason + ". playerId=" + player.getUniqueId()
+                                    + " vehicleId=" + vehicle.getEntityId());
                 }
                 continue;
             }
