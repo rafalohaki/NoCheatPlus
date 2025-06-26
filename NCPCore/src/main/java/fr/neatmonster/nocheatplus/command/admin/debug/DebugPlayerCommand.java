@@ -101,8 +101,8 @@ public class DebugPlayerCommand extends BaseCommand {
     public boolean onCommand(CommandSender sender, Command command, String alias, String[] args) {
 
         String[] colors = prepareColorCodes(sender);
-        String c1 = colors[0];
-        String c3 = colors[2];
+        String c1 = colors[COLOR_PRIMARY];
+        String c3 = colors[COLOR_ERROR];
 
         if (args.length <= 2) {
             sender.sendMessage((sender instanceof Player ? TAG : CTAG) + "Bad setup. Command usage: /ncp debug player (playername) yes/no:(checktype).");
@@ -146,7 +146,7 @@ public class DebugPlayerCommand extends BaseCommand {
 
     private Player resolvePlayer(CommandSender sender, String input) {
         String[] colors = prepareColorCodes(sender);
-        String c3 = colors[2];
+        String c3 = colors[COLOR_ERROR];
         Player player = null;
         if (IdUtil.isValidMinecraftUserName(input)) {
             player = DataManager.getPlayer(input);
@@ -166,7 +166,7 @@ public class DebugPlayerCommand extends BaseCommand {
 
     private DebugEntry parseDebugEntry(CommandSender sender, String input) {
         String[] colors = prepareColorCodes(sender);
-        String c3 = colors[2];
+        String c3 = colors[COLOR_ERROR];
         DebugEntry entry = DebugEntry.parseEntry(input);
         if (entry == null) {
             sender.sendMessage((sender instanceof Player ? TAG : CTAG) + "Bad setup: " + c3 + input);

@@ -99,8 +99,8 @@ public class UnexemptCommand extends BaseCommand {
         } catch (Exception e) {
             final String tag = sender instanceof Player ? TAG : CTAG;
             final String[] colors = getColorCodes(sender);
-            final String c3 = colors[2];
-            final String c6 = colors[5];
+            final String c3 = colors[COLOR_ERROR];
+            final String c6 = colors[COLOR_DEFAULT];
             sender.sendMessage(tag + "Could not interpret: " + c3 + input);
             sender.sendMessage(tag + "Check type should be one of: " + c3 + StringUtil.join(Arrays.asList(CheckType.values()), c6 + ", " + c3));
             return null;
@@ -119,7 +119,7 @@ public class UnexemptCommand extends BaseCommand {
         NCPExemptionManager.clear();
         final String tag = sender instanceof Player ? TAG : CTAG;
         final String[] colors = getColorCodes(sender);
-        final String c3 = colors[2];
+        final String c3 = colors[COLOR_ERROR];
         sender.sendMessage(tag + "Removed exemptions for all players for checks: " + c3 + type);
     }
 
@@ -127,8 +127,8 @@ public class UnexemptCommand extends BaseCommand {
         NCPExemptionManager.unexempt(id, type);
         final String tag = sender instanceof Player ? TAG : CTAG;
         final String[] colors = getColorCodes(sender);
-        final String c1 = colors[0];
-        final String c3 = colors[2];
+        final String c1 = colors[COLOR_PRIMARY];
+        final String c3 = colors[COLOR_ERROR];
         sender.sendMessage(tag + "Removed exemptions for " + c3 + playerName + c1 + " for checks: " + c3 + type);
     }
 }
