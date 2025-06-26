@@ -132,6 +132,17 @@ public class TestGodModeHelpers {
             java.lang.reflect.Field f = NCPAPIProvider.class.getDeclaredField("noCheatPlusAPI");
             f.setAccessible(true);
             f.set(null, new DummyAPI());
+            // Ensure DataManager is available for check initialization.
+            java.lang.reflect.Field uf = sun.misc.Unsafe.class.getDeclaredField("theUnsafe");
+            uf.setAccessible(true);
+            sun.misc.Unsafe un = (sun.misc.Unsafe) uf.get(null);
+            Object pdm = un.allocateInstance(fr.neatmonster.nocheatplus.players.PlayerDataManager.class);
+            java.lang.reflect.Field eh = fr.neatmonster.nocheatplus.players.PlayerDataManager.class.getDeclaredField("executionHistories");
+            eh.setAccessible(true);
+            eh.set(pdm, new java.util.HashMap<>());
+            java.lang.reflect.Field dm = fr.neatmonster.nocheatplus.players.DataManager.class.getDeclaredField("instance");
+            dm.setAccessible(true);
+            dm.set(null, pdm);
         } catch (Exception e) {
             throw new RuntimeException(e);
         }
