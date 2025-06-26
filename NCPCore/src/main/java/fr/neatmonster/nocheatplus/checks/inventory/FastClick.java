@@ -73,61 +73,59 @@ public class FastClick extends Check {
                          final String inventoryAction, final InventoryData data, final InventoryConfig cc,
                          final IPlayerData pData) {
 
-        if (player == null || view == null || inventoryAction == null) {
-            return false;
-        }
-
-        final Material clickedMat = clicked == null ? Material.AIR : clicked.getType();
-        final Material cursorMat;
-        final int cursorAmount;
         boolean cancel = false;
         tags.clear();
+        if (player != null && view != null && inventoryAction != null) {
+            final Material clickedMat = clicked == null ? Material.AIR : clicked.getType();
+            final Material cursorMat;
+            final int cursorAmount;
 
-        if (cursor != null) {
-            cursorMat = cursor.getType();
-            cursorAmount = Math.max(1, cursor.getAmount());
-        } else {
-            cursorMat = null;
-            cursorAmount = 0;
-        }
-
-        final float amount = computeAmount(view, slot, clicked, clickedMat, cursorMat,
-                cursorAmount, isShiftClick, inventoryAction, data, cc);
-
-        final boolean skipShiftMove = shouldSkipShiftMove(isShiftClick, inventoryAction, cursorMat, clickedMat);
-
-        if (!skipShiftMove) {
-            data.fastClickFreq.add(now, amount);
-
-            float shortTerm = data.fastClickFreq.bucketScore(0);
-            if (shortTerm > cc.fastClickShortTermLimit) {
-                shortTerm /= (float) TickTask.getLag(data.fastClickFreq.bucketDuration(), true);
+            if (cursor != null) {
+                cursorMat = cursor.getType();
+                cursorAmount = Math.max(1, cursor.getAmount());
+            } else {
+                cursorMat = null;
+                cursorAmount = 0;
             }
-            shortTerm -= cc.fastClickShortTermLimit;
 
-            float normal = data.fastClickFreq.score(1f);
-            if (normal > cc.fastClickNormalLimit) {
-                normal /= (float) TickTask.getLag(data.fastClickFreq.bucketDuration()
-                        * data.fastClickFreq.numberOfBuckets(), true);
+            final float amount = computeAmount(view, slot, clicked, clickedMat, cursorMat,
+                    cursorAmount, isShiftClick, inventoryAction, data, cc);
+
+            final boolean skipShiftMove = shouldSkipShiftMove(isShiftClick, inventoryAction, cursorMat, clickedMat);
+
+            if (!skipShiftMove) {
+                data.fastClickFreq.add(now, amount);
+
+                float shortTerm = data.fastClickFreq.bucketScore(0);
+                if (shortTerm > cc.fastClickShortTermLimit) {
+                    shortTerm /= (float) TickTask.getLag(data.fastClickFreq.bucketDuration(), true);
+                }
+                shortTerm -= cc.fastClickShortTermLimit;
+
+                float normal = data.fastClickFreq.score(1f);
+                if (normal > cc.fastClickNormalLimit) {
+                    normal /= (float) TickTask.getLag(data.fastClickFreq.bucketDuration()
+                            * data.fastClickFreq.numberOfBuckets(), true);
+                }
+                normal -= cc.fastClickNormalLimit;
+
+                cancel = processViolation(player, data, cc, shortTerm, normal);
             }
-            normal -= cc.fastClickNormalLimit;
 
-            cancel = processViolation(player, data, cc, shortTerm, normal);
-        }
+            if (pData.isDebugActive(type) && pData.hasPermission(Permissions.ADMINISTRATION_DEBUG, player)) {
+                player.sendMessage("FastClick: " + data.fastClickFreq.bucketScore(0) + " | "
+                        + data.fastClickFreq.score(1f) + " | cursor=" + cursor + " | clicked=" + clicked
+                        + " | action=" + inventoryAction);
+            }
 
-        if (pData.isDebugActive(type) && pData.hasPermission(Permissions.ADMINISTRATION_DEBUG, player)) {
-            player.sendMessage("FastClick: " + data.fastClickFreq.bucketScore(0) + " | "
-                    + data.fastClickFreq.score(1f) + " | cursor=" + cursor + " | clicked=" + clicked
-                    + " | action=" + inventoryAction);
-        }
+            data.fastClickLastClicked = clickedMat;
+            data.fastClickLastSlot = slot;
+            data.fastClickLastCursor = cursorMat;
+            data.fastClickLastCursorAmount = cursorAmount;
 
-        data.fastClickLastClicked = clickedMat;
-        data.fastClickLastSlot = slot;
-        data.fastClickLastCursor = cursorMat;
-        data.fastClickLastCursorAmount = cursorAmount;
-
-        if (cc.fastClickImprobableWeight > 0.0f) {
-            Improbable.feed(player, cc.fastClickImprobableWeight * amount, now);
+            if (cc.fastClickImprobableWeight > 0.0f) {
+                Improbable.feed(player, cc.fastClickImprobableWeight * amount, now);
+            }
         }
         return cancel;
     }
