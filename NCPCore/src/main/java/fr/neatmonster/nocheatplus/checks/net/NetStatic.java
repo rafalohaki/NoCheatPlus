@@ -60,56 +60,62 @@ public class NetStatic {
      * @param tags List to add tags to, for which parts of this check triggered a violation.
      * @return The violation amount, i.e. "count above limit", 0.0 if no violation.
      */
-    public static double morePacketsCheck(final ActionFrequency packetFreq, final long time, final float packets, final float maxPackets, final float idealPackets, final ActionFrequency burstFreq, final float burstPackets, final double burstDirect, final double burstEPM, final List<String> tags) {
+    public static double morePacketsCheck(final ActionFrequency packetFreq, final long time,
+            final float packets, final float maxPackets, final float idealPackets,
+            final ActionFrequency burstFreq, final float burstPackets, final double burstDirect,
+            final double burstEPM, final List<String> tags) {
         // Note: this logic could be refactored into a dedicated PacketFrequency class.
-        // Pull down stuff.
         final long winDur = packetFreq.bucketDuration();
         final int winNum = packetFreq.numberOfBuckets();
         final long totalDur = winDur * winNum;
 
-        // "Relax" bursts from i = 1 on, i.e. distribute to following intervals (if zero ~ ?or lower).
-        // Consider making this smoothing step configurable and refining the implementation.
         final long tDiff = time - packetFreq.lastAccess();
+        relaxBurstBuckets(packetFreq, tDiff, winDur, winNum, totalDur, maxPackets);
+
+        packetFreq.add(time, packets);
+
+        final double violation = calculateViolation(packetFreq, winDur, winNum, totalDur,
+                idealPackets, maxPackets, burstFreq, burstPackets, burstDirect, burstEPM, time,
+                tags);
+        return Math.max(0.0, violation);
+    }
+
+    private static void relaxBurstBuckets(final ActionFrequency packetFreq, final long tDiff,
+            final long winDur, final int winNum, final long totalDur, final float maxPackets) {
         if (tDiff >= winDur && tDiff < totalDur) {
-            // There will be some shift, so check if to relax, only if there could be some congestion. 
             float sc0 = packetFreq.bucketScore(0);
-            if (sc0 > maxPackets) { // Clarify ideal versus maximum packet counts.
-                // Keep in mind potential burst-to-burst exploits.
-                sc0 -= maxPackets; // Count this down.
+            if (sc0 > maxPackets) {
+                sc0 -= maxPackets;
                 for (int i = 1; i < winNum; i++) {
                     final float sci = packetFreq.bucketScore(i);
                     if (sci < maxPackets) {
-                        // Smoothen, using following empty spots including one occupied spot at most..
-                        float consume = Math.min(sc0, maxPackets - sci);
+                        final float consume = Math.min(sc0, maxPackets - sci);
                         sc0 -= consume;
                         packetFreq.setBucket(i, sci + consume);
                         if (sci > 0f) {
-                            // Only allow relaxing "into" the next occupied spot.
                             break;
                         }
                     } else {
                         break;
                     }
                 }
-                // Finally adjust the first bucket score.
                 packetFreq.setBucket(0, maxPackets + sc0);
             }
         }
+    }
 
-        // Add packet to frequency count.
-        packetFreq.add(time, packets);
-
-        // Fill up all "used" time windows (minimum we can do without other events).
-        final float burnScore = (float) idealPackets * (float) winDur / 1000f;
-        // Find index.
+    private static double calculateViolation(final ActionFrequency packetFreq, final long winDur,
+            final int winNum, final long totalDur, final float idealPackets, final float maxPackets,
+            final ActionFrequency burstFreq, final float burstPackets, final double burstDirect,
+            final double burstEPM, final long time, final List<String> tags) {
+        final float burnScore = idealPackets * winDur / 1000f;
         int burnStart;
         int empty = 0;
         boolean used = false;
-        for (burnStart = 1; burnStart < winNum; burnStart ++) {
+        for (burnStart = 1; burnStart < winNum; burnStart++) {
             if (packetFreq.bucketScore(burnStart) > 0f) {
-                // Evaluate whether burnStart should increment for partially filled windows.
                 if (used) {
-                    for (int j = burnStart; j < winNum; j ++) {
+                    for (int j = burnStart; j < winNum; j++) {
                         if (packetFreq.bucketScore(j) == 0f) {
                             empty += 1;
                         }
@@ -121,55 +127,48 @@ public class NetStatic {
             }
         }
 
-        // Future: burn time windows based on other activity counting, such as matching ActinFrequency with keep-alive packets.
-
-        // Adjust empty based on server side lag, this makes the check more strict.
         if (empty > 0) {
-            // Consider adding a configuration flag to skip lag adaption when running in strict mode.
-            final float lag = TickTask.getLag(totalDur, true); // Full seconds range considered.
-            // Also consider increasing the allowed maximum for extreme server-side lag conditions.
+            final float lag = TickTask.getLag(totalDur, true);
             empty = Math.min(empty, (int) Math.round((lag - 1f) * winNum));
         }
 
         final double fullCount;
         if (burnStart < winNum) {
-            // Assume all following time windows are burnt.
-            // Revisit trailing score calculation to properly account for empty buckets.
-            final float trailing = Math.max(packetFreq.trailingScore(burnStart, 1f), burnScore * (winNum - burnStart - empty));
+            final float trailing = Math.max(packetFreq.trailingScore(burnStart, 1f),
+                    burnScore * (winNum - burnStart - empty));
             final float leading = packetFreq.leadingScore(burnStart, 1f);
             fullCount = leading + trailing;
         } else {
-            // All time windows are used.
             fullCount = packetFreq.score(1f);
         }
 
-        double violation = 0.0; // Classic processing.
-        final double vEPSAcc = (double) fullCount - (double) (maxPackets * winNum * winDur / 1000f);
+        double violation = 0.0;
+        final double vEPSAcc = fullCount - (double) (maxPackets * winNum * winDur / 1000f);
         if (vEPSAcc > 0.0) {
             violation = Math.max(violation, vEPSAcc);
             tags.add("epsacc");
         }
 
-        float burst = packetFreq.bucketScore(0); // 500ms
+        float burst = packetFreq.bucketScore(0);
         if (burst > burstPackets) {
-            // Account for server-side lag "minimally".
-            burst /= TickTask.getLag(winDur, true); // First window lag.
+            burst /= TickTask.getLag(winDur, true);
             if (burst > burstPackets) {
                 final double vBurstDirect = burst - burstDirect;
                 if (vBurstDirect > 0.0) {
                     violation = Math.max(violation, vBurstDirect);
                     tags.add("burstdirect");
                 }
-                // Investigate lag adaption for burstFreq with differing window durations.
-                burstFreq.add(time, 1f); // Packet counts are float but only whole packets are expected.
-                final double vBurstEPM = (double) burstFreq.score(0f) - burstEPM * (double) (burstFreq.bucketDuration() * burstFreq.numberOfBuckets()) / 60000.0;
+                burstFreq.add(time, 1f);
+                final double vBurstEPM = (double) burstFreq.score(0f)
+                        - burstEPM * (double) (burstFreq.bucketDuration()
+                                * burstFreq.numberOfBuckets()) / 60000.0;
                 if (vBurstEPM > 0.0) {
                     violation = Math.max(violation, vBurstEPM);
                     tags.add("burstepm");
                 }
             }
         }
-        return Math.max(0.0, violation);
+        return violation;
     }
 
     @SuppressWarnings("unchecked")
