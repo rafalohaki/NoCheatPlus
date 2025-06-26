@@ -27,6 +27,7 @@ import fr.neatmonster.nocheatplus.utilities.ReflectionUtil;
 import fr.neatmonster.nocheatplus.NCPAPIProvider;
 import fr.neatmonster.nocheatplus.logging.LogManager;
 import fr.neatmonster.nocheatplus.logging.Streams;
+import fr.neatmonster.nocheatplus.logging.StaticLog;
 
 import org.bukkit.entity.Entity;
 import org.bukkit.event.player.PlayerTeleportEvent.TeleportCause;
@@ -112,7 +113,7 @@ public class Folia {
             Object taskInfo = executeMethod.invoke(syncScheduler, plugin, run, delay, period);
             return taskInfo;
         } catch (Exception e) {
-            e.printStackTrace();
+            StaticLog.logSevere(e);
         }
         return null;
     }
@@ -151,7 +152,7 @@ public class Folia {
             Object taskInfo = executeMethod.invoke(syncScheduler, plugin, run);
             return taskInfo;
         } catch (Exception e) {
-            e.printStackTrace();
+            StaticLog.logSevere(e);
         }
         return null;
     }
@@ -275,7 +276,7 @@ public class Folia {
                 //executeMethod = schedulerClass.getMethod("cancelTasks", Plugin.class);
                 //executeMethod.invoke(asyncScheduler, plugin);
             } catch (Exception e) {
-                e.printStackTrace();
+                StaticLog.logSevere(e);
             }
         }
     }
@@ -290,7 +291,7 @@ public class Folia {
             CompletableFuture<Boolean> res = (CompletableFuture<Boolean>) result;
             return res.join();
         } catch (Exception e) {
-            e.printStackTrace();
+            StaticLog.logSevere(e);
         }
         return false;
     }

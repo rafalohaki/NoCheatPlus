@@ -555,7 +555,8 @@ public class DefaultConfig extends ConfigFile {
         // More leniency features
         set(ConfPaths.MOVING_SURVIVALFLY_LENIENCY_FREEZECOUNT, 40, 1144);
         set(ConfPaths.MOVING_SURVIVALFLY_LENIENCY_FREEZEINAIR, true, 1143);
-        set(ConfPaths.MOVING_SURVIVALFLY_SETBACKPOLICY_FALLDAMAGE, true, 785);
+        // MOVING_SURVIVALFLY_SETBACKPOLICY_FALLDAMAGE -> MOVING_SURVIVALFLY_SETBACKPOLICY_APPLYFALLDAMAGE
+        set(ConfPaths.MOVING_SURVIVALFLY_SETBACKPOLICY_APPLYFALLDAMAGE, true, 785);
         set(ConfPaths.MOVING_SURVIVALFLY_SETBACKPOLICY_VOIDTOVOID, false, 1154);
         set(ConfPaths.MOVING_SURVIVALFLY_ACTIONS, "cancel log:flyfile:6:15:f" 
             + " vl>100 cancel log:survivalfly:10:11:i log:flyfile:6:15:f" 
@@ -566,7 +567,8 @@ public class DefaultConfig extends ConfigFile {
         set(ConfPaths.MOVING_SURVIVALFLY_HOVER_STEP, 5, 785);
         set(ConfPaths.MOVING_SURVIVALFLY_HOVER_TICKS, 85, 785);
         set(ConfPaths.MOVING_SURVIVALFLY_HOVER_LOGINTICKS, 60, 785);
-        set(ConfPaths.MOVING_SURVIVALFLY_HOVER_FALLDAMAGE, true, 785);
+        // MOVING_SURVIVALFLY_HOVER_FALLDAMAGE -> MOVING_SURVIVALFLY_HOVER_TAKEFALLDAMAGE
+        set(ConfPaths.MOVING_SURVIVALFLY_HOVER_TAKEFALLDAMAGE, true, 785);
         set(ConfPaths.MOVING_SURVIVALFLY_HOVER_SFVIOLATION, 200, 1154); 
         // Moving Trace - Lag compensator
         set(ConfPaths.MOVING_TRACE_MAXAGE, 30, 1154);
