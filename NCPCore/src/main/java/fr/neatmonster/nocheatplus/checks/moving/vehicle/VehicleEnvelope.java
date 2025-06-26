@@ -110,7 +110,6 @@ public class VehicleEnvelope extends Check {
     
     private final Class<?> strider;
     
-    private final Class<?> camel;
     
    /*
     *
@@ -122,7 +121,6 @@ public class VehicleEnvelope extends Check {
         Class<?> clazz = ReflectionUtil.getClass("org.bukkit.entity.AbstractHorse");
         bestHorse = clazz == null ? ReflectionUtil.getClass("org.bukkit.entity.Horse") : clazz;
         strider = ReflectionUtil.getClass("org.bukkit.entity.Strider");
-        camel = ReflectionUtil.getClass("org.bukkit.entity.Camel");
     }
 
 
@@ -364,7 +362,7 @@ public class VehicleEnvelope extends Check {
         double cap = getHDistCap(checkDetails.simplifiedType, cc, thisMove, data, debug);
         if (vehicle instanceof LivingEntity) {
             Double speed = PotionUtil.getPotionEffectAmplifier((LivingEntity) vehicle, PotionEffectType.SPEED);
-            if (camel != null && camel.isAssignableFrom(vehicle.getClass())) {
+            if (thisMove.isCamel) {
                 VehicleMoveData firstPastMove = data.vehicleMoves.getFirstPastMove();
                 double camelCap = cap;
                 if (!Double.isInfinite(speed)) camelCap *= (1 + 0.2 * (speed + 1));
@@ -567,7 +565,7 @@ public class VehicleEnvelope extends Check {
                 applyHorseSettings();
             } else if (isStrider(vehicle)) {
                 applyStriderSettings(thisMove);
-            } else if (isCamel(vehicle)) {
+            } else if (thisMove.isCamel) {
                 applyCamelSettings();
             } else if (vehicle instanceof Pig) {
                 applyPigSettings();
@@ -666,10 +664,6 @@ public class VehicleEnvelope extends Check {
 
     private boolean isStrider(final Entity vehicle) {
         return strider != null && strider.isAssignableFrom(vehicle.getClass());
-    }
-
-    private boolean isCamel(final Entity vehicle) {
-        return camel != null && camel.isAssignableFrom(vehicle.getClass());
     }
 
 
