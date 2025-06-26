@@ -150,8 +150,11 @@ public class PassengerUtilTest {
     @Test
     public void testScheduleSetPassengerDebugLogging() throws Exception {
         DummyVehicleAccess access = new DummyVehicleAccess() {
-            @Override public boolean addPassenger(Entity entity, Entity vehicle) {
-                called = true; return false; }
+            @Override
+            public boolean addPassenger(Entity entity, Entity vehicle) {
+                called = true;
+                return false;
+            }
         };
         LoggingAPI apiHandler = new LoggingAPI();
         fr.neatmonster.nocheatplus.components.NoCheatPlusAPI api = apiHandler.create();

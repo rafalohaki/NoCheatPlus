@@ -337,37 +337,45 @@ public class PassengerUtil {
         }
 
         for (final Entity passenger : originalPassengers) {
-            if (passenger == null) {
-                continue;
-            }
-            if (!passenger.isValid() || passenger.isDead() || !vWorldMatchesPWorld) {
-                if (debug) {
-                    CheckUtils.debug(player, CheckType.MOVING_VEHICLE,
-                            (!vWorldMatchesPWorld) ? "**** Prevent adding passengers to root vehicle on world change (potential exploit)"
-                                    : "Can't add passenger to vehicle: passenger is dead.");
-                }
-                continue;
-            }
-            if (passenger instanceof Player) {
-                if (teleportPlayerPassenger((Player) passenger, vehicle, location, vehicleTeleported,
-                        DataManager.getGenericInstance((Player) passenger, MovingData.class), debug)) {
-                    if (player.equals(passenger)) {
-                        result.playerTeleported = true;
-                    } else {
-                        result.otherPlayersTeleported++;
-                    }
-                }
-            } else {
-                if (Folia.teleportEntity(passenger, location, BridgeMisc.TELEPORT_CAUSE_CORRECTION_OF_POSITION)
-                        && vehicleTeleported
-                        && TrigUtil.distance(passenger.getLocation(useLoc2), vehicle.getLocation(useLoc)) < 1.5) {
-                    if (!handleVehicle.getHandle().addPassenger(passenger, vehicle) && debug) {
-                        CheckUtils.debug(player, CheckType.MOVING_VEHICLE, "Failed to add passenger after teleport.");
-                    }
-                }
-            }
+            handlePassenger(passenger, result, player, vehicle, location, debug,
+                    vWorldMatchesPWorld, vehicleTeleported, data);
         }
         return result;
+    }
+
+    private void handlePassenger(final Entity passenger, final TeleportResult result,
+                                 final Player player, final Entity vehicle, final Location location,
+                                 final boolean debug, final boolean vWorldMatchesPWorld,
+                                 final boolean vehicleTeleported, final MovingData data) {
+        if (passenger == null) {
+            return;
+        }
+        if (!passenger.isValid() || passenger.isDead() || !vWorldMatchesPWorld) {
+            if (debug) {
+                CheckUtils.debug(player, CheckType.MOVING_VEHICLE,
+                        (!vWorldMatchesPWorld)
+                                ? "**** Prevent adding passengers to root vehicle on world change (potential exploit)"
+                                : "Can't add passenger to vehicle: passenger is dead.");
+            }
+            return;
+        }
+        if (passenger instanceof Player) {
+            if (teleportPlayerPassenger((Player) passenger, vehicle, location, vehicleTeleported,
+                    DataManager.getGenericInstance((Player) passenger, MovingData.class), debug)) {
+                if (player.equals(passenger)) {
+                    result.playerTeleported = true;
+                } else {
+                    result.otherPlayersTeleported++;
+                }
+            }
+        } else if (Folia.teleportEntity(passenger, location, BridgeMisc.TELEPORT_CAUSE_CORRECTION_OF_POSITION)
+                && vehicleTeleported
+                && TrigUtil.distance(passenger.getLocation(useLoc2), vehicle.getLocation(useLoc)) < 1.5) {
+            if (!handleVehicle.getHandle().addPassenger(passenger, vehicle) && debug) {
+                CheckUtils.debug(player, CheckType.MOVING_VEHICLE,
+                        "Failed to add passenger after teleport.");
+            }
+        }
     }
 
     private void logTeleportResult(final Player player, final Location location, final boolean debug,
