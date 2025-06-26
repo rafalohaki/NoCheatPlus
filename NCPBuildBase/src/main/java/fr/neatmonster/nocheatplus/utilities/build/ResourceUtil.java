@@ -23,6 +23,8 @@ import java.net.URL;
 import java.security.CodeSource;
 import java.util.Map;
 
+import fr.neatmonster.nocheatplus.utilities.build.URLUtil;
+
 public class ResourceUtil {
 
     private ResourceUtil() {
@@ -46,8 +48,7 @@ public class ResourceUtil {
             return null;
         }
         final String csPath = codeSource.getLocation().getPath();
-        final String csLower = csPath.toLowerCase();
-        if (!csLower.endsWith(".jar") && !csLower.contains(".jar!")) {
+        if (!URLUtil.isJarURL(csPath)) {
             return null;
         }
         if (!classPath.startsWith("jar")) {

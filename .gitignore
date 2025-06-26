@@ -88,5 +88,5 @@ nb-configuration.xml
 dummy/
 
 !NCPBuildBase/src/test/java/fr/neatmonster/nocheatplus/utilities/build/ResourceUtilTest.java
-
-essa.patch
+!NCPBuildBase/src/main/java/fr/neatmonster/nocheatplus/utilities/build/URLUtil.java
+!NCPBuildBase/src/test/java/fr/neatmonster/nocheatplus/utilities/build/URLUtilTest.java
