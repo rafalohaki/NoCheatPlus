@@ -84,6 +84,9 @@ public class BlockInteractData extends ACheckData {
      */
     private final Set<CheckType> consumedChecks = new HashSet<CheckType>();
 
+    /** Reusable result instance for block interaction checks. */
+    private final CheckResult checkResult = new CheckResult();
+
     /**
      * Set last interacted block (coordinates, type, tick). Also resets the
      * passed checks.
@@ -340,6 +343,43 @@ public class BlockInteractData extends ACheckData {
      */
     public void setLastAllowUseBlock(final boolean allowUseBlock) {
         this.lastAllowUseBlock = allowUseBlock;
+    }
+
+    /**
+     * Access the reusable check result instance.
+     *
+     * @return the mutable {@link CheckResult}
+     */
+    public CheckResult getCheckResult() {
+        return checkResult;
+    }
+
+    /** Simple mutable result for block interaction checks. */
+    public static final class CheckResult {
+
+        private boolean cancelled;
+        private boolean preventUseItem;
+
+        public boolean isCancelled() {
+            return cancelled;
+        }
+
+        public void setCancelled(final boolean cancelled) {
+            this.cancelled = cancelled;
+        }
+
+        public boolean isPreventUseItem() {
+            return preventUseItem;
+        }
+
+        public void setPreventUseItem(final boolean preventUseItem) {
+            this.preventUseItem = preventUseItem;
+        }
+
+        public void reset() {
+            cancelled = false;
+            preventUseItem = false;
+        }
     }
 
 }
