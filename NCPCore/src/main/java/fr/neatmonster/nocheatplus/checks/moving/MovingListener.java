@@ -688,75 +688,31 @@ public class MovingListener extends CheckListener implements TickListener, IRemo
         // (e.g. checkPastStateHorizontalPush).
 
         debugOutput(player, moveInfo, cc, debug);
-        
 
-        ////////////////////////////////////////////////////
-        // Check for illegal move and bounding box etc.   //
-        ///////////////////////////////////////////////////
+        // 1: Illegal coordinate check.
         if (handleIllegalCoordinates(player, event, data, cc, moveInfo)) {
             return true;
         }
-        
 
-        /////////////////////////////////////
-        // Check for location consistency. //
-        /////////////////////////////////////
+        // 2: Location consistency.
         newTo = validateLocationConsistency(player, from, data, cc);
 
-
-        //////////////////////////////////////////////
-        // Check for sprinting (assumeSprint)       //
-        //////////////////////////////////////////////
+        // 3: Sprinting state update.
         updateSprintingState(player, time, data, cc);
-        
 
-        /////////////////////////////////////
-        // Prepare locations for use.      //
-        /////////////////////////////////////
-        // Block flags might not be needed if neither sf nor passable get checked.
-        final PlayerLocation pFrom, pTo;
-        pFrom = moveInfo.from;
-        pTo = moveInfo.to;
-        
+        // 4: Prepare locations and vehicle state.
+        final PlayerLocation pFrom = moveInfo.from;
+        final PlayerLocation pTo = moveInfo.to;
+        prepareMoveLocations(player, pFrom, pTo, data, cc, pData, debug);
 
-        handlePowderSnow(player, pFrom, pTo, cc, debug);
+        // 5: Initialize move data.
+        initCurrentMove(thisMove, pFrom, pTo, multiMoveCount);
 
-        resetWindChargeImpulse(player, pFrom, data);
+        // 6: Jump amplifier.
+        final double jumpAmplifier = updateJumpAmplifier(player, data);
 
-        //////////////////////////////////////////////
-        // HOT FIX - for VehicleLeaveEvent missing. //
-        //////////////////////////////////////////////
-        if (data.wasInVehicle) {
-            vehicleChecks.onVehicleLeaveMiss(player, data, cc, pData);
-        }
-
-
-        ////////////////////////////////////
-        // Set some data for this move.   //
-        ////////////////////////////////////
-        thisMove.set(pFrom, pTo);
-        if (multiMoveCount > 0) {
-            thisMove.multiMoveCount = multiMoveCount;
-        }
-    
-
-        ////////////////////////////
-        // Potion effect "Jump".  //
-        ////////////////////////////
-        // Jump amplifier should be set in PlayerMoveData, and/or only get updated for lift off (?).
-        // same for speed (once medium is introduced).
-        final double jumpAmplifier = aux.getJumpAmplifier(player);
-        if (jumpAmplifier > data.jumpAmplifier) {
-            data.jumpAmplifier = jumpAmplifier;
-        }
-
-
-        ////////////////////////////////////////////////
-        // Velocity tick (decrease + invalidation).   //
-        ///////////////////////////////////////////////
-        // Rework to generic (?) queued velocity entries: activation + invalidation
-        final int tick = TickTask.getTick();
-        applyVelocityAdjustments(data, cc, tick);
+        // 7: Velocity tick.
+        final int tick = updateVelocityTick(data, cc);
 
 
         ////////////////////////////////////
@@ -1009,6 +965,47 @@ public class MovingListener extends CheckListener implements TickListener, IRemo
                 data.jumpAmplifier = jumpAmplifier;
             }
         }
+    }
+
+    private void prepareMoveLocations(final Player player, final PlayerLocation pFrom,
+            final PlayerLocation pTo, final MovingData data, final MovingConfig cc,
+            final IPlayerData pData, final boolean debug) {
+        if (player == null || pFrom == null || pTo == null || data == null || cc == null || pData == null) {
+            return;
+        }
+        handlePowderSnow(player, pFrom, pTo, cc, debug);
+        resetWindChargeImpulse(player, pFrom, data);
+        if (data.wasInVehicle) {
+            vehicleChecks.onVehicleLeaveMiss(player, data, cc, pData);
+        }
+    }
+
+    private void initCurrentMove(final PlayerMoveData move, final PlayerLocation pFrom,
+            final PlayerLocation pTo, final int multiMoveCount) {
+        if (move == null || pFrom == null || pTo == null) {
+            return;
+        }
+        move.set(pFrom, pTo);
+        if (multiMoveCount > 0) {
+            move.multiMoveCount = multiMoveCount;
+        }
+    }
+
+    private double updateJumpAmplifier(final Player player, final MovingData data) {
+        if (player == null || data == null) {
+            return 0.0;
+        }
+        final double amplifier = aux.getJumpAmplifier(player);
+        if (amplifier > data.jumpAmplifier) {
+            data.jumpAmplifier = amplifier;
+        }
+        return amplifier;
+    }
+
+    private int updateVelocityTick(final MovingData data, final MovingConfig cc) {
+        final int tick = TickTask.getTick();
+        applyVelocityAdjustments(data, cc, tick);
+        return tick;
     }
 
     private PreCheckData runPreChecks(final Player player, final Location from, final Location to,
