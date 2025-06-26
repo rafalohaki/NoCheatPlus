@@ -113,20 +113,9 @@ public class InventoryMove extends Check {
     
             final boolean[] cancelHolder = new boolean[1];
 
-            if (handleUsingItem(mData, isMerchant, tags)) {
-                violation = true;
-            } else if (handleSwimming(player, thisMove, tags)) {
-                violation = true;
-            } else if (handleDeadOrSleeping(player, tags)) {
-                violation = true;
-            } else if (handleSprinting(player, fullLiquidMove, movingOnSurface, cc, pData, tags, cancelHolder)) {
-                violation = true;
-            } else if (handleSneaking(player, tags)) {
-                violation = true;
-            } else if (handleActiveMoving(player, data, mData, thisMove, lastMove, pastMove3,
-                    minHDistance, currentEvent, isCollidingWithEntities, fullLiquidMove, movingOnSurface, tags)) {
-                violation = true;
-            }
+            violation = determineViolation(player, data, cc, pData, mData, thisMove, lastMove,
+                    pastMove3, minHDistance, currentEvent, isCollidingWithEntities,
+                    fullLiquidMove, movingOnSurface, isMerchant, tags, cancelHolder);
 
             cancel = cancelHolder[0];
     
@@ -143,6 +132,35 @@ public class InventoryMove extends Check {
         }
         }
         return cancel;
+    }
+
+    private boolean determineViolation(final Player player, final InventoryData data, final InventoryConfig cc,
+            final IPlayerData pData, final MovingData mData, final PlayerMoveData thisMove,
+            final PlayerMoveData lastMove, final PlayerMoveData pastMove3, final double minHDistance,
+            final long currentEvent, final boolean isCollidingWithEntities, final boolean fullLiquidMove,
+            final boolean movingOnSurface, final boolean isMerchant, final List<String> tags,
+            final boolean[] cancelHolder) {
+
+        if (handleUsingItem(mData, isMerchant, tags)) {
+            return true;
+        }
+        if (handleSwimming(player, thisMove, tags)) {
+            return true;
+        }
+        if (handleDeadOrSleeping(player, tags)) {
+            return true;
+        }
+        if (handleSprinting(player, fullLiquidMove, movingOnSurface, cc, pData, tags, cancelHolder)) {
+            return true;
+        }
+        if (handleSneaking(player, tags)) {
+            return true;
+        }
+        if (handleActiveMoving(player, data, mData, thisMove, lastMove, pastMove3, minHDistance,
+                currentEvent, isCollidingWithEntities, fullLiquidMove, movingOnSurface, tags)) {
+            return true;
+        }
+        return false;
     }
 
     private boolean handleUsingItem(final MovingData mData, final boolean isMerchant, final List<String> tags) {
