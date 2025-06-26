@@ -44,14 +44,26 @@ public class TestBubbleWebDrag {
         setupAPI();
     }
 
+    // Helper to centralize reflective access
+    private Method getBubbleWebDragMethod() throws Exception {
+        Method m = SurvivalFly.class.getDeclaredMethod("vDistBubbleWebDrag", double.class, double.class);
+        m.setAccessible(true);
+        return m;
+    }
+
+    // Computes the bubble-web descend limit based on Magic constants
+    private double calculateExpectedLimit() {
+        return -fr.neatmonster.nocheatplus.checks.moving.magic.Magic.bubbleStreamDescend
+                * fr.neatmonster.nocheatplus.checks.moving.magic.Magic.FRICTION_MEDIUM_WATER;
+    }
+
     @Test
     public void testDragViolation() throws Exception {
         SurvivalFly sf = new SurvivalFly();
-        Method m = SurvivalFly.class.getDeclaredMethod("vDistBubbleWebDrag", double.class, double.class);
-        m.setAccessible(true);
+        Method m = getBubbleWebDragMethod();
+        // Velocity -0.5 exceeds the bubble stream limit when combined with prior velocity -0.3
         double[] res = (double[]) m.invoke(sf, -0.5, -0.3);
-        double limit = -fr.neatmonster.nocheatplus.checks.moving.magic.Magic.bubbleStreamDescend
-                * fr.neatmonster.nocheatplus.checks.moving.magic.Magic.FRICTION_MEDIUM_WATER;
+        double limit = calculateExpectedLimit();
         assertEquals(limit, res[0], 1e-6);
         assertEquals(Math.abs(-0.5 - limit), res[1], 1e-6);
     }
@@ -59,11 +71,10 @@ public class TestBubbleWebDrag {
     @Test
     public void testDragNoViolation() throws Exception {
         SurvivalFly sf = new SurvivalFly();
-        Method m = SurvivalFly.class.getDeclaredMethod("vDistBubbleWebDrag", double.class, double.class);
-        m.setAccessible(true);
+        Method m = getBubbleWebDragMethod();
+        // Velocity -0.47 remains within the bubble stream limit for prior velocity -0.3
         double[] res = (double[]) m.invoke(sf, -0.47, -0.3);
-        double limit = -fr.neatmonster.nocheatplus.checks.moving.magic.Magic.bubbleStreamDescend
-                * fr.neatmonster.nocheatplus.checks.moving.magic.Magic.FRICTION_MEDIUM_WATER;
+        double limit = calculateExpectedLimit();
         assertEquals(limit, res[0], 1e-6);
         assertEquals(0.0, res[1], 1e-6);
     }

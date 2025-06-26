@@ -3073,24 +3073,28 @@ public class SurvivalFly extends Check {
                                      final MovingData data) {
 
         final double yDistance = thisMove.yDistance;
+        double vAllowedDistance;
+        double vDistanceAboveLimit;
+
         if (thisMove.from.draggedByBubbleStream) {
-            return vDistBubbleWebDrag(yDistance, lastMove.yDistance);
-        }
-        final double vAllowedDistance;
+            final double[] res = vDistBubbleWebDrag(yDistance, lastMove.yDistance);
+            vAllowedDistance = res[0];
+            vDistanceAboveLimit = res[1];
+        } else {
+            // Lenient on first move(s) in web.
+            if (data.insideMediumCount < 4 && lastMove.yDistance <= 0.0) {
+                vAllowedDistance = lastMove.yDistance * Magic.FRICTION_MEDIUM_AIR - Magic.GRAVITY_MAX;
+            }
+            // Ordinary.
+            // We could be stricter but spamming WASD in a tower of webs results in random falling speed changes: ca. observed -0.058 (!? Mojang...)
+            else {
+                vAllowedDistance = -Magic.GRAVITY_MIN * Magic.FRICTION_MEDIUM_AIR;
+            }
+            vDistanceAboveLimit = yDistance < vAllowedDistance ? Math.abs(yDistance - vAllowedDistance) : 0.0;
 
-        // Lenient on first move(s) in web.
-        if (data.insideMediumCount < 4 && lastMove.yDistance <= 0.0) {
-            vAllowedDistance = lastMove.yDistance * Magic.FRICTION_MEDIUM_AIR - Magic.GRAVITY_MAX;
-        }
-        // Ordinary.
-        // We could be stricter but spamming WASD in a tower of webs results in random falling speed changes: ca. observed -0.058 (!? Mojang...)
-        else {
-            vAllowedDistance = -Magic.GRAVITY_MIN * Magic.FRICTION_MEDIUM_AIR;
-        }
-        final double vDistanceAboveLimit = yDistance < vAllowedDistance ? Math.abs(yDistance - vAllowedDistance) : 0.0;
-
-        if (vDistanceAboveLimit > 0.0) {
-            tags.add("vwebdesc");
+            if (vDistanceAboveLimit > 0.0) {
+                tags.add("vwebdesc");
+            }
         }
         return new double[]{vAllowedDistance, vDistanceAboveLimit};
     }
