@@ -74,6 +74,7 @@ import fr.neatmonster.nocheatplus.utilities.InventoryUtil;
 import fr.neatmonster.nocheatplus.utilities.ReflectionUtil;
 import fr.neatmonster.nocheatplus.utilities.map.BlockProperties;
 import fr.neatmonster.nocheatplus.utilities.map.MaterialUtil;
+import fr.neatmonster.nocheatplus.utilities.TickTask;
 
 /**
  * Central location to listen to events that are relevant for the inventory checks.
@@ -384,8 +385,10 @@ public class InventoryListener  extends CheckListener implements JoinLeaveListen
 
     /**
      * Debug inventory classes. Contains information about classes, to indicate
-     * if cross-plugin compatibility issues can be dealt with easily.
-     * 
+     * if cross-plugin compatibility issues can be dealt with easily. The output
+     * includes the current time in milliseconds and, if available, the current
+     * server tick.
+     *
      * @param player
      * @param slot
      * @param event
@@ -397,7 +400,12 @@ public class InventoryListener  extends CheckListener implements JoinLeaveListen
         // Consider logging only where different from expected (CraftXY, more/other viewer than player).
 
         final StringBuilder builder = new StringBuilder(512);
-        builder.append("Inventory click: slot: " + slot);
+        builder.append("Inventory click: slot: ").append(slot);
+        builder.append(" , Time: ").append(System.currentTimeMillis());
+        final int tick = TickTask.getTick();
+        if (tick > 0) {
+            builder.append(" , Tick: ").append(tick);
+        }
 
         // Viewers.
         builder.append(" , Viewers: ");
