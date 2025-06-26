@@ -416,7 +416,7 @@ public class PlayerCheckTypeTree extends CheckTypeTree<PlayerCheckTypeTreeNode>{
     private boolean isExemptedAsynchronous(final PlayerCheckTypeTreeNode node, final ExemptionContext context) {
         lock.lock();
         try {
-            return node.isExemptedPrimaryThread(context);
+            return node.isExemptedAsynchronous(context);
         } finally {
             lock.unlock();
         }
