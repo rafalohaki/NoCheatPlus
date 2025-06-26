@@ -145,8 +145,8 @@ public class SurvivalFly extends Check {
                                                double freedom) {}
 
     /** Result structure for vertical movement handling. */
-    private static record VerticalDistance(double allowed,
-                                           double excess) {}
+    private static record VerticalDistance(double allowedDistance,
+                                           double distanceAboveLimit) {}
 
     /**
      * Internal container for values initialized at the start of a check.
@@ -355,8 +355,8 @@ public class SurvivalFly extends Check {
         final VerticalDistance vResult = computeVerticalMovement(player, from, to,
                 thisMove, lastMove, fromOnGround, toOnGround, resetFrom, resetTo,
                 yDistance, hDistanceAboveLimit, now, multiMoveCount, data, cc, pData);
-        double vAllowedDistance = vResult.allowed();
-        double vDistanceAboveLimit = vResult.excess();
+        double vAllowedDistance = vResult.allowedDistance();
+        double vDistanceAboveLimit = vResult.distanceAboveLimit();
 
 
 
@@ -366,8 +366,8 @@ public class SurvivalFly extends Check {
         if (useBlockChangeTracker && vDistanceAboveLimit > 0.0) {
             VerticalDistance blockMoveResult = getVerticalBlockMoveResult(yDistance, from, to, tick, data);
             if (blockMoveResult != null) {
-                vAllowedDistance = blockMoveResult.allowed();
-                vDistanceAboveLimit = blockMoveResult.excess();
+                vAllowedDistance = blockMoveResult.allowedDistance();
+                vDistanceAboveLimit = blockMoveResult.distanceAboveLimit();
             }
         }
 
@@ -746,7 +746,8 @@ public class SurvivalFly extends Check {
     /**
      * Compute allowances and violations for vertical movement.
      *
-     * @return array containing the allowed distance and the distance above the limit
+     * @return vertical movement result containing the allowed distance and the
+     *         distance above the limit
      */
     private VerticalDistance computeVerticalMovement(final Player player, final PlayerLocation from,
                                              final PlayerLocation to, final PlayerMoveData thisMove,
