@@ -121,6 +121,8 @@ public class MCAccessBukkitModern extends MCAccessBukkit {
     private static final BukkitShapeModel MODEL_GROUND_HEAD = BukkitStatic.ofInsetAndHeight(0.25, 0.5);
     private static final BukkitShapeModel MODEL_SINGLE_CHEST = BukkitStatic.ofInsetAndHeight(0.0625, 0.875);
     private static final BukkitShapeModel MODEL_HONEY_BLOCK = BukkitStatic.ofInsetAndHeight(0.0625, 0.9375);
+    /** Bounds for cactus blocks: inset by 1/16 and full height. */
+    private static final BukkitShapeModel MODEL_CACTUS = BukkitStatic.ofInsetAndHeight(0.0625, 1.0);
     private static final BukkitShapeModel MODEL_SCULK_SHRIEKER = BukkitStatic.ofInsetAndHeight(0.0, 0.5);
 
     // Static blocks with full height sorted by inset.
@@ -299,7 +301,7 @@ public class MCAccessBukkitModern extends MCAccessBukkit {
         addModel(Material.LADDER, MODEL_LADDER);
         addModel(Material.BREWING_STAND, MODEL_BREWING_STAND);
         addModel(Material.DRAGON_EGG, MODEL_INSET16_1_HEIGHT100);
-        addModel(Material.CACTUS, MODEL_HONEY_BLOCK);
+        addModel(Material.CACTUS, MODEL_CACTUS);
     }
 
     private void registerMiscModelCollections() {
