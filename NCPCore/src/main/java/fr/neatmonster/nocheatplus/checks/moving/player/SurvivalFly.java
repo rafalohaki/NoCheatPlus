@@ -41,6 +41,7 @@ import fr.neatmonster.nocheatplus.checks.moving.magic.Magic;
 import fr.neatmonster.nocheatplus.checks.moving.magic.MagicBunny;
 import fr.neatmonster.nocheatplus.checks.moving.magic.AirWorkarounds;
 import fr.neatmonster.nocheatplus.checks.moving.magic.LiquidWorkarounds;
+import fr.neatmonster.nocheatplus.checks.moving.helper.BubbleWebHandler;
 import fr.neatmonster.nocheatplus.checks.moving.model.LiftOffEnvelope;
 import fr.neatmonster.nocheatplus.checks.moving.model.PlayerMoveData;
 import fr.neatmonster.nocheatplus.checks.moving.util.AuxMoving;
@@ -3047,7 +3048,7 @@ public class SurvivalFly extends Check {
         }
         // Bubble columns can slowly push the player upwards through the web.
         else if (from.isInBubbleStream() && !from.isDraggedByBubbleStream() && yDistance < Magic.bubbleStreamAscend) {
-            vAllowedDistance = lastMove.yDistance * Magic.FRICTION_MEDIUM_WATER;
+            vAllowedDistance = BubbleWebHandler.computeAscendSpeed(lastMove.yDistance);
             vDistanceAboveLimit = yDistance - vAllowedDistance;
             tags.add("bubbleweb");
         }
