@@ -97,6 +97,87 @@ public class VehicleEnvelope extends Check {
 
     }
 
+    private static enum VehicleBehavior {
+        BOAT {
+            @Override
+            void apply(final VehicleEnvelope env, final Entity vehicle,
+                        final VehicleMoveInfo info, final VehicleMoveData data) {
+                env.applyBoatSettings();
+            }
+        },
+        MINECART {
+            @Override
+            void apply(final VehicleEnvelope env, final Entity vehicle,
+                        final VehicleMoveInfo info, final VehicleMoveData data) {
+                env.applyMinecartSettings(info, data);
+            }
+        },
+        HORSE {
+            @Override
+            void apply(final VehicleEnvelope env, final Entity vehicle,
+                        final VehicleMoveInfo info, final VehicleMoveData data) {
+                env.applyHorseSettings();
+            }
+        },
+        STRIDER {
+            @Override
+            void apply(final VehicleEnvelope env, final Entity vehicle,
+                        final VehicleMoveInfo info, final VehicleMoveData data) {
+                env.applyStriderSettings(data);
+            }
+        },
+        CAMEL {
+            @Override
+            void apply(final VehicleEnvelope env, final Entity vehicle,
+                        final VehicleMoveInfo info, final VehicleMoveData data) {
+                env.applyCamelSettings();
+            }
+        },
+        PIG {
+            @Override
+            void apply(final VehicleEnvelope env, final Entity vehicle,
+                        final VehicleMoveInfo info, final VehicleMoveData data) {
+                env.applyPigSettings();
+            }
+        },
+        GENERIC {
+            @Override
+            void apply(final VehicleEnvelope env, final Entity vehicle,
+                        final VehicleMoveInfo info, final VehicleMoveData data) {
+                env.applyGenericSettings(data.vehicleType);
+            }
+        };
+
+        abstract void apply(VehicleEnvelope env, Entity vehicle,
+                             VehicleMoveInfo info, VehicleMoveData data);
+
+        static VehicleBehavior resolve(final Entity vehicle,
+                                        final VehicleMoveData move,
+                                        final VehicleEnvelope env) {
+            if (vehicle != null) {
+                if (MaterialUtil.isBoat(vehicle.getType())) {
+                    return BOAT;
+                }
+                if (vehicle instanceof Minecart) {
+                    return MINECART;
+                }
+                if (move.isCamel) {
+                    return CAMEL;
+                }
+                if (env.isHorse(vehicle)) {
+                    return HORSE;
+                }
+                if (env.isStrider(vehicle)) {
+                    return STRIDER;
+                }
+                if (vehicle instanceof Pig) {
+                    return PIG;
+                }
+            }
+            return GENERIC;
+        }
+    }
+
     /** Tags for checks. */
     private final List<String> tags = new LinkedList<String>();
 
@@ -556,26 +637,9 @@ public class VehicleEnvelope extends Check {
         checkDetails.reset();
         setBasicMediumState(thisMove);
 
-        if (vehicle != null) {
-            if (MaterialUtil.isBoat(vehicle.getType())) {
-                applyBoatSettings();
-            } else if (vehicle instanceof Minecart) {
-                applyMinecartSettings(moveInfo, thisMove);
-            } else if (isHorse(vehicle)) {
-                applyHorseSettings();
-            } else if (isStrider(vehicle)) {
-                applyStriderSettings(thisMove);
-            } else if (thisMove.isCamel) {
-                applyCamelSettings();
-            } else if (vehicle instanceof Pig) {
-                applyPigSettings();
-            } else {
-                checkDetails.simplifiedType = thisMove.vehicleType;
-            }
-        } else {
-            checkDetails.simplifiedType = thisMove.vehicleType;
-        }
-
+        VehicleBehavior behavior = VehicleBehavior.resolve(vehicle, thisMove, this);
+        behavior.apply(this, vehicle, moveInfo, thisMove);
+        
         applyJumpSettings();
         applyClimbSettings(thisMove);
     }
@@ -637,6 +701,10 @@ public class VehicleEnvelope extends Check {
         checkDetails.canJump = false;
         checkDetails.canStepUpBlock = true;
         checkDetails.canClimb = true;
+    }
+
+    private void applyGenericSettings(final EntityType type) {
+        checkDetails.simplifiedType = type;
     }
 
     private void applyJumpSettings() {
