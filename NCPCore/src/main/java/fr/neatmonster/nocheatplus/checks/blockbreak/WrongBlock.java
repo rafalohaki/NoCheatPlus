@@ -35,10 +35,11 @@ public class WrongBlock extends Check {
      * Check if the player destroys another block than interacted with last.<br>
      * This does occasionally trigger for players that destroy grass or snow, 
      * probably due to packet delaying issues for insta breaking.
-     * @param player
-     * @param block
-     * @param data 
-     * @param cc 
+     * @param player the acting player, may be {@code null}
+     * @param block the targeted block, may be {@code null}
+     * @param data runtime data for this check
+     * @param cc configuration settings for this check
+     * @param pData aggregated player data
      * @return {@code true} if the event should be cancelled
      */
 
