@@ -33,7 +33,7 @@ public class BukkitStatic implements BukkitShapeModel {
      * @return New instance.
      */
     public static BukkitStatic ofHeight(double height) {
-        return ofInsetAndHeight(0.0, height);
+        return ofInsetAndHeight(0.0, Math.min(height, 1.0));
     }
 
     /**
@@ -44,7 +44,8 @@ public class BukkitStatic implements BukkitShapeModel {
      * @return New instance.
      */
     public static BukkitStatic ofInsetAndHeight(double xzInset, double height) {
-        return ofBounds(xzInset, 0.0, xzInset, 1.0 - xzInset, height, 1.0 - xzInset);
+        double capped = Math.min(height, 1.0);
+        return ofBounds(xzInset, 0.0, xzInset, 1.0 - xzInset, capped, 1.0 - xzInset);
     }
 
     /**

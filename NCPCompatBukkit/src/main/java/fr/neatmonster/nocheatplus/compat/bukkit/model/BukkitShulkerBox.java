@@ -34,7 +34,7 @@ public class BukkitShulkerBox implements BukkitShapeModel {
 
         if (state instanceof ShulkerBox) {
             if (!((ShulkerBox) state).getInventory().getViewers().isEmpty()) {
-                return new double[] {0.0, 0.0, 0.0, 1.0, 1.5, 1.0};
+                return new double[] {0.0, 0.0, 0.0, 1.0, Math.min(1.5, 1.0), 1.0};
             }
         }
         return new double[] {0.0, 0.0, 0.0, 1.0, 1.0, 1.0};
