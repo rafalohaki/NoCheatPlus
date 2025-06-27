@@ -72,18 +72,18 @@ public class NetStatic {
         final long tDiff = time - packetFreq.lastAccess();
         if (tDiff >= winDur && tDiff < totalDur) {
             // There will be some shift, so check if to relax, only if there could be some congestion. 
-            float sc0 = packetFreq.bucketScore(0);
-            if (sc0 > maxPackets) { // Clarify ideal versus maximum packet counts.
+            float firstBucketScore = packetFreq.bucketScore(0);
+            if (firstBucketScore > maxPackets) { // Clarify ideal versus maximum packet counts.
                 // Keep in mind potential burst-to-burst exploits.
-                sc0 -= maxPackets; // Count this down.
+                firstBucketScore -= maxPackets; // Count this down.
                 for (int i = 1; i < winNum; i++) {
-                    final float sci = packetFreq.bucketScore(i);
-                    if (sci < maxPackets) {
+                    final float currentBucketScore = packetFreq.bucketScore(i);
+                    if (currentBucketScore < maxPackets) {
                         // Smoothen, using following empty spots including one occupied spot at most..
-                        float consume = Math.min(sc0, maxPackets - sci);
-                        sc0 -= consume;
-                        packetFreq.setBucket(i, sci + consume);
-                        if (sci > 0f) {
+                        float consume = Math.min(firstBucketScore, maxPackets - currentBucketScore);
+                        firstBucketScore -= consume;
+                        packetFreq.setBucket(i, currentBucketScore + consume);
+                        if (currentBucketScore > 0f) {
                             // Only allow relaxing "into" the next occupied spot.
                             break;
                         }
@@ -92,7 +92,7 @@ public class NetStatic {
                     }
                 }
                 // Finally adjust the first bucket score.
-                packetFreq.setBucket(0, maxPackets + sc0);
+                packetFreq.setBucket(0, maxPackets + firstBucketScore);
             }
         }
 
