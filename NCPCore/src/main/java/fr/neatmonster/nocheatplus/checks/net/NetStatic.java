@@ -48,21 +48,27 @@ public class NetStatic {
     static BurnInfo computeBurnInfo(final ActionFrequency packetFreq) {
         final int winNum = packetFreq.numberOfBuckets();
         int burnStart = winNum;
-        int empty = 0;
-        boolean firstUsed = false;
-        boolean counting = false;
+        boolean foundFirst = false;
         for (int i = 1; i < winNum; i++) {
             if (packetFreq.bucketScore(i) > 0f) {
-                if (!firstUsed) {
-                    firstUsed = true;
-                } else if (!counting) {
+                if (!foundFirst) {
+                    foundFirst = true;
+                } else {
                     burnStart = i;
-                    counting = true;
+                    break;
                 }
-            } else if (counting) {
-                empty++;
             }
         }
+
+        int empty = 0;
+        if (burnStart < winNum) {
+            for (int i = burnStart + 1; i < winNum; i++) {
+                if (packetFreq.bucketScore(i) <= 0f) {
+                    empty++;
+                }
+            }
+        }
+
         return new BurnInfo(burnStart, empty);
     }
 
