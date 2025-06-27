@@ -51,6 +51,7 @@ public final class ElytraBoostHandler {
         mData.fireworksBoostDuration = ticks;
         mData.fireworksBoostTickNeedCheck = ticks - 1;
         mData.fireworksBoostTickExpire = tick + ticks;
+        mData.hasFireworkBoost = true;
         logBoostEvent(context.player(), "started", tick, ticks);
         return true;
     }

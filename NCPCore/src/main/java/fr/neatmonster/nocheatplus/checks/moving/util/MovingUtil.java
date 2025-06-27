@@ -191,8 +191,8 @@ public class MovingUtil {
          */
 
         // Only the web can stop a player who isn't propelled by a rocket.
-        return data.fireworksBoostDuration > 0 || !BlockProperties.collides(fromLocation.getBlockCache(), 
-                fromLocation.getMinX(), fromLocation.getMinY(), fromLocation.getMinZ(), 
+        return data.hasFireworkBoost || !BlockProperties.collides(fromLocation.getBlockCache(),
+                fromLocation.getMinX(), fromLocation.getMinY(), fromLocation.getMinZ(),
                 fromLocation.getMaxX(), fromLocation.getMinY() + 0.6, fromLocation.getMaxZ(),
                 BlockFlags.F_COBWEB);
     }

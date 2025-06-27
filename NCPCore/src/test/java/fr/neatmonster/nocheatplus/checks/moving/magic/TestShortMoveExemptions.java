@@ -52,6 +52,7 @@ public class TestShortMoveExemptions {
         WorkaroundSet ws = createWorkaroundSet();
         MovingData data = newData(ws);
         data.fireworksBoostDuration = 5;
+        data.hasFireworkBoost = true;
         data.keepfrictiontick = -1;
         PlayerMoveData lastMove = new PlayerMoveData();
         lastMove.toIsValid = true;

@@ -221,6 +221,8 @@ public class MovingData extends ACheckData implements IDataOnRemoveSubCheckData,
     public int fireworksBoostTickNeedCheck = 0;
     /** Expire at this tick. */
     public int fireworksBoostTickExpire = 0;
+    /** Quick access flag for an active firework boost. */
+    public boolean hasFireworkBoost = false;
 
     // *----------Data of the MorePackets check----------*
     /** Packet frequency count. */
@@ -942,8 +944,9 @@ public class MovingData extends ACheckData implements IDataOnRemoveSubCheckData,
         // Velocity
         removeAllVelocity();
         // Elytra boost best fits velocity / effects.
-        fireworksBoostDuration = 0; 
+        fireworksBoostDuration = 0;
         fireworksBoostTickExpire = 0;
+        hasFireworkBoost = false;
         // Horizontal buffer.
         sfHorizontalBuffer = 0.0;
     }
