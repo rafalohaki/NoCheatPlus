@@ -33,8 +33,16 @@ import net.minecraft.server.v1_10_R1.EntityShulker;
 public class BlockCacheSpigotCB1_10_R1 extends BlockCache {
 
     protected net.minecraft.server.v1_10_R1.World world;
-    
+
     protected World bukkitWorld;
+
+    private net.minecraft.server.v1_10_R1.Entity toNmsEntity(final Entity entity) {
+        if (!(entity instanceof CraftEntity)) {
+            throw new IllegalArgumentException("Expected CraftEntity, got "
+                    + (entity == null ? "null" : entity.getClass().getName()));
+        }
+        return ((CraftEntity) entity).getHandle();
+    }
 
     public BlockCacheSpigotCB1_10_R1(World world) {
         setAccess(world);
@@ -99,7 +107,7 @@ public class BlockCacheSpigotCB1_10_R1 extends BlockCache {
         try{
             // Find some simplification!
 
-            final net.minecraft.server.v1_10_R1.Entity mcEntity  = ((CraftEntity) entity).getHandle();
+            final net.minecraft.server.v1_10_R1.Entity mcEntity = toNmsEntity(entity);
 
             final AxisAlignedBB box = new AxisAlignedBB(minX, minY, minZ, maxX, maxY, maxZ);
             @SuppressWarnings("rawtypes")

@@ -36,6 +36,14 @@ public class BlockCacheCBDev extends BlockCache {
 
     protected World bukkitWorld;
 
+    private net.minecraft.server.v1_12_R1.Entity toNmsEntity(final Entity entity) {
+        if (!(entity instanceof CraftEntity)) {
+            throw new IllegalArgumentException("Expected CraftEntity, got "
+                    + (entity == null ? "null" : entity.getClass().getName()));
+        }
+        return ((CraftEntity) entity).getHandle();
+    }
+
     public BlockCacheCBDev(World world) {
         setAccess(world);
     }
@@ -93,7 +101,7 @@ public class BlockCacheCBDev extends BlockCache {
         try{
             // Potentially simplify this code path.
 
-            final net.minecraft.server.v1_12_R1.Entity mcEntity  = ((CraftEntity) entity).getHandle();
+            final net.minecraft.server.v1_12_R1.Entity mcEntity = toNmsEntity(entity);
 
             final AxisAlignedBB box = new AxisAlignedBB(minX, minY, minZ, maxX, maxY, maxZ);
             @SuppressWarnings("rawtypes")
