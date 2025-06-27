@@ -36,6 +36,36 @@ import fr.neatmonster.nocheatplus.worlds.WorldFactoryArgument;
  */
 public class NetStatic {
 
+    static class BurnInfo {
+        final int burnStart;
+        final int empty;
+        BurnInfo(int burnStart, int empty) {
+            this.burnStart = burnStart;
+            this.empty = empty;
+        }
+    }
+
+    static BurnInfo computeBurnInfo(final ActionFrequency packetFreq) {
+        final int winNum = packetFreq.numberOfBuckets();
+        int burnStart = winNum;
+        int empty = 0;
+        boolean firstUsed = false;
+        boolean counting = false;
+        for (int i = 1; i < winNum; i++) {
+            if (packetFreq.bucketScore(i) > 0f) {
+                if (!firstUsed) {
+                    firstUsed = true;
+                } else if (!counting) {
+                    burnStart = i;
+                    counting = true;
+                }
+            } else if (counting) {
+                empty++;
+            }
+        }
+        return new BurnInfo(burnStart, empty);
+    }
+
     /**
      * Packet-cheating check, for catching clients that send more packets than
      * allowed. Intention is to have a more accurate check than just preventing
@@ -101,25 +131,9 @@ public class NetStatic {
 
         // Fill up all "used" time windows (minimum we can do without other events).
         final float burnScore = (float) idealPackets * (float) winDur / 1000f;
-        // Find index.
-        int burnStart;
-        int empty = 0;
-        boolean used = false;
-        for (burnStart = 1; burnStart < winNum; burnStart ++) {
-            if (packetFreq.bucketScore(burnStart) > 0f) {
-                // Evaluate whether burnStart should increment for partially filled windows.
-                if (used) {
-                    for (int j = burnStart; j < winNum; j ++) {
-                        if (packetFreq.bucketScore(j) == 0f) {
-                            empty += 1;
-                        }
-                    }
-                    break;
-                } else {
-                    used = true;
-                }
-            }
-        }
+        final BurnInfo burnInfo = computeBurnInfo(packetFreq);
+        final int burnStart = burnInfo.burnStart;
+        int empty = burnInfo.empty;
 
         // Future: burn time windows based on other activity counting, such as matching ActinFrequency with keep-alive packets.
 
