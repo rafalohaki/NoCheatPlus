@@ -216,7 +216,7 @@ public class BlockBreakListener extends CheckListener {
             final Block block, final BlockBreakConfig cc, final BlockBreakData data,
             final IPlayerData pData) {
         if (!result.cancelled && wrongBlock.isEnabled(player, pData)
-                && wrongBlock.check(player, block, cc, data, pData, isInstaBreak)) {
+                && wrongBlock.check(player, block, cc, data, pData)) {
             result.cancelled = true;
         }
     }
