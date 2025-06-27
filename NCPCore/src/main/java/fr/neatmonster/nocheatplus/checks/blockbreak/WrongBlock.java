@@ -38,14 +38,12 @@ public class WrongBlock extends Check {
      * @param player
      * @param block
      * @param data 
-     * @param cc 
-     * @param isInstaBreak 
+     * @param cc
      * @return
      */
-    
+
     public boolean check(final Player player, final Block block,
-            final BlockBreakConfig cc, final BlockBreakData data, final IPlayerData pData,
-            final AlmostBoolean isInstaBreak) {
+            final BlockBreakConfig cc, final BlockBreakData data, final IPlayerData pData) {
 
         boolean cancel = false;
 
