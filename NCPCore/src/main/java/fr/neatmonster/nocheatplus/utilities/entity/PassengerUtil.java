@@ -16,6 +16,9 @@ package fr.neatmonster.nocheatplus.utilities.entity;
 
 import java.util.List;
 
+import java.util.concurrent.CompletableFuture;
+import java.util.concurrent.atomic.AtomicInteger;
+import java.util.concurrent.atomic.AtomicReference;
 import org.bukkit.Bukkit;
 import org.bukkit.Location;
 import org.bukkit.entity.Entity;
@@ -379,41 +382,82 @@ public class PassengerUtil {
         }
     }
 
+    private CompletableFuture<Boolean> addPassengerWithRetry(final Entity passenger, final Entity vehicle,
+                                                             final int maxRetries) {
+        final CompletableFuture<Boolean> future = new CompletableFuture<>();
+        if (passenger == null || vehicle == null) {
+            future.complete(false);
+            return future;
+        }
+        if (handleVehicle.getHandle().addPassenger(passenger, vehicle)) {
+            future.complete(true);
+            return future;
+        }
+        if (plugin == null || maxRetries <= 0) {
+            future.complete(false);
+            return future;
+        }
+
+        final AtomicInteger remaining = new AtomicInteger(maxRetries);
+        final AtomicReference<Object> taskRef = new AtomicReference<>();
+        final Runnable attempt = () -> {
+            if (handleVehicle.getHandle().addPassenger(passenger, vehicle)) {
+                future.complete(true);
+                Folia.cancelTask(taskRef.get());
+            } else if (remaining.decrementAndGet() < 0) {
+                future.complete(false);
+                Folia.cancelTask(taskRef.get());
+            }
+        };
+        taskRef.set(Folia.runSyncRepeatingTask(plugin, (o) -> attempt.run(), 1L, 1L));
+        if (taskRef.get() == null) {
+            future.complete(false);
+        }
+        return future;
+    }
+
     private void handlePassengerScheduling(final Player player, final Entity vehicle,
                                            final MovingConfig cc, final MovingData data,
                                            final boolean debug) {
-        boolean scheduleDelay = cc.schedulevehicleSetPassenger;
-        if (data.vehicleSetPassengerTaskId == null) {
-            if (vehicle.getType() == EntityType.BOAT) {
-                if (!handleVehicle.getHandle().addPassenger(player, vehicle)) {
-                    vehicle.eject();
-                    // Not schedule set passenger for boat due to location async
-                }
-            } else if (scheduleDelay) {
-                data.vehicleSetPassengerTaskId = Folia.runSyncDelayedTaskForEntity(player, plugin,
-                        (arg) -> new VehicleSetPassengerTask(handleVehicle, vehicle, player).run(), null, 2L);
-                if (data.vehicleSetPassengerTaskId == null) {
-                    if (debug) {
-                        CheckUtils.debug(player, CheckType.MOVING_VEHICLE,
-                                "Failed to schedule set passenger!");
-                    }
-                    scheduleDelay = false;
-                } else if (debug) {
-                    CheckUtils.debug(player, CheckType.MOVING_VEHICLE,
-                            "Schedule set passenger task id: " + data.vehicleSetPassengerTaskId);
-                }
+        if (data.vehicleSetPassengerTaskId != null) {
+            if (debug) {
+                CheckUtils.debug(player, CheckType.MOVING_VEHICLE,
+                        "Set passenger task already scheduled, skip this time.");
             }
+            return;
+        }
 
-            if (!scheduleDelay) {
+        if (vehicle.getType() == EntityType.BOAT) {
+            addPassengerWithRetry(player, vehicle, 2).thenAccept(success -> {
+                if (!success) {
+                    vehicle.eject();
+                }
+            });
+            return;
+        }
+
+        boolean scheduleDelay = cc.schedulevehicleSetPassenger;
+        if (scheduleDelay) {
+            data.vehicleSetPassengerTaskId = Folia.runSyncDelayedTaskForEntity(player, plugin,
+                    (arg) -> new VehicleSetPassengerTask(handleVehicle, vehicle, player).run(), null, 2L);
+            if (data.vehicleSetPassengerTaskId == null) {
                 if (debug) {
                     CheckUtils.debug(player, CheckType.MOVING_VEHICLE,
-                            "Attempt set passenger directly");
+                            "Failed to schedule set passenger!");
                 }
-                handleVehicle.getHandle().addPassenger(player, vehicle);
+                scheduleDelay = false;
+            } else if (debug) {
+                CheckUtils.debug(player, CheckType.MOVING_VEHICLE,
+                        "Schedule set passenger task id: " + data.vehicleSetPassengerTaskId);
             }
-        } else if (debug) {
-            CheckUtils.debug(player, CheckType.MOVING_VEHICLE,
-                    "Set passenger task already scheduled, skip this time.");
+        }
+
+        if (!scheduleDelay) {
+            if (debug) {
+                CheckUtils.debug(player, CheckType.MOVING_VEHICLE,
+                        "Attempt set passenger directly");
+            }
+            handleVehicle.getHandle().addPassenger(player, vehicle);
         }
     }
 

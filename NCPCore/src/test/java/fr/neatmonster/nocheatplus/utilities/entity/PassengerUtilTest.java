@@ -6,6 +6,7 @@ import static org.mockito.Mockito.*;
 import java.lang.reflect.Field;
 import java.lang.reflect.Method;
 import java.util.Collections;
+import java.util.concurrent.CompletableFuture;
 
 import org.bukkit.entity.Entity;
 import org.bukkit.entity.EntityType;
@@ -34,6 +35,15 @@ public class PassengerUtilTest {
         public boolean addPassenger(Entity entity, Entity vehicle) {
             called = true;
             return true;
+        }
+    }
+
+    private static class CountingVehicleAccess extends DummyVehicleAccess {
+        int count;
+        @Override
+        public boolean addPassenger(Entity entity, Entity vehicle) {
+            count++;
+            return super.addPassenger(entity, vehicle);
         }
     }
 
@@ -91,5 +101,37 @@ public class PassengerUtilTest {
         MovingData data = newData();
         sched.invoke(util, player, vehicle, cfg, data, false);
         assertTrue(access.called);
+    }
+
+    @Test
+    public void testAddPassengerWithRetryImmediate() throws Exception {
+        CountingVehicleAccess access = new CountingVehicleAccess();
+        PassengerUtil util = newUtil(access);
+        Method m = PassengerUtil.class.getDeclaredMethod("addPassengerWithRetry", Entity.class, Entity.class, int.class);
+        m.setAccessible(true);
+        Entity passenger = mock(Entity.class);
+        Entity vehicle = mock(Entity.class);
+        CompletableFuture<Boolean> res = (CompletableFuture<Boolean>) m.invoke(util, passenger, vehicle, 2);
+        assertTrue(res.get());
+        assertEquals(1, access.count);
+    }
+
+    @Test
+    public void testHandlePassengerSchedulingBoatMultiplePassengers() throws Exception {
+        CountingVehicleAccess access = new CountingVehicleAccess();
+        PassengerUtil util = newUtil(access);
+        Method sched = PassengerUtil.class.getDeclaredMethod("handlePassengerScheduling", Player.class,
+                Entity.class, MovingConfig.class, MovingData.class, boolean.class);
+        sched.setAccessible(true);
+        Player player1 = mock(Player.class);
+        Player player2 = mock(Player.class);
+        Entity vehicle = mock(Entity.class);
+        when(vehicle.getType()).thenReturn(EntityType.BOAT);
+        MovingConfig cfg = newConfig();
+        MovingData d1 = newData();
+        MovingData d2 = newData();
+        sched.invoke(util, player1, vehicle, cfg, d1, false);
+        sched.invoke(util, player2, vehicle, cfg, d2, false);
+        assertEquals(2, access.count);
     }
 }
