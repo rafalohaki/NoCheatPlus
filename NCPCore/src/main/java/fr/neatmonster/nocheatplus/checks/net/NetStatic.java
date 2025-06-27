@@ -71,17 +71,22 @@ public class NetStatic {
         // Consider making this smoothing step configurable and refining the implementation.
         final long tDiff = time - packetFreq.lastAccess();
         if (tDiff >= winDur && tDiff < totalDur) {
-            // There will be some shift, so check if to relax, only if there could be some congestion. 
-            float sc0 = packetFreq.bucketScore(0);
+            // There will be some shift, so check if to relax, only if there could be some congestion.
+            final float[] bucketScores = new float[winNum];
+            for (int i = 0; i < winNum; i++) {
+                bucketScores[i] = packetFreq.bucketScore(i);
+            }
+            float sc0 = bucketScores[0];
             if (sc0 > maxPackets) { // Clarify ideal versus maximum packet counts.
                 // Keep in mind potential burst-to-burst exploits.
                 sc0 -= maxPackets; // Count this down.
                 for (int i = 1; i < winNum; i++) {
-                    final float sci = packetFreq.bucketScore(i);
+                    final float sci = bucketScores[i];
                     if (sci < maxPackets) {
                         // Smoothen, using following empty spots including one occupied spot at most..
                         float consume = Math.min(sc0, maxPackets - sci);
                         sc0 -= consume;
+                        bucketScores[i] = sci + consume;
                         packetFreq.setBucket(i, sci + consume);
                         if (sci > 0f) {
                             // Only allow relaxing "into" the next occupied spot.
@@ -101,17 +106,23 @@ public class NetStatic {
 
         // Fill up all "used" time windows (minimum we can do without other events).
         final float burnScore = (float) idealPackets * (float) winDur / 1000f;
+        // Cache bucket scores to avoid repeated method calls inside loops.
+        final float[] bucketScores = new float[winNum];
+        for (int i = 0; i < winNum; i++) {
+            bucketScores[i] = packetFreq.bucketScore(i);
+        }
+
         // Find index.
         int burnStart;
         int empty = 0;
         boolean used = false;
         for (burnStart = 1; burnStart < winNum; burnStart ++) {
-            final float bucket = packetFreq.bucketScore(burnStart);
+            final float bucket = bucketScores[burnStart];
             if (bucket > 0f) {
                 // Evaluate whether burnStart should increment for partially filled windows.
                 if (used) {
                     for (int j = burnStart; j < winNum; j ++) {
-                        final float bucketJ = packetFreq.bucketScore(j);
+                        final float bucketJ = bucketScores[j];
                         if (bucketJ == 0f) {
                             empty += 1;
                         }
