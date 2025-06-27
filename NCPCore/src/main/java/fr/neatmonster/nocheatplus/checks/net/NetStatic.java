@@ -47,12 +47,17 @@ public class NetStatic {
 
     static BurnInfo computeBurnInfo(final ActionFrequency packetFreq) {
         final int winNum = packetFreq.numberOfBuckets();
+        final float[] bucketScores = new float[winNum];
+        for (int i = 0; i < winNum; i++) {
+            bucketScores[i] = packetFreq.bucketScore(i);
+        }
         int burnStart = winNum;
         int empty = 0;
         boolean firstUsed = false;
         boolean counting = false;
         for (int i = 1; i < winNum; i++) {
-            if (packetFreq.bucketScore(i) > 0f) {
+            final float score = bucketScores[i];
+            if (score > 0f) {
                 if (!firstUsed) {
                     firstUsed = true;
                 } else if (!counting) {
@@ -96,23 +101,28 @@ public class NetStatic {
         final long winDur = packetFreq.bucketDuration();
         final int winNum = packetFreq.numberOfBuckets();
         final long totalDur = winDur * winNum;
+        final float[] bucketScores = new float[winNum];
+        for (int i = 0; i < winNum; i++) {
+            bucketScores[i] = packetFreq.bucketScore(i);
+        }
 
         // "Relax" bursts from i = 1 on, i.e. distribute to following intervals (if zero ~ ?or lower).
         // Consider making this smoothing step configurable and refining the implementation.
         final long tDiff = time - packetFreq.lastAccess();
         if (tDiff >= winDur && tDiff < totalDur) {
-            // There will be some shift, so check if to relax, only if there could be some congestion. 
-            float firstBucketScore = packetFreq.bucketScore(0);
+            // There will be some shift, so check if to relax, only if there could be some congestion.
+            float firstBucketScore = bucketScores[0];
             if (firstBucketScore > maxPackets) { // Clarify ideal versus maximum packet counts.
                 // Keep in mind potential burst-to-burst exploits.
                 firstBucketScore -= maxPackets; // Count this down.
                 for (int i = 1; i < winNum; i++) {
-                    final float currentBucketScore = packetFreq.bucketScore(i);
+                    final float currentBucketScore = bucketScores[i];
                     if (currentBucketScore < maxPackets) {
                         // Smoothen, using following empty spots including one occupied spot at most..
                         float consume = Math.min(firstBucketScore, maxPackets - currentBucketScore);
                         firstBucketScore -= consume;
-                        packetFreq.setBucket(i, currentBucketScore + consume);
+                        bucketScores[i] = currentBucketScore + consume;
+                        packetFreq.setBucket(i, bucketScores[i]);
                         if (currentBucketScore > 0f) {
                             // Only allow relaxing "into" the next occupied spot.
                             break;
@@ -122,7 +132,8 @@ public class NetStatic {
                     }
                 }
                 // Finally adjust the first bucket score.
-                packetFreq.setBucket(0, maxPackets + firstBucketScore);
+                bucketScores[0] = maxPackets + firstBucketScore;
+                packetFreq.setBucket(0, bucketScores[0]);
             }
         }
 
