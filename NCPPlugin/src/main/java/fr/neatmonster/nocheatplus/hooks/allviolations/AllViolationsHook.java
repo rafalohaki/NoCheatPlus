@@ -134,8 +134,14 @@ public class AllViolationsHook implements NCPHook, ILast, IStats {
         builder.append("[VL] [" + checkType.toString() + "] ");
         builder.append("[" + ChatColor.YELLOW + playerName);
         builder.append(ChatColor.WHITE + "] ");
-        final String displayName = Objects.requireNonNull(ChatColor.stripColor(player.getDisplayName()), "displayName").trim();
-        if (!playerName.equals(displayName)) {
+        String displayName = player.getDisplayName();
+        if (displayName != null) {
+            displayName = ChatColor.stripColor(displayName);
+            if (displayName != null) {
+                displayName = displayName.trim();
+            }
+        }
+        if (displayName != null && !playerName.equals(displayName)) {
             builder.append("[->" + ChatColor.YELLOW + displayName + ChatColor.WHITE + "] ");
         }
         builder.append("VL=" + StringUtil.fdec1.format(info.getTotalVl()));
