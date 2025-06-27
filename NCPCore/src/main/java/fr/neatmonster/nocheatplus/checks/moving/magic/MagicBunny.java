@@ -204,7 +204,7 @@ public class MagicBunny {
         // Consider fixing resetbunny instead of adding this section.
         // This workaround might be obsolete now.
         final double inc = ServerIsAtLeast1_13 ? 0.03 : 0;
-        final double hopMargin = Magic.wasOnIceRecently(data) ? 1.4 : (data.momentumTick > 0 ? (data.momentumTick > 2 ? 1.0 + inc : 1.11 + inc) : 1.22 + inc);
+        final double hopMargin = calculateHopMargin(data, inc);
 
         if (lastMove.toIsValid && data.getBunnyhopDelay() <= 0 && data.lastbunnyhopDelay > 0
             && lastMove.hDistance > hDistance && baseSpeed > 0.0 && hDistance / baseSpeed < hopMargin) {
@@ -384,7 +384,7 @@ public class MagicBunny {
      * @return the modifier
      */
     public static double modBunny(final boolean headObstructed, final MovingData data) {
-        return  
+        return
                 // Ice (friction takes care with head obstr, so no need to increase the factor.)
                 Magic.wasOnIceRecently(data) ? 1.5415 :
                 // Slimes / beds
@@ -392,5 +392,12 @@ public class MagicBunny {
                 // Ordinary
                 headObstructed ? 1.474 : (data.momentumTick > 0 ? 1.09 : 1.255)
             ;
+    }
+
+    private static double calculateHopMargin(final MovingData data, final double inc) {
+        return Magic.wasOnIceRecently(data) ? 1.4
+                : (data.momentumTick > 0
+                        ? (data.momentumTick > 2 ? 1.0 + inc : 1.11 + inc)
+                        : 1.22 + inc);
     }
 }
