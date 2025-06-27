@@ -26,6 +26,13 @@ public class BukkitStatic implements BukkitShapeModel {
         this.bounds = bounds;
     }
 
+    private static void checkHeightRange(double height) {
+        if (height < 0.0 || height > 1.0) {
+            throw new IllegalArgumentException(
+                    "Height must be between 0.0 and 1.0, but was: " + height);
+        }
+    }
+
     /**
      * Create a shape model using full xz-bounds for the given height.
      *
@@ -33,6 +40,7 @@ public class BukkitStatic implements BukkitShapeModel {
      * @return New instance.
      */
     public static BukkitStatic ofHeight(double height) {
+        checkHeightRange(height);
         return ofInsetAndHeight(0.0, height);
     }
 
@@ -44,6 +52,7 @@ public class BukkitStatic implements BukkitShapeModel {
      * @return New instance.
      */
     public static BukkitStatic ofInsetAndHeight(double xzInset, double height) {
+        checkHeightRange(height);
         return ofBounds(xzInset, 0.0, xzInset, 1.0 - xzInset, height, 1.0 - xzInset);
     }
 
