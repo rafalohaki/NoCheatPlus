@@ -368,25 +368,6 @@ public class Reach extends Check {
 
     return cancel;
 }
-    /**
-
-        final double violation = lenpRel - context.distanceLimit;
-        boolean cancel = false;
-
-        if (violation > 0) {
-            cancel = handleViolation(player, lenpRel, violation, data, cc, pData);
-        } else if (lenpRel - context.distanceLimit * data.reachMod > 0) {
-            cancel = handleSilentViolation(player, lenpRel, context.distanceLimit,
-                    data.reachMod, cc, data);
-        } else {
-            data.reachVL *= 0.8D;
-        }
-
-        updateReachModifier(lenpRel, context, data, cc);
-        sendDebugInfo(player, damaged, traceEntry, lenpRel, data, pData);
-
-        return cancel;
-    }
 
     /**
      * Update the dynamic reach modifier based on the last result.
