@@ -33,8 +33,12 @@ public class EntityAccessVehicleMultiPassenger implements IEntityAccessVehicle {
      * @return Instance or {@code null} if not supported.
      */
     public static EntityAccessVehicleMultiPassenger createIfSupported() {
-        // Ensure the method signature matches List<Entity> for getPassengers.
-        if (ReflectionUtil.getMethodNoArgs(Entity.class, "getPassengers", List.class) == null) {
+        // Ensure both getPassengers and addPassenger methods exist.
+        boolean hasGetPassengers =
+                ReflectionUtil.getMethodNoArgs(Entity.class, "getPassengers", List.class) != null;
+        boolean hasAddPassenger =
+                ReflectionUtil.getMethodNoArgs(Entity.class, "addPassenger", Entity.class) != null;
+        if (!hasGetPassengers || !hasAddPassenger) {
             return null;
         }
         return new EntityAccessVehicleMultiPassenger();
