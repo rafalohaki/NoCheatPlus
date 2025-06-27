@@ -128,19 +128,19 @@ public class NetStatic {
 
     private static int findSecondUsedBucket(final float[] scores, final int winNum) {
         boolean used = false;
+        int secondUsed = winNum;
         for (int i = 1; i < winNum; i++) {
             if (scores[i] > 0f) {
                 if (used) {
-                    return i;
+                    secondUsed = i;
+                    break;
                 }
                 used = true;
-            } else if (!used) {
-                continue;
-            } else {
-                return winNum;
+            } else if (used) {
+                break;
             }
         }
-        return winNum;
+        return secondUsed;
     }
 
     private static int countEmptyAfter(final float[] scores, final int startIndex, final int winNum) {
@@ -155,6 +155,7 @@ public class NetStatic {
 
     private static double computeFullCount(final float[] scores, final int burnStart, final int empty,
             final float burnScore, final int winNum) {
+        double fullCount;
         if (burnStart < winNum) {
             float trailing = 0f;
             for (int i = burnStart; i < winNum; i++) {
@@ -166,14 +167,15 @@ public class NetStatic {
             for (int i = 0; i < burnStart; i++) {
                 leading += scores[i];
             }
-            return leading + trailing;
+            fullCount = leading + trailing;
+        } else {
+            float total = 0f;
+            for (float score : scores) {
+                total += score;
+            }
+            fullCount = total;
         }
-
-        float total = 0f;
-        for (float score : scores) {
-            total += score;
-        }
-        return total;
+        return fullCount;
     }
 
     private static double computeViolation(final float[] scores, final ActionFrequency burstFreq,
