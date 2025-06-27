@@ -47,7 +47,7 @@ public class ResourceUtil {
         }
         final String csPath = codeSource.getLocation().getPath();
         final String csLower = csPath.toLowerCase();
-        if (!csLower.endsWith(".jar") && !csLower.contains(".jar!")) {
+        if (!csLower.matches(".*\\.jar(\\?.*)?$") && !csLower.contains(".jar!")) {
             return null;
         }
         if (!classPath.startsWith("jar")) {
