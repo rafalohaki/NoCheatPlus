@@ -98,7 +98,7 @@ public class RegistrationOrder {
         } else if (p2 == null) {
             return 1; // o2 to front.
         } else {
-            return p1.compareTo(p2);
+            return p2.compareTo(p1);
         }
     };
 
