@@ -308,42 +308,79 @@ public class MovingListener extends CheckListener implements TickListener, IRemo
     public void onPlayerBedLeave(final PlayerBedLeaveEvent event) {
 
         final Player player = event.getPlayer();
+        if (player == null) {
+            return;
+        }
+
+        handleBedLeave(player);
+    }
+
+    private void handleBedLeave(final Player player) {
         final IPlayerData pData = DataManager.getPlayerData(player);
-        if (!pData.isCheckActive(CheckType.MOVING, player)) return;
+        if (pData == null || !pData.isCheckActive(CheckType.MOVING, player)) {
+            return;
+        }
+
         final MovingData data = pData.getGenericInstance(MovingData.class);
         final MovingConfig cc = pData.getGenericInstance(MovingConfig.class);
-    
-        if (pData.isCheckActive(CheckType.MOVING_SURVIVALFLY, player) && survivalFly.checkBed(player, pData, cc, data)) {
-
-            // Check if the player has to be reset.
-            // To "cancel" the event, we teleport the player.
-            Location newTo = null;
+        if (shouldResetAfterBedLeave(player, pData, cc, data)) {
             final Location loc = player.getLocation(useBedLeaveLoc);
             final PlayerMoveInfo moveInfo = aux.usePlayerMoveInfo();
-            moveInfo.set(player, loc, null, cc.yOnGround);
-            final boolean sfCheck = MovingUtil.shouldCheckSurvivalFly(player, moveInfo.from, moveInfo.to, data, cc, pData);
+            final boolean sfCheck = shouldCheckSurvivalFly(player, pData, cc, data, loc, moveInfo);
+            final Location newTo = determineBedLeaveLocation(player, cc, data, moveInfo.from, loc, sfCheck);
             aux.returnPlayerMoveInfo(moveInfo);
-            if (sfCheck) {
-                newTo = MovingUtil.getApplicableSetBackLocation(player, loc.getYaw(), loc.getPitch(), moveInfo.from, data, cc);
-            }
-            if (newTo == null) {
-                newTo = LocUtil.clone(loc);
-            }
-
-            if (sfCheck && cc.sfSetBackPolicyApplyFallDamage && noFall.isEnabled(player, pData)) {
-                // Check if to deal damage.
-                double y = loc.getY();
-                if (data.hasSetBack()) y = Math.min(y, data.getSetBackY());
-                noFall.checkDamage(player, y, data, pData);
-            }
-            // Cleanup
-            useBedLeaveLoc.setWorld(null);
-            // Teleport.
-            data.prepareSetBack(newTo); // Should be enough. 
-            player.teleport(newTo, BridgeMisc.TELEPORT_CAUSE_CORRECTION_OF_POSITION);
+            applyBedLeaveDamage(player, pData, cc, data, loc, sfCheck);
+            finalizeBedLeave(player, data, newTo);
+        } else {
+            data.wasInBed = false;
         }
-        // Reset bed ...
-        else data.wasInBed = false;
+    }
+
+    private boolean shouldResetAfterBedLeave(final Player player, final IPlayerData pData,
+                                             final MovingConfig cc, final MovingData data) {
+        return pData.isCheckActive(CheckType.MOVING_SURVIVALFLY, player)
+                && survivalFly.checkBed(player, pData, cc, data);
+    }
+
+    private boolean shouldCheckSurvivalFly(final Player player, final IPlayerData pData,
+                                           final MovingConfig cc, final MovingData data,
+                                           final Location loc, final PlayerMoveInfo moveInfo) {
+        moveInfo.set(player, loc, null, cc.yOnGround);
+        return MovingUtil.shouldCheckSurvivalFly(player, moveInfo.from, moveInfo.to, data, cc, pData);
+    }
+
+    private Location determineBedLeaveLocation(final Player player, final MovingConfig cc,
+                                               final MovingData data, final PlayerLocation from,
+                                               final Location loc, final boolean sfCheck) {
+        Location newTo = null;
+        if (sfCheck) {
+            newTo = MovingUtil.getApplicableSetBackLocation(player, loc.getYaw(), loc.getPitch(), from, data, cc);
+        }
+        if (newTo == null) {
+            newTo = LocUtil.clone(loc);
+        }
+        return newTo;
+    }
+
+    private void applyBedLeaveDamage(final Player player, final IPlayerData pData,
+                                     final MovingConfig cc, final MovingData data,
+                                     final Location loc, final boolean sfCheck) {
+        if (sfCheck && cc.sfSetBackPolicyApplyFallDamage && noFall.isEnabled(player, pData)) {
+            double y = loc.getY();
+            if (data.hasSetBack()) {
+                y = Math.min(y, data.getSetBackY());
+            }
+            noFall.checkDamage(player, y, data, pData);
+        }
+    }
+
+    private void finalizeBedLeave(final Player player, final MovingData data, final Location newTo) {
+        if (newTo == null) {
+            return;
+        }
+        useBedLeaveLoc.setWorld(null);
+        data.prepareSetBack(newTo);
+        player.teleport(newTo, BridgeMisc.TELEPORT_CAUSE_CORRECTION_OF_POSITION);
     }
 
 
