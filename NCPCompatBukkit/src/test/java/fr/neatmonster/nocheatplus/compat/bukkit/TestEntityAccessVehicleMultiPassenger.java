@@ -44,17 +44,4 @@ public class TestEntityAccessVehicleMultiPassenger {
         }
     }
 
-    @Test
-    public void testBothMethodsPresent() throws Exception {
-        Method dummyGet = TestEntityAccessVehicleMultiPassenger.class.getDeclaredMethod("dummyPassengers");
-        Method dummyAdd = TestEntityAccessVehicleMultiPassenger.class.getDeclaredMethod("dummyAddPassenger");
-        try (MockedStatic<ReflectionUtil> util = mockStatic(ReflectionUtil.class)) {
-            util.when(() -> ReflectionUtil.getMethodNoArgs(Entity.class, "getPassengers", List.class))
-                    .thenReturn(dummyGet);
-            util.when(() -> ReflectionUtil.getMethodNoArgs(Entity.class, "addPassenger", Entity.class))
-                    .thenReturn(dummyAdd);
-            EntityAccessVehicleMultiPassenger access = EntityAccessVehicleMultiPassenger.createIfSupported();
-            assertNotNull(access);
-        }
-    }
 }

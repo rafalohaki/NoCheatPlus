@@ -1,3 +1,5 @@
+package fr.neatmonster.nocheatplus.checks.inventory;
+
 import static org.junit.Assert.*;
 
 import java.lang.reflect.Field;
@@ -9,9 +11,9 @@ import org.junit.Test;
 
 import fr.neatmonster.nocheatplus.actions.ActionList;
 import fr.neatmonster.nocheatplus.checks.ViolationData;
-import fr.neatmonster.nocheatplus.checks.inventory.FastClick;
-import fr.neatmonster.nocheatplus.checks.inventory.InventoryConfig;
-import fr.neatmonster.nocheatplus.checks.inventory.InventoryData;
+//import fr.neatmonster.nocheatplus.checks.inventory.FastClick;
+//import fr.neatmonster.nocheatplus.checks.inventory.InventoryConfig;
+//import fr.neatmonster.nocheatplus.checks.inventory.InventoryData;
 
 public class FastClickTest {
 
