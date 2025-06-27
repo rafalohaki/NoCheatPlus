@@ -415,9 +415,6 @@ public class BlockBreakListener extends CheckListener {
         //        	return;
         //        }
 
-        if (block == null) {
-            return;
-        }
 
         final int tick = TickTask.getTick();
         // Skip if already set to the same block without breaking within one tick difference.
