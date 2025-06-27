@@ -102,21 +102,22 @@ public class NetStatic {
         // Fill up all "used" time windows (minimum we can do without other events).
         final float burnScore = (float) idealPackets * (float) winDur / 1000f;
         // Find index.
-        int burnStart;
+        int burnStart = winNum;
         int empty = 0;
-        boolean used = false;
-        for (burnStart = 1; burnStart < winNum; burnStart ++) {
-            if (packetFreq.bucketScore(burnStart) > 0f) {
-                // Evaluate whether burnStart should increment for partially filled windows.
-                if (used) {
-                    for (int j = burnStart; j < winNum; j ++) {
-                        if (packetFreq.bucketScore(j) == 0f) {
-                            empty += 1;
-                        }
-                    }
+        boolean firstFound = false;
+        for (int i = 1; i < winNum; i++) {
+            if (packetFreq.bucketScore(i) > 0f) {
+                if (firstFound) {
+                    burnStart = i;
                     break;
-                } else {
-                    used = true;
+                }
+                firstFound = true;
+            }
+        }
+        if (burnStart < winNum) {
+            for (int j = burnStart; j < winNum; j++) {
+                if (packetFreq.bucketScore(j) == 0f) {
+                    empty += 1;
                 }
             }
         }
