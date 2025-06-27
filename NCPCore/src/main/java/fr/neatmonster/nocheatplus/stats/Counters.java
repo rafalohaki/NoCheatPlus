@@ -141,7 +141,7 @@ public class Counters {
      */
     public void add(int id, int count, boolean isPrimaryThread) {
         if (isPrimaryThread) {
-            ptCounts[id].increment();
+            ptCounts[id].add(count);
         } else {
             addSynchronized(id, count);
         }
