@@ -485,7 +485,11 @@ public class TrigUtil {
     }
 
     /**
-     * Manhattan.
+     * Manhattan distance on the horizontal plane using exact world coordinates.
+     * <p>
+     * Unlike other variants this method does not round the coordinates to block
+     * positions. Callers should convert to block coordinates separately if they
+     * require discrete values.
      *
      * @param x1
      *            the x1
