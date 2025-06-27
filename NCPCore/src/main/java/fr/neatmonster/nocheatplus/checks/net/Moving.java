@@ -138,7 +138,8 @@ public class Moving extends Check {
                     }
                 }, null);
                 if (!Folia.isTaskScheduled(task)) {
-                    StaticLog.logWarning("[NoCheatPlus] Failed to schedule task. Player: " + player.getName());
+                    StaticLog.logWarning("[NoCheatPlus] Failed to schedule task (plugin="
+                            + plugin.getName() + ", delay=1) Player: " + player.getName());
                 }
                 mData.resetTeleported(); // Cleanup, just in case.
             }

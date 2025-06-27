@@ -395,7 +395,8 @@ public class PassengerUtil {
                 if (data.vehicleSetPassengerTaskId == null) {
                     if (debug) {
                         CheckUtils.debug(player, CheckType.MOVING_VEHICLE,
-                                "Failed to schedule set passenger!");
+                                "Failed to schedule set passenger (plugin=" + plugin.getName()
+                                        + ", delay=2)");
                     }
                     scheduleDelay = false;
                 } else if (debug) {

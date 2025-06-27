@@ -79,7 +79,8 @@ public class Folia {
             } catch (Exception ex) {
                 LogManager logManager = NCPAPIProvider.getNoCheatPlusAPI().getLogManager();
                 logManager.warning(Streams.STATUS,
-                        "Failed to schedule async task: " + ex.getClass().getSimpleName());
+                        "Failed to schedule async task (plugin=" + plugin.getName() + ") "
+                                + ex.getClass().getSimpleName());
                 logManager.warning(Streams.STATUS, ex);
             }
             return null;
@@ -113,7 +114,12 @@ public class Folia {
             Object taskInfo = executeMethod.invoke(syncScheduler, plugin, run, delay, period);
             return taskInfo;
         } catch (Exception e) {
-            StaticLog.logSevere(e);
+            LogManager logManager = NCPAPIProvider.getNoCheatPlusAPI().getLogManager();
+            logManager.warning(Streams.STATUS,
+                    "Failed to schedule repeating task (plugin=" + plugin.getName()
+                            + ", delay=" + delay + ", period=" + period + ") "
+                            + e.getClass().getSimpleName());
+            logManager.warning(Streams.STATUS, e);
         }
         return null;
     }
@@ -152,7 +158,11 @@ public class Folia {
             Object taskInfo = executeMethod.invoke(syncScheduler, plugin, run);
             return taskInfo;
         } catch (Exception e) {
-            StaticLog.logSevere(e);
+            LogManager logManager = NCPAPIProvider.getNoCheatPlusAPI().getLogManager();
+            logManager.warning(Streams.STATUS,
+                    "Failed to schedule sync task (plugin=" + plugin.getName() + ") "
+                            + e.getClass().getSimpleName());
+            logManager.warning(Streams.STATUS, e);
         }
         return null;
     }
@@ -184,7 +194,9 @@ public class Folia {
             return taskInfo;
         } catch (Exception e) {
             LogManager logManager = NCPAPIProvider.getNoCheatPlusAPI().getLogManager();
-            logManager.warning(Streams.STATUS, "Failed to schedule delayed task: " + e.getClass().getSimpleName());
+            logManager.warning(Streams.STATUS,
+                    "Failed to schedule delayed task (plugin=" + plugin.getName()
+                            + ", delay=" + delay + ") " + e.getClass().getSimpleName());
             logManager.warning(Streams.STATUS, e);
         }
         return null;
@@ -231,7 +243,9 @@ public class Folia {
             return taskInfo;
         } catch (Exception e) {
             LogManager logManager = NCPAPIProvider.getNoCheatPlusAPI().getLogManager();
-            logManager.warning(Streams.STATUS, "Failed to schedule entity task: " + e.getClass().getSimpleName());
+            logManager.warning(Streams.STATUS,
+                    "Failed to schedule entity task (plugin=" + plugin.getName()
+                            + ", delay=" + delay + ") " + e.getClass().getSimpleName());
             logManager.warning(Streams.STATUS, e);
         }
         return null;
