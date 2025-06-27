@@ -22,7 +22,7 @@ import java.util.logging.Level;
  *
  */
 public class LogRecord<C> implements Runnable {
-    
+
     private final LogNode<C> node;
     private final Level level;
     private final C content;
@@ -32,11 +32,23 @@ public class LogRecord<C> implements Runnable {
         this.level = level;
         this.content = content;
     }
-    
+
     @Override
     public void run() {
-        // NOTE: Determine appropriate location for checks or try-catch handling.
+        // NOTE: Direct invocation, actual handling is done by the dispatcher.
         node.logger.log(level, content);
     }
-    
+
+    public LogNode<C> getNode() {
+        return node;
+    }
+
+    public Level getLevel() {
+        return level;
+    }
+
+    public C getContent() {
+        return content;
+    }
+
 }

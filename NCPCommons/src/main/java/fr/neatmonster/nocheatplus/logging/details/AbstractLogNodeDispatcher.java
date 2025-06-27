@@ -92,9 +92,8 @@ public abstract class AbstractLogNodeDispatcher implements LogNodeDispatcher { /
     protected ContentLogger<String> initLogger = null;
 
     public <C> void dispatch(LogNode<C> node, Level level, C content) {
-        // NOTE: Try/catch ?
         if (isWithinContext(node)) {
-            node.logger.log(level, content);
+            logSafely(node, level, content);
         } else {
             scheduleLog(node, level, content);
         }
@@ -115,7 +114,7 @@ public abstract class AbstractLogNodeDispatcher implements LogNodeDispatcher { /
             return false;
         }
         for (final LogRecord<?> record : records) {
-            record.run();
+            logSafely(record.getNode(), record.getLevel(), record.getContent());
         }
         return true;
     }
@@ -231,6 +230,19 @@ public abstract class AbstractLogNodeDispatcher implements LogNodeDispatcher { /
     protected void logINIT(final Level level, final String message) {
         if (initLogger != null) {
             initLogger.log(level, message);
+        }
+    }
+
+    @SuppressWarnings("unchecked")
+    private void logSafely(LogNode<?> node, Level level, Object content) {
+        if (node == null || node.logger == null) {
+            logINIT(Level.WARNING, "Skipped log record due to missing node or logger.");
+            return;
+        }
+        try {
+            ((ContentLogger<Object>) node.logger).log(level, content);
+        } catch (Exception e) {
+            logINIT(Level.WARNING, "Logging failed: " + e.getMessage());
         }
     }
 
