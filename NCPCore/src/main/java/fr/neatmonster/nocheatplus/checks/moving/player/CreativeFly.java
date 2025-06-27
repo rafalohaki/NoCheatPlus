@@ -833,7 +833,8 @@ public class CreativeFly extends Check {
      */
     private boolean handleFireworkBoostAscend(final double yDistance, final double limitV,
             final PlayerMoveData lastMove, final MovingData data) {
-        if (yDistance > limitV && data.fireworksBoostDuration > 0 && lastMove.toIsValid
+        boolean boostAscend = false;
+        if (data.hasFireworkBoost && yDistance > limitV && lastMove.toIsValid
                 && (
                         yDistance >= lastMove.yDistance
                                 || yDistance - lastMove.yDistance < Magic.GRAVITY_MAX
@@ -845,9 +846,9 @@ public class CreativeFly extends Check {
                 && yDistance < 1.67) {
             /* Additional checks for fireworks boost could be implemented here. */
             tags.add("fw_boost_asc");
-            return true;
+            boostAscend = true;
         }
-        return false;
+        return boostAscend;
     }
 
     /**
