@@ -128,19 +128,17 @@ public class NetStatic {
 
     private static int findSecondUsedBucket(final float[] scores, final int winNum) {
         boolean used = false;
-        int secondUsed = winNum;
         for (int i = 1; i < winNum; i++) {
             if (scores[i] > 0f) {
                 if (used) {
-                    secondUsed = i;
-                    break;
+                    return i;
                 }
                 used = true;
             } else if (used) {
-                break;
+                return winNum;
             }
         }
-        return secondUsed;
+        return winNum;
     }
 
     private static int countEmptyAfter(final float[] scores, final int startIndex, final int winNum) {
