@@ -128,12 +128,10 @@ public class NetStatic {
             // Consider adding a configuration flag to skip lag adaption when running in strict mode.
             final float lag = TickTask.getLag(totalDur, true); // Full seconds range considered.
             // Also consider increasing the allowed maximum for extreme server-side lag conditions.
-            if (lag > 1f) {
-                empty = Math.min(empty, (int) Math.round((lag - 1f) * winNum));
-            }
+            empty = (int) Math.round(empty * (1f / lag));
         }
-        // Negative values would reduce the count of unused windows and thus are
-        // ignored. Clamp the value to the valid range of [0, winNum].
+        // Negative values would reduce the count of unused windows and thus are ignored.
+        // Clamp the value to the valid range of [0, winNum].
         empty = Math.max(0, Math.min(empty, winNum));
 
         final double fullCount;
