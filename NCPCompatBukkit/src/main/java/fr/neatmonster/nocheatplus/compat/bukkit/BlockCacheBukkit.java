@@ -19,6 +19,7 @@ import org.bukkit.Material;
 import org.bukkit.World;
 import org.bukkit.entity.Entity;
 import org.bukkit.entity.EntityType;
+import org.bukkit.block.data.BlockData;
 
 import fr.neatmonster.nocheatplus.compat.Bridge1_13;
 import fr.neatmonster.nocheatplus.utilities.map.BlockCache;
@@ -58,6 +59,16 @@ public class BlockCacheBukkit extends BlockCache {
     public int fetchData(final int x, final int y, final int z) {
         // Consider setting type id and data at once.
         return Bridge1_13.hasIsSwimming() ? 0 : world.getBlockAt(x, y, z).getData();
+    }
+
+    /**
+     * Get the {@link BlockData} for the specified block coordinates.
+     *
+     * <p>This method must only be called from the primary server thread as
+     * Bukkit's block access is not thread-safe.</p>
+     */
+    public BlockData getBlockData(final int x, final int y, final int z) {
+        return world.getBlockAt(x, y, z).getState().getBlockData();
     }
 
     @Override

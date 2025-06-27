@@ -17,6 +17,7 @@ package fr.neatmonster.nocheatplus.compat.bukkit.model;
 import java.util.Set;
 import java.util.ArrayList;
 import java.util.List;
+import java.util.Arrays;
 
 import org.bukkit.World;
 import org.bukkit.block.Block;
@@ -97,21 +98,30 @@ public class BukkitWall implements BukkitShapeModel {
 
     private double[] computeAndCacheShape(final BlockCache blockCache,
             final World world, final int x, final int y, final int z) {
-        final Block block = world.getBlockAt(x, y, z);
-        final BlockState state = block.getState();
-        final BlockData blockData = state.getBlockData();
-        if (blockData instanceof MultipleFacing) {
-            final double[] shape = getShapeForMultipleFacing((MultipleFacing) blockData);
-            cacheBounds(blockCache, x, y, z, shape);
-            return shape;
-        } else if (blockData instanceof Wall) {
-            final double[] shape = getShapeForWall((Wall) blockData);
-            cacheBounds(blockCache, x, y, z, shape);
-            return shape;
-        }
-        final double[] shape = new double[] {0.0, 0.0, 0.0, 1.0, 1.0, 1.0};
+        final BlockData blockData = fetchBlockData(blockCache, world, x, y, z);
+        final double[] shape = getShapeForBlockData(blockData);
         cacheBounds(blockCache, x, y, z, shape);
         return shape;
+    }
+
+    private BlockData fetchBlockData(final BlockCache blockCache,
+            final World world, final int x, final int y, final int z) {
+        if (blockCache instanceof fr.neatmonster.nocheatplus.compat.bukkit.BlockCacheBukkit) {
+            return ((fr.neatmonster.nocheatplus.compat.bukkit.BlockCacheBukkit) blockCache)
+                    .getBlockData(x, y, z);
+        }
+        final Block block = world.getBlockAt(x, y, z);
+        final BlockState state = block.getState();
+        return state.getBlockData();
+    }
+
+    private double[] getShapeForBlockData(final BlockData blockData) {
+        if (blockData instanceof MultipleFacing) {
+            return getShapeForMultipleFacing((MultipleFacing) blockData);
+        } else if (blockData instanceof Wall) {
+            return getShapeForWall((Wall) blockData);
+        }
+        return new double[] {0.0, 0.0, 0.0, 1.0, 1.0, 1.0};
     }
 
     private void cacheShapeAsync(final BlockCache blockCache, final World world,
@@ -134,7 +144,7 @@ public class BukkitWall implements BukkitShapeModel {
                 blockCache.getOrCreateBlockCacheNode(x, y, z, false);
         if (node instanceof BlockCache.BlockCacheNode) {
             final BlockCache.BlockCacheNode bcNode = (BlockCache.BlockCacheNode) node;
-            if (!bcNode.isBoundsFetched()) {
+            if (!bcNode.isBoundsFetched() || !Arrays.equals(bcNode.getBounds(), bounds)) {
                 bcNode.setBounds(bounds);
             }
         }
