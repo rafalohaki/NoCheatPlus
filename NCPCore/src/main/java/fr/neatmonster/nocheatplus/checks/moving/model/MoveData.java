@@ -55,6 +55,12 @@ public class MoveData {
     /////////////////////////////////////////////////////////////////////
 
     // Coordinates and distances.
+    /**
+     * The location fields ({@link #from}, {@link #to}) and the distance fields
+     * ({@link #yDistance}, {@link #hDistance}, {@link #distanceSquared}) are
+     * tightly coupled. Use the provided setter methods to update locations so
+     * that distance values stay consistent.
+     */
 
     /**
      * End point of a move.
@@ -132,16 +138,52 @@ public class MoveData {
      */
     public ModelFlying modelFlying;
 
+    /**
+     * Update both from and to locations and recompute distance values. This
+     * method resets {@code toIsValid} and related fields accordingly.
+     */
     private void setPositions(final IGetLocationWithLook from, final IGetLocationWithLook to) {
         this.from.setLocation(from);
         this.to.setLocation(to);
-        yDistance = this.to.getY() - this.from.getY();
-        hDistance = TrigUtil.xzDistance(from, to);
-        distanceSquared = yDistance * yDistance + hDistance * hDistance;
+        recomputeDistances();
         toIsValid = true;
         elytrafly = false;
         flyCheck = null;
         modelFlying = null;
+    }
+
+    /**
+     * Recompute the {@link #yDistance}, {@link #hDistance} and
+     * {@link #distanceSquared} fields based on the current locations.
+     */
+    private void recomputeDistances() {
+        yDistance = this.to.getY() - this.from.getY();
+        hDistance = TrigUtil.xzDistance(this.from, this.to);
+        distanceSquared = yDistance * yDistance + hDistance * hDistance;
+    }
+
+    /**
+     * Update only the start location. Distances are recomputed if the end
+     * location is currently valid.
+     *
+     * @param from the new start location
+     */
+    public void setFrom(final IGetLocationWithLook from) {
+        this.from.setLocation(from);
+        if (toIsValid) {
+            recomputeDistances();
+        }
+    }
+
+    /**
+     * Update only the end location and recompute all distance values.
+     *
+     * @param to the new end location
+     */
+    public void setTo(final IGetLocationWithLook to) {
+        this.to.setLocation(to);
+        toIsValid = true;
+        recomputeDistances();
     }
 
     /**
