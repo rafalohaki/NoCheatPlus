@@ -26,7 +26,6 @@ import org.bukkit.command.Command;
 import org.bukkit.command.CommandSender;
 import org.bukkit.entity.Player;
 import org.bukkit.plugin.java.JavaPlugin;
-import org.bukkit.ChatColor;
 
 import fr.neatmonster.nocheatplus.checks.CheckType;
 import fr.neatmonster.nocheatplus.command.BaseCommand;
@@ -100,7 +99,7 @@ public class DebugPlayerCommand extends BaseCommand {
     @Override
     public boolean onCommand(CommandSender sender, Command command, String alias, String[] args) {
 
-        String[] colors = prepareColorCodes(sender);
+        String[] colors = getColorCodes(sender);
         String c1 = colors[0];
         String c3 = colors[2];
 
@@ -130,22 +129,9 @@ public class DebugPlayerCommand extends BaseCommand {
         return true;
     }
 
-    private String[] prepareColorCodes(CommandSender sender) {
-        if (sender instanceof Player) {
-            return new String[] {
-                    ChatColor.GRAY.toString(),
-                    ChatColor.BOLD.toString(),
-                    ChatColor.RED.toString(),
-                    ChatColor.ITALIC.toString(),
-                    ChatColor.GOLD.toString(),
-                    ChatColor.WHITE.toString(),
-                    ChatColor.YELLOW.toString() };
-        }
-        return new String[] {"", "", "", "", "", "", ""};
-    }
 
     private Player resolvePlayer(CommandSender sender, String input) {
-        String[] colors = prepareColorCodes(sender);
+        String[] colors = getColorCodes(sender);
         String c3 = colors[2];
         Player player = null;
         if (IdUtil.isValidMinecraftUserName(input)) {
@@ -165,7 +151,7 @@ public class DebugPlayerCommand extends BaseCommand {
     }
 
     private DebugEntry parseDebugEntry(CommandSender sender, String input) {
-        String[] colors = prepareColorCodes(sender);
+        String[] colors = getColorCodes(sender);
         String c3 = colors[2];
         DebugEntry entry = DebugEntry.parseEntry(input);
         if (entry == null) {
