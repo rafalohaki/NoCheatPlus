@@ -132,6 +132,15 @@ public class ServerVersion {
      */
     private static String parseMinecraftVersionGeneric(String serverVersion) {
         String lcServerVersion = serverVersion.trim().toLowerCase();
+
+        // Detect pre-release versions explicitly.
+        java.util.regex.Matcher preMatcher = java.util.regex.Pattern
+                .compile("(\\d+(?:\\.\\d+)*-pre\\d*)")
+                .matcher(lcServerVersion);
+        if (preMatcher.find()) {
+            return preMatcher.group(1);
+        }
+
         for (String candidate : new String[] {
                 GenericVersion.parseVersionDelimiters(lcServerVersion, "(mc:", ")"),
                 GenericVersion.parseVersionDelimiters(lcServerVersion, "(mc:", "-pre"),
@@ -179,6 +188,17 @@ public class ServerVersion {
         return minecraftVersion;
     }
 
+    private static String stripPreRelease(String version) {
+        if (version == null) {
+            return null;
+        }
+        int idx = version.indexOf("-pre");
+        if (idx != -1) {
+            return version.substring(0, idx);
+        }
+        return version;
+    }
+
     /**
      * Convenience for compareVersions(getMinecraftVersion(), version).
      * 
@@ -188,7 +208,7 @@ public class ServerVersion {
      *         Minecraft version is higher.
      */
     public static int compareMinecraftVersion(String toVersion) {
-        return GenericVersion.compareVersions(getMinecraftVersion(), toVersion);
+        return GenericVersion.compareVersions(stripPreRelease(getMinecraftVersion()), toVersion);
     }
 
     /**
@@ -205,7 +225,7 @@ public class ServerVersion {
      * @return
      */
     public static boolean isMinecraftVersionBetween(String versionLow, boolean includeLow, String versionHigh, boolean includeHigh) {
-        return GenericVersion.isVersionBetween(getMinecraftVersion(), versionLow, includeLow, versionHigh, includeHigh);
+        return GenericVersion.isVersionBetween(stripPreRelease(getMinecraftVersion()), versionLow, includeLow, versionHigh, includeHigh);
     }
 
     /**
@@ -230,7 +250,7 @@ public class ServerVersion {
         if (mcVersion == GenericVersion.UNKNOWN_VERSION) {
             return valueUnknown;
         } else {
-            final int cmp = GenericVersion.compareVersions(mcVersion, cmpVersion);
+            final int cmp = GenericVersion.compareVersions(stripPreRelease(mcVersion), cmpVersion);
             if (cmp == 0) {
                 return valueEQ;
             } else if (cmp < 0) {

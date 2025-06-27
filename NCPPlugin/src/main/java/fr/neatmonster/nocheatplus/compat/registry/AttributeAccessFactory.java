@@ -36,7 +36,7 @@ public class AttributeAccessFactory {
         final IAttributeAccess fallBackReflect = new DummyAttributeAccess();
         IAttributeAccess fallBackDedicated = null;
         try {
-            fallBackDedicated = ServerVersion.compareMinecraftVersion("1.21") < 0
+            fallBackDedicated = ServerVersion.compareMinecraftVersion("1.21.0") < 0
                     ? BukkitAttributeAccess.createIfSupported()
                     : NSBukkitAttributeAccess.createIfSupported();
         }
