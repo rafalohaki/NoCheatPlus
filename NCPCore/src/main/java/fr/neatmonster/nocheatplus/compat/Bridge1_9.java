@@ -183,17 +183,19 @@ public class Bridge1_9 {
         if (!hasGetItemInOffHand()) { // Optimistic check.
             return getItemInMainHand(player);
         }
-        else {
-            switch (event.getHand()) {
-                case HAND: {
-                    return getItemInMainHand(player);
-                }
-                case OFF_HAND: {
-                    return getItemInOffHand(player);
-                }
-                default: {
-                    return null;
-                }
+        final org.bukkit.inventory.EquipmentSlot hand = event.getHand();
+        if (hand == null) {
+            return getItemInMainHand(player);
+        }
+        switch (hand) {
+            case HAND: {
+                return getItemInMainHand(player);
+            }
+            case OFF_HAND: {
+                return getItemInOffHand(player);
+            }
+            default: {
+                return null;
             }
         }
     }
@@ -207,17 +209,19 @@ public class Bridge1_9 {
         if (!hasGetItemInOffHand()) { // Optimistic check.
             return getItemInMainHand(player);
         }
-        else {
-            switch (event.getHand()) {
-                case HAND: {
-                    return getItemInMainHand(player);
-                }
-                case OFF_HAND: {
-                    return getItemInOffHand(player);
-                }
-                default: {
-                    return null;
-                }
+        final org.bukkit.inventory.EquipmentSlot hand = event.getHand();
+        if (hand == null) {
+            return getItemInMainHand(player);
+        }
+        switch (hand) {
+            case HAND: {
+                return getItemInMainHand(player);
+            }
+            case OFF_HAND: {
+                return getItemInOffHand(player);
+            }
+            default: {
+                return null;
             }
         }
     }
