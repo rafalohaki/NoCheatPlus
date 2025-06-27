@@ -64,6 +64,7 @@ public class TestBlockPlaceAgainst {
 
     @Before
     public void setup() throws Exception {
+        fr.neatmonster.nocheatplus.compat.versions.ServerVersion.setMinecraftVersion("1.8");
         // Use Unsafe to initialize the config object for the test
         sun.misc.Unsafe unsafe;
         Field uf = sun.misc.Unsafe.class.getDeclaredField("theUnsafe");
@@ -88,14 +89,9 @@ public class TestBlockPlaceAgainst {
         // 2. Create the real PlayerDataManager instance.
         PlayerDataManager realDataManager = new PlayerDataManager(wdm, pr);
 
-        // 3. Use reflection to set the static field: 'Check.dataManager'.
-        Field dataManagerField = Check.class.getDeclaredField("dataManager");
+        // 3. Use reflection to set the static field: 'DataManager.instance'.
+        Field dataManagerField = fr.neatmonster.nocheatplus.players.DataManager.class.getDeclaredField("instance");
         dataManagerField.setAccessible(true);
-        
-        // Remove the 'final' modifier from the static field to allow setting it.
-        Field modifiersField = Field.class.getDeclaredField("modifiers");
-        modifiersField.setAccessible(true);
-        modifiersField.setInt(dataManagerField, dataManagerField.getModifiers() & ~Modifier.FINAL);
         
         dataManagerField.set(null, realDataManager);
         
@@ -103,14 +99,14 @@ public class TestBlockPlaceAgainst {
         this.against = new TestableAgainst();
     }
 
-    private boolean runCheck(Material placedMat, Material baseMat) {
+    private boolean runCheck(Material placedMat, Material againstMat, Material belowMat) {
         Block placed = mock(Block.class);
         Block below = mock(Block.class);
         when(placed.getRelative(BlockFace.DOWN)).thenReturn(below);
-        when(below.getType()).thenReturn(baseMat);
+        when(below.getType()).thenReturn(belowMat);
 
         Block againstBlock = mock(Block.class);
-        when(againstBlock.getType()).thenReturn(baseMat);
+        when(againstBlock.getType()).thenReturn(againstMat);
         when(againstBlock.getX()).thenReturn(0);
         when(againstBlock.getY()).thenReturn(0);
         when(againstBlock.getZ()).thenReturn(0);
@@ -137,6 +133,16 @@ public class TestBlockPlaceAgainst {
 
             return against.check(player, placed, placedMat, againstBlock, isInteract, data, config, pData);
         }
+    }
+
+    @Test
+    public void testLilyPadWithWaterBelowAllowed() {
+        assertFalse(runCheck(BridgeMaterial.LILY_PAD, Material.WATER, Material.WATER));
+    }
+
+    @Test
+    public void testLilyPadWithoutWaterBelowViolation() {
+        assertTrue(runCheck(BridgeMaterial.LILY_PAD, Material.WATER, Material.STONE));
     }
 
 }

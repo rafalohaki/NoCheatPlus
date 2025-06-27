@@ -173,8 +173,11 @@ public class Against extends Check {
         }
         if (BlockProperties.isLiquid(ncpAgainst)) {
             final boolean isLilyPadOrFrog = isLilyPadOrFrogspawn(placedMat);
-            final boolean blockBelowLiquid = block != null && BlockProperties.isLiquid(block.getRelative(BlockFace.DOWN).getType());
-            if ((!isLilyPadOrFrog || !blockBelowLiquid)
+            final boolean blockBelowLiquid = block != null
+                    && BlockProperties.isLiquid(block.getRelative(BlockFace.DOWN).getType());
+            // Allow lily pads and frogspawn on water when another liquid is below.
+            // Fail only if such items sit on a single liquid block.
+            if ((isLilyPadOrFrog && !blockBelowLiquid)
                     && !BlockProperties.isWaterPlant(ncpAgainst)
                     && !pData.hasPermission(Permissions.BLOCKPLACE_AGAINST_LIQUIDS, player)) {
                 return true;
