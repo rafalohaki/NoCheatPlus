@@ -3353,13 +3353,24 @@ public class BlockProperties {
     /** Immutable local bounding box helper */
     private static final class BoundingBox {
         final double minX, minY, minZ, maxX, maxY, maxZ;
-        BoundingBox(double minX, double minY, double minZ, double maxX, double maxY, double maxZ) {
+        BoundingBox(double minX, double minY, double minZ,
+                    double maxX, double maxY, double maxZ) {
+            validateBounds(minX, minY, minZ, maxX, maxY, maxZ);
             this.minX = minX;
             this.minY = minY;
             this.minZ = minZ;
             this.maxX = maxX;
             this.maxY = maxY;
             this.maxZ = maxZ;
+        }
+
+        private static void validateBounds(double minX, double minY, double minZ,
+                                           double maxX, double maxY, double maxZ) {
+            if (minX > maxX || minY > maxY || minZ > maxZ) {
+                throw new IllegalArgumentException("Invalid bounds: [" + minX + ", "
+                        + minY + ", " + minZ + "] > [" + maxX + ", " + maxY
+                        + ", " + maxZ + "]");
+            }
         }
 
         /**
