@@ -1434,11 +1434,13 @@ public class NoCheatPlus extends JavaPlugin implements NoCheatPlusAPI {
     }
 
     private void onLeave(final Player player) {
+        if (!pDataMan.registerPlayerLeave(player)) {
+            return;
+        }
         for (final JoinLeaveListener jlListener : joinLeaveListeners) {
-            try{
+            try {
                 jlListener.playerLeaves(player);
-            }
-            catch(Throwable t) {
+            } catch (Throwable t) {
                 logManager.severe(Streams.INIT, "JoinLeaveListener(" + jlListener.getClass().getName() + ") generated an exception (leave): " + t.getClass().getSimpleName());
                 logManager.severe(Streams.INIT, t);
             }
@@ -1446,6 +1448,8 @@ public class NoCheatPlus extends JavaPlugin implements NoCheatPlusAPI {
         if (clearExemptionsOnLeave) {
             NCPExemptionManager.unexempt(player);
         }
+        pDataMan.playerLeaves(player);
+        pDataMan.completePlayerLeave(player);
     }
 
     private void scheduleConsistencyCheckers() {

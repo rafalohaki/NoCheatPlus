@@ -129,6 +129,11 @@ public class PlayerDataManager  implements IPlayerDataManager, ComponentWithName
     private final Map<UUID, Long> lastLogout = new LinkedHashMap<UUID, Long>(50, 0.75f, true);
 
     /**
+     * Tracks ongoing leave processing and the tick in which it started.
+     */
+    private final Map<UUID, Long> leaveInProgress = new HashMap<UUID, Long>();
+
+    /**
      * Keeping track of online players. Currently id/name mappings are not kept
      * on logout, but might be later.
      */
@@ -204,7 +209,11 @@ public class PlayerDataManager  implements IPlayerDataManager, ComponentWithName
             @RegisterMethodWithOrder(tag = "system.nocheatplus.datamanager", afterTag = ".*")
             @Override
             public void onEvent(final PlayerQuitEvent event) {
-                playerLeaves(event.getPlayer());
+                final Player player = event.getPlayer();
+                if (registerPlayerLeave(player)) {
+                    playerLeaves(player);
+                    completePlayerLeave(player);
+                }
             }
         },
         new MiniListener<PlayerKickEvent>() {
@@ -214,7 +223,11 @@ public class PlayerDataManager  implements IPlayerDataManager, ComponentWithName
             @RegisterMethodWithOrder(tag = "system.nocheatplus.datamanager", afterTag = "feature.*")
             @Override
             public void onEvent(final PlayerKickEvent event) {
-                playerLeaves(event.getPlayer());
+                final Player player = event.getPlayer();
+                if (registerPlayerLeave(player)) {
+                    playerLeaves(player);
+                    completePlayerLeave(player);
+                }
             }
         },
         new MiniListener<AsyncPlayerPreLoginEvent>() {
@@ -699,27 +712,96 @@ public class PlayerDataManager  implements IPlayerDataManager, ComponentWithName
         // Data stuff.
         final Collection<Class<? extends IDataOnJoin>> types = factoryRegistry.getGroupedTypes(IDataOnJoin.class);
         pData.onPlayerJoin(player, player.getWorld(), timeNow, worldDataManager, types);
-        pData.getGenericInstance(CombinedData.class).lastJoinTime = timeNow; 
+        pData.getGenericInstance(CombinedData.class).lastJoinTime = timeNow;
+    }
+
+    /**
+     * Check if a leave action for this player should be skipped.
+     *
+     * @param playerId the player id
+     * @param timeNow  current time in milliseconds
+     * @return {@code true} if leave processing should be skipped
+     */
+    private boolean shouldSkipLeave(final UUID playerId, final long timeNow) {
+        final Long inProgress = leaveInProgress.get(playerId);
+        if (inProgress != null) {
+            return true;
+        }
+        final Long last = lastLogout.get(playerId);
+        return last != null && timeNow - last < 50L;
+    }
+
+    /**
+     * Mark the start of leave processing.
+     *
+     * @param playerId the player id
+     * @param timeNow  current time in milliseconds
+     */
+    private void markLeaveStart(final UUID playerId, final long timeNow) {
+        leaveInProgress.put(playerId, timeNow);
+    }
+
+    /**
+     * Clear the leave processing state.
+     *
+     * @param playerId the player id
+     */
+    private void markLeaveEnd(final UUID playerId) {
+        leaveInProgress.remove(playerId);
+    }
+
+    /**
+     * Register a leave event. Returns {@code true} if it is the first leave
+     * processed within the configured interval.
+     *
+     * @param player the player
+     * @return {@code true} if processing should continue
+     */
+    public boolean registerPlayerLeave(final Player player) {
+        if (player == null) {
+            return false;
+        }
+        final long timeNow = System.currentTimeMillis();
+        final UUID playerId = player.getUniqueId();
+        if (shouldSkipLeave(playerId, timeNow)) {
+            return false;
+        }
+        markLeaveStart(playerId, timeNow);
+        lastLogout.put(playerId, timeNow);
+        return true;
+    }
+
+    /**
+     * Mark leave processing as finished for the given player.
+     *
+     * @param player the player
+     */
+    public void completePlayerLeave(final Player player) {
+        if (player != null) {
+            markLeaveEnd(player.getUniqueId());
+        }
     }
 
     /**
      * Quit or kick.
      * @param player
      */
-    private void playerLeaves(final Player player) {
-        final long timeNow = System.currentTimeMillis();
+    public void playerLeaves(final Player player) {
+        if (player == null) {
+            return;
+        }
         final UUID playerId = player.getUniqueId();
-        lastLogout.put(playerId, timeNow);
+        final long timeNow = lastLogout.getOrDefault(playerId, System.currentTimeMillis());
         final PlayerData pData = playerData.get(playerId);
         if (pData != null) {
             final Collection<Class<? extends IDataOnLeave>> types = factoryRegistry.getGroupedTypes(IDataOnLeave.class);
             pData.onPlayerLeave(player, timeNow, types);
             pData.getGenericInstance(CombinedData.class).lastLogoutTime = timeNow;
-        }
-        else {
+        } else {
             // NOTE: Possibly put lastLogoutTime to OfflinePlayerData.
         }
         removeOnlinePlayer(player);
+        markLeaveEnd(playerId);
     }
 
     private void playerChangedWorld(final PlayerChangedWorldEvent event) {
