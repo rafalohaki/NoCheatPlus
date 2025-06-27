@@ -386,7 +386,10 @@ public class PassengerUtil {
         if (data.vehicleSetPassengerTaskId == null) {
             if (vehicle.getType() == EntityType.BOAT) {
                 if (!handleVehicle.getHandle().addPassenger(player, vehicle)) {
-                    vehicle.eject();
+                    if (debug) {
+                        CheckUtils.debug(player, CheckType.MOVING_VEHICLE,
+                                "Failed to add passenger to boat.");
+                    }
                     // Not schedule set passenger for boat due to location async
                 }
             } else if (scheduleDelay) {
