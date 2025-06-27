@@ -33,6 +33,8 @@ import fr.neatmonster.nocheatplus.worlds.IWorldData;
 public class BlockPlaceConfig extends ACheckConfig {
 
     public final ActionList againstActions;
+    /** Factor multiplied with violation level for the Against check when passed. */
+    public final double    againstVlDecay;
 
     public final boolean    autoSignSkipEmpty;
     public final ActionList autoSignActions;
@@ -44,6 +46,8 @@ public class BlockPlaceConfig extends ACheckConfig {
     public final int        fastPlaceShortTermLimit;
     public final boolean    fastPlaceImprobableFeedOnly;
     public final float      fastPlaceImprobableWeight;
+    /** Factor multiplied with the current violation level when no FastPlace violation occurs. */
+    public final double     fastPlaceVlDecay;
     public final ActionList fastPlaceActions;
 
     public final Set<Material> noSwingExceptions = new HashSet<Material>();
@@ -81,6 +85,7 @@ public class BlockPlaceConfig extends ACheckConfig {
         final ConfigFile config = worldData.getRawConfiguration();
 
         againstActions = config.getOptimizedActionList(ConfPaths.BLOCKPLACE_AGAINST_ACTIONS, Permissions.BLOCKPLACE_AGAINST);
+        againstVlDecay = config.getDouble(ConfPaths.BLOCKPLACE_AGAINST_VL_DECAY, 0.99);
 
         autoSignSkipEmpty = config.getBoolean(ConfPaths.BLOCKPLACE_AUTOSIGN_SKIPEMPTY);
         autoSignActions = config.getOptimizedActionList(ConfPaths.BLOCKPLACE_AUTOSIGN_ACTIONS, Permissions.BLOCKPLACE_AUTOSIGN);
@@ -93,6 +98,7 @@ public class BlockPlaceConfig extends ACheckConfig {
         fastPlaceShortTermLimit = config.getInt(ConfPaths.BLOCKPLACE_FASTPLACE_SHORTTERM_LIMIT);
         fastPlaceImprobableFeedOnly = config.getBoolean(ConfPaths.BLOCKPLACE_FASTPLACE_IMPROBABLE_FEEDONLY);
         fastPlaceImprobableWeight = (float) config.getDouble(ConfPaths.BLOCKPLACE_FASTPLACE_IMPROBABLE_WEIGHT);
+        fastPlaceVlDecay = config.getDouble(ConfPaths.BLOCKPLACE_FASTPLACE_VL_DECAY, 0.95);
         fastPlaceActions = config.getOptimizedActionList(ConfPaths.BLOCKPLACE_FASTPLACE_ACTIONS, Permissions.BLOCKPLACE_FASTPLACE);
 
         config.readMaterialFromList(ConfPaths.BLOCKPLACE_NOSWING_EXCEPTIONS, noSwingExceptions);

@@ -371,7 +371,7 @@ public class Text extends Check implements INotifyReload {
                     ColorUtil.replaceColors(cc.chatWarningMessage));
             data.chatWarningTime = time;
         } else {
-            data.textVL *= 0.95;
+            data.textVL *= cc.textVlDecay;
             if (cc.textAllowVLReset && normalScore < 2.0f * cc.textFreqNormWeight
                     && shortTermScore < 2.0f * cc.textFreqShortTermWeight) {
                 data.textVL = 0.0;

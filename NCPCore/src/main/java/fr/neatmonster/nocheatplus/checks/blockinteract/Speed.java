@@ -55,7 +55,7 @@ public class Speed extends Check {
             }
         }
         else{
-            data.speedVL *= 0.99;
+            data.speedVL *= cc.speedVlDecay;
             data.addPassedCheck(this.type);
         }
 

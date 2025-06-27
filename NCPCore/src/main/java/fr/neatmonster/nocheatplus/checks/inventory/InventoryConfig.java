@@ -45,6 +45,8 @@ public class InventoryConfig extends ACheckConfig {
     public final int        chestOpenLimit;
     public final Set<String> inventoryExemptions = new HashSet<String>();
     public final float      fastClickImprobableWeight;
+    /** Factor multiplied with the violation level when FastClick passes checks. */
+    public final double     fastClickVlDecay;
     public final ActionList fastClickActions;
 
     public final long		fastConsumeDuration;
@@ -92,6 +94,7 @@ public class InventoryConfig extends ACheckConfig {
         chestOpenLimit = data.getInt(ConfPaths.INVENTORY_FASTCLICK_LIMIT_CHEST);
         data.readStringlFromList(ConfPaths.INVENTORY_FASTCLICK_EXCLUDE, inventoryExemptions);
         fastClickImprobableWeight = (float) data.getDouble(ConfPaths.INVENTORY_FASTCLICK_IMPROBABLE_WEIGHT);
+        fastClickVlDecay = data.getDouble(ConfPaths.INVENTORY_FASTCLICK_VL_DECAY, 0.99);
         fastClickActions = data.getOptimizedActionList(ConfPaths.INVENTORY_FASTCLICK_ACTIONS, Permissions.INVENTORY_FASTCLICK);
 
         if (ServerVersion.compareMinecraftVersion("1.9") >= 0) {

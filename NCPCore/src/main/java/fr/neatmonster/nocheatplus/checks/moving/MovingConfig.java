@@ -106,6 +106,8 @@ public class MovingConfig extends ACheckConfig {
     public ActionList passableActions;
     public double     passableHorizontalMargins;
     public double     passableVerticalMargins;
+    /** Factor multiplied with violation level when Passable passes checks. */
+    public double     passableVlDecay;
     public boolean    passableUntrackedTeleportCheck;
     public boolean    passableUntrackedCommandCheck;
     public boolean    passableUntrackedCommandTryTeleport;
@@ -133,6 +135,8 @@ public class MovingConfig extends ACheckConfig {
     public double     hBufMax;
     public long       survivalFlyVLFreezeCount;
     public boolean    survivalFlyVLFreezeInAir;
+    /** Factor multiplied with violation level when SurvivalFly passes checks. */
+    public double     survivalFlyVlDecay;
     // Set back policy.
     public boolean    sfSetBackPolicyVoid;
     public boolean    sfSetBackPolicyApplyFallDamage;
@@ -189,6 +193,8 @@ public class MovingConfig extends ACheckConfig {
 
     public HashMap<EntityType, Double> vehicleEnvelopeHorizontalSpeedCap = new HashMap<EntityType, Double>();
     public ActionList vehicleEnvelopeActions;
+    /** Factor multiplied with violation level when VehicleEnvelope passes checks. */
+    public double vehicleEnvelopeVlDecay;
 
     // Trace
     public int traceMaxAge;
@@ -340,6 +346,7 @@ public class MovingConfig extends ACheckConfig {
                 Permissions.MOVING_PASSABLE);
         passableHorizontalMargins = config.getDouble(ConfPaths.MOVING_PASSABLE_RT_XZ_FACTOR, 0.1, 1.0, 0.999999);
         passableVerticalMargins = config.getDouble(ConfPaths.MOVING_PASSABLE_RT_Y_FACTOR, 0.1, 1.0, 0.999999);
+        passableVlDecay = config.getDouble(ConfPaths.MOVING_PASSABLE_VL_DECAY, 0.99);
         passableUntrackedTeleportCheck = config.getBoolean(ConfPaths.MOVING_PASSABLE_UNTRACKED_TELEPORT_ACTIVE);
         passableUntrackedCommandCheck = config.getBoolean(ConfPaths.MOVING_PASSABLE_UNTRACKED_CMD_ACTIVE);
         passableUntrackedCommandTryTeleport = config.getBoolean(ConfPaths.MOVING_PASSABLE_UNTRACKED_CMD_TRYTELEPORT);
@@ -380,6 +387,7 @@ public class MovingConfig extends ACheckConfig {
         hBufMax = config.getDouble(ConfPaths.MOVING_SURVIVALFLY_LENIENCY_HBUFMAX);
         survivalFlyVLFreezeCount = config.getInt(ConfPaths.MOVING_SURVIVALFLY_LENIENCY_FREEZECOUNT);
         survivalFlyVLFreezeInAir = config.getBoolean(ConfPaths.MOVING_SURVIVALFLY_LENIENCY_FREEZEINAIR);
+        survivalFlyVlDecay = config.getDouble(ConfPaths.MOVING_SURVIVALFLY_VL_DECAY, 0.95);
         survivalFlyActions = config.getOptimizedActionList(ConfPaths.MOVING_SURVIVALFLY_ACTIONS,
                 Permissions.MOVING_SURVIVALFLY);
 
@@ -455,6 +463,7 @@ public class MovingConfig extends ACheckConfig {
                 vehicleEnvelopeHorizontalSpeedCap, 4.0, true);
         vehicleEnvelopeActions = config.getOptimizedActionList(ConfPaths.MOVING_VEHICLE_ENVELOPE_ACTIONS,
                 Permissions.MOVING_VEHICLE_ENVELOPE);
+        vehicleEnvelopeVlDecay = config.getDouble(ConfPaths.MOVING_VEHICLE_ENVELOPE_VL_DECAY, 0.99);
         List<String> types;
         if (config.get(ConfPaths.MOVING_VEHICLE_IGNOREDVEHICLES) == null) {
             types = Arrays.asList("arrow", "spectral_arrow", "tipped_arrow");

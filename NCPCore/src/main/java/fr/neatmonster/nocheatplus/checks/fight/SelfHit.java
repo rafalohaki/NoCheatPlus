@@ -33,7 +33,7 @@ public class SelfHit extends Check {
         // Treat self hitting as instant violation.
         data.selfHitVL.add(System.currentTimeMillis(), 1.0f);
         // NOTE: This lets VL decrease slightly over 30 seconds, one could also use a number, but  this is more tolerant.
-        cancel = executeActions(damager, data.selfHitVL.score(0.99f), 1.0f, cc.selfHitActions).willCancel();
+        cancel = executeActions(damager, data.selfHitVL.score((float) cc.selfHitVlDecay), 1.0f, cc.selfHitActions).willCancel();
 
         return cancel;
     }

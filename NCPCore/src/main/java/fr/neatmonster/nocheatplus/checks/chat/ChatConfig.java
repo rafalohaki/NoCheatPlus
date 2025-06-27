@@ -53,6 +53,8 @@ public class ChatConfig extends ACheckConfig {
     public final double       commandsLevel;
     public final int          commandsShortTermTicks;
     public final double       commandsShortTermLevel;
+    /** Factor multiplied with the violation level when command spam subsides. */
+    public final double       commandsVlDecay;
     public final ActionList   commandsActions;
 
     // Potentially add sub check types
@@ -69,6 +71,8 @@ public class ChatConfig extends ACheckConfig {
     public final float        textFreqShortTermLevel;
     public final float        textFreqShortTermMin;
     public final ActionList   textFreqShortTermActions;
+    /** Factor multiplied with the violation level when chat spam subsides. */
+    public final double       textVlDecay;
     public final float        textMessageLetterCount;
     public final float        textMessageUpperCase;
     public final float        textMessagePartition;
@@ -130,6 +134,7 @@ public class ChatConfig extends ACheckConfig {
         commandsLevel = config.getDouble(ConfPaths.CHAT_COMMANDS_LEVEL);
         commandsShortTermTicks = config.getInt(ConfPaths.CHAT_COMMANDS_SHORTTERM_TICKS);
         commandsShortTermLevel = config.getDouble(ConfPaths.CHAT_COMMANDS_SHORTTERM_LEVEL);
+        commandsVlDecay = config.getDouble(ConfPaths.CHAT_COMMANDS_VL_DECAY, 0.99);
         commandsActions = config.getOptimizedActionList(ConfPaths.CHAT_COMMANDS_ACTIONS, Permissions.CHAT_COMMANDS);
 
         textGlobalCheck = config.getBoolean(ConfPaths.CHAT_TEXT_GL_CHECK, true);
@@ -162,6 +167,7 @@ public class ChatConfig extends ACheckConfig {
         textDebug = config.getBoolean(ConfPaths.CHAT_TEXT_DEBUG, false);
         textFreqNormActions = config.getOptimizedActionList(ConfPaths.CHAT_TEXT_FREQ_NORM_ACTIONS, Permissions.CHAT_TEXT);
         textAllowVLReset = config.getBoolean(ConfPaths.CHAT_TEXT_ALLOWVLRESET);
+        textVlDecay = config.getDouble(ConfPaths.CHAT_TEXT_VL_DECAY, 0.95);
 
         chatWarningCheck = config.getBoolean(ConfPaths.CHAT_WARNING_CHECK);
         chatWarningLevel = (float) config.getDouble(ConfPaths.CHAT_WARNING_LEVEL);
