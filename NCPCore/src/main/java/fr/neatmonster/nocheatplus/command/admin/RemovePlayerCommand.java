@@ -156,7 +156,7 @@ public class RemovePlayerCommand extends BaseCommand {
      * @param type the check type
      */
     private void removeAllData(CommandSender sender, CheckType type) {
-        DataManager.clearData(type);
+        DataManager.getInstance().clearData(type);
         final boolean player = sender instanceof Player;
         sender.sendMessage((player ? TAG : CTAG) + "Removed all data and history: "
                 + formatMessage(type.toString(), player ? ChatColor.RED : null));
@@ -174,7 +174,7 @@ public class RemovePlayerCommand extends BaseCommand {
         final String c1 = isPlayer ? ChatColor.GRAY.toString() : "";
         final ChatColor red = isPlayer ? ChatColor.RED : null;
 
-        final Player exact = DataManager.getPlayer(playerName);
+        final Player exact = DataManager.getInstance().getPlayer(playerName);
         if (exact != null) {
             playerName = exact.getName();
         }
@@ -189,11 +189,11 @@ public class RemovePlayerCommand extends BaseCommand {
             }
         }
 
-        if (DataManager.removeExecutionHistory(type, playerName)) {
+        if (DataManager.getInstance().removeExecutionHistory(type, playerName)) {
             somethingFound = true;
         }
 
-        if (DataManager.removeData(playerName, type)) {
+        if (DataManager.getInstance().removeData(playerName, type)) {
             somethingFound = true;
         }
 

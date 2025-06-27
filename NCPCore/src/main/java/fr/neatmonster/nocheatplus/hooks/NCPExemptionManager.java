@@ -72,7 +72,7 @@ public class NCPExemptionManager {
      * Remove all exemptions.
      */
     public static final void clear() {
-        DataManager.clearAllExemptions();
+        DataManager.getInstance().clearAllExemptions();
     }
 
     /**
@@ -95,7 +95,7 @@ public class NCPExemptionManager {
      *            The check type.
      */
     public static final void exemptPermanently(final UUID id, final CheckType checkType) {
-        final IPlayerData data = DataManager.getPlayerData(id);
+        final IPlayerData data = DataManager.getInstance().getPlayerData(id);
         if (data != null) {
             data.exempt(checkType);
         }
@@ -139,7 +139,7 @@ public class NCPExemptionManager {
      * @return If the entity is exempted from checks right now.
      */
     public static final boolean isExempted(final UUID id, final CheckType checkType) {
-        final IPlayerData data = DataManager.getPlayerData(id);
+        final IPlayerData data = DataManager.getInstance().getPlayerData(id);
         return data != null && data.isExempted(checkType);
     }
 
@@ -191,7 +191,7 @@ public class NCPExemptionManager {
      *            The check type.
      */
     public static final void unexempt(final UUID id,  final CheckType checkType) {
-        final IPlayerData data = DataManager.getPlayerData(id);
+        final IPlayerData data = DataManager.getInstance().getPlayerData(id);
         if (data != null) {
             data.unexempt(checkType);
         }

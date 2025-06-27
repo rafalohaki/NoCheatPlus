@@ -19,6 +19,7 @@ import fr.neatmonster.nocheatplus.checks.moving.MovingData;
 import fr.neatmonster.nocheatplus.checks.moving.model.ModelFlying;
 import fr.neatmonster.nocheatplus.checks.moving.model.PlayerMoveData;
 import fr.neatmonster.nocheatplus.checks.moving.player.CreativeFly;
+import fr.neatmonster.nocheatplus.players.PlayerDataManager;
 import fr.neatmonster.nocheatplus.components.modifier.IAttributeAccess;
 import fr.neatmonster.nocheatplus.components.registry.event.IGenericInstanceHandle;
 import fr.neatmonster.nocheatplus.compat.MCAccess;
@@ -109,17 +110,14 @@ public class TestCreativeFlyHDist {
         f.setAccessible(true);
         f.set(null, api);
 
-        // Set DataManager.instance
         Field uf = sun.misc.Unsafe.class.getDeclaredField("theUnsafe");
         uf.setAccessible(true);
         sun.misc.Unsafe un = (sun.misc.Unsafe) uf.get(null);
-        Object pdm = un.allocateInstance(fr.neatmonster.nocheatplus.players.PlayerDataManager.class);
+        PlayerDataManager pdm = (PlayerDataManager) un.allocateInstance(fr.neatmonster.nocheatplus.players.PlayerDataManager.class);
         Field eh = fr.neatmonster.nocheatplus.players.PlayerDataManager.class.getDeclaredField("executionHistories");
         eh.setAccessible(true);
         eh.set(pdm, new HashMap<>());
-        Field dm = fr.neatmonster.nocheatplus.players.DataManager.class.getDeclaredField("instance");
-        dm.setAccessible(true);
-        dm.set(null, pdm);
+        new fr.neatmonster.nocheatplus.players.DataManager(pdm);
     }
 
     @Before

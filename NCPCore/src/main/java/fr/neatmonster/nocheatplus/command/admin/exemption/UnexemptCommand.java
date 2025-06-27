@@ -69,7 +69,7 @@ public class UnexemptCommand extends BaseCommand {
             return true;
         }
 
-        final Player player = DataManager.getPlayer(targetName);
+        final Player player = DataManager.getInstance().getPlayer(targetName);
         final String name = player != null ? player.getName() : targetName;
         unexemptPlayer(id, name, checkType, sender);
         return true;
@@ -108,11 +108,11 @@ public class UnexemptCommand extends BaseCommand {
     }
 
     private UUID resolveTargetId(String name, CommandSender sender) {
-        final Player player = DataManager.getPlayer(name);
+        final Player player = DataManager.getInstance().getPlayer(name);
         if (player != null) {
             return player.getUniqueId();
         }
-        return DataManager.getUUID(name);
+        return DataManager.getInstance().getUUID(name);
     }
 
     private void unexemptAll(CheckType type, CommandSender sender) {

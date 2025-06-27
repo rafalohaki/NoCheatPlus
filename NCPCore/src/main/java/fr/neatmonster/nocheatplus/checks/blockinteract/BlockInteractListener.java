@@ -138,7 +138,7 @@ public class BlockInteractListener extends CheckListener {
         if (player == null) {
             return;
         }
-        final IPlayerData pData = DataManager.getPlayerData(player);
+        final IPlayerData pData = DataManager.getInstance().getPlayerData(player);
         if (pData == null || !pData.isCheckActive(CheckType.BLOCKINTERACT, player)) {
             return;
         }
@@ -338,7 +338,7 @@ public class BlockInteractListener extends CheckListener {
     public void onPlayerInteractMonitor(final PlayerInteractEvent event) {
         // Set event resolution.
         final Player player = event.getPlayer();
-        final IPlayerData pData = DataManager.getPlayerData(player);
+        final IPlayerData pData = DataManager.getInstance().getPlayerData(player);
         final BlockInteractData data = pData.getGenericInstance(BlockInteractData.class);
         data.setPlayerInteractEventResolution(event);
 

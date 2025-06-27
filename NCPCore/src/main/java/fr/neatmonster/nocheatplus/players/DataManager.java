@@ -35,6 +35,32 @@ import fr.neatmonster.nocheatplus.checks.CheckType;
  */
 public class DataManager {
 
+    private static DataManager instance;
+
+    private final PlayerDataManager playerDataManager;
+
+    /**
+     * Create a new DataManager service wrapping the given manager. The
+     * last created instance is used for legacy access via {@link #getInstance()}.
+     *
+     * @param playerDataManager the backing PlayerDataManager
+     */
+    public DataManager(final PlayerDataManager playerDataManager) {
+        this.playerDataManager = playerDataManager;
+        instance = this;
+    }
+
+    /**
+     * Legacy accessor for callers still using the singleton pattern.
+     *
+     * @return current DataManager instance
+     * @deprecated inject the DataManager service instead of calling this method
+     */
+    @Deprecated
+    public static DataManager getInstance() {
+        return instance;
+    }
+
     /*
      * DataManager currently acts as a static facade to {@link PlayerDataManager}.
      * A future refactoring might detach the underlying manager and replace this
@@ -42,14 +68,13 @@ public class DataManager {
      * could share locks for efficiency.
      */
 
-    static PlayerDataManager instance = null;
 
     /**
      * Get the exact player name, stored internally.
      * @param playerId
      */
-    public static String getPlayerName(final UUID playerId) {
-        return instance.getPlayerName(playerId);
+    public String getPlayerName(final UUID playerId) {
+        return playerDataManager.getPlayerName(playerId);
     }
 
     /**
@@ -66,8 +91,8 @@ public class DataManager {
      *             instead of this utility method.
      *             </p>
      */
-    public static void registerExecutionHistory(CheckType type, Map<String, ExecutionHistory> histories) {
-        instance.registerExecutionHistory(type, histories);
+    public void registerExecutionHistory(CheckType type, Map<String, ExecutionHistory> histories) {
+        playerDataManager.registerExecutionHistory(type, histories);
     }
 
     /**
@@ -84,8 +109,8 @@ public class DataManager {
      *             utility method.
      *             </p>
      */
-    public static ExecutionHistory getExecutionHistory(final CheckType type, final String playerName) {
-        return instance.getExecutionHistory(type, playerName);
+    public ExecutionHistory getExecutionHistory(final CheckType type, final String playerName) {
+        return playerDataManager.getExecutionHistory(type, playerName);
     }
 
     /**
@@ -101,8 +126,8 @@ public class DataManager {
      *             instead.
      *             </p>
      */
-    public static boolean removeExecutionHistory(final CheckType type, final String playerName) {
-        return instance.removeExecutionHistory(type, playerName);
+    public boolean removeExecutionHistory(final CheckType type, final String playerName) {
+        return playerDataManager.removeExecutionHistory(type, playerName);
     }
 
     /**
@@ -111,9 +136,9 @@ public class DataManager {
      * 
      * @param checkType
      */
-    public static void clearData(final CheckType checkType) {
+    public void clearData(final CheckType checkType) {
         NCPAPIProvider.getNoCheatPlusAPI().getWorldDataManager().clearData(checkType);
-        instance.clearData(checkType);
+        playerDataManager.clearData(checkType);
     }
 
     /**
@@ -122,10 +147,10 @@ public class DataManager {
      * ICanHandleTimeRunningBackwards.handleTimeRanBackwards for data instances
      * which implement this.
      */
-    public static void handleSystemTimeRanBackwards() {
+    public void handleSystemTimeRanBackwards() {
         // This is currently called through the static API. Refactoring may
         // invoke the underlying manager directly from the core plugin.
-        instance.handleSystemTimeRanBackwards();
+        playerDataManager.handleSystemTimeRanBackwards();
     }
 
     /**
@@ -137,8 +162,8 @@ public class DataManager {
      * Further documentation will clarify how default debug flags are derived
      * from the configuration in a future refactoring.
      */
-    public static void restoreDefaultDebugFlags() {
-        instance.restoreDefaultDebugFlags();
+    public void restoreDefaultDebugFlags() {
+        playerDataManager.restoreDefaultDebugFlags();
     }
 
     /**
@@ -151,8 +176,8 @@ public class DataManager {
      *            Check type to remove data for, null is regarded as ALL.
      * @return If any data was present (not strict).
      */
-    public static boolean removeData(final String playerName, CheckType checkType) {
-        return instance.removeData(playerName, checkType);
+    public boolean removeData(final String playerName, CheckType checkType) {
+        return playerDataManager.removeData(playerName, checkType);
     }
 
     /**
@@ -164,10 +189,10 @@ public class DataManager {
      * @param PlayerName
      * @return If something was removed.
      */
-    public static boolean clearComponentData(final CheckType checkType, final String PlayerName) {
+    public boolean clearComponentData(final CheckType checkType, final String PlayerName) {
         // This method still relies on player names. Refactoring should switch
         // to UUID based lookups to avoid ambiguity.
-        return instance.clearComponentData(checkType, PlayerName);
+        return playerDataManager.clearComponentData(checkType, PlayerName);
     }
 
     /**
@@ -177,8 +202,8 @@ public class DataManager {
      * @param playerName
      * @return
      */
-    public static Player getPlayerExact(final String playerName) {
-        return instance.getPlayerExact(playerName);
+    public Player getPlayerExact(final String playerName) {
+        return playerDataManager.getPlayerExact(playerName);
     }
 
     /**
@@ -189,8 +214,8 @@ public class DataManager {
      * @param input
      * @return
      */
-    public static UUID getUUID(final String input) {
-        return instance.getUUID(input);
+    public UUID getUUID(final String input) {
+        return playerDataManager.getUUID(input);
     }
 
     /**
@@ -199,8 +224,8 @@ public class DataManager {
      * @param id
      * @return
      */
-    public static Player getPlayer(final UUID id) {
-        return instance.getPlayer(id);
+    public Player getPlayer(final UUID id) {
+        return playerDataManager.getPlayer(id);
     }
 
     /**
@@ -210,8 +235,8 @@ public class DataManager {
      * @param playerName
      * @return
      */
-    public static Player getPlayer(final String playerName) {
-        return instance.getPlayer(playerName);
+    public Player getPlayer(final String playerName) {
+        return playerDataManager.getPlayer(playerName);
     }
 
     /**
@@ -222,8 +247,8 @@ public class DataManager {
      * @param player
      * @return
      */
-    public static IPlayerData getPlayerData(final Player player) {
-        return instance.getPlayerData(player, true);
+    public IPlayerData getPlayerData(final Player player) {
+        return playerDataManager.getPlayerData(player, true);
     }
 
     /**
@@ -232,8 +257,8 @@ public class DataManager {
      * @param playerName
      * @return The PlayerData instance if present, null otherwise.
      */
-    public static IPlayerData getPlayerData(final String playerName) {
-        return instance.getPlayerData(playerName);
+    public IPlayerData getPlayerData(final String playerName) {
+        return playerDataManager.getPlayerData(playerName);
     }
 
     /**
@@ -242,27 +267,24 @@ public class DataManager {
      * @param playerId
      * @return The PlayerData instance if present, null otherwise.
      */
-    public static IPlayerData getPlayerData(final UUID playerId) {
-        return instance.getPlayerData(playerId);
+    public IPlayerData getPlayerData(final UUID playerId) {
+        return playerDataManager.getPlayerData(playerId);
     }
-
-    static boolean isFrequentPlayerTaskScheduled(final UUID playerId) {
-        return instance.isFrequentPlayerTaskScheduled(playerId);
+    boolean isFrequentPlayerTaskScheduled(final UUID playerId) {
+        return playerDataManager.isFrequentPlayerTaskScheduled(playerId);
     }
-
-    static void registerFrequentPlayerTaskPrimaryThread(final UUID playerId) {
-        instance.registerFrequentPlayerTaskPrimaryThread(playerId);
+    void registerFrequentPlayerTaskPrimaryThread(final UUID playerId) {
+        playerDataManager.registerFrequentPlayerTaskPrimaryThread(playerId);
     }
-
-    static void registerFrequentPlayerTaskAsynchronous(final UUID playerId) {
-        instance.registerFrequentPlayerTaskAsynchronous(playerId);
+    void registerFrequentPlayerTaskAsynchronous(final UUID playerId) {
+        playerDataManager.registerFrequentPlayerTaskAsynchronous(playerId);
     }
 
     /**
      * 
      */
-    public static void clearAllExemptions() {
-        instance.clearAllExemptions();
+    public void clearAllExemptions() {
+        playerDataManager.clearAllExemptions();
     }
 
     /**
@@ -272,23 +294,22 @@ public class DataManager {
      * @param registeredFor
      * @return
      */
-    public static <T> T getGenericInstance(final Player player, final Class<T> registeredFor) {
-        return instance.getPlayerData(player).getGenericInstance(registeredFor);
+    public <T> T getGenericInstance(final Player player, final Class<T> registeredFor) {
+        return playerDataManager.getPlayerData(player).getGenericInstance(registeredFor);
     }
-
-    static <T> T getFromFactory(final Class<T> registeredFor, 
+    <T> T getFromFactory(final Class<T> registeredFor, 
             final PlayerFactoryArgument arg) {
-        return instance.getNewInstance(registeredFor, arg);
+        return playerDataManager.getNewInstance(registeredFor, arg);
     }
 
     /**
-     * Attempt to get or create an IPlayerData instance. Creation will only be
+     * Attempt to get or create an IPlayerData playerDataManager. Creation will only be
      * done, if the player name, UUID and world can be fetched.
      * 
      * @param player
      * @return null in case of failures.
     */
-    public static IPlayerData getPlayerDataSafe(final Player player) {
+    public IPlayerData getPlayerDataSafe(final Player player) {
         if (player == null) {
             return null;
         }

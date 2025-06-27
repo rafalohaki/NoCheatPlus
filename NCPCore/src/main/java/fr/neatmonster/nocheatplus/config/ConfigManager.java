@@ -373,7 +373,7 @@ public class ConfigManager {
 
     /**
      * Set a property for all configurations. Might use with
-     * DataManager.clearConfigs if check-configurations might already be in use.
+     * DataManager.getInstance().clearConfigs if check-configurations might already be in use.
      *
      * @param path
      * @param value

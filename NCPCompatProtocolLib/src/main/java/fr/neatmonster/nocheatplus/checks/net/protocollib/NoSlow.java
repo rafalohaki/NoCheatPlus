@@ -133,7 +133,7 @@ public class NoSlow extends BaseAdapter {
     private static void onItemConsume(final PlayerItemConsumeEvent e){
         final Player p = e.getPlayer();
         
-        final IPlayerData pData = DataManager.getPlayerData(p);
+        final IPlayerData pData = DataManager.getInstance().getPlayerData(p);
         final MovingData data = pData.getGenericInstance(MovingData.class);
         data.isUsingItem = false;        
     }
@@ -142,7 +142,7 @@ public class NoSlow extends BaseAdapter {
         if (e.isCancelled()) return;
         final Player p = (Player) e.getPlayer();
         
-        final IPlayerData pData = DataManager.getPlayerData(p);
+        final IPlayerData pData = DataManager.getInstance().getPlayerData(p);
         final MovingData data = pData.getGenericInstance(MovingData.class);
         data.isUsingItem = false;        
     }
@@ -158,7 +158,7 @@ public class NoSlow extends BaseAdapter {
             return;
         }
 
-        final IPlayerData pData = DataManager.getPlayerData(player);
+        final IPlayerData pData = DataManager.getInstance().getPlayerData(player);
         if (pData == null) {
             return;
         }
@@ -301,7 +301,7 @@ public class NoSlow extends BaseAdapter {
 
     private static void onChangeSlot(final PlayerItemHeldEvent e) {
         final Player p = e.getPlayer();
-        final IPlayerData pData = DataManager.getPlayerData(p);
+        final IPlayerData pData = DataManager.getInstance().getPlayerData(p);
         final MovingData data = pData.getGenericInstance(MovingData.class);
         //if (data.changeslot) {
         //    p.getInventory().setHeldItemSlot(data.olditemslot);
@@ -327,7 +327,7 @@ public class NoSlow extends BaseAdapter {
 
     private void handleBlockPlacePacket(PacketEvent event) {
         final Player p = event.getPlayer();
-        final IPlayerData pData = DataManager.getPlayerData(p);
+        final IPlayerData pData = DataManager.getInstance().getPlayerData(p);
         final MovingData data = pData.getGenericInstance(MovingData.class);
         final PacketContainer packet = event.getPacket();
 
@@ -350,7 +350,7 @@ public class NoSlow extends BaseAdapter {
             counters.add(ProtocolLibComponent.idNullPlayer, 1);
             return;
         }
-        final IPlayerData pData = DataManager.getPlayerDataSafe(p);
+        final IPlayerData pData = DataManager.getInstance().getPlayerDataSafe(p);
         if (pData == null) {
             StaticLog.logWarning("Failed to fetch player data with " + event.getPacketType() + " for: " + p);
             return;

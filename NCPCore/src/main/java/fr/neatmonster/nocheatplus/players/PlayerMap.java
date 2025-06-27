@@ -240,7 +240,7 @@ public final class PlayerMap {
             return Bukkit.getPlayer(id);
         } else {
             // HACKS
-            final IPlayerData pData = DataManager.getPlayerData(id);
+            final IPlayerData pData = DataManager.getInstance().getPlayerData(id);
             if (pData != null) {
                 return getPlayer(pData.getPlayerName());
             }

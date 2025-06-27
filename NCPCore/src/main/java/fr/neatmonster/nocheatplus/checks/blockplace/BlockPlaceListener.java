@@ -166,7 +166,7 @@ public class BlockPlaceListener extends CheckListener {
      */
     @EventHandler(ignoreCancelled = true, priority = EventPriority.LOWEST)
     public void onBlockPlace(final BlockPlaceEvent event) {
-        if (!DataManager.getPlayerData(event.getPlayer()).isCheckActive(CheckType.BLOCKPLACE, event.getPlayer())) {
+        if (!DataManager.getInstance().getPlayerData(event.getPlayer()).isCheckActive(CheckType.BLOCKPLACE, event.getPlayer())) {
             return;
         }
         final Block block = event.getBlockPlaced();
@@ -181,7 +181,7 @@ public class BlockPlaceListener extends CheckListener {
         boolean cancelled = false;
         int skippedRedundantChecks = 0;
         boolean shouldCheck;
-        final IPlayerData pData = DataManager.getPlayerData(player);
+        final IPlayerData pData = DataManager.getInstance().getPlayerData(player);
         final BlockPlaceData data = pData.getGenericInstance(BlockPlaceData.class);
         final BlockPlaceConfig cc = pData.getGenericInstance(BlockPlaceConfig.class);
         final BlockInteractData bdata = pData.getGenericInstance(BlockInteractData.class);
@@ -407,7 +407,7 @@ public class BlockPlaceListener extends CheckListener {
 
     @EventHandler(priority = EventPriority.LOWEST)
     public void onSignChange(final SignChangeEvent event) {
-        if (!DataManager.getPlayerData(event.getPlayer()).isCheckActive(CheckType.BLOCKPLACE, event.getPlayer())) {
+        if (!DataManager.getInstance().getPlayerData(event.getPlayer()).isCheckActive(CheckType.BLOCKPLACE, event.getPlayer())) {
             return;
         }
         if (event.getClass() != SignChangeEvent.class) {
@@ -421,7 +421,7 @@ public class BlockPlaceListener extends CheckListener {
         if (block == null || lines == null || player == null) {
             return;
         }
-        final IPlayerData pData = DataManager.getPlayerData(player);
+        final IPlayerData pData = DataManager.getInstance().getPlayerData(player);
         final BlockPlaceData data = pData.getGenericInstance(BlockPlaceData.class);
         // NCP did not register the needed data from the block-place event but we still got a sign change event: the event was triggered by the new player-editing mechanic in 1.20, not by a the player placing down a sign.
         // In this case, the hash-checking is skipped, but the edit time check is not, because AutoSign hacks can still work with editing.
@@ -444,7 +444,7 @@ public class BlockPlaceListener extends CheckListener {
     @EventHandler(priority = EventPriority.MONITOR)
     public void onPlayerAnimation(final PlayerAnimationEvent event) {
         // Just set a flag to true when the arm was swung.
-        final BlockPlaceData data = DataManager.getGenericInstance(event.getPlayer(), BlockPlaceData.class);
+        final BlockPlaceData data = DataManager.getInstance().getGenericInstance(event.getPlayer(), BlockPlaceData.class);
         data.noSwingCount = Math.max(data.noSwingCount - 1, 0);
     }
 
@@ -456,7 +456,7 @@ public class BlockPlaceListener extends CheckListener {
      */
     @EventHandler(ignoreCancelled = true, priority = EventPriority.LOWEST)
     public void onPlayerInteract(final PlayerInteractEvent event) {
-        if (!DataManager.getPlayerData(event.getPlayer()).isCheckActive(CheckType.BLOCKPLACE, event.getPlayer())) {
+        if (!DataManager.getInstance().getPlayerData(event.getPlayer()).isCheckActive(CheckType.BLOCKPLACE, event.getPlayer())) {
             return;
         }
         if (event.getAction() != Action.RIGHT_CLICK_BLOCK) {
@@ -467,7 +467,7 @@ public class BlockPlaceListener extends CheckListener {
         if (stack == null) {
             return;
         }
-        final IPlayerData pData = DataManager.getPlayerData(player);
+        final IPlayerData pData = DataManager.getInstance().getPlayerData(player);
         final BlockPlaceConfig cc = pData.getGenericInstance(BlockPlaceConfig.class);
         final Material type = stack.getType();
         if (MaterialUtil.isBoat(type)) {
@@ -542,7 +542,7 @@ public class BlockPlaceListener extends CheckListener {
             return;
         }
 
-        final IPlayerData pData = DataManager.getPlayerData(player);
+        final IPlayerData pData = DataManager.getInstance().getPlayerData(player);
         if (!pData.isCheckActive(CheckType.BLOCKPLACE, player)) {
             return;
         }
@@ -632,7 +632,7 @@ public class BlockPlaceListener extends CheckListener {
     @EventHandler(priority = EventPriority.MONITOR)
     public void onMove(PlayerMoveEvent event) {
         Player player = event.getPlayer();
-        final IPlayerData pData = DataManager.getPlayerData(player);
+        final IPlayerData pData = DataManager.getInstance().getPlayerData(player);
         final BlockPlaceData data = pData.getGenericInstance(BlockPlaceData.class);
 
         if (!pData.isCheckActive(CheckType.BLOCKPLACE, player)) return;

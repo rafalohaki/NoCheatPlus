@@ -151,7 +151,7 @@ public class BlockBreakListener extends CheckListener {
     public void onBlockBreak(final BlockBreakEvent event) {
         final long now = Monotonic.millis();
         final Player player = event.getPlayer();
-        final IPlayerData pData = player != null ? DataManager.getPlayerData(player) : null;
+        final IPlayerData pData = player != null ? DataManager.getInstance().getPlayerData(player) : null;
         final Block block = event.getBlock();
 
         boolean process = isPlayerValid(player);
@@ -346,7 +346,7 @@ public class BlockBreakListener extends CheckListener {
     public void onPlayerAnimation(final PlayerAnimationEvent event) {
         // Just set a flag to true when the arm was swung.
         // debug(player, "Animation");
-        final BlockBreakData data = DataManager.getPlayerData(event.getPlayer()).getGenericInstance(BlockBreakData.class);
+        final BlockBreakData data = DataManager.getInstance().getPlayerData(event.getPlayer()).getGenericInstance(BlockBreakData.class);
         data.noSwingCount = Math.max(data.noSwingCount - 1, 0);
     }
 
@@ -362,7 +362,7 @@ public class BlockBreakListener extends CheckListener {
     public void onPlayerInteract(final PlayerInteractEvent event) {
         // debug(player, "Interact("+event.isCancelled()+"): " + event.getClickedBlock());
         // The following is to set the "first damage time" for a block.
-        boolean handle = DataManager.getPlayerData(event.getPlayer())
+        boolean handle = DataManager.getInstance().getPlayerData(event.getPlayer())
                 .isCheckActive(CheckType.BLOCKBREAK, event.getPlayer());
         if (handle) {
             isInstaBreak = AlmostBoolean.NO;
@@ -390,7 +390,7 @@ public class BlockBreakListener extends CheckListener {
 
     @EventHandler(ignoreCancelled = false, priority = EventPriority.MONITOR)
     public void onBlockDamage(final BlockDamageEvent event) {
-        boolean handle = DataManager.getPlayerData(event.getPlayer())
+        boolean handle = DataManager.getInstance().getPlayerData(event.getPlayer())
                 .isCheckActive(CheckType.BLOCKBREAK, event.getPlayer());
         if (handle) {
             if (!event.isCancelled() && event.getInstaBreak()) {
@@ -406,7 +406,7 @@ public class BlockBreakListener extends CheckListener {
 
     private void checkBlockDamage(final Player player, final Block block, final Cancellable event){
         final long now = Monotonic.millis();
-        final IPlayerData pData = DataManager.getPlayerData(player);
+        final IPlayerData pData = DataManager.getInstance().getPlayerData(player);
         final BlockBreakData data = pData.getGenericInstance(BlockBreakData.class);
 
         //        if (event.isCancelled()){
@@ -448,11 +448,11 @@ public class BlockBreakListener extends CheckListener {
 
     @EventHandler(ignoreCancelled = false, priority = EventPriority.MONITOR)
     public void onItemHeld(final PlayerItemHeldEvent event) {
-        boolean handle = DataManager.getPlayerData(event.getPlayer())
+        boolean handle = DataManager.getInstance().getPlayerData(event.getPlayer())
                 .isCheckActive(CheckType.BLOCKBREAK, event.getPlayer());
         if (handle) {
             final Player player = event.getPlayer();
-            final BlockBreakData data = DataManager.getPlayerData(player)
+            final BlockBreakData data = DataManager.getInstance().getPlayerData(player)
                     .getGenericInstance(BlockBreakData.class);
             if (data.toolChanged(player.getInventory().getItem(event.getNewSlot()))) {
                 data.resetClickedBlock();

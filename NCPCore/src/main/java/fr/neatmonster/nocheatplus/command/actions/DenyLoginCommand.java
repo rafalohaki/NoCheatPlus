@@ -75,7 +75,7 @@ public class DenyLoginCommand extends BaseCommand {
 
 
     protected void denyLogin(CommandSender sender, String name, long duration, String reason){
-        Player player = DataManager.getPlayer(name);
+        Player player = DataManager.getInstance().getPlayer(name);
         NCPAPIProvider.getNoCheatPlusAPI().denyLogin(name, duration);
         if (player == null) return;
         player.kickPlayer(reason);

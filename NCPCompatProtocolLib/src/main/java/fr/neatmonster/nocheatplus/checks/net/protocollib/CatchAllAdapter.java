@@ -79,7 +79,7 @@ public class CatchAllAdapter extends BaseAdapter {
             // Questionable: the server still knows the player, so could this break a block?
             return;
         }
-        final IPlayerData pData = DataManager.getPlayerDataSafe(player);
+        final IPlayerData pData = DataManager.getInstance().getPlayerDataSafe(player);
         if (pData == null) {
             StaticLog.logWarning("Failed to fetch player data with " + event.getPacketType() + " for: " + player);
             return;
