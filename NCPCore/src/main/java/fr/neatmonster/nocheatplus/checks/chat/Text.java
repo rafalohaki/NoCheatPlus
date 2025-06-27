@@ -35,6 +35,7 @@ import fr.neatmonster.nocheatplus.config.ConfigManager;
 import fr.neatmonster.nocheatplus.players.IPlayerData;
 import fr.neatmonster.nocheatplus.utilities.ColorUtil;
 import fr.neatmonster.nocheatplus.utilities.StringUtil;
+import fr.neatmonster.nocheatplus.checks.chat.ChatCaptchaUtil;
 
 /**
  * Some alternative more or less advanced analysis methods.
@@ -179,7 +180,8 @@ public class Text extends Check implements INotifyReload {
     private boolean handleCaptcha(final Player player, final String message, final ICaptcha captcha,
             final ChatConfig cc, final ChatData data, final IPlayerData pData,
             boolean isMainThread, final boolean alreadyCancelled) {
-        if (captcha.shouldCheckCaptcha(player, cc, data, pData)) {
+        if (ChatCaptchaUtil.isCaptchaEnabled(player, pData)
+                && captcha.shouldCheckCaptcha(player, cc, data, pData)) {
             captcha.checkCaptcha(player, message, cc, data, isMainThread);
             return true;
         }
@@ -350,7 +352,8 @@ public class Text extends Check implements INotifyReload {
                     : (accumulated - cc.textFreqNormLevel) / 10.0;
             data.textVL += added;
 
-            if (captcha.shouldStartCaptcha(player, cc, data, pData)) {
+            if (ChatCaptchaUtil.isCaptchaEnabled(player, pData)
+                    && captcha.shouldStartCaptcha(player, cc, data, pData)) {
                 captcha.sendNewCaptcha(player, cc, data);
                 cancel = true;
             } else {

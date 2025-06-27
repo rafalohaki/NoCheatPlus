@@ -21,6 +21,7 @@ import fr.neatmonster.nocheatplus.checks.CheckType;
 import fr.neatmonster.nocheatplus.players.IPlayerData;
 import fr.neatmonster.nocheatplus.utilities.ColorUtil;
 import fr.neatmonster.nocheatplus.utilities.TickTask;
+import fr.neatmonster.nocheatplus.checks.chat.ChatCaptchaUtil;
 
 /**
  * Check only for commands
@@ -46,7 +47,7 @@ public class Commands extends Check {
         final ChatData data = pData.getGenericInstance(ChatData.class);
 
         final boolean captchaEnabled = !cc.captchaSkipCommands
-                && pData.isCheckActive(CheckType.CHAT_CAPTCHA, player);
+                && ChatCaptchaUtil.isCaptchaEnabled(player, pData);
 
         if (handleCaptcha(player, message, captcha, cc, data, pData, captchaEnabled)) {
             return true;

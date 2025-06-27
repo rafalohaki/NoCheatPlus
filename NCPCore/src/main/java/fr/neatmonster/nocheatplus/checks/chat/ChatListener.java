@@ -50,6 +50,7 @@ import fr.neatmonster.nocheatplus.players.PlayerFactoryArgument;
 import fr.neatmonster.nocheatplus.utilities.StringUtil;
 import fr.neatmonster.nocheatplus.utilities.ds.prefixtree.SimpleCharPrefixTree;
 import fr.neatmonster.nocheatplus.worlds.WorldFactoryArgument;
+import fr.neatmonster.nocheatplus.checks.chat.ChatCaptchaUtil;
 
 /**
  * Central location to listen to events that are relevant for the chat checks.
@@ -281,8 +282,10 @@ public class ChatListener extends CheckListener implements INotifyReload, JoinLe
         // (No forced permission update, because the associated permissions are treated as hints rather.)
 
         // Reset captcha of player if needed.
-        synchronized(data) {
-            captcha.resetCaptcha(player, cc, data, pData);
+        if (ChatCaptchaUtil.isCaptchaEnabled(player, pData)) {
+            synchronized (data) {
+                captcha.resetCaptcha(player, cc, data, pData);
+            }
         }
         // Fast relog check.
         if (relog.isEnabled(player, pData) && relog.unsafeLoginCheck(player, cc, data,pData)) {
@@ -314,13 +317,12 @@ public class ChatListener extends CheckListener implements INotifyReload, JoinLe
          * implementation.
          */
         synchronized (data) {
-            if (captcha.isEnabled(player, pData)) {
-                if (captcha.shouldCheckCaptcha(player, cc, data, pData)) {
-                    // shouldCheckCaptcha: only if really enabled.
-                    // Possible addition: check cc.captchaOnLogin before shouldCheckCaptcha.
-                    // Consider scheduling this after other plugin messages.
-                    captcha.sendNewCaptcha(player, cc, data);
-                }
+            if (ChatCaptchaUtil.isCaptchaEnabled(player, pData)
+                    && captcha.shouldCheckCaptcha(player, cc, data, pData)) {
+                // shouldCheckCaptcha: only if really enabled.
+                // Possible addition: check cc.captchaOnLogin before shouldCheckCaptcha.
+                // Consider scheduling this after other plugin messages.
+                captcha.sendNewCaptcha(player, cc, data);
             }
         }
     }

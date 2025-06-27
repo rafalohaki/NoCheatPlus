@@ -23,11 +23,16 @@ import fr.neatmonster.nocheatplus.checks.CheckType;
 import fr.neatmonster.nocheatplus.players.DataManager;
 import fr.neatmonster.nocheatplus.players.IPlayerData;
 import fr.neatmonster.nocheatplus.utilities.ColorUtil;
+import fr.neatmonster.nocheatplus.worlds.IWorldData;
 
 /**
  * NOTE: EARLY REFACTORING STATE, MOST METHODS NEED SYNC OVER DATA !
- * @author mc_dev
+ * <p>
+ * The check should only run if the player's {@link IWorldData} and
+ * {@link IPlayerData} both report {@link CheckType#CHAT_CAPTCHA} as active.
+ * </p>
  *
+ * @author mc_dev
  */
 public class Captcha extends Check implements ICaptcha{
 
