@@ -175,7 +175,7 @@ public class UseEntityAdapter extends BaseAdapter {
         boolean attack = false;
         boolean interpreted = false;
         if (legacySet != null) {
-            final int flags = getAction_legacy(packet);
+            final int flags = getActionLegacy(packet);
             if ((flags & INTERPRETED) != 0) {
                 interpreted = true;
                 if ((flags & ATTACK) != 0) {
@@ -222,7 +222,7 @@ public class UseEntityAdapter extends BaseAdapter {
         }
     }
 
-    private int getAction_legacy(final PacketContainer packetContainer) {
+    private int getActionLegacy(final PacketContainer packetContainer) {
         // (For some reason the object didn't appear work with equality checks, thus compare the short string.)
         final String actionName = legacySet.getActionFromNMSPacket(packetContainer.getHandle());
         return actionName == null ? 0 : (INTERPRETED | ("ATTACK".equals(actionName) ? ATTACK : 0));
