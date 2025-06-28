@@ -53,13 +53,15 @@ public class FastBreak extends Check {
      *            the player
      * @param block
      *            the block
-     * @param isInstaBreak 
+     * @param isInstaBreak
+     *            indicates that the block was flagged as instantly
+     *            breakable. Values other than {@link AlmostBoolean#NO}
+     *            cause the check to adjust or skip violation handling.
      * @param data 
      * @param cc 
-     * @param elaspedTime
      * @return true, if successful
      */
-    public boolean check(final Player player, final Block block, final AlmostBoolean isInstaBreak, 
+    public boolean check(final Player player, final Block block, final AlmostBoolean isInstaBreak,
             final BlockBreakConfig cc, final BlockBreakData data, final IPlayerData pData) {
         final long now = Monotonic.millis();
         boolean cancel = false;
@@ -80,23 +82,23 @@ public class FastBreak extends Check {
             elapsedTime = (data.fastBreakBreakTime > now) ? 0 : now - data.fastBreakBreakTime;
         }
 
+        final long adjustedElapsed = adjustElapsedTime(elapsedTime, isInstaBreak, cc);
+
         // Check if the time used time is lower than expected.
-        if (isInstaBreak.decideOptimistically()) {
-            // Ignore those for now.
-            // Find out why this was commented out long ago a) did not fix mcMMO b) exploits.
-            // Maybe adjust time to min(time, SOMETHING) for MAYBE/YES.
+        if (shouldSkipFastBreak(isInstaBreak)) {
+            // ignore: instant break flagged
         }
-        else if (elapsedTime < 0) {
+        else if (adjustedElapsed < 0) {
             // Ignore it for now.
         }
-        else if (elapsedTime + cc.fastBreakDelay < expectedBreakingTime) {
+        else if (adjustedElapsed + cc.fastBreakDelay < expectedBreakingTime) {
             // lag or cheat or Minecraft.
 
             // Count in server side lag, if desired.
             final float lag = pData.getCurrentWorldDataSafe().shouldAdjustToLag(type) 
                     ? TickTask.getLag(expectedBreakingTime, true) : 1f;
 
-                    final long missingTime = expectedBreakingTime - (long) (lag * elapsedTime);
+                    final long missingTime = expectedBreakingTime - (long) (lag * adjustedElapsed);
 
                     if (missingTime > 0) {
                         // Add as penalty
@@ -134,6 +136,18 @@ public class FastBreak extends Check {
         // (The break time is set in the listener).
 
         return cancel;
+    }
+
+    private boolean shouldSkipFastBreak(final AlmostBoolean isInstaBreak) {
+        return isInstaBreak == AlmostBoolean.YES;
+    }
+
+    private long adjustElapsedTime(final long elapsedTime, final AlmostBoolean isInstaBreak,
+            final BlockBreakConfig cc) {
+        if (isInstaBreak == AlmostBoolean.MAYBE) {
+            return Math.min(elapsedTime, cc.fastBreakDelay);
+        }
+        return elapsedTime;
     }
 
     private void detailDebugStats(final Player player, final AlmostBoolean isInstaBreak,
