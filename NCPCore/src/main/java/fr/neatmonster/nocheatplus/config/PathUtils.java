@@ -229,7 +229,8 @@ public class PathUtils {
     protected static void warnPaths(final ConfigurationSection config, final CharPrefixTree<?, ?> paths, final String msgPrefix, final Set<String> warnedPaths) {
         for (final String path : config.getKeys(true)) {
             if (paths.hasPrefix(path)) {
-                StaticLog.logWarning("Config path '" + path + "'" + msgPrefix);
+                // Deprecated or moved config paths are expected; log as debug.
+                StaticLog.logDebug("Config path '" + path + "'" + msgPrefix);
                 if (warnedPaths != null) {
                     warnedPaths.add(path);
                 }
@@ -392,7 +393,8 @@ public class PathUtils {
                     addPaths.put(newPath, value);
                     removePaths.add(path);
                 }
-                StaticLog.logWarning("Config path '" + path + "' (" + configName + ") has been moved" + to);
+                // Path moves are normal during updates; use debug level.
+                StaticLog.logDebug("Config path '" + path + "' (" + configName + ") has been moved" + to);
             }
         }
     }
