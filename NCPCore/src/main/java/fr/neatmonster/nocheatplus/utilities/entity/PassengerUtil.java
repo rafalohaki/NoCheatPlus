@@ -34,7 +34,6 @@ import fr.neatmonster.nocheatplus.compat.BridgeMisc;
 import fr.neatmonster.nocheatplus.compat.Folia;
 import fr.neatmonster.nocheatplus.components.entity.IEntityAccessVehicle;
 import fr.neatmonster.nocheatplus.components.registry.event.IHandle;
-import fr.neatmonster.nocheatplus.players.DataManager;
 import fr.neatmonster.nocheatplus.players.IPlayerData;
 import fr.neatmonster.nocheatplus.utilities.CheckUtils;
 import fr.neatmonster.nocheatplus.utilities.location.LocUtil;
@@ -266,7 +265,10 @@ public class PassengerUtil {
 
         final boolean playerTeleported;
         if (player.isOnline() && !player.isDead()) {
-            final MovingConfig cc = DataManager.getInstance().getGenericInstance(player, MovingConfig.class);
+            final MovingConfig cc = NCPAPIProvider.getNoCheatPlusAPI()
+                    .getPlayerDataManager()
+                    .getPlayerData(player)
+                    .getGenericInstance(MovingConfig.class);
 
             // Mask player teleport as a set back.
             data.prepareSetBack(location);
@@ -303,7 +305,10 @@ public class PassengerUtil {
                     stats.playerIsOriginalPassenger = true;
                     break;
                 } else if (passenger instanceof Player) {
-                    DataManager.getInstance().getGenericInstance((Player) passenger, MovingData.class).isVehicleSetBack = true;
+                    NCPAPIProvider.getNoCheatPlusAPI()
+                            .getPlayerDataManager()
+                            .getPlayerData((Player) passenger)
+                            .getGenericInstance(MovingData.class).isVehicleSetBack = true;
                     stats.otherPlayers++;
                 }
             }
@@ -348,7 +353,10 @@ public class PassengerUtil {
             }
             if (passenger instanceof Player) {
                 if (teleportPlayerPassenger((Player) passenger, vehicle, location, vehicleTeleported,
-                        DataManager.getInstance().getGenericInstance((Player) passenger, MovingData.class), debug)) {
+                        NCPAPIProvider.getNoCheatPlusAPI()
+                                .getPlayerDataManager()
+                                .getPlayerData((Player) passenger)
+                                .getGenericInstance(MovingData.class), debug)) {
                     if (player.equals(passenger)) {
                         result.playerTeleported = true;
                     } else {
