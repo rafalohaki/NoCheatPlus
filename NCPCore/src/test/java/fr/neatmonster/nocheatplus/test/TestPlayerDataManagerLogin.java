@@ -1,6 +1,6 @@
 package fr.neatmonster.nocheatplus.test;
 
-import static org.junit.Assert.assertEquals;
+import static org.junit.jupiter.api.Assertions.assertEquals;
 import static org.mockito.Mockito.*;
 
 import java.lang.reflect.Field;
@@ -14,8 +14,8 @@ import org.bukkit.World;
 import org.bukkit.entity.Player;
 import org.bukkit.event.player.PlayerLoginEvent;
 import org.bukkit.event.player.PlayerLoginEvent.Result;
-import org.junit.Before;
-import org.junit.Test;
+import org.junit.jupiter.api.BeforeEach;
+import org.junit.jupiter.api.Test;
 
 import fr.neatmonster.nocheatplus.players.DataManager;
 import fr.neatmonster.nocheatplus.players.PlayerData;
@@ -83,7 +83,7 @@ public class TestPlayerDataManagerLogin {
         return (TestManager) u.allocateInstance(TestManager.class);
     }
 
-    @Before
+    @BeforeEach
     public void setup() throws Exception {
         manager = createManager();
         Field f = PlayerDataManager.class.getDeclaredField("worldDataManager");

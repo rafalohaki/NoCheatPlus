@@ -25,8 +25,8 @@ import org.bukkit.Location;
 import org.bukkit.World;
 import org.bukkit.entity.Player;
 import org.bukkit.event.player.PlayerMoveEvent;
-import org.junit.Before;
-import org.junit.Test;
+import org.junit.jupiter.api.BeforeEach;
+import org.junit.jupiter.api.Test;
 
 import java.lang.reflect.Field;
 import java.lang.reflect.InvocationHandler;
@@ -36,7 +36,7 @@ import java.util.HashMap;
 import java.util.UUID;
 import static org.mockito.Mockito.*;
 
-import static org.junit.Assert.*;
+import static org.junit.jupiter.api.Assertions.*;
 
 public class TestTeleportHandling {
 
@@ -187,7 +187,7 @@ public class TestTeleportHandling {
     private Player player;
     private sun.misc.Unsafe unsafe;
 
-    @Before
+    @BeforeEach
     public void setup() throws Exception {
         unsafe = getUnsafe();
         setupAPI(unsafe);

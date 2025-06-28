@@ -1,6 +1,6 @@
 package fr.neatmonster.nocheatplus.checks.blockinteract;
 
-import static org.junit.Assert.*;
+import static org.junit.jupiter.api.Assertions.*;
 import static org.mockito.Mockito.*;
 
 import java.lang.reflect.Method;
@@ -11,8 +11,8 @@ import org.bukkit.entity.Player;
 import org.bukkit.event.Event.Result;
 import org.bukkit.event.player.PlayerInteractEvent;
 import org.bukkit.inventory.ItemStack;
-import org.junit.Before;
-import org.junit.Test;
+import org.junit.jupiter.api.BeforeEach;
+import org.junit.jupiter.api.Test;
 import org.mockito.MockedStatic;
 
 import fr.neatmonster.nocheatplus.players.IPlayerData;
@@ -25,7 +25,7 @@ public class TestInteractHandlers {
 
     private sun.misc.Unsafe unsafe;
 
-    @Before
+    @BeforeEach
     public void setup() throws Exception {
         java.lang.reflect.Field f = sun.misc.Unsafe.class.getDeclaredField("theUnsafe");
         f.setAccessible(true);

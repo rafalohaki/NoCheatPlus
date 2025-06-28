@@ -1,13 +1,13 @@
 package fr.neatmonster.nocheatplus.test;
 
-import static org.junit.Assert.*;
+import static org.junit.jupiter.api.Assertions.*;
 import static org.mockito.Mockito.*;
 
 import java.lang.reflect.Method;
 
 import org.bukkit.entity.Player;
-import org.junit.Before;
-import org.junit.Test;
+import org.junit.jupiter.api.BeforeEach;
+import org.junit.jupiter.api.Test;
 
 import fr.neatmonster.nocheatplus.NCPAPIProvider;
 import fr.neatmonster.nocheatplus.checks.fight.FightConfig;
@@ -128,7 +128,7 @@ public class TestGodModeHelpers {
         @Override public IPlayerDataManager getPlayerDataManager(){ throw new UnsupportedOperationException(); }
     }
 
-    @Before
+    @BeforeEach
     public void setup() {
         try {
             java.lang.reflect.Field f = NCPAPIProvider.class.getDeclaredField("noCheatPlusAPI");

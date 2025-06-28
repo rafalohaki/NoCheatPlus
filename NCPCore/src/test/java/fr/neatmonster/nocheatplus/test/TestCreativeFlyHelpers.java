@@ -1,6 +1,6 @@
 package fr.neatmonster.nocheatplus.test;
 
-import static org.junit.Assert.*;
+import static org.junit.jupiter.api.Assertions.*;
 
 import java.lang.reflect.Field;
 import java.lang.reflect.Method;
@@ -25,8 +25,8 @@ import fr.neatmonster.nocheatplus.compat.MCAccess;
 import fr.neatmonster.nocheatplus.compat.blocks.changetracker.BlockChangeTracker;
 import fr.neatmonster.nocheatplus.utilities.location.PlayerLocation;
 
-import org.junit.Before;
-import org.junit.Test;
+import org.junit.jupiter.api.BeforeEach;
+import org.junit.jupiter.api.Test;
 import static org.mockito.Mockito.*;
 
 public class TestCreativeFlyHelpers {
@@ -122,7 +122,7 @@ public class TestCreativeFlyHelpers {
         return mock(MovingData.class);
     }
 
-    @Before
+    @BeforeEach
     public void init() throws Exception {
         setupAPI();
     }

@@ -1,14 +1,14 @@
 package fr.neatmonster.nocheatplus.checks.blockplace;
 
-import static org.junit.Assert.*;
+import static org.junit.jupiter.api.Assertions.*;
 import static org.mockito.Mockito.*;
 
 import org.bukkit.Material;
 import org.bukkit.block.Block;
 import org.bukkit.block.BlockFace;
 import org.bukkit.entity.Player;
-import org.junit.Before;
-import org.junit.Test;
+import org.junit.jupiter.api.BeforeEach;
+import org.junit.jupiter.api.Test;
 
 import fr.neatmonster.nocheatplus.actions.ActionList;
 import fr.neatmonster.nocheatplus.checks.blockinteract.BlockInteractData;
@@ -20,7 +20,7 @@ import fr.neatmonster.nocheatplus.players.DataManager;
 import fr.neatmonster.nocheatplus.players.PlayerDataManager;
 
 public class TestAgainstCheck {
-    @Before
+    @BeforeEach
     public void initAPI() throws Exception {
         Object api = java.lang.reflect.Proxy.newProxyInstance(
                 NCPAPIProvider.class.getClassLoader(),
@@ -77,7 +77,7 @@ public class TestAgainstCheck {
         }
     }
 
-    @Before
+    @BeforeEach
     public void setup() {
         check = new DummyAgainst();
         player = mock(Player.class);

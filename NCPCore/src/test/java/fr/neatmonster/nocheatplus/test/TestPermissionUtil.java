@@ -1,6 +1,6 @@
 package fr.neatmonster.nocheatplus.test;
 
-import static org.junit.Assert.*;
+import static org.junit.jupiter.api.Assertions.*;
 import static org.mockito.Mockito.*;
 
 import java.lang.reflect.Method;
@@ -19,9 +19,9 @@ import org.bukkit.permissions.PermissionDefault;
 import org.bukkit.plugin.Plugin;
 import org.bukkit.plugin.PluginManager;
 import org.bukkit.Server;
-import org.junit.After;
-import org.junit.Before;
-import org.junit.Test;
+import org.junit.jupiter.api.AfterEach;
+import org.junit.jupiter.api.BeforeEach;
+import org.junit.jupiter.api.Test;
 
 import fr.neatmonster.nocheatplus.permissions.PermissionUtil;
 import fr.neatmonster.nocheatplus.permissions.PermissionUtil.CommandProtectionEntry;
@@ -49,7 +49,7 @@ public class TestPermissionUtil {
     private ConsoleCommandSender console;
     private Server previousServer;
 
-    @Before
+    @BeforeEach
     public void setup() throws Exception {
         pluginManager = mock(PluginManager.class);
         console = mock(ConsoleCommandSender.class);
@@ -70,7 +70,7 @@ public class TestPermissionUtil {
         }
     }
 
-    @After
+    @AfterEach
     public void teardown() {
         if (previousServer != null && Bukkit.getServer() != previousServer) {
             Bukkit.setServer(previousServer);

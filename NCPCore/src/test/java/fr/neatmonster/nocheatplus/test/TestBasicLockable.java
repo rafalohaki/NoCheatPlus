@@ -14,9 +14,9 @@
  */
 package fr.neatmonster.nocheatplus.test;
 
-import static org.junit.Assert.fail;
+import static org.junit.jupiter.api.Assertions.*;
 
-import org.junit.Test;
+import org.junit.jupiter.api.Test;
 
 import fr.neatmonster.nocheatplus.components.registry.lockable.BasicLockable;
 import fr.neatmonster.nocheatplus.components.registry.lockable.ILockable;
@@ -62,10 +62,10 @@ public class TestBasicLockable {
     /**
      * Attempt to lock an already permanently locked item with a secret.
      */
-    @Test(expected = IllegalArgumentException.class)
+    @Test
     public void testFailChangeLockNoSecret() {
         BasicLockable lock = getLocked();
-        lock.lock(new Object());
+        assertThrows(IllegalArgumentException.class, () -> lock.lock(new Object()));
     }
 
     /**
@@ -84,22 +84,22 @@ public class TestBasicLockable {
         lock.lock();
     }
 
-    @Test(expected = IllegalArgumentException.class)
+    @Test
     public void testSecretTypeIdentity() {
         BasicLockable lock = new BasicLockable(new Dummy(), true, true);
-        lock.lock(new Dummy());
+        assertThrows(IllegalArgumentException.class, () -> lock.lock(new Dummy()));
     }
 
-    @Test(expected = IllegalArgumentException.class)
+    @Test
     public void testSecretTypeExactFail1() {
         BasicLockable lock = new BasicLockable(new Dummy(), false, true, false);
-        lock.lock(new Dummy());
+        assertThrows(IllegalArgumentException.class, () -> lock.lock(new Dummy()));
     }
 
-    @Test(expected = IllegalArgumentException.class)
+    @Test
     public void testSecretTypeExactFail2() {
         BasicLockable lock = new BasicLockable(new Dummy(), false, true, false);
-        lock.lock(new DummMY());
+        assertThrows(IllegalArgumentException.class, () -> lock.lock(new DummMY()));
     }
 
     @Test
@@ -170,27 +170,27 @@ public class TestBasicLockable {
         lock.unlock(secret);
     }
 
-    @Test(expected = IllegalArgumentException.class)
+    @Test
     public void testUnlockAfterPermanentLockFail() {
         Dummy secret = new Dummy();
         BasicLockable lock = new BasicLockable(secret, true, true);
         lock.lock();
-        lock.unlock(secret);
+        assertThrows(IllegalArgumentException.class, () -> lock.unlock(secret));
     }
 
-    @Test(expected = IllegalArgumentException.class)
+    @Test
     public void testUnlockWithWrongSecretFail() {
         Dummy secret = new Dummy();
         BasicLockable lock = new BasicLockable(secret, true, true);
-        lock.unlock(new Dummy());
+        assertThrows(IllegalArgumentException.class, () -> lock.unlock(new Dummy()));
     }
 
-    @Test(expected = IllegalArgumentException.class)
+    @Test
     public void testUnlockwithSubClassFail() {
         BasicLockable lock = new BasicLockable(false, Dummy.class, true);
         lock.lock(new Dummy());
         lock.unlock(new Dummy());
-        lock.lock(new DummMY());
+        assertThrows(IllegalArgumentException.class, () -> lock.lock(new DummMY()));
     }
 
 }
