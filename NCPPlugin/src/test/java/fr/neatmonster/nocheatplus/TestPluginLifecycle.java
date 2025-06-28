@@ -1,44 +1,38 @@
 package fr.neatmonster.nocheatplus;
+
+import org.mockbukkit.mockbukkit.MockBukkit;
 import fr.neatmonster.nocheatplus.components.registry.feature.IDisableListener;
-import org.bukkit.Server;
-import org.bukkit.event.Listener;
-import org.bukkit.plugin.PluginDescriptionFile;
-import org.bukkit.plugin.PluginManager;
-import org.bukkit.plugin.java.JavaPluginLoader;
 import fr.neatmonster.nocheatplus.logging.BukkitLogManager;
-import org.bukkit.scheduler.BukkitScheduler;
+import org.bukkit.NamespacedKey;
+import org.bukkit.event.Listener;
+import net.bytebuddy.ByteBuddy;
+import net.bytebuddy.agent.ByteBuddyAgent;
+import net.bytebuddy.dynamic.loading.ClassReloadingStrategy;
+import net.bytebuddy.implementation.MethodCall;
 import org.junit.jupiter.api.AfterEach;
 import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.Test;
 
-import java.io.File;
 import java.lang.reflect.Field;
-import java.lang.reflect.InvocationHandler;
-import java.lang.reflect.Proxy;
+import java.lang.reflect.Modifier;
 import java.util.ArrayList;
 import java.util.HashSet;
 import java.util.List;
 import java.util.Map;
 import java.util.Set;
-import java.util.logging.Logger;
 
 import static org.junit.jupiter.api.Assertions.*;
 
 public class TestPluginLifecycle {
 
     private NoCheatPlus plugin;
-    private Server server;
 
     @BeforeEach
     public void setup() throws Exception {
         PluginTests.setUnitTestNoCheatPlusAPI(true);
-        server = createServer();
-        JavaPluginLoader loader = new JavaPluginLoader(server);
-        if (org.bukkit.Bukkit.getServer() == null) org.bukkit.Bukkit.setServer(server);
-        PluginDescriptionFile desc = new PluginDescriptionFile("Test", "1", "test.Main");
-        java.lang.reflect.Constructor<NoCheatPlus> ctor = NoCheatPlus.class.getDeclaredConstructor(JavaPluginLoader.class, PluginDescriptionFile.class, File.class, File.class);
-        ctor.setAccessible(true);
-        plugin = ctor.newInstance(loader, desc, new File("dummy"), new File("dummy"));
+        installTestPatches();
+        MockBukkit.mock();
+        plugin = MockBukkit.load(NoCheatPlus.class);
         DummyLogManager log = new DummyLogManager(plugin);
         java.lang.reflect.Field fLog = NoCheatPlus.class.getDeclaredField("logManager");
         fLog.setAccessible(true);
@@ -47,6 +41,7 @@ public class TestPluginLifecycle {
 
     @AfterEach
     public void teardown() {
+        MockBukkit.unmock();
     }
 @Test
 
@@ -108,40 +103,52 @@ public class TestPluginLifecycle {
         @Override public void shutdown() {}
     }
 
+    private static void installTestPatches() {
+        ByteBuddyAgent.install();
+        new net.bytebuddy.agent.builder.AgentBuilder.Default()
+                .type(net.bytebuddy.matcher.ElementMatchers.named("org.bukkit.NamespacedKey"))
+                .transform((builder, td, cl, module, pd) -> {
+                    if (td.getDeclaredMethods()
+                            .filter(net.bytebuddy.matcher.ElementMatchers.named("value")).isEmpty()) {
+                        return builder.defineMethod("value", String.class, Modifier.PUBLIC)
+                                .intercept(MethodCall.invoke(td.getDeclaredMethods()
+                                        .filter(net.bytebuddy.matcher.ElementMatchers.named("toString")).getOnly()));
+                    }
+                    return builder;
+                })
+                .installOnByteBuddyAgent();
 
-    private static Server createServer() {
-        PluginManager pluginManager = (PluginManager) Proxy.newProxyInstance(
-                TestPluginLifecycle.class.getClassLoader(), new Class[]{PluginManager.class}, defaultHandler());
-        BukkitScheduler scheduler = (BukkitScheduler) Proxy.newProxyInstance(
-                TestPluginLifecycle.class.getClassLoader(), new Class[]{BukkitScheduler.class}, defaultHandler());
-        InvocationHandler serverHandler = (proxy, method, args) -> {
-            switch (method.getName()) {
-                case "getPluginManager": return pluginManager;
-                case "getScheduler": return scheduler;
-                case "getLogger": return Logger.getLogger("TestServer");
-                case "getName": return "Dummy";
-                case "getVersion": return "0";
-                case "getBukkitVersion": return "0";
-                default: return defaultValue(method.getReturnType());
+        new net.bytebuddy.agent.builder.AgentBuilder.Default()
+                .type(net.bytebuddy.matcher.ElementMatchers.named("org.mockbukkit.mockbukkit.tags.TagsMock"))
+                .transform((builder, td, cl, module, pd) ->
+                        builder.method(net.bytebuddy.matcher.ElementMatchers.named("loadDefaultTags"))
+                                .intercept(net.bytebuddy.implementation.StubMethod.INSTANCE))
+                .installOnByteBuddyAgent();
+
+        new net.bytebuddy.agent.builder.AgentBuilder.Default()
+                .type(net.bytebuddy.matcher.ElementMatchers.named("org.mockbukkit.mockbukkit.tags.internal.InternalTag"))
+                .transform((builder, td, cl, module, pd) ->
+                        builder.method(net.bytebuddy.matcher.ElementMatchers.named("loadInternalTags"))
+                                .intercept(net.bytebuddy.implementation.StubMethod.INSTANCE))
+                .installOnByteBuddyAgent();
+
+        new net.bytebuddy.agent.builder.AgentBuilder.Default()
+                .type(net.bytebuddy.matcher.ElementMatchers.named("org.bukkit.plugin.java.JavaPlugin"))
+                .transform((builder, td, cl, module, pd) -> builder.visit(
+                        net.bytebuddy.asm.Advice.to(JavaPluginCtorAdvice.class).on(net.bytebuddy.matcher.ElementMatchers.isConstructor())))
+                .installOnByteBuddyAgent();
+    }
+
+    private static class JavaPluginCtorAdvice {
+        @net.bytebuddy.asm.Advice.OnMethodExit(onThrowable = Throwable.class, suppress = Throwable.class)
+        static void exit(@net.bytebuddy.asm.Advice.Thrown(readOnly = false) Throwable t) {
+            if (t instanceof IllegalStateException && t.getMessage() != null && t.getMessage().contains("JavaPlugin requires")) {
+                t = null; // ignore plugin class loader check
             }
-        };
-        return (Server) Proxy.newProxyInstance(TestPluginLifecycle.class.getClassLoader(), new Class[]{Server.class}, serverHandler);
+        }
     }
 
-    private static InvocationHandler defaultHandler() {
-        return (proxy, method, args) -> defaultValue(method.getReturnType());
-    }
 
-    private static Object defaultValue(Class<?> type) {
-        if (!type.isPrimitive()) return null;
-        if (type == boolean.class) return false;
-        if (type == char.class) return '\0';
-        if (type == byte.class || type == short.class || type == int.class) return 0;
-        if (type == long.class) return 0L;
-        if (type == float.class) return 0f;
-        if (type == double.class) return 0d;
-        return null;
-    }
 
     @SuppressWarnings("unchecked")
     private List<Object> getListeners() throws Exception {
