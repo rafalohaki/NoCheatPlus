@@ -33,6 +33,8 @@ import fr.neatmonster.nocheatplus.utilities.PotionUtil;
 import fr.neatmonster.nocheatplus.utilities.TickTask;
 import fr.neatmonster.nocheatplus.utilities.map.BlockProperties;
 import fr.neatmonster.nocheatplus.time.monotonic.Monotonic;
+import fr.neatmonster.nocheatplus.checks.blockbreak.FastBreakDecision;
+import fr.neatmonster.nocheatplus.checks.blockbreak.FastBreakContext;
 
 /**
  * A check used to verify if the player isn't breaking blocks faster than possible.
@@ -49,96 +51,109 @@ public class FastBreak extends Check {
     /**
      * Checks a player for fastbreak. This is NOT for creative mode.
      * 
-     * @param player
-     *            the player
-     * @param block
-     *            the block
-     * @param isInstaBreak 
-     * @param data 
-     * @param cc 
-     * @param elaspedTime
+     * @param ctx
+     *            encapsulates all data needed to evaluate the check
      * @return true, if successful
      */
-    public boolean check(final Player player, final Block block, final AlmostBoolean isInstaBreak, 
-            final BlockBreakConfig cc, final BlockBreakData data, final IPlayerData pData) {
+    public boolean check(final FastBreakContext ctx) {
+        if (!isValidContext(ctx)) {
+            return false;
+        }
+        final Player player = ctx.player();
+        final Block block = ctx.block();
+        final BlockBreakConfig cc = ctx.config();
+        final BlockBreakData data = ctx.breakData();
+        final IPlayerData pData = ctx.playerData();
+        final AlmostBoolean isInstaBreak = ctx.isInstaBreak();
+
         final long now = Monotonic.millis();
         boolean cancel = false;
 
-        // Determine expected breaking time by block type.
-        final Material blockType = block.getType();
-        final long expectedBreakingTime = Math.max(0, Math.round((double) BlockProperties.getBreakingDuration(blockType, player) * (double) cc.fastBreakModSurvival / 100D));
+        if (player != null && block != null && pData != null) {
 
-        final long elapsedTime;
+            // Determine expected breaking time by block type.
+            final Material blockType = block.getType();
+            final long expectedBreakingTime = Math.max(0,
+                    Math.round((double) BlockProperties.getBreakingDuration(blockType, player)
+                            * (double) cc.fastBreakModSurvival / 100D));
+
+            final long elapsedTime;
         // Concept for unbreakable blocks? Context: extreme VL.
         // Should it be breakingTime instead of 0 for inconsistencies?
-        if (cc.fastBreakStrict) {
+            if (cc.fastBreakStrict) {
             // Counting interact...break.
             elapsedTime = (data.fastBreakBreakTime > data.fastBreakfirstDamage) ? 0 : now - data.fastBreakfirstDamage;
-        }
-        else {
+            }
+            else {
             // Counting break...break.
             elapsedTime = (data.fastBreakBreakTime > now) ? 0 : now - data.fastBreakBreakTime;
-        }
+            }
 
-        // Check if the time used time is lower than expected.
-        if (isInstaBreak.decideOptimistically()) {
-            // Ignore those for now.
-            // Find out why this was commented out long ago a) did not fix mcMMO b) exploits.
-            // Maybe adjust time to min(time, SOMETHING) for MAYBE/YES.
-        }
-        else if (elapsedTime < 0) {
-            // Ignore it for now.
-        }
-        else if (elapsedTime + cc.fastBreakDelay < expectedBreakingTime) {
-            // lag or cheat or Minecraft.
+            final long adjustedElapsed =
+                    FastBreakDecision.adjustedElapsed(elapsedTime, isInstaBreak, cc.fastBreakDelay);
+
+            // Check if the time used time is lower than expected.
+            if (FastBreakDecision.shouldSkip(isInstaBreak)) {
+                // ignore: instant break flagged
+            }
+            else if (adjustedElapsed < 0) {
+                // Ignore it for now.
+            }
+            else if (adjustedElapsed + cc.fastBreakDelay < expectedBreakingTime) {
+                // lag or cheat or Minecraft.
 
             // Count in server side lag, if desired.
-            final float lag = pData.getCurrentWorldDataSafe().shouldAdjustToLag(type) 
-                    ? TickTask.getLag(expectedBreakingTime, true) : 1f;
+                final float lag = pData.getCurrentWorldDataSafe().shouldAdjustToLag(type)
+                        ? TickTask.getLag(expectedBreakingTime, true) : 1f;
 
-                    final long missingTime = expectedBreakingTime - (long) (lag * elapsedTime);
+                        final long missingTime = expectedBreakingTime - (long) (lag * adjustedElapsed);
 
-                    if (missingTime > 0) {
-                        // Add as penalty
-                        data.fastBreakPenalties.add(now, (float) missingTime);
+                        if (missingTime > 0) {
+                            // Add as penalty
+                            data.fastBreakPenalties.add(now, (float) missingTime);
 
 
                         // Only raise a violation, if the total penalty score exceeds the contention duration (for lag, delay).
-                        if (data.fastBreakPenalties.score(cc.fastBreakBucketFactor) > cc.fastBreakGrace) {
-                            // Potential improvement: add one absolute penalty time for big amounts to stop breaking until then
-                            final double vlAdded = (double) missingTime / 1000.0;
-                            data.fastBreakVL += vlAdded;
-                            final ViolationData vd = new ViolationData(this, player, data.fastBreakVL, vlAdded, cc.fastBreakActions);
-                            if (vd.needsParameters()) {
-                                vd.setParameter(ParameterName.BLOCK_TYPE, blockType.toString());
+                            if (data.fastBreakPenalties.score(cc.fastBreakBucketFactor) > cc.fastBreakGrace) {
+                                // Potential improvement: add one absolute penalty time for big amounts to stop breaking until then
+                                final double vlAdded = (double) missingTime / 1000.0;
+                                data.fastBreakVL += vlAdded;
+                                final ViolationData vd = new ViolationData(this, player, data.fastBreakVL,
+                                        vlAdded, cc.fastBreakActions);
+                                if (vd.needsParameters()) {
+                                    vd.setParameter(ParameterName.BLOCK_TYPE, blockType.toString());
+                                }
+                                cancel = executeActions(vd).willCancel();
                             }
-                            cancel = executeActions(vd).willCancel();
+                            // else: still within contention limits.
                         }
-                        // else: still within contention limits.
-                    }
-        }
-        else if (expectedBreakingTime > cc.fastBreakDelay) {
-            // Fast breaking does not decrease violation level.
-            data.fastBreakVL *= 0.9D;
-        }
+            }
+            else if (expectedBreakingTime > cc.fastBreakDelay) {
+                // Fast breaking does not decrease violation level.
+                data.fastBreakVL *= 0.9D;
+            }
 
-        // Rework to use (then hopefully completed) BlockBreakKey.
-        if (pData.isDebugActive(type)) {
-            detailDebugStats(player, isInstaBreak, blockType, 
-                    elapsedTime, expectedBreakingTime, data, pData);
-        }
-        else {
-            data.stats = null;
-        }
+            // Rework to use (then hopefully completed) BlockBreakKey.
+            if (pData.isDebugActive(type)) {
+                detailDebugStats(ctx, elapsedTime, expectedBreakingTime);
+            } else {
+                data.stats = null;
+            }
 
-        // (The break time is set in the listener).
+            // (The break time is set in the listener).
+        }
 
         return cancel;
     }
 
-    private void detailDebugStats(final Player player, final AlmostBoolean isInstaBreak,
-            final Material blockType, final long elapsedTime, final long expectedBreakingTime,
-            final BlockBreakData data, final IPlayerData pData) {
+    private void detailDebugStats(final FastBreakContext ctx, final long elapsedTime,
+            final long expectedBreakingTime) {
+        final Player player = ctx.player();
+        final Block block = ctx.block();
+        final BlockBreakData data = ctx.breakData();
+        final IPlayerData pData = ctx.playerData();
+        final AlmostBoolean isInstaBreak = ctx.isInstaBreak();
+        final Material blockType = block.getType();
         if (pData.hasPermission(Permissions.ADMINISTRATION_DEBUG, player)) {
             // General stats:
             // Replace stats by new system (BlockBreakKey once complete), commands to inspect / auto-config.
@@ -160,4 +175,7 @@ public class FastBreak extends Check {
         }
     }
 
+    private boolean isValidContext(final FastBreakContext ctx) {
+        return ctx != null && ctx.player() != null && ctx.block() != null && ctx.playerData() != null;
+    }
 }
