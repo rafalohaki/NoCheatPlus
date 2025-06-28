@@ -29,7 +29,6 @@ import fr.neatmonster.nocheatplus.hooks.NCPHook;
 import fr.neatmonster.nocheatplus.hooks.NCPHookManager;
 import fr.neatmonster.nocheatplus.logging.LogManager;
 import fr.neatmonster.nocheatplus.logging.Streams;
-import fr.neatmonster.nocheatplus.players.DataManager;
 import fr.neatmonster.nocheatplus.players.IPlayerData;
 import fr.neatmonster.nocheatplus.utilities.StringUtil;
 
@@ -109,7 +108,8 @@ public class AllViolationsHook implements NCPHook, ILast, IStats {
             // performance and consistency.
             // If debug is not in IViolationInfo, fall back to
             // PlayerData.isDebug(CheckType).
-            final IPlayerData pData = DataManager.getInstance().getPlayerData(player);
+            final IPlayerData pData = NCPAPIProvider.getNoCheatPlusAPI()
+                    .getPlayerDataManager().getPlayerData(player);
             if (pData != null) {
                 debugSet = pData.isDebugActive(checkType);
             }
