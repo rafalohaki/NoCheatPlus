@@ -36,7 +36,7 @@ public class BukkitGate implements BukkitShapeModel {
     public BukkitGate(double minXZ, double maxXZ, double height) {
         this.minXZ = minXZ;
         this.maxXZ = maxXZ;
-        this.height = height;
+        this.height = Math.min(height, 1.0);
     }
 
     @Override

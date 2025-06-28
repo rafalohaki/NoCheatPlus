@@ -19,7 +19,7 @@ public class BukkitWallTest {
         MultipleFacing data = mock(MultipleFacing.class);
         Set<BlockFace> faces = EnumSet.of(BlockFace.SOUTH, BlockFace.EAST);
         when(data.getFaces()).thenReturn(faces);
-        double[] expected = {0.3125, 0.0, 0.0, 1.0 - 0.3125, 1.5, 1.0};
+        double[] expected = {0.3125, 0.0, 0.0, 1.0 - 0.3125, 1.0, 1.0};
         double[] res = invokeMultipleFacing(wall, data);
         assertArrayEquals(expected, res, 0.0);
     }
@@ -33,7 +33,7 @@ public class BukkitWallTest {
         when(data.getHeight(BlockFace.EAST)).thenReturn(Wall.Height.NONE);
         when(data.getHeight(BlockFace.NORTH)).thenReturn(Wall.Height.NONE);
         when(data.getHeight(BlockFace.SOUTH)).thenReturn(Wall.Height.NONE);
-        double[] expected = {0.25,0.0,0.25,0.75,1.5,0.75,0.0,0.0,0.3125,0.25,1.5,0.6875};
+        double[] expected = {0.25,0.0,0.25,0.75,1.0,0.75,0.0,0.0,0.3125,0.25,1.0,0.6875};
         double[] res = invokeWall(wall, data);
         assertArrayEquals(expected, res, 0.0);
     }

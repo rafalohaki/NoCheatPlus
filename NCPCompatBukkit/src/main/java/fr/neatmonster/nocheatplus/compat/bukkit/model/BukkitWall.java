@@ -63,14 +63,14 @@ public class BukkitWall implements BukkitShapeModel {
     public BukkitWall(double minXZ, double maxXZ, double height, double sideInset) {
         this.minXZ = minXZ;
         this.maxXZ = maxXZ;
-        this.height = height;
+        this.height = Math.min(height, 1.0);
         this.sideInset = sideInset;
-        east = new double[] {maxXZ, 0.0, sideInset, 1.0, height, 1.0 - sideInset};
-        north = new double[] {sideInset, 0.0, 0.0, 1.0 - sideInset, height, minXZ};
-        west = new double[] {0.0, 0.0, sideInset, minXZ, height, 1.0 - sideInset};
-        south = new double[] {sideInset, 0.0, maxXZ, 1.0 - sideInset, height, 1.0};
-        eastwest = new double[] {0.0, 0.0, sideInset, 1.0, height, 1.0 - sideInset};
-        southnorth = new double[] {sideInset, 0.0, 0.0, 1.0 - sideInset, height, 1.0};
+        east = new double[] {maxXZ, 0.0, sideInset, 1.0, this.height, 1.0 - sideInset};
+        north = new double[] {sideInset, 0.0, 0.0, 1.0 - sideInset, this.height, minXZ};
+        west = new double[] {0.0, 0.0, sideInset, minXZ, this.height, 1.0 - sideInset};
+        south = new double[] {sideInset, 0.0, maxXZ, 1.0 - sideInset, this.height, 1.0};
+        eastwest = new double[] {0.0, 0.0, sideInset, 1.0, this.height, 1.0 - sideInset};
+        southnorth = new double[] {sideInset, 0.0, 0.0, 1.0 - sideInset, this.height, 1.0};
     }
 
     /**

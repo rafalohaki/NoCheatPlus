@@ -33,4 +33,18 @@ public class BukkitStaticTest {
     public void testOfInsetAndHeightInvalid() {
         BukkitStatic.ofInsetAndHeight(0.25, -0.1);
     }
+
+    @Test
+    public void testOfHeightCapped() {
+        BukkitStatic model = BukkitStatic.ofHeight(1.5);
+        double[] expected = {0.0, 0.0, 0.0, 1.0, 1.0, 1.0};
+        assertArrayEquals(expected, model.getShape(null, null, 0, 0, 0), 0.0);
+    }
+
+    @Test
+    public void testOfInsetAndHeightCapped() {
+        BukkitStatic model = BukkitStatic.ofInsetAndHeight(0.25, 1.5);
+        double[] expected = {0.25, 0.0, 0.25, 0.75, 1.0, 0.75};
+        assertArrayEquals(expected, model.getShape(null, null, 0, 0, 0), 0.0);
+    }
 }

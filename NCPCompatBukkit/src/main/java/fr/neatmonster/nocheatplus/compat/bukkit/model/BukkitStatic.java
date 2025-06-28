@@ -41,7 +41,7 @@ public class BukkitStatic implements BukkitShapeModel {
         if (height <= 0.0) {
             throw new IllegalArgumentException("Height must be positive: " + height);
         }
-        return ofInsetAndHeight(0.0, height);
+        return ofInsetAndHeight(0.0, Math.min(height, 1.0));
     }
 
     /**
@@ -55,6 +55,7 @@ public class BukkitStatic implements BukkitShapeModel {
         if (height <= 0.0) {
             throw new IllegalArgumentException("Height must be positive: " + height);
         }
+        height = Math.min(height, 1.0);
         return ofBounds(xzInset, 0.0, xzInset, 1.0 - xzInset, height, 1.0 - xzInset);
     }
 
