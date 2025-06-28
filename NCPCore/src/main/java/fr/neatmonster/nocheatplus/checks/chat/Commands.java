@@ -18,6 +18,7 @@ import org.bukkit.entity.Player;
 
 import fr.neatmonster.nocheatplus.checks.Check;
 import fr.neatmonster.nocheatplus.checks.CheckType;
+import fr.neatmonster.nocheatplus.checks.chat.util.ChatCaptchaUtil;
 import fr.neatmonster.nocheatplus.players.IPlayerData;
 import fr.neatmonster.nocheatplus.utilities.ColorUtil;
 import fr.neatmonster.nocheatplus.utilities.TickTask;
@@ -46,39 +47,43 @@ public class Commands extends Check {
         final ChatData data = pData.getGenericInstance(ChatData.class);
 
         final boolean captchaEnabled = !cc.captchaSkipCommands
-                && pData.isCheckActive(CheckType.CHAT_CAPTCHA, player);
+                && ChatCaptchaUtil.isCaptchaEnabled(player, pData);
 
-        if (handleCaptcha(player, message, captcha, cc, data, pData, captchaEnabled)) {
-            return true;
+        boolean cancelled = handleCaptcha(player, message, captcha, cc, data, pData, captchaEnabled);
+
+        if (!cancelled) {
+            // Rest of the check is done without sync, because the data is only used by this check.
+
+            // Weight might later be read from some prefix tree (also known / unknown).
+            final float weight = 1f;
+
+            updateCommandWeights(data, cc, pData, weight, now, tick);
+
+            final float nw = data.commandsWeights.score(1f);
+            final double violation = Math.max(nw - cc.commandsLevel,
+                    data.commandsShortTermWeight - cc.commandsShortTermLevel);
+
+            cancelled = processCommandViolation(player, data, cc, captcha, captchaEnabled,
+                    violation, nw, now);
         }
 
-        // Rest of the check is done without sync, because the data is only used by this check.
+        return cancelled;
 
-        // Weight might later be read from some prefix tree (also known / unknown).
-        final float weight = 1f;
-
-        updateCommandWeights(data, cc, pData, weight, now, tick);
-
-        final float nw = data.commandsWeights.score(1f);
-        final double violation = Math.max(nw - cc.commandsLevel,
-                data.commandsShortTermWeight - cc.commandsShortTermLevel);
-
-        return processCommandViolation(player, data, cc, captcha, captchaEnabled,
-                violation, nw, now);
     }
 
     private boolean handleCaptcha(final Player player, final String message,
             final ICaptcha captcha, final ChatConfig cc, final ChatData data,
             final IPlayerData pData, final boolean captchaEnabled) {
+        boolean cancelled = false;
         if (captchaEnabled) {
             synchronized (data) {
                 if (captcha.shouldCheckCaptcha(player, cc, data, pData)) {
                     captcha.checkCaptcha(player, message, cc, data, true);
-                    return true;
+                    cancelled = true;
                 }
             }
         }
-        return false;
+        return cancelled;
     }
 
     private void updateCommandWeights(final ChatData data, final ChatConfig cc,

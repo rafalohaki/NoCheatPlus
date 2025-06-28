@@ -16,13 +16,18 @@ package fr.neatmonster.nocheatplus.checks.chat;
 
 import org.bukkit.entity.Player;
 
+import fr.neatmonster.nocheatplus.checks.CheckType;
 import fr.neatmonster.nocheatplus.players.IPlayerData;
 
 /**
  * Captcha related operations.<br>
  * Auxiliary interface, most methods should need sync over data, unless stated otherwise.
- * @author mc_dev
+ * <p>
+ * Implementations must only run captcha logic if both the player's world data
+ * and the player data indicate that {@link CheckType#CHAT_CAPTCHA} is active.
+ * </p>
  *
+ * @author mc_dev
  */
 public interface ICaptcha {
 

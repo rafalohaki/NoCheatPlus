@@ -35,6 +35,7 @@ import fr.neatmonster.nocheatplus.checks.moving.util.MovingUtil;
 import fr.neatmonster.nocheatplus.command.CommandUtil;
 import fr.neatmonster.nocheatplus.compat.BridgeMisc;
 import fr.neatmonster.nocheatplus.components.NoCheatPlusAPI;
+import fr.neatmonster.nocheatplus.checks.chat.util.ChatCaptchaUtil;
 import fr.neatmonster.nocheatplus.components.data.ICheckData;
 import fr.neatmonster.nocheatplus.components.data.IData;
 import fr.neatmonster.nocheatplus.components.registry.factory.IFactoryOne;
@@ -282,7 +283,9 @@ public class ChatListener extends CheckListener implements INotifyReload, JoinLe
 
         // Reset captcha of player if needed.
         synchronized(data) {
-            captcha.resetCaptcha(player, cc, data, pData);
+            if (ChatCaptchaUtil.isCaptchaEnabled(player, pData)) {
+                captcha.resetCaptcha(player, cc, data, pData);
+            }
         }
         // Fast relog check.
         if (relog.isEnabled(player, pData) && relog.unsafeLoginCheck(player, cc, data,pData)) {
@@ -314,7 +317,7 @@ public class ChatListener extends CheckListener implements INotifyReload, JoinLe
          * implementation.
          */
         synchronized (data) {
-            if (captcha.isEnabled(player, pData)) {
+            if (ChatCaptchaUtil.isCaptchaEnabled(player, pData)) {
                 if (captcha.shouldCheckCaptcha(player, cc, data, pData)) {
                     // shouldCheckCaptcha: only if really enabled.
                     // Possible addition: check cc.captchaOnLogin before shouldCheckCaptcha.
