@@ -131,6 +131,9 @@ public class PlayerDataManager  implements IPlayerDataManager, ComponentWithName
     /** Tracks the server tick when a leave event started processing for a player. */
     private final Map<UUID, Integer> leaveProcessing = new HashMap<UUID, Integer>(50);
 
+    /** Maximum number of entries to track for leave processing. */
+    private static final int MAX_LEAVE_PROCESSING = 5000;
+
     /**
      * Keeping track of online players. Currently id/name mappings are not kept
      * on logout, but might be later.
@@ -720,17 +723,20 @@ public class PlayerDataManager  implements IPlayerDataManager, ComponentWithName
         }
     }
 
-    private boolean startLeaveProcessing(Player player) {
+    private boolean startLeaveProcessing(final Player player) {
         if (player == null) {
             return false;
         }
         final UUID id = player.getUniqueId();
         final int tick = TickTask.getTick();
-        final Integer existing = leaveProcessing.get(id);
-        if (existing != null && existing.intValue() == tick) {
+        if (tick == leaveProcessing.getOrDefault(id, -1)) {
+            CheckUtils.debug(player, null, "Duplicate leave event in tick " + tick + " ignored.");
             return false;
         }
         leaveProcessing.put(id, tick);
+        if (leaveProcessing.size() > MAX_LEAVE_PROCESSING) {
+            leaveProcessing.clear();
+        }
         return true;
     }
 
