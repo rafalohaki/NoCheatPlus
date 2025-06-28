@@ -37,6 +37,20 @@ public class PassengerUtilTest {
         }
     }
 
+    private static class FailingVehicleAccess extends DummyVehicleAccess {
+        private final int fails;
+        private int calls;
+        FailingVehicleAccess(int fails) { this.fails = fails; }
+        @Override
+        public boolean addPassenger(Entity entity, Entity vehicle) {
+            calls++;
+            if (calls <= fails) {
+                return false;
+            }
+            return super.addPassenger(entity, vehicle);
+        }
+    }
+
     private sun.misc.Unsafe unsafe;
 
     @Before
@@ -91,5 +105,31 @@ public class PassengerUtilTest {
         MovingData data = newData();
         sched.invoke(util, player, vehicle, cfg, data, false);
         assertTrue(access.called);
+    }
+
+    @Test
+    public void testAddPassengerWithRetrySuccessNoPlugin() throws Exception {
+        DummyVehicleAccess access = new DummyVehicleAccess();
+        PassengerUtil util = newUtil(access);
+        Method m = PassengerUtil.class.getDeclaredMethod("addPassengerWithRetry", Entity.class, Entity.class, int.class);
+        m.setAccessible(true);
+        Player player = mock(Player.class);
+        Entity vehicle = mock(Entity.class);
+        @SuppressWarnings("unchecked")
+        java.util.concurrent.CompletableFuture<Boolean> res = (java.util.concurrent.CompletableFuture<Boolean>) m.invoke(util, player, vehicle, 1);
+        assertTrue(res.get());
+    }
+
+    @Test
+    public void testAddPassengerWithRetryFailNoPlugin() throws Exception {
+        FailingVehicleAccess access = new FailingVehicleAccess(1);
+        PassengerUtil util = newUtil(access);
+        Method m = PassengerUtil.class.getDeclaredMethod("addPassengerWithRetry", Entity.class, Entity.class, int.class);
+        m.setAccessible(true);
+        Player player = mock(Player.class);
+        Entity vehicle = mock(Entity.class);
+        @SuppressWarnings("unchecked")
+        java.util.concurrent.CompletableFuture<Boolean> res = (java.util.concurrent.CompletableFuture<Boolean>) m.invoke(util, player, vehicle, 1);
+        assertFalse(res.get());
     }
 }
