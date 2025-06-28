@@ -107,17 +107,17 @@ public class NetStatic {
         final long tDiff = time - packetFreq.lastAccess();
         if (tDiff >= winDur && tDiff < totalDur) {
             // Cache bucket scores to avoid repeated bucketScore() calls.
-            final float[] bucketScores = new float[winNum];
+            final float[] originalBucketScores = new float[winNum];
             for (int i = 0; i < winNum; i++) {
-                bucketScores[i] = packetFreq.bucketScore(i);
+                originalBucketScores[i] = packetFreq.bucketScore(i);
             }
             // There will be some shift, so check if to relax, only if there could be some congestion.
-            float firstBucketScore = bucketScores[0];
+            float firstBucketScore = originalBucketScores[0];
             if (firstBucketScore > maxPackets) { // Clarify ideal versus maximum packet counts.
                 // Keep in mind potential burst-to-burst exploits.
                 firstBucketScore -= maxPackets; // Count this down.
                 for (int i = 1; i < winNum; i++) {
-                    final float currentBucketScore = bucketScores[i];
+                    final float currentBucketScore = originalBucketScores[i];
                     if (currentBucketScore < maxPackets) {
                         // Smoothen, using following empty spots including one occupied spot at most..
                         float consume = Math.min(firstBucketScore, maxPackets - currentBucketScore);
