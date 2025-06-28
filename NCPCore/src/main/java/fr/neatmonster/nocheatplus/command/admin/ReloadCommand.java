@@ -83,7 +83,7 @@ public class ReloadCommand extends BaseCommand {
         NCPAPIProvider.getNoCheatPlusAPI().getPlayerDataManager().removeCachedConfigs();
 
         // Reset debug flags to default (temp, heavy).
-        DataManager.restoreDefaultDebugFlags();
+        DataManager.getInstance().restoreDefaultDebugFlags();
 
         // Tell the registered listeners to adapt to new config, first sort them (!).
         notifyReload.sort(Order.cmpSetupOrder);

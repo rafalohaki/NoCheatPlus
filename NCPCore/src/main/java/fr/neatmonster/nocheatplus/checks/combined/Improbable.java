@@ -92,7 +92,7 @@ public class Improbable extends Check implements IDisableListener{
      * @param now
      */
     public static void feed(final Player player, final float weight, long now) {
-        feed(player, weight, now, DataManager.getPlayerData(player));
+        feed(player, weight, now, DataManager.getInstance().getPlayerData(player));
     }
 
     ////////////////////////////////////

@@ -311,14 +311,14 @@ public class ProtocolLibComponent implements IDisableListener, INotifyReload, Jo
     @Override
     public void playerJoins(final Player player) {
         if (!registeredPacketAdapters.isEmpty()) {
-            DataManager.getGenericInstance(player, NetData.class).onJoin(player);
+            DataManager.getInstance().getGenericInstance(player, NetData.class).onJoin(player);
         }
     }
 
     @Override
     public void playerLeaves(final Player player) {
         if (!registeredPacketAdapters.isEmpty()) {
-            DataManager.getGenericInstance(player, NetData.class).onLeave(player);
+            DataManager.getInstance().getGenericInstance(player, NetData.class).onLeave(player);
         }
     }
 
@@ -326,7 +326,7 @@ public class ProtocolLibComponent implements IDisableListener, INotifyReload, Jo
     public void onPlayerRespawn(final PlayerRespawnEvent event) {
         if (!registeredPacketAdapters.isEmpty()) {
             final Player player = event.getPlayer();
-            final NetData data = DataManager.getGenericInstance(player, NetData.class);
+            final NetData data = DataManager.getInstance().getGenericInstance(player, NetData.class);
             data.onJoin(player);
             final Location loc = event.getRespawnLocation();
             data.teleportQueue.onTeleportEvent(loc.getX(), loc.getY(), loc.getZ(), loc.getYaw(), loc.getPitch());
@@ -343,7 +343,7 @@ public class ProtocolLibComponent implements IDisableListener, INotifyReload, Jo
                 return;
             }
             final Player player = event.getPlayer();
-            final IPlayerData pData = DataManager.getPlayerData(player);
+            final IPlayerData pData = DataManager.getInstance().getPlayerData(player);
             final NetData data = pData.getGenericInstance(NetData.class);
             if (pData.isCheckActive(CheckType.NET_FLYINGFREQUENCY, player)) {
                 // Register expected location for comparison with outgoing packets.

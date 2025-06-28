@@ -153,7 +153,7 @@ public class VehicleChecks extends CheckListener {
             return;
         }
         final EntityType vehicleType = vehicle.getType();
-        final IPlayerData pData = DataManager.getPlayerData(player);
+        final IPlayerData pData = DataManager.getInstance().getPlayerData(player);
         final MovingData data = pData.getGenericInstance(MovingData.class);
         final Location from = event.getFrom();
         final Location to = event.getTo();
@@ -285,7 +285,7 @@ public class VehicleChecks extends CheckListener {
             onPlayerVehicleLeave(player, vehicle);
             return;
         }
-        //final IPlayerData pData = DataManager.getPlayerData(player);
+        //final IPlayerData pData = DataManager.getInstance().getPlayerData(player);
         //final MovingData data = pData.getGenericInstance(MovingData.class);
         //final MovingConfig cc = MovingConfig.getConfig(player);
        // final boolean debug = pData.isDebugActive(checkType);
@@ -590,7 +590,7 @@ public class VehicleChecks extends CheckListener {
         for (final Entity passenger : passengers) {
             if ((passenger instanceof Player) && !player.equals(passenger)) {
                 final Player otherPlayer = (Player) passenger;
-                final MovingData otherData = DataManager.getGenericInstance(otherPlayer, MovingData.class);
+                final MovingData otherData = DataManager.getInstance().getGenericInstance(otherPlayer, MovingData.class);
                 otherData.resetVehiclePositions(moveInfo.to);
                 otherData.vehicleSetBacks.resetAllLazily(data.vehicleSetBacks.getOldestValidEntry());
                 otherData.wasInVehicle = true;
@@ -701,7 +701,7 @@ public class VehicleChecks extends CheckListener {
      * @return True, if an event is to be cancelled.
      */
     public boolean onPlayerVehicleEnter(final Player player,  final Entity vehicle) {
-        final IPlayerData pData = DataManager.getPlayerData(player);
+        final IPlayerData pData = DataManager.getInstance().getPlayerData(player);
         final boolean debug = pData.isDebugActive(checkType);
         final MovingData data = pData.getGenericInstance(MovingData.class);
         if (!data.isVehicleSetBack && MovingUtil.hasScheduledPlayerSetBack(player.getUniqueId(), data)) {
@@ -819,7 +819,7 @@ public class VehicleChecks extends CheckListener {
         final Entity attacker = event.getAttacker();
         if (attacker instanceof Player && passengerUtil.isPassenger(attacker, event.getVehicle())) {
             final Player player = (Player) attacker;
-            final IPlayerData pData = DataManager.getPlayerData(player);
+            final IPlayerData pData = DataManager.getInstance().getPlayerData(player);
             final MovingConfig cc = pData.getGenericInstance(MovingConfig.class);
             if (cc.vehiclePreventDestroyOwn
                     && (pData.isCheckActive(CheckType.MOVING_SURVIVALFLY, player)
@@ -846,7 +846,7 @@ public class VehicleChecks extends CheckListener {
      */
     private void onPlayerVehicleLeave(final Player player, final Entity vehicle) {
 
-        final IPlayerData pData = DataManager.getPlayerData(player);
+        final IPlayerData pData = DataManager.getInstance().getPlayerData(player);
         final MovingData data = pData.getGenericInstance(MovingData.class);
         final boolean debug = pData.isDebugActive(checkType);
         data.wasInVehicle = false;

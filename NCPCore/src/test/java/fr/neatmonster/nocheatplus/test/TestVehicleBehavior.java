@@ -27,6 +27,7 @@ import fr.neatmonster.nocheatplus.components.registry.event.IHandle;
 import fr.neatmonster.nocheatplus.NCPAPIProvider;
 import fr.neatmonster.nocheatplus.components.registry.event.IGenericInstanceHandle;
 import fr.neatmonster.nocheatplus.players.DataManager;
+import fr.neatmonster.nocheatplus.players.PlayerDataManager;
 
 public class TestVehicleBehavior {
 
@@ -63,13 +64,11 @@ public class TestVehicleBehavior {
         Field uf = sun.misc.Unsafe.class.getDeclaredField("theUnsafe");
         uf.setAccessible(true);
         sun.misc.Unsafe un = (sun.misc.Unsafe) uf.get(null);
-        Object pdm = un.allocateInstance(fr.neatmonster.nocheatplus.players.PlayerDataManager.class);
+        PlayerDataManager pdm = (PlayerDataManager) un.allocateInstance(fr.neatmonster.nocheatplus.players.PlayerDataManager.class);
         Field eh = fr.neatmonster.nocheatplus.players.PlayerDataManager.class.getDeclaredField("executionHistories");
         eh.setAccessible(true);
         eh.set(pdm, new java.util.HashMap<>());
-        Field dm = DataManager.class.getDeclaredField("instance");
-        dm.setAccessible(true);
-        dm.set(null, pdm);
+        new DataManager(pdm);
     }
 
     static class DummyLocation extends fr.neatmonster.nocheatplus.utilities.location.RichEntityLocation {

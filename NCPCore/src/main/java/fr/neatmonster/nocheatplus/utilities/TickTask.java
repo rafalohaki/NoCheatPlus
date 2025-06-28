@@ -152,10 +152,10 @@ public class TickTask implements Runnable {
             improbableUpdates = new LinkedHashMap<UUID, ImprobableUpdateEntry>(50);
             improbableLock.unlock();
             for (final Entry<UUID, ImprobableUpdateEntry> entry : updateMap.entrySet()) {
-                final Player player = DataManager.getPlayer(entry.getKey());
+                final Player player = DataManager.getInstance().getPlayer(entry.getKey());
                 if (player != null) {
                     Improbable.feed(player, entry.getValue().addLevel,
-                            System.currentTimeMillis(), DataManager.getPlayerData(player));
+                            System.currentTimeMillis(), DataManager.getInstance().getPlayerData(player));
                 }
             }
         }
@@ -568,7 +568,7 @@ public class TickTask implements Runnable {
         // Time running backwards check (not only players can!).
         if (timeLast > time) {
             StaticLog.logWarning("System time ran backwards (" + timeLast + "->" + time + "), clear all data and history...");
-            DataManager.handleSystemTimeRanBackwards();
+            DataManager.getInstance().handleSystemTimeRanBackwards();
             lastDur = 50;
             for (int i = 0; i < spikeDurations.length; i++) {
                 spikes[i].update(time);

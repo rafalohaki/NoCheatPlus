@@ -121,7 +121,7 @@ public class DebugPlayerCommand extends BaseCommand {
             }
         }
 
-        IPlayerData data = DataManager.getPlayerData(player);
+        IPlayerData data = DataManager.getInstance().getPlayerData(player);
         applyDebugSettings(data, entry);
 
         Collection<CheckType> checkTypes = entry.checkTypes.isEmpty() ? Collections.singletonList(CheckType.ALL) : entry.checkTypes;
@@ -134,14 +134,14 @@ public class DebugPlayerCommand extends BaseCommand {
         String c3 = colors[COLOR_ERROR];
         Player player = null;
         if (IdUtil.isValidMinecraftUserName(input)) {
-            player = DataManager.getPlayer(input);
+            player = DataManager.getInstance().getPlayer(input);
         } else {
             UUID id = IdUtil.UUIDFromStringSafe(input);
             if (id == null) {
                 sender.sendMessage((sender instanceof Player ? TAG : CTAG) + "Bad name or UUID: " + c3 + input);
                 return null;
             }
-            player = DataManager.getPlayer(id);
+            player = DataManager.getInstance().getPlayer(id);
         }
         if (player == null) {
             sender.sendMessage((sender instanceof Player ? TAG : CTAG) + "Not online: " + c3 + input);

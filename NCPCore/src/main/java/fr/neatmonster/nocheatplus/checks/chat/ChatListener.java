@@ -126,11 +126,11 @@ public class ChatListener extends CheckListener implements INotifyReload, JoinLe
         final Player player = event.getPlayer();
         final boolean alreadyCancelled = event.isCancelled();
 
-        if (!DataManager.getPlayerData(player).isCheckActive(CheckType.CHAT, player)) return;
+        if (!DataManager.getInstance().getPlayerData(player).isCheckActive(CheckType.CHAT, player)) return;
 
         // Tell TickTask to update cached permissions.
         // (Might omit this if already cancelled.)
-        final IPlayerData pData = DataManager.getPlayerData(player);
+        final IPlayerData pData = DataManager.getInstance().getPlayerData(player);
         final ChatConfig cc = pData.getGenericInstance(ChatConfig.class);
 
 
@@ -155,7 +155,7 @@ public class ChatListener extends CheckListener implements INotifyReload, JoinLe
             return;
         }
 
-        final IPlayerData pData = DataManager.getPlayerData(player);
+        final IPlayerData pData = DataManager.getInstance().getPlayerData(player);
         final ChatConfig cc = pData.getGenericInstance(ChatConfig.class);
 
         final ParsedCommandInfo parsed = parseCommand(event.getMessage());
@@ -271,7 +271,7 @@ public class ChatListener extends CheckListener implements INotifyReload, JoinLe
     public void onPlayerLogin(final PlayerLoginEvent event) {
         if (event.getResult() != Result.ALLOWED) return;
         final Player player = event.getPlayer();
-        final IPlayerData pData = DataManager.getPlayerData(player);
+        final IPlayerData pData = DataManager.getInstance().getPlayerData(player);
 
         if (!pData.isCheckActive(CheckType.CHAT, player)) return;
 
@@ -304,7 +304,7 @@ public class ChatListener extends CheckListener implements INotifyReload, JoinLe
 
     @Override
     public void playerJoins(final Player player) {
-        final IPlayerData pData = DataManager.getPlayerData(player);
+        final IPlayerData pData = DataManager.getInstance().getPlayerData(player);
         final ChatConfig cc = pData.getGenericInstance(ChatConfig.class);
         final ChatData data = pData.getGenericInstance(ChatData.class);
         /*

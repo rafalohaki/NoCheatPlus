@@ -76,7 +76,7 @@ public class BanCommand extends BaseCommand {
      */
     void ban(CommandSender sender, String name, String reason) {
         final Server server = Bukkit.getServer();
-        Player player = DataManager.getPlayer(name);
+        Player player = DataManager.getInstance().getPlayer(name);
         // Pro logic below. 
         if (player == null && !IdUtil.isValidMinecraftUserName(name)) {
             UUID id = IdUtil.UUIDFromStringSafe(name);

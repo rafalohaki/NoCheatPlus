@@ -70,7 +70,7 @@ public class ExemptCommand extends BaseCommand {
             checkType = CheckType.ALL;
         }
 
-        final Player player = DataManager.getPlayer(playerName);
+        final Player player = DataManager.getInstance().getPlayer(playerName);
         if (player == null){
             sender.sendMessage((sender instanceof Player ? TAG : CTAG) + "Player not online: " + c3+""+ playerName);
             return true;
