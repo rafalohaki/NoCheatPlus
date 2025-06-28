@@ -377,10 +377,6 @@ public class FightListener extends CheckListener implements JoinLeaveListener{
     private TargetMoveInfo computeTargetMoveInfo(final FightData data, final Location damagedLoc,
                                                  final int tick, final boolean worldChanged) {
 
-        if (tick < 0) {
-            throw new IllegalArgumentException("tick must be >= 0");
-        }
-
         if (isInvalidMoveInfo(data, damagedLoc, tick, worldChanged)) {
             return DEFAULT_TARGET_MOVE_INFO;
         }
@@ -397,6 +393,7 @@ public class FightListener extends CheckListener implements JoinLeaveListener{
         return data == null || damagedLoc == null
                 || data.lastAttackedX == Double.MAX_VALUE
                 || tick < data.lastAttackTick
+                || tick < 0
                 || worldChanged
                 || tick - data.lastAttackTick > 20;
     }
