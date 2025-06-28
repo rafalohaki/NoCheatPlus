@@ -169,10 +169,15 @@ public abstract class BlockCache {
         }
 
         private boolean hasSameData(IBlockCacheNode other) {
-            if (!isDataFetched() || !other.isDataFetched()) {
-                return !isDataFetched() && !other.isDataFetched();
+            final boolean thisDataFetched = isDataFetched();
+            final boolean otherDataFetched = other.isDataFetched();
+
+            // Either both have fetched data or neither does.
+            if (thisDataFetched != otherDataFetched) {
+                return false;
             }
-            return data == other.getData();
+
+            return !thisDataFetched || data == other.getData();
         }
 
         private boolean hasSameBounds(IBlockCacheNode other) {
