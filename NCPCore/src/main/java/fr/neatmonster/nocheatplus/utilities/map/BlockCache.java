@@ -168,6 +168,25 @@ public abstract class BlockCache {
             fetched |= FETCHED_BOUNDS;
         }
 
+        private boolean hasSameData(IBlockCacheNode other) {
+            final boolean thisDataFetched = isDataFetched();
+            final boolean otherDataFetched = other.isDataFetched();
+
+            // Either both have fetched data or neither does.
+            if (thisDataFetched != otherDataFetched) {
+                return false;
+            }
+
+            return !thisDataFetched || data == other.getData();
+        }
+
+        private boolean hasSameBounds(IBlockCacheNode other) {
+            if (!isBoundsFetched() || !other.isBoundsFetched()) {
+                return !isBoundsFetched() && !other.isBoundsFetched();
+            }
+            return BlockProperties.isSameShape(bounds, other.getBounds());
+        }
+
         @Override
         public int hashCode() {
             return 42;
@@ -180,13 +199,9 @@ public abstract class BlockCache {
             }
             if (obj instanceof IBlockCacheNode) {
                 final IBlockCacheNode other = (IBlockCacheNode) obj;
-                return id == other.getType() 
-                        && (!isDataFetched() && !other.isDataFetched() 
-                                || isDataFetched() && other.isDataFetched() && data == other.getData())
-                        && (!isBoundsFetched() && !other.isBoundsFetched()
-                                || isBoundsFetched() && other.isBoundsFetched() 
-                                && BlockProperties.isSameShape(bounds, other.getBounds())
-                                );
+                return id == other.getType()
+                        && hasSameData(other)
+                        && hasSameBounds(other);
             }
             return false;
         }
