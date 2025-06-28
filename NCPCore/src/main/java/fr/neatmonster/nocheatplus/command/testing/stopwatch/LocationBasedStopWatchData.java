@@ -15,7 +15,10 @@
 package fr.neatmonster.nocheatplus.command.testing.stopwatch;
 
 import org.bukkit.Location;
+import org.bukkit.World;
 import org.bukkit.entity.Player;
+
+import fr.neatmonster.nocheatplus.logging.StaticLog;
 
 /**
  * Just base on the players location at initialization.
@@ -39,11 +42,32 @@ public abstract class LocationBasedStopWatchData extends StopWatch{
     public LocationBasedStopWatchData(Player player) {
         super(player);
         final Location loc = player.getLocation(useLoc);
-        worldName = loc.getWorld().getName();
+        worldName = resolveWorldName(player, loc);
         x = loc.getX();
         y = loc.getY();
         z = loc.getZ();
         useLoc.setWorld(null);
+    }
+
+    /**
+     * Resolve the world name for initialization, falling back to the player's
+     * current world if necessary.
+     *
+     * @param player the player owning this stopwatch
+     * @param loc    the location obtained from the player
+     * @return the world name or {@code null} if none is available
+     */
+    private static String resolveWorldName(Player player, Location loc) {
+        World world = loc.getWorld();
+        if (world == null) {
+            world = player.getWorld();
+            if (world == null) {
+                StaticLog.logWarning("StopWatch initialization aborted: no world for player "
+                        + player.getName());
+                return null;
+            }
+        }
+        return world.getName();
     }
 
 }
