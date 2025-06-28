@@ -55,8 +55,12 @@ public class FastBreak extends Check {
      *            the block
      * @param isInstaBreak
      *            indicates that the block was flagged as instantly
-     *            breakable. Values other than {@link AlmostBoolean#NO}
-     *            cause the check to adjust or skip violation handling.
+     *            breakable. The value controls how this check reacts:
+     *            <ul>
+     *            <li>{@code YES} - skip the check entirely.</li>
+     *            <li>{@code MAYBE} - clamp the time to {@code fastBreakDelay}.</li>
+     *            <li>{@code NO} - perform a full check.</li>
+     *            </ul>
      * @param cc
      *            configuration used for the check
      * @param data
