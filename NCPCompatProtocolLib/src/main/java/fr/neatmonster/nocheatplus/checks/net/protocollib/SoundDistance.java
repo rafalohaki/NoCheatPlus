@@ -24,6 +24,8 @@ import org.bukkit.Location;
 import org.bukkit.Sound;
 import org.bukkit.entity.Player;
 import org.bukkit.plugin.Plugin;
+import fr.neatmonster.nocheatplus.NCPAPIProvider;
+import fr.neatmonster.nocheatplus.utilities.location.LocationPool;
 
 import com.comphenix.protocol.PacketType;
 import com.comphenix.protocol.events.ListenerPriority;
@@ -94,7 +96,7 @@ public class SoundDistance extends BaseAdapter {
             ));
 
     private final Integer idSoundEffectCancel = counters.registerKey("packet.sound.cancel");
-    private final Location useLoc = new Location(null, 0, 0, 0);
+    private final LocationPool locationPool = NCPAPIProvider.getNoCheatPlusAPI().getGenericInstance(LocationPool.class);
     /** Legacy check behavior. */
     private final boolean pre1_9;
 
@@ -162,8 +164,9 @@ public class SoundDistance extends BaseAdapter {
         }
 
         // Compare distance of player to the weather location.
-        final Location loc = player.getLocation(useLoc);
+        final Location loc = player.getLocation(locationPool.acquire());
         if (loc == null) {
+            locationPool.release(loc);
             return;
         }
         final StructureModifier<Integer> ints = packetContainer.getIntegers();
@@ -176,7 +179,7 @@ public class SoundDistance extends BaseAdapter {
             event.setCancelled(true);
             counters.add(idSoundEffectCancel, 1);
         }
-        useLoc.setWorld(null);
+        locationPool.release(loc);
     }
     
     @Override
