@@ -88,13 +88,17 @@ public class EntityAccessVehicleMultiPassenger implements IEntityAccessVehicle {
 
 
     @Override
-    public List<Entity> getEntityPassengers(final Entity entity) {
-        return entity.getPassengers();
+    public List<Entity> getEntityPassengers(final Entity vehicle) {
+        return vehicle.getPassengers();
     }
 
+    /**
+     * Add {@code passenger} to {@code vehicle}.
+     * The first argument is always the passenger entity and the second is the vehicle.
+     */
     @Override
-    public boolean addPassenger(final Entity entity, final Entity vehicle) {
-        return vehicle.addPassenger(entity);
+    public boolean addPassenger(final Entity passenger, final Entity vehicle) {
+        return vehicle.addPassenger(passenger);
     }
 
 }

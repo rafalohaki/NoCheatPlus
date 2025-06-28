@@ -29,9 +29,9 @@ public class PassengerUtilTest {
 
     private static class DummyVehicleAccess implements IEntityAccessVehicle {
         boolean called;
-        @Override public java.util.List<Entity> getEntityPassengers(Entity e) { return Collections.emptyList(); }
+        @Override public java.util.List<Entity> getEntityPassengers(Entity vehicle) { return Collections.emptyList(); }
         @Override
-        public boolean addPassenger(Entity entity, Entity vehicle) {
+        public boolean addPassenger(Entity passenger, Entity vehicle) {
             called = true;
             return true;
         }
@@ -42,12 +42,12 @@ public class PassengerUtilTest {
         private int calls;
         FailingVehicleAccess(int fails) { this.fails = fails; }
         @Override
-        public boolean addPassenger(Entity entity, Entity vehicle) {
+        public boolean addPassenger(Entity passenger, Entity vehicle) {
             calls++;
             if (calls <= fails) {
                 return false;
             }
-            return super.addPassenger(entity, vehicle);
+            return super.addPassenger(passenger, vehicle);
         }
     }
 

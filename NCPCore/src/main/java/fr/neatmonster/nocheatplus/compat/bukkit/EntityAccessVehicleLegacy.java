@@ -41,15 +41,19 @@ public class EntityAccessVehicleLegacy implements IEntityAccessVehicle {
 
     @SuppressWarnings("deprecation")
     @Override
-    public List<Entity> getEntityPassengers(final Entity entity) {
-        final Entity passenger = entity.getPassenger();
+    public List<Entity> getEntityPassengers(final Entity vehicle) {
+        final Entity passenger = vehicle.getPassenger();
         return passenger == null ? nullPassenger : Collections.singletonList(passenger);
     }
 
+    /**
+     * Add {@code passenger} to {@code vehicle}.
+     * The first argument refers to the passenger entity and the second refers to the vehicle.
+     */
     @SuppressWarnings("deprecation")
     @Override
-    public boolean addPassenger(final Entity entity, final Entity vehicle) {
-        return vehicle.setPassenger(entity);
+    public boolean addPassenger(final Entity passenger, final Entity vehicle) {
+        return vehicle.setPassenger(passenger);
     }
 
 }
