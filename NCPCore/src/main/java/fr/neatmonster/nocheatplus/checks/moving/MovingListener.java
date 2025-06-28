@@ -1251,7 +1251,7 @@ public class MovingListener extends CheckListener implements TickListener, IRemo
                 }
                 if (verticalBounce == BounceType.NO_BOUNCE && useBlockChangeTracker && BounceUtil
                         .checkPastStateBounceDescend(player, pFrom, pTo, thisMove, lastMove, tick, data, cc,
-                                (BlockChangeTracker) blockChangeTracker) != BounceType.NO_BOUNCE) {
+                                blockChangeTracker) != BounceType.NO_BOUNCE) {
                     checkNf = false;
                 }
             }
@@ -1260,7 +1260,7 @@ public class MovingListener extends CheckListener implements TickListener, IRemo
                     && BounceUtil.onPreparedBounceSupport(player, from, to, thisMove, lastMove, tick, data))
                     || useBlockChangeTracker && thisMove.yDistance <= 1.515) {
                 verticalBounce = BounceUtil.checkPastStateBounceAscend(player, pFrom, pTo, thisMove, lastMove, tick,
-                        pData, this, data, cc, (BlockChangeTracker) blockChangeTracker);
+                        pData, this, data, cc, blockChangeTracker);
                 if (verticalBounce != BounceType.NO_BOUNCE) {
                     checkNf = false;
                 }

@@ -26,6 +26,7 @@ import fr.neatmonster.nocheatplus.compat.blocks.changetracker.BlockChangeReferen
 import fr.neatmonster.nocheatplus.compat.blocks.changetracker.BlockChangeTracker;
 import fr.neatmonster.nocheatplus.compat.blocks.changetracker.BlockChangeTracker.BlockChangeEntry;
 import fr.neatmonster.nocheatplus.compat.blocks.changetracker.BlockChangeTracker.Direction;
+import fr.neatmonster.nocheatplus.compat.blocks.changetracker.IBlockChangeTracker;
 import fr.neatmonster.nocheatplus.compat.Bridge1_9;
 import fr.neatmonster.nocheatplus.components.location.IGetBox3D;
 import fr.neatmonster.nocheatplus.components.location.IGetBlockPosition;
@@ -1225,7 +1226,7 @@ public class RichBoundsLocation implements IGetBukkitLocation, IGetBlockPosition
      */
     public final boolean isOnGroundOpportune(
             final double yOnGround, final long ignoreFlags,
-            final BlockChangeTracker blockChangeTracker, final BlockChangeReference blockChangeRef,
+            final IBlockChangeTracker blockChangeTracker, final BlockChangeReference blockChangeRef,
             final int tick) {
         // Consider updating the onGround+distance cache.
         return blockChangeTracker.isOnGround(blockCache, blockChangeRef, tick, world.getUID(), 
@@ -1402,7 +1403,7 @@ public class RichBoundsLocation implements IGetBukkitLocation, IGetBlockPosition
      *            The (always positive) distance to cover.
      * @return Returns true, iff an entry was found.
      */
-    public boolean matchBlockChange(final BlockChangeTracker blockChangeTracker, final BlockChangeReference ref, 
+    public boolean matchBlockChange(final IBlockChangeTracker blockChangeTracker, final BlockChangeReference ref,
                                     final Direction direction, final double coverDistance) {
         final int tick = TickTask.getTick();
         final UUID worldId = world.getUID();
@@ -1460,8 +1461,8 @@ public class RichBoundsLocation implements IGetBukkitLocation, IGetBlockPosition
      *            matchFlags. If matchFlags is zero, the parameter is ignored.
      * @return Returns true, iff an entry was found.
      */
-    public boolean matchBlockChangeMatchResultingFlags(final BlockChangeTracker blockChangeTracker, 
-            final BlockChangeReference ref, final Direction direction, final double coverDistance, 
+    public boolean matchBlockChangeMatchResultingFlags(final IBlockChangeTracker blockChangeTracker,
+            final BlockChangeReference ref, final Direction direction, final double coverDistance,
             final long matchFlags) {
         /*
          * Not sure with code duplication. Is it better to run

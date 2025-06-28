@@ -28,6 +28,7 @@ import fr.neatmonster.nocheatplus.checks.moving.velocity.VelocityFlags;
 import fr.neatmonster.nocheatplus.compat.blocks.changetracker.BlockChangeTracker;
 import fr.neatmonster.nocheatplus.compat.blocks.changetracker.BlockChangeTracker.BlockChangeEntry;
 import fr.neatmonster.nocheatplus.compat.blocks.changetracker.BlockChangeTracker.Direction;
+import fr.neatmonster.nocheatplus.compat.blocks.changetracker.IBlockChangeTracker;
 import fr.neatmonster.nocheatplus.components.debug.IDebugPlayer;
 import fr.neatmonster.nocheatplus.players.IPlayerData;
 import fr.neatmonster.nocheatplus.utilities.location.PlayerLocation;
@@ -143,8 +144,8 @@ public class BounceUtil {
      * @return
      */
     public static BounceType checkPastStateBounceDescend(final Player player, final PlayerLocation from, final PlayerLocation to,
-                                                         final PlayerMoveData thisMove, final PlayerMoveData lastMove, final int tick, 
-                                                         final MovingData data, final MovingConfig cc, BlockChangeTracker blockChangeTracker) {
+                                                         final PlayerMoveData thisMove, final PlayerMoveData lastMove, final int tick,
+                                                         final MovingData data, final MovingConfig cc, IBlockChangeTracker blockChangeTracker) {
 
         // Additional preconditions may be required here.
         // It might later be necessary to override or adapt only the bounce effect set by the ordinary method.
@@ -185,8 +186,8 @@ public class BounceUtil {
      * @return
      */
     public static BounceType checkPastStateBounceAscend(final Player player, final PlayerLocation from, final PlayerLocation to,
-                                                        final PlayerMoveData thisMove, final PlayerMoveData lastMove, final int tick, final IPlayerData pData, 
-                                                        final IDebugPlayer idp, final MovingData data, final MovingConfig cc, BlockChangeTracker blockChangeTracker) {
+                                                        final PlayerMoveData thisMove, final PlayerMoveData lastMove, final int tick, final IPlayerData pData,
+                                                        final IDebugPlayer idp, final MovingData data, final MovingConfig cc, IBlockChangeTracker blockChangeTracker) {
 
         // More preconditions might be needed.
         // Side conditions for larger jumps should be determined more precisely if possible.

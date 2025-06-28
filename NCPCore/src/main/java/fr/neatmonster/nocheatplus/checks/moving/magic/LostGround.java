@@ -29,6 +29,7 @@ import fr.neatmonster.nocheatplus.checks.moving.util.MovingUtil;
 import fr.neatmonster.nocheatplus.compat.Bridge1_17;
 import fr.neatmonster.nocheatplus.compat.MCAccess;
 import fr.neatmonster.nocheatplus.compat.blocks.changetracker.BlockChangeTracker;
+import fr.neatmonster.nocheatplus.compat.blocks.changetracker.IBlockChangeTracker;
 import fr.neatmonster.nocheatplus.utilities.TickTask;
 import fr.neatmonster.nocheatplus.utilities.location.PlayerLocation;
 import fr.neatmonster.nocheatplus.utilities.map.BlockCache;
@@ -60,8 +61,8 @@ public class LostGround {
      */
     public static boolean lostGround(final Player player, final PlayerLocation from, final PlayerLocation to, 
                                      final double hDistance, final double yDistance, final boolean sprinting, 
-                                     final PlayerMoveData lastMove, final MovingData data, final MovingConfig cc, 
-                                     final BlockChangeTracker blockChangeTracker, final Collection<String> tags) {
+                                     final PlayerMoveData lastMove, final MovingData data, final MovingConfig cc,
+                                     final IBlockChangeTracker blockChangeTracker, final Collection<String> tags) {
         // Consider regrouping conditions with toOnGround first.
         // Some workarounds allow step height (0.6 on MC 1.8).
         // The current yDistance limit might not be appropriate.
@@ -104,8 +105,8 @@ public class LostGround {
     }
 
 
-    private static boolean lostGroundPastState(final Player player, final PlayerLocation from, final PlayerLocation to, 
-                                               final MovingData data, final MovingConfig cc, final BlockChangeTracker blockChangeTracker, 
+    private static boolean lostGroundPastState(final Player player, final PlayerLocation from, final PlayerLocation to,
+                                               final MovingData data, final MovingConfig cc, final IBlockChangeTracker blockChangeTracker,
                                                final Collection<String> tags) {
         // Requires additional heuristics.
         // Consider performing a full y-move at from-xz.
