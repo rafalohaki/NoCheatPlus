@@ -729,21 +729,21 @@ public class PlayerDataManager  implements IPlayerDataManager, ComponentWithName
         }
         final UUID id = player.getUniqueId();
         final int tick = TickTask.getTick();
-        if (tick == leaveProcessing.getOrDefault(id, -1)) {
+        final Integer previousTick = leaveProcessing.put(id, tick);
+        if (previousTick != null && previousTick.intValue() == tick) {
             CheckUtils.debug(player, null, "Duplicate leave event in tick " + tick + " ignored.");
             return false;
         }
-        leaveProcessing.put(id, tick);
         if (leaveProcessing.size() > MAX_LEAVE_PROCESSING) {
             leaveProcessing.clear();
         }
         return true;
     }
 
-    private void finishLeaveProcessing(Player player) {
-        if (player != null) {
-            leaveProcessing.remove(player.getUniqueId());
-        }
+    private void finishLeaveProcessing(final Player player) {
+        // Intentionally left blank to keep the tick marker for the remainder of
+        // the tick. Duplicate leave events within the same tick will be ignored
+        // even after cleanup completes. Map cleanup happens via size capping.
     }
 
     private void processLeave(final Player player) {
