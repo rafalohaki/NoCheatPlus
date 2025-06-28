@@ -93,11 +93,19 @@ public abstract class AbstractLogNodeDispatcher implements LogNodeDispatcher { /
 
     public <C> void dispatch(LogNode<C> node, Level level, C content) {
         if (node == null || node.logger == null) {
+            logINIT(Level.WARNING,
+                    "Log node or logger missing, skipping record.");
+            logINIT(Level.FINE, "Skipped content: "
+                    + (content != null ? content.toString() : "null"));
             logFallback(level, content);
             return;
         }
         if (isWithinContext(node)) {
-            node.logger.log(level, content);
+            try {
+                node.logger.log(level, content);
+            } catch (RuntimeException e) {
+                logINIT(Level.WARNING, "Failed to log content: " + e.getMessage());
+            }
         } else {
             scheduleLog(node, level, content);
         }
