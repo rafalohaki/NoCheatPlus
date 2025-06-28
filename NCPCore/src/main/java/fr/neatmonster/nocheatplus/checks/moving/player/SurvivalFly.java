@@ -659,6 +659,7 @@ public class SurvivalFly extends Check {
                     )
                     && pastMove2.setBackYDistance > pastMove3.setBackYDistance && pastMove3.setBackYDistance <= minJumpGain + jumpGainMargin
                     && pastMove3.setBackYDistance >= minJumpGain - (Magic.GRAVITY_MAX + Magic.GRAVITY_SPAN)
+                    && pastMove3.setBackYDistance >= pastMove4.setBackYDistance
                     // 0: Too little dropoff
                     || TrigUtil.isZero(thisMove.setBackYDistance) && lastMove.setBackYDistance < data.liftOffEnvelope.getMaxJumpHeight(data.jumpAmplifier)
                     && pastMove2.setBackYDistance > lastMove.setBackYDistance && pastMove2.setBackYDistance - lastMove.setBackYDistance < jumpGainMargin
@@ -3241,6 +3242,10 @@ public class SurvivalFly extends Check {
             if (newTo != null) {
                 data.prepareSetBack(newTo);
                 player.teleport(newTo, BridgeMisc.TELEPORT_CAUSE_CORRECTION_OF_POSITION);
+                // Re-synchronize internal position data using the reusable location instance.
+                final Location cur = player.getLocation(useLoc);
+                aux.resetPositionsAndMediumProperties(player, cur, data, cc);
+                useLoc.setWorld(null);
             }
             else {
                 // Solve by extra actions ? Special case (probably never happens)?
