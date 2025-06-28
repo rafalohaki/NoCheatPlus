@@ -1370,7 +1370,7 @@ public class MovingListener extends CheckListener implements TickListener, IRemo
 
         if (player == null || pFrom == null || pTo == null || from == null || to == null
                 || data == null || cc == null || pData == null) {
-            return new MoveCheckResult(newTo, checkNf);
+            return new MoveCheckResult(newTo);
         }
 
         MovingUtil.prepareFullCheck(pFrom, pTo, thisMove, Math.max(cc.noFallyOnGround, cc.yOnGround));
@@ -1393,7 +1393,7 @@ public class MovingListener extends CheckListener implements TickListener, IRemo
                     previousSetBackY, data, cc, pData);
         }
 
-        return new MoveCheckResult(newTo, checkNf);
+        return new MoveCheckResult(newTo);
     }
 
     private void handleFlyCheckTransition(final PlayerMoveData lastMove, final Player player,
@@ -1487,10 +1487,8 @@ public class MovingListener extends CheckListener implements TickListener, IRemo
 
     private static class MoveCheckResult {
         final Location newTo;
-        final boolean checkNf;
-        MoveCheckResult(final Location newTo, final boolean checkNf) {
+        MoveCheckResult(final Location newTo) {
             this.newTo = newTo;
-            this.checkNf = checkNf;
         }
     }
 
