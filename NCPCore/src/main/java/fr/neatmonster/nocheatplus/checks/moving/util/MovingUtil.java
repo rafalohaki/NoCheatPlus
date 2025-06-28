@@ -52,6 +52,7 @@ import fr.neatmonster.nocheatplus.utilities.location.TrigUtil;
 import fr.neatmonster.nocheatplus.utilities.map.BlockProperties;
 import fr.neatmonster.nocheatplus.utilities.map.BlockFlags;
 import fr.neatmonster.nocheatplus.utilities.map.MapUtil;
+import fr.neatmonster.nocheatplus.components.location.IGetPosition;
 
 /**
  * Static utility methods.
@@ -495,9 +496,12 @@ public class MovingUtil {
      * @param data
      * @param cc
      */
-    public static void ensureChunksLoaded(final Player player,final Location from, final Location to, final PlayerMoveData lastMove, 
+    public static void ensureChunksLoaded(final Player player,final Location from, final Location to, final PlayerMoveData lastMove,
                                           final String tag, final MovingConfig cc, final IPlayerData pData) {
 
+        if (player == null || from == null || to == null || lastMove == null || cc == null || pData == null) {
+            return;
+        }
         // (Worlds must be equal. Ensured in player move handling.)
         final double x0 = from.getX();
         final double z0 = from.getZ();
@@ -511,22 +515,9 @@ public class MovingUtil {
         boolean loadTo = true;
         double margin = Magic.CHUNK_LOAD_MARGIN_MIN;
         // Heuristic for if loading may be necessary at all.
-        if (lastMove.toIsValid && lastMove.to.extraPropertiesValid) {
-            if (TrigUtil.distanceSquared(lastMove.to, x0, z0) < 1.0) {
-                loadFrom = false;
-            }
-            if (TrigUtil.distanceSquared(lastMove.to, x1, z1) < 1.0) {
-                loadTo = false;
-            }
-        }
-        else if (lastMove.valid && lastMove.from.extraPropertiesValid
-                && cc.loadChunksOnJoin) {
-            if (TrigUtil.distanceSquared(lastMove.from, x0, z0) < 1.0) {
-                loadFrom = false;
-            }
-            if (TrigUtil.distanceSquared(lastMove.from, x1, z1) < 1.0) {
-                loadTo = false;
-            }
+        if (shouldSkipLoading(lastMove, cc, x0, z0, x1, z1)) {
+            loadFrom = false;
+            loadTo = false;
         }
         int loaded = 0;
         if (loadFrom && ChunkLoadValidator.canLoad(player, from)) {
@@ -555,23 +546,18 @@ public class MovingUtil {
      * @param data
      * @param cc
      */
-    public static void ensureChunksLoaded(final Player player, final Location loc, final String tag, 
+    public static void ensureChunksLoaded(final Player player, final Location loc, final String tag,
                                           final MovingData data, final MovingConfig cc, final IPlayerData pData) {
 
+        if (player == null || loc == null || data == null || cc == null || pData == null) {
+            return;
+        }
         final PlayerMoveData lastMove = data.playerMoves.getFirstPastMove();
         final double x0 = loc.getX();
         final double z0 = loc.getZ();
         // Heuristic for if loading may be necessary at all.
-        if (lastMove.toIsValid && lastMove.to.extraPropertiesValid) {
-            if (TrigUtil.distanceSquared(lastMove.to, x0, z0) < 1.0) {
-                return;
-            }
-        }
-        else if (lastMove.valid && lastMove.from.extraPropertiesValid
-                && cc.loadChunksOnJoin) {
-            if (TrigUtil.distanceSquared(lastMove.from, x0, z0) < 1.0) {
-                return;
-            }
+        if (shouldSkipLoading(lastMove, cc, x0, z0, x0, z0)) {
+            return;
         }
         int loaded = 0;
         if (ChunkLoadValidator.canLoad(player, loc)) {
@@ -580,6 +566,24 @@ public class MovingUtil {
         if (loaded > 0 && pData.isDebugActive(CheckType.MOVING)) {
             StaticLog.logInfo("Player " + tag + ": Loaded " + loaded + " chunk" + (loaded == 1 ? "" : "s") + " for the world " + loc.getWorld().getName() +  " for player: " + player.getName());
         }
+    }
+
+    private static boolean isClose(final IGetPosition position, final double x, final double z) {
+        return position != null && TrigUtil.distanceSquared(position, x, z) < 1.0;
+    }
+
+    private static boolean shouldSkipLoading(final PlayerMoveData lastMove, final MovingConfig cc,
+                                             final double x0, final double z0, final double x1, final double z1) {
+        if (lastMove == null) {
+            return false;
+        }
+        if (lastMove.toIsValid && lastMove.to != null && lastMove.to.extraPropertiesValid) {
+            return isClose(lastMove.to, x0, z0) && isClose(lastMove.to, x1, z1);
+        }
+        if (lastMove.valid && cc.loadChunksOnJoin && lastMove.from != null && lastMove.from.extraPropertiesValid) {
+            return isClose(lastMove.from, x0, z0) && isClose(lastMove.from, x1, z1);
+        }
+        return false;
     }
 
 
