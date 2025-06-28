@@ -340,47 +340,69 @@ public class Text extends Check implements INotifyReload {
 
         float shortTermScore = Math.max(cc.textFreqShortTermMin, score);
         data.chatShortTermFrequency.add(time, shortTermScore);
-        float shortTermAccumulated = cc.textFreqShortTermWeight * data.chatShortTermFrequency.score(cc.textFreqShortTermFactor);
+        float shortTermAccumulated = cc.textFreqShortTermWeight
+                * data.chatShortTermFrequency.score(cc.textFreqShortTermFactor);
         boolean shortTermViolation = shortTermAccumulated > cc.textFreqShortTermLevel;
 
         boolean cancel = false;
         if (normalViolation || shortTermViolation) {
             lastCancelledMessage = lcMessage;
             lastCancelledTime = time;
-
-            final double added = shortTermViolation ? (shortTermAccumulated - cc.textFreqShortTermLevel) / 3.0
-                    : (accumulated - cc.textFreqNormLevel) / 10.0;
+            final double added = getVlAddition(cc, accumulated, shortTermAccumulated, shortTermViolation);
             data.textVL += added;
-
-            if (ChatCaptchaUtil.isCaptchaEnabled(player, pData)
-                    && captcha.shouldStartCaptcha(player, cc, data, pData)) {
-                captcha.sendNewCaptcha(player, cc, data);
-                cancel = true;
-            } else {
-                if (shortTermViolation) {
-                    if (executeActions(player, data.textVL, added, cc.textFreqShortTermActions).willCancel()) {
-                        cancel = true;
-                    }
-                } else if (normalViolation) {
-                    if (executeActions(player, data.textVL, added, cc.textFreqNormActions).willCancel()) {
-                        cancel = true;
-                    }
-                }
-            }
-        } else if (cc.chatWarningCheck && time - data.chatWarningTime > cc.chatWarningTimeout
-                && (100f * accumulated / cc.textFreqNormLevel > cc.chatWarningLevel
-                        || 100f * shortTermAccumulated / cc.textFreqShortTermLevel > cc.chatWarningLevel)) {
-            NCPAPIProvider.getNoCheatPlusAPI().sendMessageOnTick(player.getName(),
-                    ColorUtil.replaceColors(cc.chatWarningMessage));
+            cancel = handleViolationActions(player, captcha, cc, data, pData, shortTermViolation, normalViolation,
+                    added);
+        } else if (shouldWarnPlayer(cc, data, time, accumulated, shortTermAccumulated)) {
+            warnPlayer(player, cc);
             data.chatWarningTime = time;
         } else {
-            data.textVL *= 0.95;
-            if (cc.textAllowVLReset && normalScore < 2.0f * cc.textFreqNormWeight
-                    && shortTermScore < 2.0f * cc.textFreqShortTermWeight) {
-                data.textVL = 0.0;
-            }
+            adjustVlOnCleanMessage(cc, data, normalScore, shortTermScore);
         }
         return new EvalResult(cancel, accumulated, shortTermAccumulated);
+    }
+
+    private double getVlAddition(final ChatConfig cc, final float accumulated, final float shortTermAccumulated,
+            final boolean shortTermViolation) {
+        return shortTermViolation ? (shortTermAccumulated - cc.textFreqShortTermLevel) / 3.0
+                : (accumulated - cc.textFreqNormLevel) / 10.0;
+    }
+
+    private boolean handleViolationActions(final Player player, final ICaptcha captcha, final ChatConfig cc,
+            final ChatData data, final IPlayerData pData, final boolean shortTermViolation,
+            final boolean normalViolation, final double added) {
+        if (ChatCaptchaUtil.isCaptchaEnabled(player, pData)
+                && captcha.shouldStartCaptcha(player, cc, data, pData)) {
+            captcha.sendNewCaptcha(player, cc, data);
+            return true;
+        }
+        if (shortTermViolation) {
+            return executeActions(player, data.textVL, added, cc.textFreqShortTermActions).willCancel();
+        }
+        if (normalViolation) {
+            return executeActions(player, data.textVL, added, cc.textFreqNormActions).willCancel();
+        }
+        return false;
+    }
+
+    private boolean shouldWarnPlayer(final ChatConfig cc, final ChatData data, final long time,
+            final float accumulated, final float shortTermAccumulated) {
+        return cc.chatWarningCheck && time - data.chatWarningTime > cc.chatWarningTimeout
+                && (100f * accumulated / cc.textFreqNormLevel > cc.chatWarningLevel
+                        || 100f * shortTermAccumulated / cc.textFreqShortTermLevel > cc.chatWarningLevel);
+    }
+
+    private void warnPlayer(final Player player, final ChatConfig cc) {
+        NCPAPIProvider.getNoCheatPlusAPI().sendMessageOnTick(player.getName(),
+                ColorUtil.replaceColors(cc.chatWarningMessage));
+    }
+
+    private void adjustVlOnCleanMessage(final ChatConfig cc, final ChatData data, final float normalScore,
+            final float shortTermScore) {
+        data.textVL *= 0.95;
+        if (cc.textAllowVLReset && normalScore < 2.0f * cc.textFreqNormWeight
+                && shortTermScore < 2.0f * cc.textFreqShortTermWeight) {
+            data.textVL = 0.0;
+        }
     }
 
 }
