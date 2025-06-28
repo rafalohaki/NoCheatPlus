@@ -28,6 +28,7 @@ import org.bukkit.event.player.PlayerToggleSprintEvent;
 import fr.neatmonster.nocheatplus.NCPAPIProvider;
 import fr.neatmonster.nocheatplus.checks.CheckListener;
 import fr.neatmonster.nocheatplus.checks.CheckType;
+import java.util.List;
 import fr.neatmonster.nocheatplus.components.NoCheatPlusAPI;
 import fr.neatmonster.nocheatplus.components.data.ICheckData;
 import fr.neatmonster.nocheatplus.components.data.IData;
@@ -66,7 +67,7 @@ public class CombinedListener extends CheckListener {
                 // CombinedData
                 .registerDataPlayer(CombinedData.class)
                 .factory(arg -> new CombinedData())
-                .addToGroups(CheckType.MOVING, false, IData.class, ICheckData.class)
+                .addToGroups(CheckType.MOVING, false, List.of(IData.class, ICheckData.class))
                 .removeSubCheckData(CheckType.COMBINED, true)
                 .context() //
                 );

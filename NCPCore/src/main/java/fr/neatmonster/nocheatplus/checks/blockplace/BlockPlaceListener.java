@@ -145,7 +145,7 @@ public class BlockPlaceListener extends CheckListener {
                 // BlockPlaceData
                 .registerDataPlayer(BlockPlaceData.class)
                 .factory(arg -> new BlockPlaceData())
-                .addToGroups(CheckType.BLOCKPLACE, true, IData.class, ICheckData.class)
+                .addToGroups(CheckType.BLOCKPLACE, true, List.of(IData.class, ICheckData.class))
                 .context() //
                 );
     }

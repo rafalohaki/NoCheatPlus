@@ -1195,14 +1195,14 @@ public class PlayerDataManager  implements IPlayerDataManager, ComponentWithName
     }
 
     @Override
-    public <I> void addToGroups(final Class<I> itemType, 
-            final Class<? super I>... groupTypes) {
+    public <I> void addToGroups(final Class<I> itemType,
+            final Collection<Class<? super I>> groupTypes) {
         factoryRegistry.addToGroups(itemType, groupTypes);
     }
 
     @Override
     public <I> void addToGroups(CheckType checkType, Class<I> itemType,
-            Class<? super I>... groupTypes) {
+            Collection<Class<? super I>> groupTypes) {
         factoryRegistry.addToGroups(checkType, itemType, groupTypes);
     }
 
@@ -1229,7 +1229,7 @@ public class PlayerDataManager  implements IPlayerDataManager, ComponentWithName
 
     @Override
     public <I> void addToGroups(final Collection<CheckType> checkTypes,
-            final Class<I> itemType, final Class<? super I>... groupTypes) {
+            final Class<I> itemType, final Collection<Class<? super I>> groupTypes) {
         factoryRegistry.addToGroups(checkTypes, itemType, groupTypes);
     }
 

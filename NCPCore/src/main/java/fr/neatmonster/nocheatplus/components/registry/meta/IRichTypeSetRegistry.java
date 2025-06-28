@@ -58,8 +58,8 @@ public interface IRichTypeSetRegistry {
      * @param itemType
      * @param groupTypes
      */
-    public <I> void addToGroups(Class<I> itemType, 
-            Class<? super I>... groupTypes);
+    public <I> void addToGroups(Class<I> itemType,
+            Collection<Class<? super I>> groupTypes);
 
     /**
      * Register the itemType for all applicable group types that already have
@@ -84,8 +84,8 @@ public interface IRichTypeSetRegistry {
      * @param itemType
      * @param groupTypes
      */
-    public <I> void addToGroups(CheckType checkType, 
-            Class<I> itemType, Class<? super I>... groupTypes);
+    public <I> void addToGroups(CheckType checkType,
+            Class<I> itemType, Collection<Class<? super I>> groupTypes);
 
     /**
      * Register the itemType for all applicable group types that already have
@@ -115,8 +115,8 @@ public interface IRichTypeSetRegistry {
      * @param itemType
      * @param groupTypes
      */
-    public <I> void addToGroups(Collection<CheckType> checkTypes, 
-            Class<I> itemType, Class<? super I>... groupTypes);
+    public <I> void addToGroups(Collection<CheckType> checkTypes,
+            Class<I> itemType, Collection<Class<? super I>> groupTypes);
 
     /**
      * Register the itemType for all applicable group types that already have

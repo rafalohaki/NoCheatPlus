@@ -114,9 +114,9 @@ public abstract class RegisterInstance<T, A> implements IDoRegister {
      * @param groupTypes
      * @return
      */
-    public RegisterInstance<T,A> addToGroups(final CheckType checkType, 
-            final boolean withDescendantCheckTypes, 
-            final Class<? super T>... groupTypes) {
+    public RegisterInstance<T,A> addToGroups(final CheckType checkType,
+            final boolean withDescendantCheckTypes,
+            final Collection<Class<? super T>> groupTypes) {
         items.add(() -> {
             if (withDescendantCheckTypes) {
                 factoryRegistry.addToGroups(
@@ -168,12 +168,12 @@ public abstract class RegisterInstance<T, A> implements IDoRegister {
         if (IConfig.class.isAssignableFrom(type)) {
             genericConfigItems.add(factoryRegistry -> factoryRegistry.addToGroups(checkTypes,
                     (Class<? extends IConfig>) type,
-                    IConfig.class));
+                    List.of(IConfig.class)));
         }
         if (ICheckConfig.class.isAssignableFrom(type)) {
             genericConfigItems.add(factoryRegistry -> factoryRegistry.addToGroups(checkTypes,
                     (Class<? extends ICheckConfig>) type,
-                    ICheckConfig.class));
+                    List.of(ICheckConfig.class)));
         }
         return this;
     }
@@ -216,12 +216,12 @@ public abstract class RegisterInstance<T, A> implements IDoRegister {
         if (IData.class.isAssignableFrom(type)) {
             genericConfigItems.add(factoryRegistry -> factoryRegistry.addToGroups(checkTypes,
                     (Class<? extends IData>) type,
-                    IData.class));
+                    List.of(IData.class)));
         }
         if (ICheckData.class.isAssignableFrom(type)) {
             genericConfigItems.add(factoryRegistry -> factoryRegistry.addToGroups(checkTypes,
                     (Class<? extends ICheckData>) type,
-                    ICheckData.class));
+                    List.of(ICheckData.class)));
         }
         return this;
     }
@@ -243,7 +243,7 @@ public abstract class RegisterInstance<T, A> implements IDoRegister {
                 : Collections.singletonList(checkType);
         items.add(() -> factoryRegistry.addToGroups(checkTypes,
                 (Class<? extends IDataOnRemoveSubCheckData>) type,
-                IDataOnRemoveSubCheckData.class));
+                List.of(IDataOnRemoveSubCheckData.class)));
         return this;
     }
 
@@ -283,10 +283,10 @@ public abstract class RegisterInstance<T, A> implements IDoRegister {
     @SuppressWarnings("unchecked")
     protected void registerConfigTypesPlayer(final IPlayerDataManager pdMan) {
         if (IConfig.class.isAssignableFrom(type)) {
-            pdMan.addToGroups((Class<? extends IConfig>) type, IConfig.class);
+            pdMan.addToGroups((Class<? extends IConfig>) type, List.of(IConfig.class));
         }
         if (ICheckConfig.class.isAssignableFrom(type)) {
-            pdMan.addToGroups((Class<? extends ICheckConfig>) type, ICheckConfig.class);
+            pdMan.addToGroups((Class<? extends ICheckConfig>) type, List.of(ICheckConfig.class));
         }
         for (final IDoRegisterWithRegistry item : genericConfigItems) {
             item.doRegister(pdMan);
@@ -296,10 +296,10 @@ public abstract class RegisterInstance<T, A> implements IDoRegister {
     @SuppressWarnings("unchecked")
     protected void registerDataTypesPlayer(final IPlayerDataManager pdMan) {
         if (IData.class.isAssignableFrom(type)) {
-            pdMan.addToGroups((Class<? extends IData>) type, IData.class);
+            pdMan.addToGroups((Class<? extends IData>) type, List.of(IData.class));
         }
         if (ICheckData.class.isAssignableFrom(type)) {
-            pdMan.addToGroups((Class<? extends ICheckData>) type, ICheckData.class);
+            pdMan.addToGroups((Class<? extends ICheckData>) type, List.of(ICheckData.class));
         }
         for (final IDoRegisterWithRegistry item : genericDataItems) {
             item.doRegister(pdMan);
