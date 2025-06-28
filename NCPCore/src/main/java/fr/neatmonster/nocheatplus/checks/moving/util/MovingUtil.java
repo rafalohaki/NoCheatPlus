@@ -366,7 +366,7 @@ public class MovingUtil {
             // Exempt world spawn.
             if (TrigUtil.isSamePos(loc, refLoc) && (entity instanceof Player)) {
                 final Player other = (Player) entity;
-                final IPlayerData otherPData = DataManager.getPlayerData(other);
+                final IPlayerData otherPData = DataManager.getInstance().getPlayerData(other);
                 final MovingData otherData = otherPData.getGenericInstance(MovingData.class);
                 final PlayerMoveData otherLastMove = otherData.playerMoves.getFirstPastMove();
                 if (!otherLastMove.toIsValid) {
@@ -588,7 +588,7 @@ public class MovingUtil {
      */
     public static boolean hasScheduledPlayerSetBack(final Player player) {
         return hasScheduledPlayerSetBack(player.getUniqueId(), 
-                DataManager.getGenericInstance(player, MovingData.class));
+                DataManager.getInstance().getGenericInstance(player, MovingData.class));
     }
 
 
@@ -605,7 +605,7 @@ public class MovingUtil {
 
 
     private static boolean isPlayersetBackScheduled(final UUID playerId) {
-        final IPlayerData pd = DataManager.getPlayerData(playerId);
+        final IPlayerData pd = DataManager.getInstance().getPlayerData(playerId);
         return pd != null  && pd.isPlayerSetBackScheduled();
     }
 

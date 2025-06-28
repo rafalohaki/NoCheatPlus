@@ -112,7 +112,7 @@ public class AllViolationsHook implements NCPHook, ILast, IStats {
             // performance and consistency.
             // If debug is not in IViolationInfo, fall back to
             // PlayerData.isDebug(CheckType).
-            final IPlayerData pData = DataManager.getPlayerData(player);
+            final IPlayerData pData = DataManager.getInstance().getPlayerData(player);
             if (pData != null) {
                 debugSet = pData.isDebugActive(checkType);
             }

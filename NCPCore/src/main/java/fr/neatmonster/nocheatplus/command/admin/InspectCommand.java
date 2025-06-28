@@ -75,7 +75,7 @@ public class InspectCommand extends BaseCommand {
         }
         
         for (int i = 1; i < args.length; i++) {
-            final Player player = DataManager.getPlayer(args[i].trim().toLowerCase());
+            final Player player = DataManager.getInstance().getPlayer(args[i].trim().toLowerCase());
             if (player == null) {
                 sender.sendMessage((sender instanceof Player ? TAG : CTAG) + "Not online: " + c3 +""+ args[i]);
             } 
@@ -92,7 +92,7 @@ public class InspectCommand extends BaseCommand {
         }
 
         final StringBuilder builder = new StringBuilder(256);
-        final IPlayerData pData = DataManager.getPlayerData(player);
+        final IPlayerData pData = DataManager.getInstance().getPlayerData(player);
         final MovingData mData = pData != null ? pData.getGenericInstance(MovingData.class) : null;
         final MovingConfig mCC = pData != null ? pData.getGenericInstance(MovingConfig.class) : null;
         final PlayerMoveData thisMove = mData != null ? mData.playerMoves.getCurrentMove() : null;
