@@ -1071,7 +1071,7 @@ public class NoCheatPlus extends JavaPlugin implements NoCheatPlusAPI {
                 // Do mind registration order: Combined must come before Fight.
                 new FightListener(),
                 new InventoryListener(),
-                new MovingListener(),
+                new MovingListener(dataManager),
         }) {
             addComponent(obj);
             // Register sub-components (allow later added to use registries, if any).
