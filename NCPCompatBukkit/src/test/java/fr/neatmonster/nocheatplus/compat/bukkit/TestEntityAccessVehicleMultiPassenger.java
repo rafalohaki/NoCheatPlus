@@ -17,6 +17,7 @@ public class TestEntityAccessVehicleMultiPassenger {
 
     private static List<Entity> dummyPassengers() { return null; }
     private static boolean dummyAddPassenger() { return true; }
+    private static void dummyAddPassengerVoid() { }
 
     @Test
     public void testMissingGetPassengers() throws Exception {
@@ -41,6 +42,34 @@ public class TestEntityAccessVehicleMultiPassenger {
                     .thenReturn(null);
             EntityAccessVehicleMultiPassenger access = EntityAccessVehicleMultiPassenger.createIfSupported();
             assertNull(access);
+        }
+    }
+
+    @Test
+    public void testCreateBooleanReturnType() throws Exception {
+        Method dummyGet = TestEntityAccessVehicleMultiPassenger.class.getDeclaredMethod("dummyPassengers");
+        Method dummyAdd = TestEntityAccessVehicleMultiPassenger.class.getDeclaredMethod("dummyAddPassenger");
+        try (MockedStatic<ReflectionUtil> util = mockStatic(ReflectionUtil.class)) {
+            util.when(() -> ReflectionUtil.getMethodNoArgs(Entity.class, "getPassengers", List.class))
+                    .thenReturn(dummyGet);
+            util.when(() -> ReflectionUtil.getMethod(Entity.class, "addPassenger", Entity.class))
+                    .thenReturn(dummyAdd);
+            EntityAccessVehicleMultiPassenger access = EntityAccessVehicleMultiPassenger.createIfSupported();
+            assertNotNull(access);
+        }
+    }
+
+    @Test
+    public void testCreateVoidReturnType() throws Exception {
+        Method dummyGet = TestEntityAccessVehicleMultiPassenger.class.getDeclaredMethod("dummyPassengers");
+        Method dummyAdd = TestEntityAccessVehicleMultiPassenger.class.getDeclaredMethod("dummyAddPassengerVoid");
+        try (MockedStatic<ReflectionUtil> util = mockStatic(ReflectionUtil.class)) {
+            util.when(() -> ReflectionUtil.getMethodNoArgs(Entity.class, "getPassengers", List.class))
+                    .thenReturn(dummyGet);
+            util.when(() -> ReflectionUtil.getMethod(Entity.class, "addPassenger", Entity.class))
+                    .thenReturn(dummyAdd);
+            EntityAccessVehicleMultiPassenger access = EntityAccessVehicleMultiPassenger.createIfSupported();
+            assertNotNull(access);
         }
     }
 
