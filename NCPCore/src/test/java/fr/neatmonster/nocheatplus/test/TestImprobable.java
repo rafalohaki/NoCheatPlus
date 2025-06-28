@@ -1,27 +1,21 @@
-/*
- * This program is free software: you can redistribute it and/or modify
- *   it under the terms of the GNU General Public License as published by
- *   the Free Software Foundation, either version 3 of the License, or
- *   (at your option) any later version.
- *
- *   This program is distributed in the hope that it will be useful,
- *   but WITHOUT ANY WARRANTY; without even the implied warranty of
- *   MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the
- *   GNU General Public License for more details.
- *
- *   You should have received a copy of the GNU General Public License
- *   along with this program.  If not, see <http://www.gnu.org/licenses/>.
- */
 package fr.neatmonster.nocheatplus.test;
 
 import static org.junit.Assert.*;
 import static org.mockito.Mockito.*;
 
 import java.lang.reflect.Field;
+import java.lang.reflect.Proxy;
 
 import org.bukkit.entity.Player;
+import org.bukkit.plugin.PluginManager;
+import org.bukkit.command.ConsoleCommandSender;
+import org.bukkit.Server;
+import org.bukkit.Bukkit;
+
 import org.junit.Before;
 import org.junit.Test;
+import org.junit.After;
+import org.mockito.MockedStatic;
 
 import fr.neatmonster.nocheatplus.actions.ActionList;
 import fr.neatmonster.nocheatplus.checks.combined.CombinedConfig;
@@ -29,14 +23,10 @@ import fr.neatmonster.nocheatplus.checks.combined.CombinedData;
 import fr.neatmonster.nocheatplus.checks.combined.Improbable;
 import fr.neatmonster.nocheatplus.permissions.RegisteredPermission;
 import fr.neatmonster.nocheatplus.players.IPlayerData;
-import fr.neatmonster.nocheatplus.worlds.IWorldData;
-import fr.neatmonster.nocheatplus.NCPAPIProvider;
 import fr.neatmonster.nocheatplus.players.DataManager;
 import fr.neatmonster.nocheatplus.players.PlayerDataManager;
-import org.bukkit.Server;
-import org.bukkit.plugin.PluginManager;
-import org.bukkit.command.ConsoleCommandSender;
-import org.bukkit.Bukkit;
+import fr.neatmonster.nocheatplus.worlds.IWorldData;
+import fr.neatmonster.nocheatplus.NCPAPIProvider;
 
 public class TestImprobable {
 
@@ -69,50 +59,55 @@ public class TestImprobable {
     private Server server;
     private Server previousServer;
 
+    private MockedStatic<Bukkit> bukkitMock;
+
     @Before
     public void setup() throws Exception {
-        java.lang.reflect.Field f = NCPAPIProvider.class.getDeclaredField("noCheatPlusAPI");
+        Field f = NCPAPIProvider.class.getDeclaredField("noCheatPlusAPI");
         f.setAccessible(true);
         f.set(null, new TestGodModeHelpers.DummyAPI());
+
+        // Bootstrap internal DataManager
         sun.misc.Unsafe un = getUnsafe();
         PlayerDataManager pdm = (PlayerDataManager) un.allocateInstance(PlayerDataManager.class);
-        java.lang.reflect.Field eh = PlayerDataManager.class.getDeclaredField("executionHistories");
+        Field eh = PlayerDataManager.class.getDeclaredField("executionHistories");
         eh.setAccessible(true);
         eh.set(pdm, new java.util.HashMap<>());
         new DataManager(pdm);
+
+        // Prepare dummy Bukkit server
         PluginManager pluginManager = mock(PluginManager.class);
         ConsoleCommandSender console = mock(ConsoleCommandSender.class);
-        server = (Server) java.lang.reflect.Proxy.newProxyInstance(getClass().getClassLoader(), new Class[]{Server.class},
-                (proxy, method, args) -> {
-                    switch (method.getName()) {
-                        case "getPluginManager": return pluginManager;
-                        case "getConsoleSender": return console;
-                        case "getLogger": return java.util.logging.Logger.getLogger("TestServer");
-                        case "isPrimaryThread": return true;
-                        default: return null;
-                    }
-                });
-        previousServer = Bukkit.getServer();
-        if (previousServer == null) {
-            Bukkit.setServer(server);
-        } else {
-            server = previousServer;
-        }
+        server = mock(Server.class);
+        when(server.getPluginManager()).thenReturn(pluginManager);
+        when(server.getConsoleSender()).thenReturn(console);
+        when(server.getLogger()).thenReturn(java.util.logging.Logger.getLogger("TestServer"));
+        when(server.isPrimaryThread()).thenReturn(true);
+
+        // Mock Bukkit statics
+        bukkitMock = mockStatic(Bukkit.class);
+        bukkitMock.when(Bukkit::getServer).thenReturn(server);
+        bukkitMock.when(Bukkit::isPrimaryThread).thenReturn(true);
+
         player = mock(Player.class);
         worldData = mock(IWorldData.class);
         when(worldData.shouldAdjustToLag(any())).thenReturn(false);
+
         data = new CombinedData();
         config = createConfig(1f);
+
         pData = mock(IPlayerData.class);
         when(pData.isCheckActive(any(), any())).thenReturn(true);
         when(pData.getGenericInstance(CombinedData.class)).thenReturn(data);
         when(pData.getGenericInstance(CombinedConfig.class)).thenReturn(config);
         when(pData.getCurrentWorldData()).thenReturn(worldData);
+
         new Improbable();
     }
 
-    @org.junit.After
+    @After
     public void teardown() {
+        if (bukkitMock != null) bukkitMock.close();
         if (previousServer != null && Bukkit.getServer() != previousServer) {
             Bukkit.setServer(previousServer);
         }
