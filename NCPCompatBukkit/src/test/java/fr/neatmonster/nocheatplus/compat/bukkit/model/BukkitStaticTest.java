@@ -2,8 +2,6 @@ package fr.neatmonster.nocheatplus.compat.bukkit.model;
 
 import static org.junit.Assert.assertArrayEquals;
 import static org.junit.Assert.assertNotNull;
-import static org.junit.Assert.fail;
-
 import org.junit.Test;
 
 public class BukkitStaticTest {
