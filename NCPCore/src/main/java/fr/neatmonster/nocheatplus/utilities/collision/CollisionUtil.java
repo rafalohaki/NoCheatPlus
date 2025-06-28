@@ -41,8 +41,6 @@ import fr.neatmonster.nocheatplus.utilities.map.BlockProperties;
  */
 public class CollisionUtil {
 
-    /** Temporary use, setWorld(null) once finished. */
-    private static final Location useLoc = new Location(null, 0, 0, 0);
 
     /**
      * Check if a player looks at a target of a specific size, with a specific
@@ -63,14 +61,18 @@ public class CollisionUtil {
      * @param precision
      *            the precision
      * @return the double
+     *
+     * Note: Callers must obtain player locations on the main thread.
      */
     public static double directionCheck(final Player player, final double targetX, final double targetY, final double targetZ, final double targetWidth, final double targetHeight, final double precision)
     {
-        final Location loc = player.getLocation(useLoc);
+        if (player == null)
+        {
+            return 0D;
+        }
+        final Location loc = player.getLocation();
         final Vector dir = loc.getDirection();
-        final double res = directionCheck(loc.getX(), loc.getY() + MovingUtil.getEyeHeight(player), loc.getZ(), dir.getX(), dir.getY(), dir.getZ(), targetX, targetY, targetZ, targetWidth, targetHeight, precision);
-        useLoc.setWorld(null);
-        return res;
+        return directionCheck(loc.getX(), loc.getY() + MovingUtil.getEyeHeight(player), loc.getZ(), dir.getX(), dir.getY(), dir.getZ(), targetX, targetY, targetZ, targetWidth, targetHeight, precision);
     }
 
     /**
