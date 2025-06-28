@@ -48,8 +48,8 @@ public class LogRecord<C> implements Runnable {
         }
         try {
             node.logger.log(level, content);
-        } catch (Throwable t) {
-            LOGGER.log(Level.WARNING, "Failed to log content", t);
+        } catch (RuntimeException e) {
+            LOGGER.log(Level.WARNING, "Failed to log content", e);
         }
     }
     

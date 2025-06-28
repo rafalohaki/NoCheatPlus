@@ -103,8 +103,8 @@ public abstract class AbstractLogNodeDispatcher implements LogNodeDispatcher { /
         if (isWithinContext(node)) {
             try {
                 node.logger.log(level, content);
-            } catch (Throwable t) {
-                logINIT(Level.WARNING, "Failed to log content: " + t.getMessage());
+            } catch (RuntimeException e) {
+                logINIT(Level.WARNING, "Failed to log content: " + e.getMessage());
             }
         } else {
             scheduleLog(node, level, content);
