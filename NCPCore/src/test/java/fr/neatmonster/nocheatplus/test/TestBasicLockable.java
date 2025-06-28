@@ -187,10 +187,14 @@ public class TestBasicLockable {
 
     @Test
     public void testUnlockwithSubClassFail() {
-        BasicLockable lock = new BasicLockable(false, Dummy.class, true);
-        lock.lock(new Dummy());
-        lock.unlock(new Dummy());
-        assertThrows(IllegalArgumentException.class, () -> lock.lock(new DummMY()));
+        BasicLockable lock = new BasicLockable(false, Dummy.class, true); // exact type
+        Dummy secret = new Dummy();
+        lock.lock(secret);
+        lock.unlock(secret);
+
+        DummMY subclassSecret = new DummMY();
+        assertThrows(IllegalArgumentException.class, () -> lock.lock(subclassSecret));
     }
+
 
 }

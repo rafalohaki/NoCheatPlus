@@ -58,7 +58,8 @@ public class TestFarmlandGround {
         Location loc = new Location(world, 0.5, 1.0, 0.5);
         RichBoundsLocation rloc = new RichBoundsLocation(bc);
         rloc.set(loc, 0.6, 1.8, 0.001);
-        assertTrue("Farmland should count as ground.", rloc.isOnGround());
+        assertTrue(rloc.isOnGround(), "Farmland should count as ground.");
         bc.cleanup();
     }
+
 }
