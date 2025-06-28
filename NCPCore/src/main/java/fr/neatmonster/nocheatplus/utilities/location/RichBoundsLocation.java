@@ -1375,6 +1375,12 @@ public class RichBoundsLocation implements IGetBukkitLocation, IGetBlockPosition
      * @return Number of chunks loaded.
      */
     public int ensureChunksLoaded(final double xzMargin) {
+        if (world == null) {
+            return 0;
+        }
+        if (!MapUtil.shouldLoadChunks(world, x, z, xzMargin)) {
+            return 0;
+        }
         return MapUtil.ensureChunksLoaded(world, x, z, xzMargin);
     }
 
