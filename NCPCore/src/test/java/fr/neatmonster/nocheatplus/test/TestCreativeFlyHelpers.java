@@ -1,33 +1,29 @@
 package fr.neatmonster.nocheatplus.test;
 
-import static org.junit.jupiter.api.Assertions.*;
-
+import static org.junit.jupiter.api.Assertions.assertEquals;
+import static org.mockito.ArgumentMatchers.anyDouble;
+import static org.mockito.Mockito.mock;
+import static org.mockito.Mockito.when;
 import java.lang.reflect.Field;
 import java.lang.reflect.Method;
 import java.lang.reflect.Proxy;
-import java.lang.reflect.Modifier;
-
 import org.bukkit.Material;
-import org.bukkit.entity.Player;
 import org.bukkit.World;
+import org.bukkit.entity.Player;
 import org.bukkit.inventory.ItemStack;
 import org.bukkit.inventory.PlayerInventory;
-import fr.neatmonster.nocheatplus.players.PlayerDataManager;
-
-import fr.neatmonster.nocheatplus.NCPAPIProvider;
-import fr.neatmonster.nocheatplus.checks.moving.MovingData;
-import fr.neatmonster.nocheatplus.checks.moving.MovingConfig;
-import fr.neatmonster.nocheatplus.checks.moving.player.CreativeFly;
-import fr.neatmonster.nocheatplus.checks.moving.velocity.SimpleEntry;
-import fr.neatmonster.nocheatplus.components.modifier.IAttributeAccess;
-import fr.neatmonster.nocheatplus.components.registry.event.IGenericInstanceHandle;
-import fr.neatmonster.nocheatplus.compat.MCAccess;
-import fr.neatmonster.nocheatplus.compat.blocks.changetracker.BlockChangeTracker;
-import fr.neatmonster.nocheatplus.utilities.location.PlayerLocation;
-
 import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.Test;
-import static org.mockito.Mockito.*;
+import fr.neatmonster.nocheatplus.NCPAPIProvider;
+import fr.neatmonster.nocheatplus.checks.moving.MovingData;
+import fr.neatmonster.nocheatplus.checks.moving.player.CreativeFly;
+import fr.neatmonster.nocheatplus.checks.moving.velocity.SimpleEntry;
+import fr.neatmonster.nocheatplus.compat.MCAccess;
+import fr.neatmonster.nocheatplus.compat.blocks.changetracker.BlockChangeTracker;
+import fr.neatmonster.nocheatplus.components.modifier.IAttributeAccess;
+import fr.neatmonster.nocheatplus.components.registry.event.IGenericInstanceHandle;
+import fr.neatmonster.nocheatplus.players.PlayerDataManager;
+import fr.neatmonster.nocheatplus.utilities.location.PlayerLocation;
 
 public class TestCreativeFlyHelpers {
 

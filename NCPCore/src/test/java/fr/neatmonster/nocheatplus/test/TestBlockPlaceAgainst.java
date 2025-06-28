@@ -16,15 +16,11 @@ package fr.neatmonster.nocheatplus.test;
 
 import static org.junit.jupiter.api.Assertions.assertEquals;
 import static org.junit.jupiter.api.Assertions.assertFalse;
-import static org.junit.jupiter.api.Assertions.assertTrue;
 import static org.mockito.ArgumentMatchers.any;
 import static org.mockito.Mockito.mock;
 import static org.mockito.Mockito.mockStatic;
 import static org.mockito.Mockito.when;
-
 import java.lang.reflect.Field;
-import java.lang.reflect.Modifier;
-
 import org.bukkit.Material;
 import org.bukkit.block.Block;
 import org.bukkit.block.BlockFace;
@@ -33,10 +29,7 @@ import org.bukkit.event.block.Action;
 import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.Test;
 import org.mockito.MockedStatic;
-
 import fr.neatmonster.nocheatplus.actions.ActionList;
-// We need the Check class to access its static field.
-import fr.neatmonster.nocheatplus.checks.Check;
 import fr.neatmonster.nocheatplus.checks.ViolationData;
 import fr.neatmonster.nocheatplus.checks.blockinteract.BlockInteractData;
 import fr.neatmonster.nocheatplus.checks.blockplace.Against;
@@ -45,9 +38,9 @@ import fr.neatmonster.nocheatplus.checks.blockplace.BlockPlaceData;
 import fr.neatmonster.nocheatplus.compat.BridgeMaterial;
 import fr.neatmonster.nocheatplus.permissions.PermissionRegistry;
 import fr.neatmonster.nocheatplus.permissions.RegisteredPermission;
+import fr.neatmonster.nocheatplus.players.DataManager;
 import fr.neatmonster.nocheatplus.players.IPlayerData;
 import fr.neatmonster.nocheatplus.players.PlayerDataManager;
-import fr.neatmonster.nocheatplus.players.DataManager;
 import fr.neatmonster.nocheatplus.worlds.WorldDataManager;
 
 public class TestBlockPlaceAgainst {

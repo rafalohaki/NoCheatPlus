@@ -1,18 +1,18 @@
 package fr.neatmonster.nocheatplus.utilities.build;
 
-import static org.junit.jupiter.api.Assertions.*;
-
-import java.io.InputStream;
+import static org.junit.jupiter.api.Assertions.assertEquals;
+import static org.junit.jupiter.api.Assertions.assertNotNull;
+import static org.junit.jupiter.api.Assertions.assertNull;
+import static org.junit.jupiter.api.Assertions.assertTrue;
+import java.io.File;
 import java.net.URL;
 import java.net.URLClassLoader;
 import java.nio.charset.StandardCharsets;
-import java.io.File;
 import java.nio.file.Files;
 import java.nio.file.Path;
 import java.nio.file.Paths;
 import java.util.jar.JarEntry;
 import java.util.jar.JarOutputStream;
-
 import org.junit.jupiter.api.Test;
 
 public class ResourceUtilTest {

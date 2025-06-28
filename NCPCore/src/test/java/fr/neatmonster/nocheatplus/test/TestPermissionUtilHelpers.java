@@ -1,28 +1,15 @@
 package fr.neatmonster.nocheatplus.test;
 
-import static org.junit.jupiter.api.Assertions.*;
-
-import java.lang.reflect.InvocationHandler;
-import java.lang.reflect.Proxy;
-import java.util.*;
-import java.util.logging.Logger;
-
-import org.bukkit.Bukkit;
-import org.bukkit.Server;
+import static org.junit.jupiter.api.Assertions.assertFalse;
+import static org.junit.jupiter.api.Assertions.assertTrue;
+import static org.junit.jupiter.api.Assertions.fail;
+import java.util.Arrays;
+import java.util.HashSet;
+import java.util.Set;
 import org.bukkit.command.Command;
 import org.bukkit.command.CommandSender;
-import org.bukkit.command.ConsoleCommandSender;
-import org.bukkit.permissions.Permission;
-import org.bukkit.permissions.PermissionAttachment;
-import org.bukkit.permissions.Permissible;
-import org.bukkit.permissions.PermissionDefault;
-import org.bukkit.plugin.Plugin;
-import org.bukkit.plugin.PluginManager;
-import org.bukkit.scheduler.BukkitScheduler;
 import org.junit.jupiter.api.Test;
-
 import fr.neatmonster.nocheatplus.permissions.PermissionUtil;
-import fr.neatmonster.nocheatplus.permissions.PermissionUtil.CommandProtectionEntry;
 
 public class TestPermissionUtilHelpers {
 

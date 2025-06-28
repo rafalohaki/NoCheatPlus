@@ -14,13 +14,11 @@
  */
 package fr.neatmonster.nocheatplus.components.registry.factory;
 
-import java.util.Arrays;
 import java.util.Collection;
 import java.util.Collections;
 import java.util.LinkedHashSet;
 import java.util.Set;
 import java.util.concurrent.locks.Lock;
-
 import fr.neatmonster.nocheatplus.checks.CheckType;
 import fr.neatmonster.nocheatplus.components.data.IData;
 import fr.neatmonster.nocheatplus.components.data.IDataOnRemoveSubCheckData;

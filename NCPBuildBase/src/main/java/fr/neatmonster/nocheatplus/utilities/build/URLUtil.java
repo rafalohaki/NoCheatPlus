@@ -1,7 +1,6 @@
 package fr.neatmonster.nocheatplus.utilities.build;
 
 import java.net.URL;
-import java.util.Locale;
 import java.util.regex.Pattern;
 
 /**

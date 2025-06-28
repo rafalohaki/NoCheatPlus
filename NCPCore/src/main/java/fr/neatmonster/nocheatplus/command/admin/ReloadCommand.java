@@ -14,15 +14,11 @@
  */
 package fr.neatmonster.nocheatplus.command.admin;
 
-import java.util.Collections;
 import java.util.List;
-
 import org.bukkit.Bukkit;
 import org.bukkit.command.Command;
 import org.bukkit.command.CommandSender;
-import org.bukkit.ChatColor;
 import org.bukkit.plugin.java.JavaPlugin;
-
 import fr.neatmonster.nocheatplus.NCPAPIProvider;
 import fr.neatmonster.nocheatplus.command.BaseCommand;
 import fr.neatmonster.nocheatplus.command.NoCheatPlusCommand.NCPReloadEvent;
@@ -33,7 +29,6 @@ import fr.neatmonster.nocheatplus.logging.LogManager;
 import fr.neatmonster.nocheatplus.logging.Streams;
 import fr.neatmonster.nocheatplus.permissions.Permissions;
 import fr.neatmonster.nocheatplus.players.DataManager;
-import fr.neatmonster.nocheatplus.utilities.StringUtil;
 import fr.neatmonster.nocheatplus.worlds.WorldDataManager;
 
 public class ReloadCommand extends BaseCommand {

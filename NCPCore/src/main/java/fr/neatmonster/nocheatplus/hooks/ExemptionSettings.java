@@ -15,14 +15,11 @@
 package fr.neatmonster.nocheatplus.hooks;
 
 import java.util.ArrayList;
-import java.util.Arrays;
 import java.util.Collection;
 import java.util.Collections;
 import java.util.List;
-
 import org.bukkit.entity.Entity;
 import org.bukkit.entity.NPC;
-
 import fr.neatmonster.nocheatplus.config.ConfPaths;
 import fr.neatmonster.nocheatplus.config.ConfigFile;
 
