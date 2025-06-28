@@ -14,64 +14,18 @@
  */
 package fr.neatmonster.nocheatplus.compat.bukkit;
 
-import java.lang.reflect.Method;
 import java.util.List;
 
 import org.bukkit.entity.Entity;
 
 import fr.neatmonster.nocheatplus.components.entity.IEntityAccessVehicle;
-import fr.neatmonster.nocheatplus.logging.StaticLog;
-import fr.neatmonster.nocheatplus.utilities.ReflectionUtil;
+import fr.neatmonster.nocheatplus.support.Feature;
+import fr.neatmonster.nocheatplus.support.FeatureSupportRegistry;
 
 public class EntityAccessVehicleMultiPassenger implements IEntityAccessVehicle {
 
-    /** Cached getPassengers method. */
-    private static Method methodGetPassengers;
-
-    /** Cached addPassenger method. */
-    private static Method methodAddPassenger;
-
     private EntityAccessVehicleMultiPassenger() {
         // Empty constructor.
-    }
-
-    /**
-     * Resolve and cache required methods for multi passenger support.
-     *
-     * @return {@code true} if both methods exist with expected signatures
-     */
-    private static boolean resolveAccessMethods() {
-        if (methodGetPassengers != null && methodAddPassenger != null) {
-            return true;
-        }
-
-        methodGetPassengers = ReflectionUtil.getMethodNoArgs(Entity.class, "getPassengers");
-        if (methodGetPassengers == null) {
-            StaticLog.logDebug("Entity#getPassengers() method not found.");
-            return false;
-        }
-        if (!List.class.isAssignableFrom(methodGetPassengers.getReturnType())) {
-            StaticLog.logDebug("Entity#getPassengers() has unexpected return type: "
-                    + methodGetPassengers.getReturnType().getName());
-            methodGetPassengers = null;
-            return false;
-        }
-
-        methodAddPassenger = ReflectionUtil.getMethod(Entity.class, "addPassenger", Entity.class);
-        if (methodAddPassenger == null) {
-            StaticLog.logDebug("Entity#addPassenger(Entity) method not found.");
-            methodGetPassengers = null;
-            return false;
-        }
-        final Class<?> returnType = methodAddPassenger.getReturnType();
-        if (returnType != boolean.class && returnType != void.class) {
-            StaticLog.logDebug("Entity#addPassenger(Entity) has unexpected return type: "
-                    + returnType.getName());
-            methodGetPassengers = null;
-            methodAddPassenger = null;
-            return false;
-        }
-        return true;
     }
 
     /**
@@ -80,7 +34,7 @@ public class EntityAccessVehicleMultiPassenger implements IEntityAccessVehicle {
      * @return Instance or {@code null} if not supported.
      */
     public static EntityAccessVehicleMultiPassenger createIfSupported() {
-        if (!resolveAccessMethods()) {
+        if (!FeatureSupportRegistry.isSupported(Feature.VEHICLE_MULTI_PASSENGER)) {
             return null;
         }
         return new EntityAccessVehicleMultiPassenger();
