@@ -41,6 +41,7 @@ import fr.neatmonster.nocheatplus.checks.moving.magic.Magic;
 import fr.neatmonster.nocheatplus.checks.moving.magic.MagicBunny;
 import fr.neatmonster.nocheatplus.checks.moving.magic.AirWorkarounds;
 import fr.neatmonster.nocheatplus.checks.moving.magic.LiquidWorkarounds;
+import fr.neatmonster.nocheatplus.checks.moving.helper.BubbleWebHandler;
 import fr.neatmonster.nocheatplus.checks.moving.model.LiftOffEnvelope;
 import fr.neatmonster.nocheatplus.checks.moving.model.PlayerMoveData;
 import fr.neatmonster.nocheatplus.checks.moving.util.AuxMoving;
@@ -3020,8 +3021,11 @@ public class SurvivalFly extends Check {
             vDistanceAboveLimit = yDistance - vAllowedDistance;
         }
         // Bubble columns can slowly push the player upwards through the web.
-        else if (from.isInBubbleStream() && !from.isDraggedByBubbleStream() && yDistance < Magic.bubbleStreamAscend) {
-            vAllowedDistance = lastMove.yDistance * Magic.FRICTION_MEDIUM_WATER;
+        else if (from.isInBubbleStream() && !from.isDraggedByBubbleStream()
+                && yDistance < Magic.bubbleStreamAscend) {
+            boolean wasInBubbleStream = lastMove.from.inBubbleStream && !lastMove.from.draggedByBubbleStream;
+            double lastSpeed = wasInBubbleStream ? lastMove.yDistance : 0.0;
+            vAllowedDistance = BubbleWebHandler.computeAscendSpeed(lastSpeed);
             vDistanceAboveLimit = yDistance - vAllowedDistance;
             tags.add("bubbleweb");
         }
@@ -3049,8 +3053,16 @@ public class SurvivalFly extends Check {
         final double yDistance = thisMove.yDistance;
         final double vAllowedDistance;
 
+        // Bubble columns can slowly drag the player down through the web.
+        if (thisMove.from.inBubbleStream && thisMove.from.draggedByBubbleStream
+                && yDistance > -Magic.bubbleStreamDescend) {
+            boolean wasInBubbleStream = lastMove.from.inBubbleStream && lastMove.from.draggedByBubbleStream;
+            double lastSpeed = wasInBubbleStream ? lastMove.yDistance : 0.0;
+            vAllowedDistance = BubbleWebHandler.computeDescendSpeed(lastSpeed);
+            tags.add("bubbleweb");
+        }
         // Lenient on first move(s) in web.
-        if (data.insideMediumCount < 4 && lastMove.yDistance <= 0.0) {
+        else if (data.insideMediumCount < 4 && lastMove.yDistance <= 0.0) {
             vAllowedDistance = lastMove.yDistance * Magic.FRICTION_MEDIUM_AIR - Magic.GRAVITY_MAX;
         }
         // Ordinary.
