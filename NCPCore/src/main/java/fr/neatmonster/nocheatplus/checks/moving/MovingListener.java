@@ -330,23 +330,40 @@ public class MovingListener extends CheckListener implements TickListener, IRemo
 
     private void handleBedLeave(final Player player) {
         final IPlayerData pData = fetchPlayerData(player, "bed leave");
-        if (pData == null || !pData.isCheckActive(CheckType.MOVING, player)) {
+        if (!shouldProcessBedLeave(player, pData)) {
             return;
         }
 
         final MovingData data = pData.getGenericInstance(MovingData.class);
         final MovingConfig cc = pData.getGenericInstance(MovingConfig.class);
-        if (shouldResetAfterBedLeave(player, pData, cc, data)) {
-            final Location loc = player.getLocation(useBedLeaveLoc);
-            final PlayerMoveInfo moveInfo = aux.usePlayerMoveInfo();
-            final boolean sfCheck = shouldCheckSurvivalFly(player, pData, cc, data, loc, moveInfo);
-            final Location newTo = determineBedLeaveLocation(player, cc, data, moveInfo.from, loc, sfCheck);
-            aux.returnPlayerMoveInfo(moveInfo);
-            applyBedLeaveDamage(player, pData, cc, data, loc, sfCheck);
-            finalizeBedLeave(player, data, newTo);
-        } else {
+        if (!shouldResetAfterBedLeave(player, pData, cc, data)) {
             data.wasInBed = false;
+            return;
         }
+
+        final Location loc = getCurrentBedLeaveLocation(player);
+        if (loc == null) {
+            data.wasInBed = false;
+            return;
+        }
+
+        final PlayerMoveInfo moveInfo = aux.usePlayerMoveInfo();
+        final boolean sfCheck = shouldCheckSurvivalFly(player, pData, cc, data, loc, moveInfo);
+        final Location newTo = determineBedLeaveLocation(player, pData, cc, data, moveInfo.from, loc, sfCheck);
+        aux.returnPlayerMoveInfo(moveInfo);
+        applyBedLeaveDamage(player, pData, cc, data, loc, sfCheck);
+        finalizeBedLeave(player, pData, data, newTo);
+    }
+
+    private boolean shouldProcessBedLeave(final Player player, final IPlayerData pData) {
+        return player != null && pData != null
+                && pData.isCheckActive(CheckType.MOVING, player)
+                && !pData.hasBypass(CheckType.MOVING_SURVIVALFLY, player)
+                && !pData.isExempted(CheckType.MOVING_SURVIVALFLY);
+    }
+
+    private Location getCurrentBedLeaveLocation(final Player player) {
+        return player != null ? player.getLocation(useBedLeaveLoc) : null;
     }
 
     private boolean shouldResetAfterBedLeave(final Player player, final IPlayerData pData,
@@ -362,9 +379,16 @@ public class MovingListener extends CheckListener implements TickListener, IRemo
         return MovingUtil.shouldCheckSurvivalFly(player, moveInfo.from, moveInfo.to, data, cc, pData);
     }
 
-    private Location determineBedLeaveLocation(final Player player, final MovingConfig cc,
-                                               final MovingData data, final PlayerLocation from,
-                                               final Location loc, final boolean sfCheck) {
+    private Location determineBedLeaveLocation(final Player player, final IPlayerData pData,
+                                               final MovingConfig cc, final MovingData data,
+                                               final PlayerLocation from, final Location loc,
+                                               final boolean sfCheck) {
+        if (player == null || pData == null
+                || pData.hasBypass(CheckType.MOVING_SURVIVALFLY, player)
+                || pData.isExempted(CheckType.MOVING_SURVIVALFLY)) {
+            return null;
+        }
+
         Location newTo = null;
         if (sfCheck) {
             newTo = MovingUtil.getApplicableSetBackLocation(player, loc.getYaw(), loc.getPitch(), from, data, cc);
@@ -378,6 +402,11 @@ public class MovingListener extends CheckListener implements TickListener, IRemo
     private void applyBedLeaveDamage(final Player player, final IPlayerData pData,
                                      final MovingConfig cc, final MovingData data,
                                      final Location loc, final boolean sfCheck) {
+        if (player == null || pData == null
+                || pData.hasBypass(CheckType.MOVING_SURVIVALFLY, player)
+                || pData.isExempted(CheckType.MOVING_SURVIVALFLY)) {
+            return;
+        }
         if (sfCheck && cc.sfSetBackPolicyApplyFallDamage && noFall.isEnabled(player, pData)) {
             double y = loc.getY();
             if (data.hasSetBack()) {
@@ -387,8 +416,11 @@ public class MovingListener extends CheckListener implements TickListener, IRemo
         }
     }
 
-    private void finalizeBedLeave(final Player player, final MovingData data, final Location newTo) {
-        if (newTo == null) {
+    private void finalizeBedLeave(final Player player, final IPlayerData pData,
+                                  final MovingData data, final Location newTo) {
+        if (player == null || pData == null
+                || pData.hasBypass(CheckType.MOVING_SURVIVALFLY, player)
+                || pData.isExempted(CheckType.MOVING_SURVIVALFLY) || newTo == null) {
             return;
         }
         useBedLeaveLoc.setWorld(null);
