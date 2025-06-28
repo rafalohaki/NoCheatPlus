@@ -146,10 +146,8 @@ public class AllViolationsHook implements NCPHook, ILast, IStats {
         for (int i = 0; i < parameters.length; i++) {
             final ParameterName name = parameters[i];
             final String value = info.getParameter(name);
-            final boolean hasValue = value != null && !value.isEmpty();
-            final boolean isCustomValue = hasValue && !value.equals(this.noParameterTexts[i]);
-            if (isCustomValue) {
-                builder.append(" " + name.getText() + "=" + value);
+            if (value != null && !value.isEmpty() && !value.equals(this.noParameterTexts[i])) {
+                builder.append(' ' + name.getText() + '=' + value);
             }
         }
         final String message = builder.toString();
