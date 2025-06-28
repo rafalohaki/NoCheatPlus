@@ -510,7 +510,6 @@ public class NoCheatPlus extends JavaPlugin implements NoCheatPlusAPI {
      *            Only registers ComponentRegistry instances if this is set to
      *            true.
      */
-    @SuppressWarnings("unchecked")
     @Override
     public boolean addComponent(final Object obj, final boolean allowComponentRegistry) {
 
@@ -618,18 +617,6 @@ public class NoCheatPlus extends JavaPlugin implements NoCheatPlusAPI {
      * @param obj      the component
      * @return {@code true} if added
      */
-    private boolean invokePlayerDataRegistry(final ComponentRegistry<?> registry, final Object obj) {
-        if (registry instanceof PlayerDataManager pdm) {
-            if (obj instanceof IRemoveData) {
-                return pdm.addComponent((IRemoveData) obj);
-            }
-            return pdm.addComponentReflectively(obj);
-        }
-        if (registry instanceof IPlayerDataManager ipdm && obj instanceof IRemoveData) {
-            return ipdm.addComponent((IRemoveData) obj);
-        }
-        return false;
-    }
 
     private boolean registerComponentRegistry(final Object obj) {
         if (obj instanceof ComponentRegistry<?>) {
