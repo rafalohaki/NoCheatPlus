@@ -34,15 +34,10 @@ public class EntityAccessVehicleMultiPassenger implements IEntityAccessVehicle {
      * @return Instance or {@code null} if not supported.
      */
     public static EntityAccessVehicleMultiPassenger createIfSupported() {
-        // Ensure both getPassengers and addPassenger methods exist.
+        // Ensure the getPassengers method exists and addPassenger has a compatible return type.
         boolean hasGetPassengers =
                 ReflectionUtil.getMethodNoArgs(Entity.class, "getPassengers", List.class) != null;
-        boolean hasAddPassenger =
-                ReflectionUtil.getMethodNoArgs(Entity.class, "addPassenger", Entity.class) != null;
-        if (!hasGetPassengers || !hasAddPassenger) {
-            return null;
-        }
-        if (!hasAddPassenger()) {
+        if (!hasGetPassengers || !hasAddPassenger()) {
             return null;
         }
         return new EntityAccessVehicleMultiPassenger();
@@ -50,7 +45,11 @@ public class EntityAccessVehicleMultiPassenger implements IEntityAccessVehicle {
 
     private static boolean hasAddPassenger() {
         Method method = ReflectionUtil.getMethod(Entity.class, "addPassenger", Entity.class);
-        return method != null && method.getReturnType() == boolean.class;
+        if (method == null) {
+            return false;
+        }
+        Class<?> type = method.getReturnType();
+        return type == boolean.class || type == void.class;
     }
 
     @Override
