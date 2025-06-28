@@ -128,6 +128,12 @@ public class PlayerDataManager  implements IPlayerDataManager, ComponentWithName
      */
     private final Map<UUID, Long> lastLogout = new LinkedHashMap<UUID, Long>(50, 0.75f, true);
 
+    /** Tracks the server tick when a leave event started processing for a player. */
+    private final Map<UUID, Integer> leaveProcessing = new HashMap<UUID, Integer>(50);
+
+    /** Maximum number of entries to track for leave processing. */
+    private static final int MAX_LEAVE_PROCESSING = 5000;
+
     /**
      * Keeping track of online players. Currently id/name mappings are not kept
      * on logout, but might be later.
@@ -706,16 +712,50 @@ public class PlayerDataManager  implements IPlayerDataManager, ComponentWithName
      * @param player
      */
     private void playerLeaves(final Player player) {
+        if (!startLeaveProcessing(player)) {
+            return;
+        }
+        try {
+            processLeave(player);
+        } finally {
+            finishLeaveProcessing(player);
+        }
+    }
+
+    private boolean startLeaveProcessing(final Player player) {
+        if (player == null) {
+            return false;
+        }
+        final UUID id = player.getUniqueId();
+        final int tick = TickTask.getTick();
+        final Integer previousTick = leaveProcessing.put(id, tick);
+        if (previousTick != null && previousTick.intValue() == tick) {
+            CheckUtils.debug(player, null, "Duplicate leave event in tick " + tick + " ignored.");
+            return false;
+        }
+        if (leaveProcessing.size() > MAX_LEAVE_PROCESSING) {
+            leaveProcessing.clear();
+        }
+        return true;
+    }
+
+    private void finishLeaveProcessing(final Player player) {
+        // Intentionally left blank to keep the tick marker for the remainder of
+        // the tick. Duplicate leave events within the same tick will be ignored
+        // even after cleanup completes. Map cleanup happens via size capping.
+    }
+
+    private void processLeave(final Player player) {
         final long timeNow = System.currentTimeMillis();
         final UUID playerId = player.getUniqueId();
         lastLogout.put(playerId, timeNow);
         final PlayerData pData = playerData.get(playerId);
         if (pData != null) {
-            final Collection<Class<? extends IDataOnLeave>> types = factoryRegistry.getGroupedTypes(IDataOnLeave.class);
+            final Collection<Class<? extends IDataOnLeave>> types =
+                factoryRegistry.getGroupedTypes(IDataOnLeave.class);
             pData.onPlayerLeave(player, timeNow, types);
             pData.getGenericInstance(CombinedData.class).lastLogoutTime = timeNow;
-        }
-        else {
+        } else {
             // NOTE: Possibly put lastLogoutTime to OfflinePlayerData.
         }
         removeOnlinePlayer(player);
