@@ -176,7 +176,8 @@ public class MoveData {
     }
 
     /**
-     * Update only the end location and recompute all distance values.
+     * Update only the end location and recompute all distance values. Resets
+     * flying-related state to avoid stale flags from previous moves.
      *
      * @param to the new end location
      */
@@ -184,6 +185,9 @@ public class MoveData {
         this.to.setLocation(to);
         toIsValid = true;
         recomputeDistances();
+        elytrafly = false;
+        flyCheck = null;
+        modelFlying = null;
     }
 
     /**
