@@ -128,6 +128,9 @@ public class PlayerDataManager  implements IPlayerDataManager, ComponentWithName
      */
     private final Map<UUID, Long> lastLogout = new LinkedHashMap<UUID, Long>(50, 0.75f, true);
 
+    /** Tracks the server tick when a leave event started processing for a player. */
+    private final Map<UUID, Integer> leaveProcessing = new HashMap<UUID, Integer>(50);
+
     /**
      * Keeping track of online players. Currently id/name mappings are not kept
      * on logout, but might be later.
@@ -707,16 +710,47 @@ public class PlayerDataManager  implements IPlayerDataManager, ComponentWithName
      * @param player
      */
     private void playerLeaves(final Player player) {
+        if (!startLeaveProcessing(player)) {
+            return;
+        }
+        try {
+            processLeave(player);
+        } finally {
+            finishLeaveProcessing(player);
+        }
+    }
+
+    private boolean startLeaveProcessing(Player player) {
+        if (player == null) {
+            return false;
+        }
+        final UUID id = player.getUniqueId();
+        final int tick = TickTask.getTick();
+        final Integer existing = leaveProcessing.get(id);
+        if (existing != null && existing.intValue() == tick) {
+            return false;
+        }
+        leaveProcessing.put(id, tick);
+        return true;
+    }
+
+    private void finishLeaveProcessing(Player player) {
+        if (player != null) {
+            leaveProcessing.remove(player.getUniqueId());
+        }
+    }
+
+    private void processLeave(final Player player) {
         final long timeNow = System.currentTimeMillis();
         final UUID playerId = player.getUniqueId();
         lastLogout.put(playerId, timeNow);
         final PlayerData pData = playerData.get(playerId);
         if (pData != null) {
-            final Collection<Class<? extends IDataOnLeave>> types = factoryRegistry.getGroupedTypes(IDataOnLeave.class);
+            final Collection<Class<? extends IDataOnLeave>> types =
+                factoryRegistry.getGroupedTypes(IDataOnLeave.class);
             pData.onPlayerLeave(player, timeNow, types);
             pData.getGenericInstance(CombinedData.class).lastLogoutTime = timeNow;
-        }
-        else {
+        } else {
             // NOTE: Possibly put lastLogoutTime to OfflinePlayerData.
         }
         removeOnlinePlayer(player);
