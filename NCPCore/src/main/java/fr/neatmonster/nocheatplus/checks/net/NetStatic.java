@@ -159,12 +159,28 @@ public class NetStatic {
         packetFreq.setBucket(0, maxPackets + firstBucketScore);
     }
 
+    /**
+     * Adjust empty window count for server lag.
+     * <p>
+     * Values below zero are ignored to avoid artificially reducing tolerance
+     * when the server is running faster than usual. The returned value is
+     * clamped to the range {@code [0, winNum]}.
+     *
+     * TODO: Make lag scaling behavior configurable.
+     */
     private static int adjustEmptyForLag(int empty, final long totalDur, final int winNum) {
         if (empty > 0) {
             final float lag = TickTask.getLag(totalDur, true);
             final int lagEmpty = (int) Math.round((lag - 1f) * winNum);
-            empty = lagEmpty > 0 ? Math.min(empty, lagEmpty) : empty;
-            empty = Math.max(0, empty);
+            if (lagEmpty > 0) {
+                empty = Math.min(empty, lagEmpty);
+            }
+        }
+        if (empty < 0) {
+            empty = 0;
+        }
+        if (empty > winNum) {
+            empty = winNum;
         }
         return empty;
     }
