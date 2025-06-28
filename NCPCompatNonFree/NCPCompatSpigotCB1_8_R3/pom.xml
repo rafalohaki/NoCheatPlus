@@ -28,6 +28,12 @@
             <version>1.8.8-R0.1-SNAPSHOT</version>
             <scope>provided</scope>
         </dependency>
+        <dependency>
+            <groupId>org.mockbukkit.mockbukkit</groupId>
+            <artifactId>mockbukkit-v1.21</artifactId>
+            <version>4.57.0</version>
+            <scope>test</scope>
+        </dependency>
     </dependencies>
 
     <build>

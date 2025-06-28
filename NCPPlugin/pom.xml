@@ -52,6 +52,12 @@
             <version>4.13.2</version>
             <scope>test</scope>
         </dependency>
+        <dependency>
+            <groupId>org.mockbukkit.mockbukkit</groupId>
+            <artifactId>mockbukkit-v1.21</artifactId>
+            <version>4.57.0</version>
+            <scope>test</scope>
+        </dependency>
     </dependencies>
 
     <!-- Build Description Profiles -->
