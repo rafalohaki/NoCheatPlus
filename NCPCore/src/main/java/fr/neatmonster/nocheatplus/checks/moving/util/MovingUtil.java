@@ -24,6 +24,7 @@ import org.bukkit.entity.Entity;
 import org.bukkit.entity.EntityType;
 import org.bukkit.entity.Player;
 import org.bukkit.event.player.PlayerMoveEvent;
+import fr.neatmonster.nocheatplus.utilities.map.ChunkLoadValidator;
 
 import fr.neatmonster.nocheatplus.NCPAPIProvider;
 import fr.neatmonster.nocheatplus.checks.CheckType;
@@ -528,13 +529,13 @@ public class MovingUtil {
             }
         }
         int loaded = 0;
-        if (loadFrom) {
+        if (loadFrom && ChunkLoadValidator.canLoad(player, from)) {
             loaded += MapUtil.ensureChunksLoaded(from.getWorld(), x0, z0, margin);
             if (TrigUtil.distanceSquared(x0, z0, x1, z1) < 1.0) {
                 loadTo = false;
             }
         }
-        if (loadTo) {
+        if (loadTo && ChunkLoadValidator.canLoad(player, to)) {
             loaded += MapUtil.ensureChunksLoaded(to.getWorld(), x1, z1, margin);
         }
         if (loaded > 0 && pData.isDebugActive(CheckType.MOVING)) {
@@ -572,7 +573,10 @@ public class MovingUtil {
                 return;
             }
         }
-        int loaded = MapUtil.ensureChunksLoaded(loc.getWorld(), loc.getX(), loc.getZ(), Magic.CHUNK_LOAD_MARGIN_MIN);
+        int loaded = 0;
+        if (ChunkLoadValidator.canLoad(player, loc)) {
+            loaded = MapUtil.ensureChunksLoaded(loc.getWorld(), loc.getX(), loc.getZ(), Magic.CHUNK_LOAD_MARGIN_MIN);
+        }
         if (loaded > 0 && pData.isDebugActive(CheckType.MOVING)) {
             StaticLog.logInfo("Player " + tag + ": Loaded " + loaded + " chunk" + (loaded == 1 ? "" : "s") + " for the world " + loc.getWorld().getName() +  " for player: " + player.getName());
         }

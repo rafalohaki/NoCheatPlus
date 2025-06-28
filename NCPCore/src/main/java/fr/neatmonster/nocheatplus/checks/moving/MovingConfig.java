@@ -30,6 +30,7 @@ import fr.neatmonster.nocheatplus.actions.ActionList;
 import fr.neatmonster.nocheatplus.checks.CheckType;
 import fr.neatmonster.nocheatplus.checks.access.ACheckConfig;
 import fr.neatmonster.nocheatplus.checks.moving.magic.Magic;
+import fr.neatmonster.nocheatplus.utilities.map.ChunkLoadValidator;
 import fr.neatmonster.nocheatplus.checks.moving.model.ModelFlying;
 import fr.neatmonster.nocheatplus.checks.moving.player.PlayerSetBackMethod;
 import fr.neatmonster.nocheatplus.checks.moving.util.MovingUtil;
@@ -178,6 +179,7 @@ public class MovingConfig extends ACheckConfig {
     public boolean loadChunksOnMove;
     public boolean loadChunksOnTeleport;
     public boolean loadChunksOnWorldChange;
+    public int chunkLoadMaxDistance;
     public long sprintingGrace;
     public boolean assumeSprint;
     public int speedGrace;
@@ -429,6 +431,8 @@ public class MovingConfig extends ACheckConfig {
         loadChunksOnMove = config.getBoolean(ConfPaths.MOVING_LOADCHUNKS_MOVE);
         loadChunksOnTeleport = config.getBoolean(ConfPaths.MOVING_LOADCHUNKS_TELEPORT);
         loadChunksOnWorldChange = config.getBoolean(ConfPaths.MOVING_LOADCHUNKS_WORLDCHANGE);
+        chunkLoadMaxDistance = config.getInt(ConfPaths.MOVING_CHUNKLOAD_MAXDISTANCE);
+        ChunkLoadValidator.setMaxDistance(chunkLoadMaxDistance);
         sprintingGrace = Math.max(0L, (long) (config.getDouble(ConfPaths.MOVING_SPRINTINGGRACE) * 1000.0));
         assumeSprint = config.getBoolean(ConfPaths.MOVING_ASSUMESPRINT);
         speedGrace = Math.max(0, (int) Math.round(config.getDouble(ConfPaths.MOVING_SPEEDGRACE) * 20.0));

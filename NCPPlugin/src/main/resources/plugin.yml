@@ -439,6 +439,8 @@ permissions:
         children:
             nocheatplus.bypass.denylogin:
                 description: Bypass the login denial, such as exists with the ncp denylogin command.
+            nocheatplus.bypass.chunkload:
+                description: Bypass chunk load rate limits.
     
     # Various shortcuts:
     nocheatplus.shortcut:
@@ -473,6 +475,7 @@ permissions:
                     nocheatplus.command.removeplayer: true
                     nocheatplus.filter.command: true
                     nocheatplus.bypass.denylogin: true
+                    nocheatplus.bypass.chunkload: true
                     nocheatplus.command.inspect: true
             nocheatplus.shortcut.bypass:
                 description: Bypass everything that can be bypassed.
@@ -505,6 +508,7 @@ permissions:
                 description: Receive debugging information (or cause console logs on other occasions).
             
             nocheatplus.bypass.denylogin: true
+            nocheatplus.bypass.chunkload: true
             nocheatplus.filter.command: true
             nocheatplus.command: true
     

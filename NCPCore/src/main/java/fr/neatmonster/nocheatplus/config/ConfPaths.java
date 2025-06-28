@@ -759,6 +759,8 @@ public abstract class ConfPaths {
     public static final String  MOVING_LOADCHUNKS_MOVE                      = MOVING_LOADCHUNKS + "move";
     public static final String  MOVING_LOADCHUNKS_TELEPORT                  = MOVING_LOADCHUNKS + "teleport";
     public static final String  MOVING_LOADCHUNKS_WORLDCHANGE               = MOVING_LOADCHUNKS + "worldchange";
+    private static final String MOVING_CHUNKLOAD                            = MOVING + "chunkload.";
+    public static final String  MOVING_CHUNKLOAD_MAXDISTANCE                = MOVING_CHUNKLOAD + "maxdistance";
     public static final String  MOVING_SPRINTINGGRACE                       = MOVING + "sprintinggrace";
     public static final String  MOVING_FLYINGGRACE                          = MOVING + "flyinggrace";
     public static final String  MOVING_ASSUMESPRINT                         = MOVING + "assumesprint";

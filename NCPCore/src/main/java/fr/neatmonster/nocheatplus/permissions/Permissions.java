@@ -50,6 +50,7 @@ public class Permissions {
     // Bypasses held extra from command permissions.
     private static final String BYPASS                       = NOCHEATPLUS + ".bypass";
     public static final RegisteredPermission BYPASS_DENY_LOGIN            = add(BYPASS + "denylogin");
+    public static final RegisteredPermission CHUNKLOAD_BYPASS             = add(BYPASS + "chunkload");
 
     // Bypass command filter.
     private static final String FILTER                       = NOCHEATPLUS + ".filter";
