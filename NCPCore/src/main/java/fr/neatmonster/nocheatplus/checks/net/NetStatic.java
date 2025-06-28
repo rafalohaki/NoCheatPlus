@@ -36,6 +36,41 @@ import fr.neatmonster.nocheatplus.worlds.WorldFactoryArgument;
  */
 public class NetStatic {
 
+    static class BurnInfo {
+        final int burnStart;
+        final int empty;
+        BurnInfo(int burnStart, int empty) {
+            this.burnStart = burnStart;
+            this.empty = empty;
+        }
+    }
+
+    static BurnInfo computeBurnInfo(final ActionFrequency packetFreq) {
+        final int winNum = packetFreq.numberOfBuckets();
+        int burnStart = winNum;
+        int empty = 0;
+        boolean firstUsed = false;
+        boolean counting = false;
+        final float[] bucketScores = new float[winNum];
+        for (int i = 0; i < winNum; i++) {
+            bucketScores[i] = packetFreq.bucketScore(i);
+        }
+        for (int i = 1; i < winNum; i++) {
+            final float bucket = bucketScores[i];
+            if (bucket > 0f) {
+                if (!firstUsed) {
+                    firstUsed = true;
+                } else if (!counting) {
+                    burnStart = i;
+                    counting = true;
+                }
+            } else if (counting) {
+                empty++;
+            }
+        }
+        return new BurnInfo(burnStart, empty);
+    }
+
     /**
      * Packet-cheating check, for catching clients that send more packets than
      * allowed. Intention is to have a more accurate check than just preventing
@@ -72,18 +107,18 @@ public class NetStatic {
         final long tDiff = time - packetFreq.lastAccess();
         if (tDiff >= winDur && tDiff < totalDur) {
             // There will be some shift, so check if to relax, only if there could be some congestion. 
-            float sc0 = packetFreq.bucketScore(0);
-            if (sc0 > maxPackets) { // Clarify ideal versus maximum packet counts.
+            float firstBucketScore = packetFreq.bucketScore(0);
+            if (firstBucketScore > maxPackets) { // Clarify ideal versus maximum packet counts.
                 // Keep in mind potential burst-to-burst exploits.
-                sc0 -= maxPackets; // Count this down.
+                firstBucketScore -= maxPackets; // Count this down.
                 for (int i = 1; i < winNum; i++) {
-                    final float sci = packetFreq.bucketScore(i);
-                    if (sci < maxPackets) {
+                    final float currentBucketScore = packetFreq.bucketScore(i);
+                    if (currentBucketScore < maxPackets) {
                         // Smoothen, using following empty spots including one occupied spot at most..
-                        float consume = Math.min(sc0, maxPackets - sci);
-                        sc0 -= consume;
-                        packetFreq.setBucket(i, sci + consume);
-                        if (sci > 0f) {
+                        float consume = Math.min(firstBucketScore, maxPackets - currentBucketScore);
+                        firstBucketScore -= consume;
+                        packetFreq.setBucket(i, currentBucketScore + consume);
+                        if (currentBucketScore > 0f) {
                             // Only allow relaxing "into" the next occupied spot.
                             break;
                         }
@@ -92,7 +127,7 @@ public class NetStatic {
                     }
                 }
                 // Finally adjust the first bucket score.
-                packetFreq.setBucket(0, maxPackets + sc0);
+                packetFreq.setBucket(0, maxPackets + firstBucketScore);
             }
         }
 
@@ -101,25 +136,9 @@ public class NetStatic {
 
         // Fill up all "used" time windows (minimum we can do without other events).
         final float burnScore = (float) idealPackets * (float) winDur / 1000f;
-        // Find index.
-        int burnStart;
-        int empty = 0;
-        boolean used = false;
-        for (burnStart = 1; burnStart < winNum; burnStart ++) {
-            if (packetFreq.bucketScore(burnStart) > 0f) {
-                // Evaluate whether burnStart should increment for partially filled windows.
-                if (used) {
-                    for (int j = burnStart; j < winNum; j ++) {
-                        if (packetFreq.bucketScore(j) == 0f) {
-                            empty += 1;
-                        }
-                    }
-                    break;
-                } else {
-                    used = true;
-                }
-            }
-        }
+        final BurnInfo burnInfo = computeBurnInfo(packetFreq);
+        final int burnStart = burnInfo.burnStart;
+        int empty = burnInfo.empty;
 
         // Future: burn time windows based on other activity counting, such as matching ActinFrequency with keep-alive packets.
 
@@ -128,7 +147,9 @@ public class NetStatic {
             // Consider adding a configuration flag to skip lag adaption when running in strict mode.
             final float lag = TickTask.getLag(totalDur, true); // Full seconds range considered.
             // Also consider increasing the allowed maximum for extreme server-side lag conditions.
-            empty = Math.max(0, Math.min(empty, (int) Math.round((lag - 1f) * winNum)));
+            int lagEmpty = (int) Math.round((lag - 1f) * winNum);
+            empty = lagEmpty > 0 ? Math.min(empty, lagEmpty) : empty;
+            empty = Math.max(0, empty);
         }
 
         final double fullCount;

@@ -40,7 +40,9 @@ public class OnGroundReference {
      */
     // Possibly detach this so it can be used from within BlockProperties.
 
+    /** Cache used for retrieving block states. */
     private BlockCache blockCache = null;
+    /** Reference for the block currently tracked beneath the player. */
     private BlockChangeReference ref = null;
     private long ignoreFlags = 0L;
 

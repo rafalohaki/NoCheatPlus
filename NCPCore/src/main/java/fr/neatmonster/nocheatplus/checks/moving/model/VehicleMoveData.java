@@ -27,6 +27,10 @@ import org.bukkit.entity.EntityType;
  */
 public class VehicleMoveData extends PlayerMoveData {
 
+    /** Camel class reference for reflection based checks. */
+    private static final Class<?> CAMEL_CLASS =
+            fr.neatmonster.nocheatplus.utilities.ReflectionUtil.getClass("org.bukkit.entity.Camel");
+
     // Vehicle properties.
     /**
      * Unique identifier for the vehicle. Set at the start of some check (-ing).
@@ -34,6 +38,8 @@ public class VehicleMoveData extends PlayerMoveData {
     public UUID vehicleId = null;
     /** Type of the vehicle. Set at the start of some check (-ing). */
     public EntityType vehicleType = null;
+    /** True if the vehicle is identified as a camel. */
+    public boolean isCamel = false;
 
     // Simple vehicle properties.
     /** Lazily set for minecarts. */
@@ -48,7 +54,7 @@ public class VehicleMoveData extends PlayerMoveData {
         // Vehicle properties.
         vehicleId = null;
         vehicleType = null;
-        fromOnRails = toOnRails = specialCondition = false;
+        fromOnRails = toOnRails = specialCondition = isCamel = false;
         // Super class last, because it'll set valid to true in the end.
         super.resetBase();
     }
@@ -56,6 +62,7 @@ public class VehicleMoveData extends PlayerMoveData {
     public void setExtraVehicleProperties(final Entity vehicle) {
         vehicleId = vehicle.getUniqueId();
         vehicleType = vehicle.getType();
+        isCamel = CAMEL_CLASS != null && CAMEL_CLASS.isAssignableFrom(vehicle.getClass());
     }
 
     public void setExtraMinecartProperties(final VehicleMoveInfo moveInfo) {

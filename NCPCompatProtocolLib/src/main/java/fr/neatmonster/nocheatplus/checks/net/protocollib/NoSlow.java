@@ -278,10 +278,13 @@ public class NoSlow extends BaseAdapter {
         if (item.getType() != Material.CROSSBOW) {
             return false;
         }
-        final ItemMeta rawMeta = item.getItemMeta();
-        if (rawMeta instanceof CrossbowMeta) {
-            final CrossbowMeta meta = (CrossbowMeta) rawMeta;
-            if (!meta.hasChargedProjectiles() && hasArrow(player.getInventory(), true)) {
+        final ItemMeta meta = item.getItemMeta();
+        if (meta == null) {
+            return false;
+        }
+        if (meta instanceof CrossbowMeta) {
+            final CrossbowMeta crossbowMeta = (CrossbowMeta) meta;
+            if (!crossbowMeta.hasChargedProjectiles() && hasArrow(player.getInventory(), true)) {
                 markOffHandUse(event, data, false);
                 return true;
             }

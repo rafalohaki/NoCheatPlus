@@ -191,8 +191,8 @@ public class MovingUtil {
          */
 
         // Only the web can stop a player who isn't propelled by a rocket.
-        return data.fireworksBoostDuration > 0 || !BlockProperties.collides(fromLocation.getBlockCache(), 
-                fromLocation.getMinX(), fromLocation.getMinY(), fromLocation.getMinZ(), 
+        return data.hasFireworkBoost || !BlockProperties.collides(fromLocation.getBlockCache(),
+                fromLocation.getMinX(), fromLocation.getMinY(), fromLocation.getMinZ(),
                 fromLocation.getMaxX(), fromLocation.getMinY() + 0.6, fromLocation.getMaxZ(),
                 BlockFlags.F_COBWEB);
     }
@@ -452,6 +452,8 @@ public class MovingUtil {
 
     public static double getJumpAmplifier(final Player player, final MCAccess mcAccess) {
         final double amplifier = mcAccess.getJumpAmplifier(player);
+        // Missing potion effects are indicated by Double.NEGATIVE_INFINITY in
+        // MCAccess implementations (see their class JavaDocs).
         if (Double.isInfinite(amplifier)) {
             return 0.0;
         }

@@ -246,10 +246,13 @@ public abstract class RayTracing implements ICollideBlocks {
             }
 
             int mask = computeTransitionMask(tX, tY, tZ, tMin);
-            transitions = Integer.bitCount(mask);
+            // Bits: 1 = X-axis, 2 = Y-axis, 4 = Z-axis.
             transX = (mask & 1) != 0;
             transY = (mask & 2) != 0;
             transZ = (mask & 4) != 0;
+            transitions = (transX ? 1 : 0)
+                    + (transY ? 1 : 0)
+                    + (transZ ? 1 : 0);
 
             // Advance on-block origin and time based on this move.
             // NOTE: consider calculating the new position directly based on

@@ -15,9 +15,9 @@
 package fr.neatmonster.nocheatplus.compat.registry;
 
 import fr.neatmonster.nocheatplus.compat.MCAccess;
-import fr.neatmonster.nocheatplus.components.entity.IEntityAccessLastPositionAndLook;
 import fr.neatmonster.nocheatplus.components.entity.IEntityAccessVehicle;
 import fr.neatmonster.nocheatplus.compat.bukkit.EntityAccessVehicleMultiPassenger;
+import fr.neatmonster.nocheatplus.compat.bukkit.EntityAccessVehicleLegacy;
 
 /**
  * Set up more fine grained entity access providers, registered as generic
@@ -42,20 +42,10 @@ public class EntityAccessFactory {
      */
     public void setupEntityAccess(final MCAccess mcAccess, final MCAccessConfig config) {
 
-        // IEntityAccessLastPositionAndLook
-        //RegistryHelper.setupGenericInstance(new String[] {
-        //        "fr.neatmonster.nocheatplus.compat.cbdev.EntityAccessLastPositionAndLook",
-        //        "fr.neatmonster.nocheatplus.compat.spigotcb1_10_R1.EntityAccessLastPositionAndLook",
-        //        "fr.neatmonster.nocheatplus.compat.spigotcb1_9_R2.EntityAccessLastPositionAndLook",
-        //        "fr.neatmonster.nocheatplus.compat.spigotcb1_9_R1.EntityAccessLastPositionAndLook",
-        //}, new String[] {
-        //        "fr.neatmonster.nocheatplus.compat.cbreflect.reflect.ReflectEntityLastPositionAndLook",
-        //}, IEntityAccessLastPositionAndLook.class, config, false);
-
         // IEntityAccessVehicle
         IEntityAccessVehicle vehicleAccess = EntityAccessVehicleMultiPassenger.createIfSupported();
         if (vehicleAccess == null) {
-            vehicleAccess = new fr.neatmonster.nocheatplus.compat.bukkit.EntityAccessVehicleLegacy();
+            vehicleAccess = new EntityAccessVehicleLegacy();
         }
         RegistryHelper.registerGenericInstance(IEntityAccessVehicle.class, vehicleAccess);
     }

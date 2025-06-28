@@ -20,6 +20,8 @@ import java.util.Set;
 
 import org.bukkit.Material;
 
+import fr.neatmonster.nocheatplus.utilities.InventoryUtil;
+
 import fr.neatmonster.nocheatplus.compat.blocks.BlockPropertiesSetup;
 import fr.neatmonster.nocheatplus.config.WorldConfigProvider;
 import fr.neatmonster.nocheatplus.logging.StaticLog;
@@ -29,6 +31,9 @@ import fr.neatmonster.nocheatplus.utilities.map.BlockProperties;
 
 public class MCAccessBukkit extends MCAccessBukkitBase implements BlockPropertiesSetup {
 
+    /** Cached Material values from InventoryUtil. */
+    private static final Material[] ALL_MATERIALS = InventoryUtil.ALL_MATERIALS;
+
     public MCAccessBukkit() {
         super();
     }
@@ -36,7 +41,7 @@ public class MCAccessBukkit extends MCAccessBukkitBase implements BlockPropertie
     @Override
     public void setupBlockProperties(final WorldConfigProvider<?> worldConfigProvider) {
         final Set<Material> itchyBlocks = new LinkedHashSet<Material>();
-        for (final Material mat : Material.values()) {
+        for (final Material mat : ALL_MATERIALS) {
             if (!mat.isBlock()) {
                 continue;
             }

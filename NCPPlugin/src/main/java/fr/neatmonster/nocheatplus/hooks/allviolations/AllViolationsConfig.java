@@ -41,7 +41,9 @@ public class AllViolationsConfig {
         allToTrace = config.getBoolean(ConfPaths.LOGGING_EXTENDED_ALLVIOLATIONS_BACKEND_TRACE);
         allToNotify = config.getBoolean(ConfPaths.LOGGING_EXTENDED_ALLVIOLATIONS_BACKEND_NOTIFY);
         debug = config.getBoolean(ConfPaths.LOGGING_EXTENDED_ALLVIOLATIONS_DEBUG);
-        debugOnly = config.getBoolean(ConfPaths.LOGGING_EXTENDED_ALLVIOLATIONS_DEBUGONLY) || debug && !allToTrace && !allToNotify;
+        final boolean debugWithoutExplicitLogging = debug && !allToTrace && !allToNotify;
+        debugOnly = config.getBoolean(ConfPaths.LOGGING_EXTENDED_ALLVIOLATIONS_DEBUGONLY)
+                || debugWithoutExplicitLogging;
     }
 
     public boolean doesLogAnything() {

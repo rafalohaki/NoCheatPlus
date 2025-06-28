@@ -23,7 +23,15 @@ import java.net.URL;
 import java.security.CodeSource;
 import java.util.Map;
 
+import fr.neatmonster.nocheatplus.utilities.build.URLUtil;
+
 public class ResourceUtil {
+
+    /**
+     * Separator between the JAR file path and the internal resource path
+     * in a JAR URL, e.g. "jar:file:/plugin.jar!/path".
+     */
+    private static final String JAR_URL_SEPARATOR = "!";
 
     private ResourceUtil() {
     }
@@ -45,15 +53,15 @@ public class ResourceUtil {
         if (codeSource == null) {
             return null;
         }
-        final String csPath = codeSource.getLocation().getPath();
-        final String csLower = csPath.toLowerCase();
-        if (!csLower.endsWith(".jar") && !csLower.contains(".jar!")) {
+        final String codeSourcePath = codeSource.getLocation().getPath();
+        if (!URLUtil.isJarURL(codeSourcePath)) {
             return null;
         }
         if (!classPath.startsWith("jar")) {
             return null;
         }
-        final String absPath = classPath.substring(0, classPath.lastIndexOf('!') + 1)
+        // JAR URLs separate the file part and the entry path with '!'.
+        final String absPath = classPath.substring(0, classPath.lastIndexOf(JAR_URL_SEPARATOR) + 1)
                 + "/" + path;
         try {
             final URL url = new URL(absPath);

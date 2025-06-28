@@ -29,6 +29,7 @@ import fr.neatmonster.nocheatplus.worlds.WorldFactoryArgument;
  * @author asofold
  *
  * @param <T>
+ *            Configuration type to register.
  */
 public class RegisterConfigWorld<T extends IConfig> extends RegisterInstanceWorld<T> {
 

@@ -18,6 +18,7 @@ import java.util.LinkedList;
 import java.util.List;
 import java.util.Locale;
 import java.util.Arrays;
+import java.util.OptionalDouble;
 
 import org.bukkit.GameMode;
 import org.bukkit.Location;
@@ -832,7 +833,8 @@ public class CreativeFly extends Check {
      */
     private boolean handleFireworkBoostAscend(final double yDistance, final double limitV,
             final PlayerMoveData lastMove, final MovingData data) {
-        if (yDistance > limitV && data.fireworksBoostDuration > 0 && lastMove.toIsValid
+        boolean boostAscend = false;
+        if (data.hasFireworkBoost && yDistance > limitV && lastMove.toIsValid
                 && (
                         yDistance >= lastMove.yDistance
                                 || yDistance - lastMove.yDistance < Magic.GRAVITY_MAX
@@ -844,9 +846,9 @@ public class CreativeFly extends Check {
                 && yDistance < 1.67) {
             /* Additional checks for fireworks boost could be implemented here. */
             tags.add("fw_boost_asc");
-            return true;
+            boostAscend = true;
         }
-        return false;
+        return boostAscend;
     }
 
     /**
@@ -1128,8 +1130,9 @@ public class CreativeFly extends Check {
         if (level > 0) {
             allowedH *= Magic.getModDepthStrider()[level];
             final double attrMod = attributeAccess.getHandle().getSpeedAttributeMultiplier(player);
-            if (attrMod == Double.MAX_VALUE) {
+            if (Double.isNaN(attrMod)) {
                 final double speedAmplifier = mcAccess.getHandle().getFasterMovementAmplifier(player);
+                // NEGATIVE_INFINITY from MCAccess means no speed potion effect.
                 if (!Double.isInfinite(speedAmplifier)) {
                     allowedH *= 1.0D + 0.2D * (speedAmplifier + 1);
                 }
@@ -1407,9 +1410,9 @@ public class CreativeFly extends Check {
 
         final ElytraGuessState state = initGuessState(player, lastMove, radPitch);
         updatePitchAdjustments(state, lookvec, radPitch, xzlength, thisMove);
-        final double resultH = applyFireworkBoost(state, lookvec, xzlength, thisMove, lastMove, data);
+        final OptionalDouble resultH = applyFireworkBoost(state, lookvec, xzlength, thisMove, lastMove, data);
 
-        final double finalH = Double.isNaN(resultH) ? finalizeHorizontal(state) : resultH;
+        final double finalH = resultH.isPresent() ? resultH.getAsDouble() : finalizeHorizontal(state);
         return new VelocityAdjustment(finalH, state.allowedY);
     }
 
@@ -1471,15 +1474,31 @@ public class CreativeFly extends Check {
         }
     }
 
-    private static double applyFireworkBoost(ElytraGuessState state, Vector lookvec, double xzlength,
+    /**
+     * Apply a firework boost to the current guess state.
+     *
+     * <p>Returning {@code OptionalDouble.empty()} indicates that no horizontal
+     * adjustment should be made. Previously this method returned
+     * {@link Double#NaN} for that purpose.</p>
+     *
+     * @param state the state tracking the guessed movement data
+     * @param lookvec the look vector of the player
+     * @param xzlength the horizontal length of the look vector
+     * @param thisMove information about the current move
+     * @param lastMove information about the last move
+     * @param data    moving data which may contain boost information
+     * @return an {@code OptionalDouble} containing the adjusted horizontal
+     *         distance or empty if none should be applied
+     */
+    private static OptionalDouble applyFireworkBoost(ElytraGuessState state, Vector lookvec, double xzlength,
             PlayerMoveData thisMove, PlayerMoveData lastMove, MovingData data) {
-        double resultHDistance = Double.NaN;
+        OptionalDouble resultHDistance = OptionalDouble.empty();
         if (data.fireworksBoostDuration > 0) {
             state.allowedY = Math.abs(thisMove.yDistance) < 2.0 ? thisMove.yDistance
                     : lastMove.toIsValid ? lastMove.yDistance : 0;
             if (Math.round(data.fireworksBoostTickNeedCheck / 4) > data.fireworksBoostDuration
                     && thisMove.hDistance < Math.sqrt(state.x * state.x + state.z * state.z)) {
-                resultHDistance = Math.sqrt(state.x * state.x + state.z * state.z);
+                resultHDistance = OptionalDouble.of(Math.sqrt(state.x * state.x + state.z * state.z));
             } else {
                 state.x *= 0.99;
                 state.z *= 0.99;
@@ -1487,7 +1506,7 @@ public class CreativeFly extends Check {
                 state.z += lookvec.getZ() * 0.1D + (lookvec.getZ() * 1.5D - state.z) * 0.5D;
 
                 if (thisMove.hDistance < lastMove.hAllowedDistance * 0.994) {
-                    resultHDistance = lastMove.hAllowedDistance * 0.994;
+                    resultHDistance = OptionalDouble.of(lastMove.hAllowedDistance * 0.994);
                 } else {
                     state.allowedH += 0.2;
                 }
@@ -1553,6 +1572,7 @@ public class CreativeFly extends Check {
         double fSpeed;
         if (model.getApplyModifiers()) {
             final double speedModifier = mcAccess.getHandle().getFasterMovementAmplifier(player);
+            // NEGATIVE_INFINITY signals that the speed effect is absent.
             if (Double.isInfinite(speedModifier)) fSpeed = 1.0;
             else fSpeed = 1.0 + 0.2 * (speedModifier + 1.0);
             if (flying) {
@@ -1565,7 +1585,7 @@ public class CreativeFly extends Check {
             }
             else {
                 final double attrMod = attributeAccess.getHandle().getSpeedAttributeMultiplier(player);
-                if (attrMod != Double.MAX_VALUE) fSpeed *= attrMod;
+                if (!Double.isNaN(attrMod)) fSpeed *= attrMod;
                 fSpeed *= data.walkSpeed / Magic.DEFAULT_WALKSPEED;
             }
         }

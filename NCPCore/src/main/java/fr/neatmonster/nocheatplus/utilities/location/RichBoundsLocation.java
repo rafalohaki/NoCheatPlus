@@ -621,7 +621,16 @@ public class RichBoundsLocation implements IGetBukkitLocation, IGetBlockPosition
      * @param cache
      *            the new block cache
      */
+    /**
+     * Set the block cache backing this location instance. If a previous cache
+     * exists it will be cleaned up before replacement.
+     *
+     * @param cache the new block cache, may be {@code null}
+     */
     public void setBlockCache(final BlockCache cache) {
+        if (this.blockCache != null && this.blockCache != cache) {
+            this.blockCache.cleanup();
+        }
         this.blockCache = cache;
     }
 

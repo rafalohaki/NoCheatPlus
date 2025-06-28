@@ -82,7 +82,7 @@ public class BukkitAttributeAccess implements IAttributeAccess {
     public double getSpeedAttributeMultiplier(final Player player) {
         final AttributeInstance attrInst = player.getAttribute(Attribute.GENERIC_MOVEMENT_SPEED);
         if (attrInst == null) {
-            return Double.MAX_VALUE;
+            return 1.0;
         }
         final double val = attrInst.getValue() / attrInst.getBaseValue();
         final AttributeModifier mod = getModifier(attrInst, AttribUtil.ID_SPRINT_BOOST);
@@ -93,7 +93,7 @@ public class BukkitAttributeAccess implements IAttributeAccess {
     public double getSprintAttributeMultiplier(final Player player) {
         final AttributeInstance attrInst = player.getAttribute(Attribute.GENERIC_MOVEMENT_SPEED);
         if (attrInst == null) {
-            return Double.MAX_VALUE;
+            return 1.0;
         }
         final AttributeModifier mod = getModifier(attrInst, AttribUtil.ID_SPRINT_BOOST);
         return mod == null ? 1.0 : getMultiplier(mod);

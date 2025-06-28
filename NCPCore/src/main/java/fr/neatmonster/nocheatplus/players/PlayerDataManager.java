@@ -466,7 +466,7 @@ public class PlayerDataManager  implements IPlayerDataManager, ComponentWithName
          *  ICheckData vs IData (...), except if registered for per check 
          *  type removal.
          */
-        somethingFound |= clearComponentData(checkType, playerName);
+        somethingFound = somethingFound || clearComponentData(checkType, playerName);
 
         if (pData != null) {
             final CheckRemovalSpec removalSpec = new CheckRemovalSpec(checkType, true, this);
@@ -1076,10 +1076,16 @@ public class PlayerDataManager  implements IPlayerDataManager, ComponentWithName
     /**
      * Used by checks to register the history for external access.<br>
      * NOTE: This method is not really meant to be used from outside NCP.
-     * 
+     *
      * @param type
      * @param histories
-     * @deprecated New implementation pending.
+     * @deprecated Replaced by the upcoming history service API. Scheduled for
+     *             removal in version 2.0.
+     *             <p>
+     *             Migration: obtain the history service via
+     *             {@code NCPAPIProvider.getHistoryService()} and call
+     *             {@code registerExecutionHistory(CheckType, Map)} there.
+     *             </p>
      */
     public void registerExecutionHistory(CheckType type, Map<String, ExecutionHistory> histories) {
         executionHistories.put(type, histories);
@@ -1087,12 +1093,16 @@ public class PlayerDataManager  implements IPlayerDataManager, ComponentWithName
 
     /**
      * Access method to the the execution history for check type for a player.
-     * 
+     *
      * @param type
      * @param playerName
      *            Exact case for player name.
      * @return null if not present.
-     * @deprecated New implementation pending.
+     * @deprecated Superseded by the history service. Will be removed in 2.0.
+     *             <p>
+     *             Migration: query the history service for execution history
+     *             entries instead of accessing them via this manager.
+     *             </p>
      */
     public ExecutionHistory getExecutionHistory(final CheckType type, final String playerName) {
         final Map<String, ExecutionHistory> map = executionHistories.get(type);
@@ -1104,11 +1114,17 @@ public class PlayerDataManager  implements IPlayerDataManager, ComponentWithName
 
     /**
      * Remove the execution history for a player for the given check type.
-     * 
+     *
      * @param type
      * @param playerName
-     * @return
-     * @deprecated New implementation pending.
+     * @return {@code true} if any history was removed
+     * @deprecated This logic moves to the history service. Scheduled for
+     *             removal in version 2.0.
+     *             <p>
+     *             Migration: use
+     *             {@code HistoryService#removeExecutionHistory(CheckType, String)}
+     *             instead.
+     *             </p>
      */
     public boolean removeExecutionHistory(final CheckType type, final String playerName) {
         boolean removed = false;

@@ -1,8 +1,13 @@
 package fr.neatmonster.nocheatplus.checks.moving.helper;
 
+import org.bukkit.entity.Player;
 import org.bukkit.inventory.ItemStack;
 
+import fr.neatmonster.nocheatplus.NCPAPIProvider;
 import fr.neatmonster.nocheatplus.checks.moving.MovingData;
+import fr.neatmonster.nocheatplus.config.ConfigManager;
+import fr.neatmonster.nocheatplus.config.ConfPaths;
+import fr.neatmonster.nocheatplus.logging.Streams;
 import fr.neatmonster.nocheatplus.compat.BridgeMisc;
 import fr.neatmonster.nocheatplus.utilities.TickTask;
 
@@ -12,6 +17,17 @@ import fr.neatmonster.nocheatplus.utilities.TickTask;
 public final class ElytraBoostHandler {
 
     private ElytraBoostHandler() {
+    }
+
+    public static void logBoostEvent(Player player, String event, int tick, int duration) {
+        if (player == null) {
+            return;
+        }
+        if (ConfigManager.getConfigFile().getBoolean(ConfPaths.LOGGING_EXTENDED_ELYTRABOOST)) {
+            NCPAPIProvider.getNoCheatPlusAPI().getLogManager().info(Streams.STATUS,
+                    "Elytra boost " + event + " for " + player.getName()
+                            + " at tick " + tick + " duration " + duration);
+        }
     }
 
     /**
@@ -35,6 +51,8 @@ public final class ElytraBoostHandler {
         mData.fireworksBoostDuration = ticks;
         mData.fireworksBoostTickNeedCheck = ticks - 1;
         mData.fireworksBoostTickExpire = tick + ticks;
+        mData.hasFireworkBoost = true;
+        logBoostEvent(context.player(), "started", tick, ticks);
         return true;
     }
 }

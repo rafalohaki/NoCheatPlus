@@ -23,7 +23,7 @@ public class TestBukkitAttributeAccess {
         
         Player player = mock(Player.class);
         when(player.getAttribute(Attribute.GENERIC_MOVEMENT_SPEED)).thenReturn(null);
-        assertEquals(Double.MAX_VALUE, access.getSpeedAttributeMultiplier(player), 0.0);
+        assertEquals(1.0, access.getSpeedAttributeMultiplier(player), 0.0);
     }
 
     @Test
@@ -35,7 +35,7 @@ public class TestBukkitAttributeAccess {
         
         Player player = mock(Player.class);
         when(player.getAttribute(Attribute.GENERIC_MOVEMENT_SPEED)).thenReturn(null);
-        assertEquals(Double.MAX_VALUE, access.getSprintAttributeMultiplier(player), 0.0);
+        assertEquals(1.0, access.getSprintAttributeMultiplier(player), 0.0);
     }
 
     @Test

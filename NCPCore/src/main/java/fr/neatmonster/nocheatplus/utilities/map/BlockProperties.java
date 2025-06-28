@@ -36,6 +36,8 @@ import org.bukkit.block.BlockFace;
 import org.bukkit.block.data.BlockData;
 import org.bukkit.block.data.Waterlogged;
 import org.bukkit.block.data.type.BubbleColumn;
+
+import fr.neatmonster.nocheatplus.utilities.InventoryUtil;
 import org.bukkit.configuration.ConfigurationSection;
 import org.bukkit.entity.Player;
 import org.bukkit.inventory.ItemStack;
@@ -84,11 +86,20 @@ public class BlockProperties {
     /** Tolerance for floating point comparisons. */
     private static final double EPSILON = 1.0E-6;
 
+    /** Cached Material values from InventoryUtil. */
+    private static final Material[] ALL_MATERIALS = InventoryUtil.ALL_MATERIALS;
+
     /**
      * The Enum ToolType.
      *
      * @author asofold
-     * @deprecated Will be replaced by a generic way to define tools.
+     * @deprecated Will be replaced by the new
+     *             {@code ToolDefinition} concept provided by the history
+     *             service. Removal planned for version 2.0.
+     *             <p>
+     *             Migration: create a {@code ToolDefinition} via the history
+     *             service and use it when resolving block interactions.
+     *             </p>
      */
     public static enum ToolType {
         /** The none. */
@@ -111,7 +122,13 @@ public class BlockProperties {
      * The Enum MaterialBase.
      *
      * @author asofold
-     * @deprecated Will be replaced by a generic way to define tools.
+     * @deprecated Will be replaced by {@code ToolDefinition} from the history
+     *             service. Scheduled for removal in 2.0.
+     *             <p>
+     *             Migration: obtain material properties from the history
+     *             service and refer to {@code ToolDefinition} instead of this
+     *             enum.
+     *             </p>
      */
     public static enum MaterialBase {
         /** The none. */
@@ -154,7 +171,12 @@ public class BlockProperties {
          * @param id
          *            the id
          * @return the by id
-         * @deprecated Nothing to do with ids.
+         * @deprecated Nothing to do with ids. Use the history service to obtain
+         *             material bases. Removal planned for version 2.0.
+         *             <p>
+         *             Migration: call
+         *             {@code HistoryService#getMaterialBaseById(int)} instead.
+         *             </p>
          */
         @Deprecated
         public static final MaterialBase getById(final int id) {
@@ -181,7 +203,13 @@ public class BlockProperties {
     /**
      * Properties of a tool.
      * 
-     * @deprecated Will be replaced by a generic way to define tools.
+     * @deprecated Will be replaced by {@code ToolDefinition}. Scheduled for
+     *             removal in 2.0.
+     *             <p>
+     *             Migration: transition your code to use
+     *             {@code ToolDefinition} objects fetched from the history
+     *             service.
+     *             </p>
      */
     public static class ToolProps {
         
@@ -227,7 +255,12 @@ public class BlockProperties {
     /**
      * Properties of a block.
      * 
-     * @deprecated Will be replaced by a generic way to define tools.
+     * @deprecated Will be replaced by the {@code BlockDefinition} API in the
+     *             history service. Will be removed in version 2.0.
+     *             <p>
+     *             Migration: use {@code BlockDefinition} from the history
+     *             service instead of this class.
+     *             </p>
      */
     public static class BlockProps{
 
@@ -1105,7 +1138,7 @@ public class BlockProperties {
         // Initialize block flags                           //
         //////////////////////////////////////////////////////
         // Generic initialization.
-        for (Material mat : Material.values()) {
+        for (Material mat : ALL_MATERIALS) {
             BlockFlags.blockFlags.put(mat, 0L);
             if (mcAccess.isBlockLiquid(mat).decide()) {
                 // NOTE: do not set BlockFlags.F_GROUND for liquids ?
@@ -1227,7 +1260,7 @@ public class BlockProperties {
             allBlocks.add("--- Present entries -------------------------------");
         }
         List<String> tags = new ArrayList<String>();
-        for (Material temp : Material.values()) {
+        for (Material temp : ALL_MATERIALS) {
             String mat;
             try {
                 if (!temp.isBlock()) {
@@ -1540,10 +1573,16 @@ public class BlockProperties {
      * @param inWater
      * @param aquaAffinity
      * @param efficiency
-     * @return
-     * @deprecated Public method not containing haste, fatigue.
+     * @return the breaking duration
+     * @deprecated Public method not containing haste, fatigue. Use
+     *             {@link fr.neatmonster.nocheatplus.history.HistoryService#getBreakingDuration(Material, BlockProps, ToolProps, boolean, boolean, boolean, int, int, int, int)}
+     *             instead. Removal scheduled for 2.0.
+     *             <p>
+     *             Migration: call the history service method providing haste,
+     *             fatigue and other modifiers as needed.
+     *             </p>
      */
-    public static long getBreakingDuration(final Material blockId, final BlockProps blockProps, final ToolProps toolProps, 
+    public static long getBreakingDuration(final Material blockId, final BlockProps blockProps, final ToolProps toolProps,
                                            final  boolean onGround, final boolean inWater, boolean aquaAffinity, int efficiency) {
         return getBreakingDuration(blockId, blockProps, toolProps, onGround, inWater, aquaAffinity, efficiency, 0, 0, 0);
     }
@@ -3353,13 +3392,24 @@ public class BlockProperties {
     /** Immutable local bounding box helper */
     private static final class BoundingBox {
         final double minX, minY, minZ, maxX, maxY, maxZ;
-        BoundingBox(double minX, double minY, double minZ, double maxX, double maxY, double maxZ) {
+        BoundingBox(double minX, double minY, double minZ,
+                    double maxX, double maxY, double maxZ) {
+            validateBounds(minX, minY, minZ, maxX, maxY, maxZ);
             this.minX = minX;
             this.minY = minY;
             this.minZ = minZ;
             this.maxX = maxX;
             this.maxY = maxY;
             this.maxZ = maxZ;
+        }
+
+        private static void validateBounds(double minX, double minY, double minZ,
+                                           double maxX, double maxY, double maxZ) {
+            if (minX > maxX || minY > maxY || minZ > maxZ) {
+                throw new IllegalArgumentException("Invalid bounds: [" + minX + ", "
+                        + minY + ", " + minZ + "] > [" + maxX + ", " + maxY
+                        + ", " + maxZ + "]");
+            }
         }
 
         /**
@@ -3438,6 +3488,10 @@ public class BlockProperties {
             bmaxY = b[4];
         }
 
+        if (bmaxY > 1.0) {
+            bmaxY = 1.0;
+        }
+
         // Fake bounds for thin-glass and similar oddities.
         if ((flags & BlockFlags.F_FAKEBOUNDS) != 0) {
             double dz = bmaxZ - bminZ;
@@ -3504,9 +3558,13 @@ public class BlockProperties {
         }
         // Start at index 1 since index 0 represents the primary box.
         for (int i = 1; i < rawBounds.length / 6; i++) {
+            double capMaxY = rawBounds[i * 6 + 4];
+            if (capMaxY > 1.0) {
+                capMaxY = 1.0;
+            }
             BoundingBox sub = new BoundingBox(
                     rawBounds[i*6],     rawBounds[i*6+1], rawBounds[i*6+2],
-                    rawBounds[i*6+3],   rawBounds[i*6+4], rawBounds[i*6+5]);
+                    rawBounds[i*6+3],   capMaxY, rawBounds[i*6+5]);
             if (sub.intersects(minX, minY, minZ, maxX, maxY, maxZ, x, y, z, allowEdge)) {
                 return true;
             }
@@ -4410,7 +4468,7 @@ public class BlockProperties {
         for (final Material mat : MaterialUtil.RAILS) {
             BlockFlags.setFlag(mat, BlockFlags.F_RAILS);
         }
-        for (Material material : Material.values()) {
+        for (Material material : ALL_MATERIALS) {
             if (material.isBlock()) {
                 final String name = material.name().toLowerCase();
                 if (name.endsWith("_door") || name.endsWith("_trapdoor") || name.endsWith("fence_gate")) {

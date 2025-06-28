@@ -306,9 +306,9 @@ public final class PlayerMap {
      */
     private boolean remove(final PlayerInfo info) {
         boolean altered = false;
-        altered |= idInfoMap.remove(info.id) != null;
-        altered |= exactNameInfoMap.remove(info.exactName) != null;
-        altered |= lowerCaseNameInfoMap.remove(info.lowerCaseName) != null;
+        altered = altered || idInfoMap.remove(info.id) != null;
+        altered = altered || exactNameInfoMap.remove(info.exactName) != null;
+        altered = altered || lowerCaseNameInfoMap.remove(info.lowerCaseName) != null;
         return altered;
     }
 

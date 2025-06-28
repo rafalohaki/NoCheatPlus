@@ -52,6 +52,7 @@ import fr.neatmonster.nocheatplus.players.IPlayerData;
 import fr.neatmonster.nocheatplus.players.PlayerFactoryArgument;
 import fr.neatmonster.nocheatplus.stats.Counters;
 import fr.neatmonster.nocheatplus.utilities.TickTask;
+import fr.neatmonster.nocheatplus.time.monotonic.Monotonic;
 import fr.neatmonster.nocheatplus.utilities.map.BlockProperties;
 import fr.neatmonster.nocheatplus.worlds.WorldFactoryArgument;
 
@@ -148,7 +149,7 @@ public class BlockBreakListener extends CheckListener {
      */
     @EventHandler(ignoreCancelled = false, priority = EventPriority.LOWEST)
     public void onBlockBreak(final BlockBreakEvent event) {
-        final long now = System.currentTimeMillis();
+        final long now = Monotonic.millis();
         final Player player = event.getPlayer();
         final IPlayerData pData = player != null ? DataManager.getPlayerData(player) : null;
         final Block block = event.getBlock();
@@ -188,7 +189,7 @@ public class BlockBreakListener extends CheckListener {
     private BreakCheckResult performBreakChecks(final Player player, final Block block,
             final IPlayerData pData) {
         final BreakCheckResult result = new BreakCheckResult();
-        if (player == null || block == null) {
+        if (player == null) {
             return result;
         }
 
@@ -197,7 +198,8 @@ public class BlockBreakListener extends CheckListener {
         result.data = data;
         final BlockInteractData bdata = pData.getGenericInstance(BlockInteractData.class);
         final int tick = TickTask.getTick();
-        final boolean isInteractBlock = !bdata.getLastIsCancelled() && bdata.matchesLastBlock(tick, block);
+        final boolean isInteractBlock = block != null && !bdata.getLastIsCancelled()
+                && bdata.matchesLastBlock(tick, block);
         final GameMode gameMode = player.getGameMode();
 
         applyWrongBlockCheck(result, player, block, cc, data, pData);
@@ -214,7 +216,7 @@ public class BlockBreakListener extends CheckListener {
             final Block block, final BlockBreakConfig cc, final BlockBreakData data,
             final IPlayerData pData) {
         if (!result.cancelled && wrongBlock.isEnabled(player, pData)
-                && wrongBlock.check(player, block, cc, data, pData, isInstaBreak)) {
+                && wrongBlock.check(player, block, cc, data, pData)) {
             result.cancelled = true;
         }
     }
@@ -231,6 +233,9 @@ public class BlockBreakListener extends CheckListener {
     private void applyFastBreakCheck(final BreakCheckResult result, final Player player,
             final Block block, final GameMode gameMode, final BlockBreakConfig cc,
             final BlockBreakData data, final IPlayerData pData) {
+        if (block == null) {
+            return;
+        }
         if (!result.cancelled && gameMode != GameMode.CREATIVE
                 && fastBreak.isEnabled(player, pData)
                 && fastBreak.check(player, block, isInstaBreak, cc, data, pData)) {
@@ -249,6 +254,9 @@ public class BlockBreakListener extends CheckListener {
     private void applyReachDirectionChecks(final BreakCheckResult result, final Player player,
             final Block block, final boolean isInteractBlock, final BlockInteractData bdata,
             final BlockBreakConfig cc, final BlockBreakData data, final IPlayerData pData) {
+        if (block == null) {
+            return;
+        }
         final boolean reachEnabled = reach.isEnabled(player, pData);
         final boolean directionEnabled = direction.isEnabled(player, pData);
         if (!(reachEnabled || directionEnabled)) {
@@ -279,6 +287,9 @@ public class BlockBreakListener extends CheckListener {
 
     private void applyLiquidBreakCheck(final BreakCheckResult result, final Player player,
             final Block block, final IPlayerData pData) {
+        if (block == null) {
+            return;
+        }
         if (!result.cancelled && BlockProperties.isLiquid(block.getType())
                 && !BlockProperties.isWaterPlant(block.getType())
                 && !pData.hasPermission(Permissions.BLOCKBREAK_BREAK_LIQUID, player)
@@ -289,8 +300,7 @@ public class BlockBreakListener extends CheckListener {
 
     private void finalizeBreak(final BlockBreakEvent event, final Player player, final Block block,
             final IPlayerData pData, final BreakCheckResult result, final long now) {
-        final BlockBreakData data = result.data != null ? result.data
-                : pData.getGenericInstance(BlockBreakData.class);
+        final BlockBreakData data = result.data;
         if (result.cancelled) {
             event.setCancelled(true);
             data.clickedX = block.getX();
@@ -404,7 +414,7 @@ public class BlockBreakListener extends CheckListener {
     }
 
     private void checkBlockDamage(final Player player, final Block block, final Cancellable event){
-        final long now = System.currentTimeMillis();
+        final long now = Monotonic.millis();
         final IPlayerData pData = DataManager.getPlayerData(player);
         final BlockBreakData data = pData.getGenericInstance(BlockBreakData.class);
 
@@ -415,9 +425,6 @@ public class BlockBreakListener extends CheckListener {
         //        	return;
         //        }
 
-        if (block == null) {
-            return;
-        }
 
         final int tick = TickTask.getTick();
         // Skip if already set to the same block without breaking within one tick difference.

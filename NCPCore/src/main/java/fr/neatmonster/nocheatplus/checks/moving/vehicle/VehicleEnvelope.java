@@ -97,6 +97,87 @@ public class VehicleEnvelope extends Check {
 
     }
 
+    private static enum VehicleBehavior {
+        BOAT {
+            @Override
+            void apply(final VehicleEnvelope env, final Entity vehicle,
+                        final VehicleMoveInfo info, final VehicleMoveData data) {
+                env.applyBoatSettings();
+            }
+        },
+        MINECART {
+            @Override
+            void apply(final VehicleEnvelope env, final Entity vehicle,
+                        final VehicleMoveInfo info, final VehicleMoveData data) {
+                env.applyMinecartSettings(info, data);
+            }
+        },
+        HORSE {
+            @Override
+            void apply(final VehicleEnvelope env, final Entity vehicle,
+                        final VehicleMoveInfo info, final VehicleMoveData data) {
+                env.applyHorseSettings();
+            }
+        },
+        STRIDER {
+            @Override
+            void apply(final VehicleEnvelope env, final Entity vehicle,
+                        final VehicleMoveInfo info, final VehicleMoveData data) {
+                env.applyStriderSettings(data);
+            }
+        },
+        CAMEL {
+            @Override
+            void apply(final VehicleEnvelope env, final Entity vehicle,
+                        final VehicleMoveInfo info, final VehicleMoveData data) {
+                env.applyCamelSettings();
+            }
+        },
+        PIG {
+            @Override
+            void apply(final VehicleEnvelope env, final Entity vehicle,
+                        final VehicleMoveInfo info, final VehicleMoveData data) {
+                env.applyPigSettings();
+            }
+        },
+        GENERIC {
+            @Override
+            void apply(final VehicleEnvelope env, final Entity vehicle,
+                        final VehicleMoveInfo info, final VehicleMoveData data) {
+                env.applyGenericSettings(data.vehicleType);
+            }
+        };
+
+        abstract void apply(VehicleEnvelope env, Entity vehicle,
+                             VehicleMoveInfo info, VehicleMoveData data);
+
+        static VehicleBehavior resolve(final Entity vehicle,
+                                        final VehicleMoveData move,
+                                        final VehicleEnvelope env) {
+            if (vehicle != null) {
+                if (MaterialUtil.isBoat(vehicle.getType())) {
+                    return BOAT;
+                }
+                if (vehicle instanceof Minecart) {
+                    return MINECART;
+                }
+                if (move.isCamel) {
+                    return CAMEL;
+                }
+                if (env.isHorse(vehicle)) {
+                    return HORSE;
+                }
+                if (env.isStrider(vehicle)) {
+                    return STRIDER;
+                }
+                if (vehicle instanceof Pig) {
+                    return PIG;
+                }
+            }
+            return GENERIC;
+        }
+    }
+
     /** Tags for checks. */
     private final List<String> tags = new LinkedList<String>();
 
@@ -110,7 +191,6 @@ public class VehicleEnvelope extends Check {
     
     private final Class<?> strider;
     
-    private final Class<?> camel;
     
    /*
     *
@@ -122,7 +202,6 @@ public class VehicleEnvelope extends Check {
         Class<?> clazz = ReflectionUtil.getClass("org.bukkit.entity.AbstractHorse");
         bestHorse = clazz == null ? ReflectionUtil.getClass("org.bukkit.entity.Horse") : clazz;
         strider = ReflectionUtil.getClass("org.bukkit.entity.Strider");
-        camel = ReflectionUtil.getClass("org.bukkit.entity.Camel");
     }
 
 
@@ -317,15 +396,15 @@ public class VehicleEnvelope extends Check {
             data.timeVehicletoss = System.currentTimeMillis();
         }
 
-        violation |= checkHorizontalSpeed(vehicle, thisMove, data, cc, debug);
-        violation |= evaluateMediumState(thisMove, data, debug, vehicle, moveInfo);
+        violation = violation || checkHorizontalSpeed(vehicle, thisMove, data, cc, debug);
+        violation = violation || evaluateMediumState(thisMove, data, debug, vehicle, moveInfo);
 
         if (applyLevitationModifier(vehicle)) {
             violation = false;
         }
 
-        violation |= checkVerticalLimits(thisMove, now, data);
-        violation |= checkLiquidSpecialCases(vehicle, thisMove, data);
+        violation = violation || checkVerticalLimits(thisMove, now, data);
+        violation = violation || checkLiquidSpecialCases(vehicle, thisMove, data);
 
         if (!violation) {
             if (checkDetails.inAir) {
@@ -364,7 +443,7 @@ public class VehicleEnvelope extends Check {
         double cap = getHDistCap(checkDetails.simplifiedType, cc, thisMove, data, debug);
         if (vehicle instanceof LivingEntity) {
             Double speed = PotionUtil.getPotionEffectAmplifier((LivingEntity) vehicle, PotionEffectType.SPEED);
-            if (camel != null && camel.isAssignableFrom(vehicle.getClass())) {
+            if (thisMove.isCamel) {
                 VehicleMoveData firstPastMove = data.vehicleMoves.getFirstPastMove();
                 double camelCap = cap;
                 if (!Double.isInfinite(speed)) camelCap *= (1 + 0.2 * (speed + 1));
@@ -397,7 +476,7 @@ public class VehicleEnvelope extends Check {
             handleWebState(debug);
         }
         else if (checkDetails.canClimb && thisMove.from.onClimbable) {
-            violation |= handleClimbableState(thisMove);
+            violation = violation || handleClimbableState(thisMove);
         }
         else if (checkDetails.canRails && thisMove.fromOnRails) {
             handleRailsState(thisMove);
@@ -409,7 +488,7 @@ public class VehicleEnvelope extends Check {
             handleGroundMovement(thisMove, debug);
         }
         else if (checkDetails.inAir) {
-            violation |= handleInAirState(thisMove, data, debug, vehicle, moveInfo);
+            violation = violation || handleInAirState(thisMove, data, debug, vehicle, moveInfo);
         }
         else {
             handleUnknownState(debug);
@@ -558,26 +637,9 @@ public class VehicleEnvelope extends Check {
         checkDetails.reset();
         setBasicMediumState(thisMove);
 
-        if (vehicle != null) {
-            if (MaterialUtil.isBoat(vehicle.getType())) {
-                applyBoatSettings();
-            } else if (vehicle instanceof Minecart) {
-                applyMinecartSettings(moveInfo, thisMove);
-            } else if (isHorse(vehicle)) {
-                applyHorseSettings();
-            } else if (isStrider(vehicle)) {
-                applyStriderSettings(thisMove);
-            } else if (isCamel(vehicle)) {
-                applyCamelSettings();
-            } else if (vehicle instanceof Pig) {
-                applyPigSettings();
-            } else {
-                checkDetails.simplifiedType = thisMove.vehicleType;
-            }
-        } else {
-            checkDetails.simplifiedType = thisMove.vehicleType;
-        }
-
+        VehicleBehavior behavior = VehicleBehavior.resolve(vehicle, thisMove, this);
+        behavior.apply(this, vehicle, moveInfo, thisMove);
+        
         applyJumpSettings();
         applyClimbSettings(thisMove);
     }
@@ -641,6 +703,10 @@ public class VehicleEnvelope extends Check {
         checkDetails.canClimb = true;
     }
 
+    private void applyGenericSettings(final EntityType type) {
+        checkDetails.simplifiedType = type;
+    }
+
     private void applyJumpSettings() {
         if (checkDetails.canJump) {
             checkDetails.maxAscend = 1.2; // Coarse envelope. Actual lift off gain should be checked on demand.
@@ -666,10 +732,6 @@ public class VehicleEnvelope extends Check {
 
     private boolean isStrider(final Entity vehicle) {
         return strider != null && strider.isAssignableFrom(vehicle.getClass());
-    }
-
-    private boolean isCamel(final Entity vehicle) {
-        return camel != null && camel.isAssignableFrom(vehicle.getClass());
     }
 
 

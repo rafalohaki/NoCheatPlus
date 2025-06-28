@@ -202,14 +202,14 @@ public class FightListener extends CheckListener implements JoinLeaveListener{
                 pData, cc, data, debug);
         final Player damagedPlayer = dmgInfo.player;
         final LocationTrace damagedTrace = dmgInfo.trace;
-        cancelled |= dmgInfo.cancelled;
+        cancelled = cancelled || dmgInfo.cancelled;
 
         // Log generic properties of this attack.
         if (debug) {
             debug(player, "Attacks " + (damagedPlayer == null ? ("entity " + damaged.getType()) : ("player" + damagedPlayer.getName())) + " damage=" + (finalDamage == originalDamage ? finalDamage : (originalDamage + "/" + finalDamage)));
         }
 
-        cancelled |= applyDeadChecks(cc, player, damaged, data);
+        cancelled = cancelled || applyDeadChecks(cc, player, damaged, data);
 
         if (handleSweepAttack(player, originalDamage, loc, tick, data, debug)) {
             cleanupLocations();
@@ -223,10 +223,10 @@ public class FightListener extends CheckListener implements JoinLeaveListener{
 
 
 
-        cancelled |= runCombatChecks(player, damaged, damagedIsFake, loc, damagedLoc, data, pData, cc, mCc,
+        cancelled = cancelled || runCombatChecks(player, damaged, damagedIsFake, loc, damagedLoc, data, pData, cc, mCc,
                 mData, penaltyList, now, normalizedMove, debug, damagedTrace, tick);
 
-        cancelled |= checkAngle(player, loc, damaged, worldChanged, data, cc, pData, worldName, now, debug);
+        cancelled = cancelled || checkAngle(player, loc, damaged, worldChanged, data, cc, pData, worldName, now, debug);
 
         updateLastAttackData(data, worldName, tick, damagedLoc);
         // Care for the "lost sprint problem": sprint resets, client moves as if still...
@@ -239,7 +239,7 @@ public class FightListener extends CheckListener implements JoinLeaveListener{
             checkLostSprint(player, loc, damagedLoc, now, mData, mCc, pData, debug);
         }
 
-        cancelled |= applyAttackPenalty(player, data, now, debug);
+        cancelled = cancelled || applyAttackPenalty(player, data, now, debug);
 
         cleanupLocations();
         return cancelled;
@@ -366,16 +366,23 @@ public class FightListener extends CheckListener implements JoinLeaveListener{
 
     /**
      * Calculate relative movement of the damaged entity since last attack.
+     * <p>
+     * The {@code tick} parameter must represent the current server tick at the
+     * moment of the attack. It must be non-negative and monotonically
+     * increasing. If the tick is older than the last known attack tick or if the
+     * provided values are otherwise invalid, a default {@link TargetMoveInfo} is
+     * returned.
+     * </p>
      */
     private TargetMoveInfo computeTargetMoveInfo(final FightData data, final Location damagedLoc,
                                                  final int tick, final boolean worldChanged) {
 
-        if (data == null || damagedLoc == null) {
-            return new TargetMoveInfo(0, 0.0, 0, 0.0);
+        if (tick < 0) {
+            throw new IllegalArgumentException("tick must be >= 0");
         }
-        if (data.lastAttackedX == Double.MAX_VALUE || tick < data.lastAttackTick
-                || worldChanged || tick - data.lastAttackTick > 20) {
-            return new TargetMoveInfo(0, 0.0, 0, 0.0);
+
+        if (isInvalidMoveInfo(data, damagedLoc, tick, worldChanged)) {
+            return DEFAULT_TARGET_MOVE_INFO;
         }
         final int age = tick - data.lastAttackTick;
         final double move = TrigUtil.distance(data.lastAttackedX, data.lastAttackedZ,
@@ -383,6 +390,15 @@ public class FightListener extends CheckListener implements JoinLeaveListener{
         final long msAge = (long) (50f * TickTask.getLag(50L * age, true) * (float) age);
         final double normalized = msAge == 0 ? move : move * Math.min(20.0, 1000.0 / (double) msAge);
         return new TargetMoveInfo(age, move, msAge, normalized);
+    }
+
+    private static boolean isInvalidMoveInfo(final FightData data, final Location damagedLoc,
+                                             final int tick, final boolean worldChanged) {
+        return data == null || damagedLoc == null
+                || data.lastAttackedX == Double.MAX_VALUE
+                || tick < data.lastAttackTick
+                || worldChanged
+                || tick - data.lastAttackTick > 20;
     }
 
     /**
@@ -420,6 +436,8 @@ public class FightListener extends CheckListener implements JoinLeaveListener{
         }
         auxMoving.returnPlayerMoveInfo(moveInfo);
     }
+
+    private static final TargetMoveInfo DEFAULT_TARGET_MOVE_INFO = new TargetMoveInfo(0, 0.0, 0, 0.0);
 
     private static final class TargetMoveInfo {
         final int tickAge;
@@ -523,26 +541,26 @@ public class FightListener extends CheckListener implements JoinLeaveListener{
 
         boolean cancelled = false;
 
-        cancelled |= checkSpeed(player, data, cc, pData, normalizedMove, now);
+        cancelled = cancelled || checkSpeed(player, data, cc, pData, normalizedMove, now);
 
         if (!cancelled) {
-            cancelled |= checkCritical(player, loc, data, cc, pData, penaltyList);
+            cancelled = cancelled || checkCritical(player, loc, data, cc, pData, penaltyList);
         }
 
         if (!cancelled) {
-            cancelled |= checkNoSwing(player, mData, pData, cc, now, data);
+            cancelled = cancelled || checkNoSwing(player, mData, pData, cc, now, data);
         }
 
         if (!cancelled) {
-            cancelled |= checkImpossibleHit(player, mCc, data, cc, pData);
+            cancelled = cancelled || checkImpossibleHit(player, mCc, data, cc, pData);
         }
 
         if (!cancelled) {
-            cancelled |= checkVisibility(player, loc, damaged, damagedIsFake, damagedLoc, data, cc, pData);
+            cancelled = cancelled || checkVisibility(player, loc, damaged, damagedIsFake, damagedLoc, data, cc, pData);
         }
 
         if (!cancelled) {
-            cancelled |= checkReachAndDirection(player, damaged, damagedIsFake, loc, damagedLoc, data, pData,
+            cancelled = cancelled || checkReachAndDirection(player, damaged, damagedIsFake, loc, damagedLoc, data, pData,
                     cc, mData, damagedTrace, tick, now, debug);
         }
 
@@ -554,18 +572,17 @@ public class FightListener extends CheckListener implements JoinLeaveListener{
         if (player == null || pData == null || !speed.isEnabled(player, pData)) {
             return false;
         }
+        if (cc.speedImprobableWeight > 0.0f) {
+            Improbable.feed(player, cc.speedImprobableWeight, now);
+        }
         if (speed.check(player, now, data, cc, pData)) {
-            if (data.speedVL > 50) {
-                if (cc.speedImprobableWeight > 0.0f && !cc.speedImprobableFeedOnly) {
-                    Improbable.check(player, cc.speedImprobableWeight, now, "fight.speed", pData);
-                }
-            } else if (cc.speedImprobableWeight > 0.0f) {
-                Improbable.feed(player, cc.speedImprobableWeight, now);
+            if (data.speedVL > 50 && cc.speedImprobableWeight > 0.0f && !cc.speedImprobableFeedOnly) {
+                Improbable.checkOnly(player, now, "fight.speed", pData);
             }
             return true;
         }
         if (normalizedMove > 2.0 && cc.speedImprobableWeight > 0.0f && !cc.speedImprobableFeedOnly
-                && Improbable.check(player, cc.speedImprobableWeight, now, "fight.speed", pData)) {
+                && Improbable.checkOnly(player, now, "fight.speed", pData)) {
             return true;
         }
         return false;

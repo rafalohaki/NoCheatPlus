@@ -1403,7 +1403,6 @@ public class SurvivalFly extends Check {
         final boolean isBlockingOrUsing   = isBlockingOrUsing(player, data);
         final PlayerMoveData lastMove     = data.playerMoves.getFirstPastMove();
         final PlayerMoveData pastMove2    = data.playerMoves.getSecondPastMove();
-        final long now                    = System.currentTimeMillis();
         final double modHoneyBlock        = Magic.modSoulSand * (thisMove.to.onGround ? 0.8 : 1.75);
         final double modStairs            = calcModStairs(isMovingBackwards, thisMove);
         final double modHopSprint         = calcModHopSprint(data, thisMove, to);
@@ -1418,38 +1417,48 @@ public class SurvivalFly extends Check {
         final DistanceState state = new DistanceState(hAllowedDistance, friction,
                 useBaseModifiers, useBaseModifiersSprint, useSneakModifier);
 
-        boolean handled = applyWebModifiers(ctx, state)
+        boolean handled = applyBaseEnvironmentModifiers(ctx, state, modHoneyBlock, modStairs);
+
+        if (!handled) {
+            handled = applyConditionalModifiers(ctx, state, lastMove, pastMove2, sprinting,
+                    sfDirty, actuallySneaking, isBlockingOrUsing, modHopSprint);
+        }
+
+        return finalizeAllowedDistance(ctx, state, lastMove, sprinting, actuallySneaking);
+    }
+
+    private boolean applyBaseEnvironmentModifiers(final AllowedDistanceContext ctx,
+            final DistanceState state, final double modHoneyBlock, final double modStairs) {
+        return applyWebModifiers(ctx, state)
                 || applyPowderSnowModifiers(ctx, state)
                 || applyBerryBushModifiers(ctx, state)
                 || applySoulSandModifiers(ctx, state)
                 || applySlimeBlockModifiers(ctx, state)
                 || applyHoneyBlockModifiers(ctx, state, modHoneyBlock)
-                || applyStairsModifiers(ctx, state, modStairs);
+                || applyStairsModifiers(ctx, state, modStairs)
+                || applyNoSlowPacket(ctx, state)
+                || applyInvalidUsePacket(ctx, state)
+                || applyCollisionModifiers(ctx, state);
+    }
 
-        handled |= applyNoSlowPacket(ctx, state);
-        handled |= applyInvalidUsePacket(ctx, state);
-        handled |= applyCollisionModifiers(ctx, state);
-
-        if (!handled && applyInLiquidModifiers(ctx, state, lastMove, pastMove2, sprinting, sfDirty)) {
-            handled = true;
+    private boolean applyConditionalModifiers(final AllowedDistanceContext ctx,
+            final DistanceState state, final PlayerMoveData lastMove, final PlayerMoveData pastMove2,
+            final boolean sprinting, final boolean sfDirty, final boolean actuallySneaking,
+            final boolean isBlockingOrUsing, final double modHopSprint) {
+        if (applyInLiquidModifiers(ctx, state, lastMove, pastMove2, sprinting, sfDirty)) {
+            return true;
         }
-
-        if (!handled && applyLiquidExitModifiers(ctx, state, sfDirty)) {
-            handled = true;
+        if (applyLiquidExitModifiers(ctx, state, sfDirty)) {
+            return true;
         }
-
-        if (!handled && applySneakingModifiers(ctx, state, sfDirty, actuallySneaking)) {
-            handled = true;
+        if (applySneakingModifiers(ctx, state, sfDirty, actuallySneaking)) {
+            return true;
         }
-
-        if (!handled && applyUsingItemModifiers(ctx, state, lastMove, sfDirty, isBlockingOrUsing)) {
-            handled = true;
+        if (applyUsingItemModifiers(ctx, state, lastMove, sfDirty, isBlockingOrUsing)) {
+            return true;
         }
-        if (!handled) {
-            applyDefaultSpeed(ctx, state, modHopSprint);
-        }
-
-        return finalizeAllowedDistance(ctx, state, lastMove, sprinting, actuallySneaking);
+        applyDefaultSpeed(ctx, state, modHopSprint);
+        return false;
     }
 
     private boolean applyWebModifiers(final AllowedDistanceContext ctx, final DistanceState st) {
@@ -1581,6 +1590,7 @@ public class SurvivalFly extends Check {
             st.useSneakModifier = true;
             st.allowed = modStairs * move.walkSpeed * cc.survivalFlyWalkingSpeed / 100D;
             st.friction = 0.0;
+            // If the player has a speed effect (NEGATIVE_INFINITY means none).
             if (!Double.isInfinite(mcAccess.getHandle().getFasterMovementAmplifier(player))) {
                 st.allowed *= 0.88;
             }
@@ -1888,6 +1898,7 @@ public class SurvivalFly extends Check {
                     st.allowed += 0.051 * BridgeEnchant.getSwiftSneakLevel(player);
                     st.useBaseModifiers = true;
                     st.friction = 0.0;
+                    // Only reduce if a speed potion effect is present.
                     if (!Double.isInfinite(mcAccess.getHandle().getFasterMovementAmplifier(player))) {
                         st.allowed *= 0.88;
                         st.useBaseModifiersSprint = true;
@@ -1941,6 +1952,7 @@ public class SurvivalFly extends Check {
             final MovingData data, final MovingConfig cc, final Player player, final DistanceState st) {
         if (!move.to.onGround) {
             final double speedAmplifier = mcAccess.getHandle().getFasterMovementAmplifier(player);
+            // The amplifier is NEGATIVE_INFINITY when no speed effect is active.
             st.allowed = (lastMove.hDistance > 0.23 ? 0.4 : 0.23 + (ServerIsAtLeast1_13 ? 0.155 : 0.0))
                     + 0.02 * (Double.isInfinite(speedAmplifier) ? 0 : speedAmplifier + 1.0);
             st.allowed *= cc.survivalFlyBlockingSpeed / 100D;
@@ -2033,8 +2045,9 @@ public class SurvivalFly extends Check {
             hAllowedDistance *= data.multSprinting;
         }
         final double attrMod = attributeAccess.getHandle().getSpeedAttributeMultiplier(player);
-        if (attrMod == Double.MAX_VALUE) {
+        if (Double.isNaN(attrMod)) {
             final double speedAmplifier = mcAccess.getHandle().getFasterMovementAmplifier(player);
+            // speedAmplifier is NEGATIVE_INFINITY if the effect is not present.
             if (!Double.isInfinite(speedAmplifier) && useBaseModifiersSprint) {
                 hAllowedDistance *= 1.0D + 0.2D * speedAmplifier;
             }
@@ -2048,6 +2061,7 @@ public class SurvivalFly extends Check {
             }
             if (!useBaseModifiersSprint) {
                 final double speedAmplifier = mcAccess.getHandle().getFasterMovementAmplifier(player);
+                // NEGATIVE_INFINITY indicates no speed potion effect.
                 if (!Double.isInfinite(speedAmplifier)) {
                     hAllowedDistance /= attrMod;
                     hAllowedDistance *= attrMod - 0.15D * speedAmplifier;
@@ -2544,6 +2558,7 @@ public class SurvivalFly extends Check {
                                        final boolean skipPermChecks) {
 
         final double speedAmplifier = mcAccess.getHandle().getFasterMovementAmplifier(player);
+        // Speed amplifier may be NEGATIVE_INFINITY when no potion is active.
 
         // 1: Attempt to reset item on NoSlow Violation, if set so in the configuration.
         final double[] reset = attemptItemReset(player, from, to, hAllowedDistance, hDistanceAboveLimit,

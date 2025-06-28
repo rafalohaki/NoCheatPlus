@@ -320,9 +320,8 @@ public class PassengerUtil {
         }
         if (redoPassengers) {
             vehicle.eject();
-            return Folia.teleportEntity(vehicle, LocUtil.clone(location), BridgeMisc.TELEPORT_CAUSE_CORRECTION_OF_POSITION);
         }
-        return false;
+        return Folia.teleportEntity(vehicle, LocUtil.clone(location), BridgeMisc.TELEPORT_CAUSE_CORRECTION_OF_POSITION);
     }
 
     private TeleportResult teleportPassengers(final Entity vehicle, final Player player, final Location location,
@@ -340,11 +339,13 @@ public class PassengerUtil {
             if (passenger == null) {
                 continue;
             }
+            // Skip passengers that are invalid or located in a different world than the vehicle
             if (!passenger.isValid() || passenger.isDead() || !vWorldMatchesPWorld) {
                 if (debug) {
+                    final String reason = !vWorldMatchesPWorld ? "world mismatch" : "invalid state";
                     CheckUtils.debug(player, CheckType.MOVING_VEHICLE,
-                            (!vWorldMatchesPWorld) ? "**** Prevent adding passengers to root vehicle on world change (potential exploit)"
-                                    : "Can't add passenger to vehicle: passenger is dead.");
+                            "Skipping passenger due to " + reason + ". playerId=" + player.getUniqueId()
+                                    + " vehicleId=" + vehicle.getEntityId());
                 }
                 continue;
             }
@@ -393,7 +394,8 @@ public class PassengerUtil {
                 if (data.vehicleSetPassengerTaskId == null) {
                     if (debug) {
                         CheckUtils.debug(player, CheckType.MOVING_VEHICLE,
-                                "Failed to schedule set passenger!");
+                                "Failed to schedule set passenger (plugin=" + plugin.getName()
+                                        + ", delay=2)");
                     }
                     scheduleDelay = false;
                 } else if (debug) {

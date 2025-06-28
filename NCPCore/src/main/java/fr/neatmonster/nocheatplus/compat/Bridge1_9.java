@@ -19,6 +19,7 @@ import org.bukkit.entity.LivingEntity;
 import org.bukkit.entity.Player;
 import org.bukkit.event.player.PlayerInteractEntityEvent;
 import org.bukkit.event.player.PlayerInteractEvent;
+import org.bukkit.inventory.EquipmentSlot;
 import org.bukkit.inventory.ItemStack;
 import org.bukkit.inventory.PlayerInventory;
 import org.bukkit.potion.PotionEffectType;
@@ -182,18 +183,19 @@ public class Bridge1_9 {
     public static ItemStack getUsedItem(final Player player, final PlayerInteractEvent event) {
         if (!hasGetItemInOffHand()) { // Optimistic check.
             return getItemInMainHand(player);
-        }
-        else {
-            switch (event.getHand()) {
-                case HAND: {
+        } else {
+            final EquipmentSlot slot = event.getHand();
+            // Bukkit 1.9.0 - 1.9.2 may return null for getHand().
+            if (slot == null) {
+                return getItemInMainHand(player);
+            }
+            switch (slot) {
+                case HAND:
                     return getItemInMainHand(player);
-                }
-                case OFF_HAND: {
+                case OFF_HAND:
                     return getItemInOffHand(player);
-                }
-                default: {
+                default:
                     return null;
-                }
             }
         }
     }
@@ -206,18 +208,19 @@ public class Bridge1_9 {
     public static ItemStack getUsedItem(final Player player, final PlayerInteractEntityEvent event) {
         if (!hasGetItemInOffHand()) { // Optimistic check.
             return getItemInMainHand(player);
-        }
-        else {
-            switch (event.getHand()) {
-                case HAND: {
+        } else {
+            final EquipmentSlot slot = event.getHand();
+            // Bukkit 1.9.0 - 1.9.2 may return null for getHand().
+            if (slot == null) {
+                return getItemInMainHand(player);
+            }
+            switch (slot) {
+                case HAND:
                     return getItemInMainHand(player);
-                }
-                case OFF_HAND: {
+                case OFF_HAND:
                     return getItemInOffHand(player);
-                }
-                default: {
+                default:
                     return null;
-                }
             }
         }
     }

@@ -91,6 +91,7 @@ import fr.neatmonster.nocheatplus.checks.moving.util.bounce.BounceUtil;
 import fr.neatmonster.nocheatplus.checks.moving.helper.MoveCheckContext;
 import fr.neatmonster.nocheatplus.checks.moving.helper.ExtremeMoveHandler;
 import fr.neatmonster.nocheatplus.checks.moving.helper.VelocityAdjustment;
+import fr.neatmonster.nocheatplus.checks.moving.helper.ElytraBoostHandler;
 import fr.neatmonster.nocheatplus.checks.moving.vehicle.VehicleChecks;
 import fr.neatmonster.nocheatplus.checks.moving.velocity.AccountEntry;
 import fr.neatmonster.nocheatplus.checks.moving.velocity.SimpleEntry;
@@ -307,42 +308,79 @@ public class MovingListener extends CheckListener implements TickListener, IRemo
     public void onPlayerBedLeave(final PlayerBedLeaveEvent event) {
 
         final Player player = event.getPlayer();
+        if (player == null) {
+            return;
+        }
+
+        handleBedLeave(player);
+    }
+
+    private void handleBedLeave(final Player player) {
         final IPlayerData pData = DataManager.getPlayerData(player);
-        if (!pData.isCheckActive(CheckType.MOVING, player)) return;
+        if (pData == null || !pData.isCheckActive(CheckType.MOVING, player)) {
+            return;
+        }
+
         final MovingData data = pData.getGenericInstance(MovingData.class);
         final MovingConfig cc = pData.getGenericInstance(MovingConfig.class);
-    
-        if (pData.isCheckActive(CheckType.MOVING_SURVIVALFLY, player) && survivalFly.checkBed(player, pData, cc, data)) {
-
-            // Check if the player has to be reset.
-            // To "cancel" the event, we teleport the player.
-            Location newTo = null;
+        if (shouldResetAfterBedLeave(player, pData, cc, data)) {
             final Location loc = player.getLocation(useBedLeaveLoc);
             final PlayerMoveInfo moveInfo = aux.usePlayerMoveInfo();
-            moveInfo.set(player, loc, null, cc.yOnGround);
-            final boolean sfCheck = MovingUtil.shouldCheckSurvivalFly(player, moveInfo.from, moveInfo.to, data, cc, pData);
+            final boolean sfCheck = shouldCheckSurvivalFly(player, pData, cc, data, loc, moveInfo);
+            final Location newTo = determineBedLeaveLocation(player, cc, data, moveInfo.from, loc, sfCheck);
             aux.returnPlayerMoveInfo(moveInfo);
-            if (sfCheck) {
-                newTo = MovingUtil.getApplicableSetBackLocation(player, loc.getYaw(), loc.getPitch(), moveInfo.from, data, cc);
-            }
-            if (newTo == null) {
-                newTo = LocUtil.clone(loc);
-            }
-
-            if (sfCheck && cc.sfSetBackPolicyFallDamage && noFall.isEnabled(player, pData)) {
-                // Check if to deal damage.
-                double y = loc.getY();
-                if (data.hasSetBack()) y = Math.min(y, data.getSetBackY());
-                noFall.checkDamage(player, y, data, pData);
-            }
-            // Cleanup
-            useBedLeaveLoc.setWorld(null);
-            // Teleport.
-            data.prepareSetBack(newTo); // Should be enough. 
-            player.teleport(newTo, BridgeMisc.TELEPORT_CAUSE_CORRECTION_OF_POSITION);
+            applyBedLeaveDamage(player, pData, cc, data, loc, sfCheck);
+            finalizeBedLeave(player, data, newTo);
+        } else {
+            data.wasInBed = false;
         }
-        // Reset bed ...
-        else data.wasInBed = false;
+    }
+
+    private boolean shouldResetAfterBedLeave(final Player player, final IPlayerData pData,
+                                             final MovingConfig cc, final MovingData data) {
+        return pData.isCheckActive(CheckType.MOVING_SURVIVALFLY, player)
+                && survivalFly.checkBed(player, pData, cc, data);
+    }
+
+    private boolean shouldCheckSurvivalFly(final Player player, final IPlayerData pData,
+                                           final MovingConfig cc, final MovingData data,
+                                           final Location loc, final PlayerMoveInfo moveInfo) {
+        moveInfo.set(player, loc, null, cc.yOnGround);
+        return MovingUtil.shouldCheckSurvivalFly(player, moveInfo.from, moveInfo.to, data, cc, pData);
+    }
+
+    private Location determineBedLeaveLocation(final Player player, final MovingConfig cc,
+                                               final MovingData data, final PlayerLocation from,
+                                               final Location loc, final boolean sfCheck) {
+        Location newTo = null;
+        if (sfCheck) {
+            newTo = MovingUtil.getApplicableSetBackLocation(player, loc.getYaw(), loc.getPitch(), from, data, cc);
+        }
+        if (newTo == null) {
+            newTo = LocUtil.clone(loc);
+        }
+        return newTo;
+    }
+
+    private void applyBedLeaveDamage(final Player player, final IPlayerData pData,
+                                     final MovingConfig cc, final MovingData data,
+                                     final Location loc, final boolean sfCheck) {
+        if (sfCheck && cc.sfSetBackPolicyApplyFallDamage && noFall.isEnabled(player, pData)) {
+            double y = loc.getY();
+            if (data.hasSetBack()) {
+                y = Math.min(y, data.getSetBackY());
+            }
+            noFall.checkDamage(player, y, data, pData);
+        }
+    }
+
+    private void finalizeBedLeave(final Player player, final MovingData data, final Location newTo) {
+        if (newTo == null) {
+            return;
+        }
+        useBedLeaveLoc.setWorld(null);
+        data.prepareSetBack(newTo);
+        player.teleport(newTo, BridgeMisc.TELEPORT_CAUSE_CORRECTION_OF_POSITION);
     }
 
 
@@ -687,75 +725,31 @@ public class MovingListener extends CheckListener implements TickListener, IRemo
         // (e.g. checkPastStateHorizontalPush).
 
         debugOutput(player, moveInfo, cc, debug);
-        
 
-        ////////////////////////////////////////////////////
-        // Check for illegal move and bounding box etc.   //
-        ///////////////////////////////////////////////////
+        // 1: Illegal coordinate check.
         if (handleIllegalCoordinates(player, event, data, cc, moveInfo)) {
             return true;
         }
-        
 
-        /////////////////////////////////////
-        // Check for location consistency. //
-        /////////////////////////////////////
+        // 2: Location consistency.
         newTo = validateLocationConsistency(player, from, data, cc);
 
-
-        //////////////////////////////////////////////
-        // Check for sprinting (assumeSprint)       //
-        //////////////////////////////////////////////
+        // 3: Sprinting state update.
         updateSprintingState(player, time, data, cc);
-        
 
-        /////////////////////////////////////
-        // Prepare locations for use.      //
-        /////////////////////////////////////
-        // Block flags might not be needed if neither sf nor passable get checked.
-        final PlayerLocation pFrom, pTo;
-        pFrom = moveInfo.from;
-        pTo = moveInfo.to;
-        
+        // 4: Prepare locations and vehicle state.
+        final PlayerLocation pFrom = moveInfo.from;
+        final PlayerLocation pTo = moveInfo.to;
+        prepareMoveLocations(player, pFrom, pTo, data, cc, pData, debug);
 
-        handlePowderSnow(player, pFrom, pTo, cc, debug);
+        // 5: Initialize move data.
+        initCurrentMove(thisMove, pFrom, pTo, multiMoveCount);
 
-        resetWindChargeImpulse(player, pFrom, data);
+        // 6: Jump amplifier.
+        final double jumpAmplifier = updateJumpAmplifier(player, data);
 
-        //////////////////////////////////////////////
-        // HOT FIX - for VehicleLeaveEvent missing. //
-        //////////////////////////////////////////////
-        if (data.wasInVehicle) {
-            vehicleChecks.onVehicleLeaveMiss(player, data, cc, pData);
-        }
-
-
-        ////////////////////////////////////
-        // Set some data for this move.   //
-        ////////////////////////////////////
-        thisMove.set(pFrom, pTo);
-        if (multiMoveCount > 0) {
-            thisMove.multiMoveCount = multiMoveCount;
-        }
-    
-
-        ////////////////////////////
-        // Potion effect "Jump".  //
-        ////////////////////////////
-        // Jump amplifier should be set in PlayerMoveData, and/or only get updated for lift off (?).
-        // same for speed (once medium is introduced).
-        final double jumpAmplifier = aux.getJumpAmplifier(player);
-        if (jumpAmplifier > data.jumpAmplifier) {
-            data.jumpAmplifier = jumpAmplifier;
-        }
-
-
-        ////////////////////////////////////////////////
-        // Velocity tick (decrease + invalidation).   //
-        ///////////////////////////////////////////////
-        // Rework to generic (?) queued velocity entries: activation + invalidation
-        final int tick = TickTask.getTick();
-        applyVelocityAdjustments(data, cc, tick);
+        // 7: Velocity tick.
+        final int tick = updateVelocityTick(data, cc);
 
 
         ////////////////////////////////////
@@ -1010,6 +1004,47 @@ public class MovingListener extends CheckListener implements TickListener, IRemo
         }
     }
 
+    private void prepareMoveLocations(final Player player, final PlayerLocation pFrom,
+            final PlayerLocation pTo, final MovingData data, final MovingConfig cc,
+            final IPlayerData pData, final boolean debug) {
+        if (player == null || pFrom == null || pTo == null || data == null || cc == null || pData == null) {
+            return;
+        }
+        handlePowderSnow(player, pFrom, pTo, cc, debug);
+        resetWindChargeImpulse(player, pFrom, data);
+        if (data.wasInVehicle) {
+            vehicleChecks.onVehicleLeaveMiss(player, data, cc, pData);
+        }
+    }
+
+    private void initCurrentMove(final PlayerMoveData move, final PlayerLocation pFrom,
+            final PlayerLocation pTo, final int multiMoveCount) {
+        if (move == null || pFrom == null || pTo == null) {
+            return;
+        }
+        move.set(pFrom, pTo);
+        if (multiMoveCount > 0) {
+            move.multiMoveCount = multiMoveCount;
+        }
+    }
+
+    private double updateJumpAmplifier(final Player player, final MovingData data) {
+        if (player == null || data == null) {
+            return 0.0;
+        }
+        final double amplifier = aux.getJumpAmplifier(player);
+        if (amplifier > data.jumpAmplifier) {
+            data.jumpAmplifier = amplifier;
+        }
+        return amplifier;
+    }
+
+    private int updateVelocityTick(final MovingData data, final MovingConfig cc) {
+        final int tick = TickTask.getTick();
+        applyVelocityAdjustments(data, cc, tick);
+        return tick;
+    }
+
     private PreCheckData runPreChecks(final Player player, final Location from, final Location to,
             final PlayerLocation pFrom, final PlayerLocation pTo, final PlayerMoveData thisMove,
             final PlayerMoveData lastMove, final boolean checkSf, final boolean checkCf,
@@ -1181,18 +1216,20 @@ public class MovingListener extends CheckListener implements TickListener, IRemo
             return;
         }
 
-        handleFireworkBoost(lastMove, thisMove, tick, data, cc);
+        handleFireworkBoost(player, lastMove, thisMove, tick, data, cc);
         updateLiquidTick(pFrom, data);
         updateRiptideState(player, data);
         updateBubbleStreamState(pFrom, pTo, thisMove, lastMove, data);
         handleVehicleExit(from, thisMove, data);
     }
 
-    private void handleFireworkBoost(final PlayerMoveData lastMove, final PlayerMoveData thisMove,
-            final int tick, final MovingData data, final MovingConfig cc) {
+    private void handleFireworkBoost(final Player player, final PlayerMoveData lastMove,
+            final PlayerMoveData thisMove, final int tick, final MovingData data, final MovingConfig cc) {
         if (data.fireworksBoostDuration <= 0) {
+            data.hasFireworkBoost = false;
             return;
         }
+        final int remaining = data.fireworksBoostDuration;
         final boolean invalidBoost = !lastMove.valid
                 || (cc != null && cc.resetFwOnground
                         && (lastMove.flyCheck != CheckType.MOVING_CREATIVEFLY
@@ -1200,8 +1237,14 @@ public class MovingListener extends CheckListener implements TickListener, IRemo
                 || data.fireworksBoostTickExpire < tick;
         if (invalidBoost) {
             data.fireworksBoostDuration = 0;
+            data.hasFireworkBoost = false;
+            ElytraBoostHandler.logBoostEvent(player, "reset", tick, remaining);
         } else {
             data.fireworksBoostDuration--;
+            if (data.fireworksBoostDuration == 0) {
+                data.hasFireworkBoost = false;
+                ElytraBoostHandler.logBoostEvent(player, "ended", tick, remaining);
+            }
         }
     }
 
@@ -1348,7 +1391,7 @@ public class MovingListener extends CheckListener implements TickListener, IRemo
             final PlayerLocation pFrom, final PlayerLocation pTo, final boolean checkNf,
             final double previousSetBackY, final MovingData data, final MovingConfig cc,
             final IPlayerData pData) {
-        if (checkNf && cc.sfSetBackPolicyFallDamage) {
+        if (checkNf && cc.sfSetBackPolicyApplyFallDamage) {
             boolean skip = !noFall.willDealFallDamage(player, from.getY(), previousSetBackY, data);
             if (!skip && (!pFrom.isOnGround() && !pFrom.isResetCond())) {
                 skip = false;
@@ -3133,7 +3176,7 @@ public class MovingListener extends CheckListener implements TickListener, IRemo
                                       final MovingConfig cc, final MovingData data, final IPlayerData pData) {
 
         // Check nofall damage (!).
-        if (cc.sfHoverFallDamage && noFall.isEnabled(player, pData)) {
+        if (cc.sfHoverTakeFallDamage && noFall.isEnabled(player, pData)) {
             // Consider adding 3/3.5 to fall distance if fall distance > 0?
             noFall.checkDamage(player, loc.getY(), data, pData);
         }
@@ -3241,6 +3284,7 @@ public class MovingListener extends CheckListener implements TickListener, IRemo
     private void appendPotionEffectDetails(final Player player, final MCAccess mcAccess,
             final StringBuilder builder) {
         final double speed = mcAccess.getFasterMovementAmplifier(player);
+        // See MCAccessSpigotCB class JavaDocs for the meaning of NEGATIVE_INFINITY.
         if (!Double.isInfinite(speed)) {
             builder.append("(e_speed=" + (speed + 1) + ")");
         }
@@ -3249,6 +3293,7 @@ public class MovingListener extends CheckListener implements TickListener, IRemo
             builder.append("(e_slow=" + (slow + 1) + ")");
         }
         final double jump = mcAccess.getJumpAmplifier(player);
+        // Sentinel NEGATIVE_INFINITY indicates no jump potion effect.
         if (!Double.isInfinite(jump)) {
             builder.append("(e_jump=" + (jump + 1) + ")");
         }

@@ -31,9 +31,13 @@ import fr.neatmonster.nocheatplus.logging.StaticLog;
 public final class Timings {
 	
         public static final class Entry{
+                /** Total accumulated time. */
                 private long val = 0;
+                /** Number of recorded samples. */
                 private long n = 0;
+                /** Minimum observed value. */
                 private long min = Long.MAX_VALUE;
+                /** Maximum observed value. */
                 private long max = Long.MIN_VALUE;
 
                 long getVal() {
@@ -77,12 +81,8 @@ public final class Timings {
                 }
 
                 void updateRange(final long value) {
-                        if (value < min) {
-                                min = value;
-                        }
-                        if (value > max) {
-                                max = value;
-                        }
+                        min = Math.min(min, value);
+                        max = Math.max(max, value);
                 }
         }
 	

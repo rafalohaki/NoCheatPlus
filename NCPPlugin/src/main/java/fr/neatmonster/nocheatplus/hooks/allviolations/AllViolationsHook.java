@@ -106,7 +106,8 @@ public class AllViolationsHook implements NCPHook, ILast, IStats {
             return false;
         }
         boolean debugSet = false;
-        if (config.debugOnly || config.debug) {
+        final boolean debugChecksEnabled = config.debugOnly || config.debug;
+        if (debugChecksEnabled) {
             // Note: consider mixing the debug flag into IViolationInfo for best
             // performance and consistency.
             // If debug is not in IViolationInfo, fall back to
@@ -115,7 +116,8 @@ public class AllViolationsHook implements NCPHook, ILast, IStats {
             if (pData != null) {
                 debugSet = pData.isDebugActive(checkType);
             }
-            if (config.debugOnly && !debugSet) {
+            final boolean isDebugRequiredButNotSet = config.debugOnly && !debugSet;
+            if (isDebugRequiredButNotSet) {
                 return false;
             }
 
@@ -134,7 +136,10 @@ public class AllViolationsHook implements NCPHook, ILast, IStats {
         builder.append("[VL] [" + checkType.toString() + "] ");
         builder.append("[" + ChatColor.YELLOW + playerName);
         builder.append(ChatColor.WHITE + "] ");
-        final String displayName = Objects.requireNonNull(ChatColor.stripColor(player.getDisplayName()), "displayName").trim();
+        final String rawDisplayName = player.getDisplayName();
+        final String displayName = ChatColor.stripColor(
+                rawDisplayName != null ? rawDisplayName : (playerName != null ? playerName : ""))
+                .trim();
         if (!playerName.equals(displayName)) {
             builder.append("[->" + ChatColor.YELLOW + displayName + ChatColor.WHITE + "] ");
         }
@@ -144,7 +149,9 @@ public class AllViolationsHook implements NCPHook, ILast, IStats {
         for (int i = 0; i < parameters.length; i++) {
             final ParameterName name = parameters[i];
             final String value = info.getParameter(name);
-            if (value != null && !value.isEmpty() && !value.equals(this.noParameterTexts[i])) {
+            final boolean hasValue = value != null && !value.isEmpty();
+            final boolean isCustomValue = hasValue && !value.equals(this.noParameterTexts[i]);
+            if (isCustomValue) {
                 builder.append(" " + name.getText() + "=" + value);
             }
         }

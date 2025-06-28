@@ -43,10 +43,15 @@ public interface IViolationInfo extends ParameterHolder {
 
     /**
      * Check if a cancel would happen.
-     * 
-     * @return
-     * @deprecated The concept of cancel has been changed to be contained in
-     *             penalties, use willCancel instead.
+     *
+     * @return {@code true} if cancellation would occur
+     * @deprecated The concept of cancel is now represented in penalties. Use
+     *             {@link #willCancel()} instead. This method will be removed in
+     *             version 2.0.
+     *             <p>
+     *             Migration: replace calls to {@code hasCancel()} with
+     *             {@code willCancel()}.
+     *             </p>
      */
     public boolean hasCancel();
 

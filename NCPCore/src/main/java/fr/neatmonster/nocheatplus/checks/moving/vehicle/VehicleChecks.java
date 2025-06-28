@@ -649,7 +649,9 @@ public class VehicleChecks extends CheckListener {
                 data.vehicleSetBackTaskId = Folia.runSyncTaskForEntity(vehicle, plugin, (arg) -> new VehicleSetBackTask(vehicle, player, newTo.getLocation(vehicle.getWorld()), debug).run(), null);
 
                 if (!Folia.isTaskScheduled(data.vehicleSetBackTaskId)) {
-                    NCPAPIProvider.getNoCheatPlusAPI().getLogManager().warning(Streams.STATUS, "Failed to schedule vehicle set back task. Player: " + player.getName() + " , set back: " + newTo);
+                    NCPAPIProvider.getNoCheatPlusAPI().getLogManager().warning(Streams.STATUS,
+                            "Failed to schedule vehicle set back task (plugin=" + plugin.getName()
+                                    + ", delay=1) Player: " + player.getName() + " , set back: " + newTo);
                     scheduleSetBack = false; // Force direct teleport as a fall-back measure.
                 }
                 else if (debug) {

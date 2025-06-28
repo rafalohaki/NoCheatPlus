@@ -106,6 +106,7 @@ public abstract class ConfPaths {
     public static final String  LOGGING_EXTENDED_ALLVIOLATIONS_DEBUGONLY = LOGGING_EXTENDED_ALLVIOLATIONS + "debugonly";
     private static final String LOGGING_EXTENDED_ALLVIOLATIONS_BACKEND   = LOGGING_EXTENDED_ALLVIOLATIONS + "backend.";
     public static final String  LOGGING_EXTENDED_ALLVIOLATIONS_BACKEND_TRACE     = LOGGING_EXTENDED_ALLVIOLATIONS_BACKEND + "trace";
+    public static final String  LOGGING_EXTENDED_ELYTRABOOST = LOGGING_EXTENDED + "elytraboost";
     public static final String  LOGGING_EXTENDED_ALLVIOLATIONS_BACKEND_NOTIFY    = LOGGING_EXTENDED_ALLVIOLATIONS_BACKEND + "notify";
 
     @GlobalConfig
@@ -342,6 +343,10 @@ public abstract class ConfPaths {
     public static final String CHAT_TEXT_DEBUG                           = CHAT_TEXT + "debug";
     public static final String CHAT_TEXT_ENGINE_MAXIMUM                  = CHAT_TEXT + "maximum";
     public static final String CHAT_TEXT_ALLOWVLRESET                    = CHAT_TEXT + "allowvlreset";
+    /**
+     * Expiration time for per-player word processor data in milliseconds.
+     */
+    public static final String CHAT_TEXT_EXPIRATION_TIME                 = CHAT_TEXT + "expirationtime";
     public static final String CHAT_TEXT_FREQ                            = CHAT_TEXT + "frequency.";
     public static final String CHAT_TEXT_FREQ_NORM                       = CHAT_TEXT_FREQ + "normal.";
     public static final String CHAT_TEXT_FREQ_NORM_FACTOR                = CHAT_TEXT_FREQ_NORM + "factor";
@@ -699,6 +704,8 @@ public abstract class ConfPaths {
     public static final String  MOVING_SURVIVALFLY_LENIENCY_FREEZECOUNT     = MOVING_SURVIVALFLY_LENIENCY + "freezecount";
     public static final String  MOVING_SURVIVALFLY_LENIENCY_FREEZEINAIR     = MOVING_SURVIVALFLY_LENIENCY + "freezeinair";
     private static final String MOVING_SURVIVALFLY_SETBACKPOLICY            = MOVING_SURVIVALFLY + "setbackpolicy.";
+    public static final String MOVING_SURVIVALFLY_SETBACKPOLICY_APPLYFALLDAMAGE = MOVING_SURVIVALFLY_SETBACKPOLICY + "applyfalldamage";
+    @Moved(newPath = MOVING_SURVIVALFLY_SETBACKPOLICY_APPLYFALLDAMAGE)
     public static final String MOVING_SURVIVALFLY_SETBACKPOLICY_FALLDAMAGE  = MOVING_SURVIVALFLY_SETBACKPOLICY + "falldamage";
     public static final String MOVING_SURVIVALFLY_SETBACKPOLICY_VOIDTOVOID  = MOVING_SURVIVALFLY_SETBACKPOLICY + "voidtovoid";
     public static final String MOVING_SURVIVALFLY_ACTIONS                   = MOVING_SURVIVALFLY + "actions";
@@ -716,6 +723,8 @@ public abstract class ConfPaths {
     public static final String  MOVING_SURVIVALFLY_HOVER_STEP               = MOVING_SURVIVALFLY_HOVER + "step";
     public static final String  MOVING_SURVIVALFLY_HOVER_TICKS              = MOVING_SURVIVALFLY_HOVER + "ticks";
     public static final String  MOVING_SURVIVALFLY_HOVER_LOGINTICKS         = MOVING_SURVIVALFLY_HOVER + "loginticks";
+    public static final String  MOVING_SURVIVALFLY_HOVER_TAKEFALLDAMAGE     = MOVING_SURVIVALFLY_HOVER + "takefalldamage";
+    @Moved(newPath = MOVING_SURVIVALFLY_HOVER_TAKEFALLDAMAGE)
     public static final String  MOVING_SURVIVALFLY_HOVER_FALLDAMAGE         = MOVING_SURVIVALFLY_HOVER + "falldamage";
     public static final String  MOVING_SURVIVALFLY_HOVER_SFVIOLATION        = MOVING_SURVIVALFLY_HOVER + "sfviolation";
 
@@ -894,7 +903,7 @@ public abstract class ConfPaths {
     public static final String  MOVING_CREATIVEFLY_VERTICALSPEED         = "checks.moving.creativefly.verticalspeed";
     @Moved(newPath = MOVING_CREATIVEFLY_MODEL + "creative." + SUB_MAXHEIGHT)
     public static final String  MOVING_CREATIVEFLY_MAXHEIGHT             = "checks.moving.creativefly.maxheight";
-    @Moved(newPath = MOVING_SURVIVALFLY_SETBACKPOLICY_FALLDAMAGE)
+    @Moved(newPath = MOVING_SURVIVALFLY_SETBACKPOLICY_APPLYFALLDAMAGE)
     public static final String MOVING_SURVIVALFLY_FALLDAMAGE             = "checks.moving.survivalfly.falldamage";
     @Moved(newPath=MOVING_VEHICLE_ENFORCELOCATION)
     public static final String  MOVING_VEHICLES_ENFORCELOCATION             = "checks.moving.vehicles.enforcelocation";

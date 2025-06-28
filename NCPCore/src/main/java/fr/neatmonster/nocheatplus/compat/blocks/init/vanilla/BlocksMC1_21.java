@@ -48,7 +48,7 @@ public class BlocksMC1_21 implements BlockPropertiesSetup {
             BlockInit.setAs("TEST_INSTANCE_BLOCK", Material.STONE);
         }
 
-        if (ServerVersion.compareMinecraftVersion("1.21") >= 0) {
+        if (ServerVersion.compareMinecraftVersion("1.21.0") >= 0) {
             BlockInit.setAsIfExists("RESIN_BLOCK", Material.ANDESITE);
             BlockInit.setAsIfExists("RESIN_BRICKS", Material.ANDESITE);
             BlockInit.setAsIfExists("RESIN_BRICK_SLAB", Material.ANDESITE_SLAB);

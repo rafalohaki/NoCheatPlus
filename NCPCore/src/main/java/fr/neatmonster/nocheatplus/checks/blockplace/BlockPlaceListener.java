@@ -81,6 +81,7 @@ import java.util.List;
  */
 public class BlockPlaceListener extends CheckListener {
 
+    /** Prime numbers used for coordinate hashing. */
     private static final int p1 = 73856093;
     private static final int p2 = 19349663;
     private static final int p3 = 83492791;
@@ -592,9 +593,8 @@ public class BlockPlaceListener extends CheckListener {
             return true;
         }
         if (cc.speedImprobableWeight > 0.0f) {
-            if (cc.speedImprobableFeedOnly) {
-                Improbable.feed(player, cc.speedImprobableWeight, now);
-            } else if (Improbable.check(player, cc.speedImprobableWeight, now, "blockplace.speed", pData)) {
+            Improbable.feed(player, cc.speedImprobableWeight, now);
+            if (!cc.speedImprobableFeedOnly && Improbable.checkOnly(player, now, "blockplace.speed", pData)) {
                 return true;
             }
         }

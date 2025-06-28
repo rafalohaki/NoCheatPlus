@@ -47,6 +47,12 @@ public class Reach extends Check {
     /** The maximum distance allowed to interact with an entity in creative mode. */
     public static final double CREATIVE_DISTANCE = 6D;
 
+    /** Reusable vector for inset calculations to reduce allocations. */
+    private final Vector insetVec1 = new Vector();
+
+    /** Second reusable vector for inset calculations to reduce allocations. */
+    private final Vector insetVec2 = new Vector();
+
     /** Lag threshold used to skip violations during heavy server lag. */
     private static final float LAG_THRESHOLD = 1.5f;
 
@@ -362,25 +368,6 @@ public class Reach extends Check {
 
     return cancel;
 }
-    /**
-
-        final double violation = lenpRel - context.distanceLimit;
-        boolean cancel = false;
-
-        if (violation > 0) {
-            cancel = handleViolation(player, lenpRel, violation, data, cc, pData);
-        } else if (lenpRel - context.distanceLimit * data.reachMod > 0) {
-            cancel = handleSilentViolation(player, lenpRel, context.distanceLimit,
-                    data.reachMod, cc, data);
-        } else {
-            data.reachVL *= 0.8D;
-        }
-
-        updateReachModifier(lenpRel, context, data, cc);
-        sendDebugInfo(player, damaged, traceEntry, lenpRel, data, pData);
-
-        return cancel;
-    }
 
     /**
      * Update the dynamic reach modifier based on the last result.
@@ -431,27 +418,38 @@ public class Reach extends Check {
 
         if (!isSameXZ(pLoc, dRef)) {
             final Location dRefc = dRef.clone();
-            final Vector vec1 = new Vector(pLoc.getX() - dRef.getX(), diffY , pLoc.getZ() - dRef.getZ());
-            if (vec1.length() < damagedBoxMarginHorizontal * Math.sqrt(2)) return 0.0;
-            if (vec1.getZ() > 0.0) {
+            insetVec1.setX(pLoc.getX() - dRef.getX());
+            insetVec1.setY(diffY);
+            insetVec1.setZ(pLoc.getZ() - dRef.getZ());
+            if (insetVec1.length() < damagedBoxMarginHorizontal * Math.sqrt(2)) {
+                insetVec1.zero();
+                return 0.0;
+            }
+            if (insetVec1.getZ() > 0.0) {
                 dRefc.setZ(dRefc.getZ() + damagedBoxMarginHorizontal);
-            } 
-            else if (vec1.getZ() < 0.0) {
+            }
+            else if (insetVec1.getZ() < 0.0) {
                 dRefc.setZ(dRefc.getZ() - damagedBoxMarginHorizontal);
-            } 
-            else if (vec1.getX() > 0.0) {
+            }
+            else if (insetVec1.getX() > 0.0) {
                 dRefc.setX(dRefc.getX() + damagedBoxMarginHorizontal);
-            } 
+            }
             else dRefc.setX(dRefc.getX() - damagedBoxMarginHorizontal);
 
-            final Vector vec2 = new Vector(dRefc.getX() - dRef.getX(), 0.0 , dRefc.getZ() - dRef.getZ());
-            double angle = TrigUtil.angle(vec1, vec2);
+            insetVec2.setX(dRefc.getX() - dRef.getX());
+            insetVec2.setY(0.0);
+            insetVec2.setZ(dRefc.getZ() - dRef.getZ());
+            double angle = TrigUtil.angle(insetVec1, insetVec2);
             // Require < 45deg, if not 90deg-angel
             if (angle > Math.PI / 4) angle = Math.PI / 2 - angle;
             // Evaluate if this condition is actually required
             if (angle >= 0.0 && angle <= Math.PI / 4) {
+                insetVec1.zero();
+                insetVec2.zero();
                 return damagedBoxMarginHorizontal / Math.cos(angle);
             }
+            insetVec1.zero();
+            insetVec2.zero();
         }
         return 0.0;
     }
