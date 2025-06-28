@@ -43,6 +43,7 @@ public class LogRecord<C> implements Runnable {
         if (node == null || node.logger == null) {
             LOGGER.log(Level.WARNING,
                     "Log node or logger missing, skipping record.");
+            LOGGER.log(Level.FINE, "Skipped content: {0}", content);
             return;
         }
         try {

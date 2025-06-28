@@ -95,6 +95,8 @@ public abstract class AbstractLogNodeDispatcher implements LogNodeDispatcher { /
         if (node == null || node.logger == null) {
             logINIT(Level.WARNING,
                     "Log node or logger missing, skipping record.");
+            logINIT(Level.FINE, "Skipped content: "
+                    + (content != null ? content.toString() : "null"));
             logFallback(level, content);
             return;
         }
