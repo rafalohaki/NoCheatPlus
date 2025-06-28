@@ -31,8 +31,11 @@ public enum LiftOffEnvelope {
     /** Moving off water, having two in-air moves. Rather meant for 1.13+ clients but not necessarily */
     //LIMIT_SURFACE(0.1, 0.372, 0.1, 2, false),
     LIMIT_SURFACE(0.1, 1.16, 0.1, 4, false),
-    //    /** Flowing water / strong(-est) limit. */
-    //    LIMIT_LIQUID_STRONG(...), // placeholder for stronger liquid limits
+    // Flowing water or other strong currents.
+    // Expected future "LIMIT_LIQUID_STRONG" parameters:
+    //   jump gain about 0.05, max height around 0.2 and a single jump phase.
+    // Implementation pending until heavy flow or bubble column detection is available.
+    // LIMIT_LIQUID_STRONG(...),
     /** No jumping at all (web). */
     NO_JUMP(0.0, 0.0, 0.0, 0, false),
     /** Like NO_JUMP, just to distinguish from being in web. */
