@@ -442,8 +442,10 @@ public class NoCheatPlus extends JavaPlugin implements NoCheatPlusAPI {
                 if (sender instanceof Player) {
                     // Use the permission caching feature.
                     final Player player = (Player) sender;
-                    final IPlayerData data = DataManager.getInstance().getInstance().getPlayerData(player);
-                    if (data.getNotifyOff() || !data.hasPermission(Permissions.NOTIFY, player)) {
+                    final IPlayerData data =
+                            NCPAPIProvider.getNoCheatPlusAPI().getPlayerDataManager().getPlayerData(player);
+                    if (data == null || data.getNotifyOff()
+                            || !data.hasPermission(Permissions.NOTIFY, player)) {
                         continue;
                     }
                 }
@@ -507,7 +509,6 @@ public class NoCheatPlus extends JavaPlugin implements NoCheatPlusAPI {
      *            Only registers ComponentRegistry instances if this is set to
      *            true.
      */
-    @SuppressWarnings("unchecked")
     @Override
     public boolean addComponent(final Object obj, final boolean allowComponentRegistry) {
 
@@ -606,26 +607,6 @@ public class NoCheatPlus extends JavaPlugin implements NoCheatPlusAPI {
             }
         }
         return added;
-    }
-
-    /**
-     * Attempt to add a component to player data registries.
-     *
-     * @param registry the registry to add to
-     * @param obj      the component
-     * @return {@code true} if added
-     */
-    private boolean invokePlayerDataRegistry(final ComponentRegistry<?> registry, final Object obj) {
-        if (registry instanceof PlayerDataManager pdm) {
-            if (obj instanceof IRemoveData) {
-                return pdm.addComponent((IRemoveData) obj);
-            }
-            return pdm.addComponentReflectively(obj);
-        }
-        if (registry instanceof IPlayerDataManager ipdm && obj instanceof IRemoveData) {
-            return ipdm.addComponent((IRemoveData) obj);
-        }
-        return false;
     }
 
     private boolean registerComponentRegistry(final Object obj) {
@@ -1195,8 +1176,12 @@ public class NoCheatPlus extends JavaPlugin implements NoCheatPlusAPI {
         }
         // Update some moving data for players that logged in while the plugin was disabled.
         for (final Player player : onlinePlayers) {
-            final IPlayerData pData = DataManager.getInstance().getInstance().getPlayerData(player);
-            if (player.isSleeping()) {
+            if (player == null) {
+                continue;
+            }
+            final IPlayerData pData =
+                    NCPAPIProvider.getNoCheatPlusAPI().getPlayerDataManager().getPlayerData(player);
+            if (pData != null && player.isSleeping()) {
                 pData.getGenericInstance(MovingData.class).wasInBed = true;
             }
         }
@@ -1356,7 +1341,10 @@ public class NoCheatPlus extends JavaPlugin implements NoCheatPlusAPI {
             // Check if login is denied (plus expiration check).
             // Could switch to using player UUIDs and handle AsyncPlayerPreLogin.
             if (checkDenyLoginsNames(player.getName())) {
-                if (DataManager.getInstance().getInstance().getPlayerData(player).hasPermission(Permissions.BYPASS_DENY_LOGIN, player)) {
+                final IPlayerData pData =
+                        NCPAPIProvider.getNoCheatPlusAPI().getPlayerDataManager().getPlayerData(player);
+                if (pData != null
+                        && pData.hasPermission(Permissions.BYPASS_DENY_LOGIN, player)) {
                     return;
                 }
                 // An alternative would be to use the built in temporary ban feature and include the remaining duration.
@@ -1420,8 +1408,9 @@ public class NoCheatPlus extends JavaPlugin implements NoCheatPlusAPI {
 
     private void onJoinLow(final Player player) {
         final String playerName = player.getName();
-        final IPlayerData data = DataManager.getInstance().getInstance().getPlayerData(player);
-        if (data.hasPermission(Permissions.NOTIFY, player)) { // Updates the cache.
+        final IPlayerData data =
+                NCPAPIProvider.getNoCheatPlusAPI().getPlayerDataManager().getPlayerData(player);
+        if (data != null && data.hasPermission(Permissions.NOTIFY, player)) { // Updates the cache.
             // Login notifications...
             //            // Update available.
             // Inconsistent config version.
