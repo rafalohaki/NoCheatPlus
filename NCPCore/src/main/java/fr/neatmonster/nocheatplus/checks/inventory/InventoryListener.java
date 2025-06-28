@@ -525,9 +525,18 @@ public class InventoryListener  extends CheckListener implements JoinLeaveListen
 
     private void rememberFoodInteract(final InventoryData data, final Material type) {
         final long now = System.currentTimeMillis();
-        data.instantEatFood = type;
-        data.instantEatInteract = (data.instantEatInteract > 0 && now - data.instantEatInteract < 800)
-                ? Math.min(now, data.instantEatInteract) : now;
+        final long diff = now - data.instantEatInteract;
+
+        if (data.instantEatInteract <= 0) {
+            data.instantEatInteract = now;
+            data.instantEatFood = type;
+        } else if (diff < 800) {
+            data.instantEatInteract = Math.min(now, data.instantEatInteract);
+            data.instantEatFood = type;
+        } else {
+            data.instantEatInteract = now;
+            data.instantEatFood = null;
+        }
         data.instantBowInteract = 0;
     }
 
