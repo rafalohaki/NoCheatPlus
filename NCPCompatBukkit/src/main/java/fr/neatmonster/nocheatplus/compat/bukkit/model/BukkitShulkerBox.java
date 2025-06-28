@@ -22,6 +22,8 @@ import org.bukkit.block.Container;
 import fr.neatmonster.nocheatplus.utilities.map.BlockCache;
 import org.bukkit.block.ShulkerBox;
 
+import fr.neatmonster.nocheatplus.compat.bukkit.model.BukkitModelUtil;
+
 public class BukkitShulkerBox implements BukkitShapeModel {
 
     /**
@@ -38,7 +40,7 @@ public class BukkitShulkerBox implements BukkitShapeModel {
 
         if (state instanceof ShulkerBox) {
             if (!((ShulkerBox) state).getInventory().getViewers().isEmpty()) {
-                return new double[] {0.0, 0.0, 0.0, 1.0, Math.min(1.5, 1.0), 1.0};
+                return new double[] {0.0, 0.0, 0.0, 1.0, BukkitModelUtil.clampHeight(1.5), 1.0};
             }
         }
         return new double[] {0.0, 0.0, 0.0, 1.0, 1.0, 1.0};

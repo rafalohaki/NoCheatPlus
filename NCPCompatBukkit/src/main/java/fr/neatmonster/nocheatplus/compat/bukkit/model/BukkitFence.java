@@ -56,7 +56,7 @@ public class BukkitFence implements BukkitShapeModel {
     public BukkitFence(double minXZ, double maxXZ, double height) {
         this.minXZ = minXZ;
         this.maxXZ = maxXZ;
-        this.height = Math.min(height, 1.0);
+        this.height = BukkitModelUtil.clampHeight(height);
     }
 
     @Override
