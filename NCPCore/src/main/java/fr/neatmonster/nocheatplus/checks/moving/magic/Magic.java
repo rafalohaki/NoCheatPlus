@@ -124,7 +124,7 @@ public class Magic {
     public static final double bushSpeedAscend         = 0.315;
     public static final double bushSpeedDescend        = -0.09;
     public static final double bubbleStreamDescend     = 0.49; // from wiki.
-    public static final double bubbleStreamAscend      = 0.9; // 1.1 from wiki. Wiki is too fast
+    public static final double bubbleStreamAscend      = 0.9; // 1.1 from the wiki proved too generous during testing
     /**
      * Approximate upward acceleration in bubble streams while stuck in webs.
      * This accounts for the push from the bubble column per tick.
