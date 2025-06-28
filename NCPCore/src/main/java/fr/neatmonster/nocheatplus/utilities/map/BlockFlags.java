@@ -366,8 +366,8 @@ public class BlockFlags {
     public static void setFlag(Material material, long addFlag) {
         try {
             if (!material.isBlock()) {
-                // Let's not fail hard here.
-                StaticLog.logWarning("Attempt to set flag for a non-block: " + material);
+                // Expected if plugins misuse API; keep at debug level.
+                StaticLog.logDebug("Attempt to set flag for a non-block: " + material);
             }
         }
         catch (Exception e) {
@@ -379,8 +379,8 @@ public class BlockFlags {
     public static void maskFlag(Material material, long addFlag) {
         try {
             if (!material.isBlock()) {
-                // Let's not fail hard here.
-                StaticLog.logWarning("Attempt to mask flag for a non-block: " + material);
+                // Expected if plugins misuse API; keep at debug level.
+                StaticLog.logDebug("Attempt to mask flag for a non-block: " + material);
             }
         }
         catch (Exception e) {
@@ -500,8 +500,8 @@ public class BlockFlags {
     public static final void setBlockFlags(final Material blockType, final long flags) {
         try {
             if (!blockType.isBlock()) {
-                // Let's not fail hard here.
-                StaticLog.logWarning("Attempt to set flags for a non-block: " + blockType);
+                // Expected if plugins misuse API; keep at debug level.
+                StaticLog.logDebug("Attempt to set flags for a non-block: " + blockType);
             }
         }
         catch (Exception e) {

@@ -197,7 +197,8 @@ public class RawConfigFile  extends YamlConfiguration {
                 materialLookup.put(key, mat);
             }
             if (mat == null) {
-                StaticLog.logWarning("Bad material entry (" + path + "): " + entry);
+                // Invalid material names can be frequent in configs; log as debug.
+                StaticLog.logDebug("Bad material entry (" + path + "): " + entry);
             } else {
                 target.add(mat);
             }

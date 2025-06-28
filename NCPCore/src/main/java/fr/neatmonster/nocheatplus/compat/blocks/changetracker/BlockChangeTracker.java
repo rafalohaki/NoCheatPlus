@@ -1165,7 +1165,10 @@ public class BlockChangeTracker implements IBlockChangeTracker {
     private void checkProcessBlocks() {
         if (!processBlocks.isEmpty()) {
             processBlocks.clear();
-            NCPAPIProvider.getNoCheatPlusAPI().getLogManager().warning(Streams.STATUS, "BlockChangeTracker: processBlocks is not empty on starting to add blocks.");
+            // This can happen if previous processing was interrupted. It's not
+            // a severe issue, so use debug level to avoid console spam.
+            NCPAPIProvider.getNoCheatPlusAPI().getLogManager().debug(Streams.STATUS,
+                    "BlockChangeTracker: processBlocks is not empty on starting to add blocks.");
         }
     }
 

@@ -1105,7 +1105,8 @@ public class BlockProperties {
     private static void setBlock(Material material, BlockProps props) {
         try {
             if (!material.isBlock()) {
-                StaticLog.logWarning("Material is not a block: " + material);
+                // Misconfigured materials are common; log at debug level.
+                StaticLog.logDebug("Material is not a block: " + material);
             }
         } catch (Throwable t) {
             StaticLog.logSevere("Failed to validate block material: " + material);
