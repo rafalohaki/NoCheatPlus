@@ -38,7 +38,26 @@ public class TestMorePacketsCheck {
         freq.setBucket(1, 2f);
         freq.setBucket(3, 1f);
         NetStatic.BurnInfo info = NetStatic.computeBurnInfo(freq);
-        assertEquals(3, info.burnStart);
-        assertEquals(1, info.empty);
+        assertEquals(3, info.burnStart());
+        assertEquals(1, info.empty());
+    }
+
+    @Test
+    public void testBurnInfoSingleBucket() {
+        ActionFrequency freq = new ActionFrequency(5, 1000);
+        freq.setBucket(2, 1f);
+        NetStatic.BurnInfo info = NetStatic.computeBurnInfo(freq);
+        assertEquals(5, info.burnStart());
+        assertEquals(0, info.empty());
+    }
+
+    @Test
+    public void testBurnInfoTrailingEmpty() {
+        ActionFrequency freq = new ActionFrequency(5, 1000);
+        freq.setBucket(1, 1f);
+        freq.setBucket(2, 1f);
+        NetStatic.BurnInfo info = NetStatic.computeBurnInfo(freq);
+        assertEquals(2, info.burnStart());
+        assertEquals(2, info.empty());
     }
 }
