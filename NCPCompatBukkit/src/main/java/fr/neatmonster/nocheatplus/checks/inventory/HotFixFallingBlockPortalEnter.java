@@ -27,6 +27,7 @@ import org.bukkit.event.entity.EntityPortalEnterEvent;
 
 import fr.neatmonster.nocheatplus.NCPAPIProvider;
 import fr.neatmonster.nocheatplus.compat.BridgeMaterial;
+import fr.neatmonster.nocheatplus.utilities.location.LocationPool;
 import fr.neatmonster.nocheatplus.compat.versions.ServerVersion;
 import fr.neatmonster.nocheatplus.logging.Streams;
 import fr.neatmonster.nocheatplus.utilities.ReflectionUtil;
@@ -57,8 +58,7 @@ public class HotFixFallingBlockPortalEnter implements Listener {
         }
     }
 
-    /** Temporary use only: setWorld(null) after use. */
-    private final Location useLoc = new Location(null, 0, 0, 0);
+    private final LocationPool locationPool = NCPAPIProvider.getNoCheatPlusAPI().getGenericInstance(LocationPool.class);
 
     private final WrapBlockCache wrapBlockCache;
 
@@ -87,7 +87,7 @@ public class HotFixFallingBlockPortalEnter implements Listener {
             mat = null;
         }
         if (mat != null) {
-            final Location loc = entity.getLocation(useLoc);
+            final Location loc = entity.getLocation(locationPool.acquire());
             final World world = loc.getWorld();
             final IWorldData worldData = NCPAPIProvider.getNoCheatPlusAPI().getWorldDataManager().getWorldData(world);
             if (worldData.getGenericInstance(InventoryConfig.class).hotFixFallingBlockEndPortalActive) {
@@ -107,7 +107,7 @@ public class HotFixFallingBlockPortalEnter implements Listener {
                     NCPAPIProvider.getNoCheatPlusAPI().getLogManager().info(Streams.STATUS, message);
                 }
             }
-            useLoc.setWorld(null);
+            locationPool.release(loc);
         }
     }
 

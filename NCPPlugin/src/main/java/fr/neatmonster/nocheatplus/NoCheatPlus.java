@@ -144,6 +144,7 @@ import fr.neatmonster.nocheatplus.utilities.OnDemandTickListener;
 import fr.neatmonster.nocheatplus.utilities.ReflectionUtil;
 import fr.neatmonster.nocheatplus.utilities.TickTask;
 import fr.neatmonster.nocheatplus.utilities.entity.PassengerUtil;
+import fr.neatmonster.nocheatplus.utilities.location.LocationPool;
 import fr.neatmonster.nocheatplus.utilities.map.BlockCache;
 import fr.neatmonster.nocheatplus.utilities.map.BlockProperties;
 import fr.neatmonster.nocheatplus.worlds.IWorldData;
@@ -1026,6 +1027,8 @@ public class NoCheatPlus extends JavaPlugin implements NoCheatPlusAPI {
         genericInstanceRegistry.denyChangeExistingRegistration(WRPT.class);
         registerGenericInstance(new TraceEntryPool(1000)); // Random number.
         genericInstanceRegistry.denyChangeExistingRegistration(TraceEntryPool.class);
+        registerGenericInstance(new LocationPool());
+        genericInstanceRegistry.denyChangeExistingRegistration(LocationPool.class);
         registerGenericInstance(new PassengerUtil());
         genericInstanceRegistry.denyChangeExistingRegistration(PassengerUtil.class);
         // (Allow override others.)

@@ -16,6 +16,7 @@ package fr.neatmonster.nocheatplus.compat.bukkit;
 
 import java.util.Map;
 
+import org.bukkit.Location;
 import org.bukkit.Material;
 import org.bukkit.World;
 import org.bukkit.entity.Entity;
@@ -89,22 +90,21 @@ public class BlockCacheBukkitModern extends BlockCacheBukkit {
     
     @Override
     public boolean standsOnEntity(final Entity entity, final double minX, final double minY, final double minZ, final double maxX, final double maxY, final double maxZ){
-        try{
-            // Vehicle IDs may need to be checked before performing this action.
-            for (final Entity vehicle : entity.getNearbyEntities(0.1, 2.0, 0.1)){
+        final Location temp = locationPool.acquire();
+        try {
+            for (final Entity vehicle : entity.getNearbyEntities(0.1, 2.0, 0.1)) {
                 final EntityType type = vehicle.getType();
-                if (!MaterialUtil.isBoat(type) && type != EntityType.SHULKER){ //  && !(vehicle instanceof Minecart)) 
-                    continue; 
+                if (!MaterialUtil.isBoat(type) && type != EntityType.SHULKER) {
+                    continue;
                 }
-                final double vehicleY = vehicle.getLocation(useLoc).getY() + vehicle.getHeight();
-                final double entityY = entity.getLocation(useLoc).getY();
-                useLoc.setWorld(null);
-                // A more accurate estimate may be implemented, though some more tolerance would help.
+                final double vehicleY = vehicle.getLocation(temp).getY() + vehicle.getHeight();
+                final double entityY = entity.getLocation(temp).getY();
                 return vehicleY < entityY + 0.1 && Math.abs(vehicleY - entityY) < 0.7;
-            }		
-        }
-        catch (Throwable t){
+            }
+        } catch (Throwable t) {
             // Ignore exceptions (Context: DisguiseCraft).
+        } finally {
+            locationPool.release(temp);
         }
         return false;
     }

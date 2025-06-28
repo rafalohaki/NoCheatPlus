@@ -22,6 +22,8 @@ import org.bukkit.entity.EntityType;
 import org.bukkit.block.data.BlockData;
 
 import fr.neatmonster.nocheatplus.compat.Bridge1_13;
+import fr.neatmonster.nocheatplus.NCPAPIProvider;
+import fr.neatmonster.nocheatplus.utilities.location.LocationPool;
 import fr.neatmonster.nocheatplus.utilities.map.BlockCache;
 import fr.neatmonster.nocheatplus.utilities.map.BlockFlags;
 import fr.neatmonster.nocheatplus.utilities.map.BlockProperties;
@@ -31,8 +33,7 @@ public class BlockCacheBukkit extends BlockCache {
 
     protected World world;
 
-    /** Temporary use. Use LocUtil.clone before passing on. Call setWorld(null) after use. */
-    protected final Location useLoc = new Location(null, 0, 0, 0);
+    protected final LocationPool locationPool = NCPAPIProvider.getNoCheatPlusAPI().getGenericInstance(LocationPool.class);
 
     public BlockCacheBukkit(World world) {
         setAccess(world);
@@ -87,21 +88,20 @@ public class BlockCacheBukkit extends BlockCache {
 
     @Override
     public boolean standsOnEntity(final Entity entity, final double minX, final double minY, final double minZ, final double maxX, final double maxY, final double maxZ){
-        try{
-            // Possibly check other ids too before doing this.
-            for (final Entity other : entity.getNearbyEntities(2.0, 2.0, 2.0)){
+        final Location temp = locationPool.acquire();
+        try {
+            for (final Entity other : entity.getNearbyEntities(2.0, 2.0, 2.0)) {
                 final EntityType type = other.getType();
-                if (!MaterialUtil.isBoat(type) && type != EntityType.SHULKER){ //  && !(other instanceof Minecart)) 
+                if (!MaterialUtil.isBoat(type) && type != EntityType.SHULKER) {
                     continue;
                 }
-                final double locY = entity.getLocation(useLoc).getY();
-                useLoc.setWorld(null);
-                // A "better" estimate is possible, though some more tolerance would be good.
+                final double locY = entity.getLocation(temp).getY();
                 return Math.abs(locY - minY) < 0.7;
             }
-        }
-        catch (Throwable t){
+        } catch (Throwable t) {
             // Ignore exceptions (Context: DisguiseCraft).
+        } finally {
+            locationPool.release(temp);
         }
         return false;
     }
