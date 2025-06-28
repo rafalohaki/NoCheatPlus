@@ -204,7 +204,7 @@ public class TestGodModeHelpers {
         cData.lastMoveTime = 0;
         InventoryData iData = new InventoryData();
         iData.lastClickTime = 0;
-        iData.instantEatInteract = 0;
+        iData.eatTracker.reset();
         NetData netData = new NetData(new fr.neatmonster.nocheatplus.checks.net.NetConfig(worldData));
 
         IPlayerData pData = mock(IPlayerData.class);
