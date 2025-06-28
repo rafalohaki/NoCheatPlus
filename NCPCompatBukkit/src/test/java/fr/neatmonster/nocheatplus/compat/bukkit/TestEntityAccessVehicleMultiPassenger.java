@@ -24,7 +24,7 @@ public class TestEntityAccessVehicleMultiPassenger {
         try (MockedStatic<ReflectionUtil> util = mockStatic(ReflectionUtil.class)) {
             util.when(() -> ReflectionUtil.getMethodNoArgs(Entity.class, "getPassengers", List.class))
                     .thenReturn(null);
-            util.when(() -> ReflectionUtil.getMethodNoArgs(Entity.class, "addPassenger", Entity.class))
+            util.when(() -> ReflectionUtil.getMethod(Entity.class, "addPassenger", Entity.class))
                     .thenReturn(dummyAdd);
             EntityAccessVehicleMultiPassenger access = EntityAccessVehicleMultiPassenger.createIfSupported();
             assertNull(access);
@@ -37,7 +37,7 @@ public class TestEntityAccessVehicleMultiPassenger {
         try (MockedStatic<ReflectionUtil> util = mockStatic(ReflectionUtil.class)) {
             util.when(() -> ReflectionUtil.getMethodNoArgs(Entity.class, "getPassengers", List.class))
                     .thenReturn(dummyGet);
-            util.when(() -> ReflectionUtil.getMethodNoArgs(Entity.class, "addPassenger", Entity.class))
+            util.when(() -> ReflectionUtil.getMethod(Entity.class, "addPassenger", Entity.class))
                     .thenReturn(null);
             EntityAccessVehicleMultiPassenger access = EntityAccessVehicleMultiPassenger.createIfSupported();
             assertNull(access);
