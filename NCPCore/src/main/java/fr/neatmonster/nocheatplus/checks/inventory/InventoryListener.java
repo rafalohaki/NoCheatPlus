@@ -525,6 +525,7 @@ public class InventoryListener  extends CheckListener implements JoinLeaveListen
 
     void rememberFoodInteract(final InventoryData data, final Material type) {
         final long now = System.currentTimeMillis();
+        // Delegate interaction timing; ensures valid fast-eat window (800 ms).
         InventoryInteractHelper.applyFoodInteract(data, type, now);
         data.instantBowInteract = 0;
     }
