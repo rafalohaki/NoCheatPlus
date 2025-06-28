@@ -15,6 +15,7 @@
 package fr.neatmonster.nocheatplus.logging.details;
 
 import java.util.logging.Level;
+import java.util.logging.Logger;
 
 /**
  * A log message to be executed within a task from a queue, hiding the generics.
@@ -22,6 +23,10 @@ import java.util.logging.Level;
  *
  */
 public class LogRecord<C> implements Runnable {
+
+    /** Logger for reporting log invocation issues. */
+    private static final Logger LOGGER =
+            Logger.getLogger(LogRecord.class.getName());
     
     private final LogNode<C> node;
     private final Level level;
@@ -35,8 +40,16 @@ public class LogRecord<C> implements Runnable {
     
     @Override
     public void run() {
-        // NOTE: Determine appropriate location for checks or try-catch handling.
-        node.logger.log(level, content);
+        if (node == null || node.logger == null) {
+            LOGGER.log(Level.WARNING,
+                    "Log node or logger missing, skipping record.");
+            return;
+        }
+        try {
+            node.logger.log(level, content);
+        } catch (Throwable t) {
+            LOGGER.log(Level.WARNING, "Failed to log content", t);
+        }
     }
     
 }
