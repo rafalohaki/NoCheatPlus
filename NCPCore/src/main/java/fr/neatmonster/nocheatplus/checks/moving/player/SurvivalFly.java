@@ -2639,17 +2639,24 @@ public class SurvivalFly extends Check {
             // Push by 0.49-0.51 in one direction. Also observed 1.02.
             final double xDistance = to.getX() - from.getX();
             final double zDistance = to.getZ() - from.getZ();
-            if (Math.abs(xDistance) > 0.485 && Math.abs(xDistance) < 1.025
-                && from.matchBlockChange((BlockChangeTracker) blockChangeTracker, data.blockChangeRef,
-                        xDistance < 0 ? Direction.X_NEG : Direction.X_POS, 0.05)) {
-                hAllowedDistance = thisMove.hDistance; // MAGIC
-                hDistanceAboveLimit = 0.0;
+
+            final IBlockChangeTracker tracker = blockChangeTracker;
+
+            if (Math.abs(xDistance) > 0.485 && Math.abs(xDistance) < 1.025) {
+                if (tracker instanceof BlockChangeTracker mutableTracker
+                        && from.matchBlockChange(mutableTracker, data.blockChangeRef,
+                                xDistance < 0 ? Direction.X_NEG : Direction.X_POS, 0.05)) {
+                    hAllowedDistance = thisMove.hDistance; // MAGIC
+                    hDistanceAboveLimit = 0.0;
+                }
             }
-            else if (Math.abs(zDistance) > 0.485 && Math.abs(zDistance) < 1.025
-                    && from.matchBlockChange((BlockChangeTracker) blockChangeTracker, data.blockChangeRef,
-                        zDistance < 0 ? Direction.Z_NEG : Direction.Z_POS, 0.05)) {
-                hAllowedDistance = thisMove.hDistance; // MAGIC
-                hDistanceAboveLimit = 0.0;
+            else if (Math.abs(zDistance) > 0.485 && Math.abs(zDistance) < 1.025) {
+                if (tracker instanceof BlockChangeTracker mutableTracker
+                        && from.matchBlockChange(mutableTracker, data.blockChangeRef,
+                                zDistance < 0 ? Direction.Z_NEG : Direction.Z_POS, 0.05)) {
+                    hAllowedDistance = thisMove.hDistance; // MAGIC
+                    hDistanceAboveLimit = 0.0;
+                }
             }
         }
         return new double[]{hAllowedDistance, hDistanceAboveLimit};
