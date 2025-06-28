@@ -33,6 +33,8 @@ import fr.neatmonster.nocheatplus.utilities.PotionUtil;
 import fr.neatmonster.nocheatplus.utilities.TickTask;
 import fr.neatmonster.nocheatplus.utilities.map.BlockProperties;
 import fr.neatmonster.nocheatplus.time.monotonic.Monotonic;
+import fr.neatmonster.nocheatplus.checks.blockbreak.FastBreakDecision;
+import fr.neatmonster.nocheatplus.checks.blockbreak.FastBreakContext;
 
 /**
  * A check used to verify if the player isn't breaking blocks faster than possible.
@@ -49,26 +51,21 @@ public class FastBreak extends Check {
     /**
      * Checks a player for fastbreak. This is NOT for creative mode.
      * 
-     * @param player
-     *            the player
-     * @param block
-     *            the block
-     * @param isInstaBreak
-     *            indicates that the block was flagged as instantly
-     *            breakable. The value controls how this check reacts:
-     *            <ul>
-     *            <li>{@code YES} - skip the check entirely.</li>
-     *            <li>{@code MAYBE} - clamp the time to {@code fastBreakDelay}.</li>
-     *            <li>{@code NO} - perform a full check.</li>
-     *            </ul>
-     * @param cc
-     *            configuration used for the check
-     * @param data
-     *            player specific data for block breaking
+     * @param ctx
+     *            encapsulates all data needed to evaluate the check
      * @return true, if successful
      */
-    public boolean check(final Player player, final Block block, final AlmostBoolean isInstaBreak,
-            final BlockBreakConfig cc, final BlockBreakData data, final IPlayerData pData) {
+    public boolean check(final FastBreakContext ctx) {
+        if (!isValidContext(ctx)) {
+            return false;
+        }
+        final Player player = ctx.player();
+        final Block block = ctx.block();
+        final BlockBreakConfig cc = ctx.config();
+        final BlockBreakData data = ctx.breakData();
+        final IPlayerData pData = ctx.playerData();
+        final AlmostBoolean isInstaBreak = ctx.isInstaBreak();
+
         final long now = Monotonic.millis();
         boolean cancel = false;
 
@@ -92,10 +89,11 @@ public class FastBreak extends Check {
             elapsedTime = (data.fastBreakBreakTime > now) ? 0 : now - data.fastBreakBreakTime;
             }
 
-            final long adjustedElapsed = adjustElapsedTime(elapsedTime, isInstaBreak, cc);
+            final long adjustedElapsed =
+                    FastBreakDecision.adjustedElapsed(elapsedTime, isInstaBreak, cc.fastBreakDelay);
 
             // Check if the time used time is lower than expected.
-            if (shouldSkipFastBreak(isInstaBreak)) {
+            if (FastBreakDecision.shouldSkip(isInstaBreak)) {
                 // ignore: instant break flagged
             }
             else if (adjustedElapsed < 0) {
@@ -137,9 +135,8 @@ public class FastBreak extends Check {
 
             // Rework to use (then hopefully completed) BlockBreakKey.
             if (pData.isDebugActive(type)) {
-                detailDebugStats(player, isInstaBreak, blockType, elapsedTime, expectedBreakingTime, data, pData);
-            }
-            else {
+                detailDebugStats(ctx, elapsedTime, expectedBreakingTime);
+            } else {
                 data.stats = null;
             }
 
@@ -149,21 +146,14 @@ public class FastBreak extends Check {
         return cancel;
     }
 
-    private boolean shouldSkipFastBreak(final AlmostBoolean isInstaBreak) {
-        return isInstaBreak == AlmostBoolean.YES;
-    }
-
-    private long adjustElapsedTime(final long elapsedTime, final AlmostBoolean isInstaBreak,
-            final BlockBreakConfig cc) {
-        if (isInstaBreak == AlmostBoolean.MAYBE) {
-            return Math.min(elapsedTime, cc.fastBreakDelay);
-        }
-        return elapsedTime;
-    }
-
-    private void detailDebugStats(final Player player, final AlmostBoolean isInstaBreak,
-            final Material blockType, final long elapsedTime, final long expectedBreakingTime,
-            final BlockBreakData data, final IPlayerData pData) {
+    private void detailDebugStats(final FastBreakContext ctx, final long elapsedTime,
+            final long expectedBreakingTime) {
+        final Player player = ctx.player();
+        final Block block = ctx.block();
+        final BlockBreakData data = ctx.breakData();
+        final IPlayerData pData = ctx.playerData();
+        final AlmostBoolean isInstaBreak = ctx.isInstaBreak();
+        final Material blockType = block.getType();
         if (pData.hasPermission(Permissions.ADMINISTRATION_DEBUG, player)) {
             // General stats:
             // Replace stats by new system (BlockBreakKey once complete), commands to inspect / auto-config.
@@ -185,4 +175,7 @@ public class FastBreak extends Check {
         }
     }
 
+    private boolean isValidContext(final FastBreakContext ctx) {
+        return ctx != null && ctx.player() != null && ctx.block() != null && ctx.playerData() != null;
+    }
 }

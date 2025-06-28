@@ -54,6 +54,7 @@ import fr.neatmonster.nocheatplus.stats.Counters;
 import fr.neatmonster.nocheatplus.utilities.TickTask;
 import fr.neatmonster.nocheatplus.time.monotonic.Monotonic;
 import fr.neatmonster.nocheatplus.utilities.map.BlockProperties;
+import fr.neatmonster.nocheatplus.checks.blockbreak.FastBreakContext;
 import fr.neatmonster.nocheatplus.worlds.WorldFactoryArgument;
 
 /**
@@ -238,7 +239,7 @@ public class BlockBreakListener extends CheckListener {
         }
         if (!result.cancelled && gameMode != GameMode.CREATIVE
                 && fastBreak.isEnabled(player, pData)
-                && fastBreak.check(player, block, isInstaBreak, cc, data, pData)) {
+                && fastBreak.check(new FastBreakContext(player, block, cc, data, pData, isInstaBreak))) {
             result.cancelled = true;
         }
     }
