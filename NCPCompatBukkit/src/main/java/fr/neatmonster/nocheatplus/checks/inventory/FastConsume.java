@@ -31,7 +31,6 @@ import fr.neatmonster.nocheatplus.compat.BridgeHealth;
 import fr.neatmonster.nocheatplus.components.config.value.OverrideType;
 import fr.neatmonster.nocheatplus.components.registry.feature.INotifyReload;
 import fr.neatmonster.nocheatplus.logging.StaticLog;
-import fr.neatmonster.nocheatplus.players.DataManager;
 import fr.neatmonster.nocheatplus.players.IPlayerData;
 import fr.neatmonster.nocheatplus.stats.Counters;
 import fr.neatmonster.nocheatplus.utilities.InventoryUtil;
@@ -78,7 +77,7 @@ public class FastConsume extends Check implements Listener, INotifyReload {
             counters.addPrimaryThread(idCancelDead, 1);
             return;
         }
-        final IPlayerData pData = DataManager.getInstance().getPlayerData(player);
+        final IPlayerData pData = NCPAPIProvider.getNoCheatPlusAPI().getPlayerDataManager().getPlayerData(player);
         if (!pData.isCheckActive(type, player)) {
             return;
         }
@@ -86,7 +85,7 @@ public class FastConsume extends Check implements Listener, INotifyReload {
         final long time = System.currentTimeMillis();
         if (check(player, event.getItem(), time, data, pData)){
             event.setCancelled(true);
-            DataManager.getInstance().getPlayerData(player).requestUpdateInventory();
+            NCPAPIProvider.getNoCheatPlusAPI().getPlayerDataManager().getPlayerData(player).requestUpdateInventory();
         }
     }
 

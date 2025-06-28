@@ -23,7 +23,7 @@ import org.bukkit.inventory.meta.BookMeta;
 
 import fr.neatmonster.nocheatplus.checks.Check;
 import fr.neatmonster.nocheatplus.checks.CheckType;
-import fr.neatmonster.nocheatplus.players.DataManager;
+import fr.neatmonster.nocheatplus.NCPAPIProvider;
 import fr.neatmonster.nocheatplus.players.IPlayerData;
 
 public class Gutenberg extends Check implements Listener {
@@ -44,7 +44,7 @@ public class Gutenberg extends Check implements Listener {
         if (!isEnabled(player)) {
             return;
         }
-        final IPlayerData pData = DataManager.getInstance().getPlayerData(player);
+        final IPlayerData pData = NCPAPIProvider.getNoCheatPlusAPI().getPlayerDataManager().getPlayerData(player);
         final InventoryConfig cc = pData.getGenericInstance(InventoryConfig.class);
         final InventoryData data = pData.getGenericInstance(InventoryData.class);
         final BookMeta newMeta = event.getNewBookMeta();
