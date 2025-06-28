@@ -138,7 +138,7 @@ public class Improbable extends Check implements IDisableListener{
             cancel = executeActions(vd).willCancel();
         }
         else
-            data.improbableVL *= 0.95;
+            data.improbableVL *= cc.improbableVlDecay;
         return cancel;
     }
 

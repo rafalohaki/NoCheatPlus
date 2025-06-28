@@ -33,6 +33,8 @@ import fr.neatmonster.nocheatplus.worlds.IWorldData;
 public class BlockPlaceConfig extends ACheckConfig {
 
     public final ActionList againstActions;
+    /** Factor to decrease the against violation level on pass. */
+    public final double     againstVlDecay;
 
     public final boolean    autoSignSkipEmpty;
     public final ActionList autoSignActions;
@@ -45,6 +47,8 @@ public class BlockPlaceConfig extends ACheckConfig {
     public final boolean    fastPlaceImprobableFeedOnly;
     public final float      fastPlaceImprobableWeight;
     public final ActionList fastPlaceActions;
+    /** Factor applied when reducing fast place violation level. */
+    public final double     fastPlaceVlDecay;
 
     public final Set<Material> noSwingExceptions = new HashSet<Material>();
     public final ActionList noSwingActions;
@@ -81,6 +85,7 @@ public class BlockPlaceConfig extends ACheckConfig {
         final ConfigFile config = worldData.getRawConfiguration();
 
         againstActions = config.getOptimizedActionList(ConfPaths.BLOCKPLACE_AGAINST_ACTIONS, Permissions.BLOCKPLACE_AGAINST);
+        againstVlDecay = config.getDouble(ConfPaths.BLOCKPLACE_AGAINST_VL_DECAY, 0.99);
 
         autoSignSkipEmpty = config.getBoolean(ConfPaths.BLOCKPLACE_AUTOSIGN_SKIPEMPTY);
         autoSignActions = config.getOptimizedActionList(ConfPaths.BLOCKPLACE_AUTOSIGN_ACTIONS, Permissions.BLOCKPLACE_AUTOSIGN);
@@ -94,6 +99,7 @@ public class BlockPlaceConfig extends ACheckConfig {
         fastPlaceImprobableFeedOnly = config.getBoolean(ConfPaths.BLOCKPLACE_FASTPLACE_IMPROBABLE_FEEDONLY);
         fastPlaceImprobableWeight = (float) config.getDouble(ConfPaths.BLOCKPLACE_FASTPLACE_IMPROBABLE_WEIGHT);
         fastPlaceActions = config.getOptimizedActionList(ConfPaths.BLOCKPLACE_FASTPLACE_ACTIONS, Permissions.BLOCKPLACE_FASTPLACE);
+        fastPlaceVlDecay = config.getDouble(ConfPaths.BLOCKPLACE_FASTPLACE_VL_DECAY, 0.95);
 
         config.readMaterialFromList(ConfPaths.BLOCKPLACE_NOSWING_EXCEPTIONS, noSwingExceptions);
         noSwingActions = config.getOptimizedActionList(ConfPaths.BLOCKPLACE_NOSWING_ACTIONS, Permissions.BLOCKPLACE_NOSWING);

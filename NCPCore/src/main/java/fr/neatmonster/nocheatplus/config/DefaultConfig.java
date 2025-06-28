@@ -136,6 +136,7 @@ public class DefaultConfig extends ConfigFile {
         set(ConfPaths.BLOCKBREAK_FREQUENCY_SHORTTERM_TICKS, 5, 785);
         set(ConfPaths.BLOCKBREAK_FREQUENCY_SHORTTERM_LIMIT, 7, 785);
         set(ConfPaths.BLOCKBREAK_FREQUENCY_ACTIONS, "cancel vl>5 log:bbfrequency:3:5:i cancel vl>40 log:bbfrequency:0:5:if cancel cmdc:kickfrequency:0:5", 1154);
+        set(ConfPaths.BLOCKBREAK_FREQUENCY_VL_DECAY, 0.95, 1154);
         // NoSwing
         set(ConfPaths.BLOCKBREAK_NOSWING_CHECK, "default", 785);
         set(ConfPaths.BLOCKBREAK_NOSWING_ACTIONS, "cancel vl>10 log:noswing:0:5:i cancel", 785);
@@ -161,11 +162,13 @@ public class DefaultConfig extends ConfigFile {
         // Speed
         set(ConfPaths.BLOCKINTERACT_SPEED_CHECK, "default", 785);
         set(ConfPaths.BLOCKINTERACT_SPEED_INTERVAL, 2000, 785);
-        set(ConfPaths.BLOCKINTERACT_SPEED_LIMIT, 55, 1154); 
+        set(ConfPaths.BLOCKINTERACT_SPEED_LIMIT, 55, 1154);
         set(ConfPaths.BLOCKINTERACT_SPEED_ACTIONS, "cancel vl>10 cancel log:bspeed:5:4:i cancel vl>500 cancel log:bspeed:0:5:icf cmdc:kickbspeed:2:5", 1154);
+        set(ConfPaths.BLOCKINTERACT_SPEED_VL_DECAY, 0.99, 1154);
         // Visible
         set(ConfPaths.BLOCKINTERACT_VISIBLE_CHECK, "default", 785);
-        set(ConfPaths.BLOCKINTERACT_VISIBLE_ACTIONS, "cancel vl>30 log:bvisible:8:5:if cancel", 1154); 
+        set(ConfPaths.BLOCKINTERACT_VISIBLE_ACTIONS, "cancel vl>30 log:bvisible:8:5:if cancel", 1154);
+        set(ConfPaths.BLOCKINTERACT_VISIBLE_VL_DECAY, 0.99, 1154);
 
 
         /* BlockPlace */
@@ -173,6 +176,7 @@ public class DefaultConfig extends ConfigFile {
         // Against
         set(ConfPaths.BLOCKPLACE_AGAINST_CHECK, "default", 785);
         set(ConfPaths.BLOCKPLACE_AGAINST_ACTIONS, "cancel log:against:1:5:i vl>10 cancel log:against:0:2:if cmdc:kickagainst:0:10", 1154);
+        set(ConfPaths.BLOCKPLACE_AGAINST_VL_DECAY, 0.99, 1154); // Assume one false positive every 100 blocks.
         // AutoSign
         set(ConfPaths.BLOCKPLACE_AUTOSIGN_CHECK, "default", 785);
         set(ConfPaths.BLOCKPLACE_AUTOSIGN_SKIPEMPTY, false, 785);
@@ -188,6 +192,7 @@ public class DefaultConfig extends ConfigFile {
         set(ConfPaths.BLOCKPLACE_FASTPLACE_IMPROBABLE_FEEDONLY, false, 1154);
         set(ConfPaths.BLOCKPLACE_FASTPLACE_IMPROBABLE_WEIGHT, 0.3, 1154);
         set(ConfPaths.BLOCKPLACE_FASTPLACE_ACTIONS, "cancel vl>5 cancel log:fastplace:8:3:i vl>20 cancel log:fastplace:2:4:i vl>80 cancel log:fastplace:0:10:if cmdc:kickfastplace:1:10", 1154);
+        set(ConfPaths.BLOCKPLACE_FASTPLACE_VL_DECAY, 0.95, 1154);
         // Reach
         set(ConfPaths.BLOCKPLACE_REACH_CHECK, "default", 785);
         set(ConfPaths.BLOCKPLACE_REACH_ACTIONS, "cancel", 1154);
@@ -236,10 +241,12 @@ public class DefaultConfig extends ConfigFile {
         set(ConfPaths.CHAT_COMMANDS_SHORTTERM_TICKS, 18, 785);
         set(ConfPaths.CHAT_COMMANDS_SHORTTERM_LEVEL, 3, 785);
         set(ConfPaths.CHAT_COMMANDS_ACTIONS, "log:commands:0:5:cf cancel cmdc:kickcommands vl>20 log:commands:0:5:cf cancel cmdc:tempkick1", 1154);
+        set(ConfPaths.CHAT_COMMANDS_VL_DECAY, 0.99, 1154);
         // Text (ordering on purpose).
         // Normal
         set(ConfPaths.CHAT_TEXT_CHECK, "default", 785);
         set(ConfPaths.CHAT_TEXT_ALLOWVLRESET, true, 785);
+        set(ConfPaths.CHAT_TEXT_VL_DECAY, 0.95, 1154);
         // Expiration duration for per-player cache in milliseconds.
         set(ConfPaths.CHAT_TEXT_EXPIRATION_TIME, 600000L, 785);
         set(ConfPaths.CHAT_TEXT_FREQ_NORM_MIN, 0.0, 785);
@@ -308,6 +315,7 @@ public class DefaultConfig extends ConfigFile {
         set(ConfPaths.COMBINED_IMPROBABLE_CHECK , "default", 785);
         set(ConfPaths.COMBINED_IMPROBABLE_LEVEL, 250, 1154);
         set(ConfPaths.COMBINED_IMPROBABLE_ACTIONS, "cancel vl>20 log:improbable:8:9:if cancel vl>1500 cancel log:improbable:0:10:if cmdc:kickimprobable:0:5", 1154);
+        set(ConfPaths.COMBINED_IMPROBABLE_VL_DECAY, 0.95, 1154);
         // Invulnerable
         set(ConfPaths.COMBINED_INVULNERABLE_CHECK, true, 785); // Not a check type yet.
         set(ConfPaths.COMBINED_INVULNERABLE_TRIGGERS_ALWAYS, false, 785);
@@ -411,6 +419,7 @@ public class DefaultConfig extends ConfigFile {
         set(ConfPaths.INVENTORY_FASTCLICK_LIMIT_CHEST, 155, 1154);
         set(ConfPaths.INVENTORY_FASTCLICK_IMPROBABLE_WEIGHT, 0.7, 1154);
         set(ConfPaths.INVENTORY_FASTCLICK_ACTIONS, "cancel vl>150 cancel log:fastclick:7:5:i vl>400 cancel log:fastclick:1:5:if vl>3000 cancel log:fastclick:1:2:if cmdc:kickfastclick:2:5", 1154);
+        set(ConfPaths.INVENTORY_FASTCLICK_VL_DECAY, 0.99, 1154);
         // InstantBow
         set(ConfPaths.INVENTORY_INSTANTBOW_CHECK, "default", 785);
         set(ConfPaths.INVENTORY_INSTANTBOW_STRICT, true, 785);
@@ -535,6 +544,7 @@ public class DefaultConfig extends ConfigFile {
         // Passable
         set(ConfPaths.MOVING_PASSABLE_CHECK, "default", 785);
         set(ConfPaths.MOVING_PASSABLE_ACTIONS, "cancel vl>15 cancel log:passable:7:9:i vl>100 cancel log:passable:1:4:if", 1154);
+        set(ConfPaths.MOVING_PASSABLE_VL_DECAY, 0.99, 1154);
         set(ConfPaths.MOVING_PASSABLE_UNTRACKED_TELEPORT_ACTIVE, true, 785);
         set(ConfPaths.MOVING_PASSABLE_UNTRACKED_CMD_ACTIVE, true, 785);
         set(ConfPaths.MOVING_PASSABLE_UNTRACKED_CMD_TRYTELEPORT, true, 785);
@@ -561,10 +571,11 @@ public class DefaultConfig extends ConfigFile {
         // MOVING_SURVIVALFLY_SETBACKPOLICY_FALLDAMAGE -> MOVING_SURVIVALFLY_SETBACKPOLICY_APPLYFALLDAMAGE
         set(ConfPaths.MOVING_SURVIVALFLY_SETBACKPOLICY_APPLYFALLDAMAGE, true, 785);
         set(ConfPaths.MOVING_SURVIVALFLY_SETBACKPOLICY_VOIDTOVOID, false, 1154);
-        set(ConfPaths.MOVING_SURVIVALFLY_ACTIONS, "cancel log:flyfile:6:15:f" 
-            + " vl>100 cancel log:survivalfly:10:11:i log:flyfile:6:15:f" 
-            + " vl>700 cancel log:survivalfly:8:5:i log:flyfile:1:3:f" 
-            + " vl>2100 cancel log:survivalflyhighvl:0:4:icf cmdc:kickfly:0:15", 1154);     
+        set(ConfPaths.MOVING_SURVIVALFLY_ACTIONS, "cancel log:flyfile:6:15:f"
+            + " vl>100 cancel log:survivalfly:10:11:i log:flyfile:6:15:f"
+            + " vl>700 cancel log:survivalfly:8:5:i log:flyfile:1:3:f"
+            + " vl>2100 cancel log:survivalflyhighvl:0:4:icf cmdc:kickfly:0:15", 1154);
+        set(ConfPaths.MOVING_SURVIVALFLY_VL_DECAY, 0.95, 1154);
         // SurvivalFly - Hover Subcheck
         set(ConfPaths.MOVING_SURVIVALFLY_HOVER_CHECK, true, 785); // Not a check type yet.
         set(ConfPaths.MOVING_SURVIVALFLY_HOVER_STEP, 5, 785);
@@ -608,6 +619,7 @@ public class DefaultConfig extends ConfigFile {
         set(ConfPaths.MOVING_VEHICLE_ENVELOPE_HSPEEDCAP + ".default", 0.9, 1154);
         set(ConfPaths.MOVING_VEHICLE_ENVELOPE_HSPEEDCAP + ".pig", 0.3, 1154);
         set(ConfPaths.MOVING_VEHICLE_ENVELOPE_ACTIONS, "cancel vl>50 cancel log:vehicleenvelope:10:6:if vl>300 cancel log:vehicleenvelope:0:10:if cmdc:kickvehiclefly:0:10", 1154);
+        set(ConfPaths.MOVING_VEHICLE_ENVELOPE_VL_DECAY, 0.99, 1154);
         // Messages
         set(ConfPaths.MOVING_MESSAGE_ILLEGALPLAYERMOVE, "Illegal move.", 785);
         set(ConfPaths.MOVING_MESSAGE_ILLEGALVEHICLEMOVE, "Illegal vehicle move.", 785);

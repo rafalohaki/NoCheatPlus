@@ -34,8 +34,12 @@ public class BlockInteractConfig extends ACheckConfig {
     public final long		speedInterval;
     public final int		speedLimit;
     public final ActionList speedActions;
+    /** Decay factor for speed violation level. */
+    public final double speedVlDecay;
 
     public final ActionList visibleActions;
+    /** Decay factor for visible violation level. */
+    public final double visibleVlDecay;
 
     /**
      * Instantiates a new block interact configuration.
@@ -54,8 +58,10 @@ public class BlockInteractConfig extends ACheckConfig {
         speedInterval = data.getLong(ConfPaths.BLOCKINTERACT_SPEED_INTERVAL);
         speedLimit = data.getInt(ConfPaths.BLOCKINTERACT_SPEED_LIMIT);
         speedActions = data.getOptimizedActionList(ConfPaths.BLOCKINTERACT_SPEED_ACTIONS, Permissions.BLOCKINTERACT_SPEED);
+        speedVlDecay = data.getDouble(ConfPaths.BLOCKINTERACT_SPEED_VL_DECAY, 0.99);
 
         visibleActions = data.getOptimizedActionList(ConfPaths.BLOCKINTERACT_VISIBLE_ACTIONS, Permissions.BLOCKINTERACT_VISIBLE);
+        visibleVlDecay = data.getDouble(ConfPaths.BLOCKINTERACT_VISIBLE_VL_DECAY, 0.99);
     }
 
 }
