@@ -16,7 +16,7 @@ public class TestBubbleWebMovement {
     public void testAscendDoesNotExceedLimit() {
         double speed = 0.0;
         for (int i = 0; i < 20; i++) {
-            speed = BubbleWebHandler.computeBubbleSpeed(speed, true);
+            speed = BubbleWebHandler.computeAscendSpeed(speed);
             assertTrue(speed <= Magic.bubbleStreamAscend + 1e-9,
                     "Exceeded ascend limit at iteration " + i + ": " + speed);
         }
@@ -26,7 +26,7 @@ public class TestBubbleWebMovement {
     public void testDescendDoesNotExceedLimit() {
         double speed = 0.0;
         for (int i = 0; i < 20; i++) {
-            speed = BubbleWebHandler.computeBubbleSpeed(speed, false);
+            speed = BubbleWebHandler.computeDescendSpeed(speed);
             assertTrue(speed >= -Magic.bubbleStreamDescend - 1e-9,
                     "Exceeded descend limit at iteration " + i + ": " + speed);
         }

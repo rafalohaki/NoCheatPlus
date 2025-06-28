@@ -23,14 +23,21 @@ public final class BubbleWebHandler {
      * @return the predicted vertical speed limited by the bubble stream cap
      */
     public static double computeBubbleSpeed(double lastSpeed, boolean upward) {
-        double acceleration = upward ? Magic.bubbleWebUpAcceleration : Magic.bubbleWebDownAcceleration;
-        double limit = upward ? Magic.bubbleStreamAscend : -Magic.bubbleStreamDescend;
+        double acceleration;
+        double limit;
+        if (upward) {
+            acceleration = Magic.bubbleWebUpAcceleration;
+            limit = Magic.bubbleStreamAscend;
+        } else {
+            acceleration = Magic.bubbleWebDownAcceleration;
+            limit = -Magic.bubbleStreamDescend;
+        }
+
         double next = lastSpeed * Magic.FRICTION_MEDIUM_WATER + acceleration;
         if (upward) {
             return Math.min(next, limit);
-        } else {
-            return Math.max(next, limit);
         }
+        return Math.max(next, limit);
     }
 
     /**
@@ -41,5 +48,15 @@ public final class BubbleWebHandler {
      */
     public static double computeAscendSpeed(double lastSpeed) {
         return computeBubbleSpeed(lastSpeed, true);
+    }
+
+    /**
+     * Convenience wrapper for downward bubble streams.
+     *
+     * @param lastSpeed last vertical speed
+     * @return next speed limited by {@link Magic#bubbleStreamDescend}
+     */
+    public static double computeDescendSpeed(double lastSpeed) {
+        return computeBubbleSpeed(lastSpeed, false);
     }
 }

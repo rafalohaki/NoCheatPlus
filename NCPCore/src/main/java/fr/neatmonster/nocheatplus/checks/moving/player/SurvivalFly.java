@@ -3064,7 +3064,9 @@ public class SurvivalFly extends Check {
         // Bubble columns can slowly push the player upwards through the web.
         else if (from.isInBubbleStream() && !from.isDraggedByBubbleStream()
                 && yDistance < Magic.bubbleStreamAscend) {
-            vAllowedDistance = BubbleWebHandler.computeBubbleSpeed(lastMove.yDistance, true);
+            boolean wasInBubbleStream = lastMove.from.inBubbleStream && !lastMove.from.draggedByBubbleStream;
+            double lastSpeed = wasInBubbleStream ? lastMove.yDistance : 0.0;
+            vAllowedDistance = BubbleWebHandler.computeAscendSpeed(lastSpeed);
             vDistanceAboveLimit = yDistance - vAllowedDistance;
             tags.add("bubbleweb");
         }
@@ -3095,7 +3097,9 @@ public class SurvivalFly extends Check {
         // Bubble columns can slowly drag the player down through the web.
         if (thisMove.from.inBubbleStream && thisMove.from.draggedByBubbleStream
                 && yDistance > -Magic.bubbleStreamDescend) {
-            vAllowedDistance = BubbleWebHandler.computeBubbleSpeed(lastMove.yDistance, false);
+            boolean wasInBubbleStream = lastMove.from.inBubbleStream && lastMove.from.draggedByBubbleStream;
+            double lastSpeed = wasInBubbleStream ? lastMove.yDistance : 0.0;
+            vAllowedDistance = BubbleWebHandler.computeDescendSpeed(lastSpeed);
             tags.add("bubbleweb");
         }
         // Lenient on first move(s) in web.
