@@ -553,10 +553,24 @@ public class ReflectionUtil {
     }
 
     private static String getSimpleMemberModifierDescription(final Member member) {
-        final boolean accessible = member instanceof AccessibleObject && ((AccessibleObject) member).isAccessible();
         final int mod = member.getModifiers();
-        final String out = Modifier.isPublic(mod) ? "(public" : (accessible ? "(accessible" : "( -");
-        return out + (Modifier.isStatic(mod) ? " static) " : ") ");
+        final StringBuilder out = new StringBuilder();
+        out.append(Modifier.isPublic(mod) ? "(public" : "( -");
+        if (member instanceof AccessibleObject) {
+            AccessibleObject ao = (AccessibleObject) member;
+            boolean accessible = false;
+            try {
+                if (Modifier.isStatic(mod)) {
+                    accessible = ao.canAccess(null);
+                }
+            } catch (RuntimeException ignored) {
+            }
+            if (accessible) {
+                out.append(" accessible");
+            }
+        }
+        out.append(Modifier.isStatic(mod) ? " static) " : ") ");
+        return out.toString();
     }
 
 }
