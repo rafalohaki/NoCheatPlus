@@ -609,53 +609,99 @@ public class MovingListener extends CheckListener implements TickListener, IRemo
                                                      final PlayerMoveEvent event, final MovingData data,
                                                      final MovingConfig cc, final IPlayerData pData) {
 
-        Location newTo = null;
-        final String token;
-        final boolean earlyReturn;
+        EarlyReturnDecision res;
+
+        // Vehicle related handling first to prevent conflicting physics.
+        res = checkVehicleConditions(player, from, to, data, pData);
+        if (res != null) return res;
+
+        // Ignore moves while the player is dead or sleeping.
+        res = checkPlayerState(player, data);
+        if (res != null) return res;
+
+        // Handle world changes and scheduled teleports.
+        res = checkWorldAndTeleport(player, from, to, event, data, cc, pData);
+        if (res != null) return res;
+
+        // Skip duplicate move events created by the server.
+        res = checkDuplicateMove(from, to, data);
+        if (res != null) return res;
+
+        return new EarlyReturnDecision(false, null, null);
+    }
+
+    /**
+     * Check for various vehicle related conditions that require an early return.
+     *
+     * @return A decision if an early return is required or {@code null}.
+     */
+    private EarlyReturnDecision checkVehicleConditions(final Player player, final Location from,
+                                                       final Location to, final MovingData data,
+                                                       final IPlayerData pData) {
         if (player.isInsideVehicle()) {
-            newTo = vehicleChecks.onPlayerMoveVehicle(player, from, to, data, pData);
-            earlyReturn = true;
-            token = "vehicle";
+            // Movement is handled by VehicleChecks to avoid conflicts with vehicle physics.
+            Location newTo = vehicleChecks.onPlayerMoveVehicle(player, from, to, data, pData);
+            return new EarlyReturnDecision(true, newTo, "vehicle");
         }
-        else if (data.lastVehicleType == EntityType.MINECART && specialMinecart
+        if (data.lastVehicleType == EntityType.MINECART && specialMinecart
                 && to.distance(data.getSetBack(from)) < 3) {
-            earlyReturn = true;
-            token = "minecart-total";
+            // Skip to wait for a full minecart transition after world changes.
             data.lastVehicleType = null;
+            return new EarlyReturnDecision(true, null, "minecart-total");
         }
-        else if (data.vehicleLeave && to.distance(from) > 3) {
-            earlyReturn = true;
-            token = "vehicle-leave-sb";
-            newTo = data.getSetBack(from);
+        if (data.vehicleLeave && to.distance(from) > 3) {
+            // Player left a vehicle but moved away before normal handling.
+            Location newTo = data.getSetBack(from);
             data.vehicleLeave = false;
+            return new EarlyReturnDecision(true, newTo, "vehicle-leave-sb");
         }
-        else if (player.isDead()) {
+        return null;
+    }
+
+    /**
+     * Detect if the player state prevents processing the move.
+     */
+    private EarlyReturnDecision checkPlayerState(final Player player, final MovingData data) {
+        if (player.isDead()) {
+            // Dead players shouldn't be processed by movement checks.
             data.sfHoverTicks = -1;
-            earlyReturn = true;
-            token = "dead";
+            return new EarlyReturnDecision(true, null, "dead");
         }
-        else if (player.isSleeping()) {
+        if (player.isSleeping()) {
+            // Sleeping players can't move legitimately.
             data.sfHoverTicks = -1;
-            earlyReturn = true;
-            token = "sleeping";
+            return new EarlyReturnDecision(true, null, "sleeping");
         }
-        else if (!from.getWorld().equals(to.getWorld())) {
-            earlyReturn = true;
-            token = "worldchange";
+        return null;
+    }
+
+    /**
+     * Handle world transitions and pending teleports.
+     */
+    private EarlyReturnDecision checkWorldAndTeleport(final Player player, final Location from, final Location to,
+                                                      final PlayerMoveEvent event, final MovingData data,
+                                                      final MovingConfig cc, final IPlayerData pData) {
+        if (!from.getWorld().equals(to.getWorld())) {
+            // Changing world: wait for the proper teleport event first.
+            return new EarlyReturnDecision(true, null, "worldchange");
         }
-        else if (data.hasTeleported()) {
-            earlyReturn = handleTeleportedOnMove(player, event, data, cc, pData);
-            token = "awaitsetback";
+        if (data.hasTeleported()) {
+            // A teleport is pending and must be resolved before processing moves.
+            boolean early = handleTeleportedOnMove(player, event, data, cc, pData);
+            return new EarlyReturnDecision(early, null, "awaitsetback");
         }
-        else if (TrigUtil.isSamePos(from, to) && !data.lastMoveNoMove) {
-            earlyReturn = data.lastMoveNoMove = true;
-            token = "duplicate";
+        return null;
+    }
+
+    /**
+     * Ignore duplicate move events with identical positions.
+     */
+    private EarlyReturnDecision checkDuplicateMove(final Location from, final Location to, final MovingData data) {
+        if (TrigUtil.isSamePos(from, to) && !data.lastMoveNoMove) {
+            data.lastMoveNoMove = true;
+            return new EarlyReturnDecision(true, null, "duplicate");
         }
-        else {
-            earlyReturn = false;
-            token = null;
-        }
-        return new EarlyReturnDecision(earlyReturn, newTo, token);
+        return null;
     }
 
     private void handleSplitMoves(final Player player, final Location from, final Location to,
