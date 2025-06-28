@@ -46,7 +46,6 @@ import fr.neatmonster.nocheatplus.compat.Bridge1_13;
 import fr.neatmonster.nocheatplus.compat.Bridge1_9;
 import fr.neatmonster.nocheatplus.compat.BridgeEnchant;
 import fr.neatmonster.nocheatplus.compat.BridgeMisc;
-import fr.neatmonster.nocheatplus.compat.blocks.changetracker.BlockChangeTracker;
 import fr.neatmonster.nocheatplus.compat.blocks.changetracker.IBlockChangeTracker;
 import fr.neatmonster.nocheatplus.components.modifier.IAttributeAccess;
 import fr.neatmonster.nocheatplus.components.registry.event.IGenericInstanceHandle;
@@ -247,7 +246,7 @@ public class CreativeFly extends Check {
                 }
             } else if (LostGround.lostGround(player, from, to, hDistance, yDistance, sprinting,
                     lastMove, data, cc,
-                    useBlockChangeTracker ? (BlockChangeTracker) blockChangeTracker : null, tags)) {
+                    useBlockChangeTracker ? blockChangeTracker : null, tags)) {
                 return true;
             }
         }

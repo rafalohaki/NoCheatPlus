@@ -209,7 +209,7 @@ public class SurvivalFly extends Check {
         }
         if (isSamePos) {
             if (useBlockChangeTracker && from.isOnGroundOpportune(cc.yOnGround, 0L,
-                    (BlockChangeTracker) blockChangeTracker, data.blockChangeRef, tick)) {
+                    blockChangeTracker, data.blockChangeRef, tick)) {
                 tags.add("pastground_from");
                 return true;
             }
@@ -221,7 +221,7 @@ public class SurvivalFly extends Check {
         }
         return LostGround.lostGround(player, from, to, hDistance, yDistance, sprinting,
                 lastMove, data, cc,
-                useBlockChangeTracker ? (BlockChangeTracker) blockChangeTracker : null, tags);
+                useBlockChangeTracker ? blockChangeTracker : null, tags);
     }
 
     /** Validate player movement parameters and log if invalid. */
@@ -891,7 +891,7 @@ public class SurvivalFly extends Check {
                                          final PlayerMoveData thisMove, int tick,
                                          final MovingData data, final MovingConfig cc) {
 
-        if (to.isOnGroundOpportune(cc.yOnGround, 0L, (BlockChangeTracker) blockChangeTracker, data.blockChangeRef, tick)) {
+        if (to.isOnGroundOpportune(cc.yOnGround, 0L, blockChangeTracker, data.blockChangeRef, tick)) {
             tags.add("pastground_to");
             return true;
         }
@@ -1266,7 +1266,7 @@ public class SurvivalFly extends Check {
                  * (Full blocks: slightly more possible, ending up just above
                  * the block. Bounce allows other end positions.)
                  */
-                if (from.matchBlockChange((BlockChangeTracker) blockChangeTracker, data.blockChangeRef, Direction.Y_POS, Math.min(yDistance, 1.0))) {
+                if (from.matchBlockChange(blockChangeTracker, data.blockChangeRef, Direction.Y_POS, Math.min(yDistance, 1.0))) {
                     if (yDistance > 1.0) {
                         //
                         //                        final BlockChangeEntry entry = blockChangeTracker.getBlockChangeEntryMatchFlags(data.blockChangeRef,
@@ -1309,7 +1309,7 @@ public class SurvivalFly extends Check {
         }
         // Push (/pull) down.
         else if (yDistance < 0.0 && yDistance >= -1.0) {
-            if (from.matchBlockChange((BlockChangeTracker) blockChangeTracker, data.blockChangeRef, Direction.Y_NEG, -yDistance)) {
+            if (from.matchBlockChange(blockChangeTracker, data.blockChangeRef, Direction.Y_NEG, -yDistance)) {
                 tags.add("blkmv_y_neg");
                 final double maxDistYNeg = yDistance; // from.getY() - from.getBlockY();
                 return new double[]{maxDistYNeg, 0.0};
@@ -2643,16 +2643,14 @@ public class SurvivalFly extends Check {
             final IBlockChangeTracker tracker = blockChangeTracker;
 
             if (Math.abs(xDistance) > 0.485 && Math.abs(xDistance) < 1.025) {
-                if (tracker instanceof BlockChangeTracker mutableTracker
-                        && from.matchBlockChange(mutableTracker, data.blockChangeRef,
+                if (from.matchBlockChange(tracker, data.blockChangeRef,
                                 xDistance < 0 ? Direction.X_NEG : Direction.X_POS, 0.05)) {
                     hAllowedDistance = thisMove.hDistance; // MAGIC
                     hDistanceAboveLimit = 0.0;
                 }
             }
             else if (Math.abs(zDistance) > 0.485 && Math.abs(zDistance) < 1.025) {
-                if (tracker instanceof BlockChangeTracker mutableTracker
-                        && from.matchBlockChange(mutableTracker, data.blockChangeRef,
+                if (from.matchBlockChange(tracker, data.blockChangeRef,
                                 zDistance < 0 ? Direction.Z_NEG : Direction.Z_POS, 0.05)) {
                     hAllowedDistance = thisMove.hDistance; // MAGIC
                     hDistanceAboveLimit = 0.0;

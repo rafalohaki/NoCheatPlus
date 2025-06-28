@@ -26,7 +26,7 @@ import fr.neatmonster.nocheatplus.checks.moving.model.PlayerMoveData;
 import fr.neatmonster.nocheatplus.checks.moving.model.VehicleMoveData;
 import fr.neatmonster.nocheatplus.checks.moving.player.Passable;
 import fr.neatmonster.nocheatplus.compat.MCAccess;
-import fr.neatmonster.nocheatplus.compat.blocks.changetracker.BlockChangeTracker;
+import fr.neatmonster.nocheatplus.compat.blocks.changetracker.IBlockChangeTracker;
 import fr.neatmonster.nocheatplus.utilities.location.RichEntityLocation;
 import fr.neatmonster.nocheatplus.utilities.map.BlockCache;
 import fr.neatmonster.nocheatplus.utilities.map.BlockProperties;
@@ -55,7 +55,7 @@ public class LostGroundVehicle {
     public static boolean lostGround(final Entity vehicle, final RichEntityLocation from, final RichEntityLocation to,
             final double hDistance, final double yDistance, final boolean sprinting,
             final VehicleMoveData lastMove, final MovingData data, final MovingConfig cc,
-            final BlockChangeTracker blockChangeTracker, final Collection<String> tags) {
+            final IBlockChangeTracker blockChangeTracker, final Collection<String> tags) {
 
 
 
