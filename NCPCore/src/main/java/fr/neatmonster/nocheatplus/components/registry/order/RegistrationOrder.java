@@ -98,6 +98,8 @@ public class RegistrationOrder {
         } else if (p2 == null) {
             return 1; // o2 to front.
         } else {
+            // Higher numbers should be considered later, thus compare in
+            // reverse to achieve descending order.
             return p2.compareTo(p1);
         }
     };
