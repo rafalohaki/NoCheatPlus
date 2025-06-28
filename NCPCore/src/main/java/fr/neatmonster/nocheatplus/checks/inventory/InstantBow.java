@@ -66,7 +66,7 @@ public class InstantBow extends Check {
 
             debugOutput(player, pData, cc, force, pullDuration, expectedPullDuration);
 
-            data.instantBowInteract = 0;
+            data.bowTracker.reset();
             data.instantBowShoot = now;
         }
         return cancel;
@@ -79,8 +79,8 @@ public class InstantBow extends Check {
     private boolean isValidBowPull(final InventoryConfig cc, final InventoryData data,
             final long now, final long[] durationHolder) {
         if (cc.instantBowStrict) {
-            final boolean valid = data.instantBowInteract != 0;
-            durationHolder[0] = valid ? (now - data.instantBowInteract) : 0L;
+            final boolean valid = data.bowTracker.getLast() != 0;
+            durationHolder[0] = valid ? (now - data.bowTracker.getLast()) : 0L;
             return valid;
         }
         durationHolder[0] = now - data.instantBowShoot;
@@ -91,12 +91,12 @@ public class InstantBow extends Check {
             final InventoryConfig cc, final InventoryData data,
             final long expectedPullDuration, final boolean valid,
             final long pullDuration, final long now) {
-        if (valid && (!cc.instantBowStrict || data.instantBowInteract > 0L)
+        if (valid && (!cc.instantBowStrict || data.bowTracker.getLast() > 0L)
                 && pullDuration >= expectedPullDuration) {
             data.instantBowVL *= 0.9D;
             return false;
         }
-        if (valid && data.instantBowInteract > now) {
+        if (valid && data.bowTracker.getLast() > now) {
             return false;
         }
         return handleInstantBowViolation(player, pData, cc, data,

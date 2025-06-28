@@ -95,10 +95,11 @@ public class FastConsume extends Check implements Listener, INotifyReload {
             final long time, final InventoryData data, final IPlayerData pData) {
         boolean cancel = false;
         if (stack != null) {
-            final long ref = data.instantEatInteract == 0 ? 0
-                    : Math.max(data.instantEatInteract, data.lastClickTime);
+            final long ref = data.eatTracker.getLast() == 0 ? 0
+                    : Math.max(data.eatTracker.getLast(), data.lastClickTime);
             if (time < ref) {
-                data.instantEatInteract = data.lastClickTime = time;
+                data.eatTracker.setLast(time);
+                data.lastClickTime = time;
             } else {
                 final InventoryConfig cc = pData.getGenericInstance(
                         InventoryConfig.class);
@@ -108,7 +109,7 @@ public class FastConsume extends Check implements Listener, INotifyReload {
                     cancel = calculateViolation(player, stack, timeSpent, data,
                             cc);
                     resetFastConsumeState(player, cancel, data, pData);
-                    data.instantEatInteract = time;
+                    data.eatTracker.setLast(time);
                 }
             }
         }

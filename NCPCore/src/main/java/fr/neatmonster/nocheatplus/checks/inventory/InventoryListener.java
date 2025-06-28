@@ -519,23 +519,25 @@ public class InventoryListener  extends CheckListener implements JoinLeaveListen
 
     private void rememberBowInteract(final InventoryData data) {
         final long now = System.currentTimeMillis();
-        data.instantBowInteract = (data.instantBowInteract > 0 && now - data.instantBowInteract < 800)
-                ? Math.min(now, data.instantBowInteract) : now;
+        data.bowTracker.updateAndQualifies(now);
     }
 
     void rememberFoodInteract(final InventoryData data, final Material type) {
         final long now = System.currentTimeMillis();
-        // Delegate interaction timing; ensures valid fast-eat window (800 ms).
-        InventoryInteractHelper.applyFoodInteract(data, type, now);
-        data.instantBowInteract = 0;
+        if (data.eatTracker.updateAndQualifies(now)) {
+            data.instantEatFood = type;
+        } else {
+            data.instantEatFood = null;
+        }
+        data.bowTracker.reset();
     }
 
     private void resetInteractionData(final Player player, final IPlayerData pData, final InventoryData data) {
         if (pData.isDebugActive(CheckType.INVENTORY_INSTANTEAT) && data.instantEatFood != null) {
             debug(player, "PlayerInteractEvent, reset fastconsume (legacy: instanteat).");
         }
-        data.instantBowInteract = 0;
-        data.instantEatInteract = 0;
+        data.bowTracker.reset();
+        data.eatTracker.reset();
         data.instantEatFood = null;
     }
 
@@ -606,8 +608,8 @@ public class InventoryListener  extends CheckListener implements JoinLeaveListen
         if (pData.isDebugActive(checkType) && data.instantEatFood != null) {
             debug(player, "PlayerItemHeldEvent, reset fastconsume (legacy: instanteat).");
         }
-        data.instantBowInteract = 0;
-        data.instantEatInteract = System.currentTimeMillis();
+        data.bowTracker.reset();
+        data.eatTracker.setLast(System.currentTimeMillis());
         data.instantEatFood = null;
 
         // Illegal enchantments hotfix check.

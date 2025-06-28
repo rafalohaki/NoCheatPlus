@@ -12,22 +12,24 @@ public class InventoryListenerTest {
         InventoryData data = new InventoryData();
 
         long before = System.currentTimeMillis();
-        data.instantEatInteract = before - 900; // older than threshold
-        InventoryInteractHelper.applyFoodInteract(data, Material.BREAD, System.currentTimeMillis());
+        data.eatTracker.setLast(before - 900); // older than threshold
+        data.eatTracker.updateAndQualifies(System.currentTimeMillis());
         long after = System.currentTimeMillis();
 
         assertNull(data.instantEatFood);
-        assertEquals("Expected reset timestamp on slow interact", after, data.instantEatInteract, 50L);
+        assertEquals("Expected reset timestamp on slow interact", after, data.eatTracker.getLast(), 50L);
     }
 
     @Test
     public void testFoodSetForRecentInteract() throws Exception {
         InventoryData data = new InventoryData();
 
-        data.instantEatInteract = System.currentTimeMillis() - 100; // within threshold
-        InventoryInteractHelper.applyFoodInteract(data, Material.APPLE, System.currentTimeMillis());
+        data.eatTracker.setLast(System.currentTimeMillis() - 100); // within threshold
+        if (data.eatTracker.updateAndQualifies(System.currentTimeMillis())) {
+            data.instantEatFood = Material.APPLE;
+        }
 
         assertEquals(Material.APPLE, data.instantEatFood);
-        assertTrue(data.instantEatInteract > 0);
+        assertTrue(data.eatTracker.getLast() > 0);
     }
 }

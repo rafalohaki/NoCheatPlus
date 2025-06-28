@@ -19,6 +19,7 @@ import org.bukkit.inventory.InventoryView;
 
 import fr.neatmonster.nocheatplus.checks.access.ACheckData;
 import fr.neatmonster.nocheatplus.utilities.ds.count.ActionFrequency;
+import fr.neatmonster.nocheatplus.util.TimedInteractionTracker;
 
 /**
  * Player specific dataFactory for the inventory checks.
@@ -53,13 +54,14 @@ public class InventoryData extends ACheckData {
     public int fastClickLastCursorAmount = 0;
 
     // Data of the instant bow check.
-    /** Last time right click interact on bow. A value of 0 means 'invalid'.*/
-    public long     instantBowInteract = 0;
+    /** Tracker for quick bow interactions (800 ms window). */
+    public final TimedInteractionTracker bowTracker = new TimedInteractionTracker(800);
     public long     instantBowShoot;
 
     // Data of the instant eat check.
+    /** Tracks quick food interactions (800 ms window). */
+    public final TimedInteractionTracker eatTracker = new TimedInteractionTracker(800);
     public Material instantEatFood;
-    public long     instantEatInteract;
     
     // Data of the InventoryMove check.
     public long     lastMoveEvent = 0;
