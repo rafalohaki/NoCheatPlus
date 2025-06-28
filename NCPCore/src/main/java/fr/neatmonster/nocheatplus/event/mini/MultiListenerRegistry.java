@@ -170,7 +170,7 @@ public abstract class MultiListenerRegistry<EB, P> extends MiniListenerRegistry<
                 listener, method, order, basePriority);
     }
 
-    protected boolean check_and_prepare_method(final Method method) {
+    protected boolean check_and_prepare_method(final Object listener, final Method method) {
         try {
             if (!method.getReturnType().equals(void.class)) {
                 return false;
@@ -183,8 +183,7 @@ public abstract class MultiListenerRegistry<EB, P> extends MiniListenerRegistry<
                 // NOTE: Add a specific log message here.
                 return false;
             }
-            if (!method.isAccessible()) {
-                // NOTE: Can this step be minimized?
+            if (!method.canAccess(listener)) {
                 method.setAccessible(true);
             }
             return true;
@@ -230,7 +229,7 @@ public abstract class MultiListenerRegistry<EB, P> extends MiniListenerRegistry<
         for (Method method : listenerClass.getMethods()) {
             if (shouldBeEventHandler(method)) {
                 MiniListener<? extends EB> miniListener = null;
-                if (check_and_prepare_method(method)) {
+                if (check_and_prepare_method(listener, method)) {
                     miniListener = register(listener, method, 
                             getPriority(method, defaultPriority), order, 
                             getIgnoreCancelled(method, defaultIgnoreCancelled));

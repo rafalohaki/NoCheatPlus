@@ -154,7 +154,7 @@ public class ReflectHelper {
                 if (rootField.isAnnotationPresent(MostlyHarmless.class)) {
                     continue;
                 }
-                boolean accessible = rootField.isAccessible();
+                boolean accessible = rootField.canAccess(this);
                 if (!accessible) {
                     rootField.setAccessible(true);
                 }
