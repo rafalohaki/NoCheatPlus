@@ -50,7 +50,6 @@ public class NetStatic {
         int burnStart = winNum;
         int empty = 0;
         boolean firstUsed = false;
-        boolean counting = false;
         final float[] bucketScores = new float[winNum];
         for (int i = 0; i < winNum; i++) {
             bucketScores[i] = packetFreq.bucketScore(i);
@@ -60,11 +59,17 @@ public class NetStatic {
             if (bucket > 0f) {
                 if (!firstUsed) {
                     firstUsed = true;
-                } else if (!counting) {
+                } else {
                     burnStart = i;
-                    counting = true;
+                    break;
                 }
-            } else if (counting) {
+            }
+        }
+        if (burnStart < winNum) {
+            for (int i = burnStart + 1; i < winNum; i++) {
+                if (bucketScores[i] > 0f) {
+                    break;
+                }
                 empty++;
             }
         }
