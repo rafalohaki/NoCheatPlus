@@ -52,7 +52,7 @@ public class WrongTurnAdapter extends BaseAdapter {
             if (event.isPlayerTemporary()) return;
         } catch(NoSuchMethodError e) {
             if (player == null) return;
-            if (DataManager.getPlayerDataSafe(event.getPlayer()) == null) return;
+            if (DataManager.getInstance().getPlayerDataSafe(event.getPlayer()) == null) return;
         }
 
         if (player == null) {
@@ -62,7 +62,7 @@ public class WrongTurnAdapter extends BaseAdapter {
         final StructureModifier<Float> floats = event.getPacket().getFloat();
         final float pitch = floats.read(1);
 
-        final IPlayerData pData = DataManager.getPlayerData(player);
+        final IPlayerData pData = DataManager.getInstance().getPlayerData(player);
         final NetData data = pData.getGenericInstance(NetData.class);
         final NetConfig cc = pData.getGenericInstance(NetConfig.class);
 

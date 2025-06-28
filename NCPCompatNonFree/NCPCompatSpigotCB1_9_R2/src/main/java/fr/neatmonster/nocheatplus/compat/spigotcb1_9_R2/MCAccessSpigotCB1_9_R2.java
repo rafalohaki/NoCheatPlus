@@ -56,6 +56,14 @@ public class MCAccessSpigotCB1_9_R2 implements MCAccess {
     private final MobEffectList JUMP;
     private final MobEffectList FASTER_MOVEMENT;
 
+    private net.minecraft.server.v1_9_R2.Entity toNmsEntity(final Entity entity) {
+        if (!(entity instanceof CraftEntity)) {
+            throw new IllegalArgumentException("Expected CraftEntity, got "
+                    + (entity == null ? "null" : entity.getClass().getName()));
+        }
+        return ((CraftEntity) entity).getHandle();
+    }
+
     /**
      * Test for availability in constructor.
      */
@@ -135,7 +143,7 @@ public class MCAccessSpigotCB1_9_R2 implements MCAccess {
 
     @Override
     public double getHeight(final Entity entity) {
-        final net.minecraft.server.v1_9_R2.Entity mcEntity = ((CraftEntity) entity).getHandle();
+        final net.minecraft.server.v1_9_R2.Entity mcEntity = toNmsEntity(entity);
         AxisAlignedBB boundingBox = mcEntity.getBoundingBox();
         final double entityHeight = Math.max(mcEntity.length, Math.max(mcEntity.getHeadHeight(), boundingBox.e - boundingBox.b));
         if (entity instanceof LivingEntity) {
@@ -180,7 +188,7 @@ public class MCAccessSpigotCB1_9_R2 implements MCAccess {
 
     @Override
     public double getWidth(final Entity entity) {
-        return ((CraftEntity) entity).getHandle().width;
+        return toNmsEntity(entity).width;
     }
 
     @Override
@@ -250,7 +258,7 @@ public class MCAccessSpigotCB1_9_R2 implements MCAccess {
 
     @Override
     public boolean isComplexPart(final Entity entity) {
-        return ((CraftEntity) entity).getHandle() instanceof EntityComplexPart;
+        return toNmsEntity(entity) instanceof EntityComplexPart;
     }
 
     @Override

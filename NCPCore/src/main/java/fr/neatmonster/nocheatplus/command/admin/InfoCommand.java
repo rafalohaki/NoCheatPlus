@@ -70,7 +70,7 @@ public class InfoCommand extends BaseCommand {
         }
         else cG = cR = cGO = bold = italicbold = "";
 
-    	final Player player = DataManager.getPlayer(playerName);
+    	final Player player = DataManager.getInstance().getPlayer(playerName);
     	if (player != null) playerName = player.getName();
     	
     	final ViolationHistory history = ViolationHistory.getHistory(playerName, false);

@@ -12,6 +12,7 @@ import org.bukkit.entity.Player;
 import org.bukkit.World;
 import org.bukkit.inventory.ItemStack;
 import org.bukkit.inventory.PlayerInventory;
+import fr.neatmonster.nocheatplus.players.PlayerDataManager;
 
 import fr.neatmonster.nocheatplus.NCPAPIProvider;
 import fr.neatmonster.nocheatplus.checks.moving.MovingData;
@@ -113,10 +114,8 @@ public class TestCreativeFlyHelpers {
         f.set(null, api);
 
         // Minimal DataManager setup using mocks
-        Object pdm = mock(fr.neatmonster.nocheatplus.players.PlayerDataManager.class);
-        Field dm = fr.neatmonster.nocheatplus.players.DataManager.class.getDeclaredField("instance");
-        dm.setAccessible(true);
-        dm.set(null, pdm);
+        PlayerDataManager pdm = mock(fr.neatmonster.nocheatplus.players.PlayerDataManager.class);
+        new fr.neatmonster.nocheatplus.players.DataManager(pdm);
     }
 
     private static MovingData newData() {

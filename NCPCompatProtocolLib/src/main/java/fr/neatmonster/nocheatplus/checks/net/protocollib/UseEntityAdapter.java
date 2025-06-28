@@ -153,7 +153,7 @@ public class UseEntityAdapter extends BaseAdapter {
         if (player == null) {
             return null;
         }
-        final IPlayerData pData = DataManager.getPlayerDataSafe(player);
+        final IPlayerData pData = DataManager.getInstance().getPlayerDataSafe(player);
         if (pData == null) {
             return null;
         }

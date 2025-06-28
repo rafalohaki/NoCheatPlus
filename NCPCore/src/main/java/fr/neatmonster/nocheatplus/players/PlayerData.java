@@ -213,7 +213,7 @@ public class PlayerData implements IPlayerData {
             frequentTaskDelayLazy = frequentTaskLazyDefaultDelay;
         }
         boolean busy = false;
-        final Player player = DataManager.getPlayer(playerId);
+        final Player player = DataManager.getInstance().getPlayer(playerId);
         if (hasFrequentTasks()) {
             frequentTasks(tick, timeLast, player);
             busy = true;
@@ -329,16 +329,16 @@ public class PlayerData implements IPlayerData {
 
     private void registerFrequentPlayerTaskPrimaryThread() {
         frequentPlayerTaskShouldBeScheduled = true;
-        DataManager.registerFrequentPlayerTaskPrimaryThread(playerId);
+        DataManager.getInstance().registerFrequentPlayerTaskPrimaryThread(playerId);
     }
 
     private void registerFrequentPlayerTaskAsynchronous() {
         frequentPlayerTaskShouldBeScheduled = true;
-        DataManager.registerFrequentPlayerTaskAsynchronous(playerId);
+        DataManager.getInstance().registerFrequentPlayerTaskAsynchronous(playerId);
     }
 
     private boolean isFrequentPlayerTaskScheduled() {
-        return DataManager.isFrequentPlayerTaskScheduled(playerId);
+        return DataManager.getInstance().isFrequentPlayerTaskScheduled(playerId);
     }
 
     private PermissionNode getOrCreatePermissionNode(final RegisteredPermission registeredPermission) {
@@ -361,7 +361,7 @@ public class PlayerData implements IPlayerData {
     private AlmostBoolean fetchPermission(final RegisteredPermission registeredPermission, Player player) {
         if (Bukkit.isPrimaryThread()) {
             if (player == null) {
-                player = DataManager.getPlayer(this.playerId);
+                player = DataManager.getInstance().getPlayer(this.playerId);
                 if (player == null) {
                     return AlmostBoolean.MAYBE;
                 }
@@ -885,7 +885,7 @@ public class PlayerData implements IPlayerData {
     private <T> T cacheMissGenericInstance(final Class<T> registeredFor) {
         // 2. Check for registered factory (local)
         // Storing PlayerDataManager here might be useful
-        T res = DataManager.getFromFactory(registeredFor, 
+        T res = DataManager.getInstance().getFromFactory(registeredFor, 
                 new PlayerFactoryArgument(this, getCurrentWorldDataSafe()));
         if (res != null) {
             return  putDataCache(registeredFor, res);

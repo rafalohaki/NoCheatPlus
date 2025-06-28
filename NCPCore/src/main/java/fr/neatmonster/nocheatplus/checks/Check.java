@@ -108,7 +108,7 @@ public abstract class Check implements IDebugPlayer {
         this.type = type;
         mcAccess = NCPAPIProvider.getNoCheatPlusAPI().getGenericInstanceHandle(MCAccess.class);
         ViolationHistory.checkTypeMap.put(getClass().getName(), type);
-        DataManager.registerExecutionHistory(type, histories);
+        DataManager.getInstance().registerExecutionHistory(type, histories);
     }
 
     /**
@@ -218,7 +218,7 @@ public abstract class Check implements IDebugPlayer {
      * @return true, if the check is enabled
      */
     public boolean isEnabled(final Player player) {
-        return isEnabled(player, DataManager.getPlayerData(player));
+        return isEnabled(player, DataManager.getInstance().getPlayerData(player));
     }
 
     @Override

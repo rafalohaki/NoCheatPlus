@@ -93,10 +93,8 @@ public class TestBlockPlaceAgainst {
         execHist.setAccessible(true);
         execHist.set(realDataManager, new java.util.HashMap<>());
 
-        // 3. Set the static DataManager.instance field.
-        Field dmField = DataManager.class.getDeclaredField("instance");
-        dmField.setAccessible(true);
-        dmField.set(null, realDataManager);
+        // 3. Set the static DataManager instance.
+        new DataManager(realDataManager);
         
         // 4. Now that the static dependency is met, we can safely create the check.
         this.against = new TestableAgainst();

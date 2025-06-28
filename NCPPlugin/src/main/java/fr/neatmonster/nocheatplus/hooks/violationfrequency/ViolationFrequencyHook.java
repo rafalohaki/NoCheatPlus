@@ -74,7 +74,7 @@ public class ViolationFrequencyHook implements NCPHook, IFirst {
         final ViolationFrequencyConfig config = this.config;
         final StringBuilder builder = new StringBuilder(300);
         if (info.getTotalVl() > config.maxtotalvls) return false;
-        final IPlayerData pData = DataManager.getPlayerData(player);
+        final IPlayerData pData = DataManager.getInstance().getPlayerData(player);
         if (pData != null) {
             final MovingData data = pData.getGenericInstance(MovingData.class);
 

@@ -85,13 +85,11 @@ public class TestTeleportHandling {
         f.setAccessible(true);
         f.set(null, api);
 
-        Object pdm = u.allocateInstance(PlayerDataManager.class);
+        PlayerDataManager pdm = (PlayerDataManager) u.allocateInstance(PlayerDataManager.class);
         Field eh = PlayerDataManager.class.getDeclaredField("executionHistories");
         eh.setAccessible(true);
         eh.set(pdm, new HashMap<>());
-        Field dm = DataManager.class.getDeclaredField("instance");
-        dm.setAccessible(true);
-        dm.set(null, pdm);
+        new DataManager(pdm);
     }
 
     private static sun.misc.Unsafe getUnsafe() throws Exception {
@@ -214,9 +212,7 @@ public class TestTeleportHandling {
 
     private boolean invokeHandle(Location from, Location to, MovingData data, Flag flag) throws Exception {
         PlayerData pData = createPlayerData(flag, unsafe);
-        Field f = DataManager.class.getDeclaredField("instance");
-        f.setAccessible(true);
-        f.set(null, createDataMan(pData, unsafe));
+        new DataManager(createDataMan(pData, unsafe));
         PlayerMoveEvent event = new PlayerMoveEvent(player, from, to);
         Method m = MovingListener.class.getDeclaredMethod("handleTeleportedOnMove", Player.class, PlayerMoveEvent.class, MovingData.class, MovingConfig.class, IPlayerData.class);
         m.setAccessible(true);
@@ -253,9 +249,7 @@ public class TestTeleportHandling {
     public void testConfirmSetBackNullTeleported() throws Exception {
         Flag flag = new Flag();
         PlayerData pData = createPlayerData(flag, unsafe);
-        Field f = DataManager.class.getDeclaredField("instance");
-        f.setAccessible(true);
-        f.set(null, createDataMan(pData, unsafe));
+        new DataManager(createDataMan(pData, unsafe));
 
         MovingData data = mock(MovingData.class);
         when(data.getTeleported()).thenReturn(null);

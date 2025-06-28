@@ -40,6 +40,7 @@ import fr.neatmonster.nocheatplus.actions.ActionFactoryFactory;
 import fr.neatmonster.nocheatplus.actions.ActionFactory;
 import fr.neatmonster.nocheatplus.time.monotonic.Monotonic;
 import fr.neatmonster.nocheatplus.players.IPlayerDataManager;
+import fr.neatmonster.nocheatplus.players.PlayerDataManager;
 import fr.neatmonster.nocheatplus.config.ConfigFile;
 import fr.neatmonster.nocheatplus.compat.AlmostBoolean;
 import fr.neatmonster.nocheatplus.utilities.map.BlockCache;
@@ -137,13 +138,11 @@ public class TestGodModeHelpers {
             java.lang.reflect.Field uf = sun.misc.Unsafe.class.getDeclaredField("theUnsafe");
             uf.setAccessible(true);
             sun.misc.Unsafe un = (sun.misc.Unsafe) uf.get(null);
-            Object pdm = un.allocateInstance(fr.neatmonster.nocheatplus.players.PlayerDataManager.class);
+            PlayerDataManager pdm = (PlayerDataManager) un.allocateInstance(fr.neatmonster.nocheatplus.players.PlayerDataManager.class);
             java.lang.reflect.Field eh = fr.neatmonster.nocheatplus.players.PlayerDataManager.class.getDeclaredField("executionHistories");
             eh.setAccessible(true);
             eh.set(pdm, new java.util.HashMap<>());
-            java.lang.reflect.Field dm = fr.neatmonster.nocheatplus.players.DataManager.class.getDeclaredField("instance");
-            dm.setAccessible(true);
-            dm.set(null, pdm);
+            new fr.neatmonster.nocheatplus.players.DataManager(pdm);
         } catch (Exception e) {
             throw new RuntimeException(e);
         }

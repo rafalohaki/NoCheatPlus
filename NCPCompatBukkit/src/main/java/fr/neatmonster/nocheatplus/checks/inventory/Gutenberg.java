@@ -44,7 +44,7 @@ public class Gutenberg extends Check implements Listener {
         if (!isEnabled(player)) {
             return;
         }
-        final IPlayerData pData = DataManager.getPlayerData(player);
+        final IPlayerData pData = DataManager.getInstance().getPlayerData(player);
         final InventoryConfig cc = pData.getGenericInstance(InventoryConfig.class);
         final InventoryData data = pData.getGenericInstance(InventoryData.class);
         final BookMeta newMeta = event.getNewBookMeta();

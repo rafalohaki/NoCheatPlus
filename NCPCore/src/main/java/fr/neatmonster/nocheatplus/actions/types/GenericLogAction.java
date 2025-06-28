@@ -134,7 +134,7 @@ public class GenericLogAction extends ActionWithParameters<ViolationData, Action
         final RegisteredPermission permissionSilent = violationData.getPermissionSilent();
         // Storing PlayerData in ViolationData might remove this cache query.
         if (permissionSilent != null 
-                && DataManager.getPlayerData(violationData.player).hasPermission(permissionSilent, violationData.player)) {
+                && DataManager.getInstance().getPlayerData(violationData.player).hasPermission(permissionSilent, violationData.player)) {
             return;
         }
         final LogManager logManager = NCPAPIProvider.getNoCheatPlusAPI().getLogManager();

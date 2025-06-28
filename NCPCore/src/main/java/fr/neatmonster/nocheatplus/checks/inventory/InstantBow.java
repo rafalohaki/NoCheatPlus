@@ -53,7 +53,7 @@ public class InstantBow extends Check {
 
         boolean cancel = false;
         if (player != null) {
-            final IPlayerData pData = DataManager.getPlayerData(player);
+            final IPlayerData pData = DataManager.getInstance().getPlayerData(player);
             final InventoryData data = pData.getGenericInstance(InventoryData.class);
             final InventoryConfig cc = pData.getGenericInstance(InventoryConfig.class);
 

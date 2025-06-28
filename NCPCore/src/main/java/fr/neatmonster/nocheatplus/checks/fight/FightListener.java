@@ -471,7 +471,7 @@ public class FightListener extends CheckListener implements JoinLeaveListener{
 
         if (damaged instanceof Player) {
             final Player damagedPlayer = (Player) damaged;
-            if (debug && DataManager.getPlayerData(damagedPlayer)
+            if (debug && DataManager.getInstance().getPlayerData(damagedPlayer)
                     .hasPermission(Permissions.ADMINISTRATION_DEBUG, damagedPlayer)) {
                 damagedPlayer.sendMessage("Attacked by " + attacker.getName() + ": inv="
                         + mcAccess.getHandle().getInvulnerableTicks(damagedPlayer) + " ndt="
@@ -481,7 +481,7 @@ public class FightListener extends CheckListener implements JoinLeaveListener{
             if (selfHit.isEnabled(attacker, pData) && selfHit.check(attacker, damagedPlayer, data, cc)) {
                 cancelled = true;
             }
-            final LocationTrace trace = DataManager.getPlayerData(damagedPlayer)
+            final LocationTrace trace = DataManager.getInstance().getPlayerData(damagedPlayer)
                     .getGenericInstance(MovingData.class)
                     .updateTrace(damagedPlayer, damagedLoc, tick, damagedIsFake ? null : mcAccess.getHandle());
             return new DamagedInfo(damagedPlayer, trace, cancelled);
@@ -712,7 +712,7 @@ public class FightListener extends CheckListener implements JoinLeaveListener{
 
         if (damagedPlayer != null) {
             
-            final IPlayerData damagedPData = DataManager.getPlayerData(damagedPlayer);
+            final IPlayerData damagedPData = DataManager.getInstance().getPlayerData(damagedPlayer);
             damagedData = damagedPData.getGenericInstance(FightData.class);
             if (!damagedIsDead) {
                 // God mode check.
@@ -782,7 +782,7 @@ public class FightListener extends CheckListener implements JoinLeaveListener{
 
         final DamageCause damageCause = event.getCause();
         final Player attacker = resolveAttacker(damager);
-        final IPlayerData attackerPData = attacker == null ? null : DataManager.getPlayerData(attacker);
+        final IPlayerData attackerPData = attacker == null ? null : DataManager.getInstance().getPlayerData(attacker);
         final FightData attackerData = attackerPData == null ? null : attackerPData.getGenericInstance(FightData.class);
 
         if (attacker != null) {
@@ -878,7 +878,7 @@ public class FightListener extends CheckListener implements JoinLeaveListener{
         final Entity damaged = event.getEntity();
         if (damaged instanceof Player) {
             final Player damagedPlayer = (Player) damaged;
-            final IPlayerData damagedPData = DataManager.getPlayerData(damagedPlayer);
+            final IPlayerData damagedPData = DataManager.getInstance().getPlayerData(damagedPlayer);
             final FightData damagedData = damagedPData.getGenericInstance(FightData.class);
             final int ndt = damagedPlayer.getNoDamageTicks();
 
@@ -1031,7 +1031,7 @@ public class FightListener extends CheckListener implements JoinLeaveListener{
     @EventHandler(priority = EventPriority.MONITOR)
     public void onPlayerAnimation(final PlayerAnimationEvent event) {
         // Set a flag telling us that the arm has been swung.
-        final FightData data = DataManager.getGenericInstance(event.getPlayer(), FightData.class);
+        final FightData data = DataManager.getInstance().getGenericInstance(event.getPlayer(), FightData.class);
         data.noSwingCount = Math.max(data.noSwingCount - 1, 0);
         
     }
@@ -1055,7 +1055,7 @@ public class FightListener extends CheckListener implements JoinLeaveListener{
             return;
         }
         // EATING reason / peaceful difficulty / regen potion - byCaptain SpigotMC
-        final IPlayerData pData = DataManager.getPlayerData(player);
+        final IPlayerData pData = DataManager.getInstance().getPlayerData(player);
         if (pData.isCheckActive(CheckType.FIGHT_FASTHEAL, player) 
                 && fastHeal.check(player, pData)) {
             // Can clients force events with 0-re-gain ?
@@ -1071,7 +1071,7 @@ public class FightListener extends CheckListener implements JoinLeaveListener{
             return;
         }
         final Player player = (Player) entity;
-        final FightData data = DataManager.getGenericInstance(player, FightData.class);
+        final FightData data = DataManager.getInstance().getGenericInstance(player, FightData.class);
         // Adjust god mode data:
         // Remember the time.
         data.regainHealthTime = System.currentTimeMillis();
@@ -1085,7 +1085,7 @@ public class FightListener extends CheckListener implements JoinLeaveListener{
     public void entityInteract(PlayerInteractEntityEvent e) {
     	Entity entity = e.getRightClicked();
     	final Player player = e.getPlayer();
-    	final FightData data = DataManager.getGenericInstance(player, FightData.class);
+    	final FightData data = DataManager.getInstance().getGenericInstance(player, FightData.class);
         data.exemptArmSwing = entity != null && entity.getType().name().equals("PARROT");
     }
 
@@ -1095,7 +1095,7 @@ public class FightListener extends CheckListener implements JoinLeaveListener{
 
     @Override
     public void playerLeaves(final Player player) {
-        final FightData data = DataManager.getGenericInstance(player, FightData.class);
+        final FightData data = DataManager.getInstance().getGenericInstance(player, FightData.class);
         data.angleHits.clear();
     }
 
@@ -1103,7 +1103,7 @@ public class FightListener extends CheckListener implements JoinLeaveListener{
     public void onItemHeld(final PlayerItemHeldEvent event) {
         
         final Player player = event.getPlayer();
-        final IPlayerData pData = DataManager.getPlayerData(player);
+        final IPlayerData pData = DataManager.getInstance().getPlayerData(player);
         final long penalty = pData.getGenericInstance(FightConfig.class).toolChangeAttackPenalty;
         if (penalty > 0 ) {
             pData.getGenericInstance(FightData.class).attackPenalty.applyPenalty(penalty);

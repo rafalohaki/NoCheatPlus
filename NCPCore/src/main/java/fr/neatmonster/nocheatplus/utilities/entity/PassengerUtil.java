@@ -270,7 +270,7 @@ public class PassengerUtil {
 
         final boolean playerTeleported;
         if (player.isOnline() && !player.isDead()) {
-            final MovingConfig cc = DataManager.getGenericInstance(player, MovingConfig.class);
+            final MovingConfig cc = DataManager.getInstance().getGenericInstance(player, MovingConfig.class);
 
             // Mask player teleport as a set back.
             data.prepareSetBack(location);
@@ -307,7 +307,7 @@ public class PassengerUtil {
                     stats.playerIsOriginalPassenger = true;
                     break;
                 } else if (passenger instanceof Player) {
-                    DataManager.getGenericInstance((Player) passenger, MovingData.class).isVehicleSetBack = true;
+                    DataManager.getInstance().getGenericInstance((Player) passenger, MovingData.class).isVehicleSetBack = true;
                     stats.otherPlayers++;
                 }
             }
@@ -352,7 +352,7 @@ public class PassengerUtil {
             }
             if (passenger instanceof Player) {
                 if (teleportPlayerPassenger((Player) passenger, vehicle, location, vehicleTeleported,
-                        DataManager.getGenericInstance((Player) passenger, MovingData.class), debug)) {
+                        DataManager.getInstance().getGenericInstance((Player) passenger, MovingData.class), debug)) {
                     if (player.equals(passenger)) {
                         result.playerTeleported = true;
                     } else {

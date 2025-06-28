@@ -57,7 +57,7 @@ public class TellCommand extends BaseCommand {
 	}
 
 	private void tell(String name, String message) {
-		Player player = DataManager.getPlayer(name);
+		Player player = DataManager.getInstance().getPlayer(name);
 		if (player != null) player.sendMessage(ColorUtil.replaceColors(message));
 	}
 

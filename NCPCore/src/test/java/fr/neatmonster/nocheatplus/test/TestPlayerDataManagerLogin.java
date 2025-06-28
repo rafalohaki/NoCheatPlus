@@ -89,9 +89,7 @@ public class TestPlayerDataManagerLogin {
         Field f = PlayerDataManager.class.getDeclaredField("worldDataManager");
         f.setAccessible(true);
         f.set(manager, mock(fr.neatmonster.nocheatplus.worlds.WorldDataManager.class));
-        f = DataManager.class.getDeclaredField("instance");
-        f.setAccessible(true);
-        f.set(null, manager);
+        new DataManager(manager);
     }
 
     @Test
