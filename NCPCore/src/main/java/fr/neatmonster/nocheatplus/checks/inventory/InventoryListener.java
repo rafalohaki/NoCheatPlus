@@ -82,6 +82,8 @@ import fr.neatmonster.nocheatplus.utilities.TickTask;
  * @see InventoryEvent
  */
 public class InventoryListener  extends CheckListener implements JoinLeaveListener{
+
+    private final DataManager dataManager;
     
     /** Inventory Move check */
     private final InventoryMove invMove = addCheck(new InventoryMove());
@@ -120,8 +122,9 @@ public class InventoryListener  extends CheckListener implements JoinLeaveListen
     private final IGenericInstanceHandle<IEntityAccessVehicle> handleVehicles = NCPAPIProvider.getNoCheatPlusAPI().getGenericInstanceHandle(IEntityAccessVehicle.class);
 
     @SuppressWarnings("unchecked")
-    public InventoryListener() {
-        super(CheckType.INVENTORY);
+    public InventoryListener(final DataManager dataManager) {
+        super(CheckType.INVENTORY, dataManager);
+        this.dataManager = dataManager;
         final NoCheatPlusAPI api = NCPAPIProvider.getNoCheatPlusAPI();
         api.register(api.newRegistrationContext()
                 // InventoryConfig
@@ -152,7 +155,7 @@ public class InventoryListener  extends CheckListener implements JoinLeaveListen
         if (event.getEntity() instanceof Player) {
 
             final Player player = (Player) event.getEntity();
-            final IPlayerData pData = DataManager.getInstance().getPlayerData(player);
+            final IPlayerData pData = dataManager.getPlayerData(player);
                 if (instantBow.isEnabled(player, pData)) {
                     final long now = System.currentTimeMillis();
                     final Location loc = player.getLocation(useLoc);
@@ -193,7 +196,7 @@ public class InventoryListener  extends CheckListener implements JoinLeaveListen
         // Only if a player ate food.
         if (event.getEntity() instanceof Player) {
             final Player player = (Player) event.getEntity();
-            final IPlayerData pData = DataManager.getInstance().getPlayerData(player);
+            final IPlayerData pData = dataManager.getPlayerData(player);
                 if (instantEat.isEnabled(player, pData)
                         && instantEat.check(player, event.getFoodLevel())) {
                     event.setCancelled(true);
@@ -218,7 +221,7 @@ public class InventoryListener  extends CheckListener implements JoinLeaveListen
         final HumanEntity entity = event.getWhoClicked();
         if (entity instanceof Player) {
             final Player player = (Player) entity;
-            final IPlayerData pData = DataManager.getInstance().getPlayerData(player);
+            final IPlayerData pData = dataManager.getPlayerData(player);
             if (pData.isCheckActive(CheckType.INVENTORY, player)) {
                 handleInventoryClick(event, player, pData);
             }
@@ -342,7 +345,7 @@ public class InventoryListener  extends CheckListener implements JoinLeaveListen
         if (entity instanceof Player) {
 
             final Player player = (Player) entity;
-            final IPlayerData pData = DataManager.getInstance().getPlayerData(player);
+            final IPlayerData pData = dataManager.getPlayerData(player);
             final InventoryData data = pData.getGenericInstance(InventoryData.class);
             data.firstClickTime = 0;
             data.containerOpenTime = 0;
@@ -359,7 +362,7 @@ public class InventoryListener  extends CheckListener implements JoinLeaveListen
     public void containerOpen(PlayerInteractEvent event) {
 
         final Player player = event.getPlayer();
-        final IPlayerData pData = DataManager.getInstance().getPlayerData(player);
+        final IPlayerData pData = dataManager.getPlayerData(player);
         final InventoryData data = pData.getGenericInstance(InventoryData.class);
 
         if (!pData.isCheckActive(CheckType.INVENTORY, player)) return;
@@ -458,7 +461,7 @@ public class InventoryListener  extends CheckListener implements JoinLeaveListen
     public void onPlayerDropItem(final PlayerDropItemEvent event) {
 
         final Player player = event.getPlayer();
-        final IPlayerData pData = DataManager.getInstance().getPlayerData(player);
+        final IPlayerData pData = dataManager.getPlayerData(player);
 
         if (!pData.isCheckActive(CheckType.INVENTORY, player)) return;
 
@@ -481,7 +484,7 @@ public class InventoryListener  extends CheckListener implements JoinLeaveListen
 
         if (event.getAction() == Action.RIGHT_CLICK_AIR || event.getAction() == Action.RIGHT_CLICK_BLOCK) {
             final Player player = event.getPlayer();
-            final IPlayerData pData = DataManager.getInstance().getPlayerData(player);
+            final IPlayerData pData = dataManager.getPlayerData(player);
             if (pData.isCheckActive(CheckType.INVENTORY, player)) {
                 final InventoryData data = pData.getGenericInstance(InventoryData.class);
 
@@ -544,7 +547,7 @@ public class InventoryListener  extends CheckListener implements JoinLeaveListen
     public final void onPlayerInteractEntity(final PlayerInteractEntityEvent event) {
 
         final Player player = event.getPlayer();
-        if (player.getGameMode() == GameMode.CREATIVE || !DataManager.getInstance().getPlayerData(player).isCheckActive(CheckType.INVENTORY, player)) {
+        if (player.getGameMode() == GameMode.CREATIVE || !dataManager.getPlayerData(player).isCheckActive(CheckType.INVENTORY, player)) {
             return;
         }
         if (player.isDead() && BridgeHealth.getHealth(player) <= 0.0) {
@@ -562,7 +565,7 @@ public class InventoryListener  extends CheckListener implements JoinLeaveListen
         Entity entity = event.getRightClicked();
         if (stack != null &&  MaterialUtil.isSpawnEgg(stack.getType())
             && (entity == null || entity instanceof LivingEntity  || entity instanceof ComplexEntityPart)
-            && items.isEnabled(player, DataManager.getInstance().getPlayerData(player))) {
+            && items.isEnabled(player, dataManager.getPlayerData(player))) {
             event.setCancelled(true);
             counters.addPrimaryThread(idEggOnEntity, 1);
             return;
@@ -586,7 +589,7 @@ public class InventoryListener  extends CheckListener implements JoinLeaveListen
         if (entity instanceof Player) {
 
             final Player player = (Player) entity;
-            final IPlayerData pData = DataManager.getInstance().getPlayerData(player);
+            final IPlayerData pData = dataManager.getPlayerData(player);
             final InventoryData data = pData.getGenericInstance(InventoryData.class);
             if (data.firstClickTime == 0) data.firstClickTime = now;
             if (MovingUtil.hasScheduledPlayerSetBack(player)) {
@@ -599,7 +602,7 @@ public class InventoryListener  extends CheckListener implements JoinLeaveListen
     public void onItemHeldChange(final PlayerItemHeldEvent event) {
 
         final Player player = event.getPlayer();
-        final IPlayerData pData = DataManager.getInstance().getPlayerData(player);
+        final IPlayerData pData = dataManager.getPlayerData(player);
         final InventoryData data = pData.getGenericInstance(InventoryData.class);
 
         if (!pData.isCheckActive(CheckType.INVENTORY, player)) return;
@@ -628,7 +631,7 @@ public class InventoryListener  extends CheckListener implements JoinLeaveListen
     public void onPlayerChangedWorld(final PlayerChangedWorldEvent event) {
 
         final Player player = event.getPlayer();
-        final IPlayerData pData = DataManager.getInstance().getPlayerData(player);
+        final IPlayerData pData = dataManager.getPlayerData(player);
         final InventoryData data = pData.getGenericInstance(InventoryData.class);
         open.check(event.getPlayer());
         data.firstClickTime = 0;
@@ -659,7 +662,7 @@ public class InventoryListener  extends CheckListener implements JoinLeaveListen
     public void onPlayerRespawn(final PlayerRespawnEvent event) {
 
         final Player player = event.getPlayer();
-        final IPlayerData pData = DataManager.getInstance().getPlayerData(player);
+        final IPlayerData pData = dataManager.getPlayerData(player);
         final InventoryData data = pData.getGenericInstance(InventoryData.class);
         data.firstClickTime = 0;
         data.containerOpenTime = 0;
@@ -679,7 +682,7 @@ public class InventoryListener  extends CheckListener implements JoinLeaveListen
         if (entity instanceof Player) {
 
             final Player player = (Player) entity;
-            final IPlayerData pData = DataManager.getInstance().getPlayerData(player);
+            final IPlayerData pData = dataManager.getPlayerData(player);
             final InventoryData data = pData.getGenericInstance(InventoryData.class);
             open.check(player);
             data.firstClickTime = 0;
@@ -698,7 +701,7 @@ public class InventoryListener  extends CheckListener implements JoinLeaveListen
     public void onPlayerSleep(final PlayerBedEnterEvent event) {
 
         final Player player = event.getPlayer();
-        final IPlayerData pData = DataManager.getInstance().getPlayerData(player);
+        final IPlayerData pData = dataManager.getPlayerData(player);
         final InventoryData data = pData.getGenericInstance(InventoryData.class);
         open.check(player);
         data.firstClickTime = 0;
@@ -744,7 +747,7 @@ public class InventoryListener  extends CheckListener implements JoinLeaveListen
         final Location from = event.getFrom();
         final Location to = event.getTo();
         final boolean PoYdiff = from.getPitch() != to.getPitch() || from.getYaw() != to.getYaw();
-        final IPlayerData pData = DataManager.getInstance().getPlayerData(player);
+        final IPlayerData pData = dataManager.getPlayerData(player);
 
         if (!pData.isCheckActive(CheckType.INVENTORY, player)) return;
 
@@ -784,7 +787,7 @@ public class InventoryListener  extends CheckListener implements JoinLeaveListen
         // Note: ignore cancelother setting.
         open.check(event.getPlayer());
         final Player player = event.getPlayer();
-        final IPlayerData pData = DataManager.getInstance().getPlayerData(player);
+        final IPlayerData pData = dataManager.getPlayerData(player);
         final InventoryData data = pData.getGenericInstance(InventoryData.class);
         data.firstClickTime = 0; // Fix false positives with InvMove when teleporting.
         data.containerOpenTime = 0;
@@ -794,7 +797,7 @@ public class InventoryListener  extends CheckListener implements JoinLeaveListen
     public void playerJoins(Player player) {
         
         // Just to be sure...
-        final IPlayerData pData = DataManager.getInstance().getPlayerData(player);
+        final IPlayerData pData = dataManager.getPlayerData(player);
         final InventoryData data = pData.getGenericInstance(InventoryData.class);
         data.firstClickTime = 0;
         data.containerOpenTime = 0;
@@ -803,7 +806,7 @@ public class InventoryListener  extends CheckListener implements JoinLeaveListen
     @Override
     public void playerLeaves(Player player) {
 
-        final IPlayerData pData = DataManager.getInstance().getPlayerData(player);
+        final IPlayerData pData = dataManager.getPlayerData(player);
         final InventoryData data = pData.getGenericInstance(InventoryData.class);
         data.firstClickTime = 0;
         data.containerOpenTime = 0;

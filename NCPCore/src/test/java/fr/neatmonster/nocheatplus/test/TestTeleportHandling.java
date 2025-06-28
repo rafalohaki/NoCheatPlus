@@ -199,6 +199,9 @@ public class TestTeleportHandling {
         Field fAux = MovingListener.class.getDeclaredField("aux");
         fAux.setAccessible(true);
         fAux.set(listener, aux);
+        Field fDM = MovingListener.class.getDeclaredField("dataManager");
+        fDM.setAccessible(true);
+        fDM.set(listener, DataManager.getInstance());
         config = (MovingConfig) unsafe.allocateInstance(MovingConfig.class);
         Field y = MovingConfig.class.getDeclaredField("yOnGround");
         y.setAccessible(true);
@@ -213,6 +216,9 @@ public class TestTeleportHandling {
     private boolean invokeHandle(Location from, Location to, MovingData data, Flag flag) throws Exception {
         PlayerData pData = createPlayerData(flag, unsafe);
         new DataManager(createDataMan(pData, unsafe));
+        Field ldm = MovingListener.class.getDeclaredField("dataManager");
+        ldm.setAccessible(true);
+        ldm.set(listener, DataManager.getInstance());
         PlayerMoveEvent event = new PlayerMoveEvent(player, from, to);
         Method m = MovingListener.class.getDeclaredMethod("handleTeleportedOnMove", Player.class, PlayerMoveEvent.class, MovingData.class, MovingConfig.class, IPlayerData.class);
         m.setAccessible(true);

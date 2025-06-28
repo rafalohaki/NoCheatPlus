@@ -275,7 +275,6 @@ public class PlayerDataManager  implements IPlayerDataManager, ComponentWithName
      * @param permissionRegistry
      */
     public PlayerDataManager(final WorldDataManager worldDataManager, final PermissionRegistry permissionRegistry) {
-        new DataManager(this); // initialize legacy singleton
         if (ServerVersion.isMinecraftVersionUnknown()) {
             // True hacks.
             BukkitVersion.init();

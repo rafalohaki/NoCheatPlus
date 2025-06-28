@@ -19,6 +19,8 @@ import java.util.Collection;
 import java.util.LinkedList;
 import java.util.List;
 
+import fr.neatmonster.nocheatplus.players.DataManager;
+
 import org.bukkit.entity.Player;
 
 import fr.neatmonster.nocheatplus.NCPAPIProvider;
@@ -37,6 +39,8 @@ import fr.neatmonster.nocheatplus.utilities.CheckUtils;
  */
 public class CheckListener extends NCPListener implements IHoldSubComponents, IDebugPlayer {
 
+    protected final DataManager dataManager;
+
     /** Check group / type which this listener is for. */
     protected final CheckType checkType;
     protected final IGenericInstanceHandle<MCAccess> mcAccess;
@@ -45,8 +49,13 @@ public class CheckListener extends NCPListener implements IHoldSubComponents, ID
     protected final List<Object> queuedComponents = new LinkedList<Object>();
 
     public CheckListener(CheckType checkType){
-        this.checkType = checkType; 
+        this(checkType, DataManager.getInstance());
+    }
+
+    public CheckListener(CheckType checkType, DataManager dataManager){
+        this.checkType = checkType;
         this.mcAccess = NCPAPIProvider.getNoCheatPlusAPI().getGenericInstanceHandle(MCAccess.class);
+        this.dataManager = dataManager;
     }
 
     @Override

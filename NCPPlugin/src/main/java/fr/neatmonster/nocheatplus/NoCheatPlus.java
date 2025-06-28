@@ -209,8 +209,11 @@ public class NoCheatPlus extends JavaPlugin implements NoCheatPlusAPI {
     private final PermissionRegistry permissionRegistry = new PermissionRegistry(10000);
     /** Per world data. */
     private final WorldDataManager worldDataManager = new WorldDataManager();
-    /** Player data / general data manager +- soon to be legacy static API. */
+    /** Player data / general data manager. */
     private final PlayerDataManager pDataMan = new PlayerDataManager(worldDataManager, permissionRegistry);
+
+    /** Data service wrapper for player data manager. */
+    private final DataManager dataManager = new DataManager(pDataMan);
 
     private Object dataManTaskId = null;
 
@@ -441,7 +444,7 @@ public class NoCheatPlus extends JavaPlugin implements NoCheatPlusAPI {
                 if (sender instanceof Player) {
                     // Use the permission caching feature.
                     final Player player = (Player) sender;
-                    final IPlayerData data = DataManager.getInstance().getPlayerData(player);
+                    final IPlayerData data = dataManager.getPlayerData(player);
                     if (data.getNotifyOff() || !data.hasPermission(Permissions.NOTIFY, player)) {
                         continue;
                     }
@@ -1061,15 +1064,15 @@ public class NoCheatPlus extends JavaPlugin implements NoCheatPlusAPI {
 
         // Register "higher level" components (check listeners).
         for (final Object obj : new Object[]{
-                new BlockInteractListener(),
-                new BlockBreakListener(),
-                new BlockPlaceListener(),
-                new ChatListener(),
-                new CombinedListener(),
+                new BlockInteractListener(dataManager),
+                new BlockBreakListener(dataManager),
+                new BlockPlaceListener(dataManager),
+                new ChatListener(dataManager),
+                new CombinedListener(dataManager),
                 // Do mind registration order: Combined must come before Fight.
-                new FightListener(),
-                new InventoryListener(),
-                new MovingListener(),
+                new FightListener(dataManager),
+                new InventoryListener(dataManager),
+                new MovingListener(dataManager),
         }) {
             addComponent(obj);
             // Register sub-components (allow later added to use registries, if any).
@@ -1192,7 +1195,7 @@ public class NoCheatPlus extends JavaPlugin implements NoCheatPlusAPI {
         }
         // Update some moving data for players that logged in while the plugin was disabled.
         for (final Player player : onlinePlayers) {
-            final IPlayerData pData = DataManager.getInstance().getPlayerData(player);
+            final IPlayerData pData = dataManager.getPlayerData(player);
             if (player.isSleeping()) {
                 pData.getGenericInstance(MovingData.class).wasInBed = true;
             }
@@ -1353,7 +1356,7 @@ public class NoCheatPlus extends JavaPlugin implements NoCheatPlusAPI {
             // Check if login is denied (plus expiration check).
             // Could switch to using player UUIDs and handle AsyncPlayerPreLogin.
             if (checkDenyLoginsNames(player.getName())) {
-                if (DataManager.getInstance().getPlayerData(player).hasPermission(Permissions.BYPASS_DENY_LOGIN, player)) {
+                if (dataManager.getPlayerData(player).hasPermission(Permissions.BYPASS_DENY_LOGIN, player)) {
                     return;
                 }
                 // An alternative would be to use the built in temporary ban feature and include the remaining duration.
@@ -1417,7 +1420,7 @@ public class NoCheatPlus extends JavaPlugin implements NoCheatPlusAPI {
 
     private void onJoinLow(final Player player) {
         final String playerName = player.getName();
-        final IPlayerData data = DataManager.getInstance().getPlayerData(player);
+        final IPlayerData data = dataManager.getPlayerData(player);
         if (data.hasPermission(Permissions.NOTIFY, player)) { // Updates the cache.
             // Login notifications...
             //            // Update available.

@@ -35,7 +35,7 @@ import fr.neatmonster.nocheatplus.checks.CheckType;
  */
 public class DataManager {
 
-    private static DataManager instance;
+    private static volatile DataManager instance;
 
     private final PlayerDataManager playerDataManager;
 
@@ -57,7 +57,7 @@ public class DataManager {
      * @deprecated inject the DataManager service instead of calling this method
      */
     @Deprecated
-    public static DataManager getInstance() {
+    public static synchronized DataManager getInstance() {
         return instance;
     }
 

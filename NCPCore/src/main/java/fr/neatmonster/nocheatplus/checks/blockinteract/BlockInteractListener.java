@@ -62,6 +62,8 @@ import fr.neatmonster.nocheatplus.worlds.WorldFactoryArgument;
  */
 public class BlockInteractListener extends CheckListener {
 
+    private final DataManager dataManager;
+
     public static void debugBlockVSBlockInteract(final Player player, final CheckType checkType, 
             final Block block, final String prefix, final Action expectedAction,
             final IPlayerData pData) {
@@ -109,8 +111,9 @@ public class BlockInteractListener extends CheckListener {
     private final int idInteractLookFlyingOther = counters.registerKey("block.interact.look.flying.other");
 
     @SuppressWarnings("unchecked")
-    public BlockInteractListener() {
-        super(CheckType.BLOCKINTERACT);
+    public BlockInteractListener(final DataManager dataManager) {
+        super(CheckType.BLOCKINTERACT, dataManager);
+        this.dataManager = dataManager;
         final NoCheatPlusAPI api = NCPAPIProvider.getNoCheatPlusAPI();
         api.register(api.newRegistrationContext() //
                 // BlockInteractConfig
@@ -138,7 +141,7 @@ public class BlockInteractListener extends CheckListener {
         if (player == null) {
             return;
         }
-        final IPlayerData pData = DataManager.getInstance().getPlayerData(player);
+        final IPlayerData pData = dataManager.getPlayerData(player);
         if (pData == null || !pData.isCheckActive(CheckType.BLOCKINTERACT, player)) {
             return;
         }
@@ -338,7 +341,7 @@ public class BlockInteractListener extends CheckListener {
     public void onPlayerInteractMonitor(final PlayerInteractEvent event) {
         // Set event resolution.
         final Player player = event.getPlayer();
-        final IPlayerData pData = DataManager.getInstance().getPlayerData(player);
+        final IPlayerData pData = dataManager.getPlayerData(player);
         final BlockInteractData data = pData.getGenericInstance(BlockInteractData.class);
         data.setPlayerInteractEventResolution(event);
 
