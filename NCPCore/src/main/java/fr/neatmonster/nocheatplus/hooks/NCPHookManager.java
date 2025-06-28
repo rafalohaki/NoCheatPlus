@@ -266,6 +266,17 @@ public final class NCPHookManager {
     }
 
     /**
+     * Return the player name or an empty string if the player is {@code null}.
+     *
+     * @param player
+     *            the player, may be {@code null}
+     * @return the player name or an empty string
+     */
+    private static String getPlayerNameSafe(final Player player) {
+        return player != null ? player.getName() : "";
+    }
+
+    /**
      * Log that a hook failed.
      * 
      * @param checkType
@@ -287,7 +298,10 @@ public final class NCPHookManager {
             builder.append("Parent " + checkType.getParent() + " ");
         }
         builder.append("Check " + checkType);
-        builder.append(" Player " + player.getName());
+        final String playerName = getPlayerNameSafe(player);
+        if (!playerName.isEmpty()) {
+            builder.append(" Player ").append(playerName);
+        }
         builder.append("\n");
         builder.append("Exception (" + t.getClass().getSimpleName() + "): " + t.getMessage() + "\n");
         for (final StackTraceElement el : t.getStackTrace()) {
