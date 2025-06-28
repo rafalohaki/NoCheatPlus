@@ -21,6 +21,7 @@ import fr.neatmonster.nocheatplus.components.registry.factory.IFactoryOne;
 import fr.neatmonster.nocheatplus.components.registry.setup.RegistrationContext;
 import fr.neatmonster.nocheatplus.components.registry.setup.instance.RegisterInstanceWorld;
 import fr.neatmonster.nocheatplus.worlds.WorldFactoryArgument;
+import java.util.Collection;
 
 /**
  * Per world data types are automatically registered as (data) types with the
@@ -48,7 +49,7 @@ public class RegisterDataWorld<T extends IData> extends RegisterInstanceWorld<T>
     @Override
     public RegisterDataWorld<T> addToGroups(
             final CheckType checkType, final boolean withDescendantCheckTypes,
-            final Class<? super T>... groupTypes) {
+            final Collection<Class<? super T>> groupTypes) {
         super.addToGroups(checkType, withDescendantCheckTypes, groupTypes);
         return this;
     }

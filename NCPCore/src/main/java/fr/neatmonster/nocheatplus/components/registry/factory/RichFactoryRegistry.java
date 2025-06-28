@@ -100,7 +100,7 @@ public class RichFactoryRegistry<A> extends RichTypeSetRegistry implements IRich
             factoryRegistry.registerFactory(registerFor, factory);
             for (final Class<?> groupType: autoGroups) {
                 if (groupType.isAssignableFrom(registerFor)) {
-                    addToGroups(registerFor, (Class<? super T>) groupType);
+                    addToGroups(registerFor, Collections.singletonList((Class<? super T>) groupType));
                 }
             }
         } finally {

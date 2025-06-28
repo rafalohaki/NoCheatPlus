@@ -222,7 +222,7 @@ public class NetStatic {
                 // NetData
                 .registerDataPlayer(NetData.class)
                 .factory(arg -> new NetData(arg.playerData.getGenericInstance(NetConfig.class)))
-                .addToGroups(CheckType.NET, true, IData.class, ICheckData.class)
+                .addToGroups(CheckType.NET, true, List.of(IData.class, ICheckData.class))
                 .context() //
                 );
     }

@@ -239,7 +239,7 @@ public class MovingListener extends CheckListener implements TickListener, IRemo
                 .registerDataPlayer(MovingData.class)
                 .factory(arg -> new MovingData(arg.worldData.getGenericInstance(
                         MovingConfig.class), arg.playerData))
-                .addToGroups(CheckType.MOVING, false, IData.class, ICheckData.class)
+                .addToGroups(CheckType.MOVING, false, List.of(IData.class, ICheckData.class))
                 .removeSubCheckData(CheckType.MOVING, true)
                 .context() //
                 );

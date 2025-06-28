@@ -62,7 +62,7 @@ public class RichTypeSetRegistry implements IRichTypeSetRegistry {
 
     @Override
     public <I> void addToGroups(final Class<I> itemType,
-            final Class<? super I>... groupTypes) {
+            final Collection<Class<? super I>> groupTypes) {
         lock.lock();
         try {
             for (final Class<? super I> groupType : groupTypes) {
@@ -76,7 +76,7 @@ public class RichTypeSetRegistry implements IRichTypeSetRegistry {
 
     @Override
     public <I> void addToGroups(CheckType checkType, Class<I> itemType,
-            Class<? super I>... groupTypes) {
+            Collection<Class<? super I>> groupTypes) {
         lock.lock();
         try {
             for (final Class<? super I> groupType : groupTypes) {
@@ -138,7 +138,7 @@ public class RichTypeSetRegistry implements IRichTypeSetRegistry {
 
     @Override
     public <I> void addToGroups(final Collection<CheckType> checkTypes,
-            final Class<I> itemType, final Class<? super I>... groupTypes) {
+            final Class<I> itemType, final Collection<Class<? super I>> groupTypes) {
         lock.lock();
         try {
             for (final CheckType checkType : checkTypes) {

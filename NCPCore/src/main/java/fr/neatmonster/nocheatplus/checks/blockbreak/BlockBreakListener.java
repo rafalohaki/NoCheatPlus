@@ -26,6 +26,7 @@ import org.bukkit.event.block.Action;
 import org.bukkit.event.block.BlockBreakEvent;
 import org.bukkit.event.block.BlockDamageEvent;
 import org.bukkit.event.player.PlayerAnimationEvent;
+import java.util.List;
 import org.bukkit.event.player.PlayerInteractEvent;
 import org.bukkit.event.player.PlayerItemHeldEvent;
 import org.bukkit.inventory.ItemStack;
@@ -106,7 +107,7 @@ public class BlockBreakListener extends CheckListener {
                 .factory(arg -> new BlockBreakData(
                         arg.playerData.getGenericInstance(BlockBreakConfig.class)))
                 // (Complete data removal for now.)
-                .addToGroups(CheckType.BLOCKBREAK, true, IData.class, ICheckData.class)
+                .addToGroups(CheckType.BLOCKBREAK, true, List.of(IData.class, ICheckData.class))
                 .context() //
                 );
     }

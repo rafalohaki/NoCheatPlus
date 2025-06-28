@@ -26,6 +26,7 @@ import org.bukkit.entity.LivingEntity;
 import org.bukkit.entity.Player;
 import org.bukkit.event.EventHandler;
 import org.bukkit.event.EventPriority;
+import java.util.List;
 import org.bukkit.event.block.Action;
 import org.bukkit.event.entity.EntityDeathEvent;
 import org.bukkit.event.entity.EntityPortalEnterEvent;
@@ -132,7 +133,7 @@ public class InventoryListener  extends CheckListener implements JoinLeaveListen
                 // InventoryData
                 .registerDataPlayer(InventoryData.class)
                 .factory(arg -> new InventoryData())
-                .addToGroups(CheckType.INVENTORY, true, IData.class, ICheckData.class)
+                .addToGroups(CheckType.INVENTORY, true, List.of(IData.class, ICheckData.class))
                 .context() //
                 );
         // Move to BridgeMisc?

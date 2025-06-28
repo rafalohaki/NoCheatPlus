@@ -428,7 +428,7 @@ public class WorldDataManager implements IWorldDataManager, INotifyReload {
 
     @Override
     public <I> void addToGroups(Class<I> itemType,
-            Class<? super I>... groupTypes) {
+            Collection<Class<? super I>> groupTypes) {
         factoryRegistry.addToGroups(itemType, groupTypes);
     }
 
@@ -439,7 +439,7 @@ public class WorldDataManager implements IWorldDataManager, INotifyReload {
 
     @Override
     public <I> void addToGroups(CheckType checkType, Class<I> itemType,
-            Class<? super I>... groupTypes) {
+            Collection<Class<? super I>> groupTypes) {
         factoryRegistry.addToGroups(checkType, itemType, groupTypes);
     }
 
@@ -451,7 +451,7 @@ public class WorldDataManager implements IWorldDataManager, INotifyReload {
 
     @Override
     public <I> void addToGroups(Collection<CheckType> checkTypes,
-            Class<I> itemType, Class<? super I>... groupTypes) {
+            Class<I> itemType, Collection<Class<? super I>> groupTypes) {
         factoryRegistry.addToGroups(checkTypes, itemType, groupTypes);
     }
 

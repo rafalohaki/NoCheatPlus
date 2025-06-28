@@ -26,6 +26,7 @@ import org.bukkit.event.EventHandler;
 import org.bukkit.event.EventPriority;
 import org.bukkit.event.entity.EntityDamageByEntityEvent;
 import org.bukkit.event.entity.EntityDamageEvent;
+import java.util.List;
 import org.bukkit.event.entity.EntityDamageEvent.DamageCause;
 import org.bukkit.event.entity.EntityDeathEvent;
 import org.bukkit.event.entity.EntityRegainHealthEvent;
@@ -150,7 +151,7 @@ public class FightListener extends CheckListener implements JoinLeaveListener{
                 // FightData
                 .registerDataPlayer(FightData.class)
                 .factory(arg -> new FightData(arg.playerData.getGenericInstance(FightConfig.class)))
-                .addToGroups(CheckType.FIGHT, false, IData.class, ICheckData.class)
+                .addToGroups(CheckType.FIGHT, false, List.of(IData.class, ICheckData.class))
                 .removeSubCheckData(CheckType.FIGHT, true)
                 .context() //
                 );

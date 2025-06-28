@@ -25,6 +25,7 @@ import org.bukkit.event.player.PlayerJoinEvent;
 import org.bukkit.event.player.PlayerQuitEvent;
 import org.bukkit.event.player.PlayerToggleSneakEvent;
 import org.bukkit.event.player.PlayerToggleSprintEvent;
+import java.util.List;
 
 import fr.neatmonster.nocheatplus.NCPAPIProvider;
 import fr.neatmonster.nocheatplus.checks.CheckListener;
@@ -70,7 +71,7 @@ public class CombinedListener extends CheckListener {
                 // CombinedData
                 .registerDataPlayer(CombinedData.class)
                 .factory(arg -> new CombinedData())
-                .addToGroups(CheckType.MOVING, false, IData.class, ICheckData.class)
+                .addToGroups(CheckType.MOVING, false, List.of(IData.class, ICheckData.class))
                 .removeSubCheckData(CheckType.COMBINED, true)
                 .context() //
                 );

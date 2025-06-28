@@ -21,6 +21,7 @@ import fr.neatmonster.nocheatplus.components.registry.factory.IFactoryOne;
 import fr.neatmonster.nocheatplus.components.registry.setup.RegistrationContext;
 import fr.neatmonster.nocheatplus.components.registry.setup.instance.RegisterInstanceWorld;
 import fr.neatmonster.nocheatplus.worlds.WorldFactoryArgument;
+import java.util.Collection;
 
 /**
  * World config types are automatically registered as config types with the
@@ -54,7 +55,7 @@ public class RegisterConfigWorld<T extends IConfig> extends RegisterInstanceWorl
     @Override
     public RegisterConfigWorld<T> addToGroups(
             final CheckType checkType, final boolean withDescendantCheckTypes,
-            final Class<? super T>... groupTypes) {
+            final Collection<Class<? super T>> groupTypes) {
         super.addToGroups(checkType, withDescendantCheckTypes, groupTypes);
         return this;
     }

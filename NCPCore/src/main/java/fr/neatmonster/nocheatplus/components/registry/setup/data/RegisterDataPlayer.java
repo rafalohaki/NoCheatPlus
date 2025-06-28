@@ -20,6 +20,7 @@ import fr.neatmonster.nocheatplus.components.registry.factory.IFactoryOne;
 import fr.neatmonster.nocheatplus.components.registry.setup.RegistrationContext;
 import fr.neatmonster.nocheatplus.components.registry.setup.instance.RegisterInstancePlayer;
 import fr.neatmonster.nocheatplus.players.PlayerFactoryArgument;
+import java.util.Collection;
 
 public class RegisterDataPlayer<T extends IData> extends RegisterInstancePlayer<T> {
 
@@ -38,7 +39,7 @@ public class RegisterDataPlayer<T extends IData> extends RegisterInstancePlayer<
     @Override
     public RegisterDataPlayer<T> addToGroups(
             final CheckType checkType, final boolean withDescendantCheckTypes,
-            final Class<? super T>... groupTypes) {
+            final Collection<Class<? super T>> groupTypes) {
         super.addToGroups(checkType, withDescendantCheckTypes, groupTypes);
         return this;
     }
