@@ -73,4 +73,13 @@ public class ComputeTargetMoveInfoTest {
         f.setAccessible(true);
         assertEquals(0, f.getInt(info));
     }
+
+    @Test
+    public void testValidTickReturnsNonZeroAge() throws Exception {
+        FightData data = newData(5);
+        Object info = compute.invoke(listener, data, location, 10, false);
+        Field f = info.getClass().getDeclaredField("tickAge");
+        f.setAccessible(true);
+        assertEquals(5, f.getInt(info));
+    }
 }
