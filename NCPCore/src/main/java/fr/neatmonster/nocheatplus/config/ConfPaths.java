@@ -209,6 +209,7 @@ public abstract class ConfPaths {
     public static final String  BLOCKBREAK_FREQUENCY_SHORTTERM_LIMIT     = BLOCKBREAK_FREQUENCY_SHORTTERM + "limit";
     public static final String  BLOCKBREAK_FREQUENCY_SHORTTERM_TICKS     = BLOCKBREAK_FREQUENCY_SHORTTERM + "ticks";
     public static final String  BLOCKBREAK_FREQUENCY_ACTIONS             = BLOCKBREAK_FREQUENCY + "actions";
+    public static final String  BLOCKBREAK_FREQUENCY_VL_DECAY            = BLOCKBREAK_FREQUENCY + "vldecay";
 
     private static final String BLOCKBREAK_NOSWING                       = BLOCKBREAK + "noswing.";
     public static final String  BLOCKBREAK_NOSWING_CHECK                 = BLOCKBREAK_NOSWING + SUB_ACTIVE;
@@ -242,10 +243,12 @@ public abstract class ConfPaths {
     public static final String BLOCKINTERACT_SPEED_INTERVAL              = BLOCKINTERACT_SPEED + "interval";
     public static final String BLOCKINTERACT_SPEED_LIMIT                 = BLOCKINTERACT_SPEED + "limit";
     public static final String BLOCKINTERACT_SPEED_ACTIONS               = BLOCKINTERACT_SPEED + "actions";
+    public static final String BLOCKINTERACT_SPEED_VL_DECAY              = BLOCKINTERACT_SPEED + "vldecay";
 
     private static final String BLOCKINTERACT_VISIBLE                    = BLOCKINTERACT + "visible.";
     public static final String  BLOCKINTERACT_VISIBLE_CHECK              = BLOCKINTERACT_VISIBLE + SUB_ACTIVE;
     public static final String  BLOCKINTERACT_VISIBLE_ACTIONS            = BLOCKINTERACT_VISIBLE + "actions";
+    public static final String  BLOCKINTERACT_VISIBLE_VL_DECAY           = BLOCKINTERACT_VISIBLE + "vldecay";
 
     // BLOCKPLACE
     public static final String  BLOCKPLACE                               = CHECKS + "blockplace.";
@@ -254,6 +257,7 @@ public abstract class ConfPaths {
     private static final String BLOCKPLACE_AGAINST                       = BLOCKPLACE + "against.";
     public static final String  BLOCKPLACE_AGAINST_CHECK                 = BLOCKPLACE_AGAINST + SUB_ACTIVE;
     public static final String BLOCKPLACE_AGAINST_ACTIONS                = BLOCKPLACE_AGAINST + "actions";
+    public static final String BLOCKPLACE_AGAINST_VL_DECAY               = BLOCKPLACE_AGAINST + "vldecay";
 
     private static final String BLOCKPLACE_AUTOSIGN                         = BLOCKPLACE + "autosign.";
     public static final String  BLOCKPLACE_AUTOSIGN_CHECK                = BLOCKPLACE_AUTOSIGN + SUB_ACTIVE;
@@ -274,6 +278,7 @@ public abstract class ConfPaths {
     public static final String  BLOCKPLACE_FASTPLACE_IMPROBABLE_FEEDONLY = BLOCKPLACE_FASTPLACE_IMPROBABLE + "feedonly";
     public static final String  BLOCKPLACE_FASTPLACE_IMPROBABLE_WEIGHT   = BLOCKPLACE_FASTPLACE_IMPROBABLE + "weight";
     public static final String  BLOCKPLACE_FASTPLACE_ACTIONS             = BLOCKPLACE_FASTPLACE + "actions";
+    public static final String  BLOCKPLACE_FASTPLACE_VL_DECAY            = BLOCKPLACE_FASTPLACE + "vldecay";
 
     private static final String BLOCKPLACE_NOSWING                       = BLOCKPLACE + "noswing.";
     public static final String  BLOCKPLACE_NOSWING_CHECK                 = BLOCKPLACE_NOSWING + SUB_ACTIVE;
@@ -336,6 +341,7 @@ public abstract class ConfPaths {
     public static final String  CHAT_COMMANDS_SHORTTERM_TICKS            = CHAT_COMMANDS_SHORTTERM + "ticks";
     public static final String  CHAT_COMMANDS_SHORTTERM_LEVEL            = CHAT_COMMANDS_SHORTTERM + "level";
     public static final String  CHAT_COMMANDS_ACTIONS                    = CHAT_COMMANDS + "actions";
+    public static final String  CHAT_COMMANDS_VL_DECAY                   = CHAT_COMMANDS + "vldecay";
 
     // Text
     private static final String CHAT_TEXT                                = CHAT + "text.";
@@ -343,6 +349,7 @@ public abstract class ConfPaths {
     public static final String CHAT_TEXT_DEBUG                           = CHAT_TEXT + "debug";
     public static final String CHAT_TEXT_ENGINE_MAXIMUM                  = CHAT_TEXT + "maximum";
     public static final String CHAT_TEXT_ALLOWVLRESET                    = CHAT_TEXT + "allowvlreset";
+    public static final String CHAT_TEXT_VL_DECAY                        = CHAT_TEXT + "vldecay";
     /**
      * Expiration time for per-player word processor data in milliseconds.
      */
@@ -443,6 +450,7 @@ public abstract class ConfPaths {
     public static final String  COMBINED_IMPROBABLE_CHECK                = COMBINED_IMPROBABLE + SUB_ACTIVE;
     public static final String  COMBINED_IMPROBABLE_LEVEL                = COMBINED_IMPROBABLE + "level";
     public static final String  COMBINED_IMPROBABLE_ACTIONS              = COMBINED_IMPROBABLE + "actions";
+    public static final String  COMBINED_IMPROBABLE_VL_DECAY             = COMBINED_IMPROBABLE + "vldecay";
 
     private static final String COMBINED_INVULNERABLE                       = COMBINED + "invulnerable.";
     public static final String  COMBINED_INVULNERABLE_CHECK                 = COMBINED_INVULNERABLE + SUB_ACTIVE;
@@ -583,6 +591,7 @@ public abstract class ConfPaths {
     private static final String INVENTORY_FASTCLICK_IMPROBABLE           = INVENTORY_FASTCLICK + "improbable.";
     public static final String  INVENTORY_FASTCLICK_IMPROBABLE_WEIGHT    = INVENTORY_FASTCLICK_IMPROBABLE + "weight";
     public static final String  INVENTORY_FASTCLICK_ACTIONS              = INVENTORY_FASTCLICK + "actions";
+    public static final String  INVENTORY_FASTCLICK_VL_DECAY             = INVENTORY_FASTCLICK + "vldecay";
 
     private static final String INVENTORY_FASTCONSUME                    = INVENTORY + "fastconsume.";
     public static final String  INVENTORY_FASTCONSUME_CHECK              = INVENTORY_FASTCONSUME + SUB_ACTIVE;
@@ -672,6 +681,7 @@ public abstract class ConfPaths {
     public static final String  MOVING_PASSABLE_CHECK                       = MOVING_PASSABLE + SUB_ACTIVE;
     //private static final String MOVING_PASSABLE_RAYTRACING                  = MOVING_PASSABLE + "raytracing.";
     public static final String  MOVING_PASSABLE_ACTIONS                     = MOVING_PASSABLE + "actions";
+    public static final String  MOVING_PASSABLE_VL_DECAY                    = MOVING_PASSABLE + "vldecay";
     public static final String  MOVING_PASSABLE_RT_XZ_FACTOR                = MOVING_PASSABLE + "horizontalmargins";
     public static final String  MOVING_PASSABLE_RT_Y_FACTOR                 = MOVING_PASSABLE + "verticalmargins";
     private static final String MOVING_PASSABLE_UNTRACKED                   = MOVING_PASSABLE + "untracked.";
@@ -709,6 +719,7 @@ public abstract class ConfPaths {
     public static final String MOVING_SURVIVALFLY_SETBACKPOLICY_FALLDAMAGE  = MOVING_SURVIVALFLY_SETBACKPOLICY + "falldamage";
     public static final String MOVING_SURVIVALFLY_SETBACKPOLICY_VOIDTOVOID  = MOVING_SURVIVALFLY_SETBACKPOLICY + "voidtovoid";
     public static final String MOVING_SURVIVALFLY_ACTIONS                   = MOVING_SURVIVALFLY + "actions";
+    public static final String MOVING_SURVIVALFLY_VL_DECAY                  = MOVING_SURVIVALFLY + "vldecay";
     private static final String MOVING_SURVIVALFLY_VLFREQUENCY              = MOVING_SURVIVALFLY_LENIENCY + "violationfrequency.";
     public static final String MOVING_SURVIVALFLY_VLFREQUENCY_ACTIVE        = MOVING_SURVIVALFLY_VLFREQUENCY + "active";
     public static final String MOVING_SURVIVALFLY_VLFREQUENCY_DEBUG         = MOVING_SURVIVALFLY_VLFREQUENCY + "debug";
@@ -774,6 +785,7 @@ public abstract class ConfPaths {
     public static final String  MOVING_VEHICLE_ENVELOPE_ACTIVE              = MOVING_VEHICLE_ENVELOPE + SUB_ACTIVE;
     public static final String  MOVING_VEHICLE_ENVELOPE_HSPEEDCAP           = MOVING_VEHICLE_ENVELOPE + "hdistcap"; // Section.
     public static final String  MOVING_VEHICLE_ENVELOPE_ACTIONS             = MOVING_VEHICLE_ENVELOPE + "actions";
+    public static final String  MOVING_VEHICLE_ENVELOPE_VL_DECAY            = MOVING_VEHICLE_ENVELOPE + "vldecay";
 
     private static final String MOVING_MESSAGE                              = MOVING + "message.";
     public static final  String MOVING_MESSAGE_ILLEGALPLAYERMOVE            = MOVING_MESSAGE + "illegalplayermove";

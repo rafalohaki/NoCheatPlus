@@ -188,7 +188,7 @@ public class FastClick extends Check {
             return createAndExecuteViolationData(player, data, cc, violation);
         }
         if (data != null) {
-            data.fastClickVL *= 0.99;
+            data.fastClickVL *= cc.fastClickVlDecay;
         }
         return false;
     }

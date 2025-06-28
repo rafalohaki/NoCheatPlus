@@ -126,7 +126,7 @@ public class Commands extends Check {
             player.sendMessage(ColorUtil.replaceColors(cc.chatWarningMessage));
             data.chatWarningTime = now;
         } else {
-            data.commandsVL *= 0.99;
+            data.commandsVL *= cc.commandsVlDecay;
         }
         return false;
     }
