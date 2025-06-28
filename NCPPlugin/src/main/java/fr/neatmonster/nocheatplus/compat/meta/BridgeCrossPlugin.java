@@ -16,15 +16,11 @@ package fr.neatmonster.nocheatplus.compat.meta;
 
 import org.bukkit.entity.Entity;
 import org.bukkit.entity.Player;
-
 import fr.neatmonster.nocheatplus.NCPAPIProvider;
 import fr.neatmonster.nocheatplus.compat.IBridgeCrossPlugin;
 import fr.neatmonster.nocheatplus.compat.cbreflect.reflect.ReflectBase;
-import fr.neatmonster.nocheatplus.compat.cbreflect.reflect.ReflectHelper.ReflectFailureException;
 import fr.neatmonster.nocheatplus.components.registry.feature.IPostRegisterRunnable;
-import fr.neatmonster.nocheatplus.utilities.ReflectionUtil;
 import fr.neatmonster.nocheatplus.utilities.DefensiveReflection;
-import fr.neatmonster.nocheatplus.compat.meta.BridgeCrossPluginLoader;
 
 /**
  * Utility to probe for cross-plugin issues, such as Player delegates.

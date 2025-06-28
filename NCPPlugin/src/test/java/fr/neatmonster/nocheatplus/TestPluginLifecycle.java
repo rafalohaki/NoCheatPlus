@@ -1,16 +1,8 @@
 package fr.neatmonster.nocheatplus;
-import fr.neatmonster.nocheatplus.components.registry.feature.IDisableListener;
-import org.bukkit.Server;
-import org.bukkit.event.Listener;
-import org.bukkit.plugin.PluginDescriptionFile;
-import org.bukkit.plugin.PluginManager;
-import org.bukkit.plugin.java.JavaPluginLoader;
-import fr.neatmonster.nocheatplus.logging.BukkitLogManager;
-import org.bukkit.scheduler.BukkitScheduler;
-import org.junit.jupiter.api.AfterEach;
-import org.junit.jupiter.api.BeforeEach;
-import org.junit.jupiter.api.Test;
-
+import static org.junit.jupiter.api.Assertions.assertEquals;
+import static org.junit.jupiter.api.Assertions.assertFalse;
+import static org.junit.jupiter.api.Assertions.assertNull;
+import static org.junit.jupiter.api.Assertions.assertTrue;
 import java.io.File;
 import java.lang.reflect.Field;
 import java.lang.reflect.InvocationHandler;
@@ -21,8 +13,17 @@ import java.util.List;
 import java.util.Map;
 import java.util.Set;
 import java.util.logging.Logger;
-
-import static org.junit.jupiter.api.Assertions.*;
+import org.bukkit.Server;
+import org.bukkit.event.Listener;
+import org.bukkit.plugin.PluginDescriptionFile;
+import org.bukkit.plugin.PluginManager;
+import org.bukkit.plugin.java.JavaPluginLoader;
+import org.bukkit.scheduler.BukkitScheduler;
+import org.junit.jupiter.api.AfterEach;
+import org.junit.jupiter.api.BeforeEach;
+import org.junit.jupiter.api.Test;
+import fr.neatmonster.nocheatplus.components.registry.feature.IDisableListener;
+import fr.neatmonster.nocheatplus.logging.BukkitLogManager;
 
 public class TestPluginLifecycle {
 

@@ -14,6 +14,7 @@
  */
 package fr.neatmonster.nocheatplus;
 
+import java.io.File;
 import java.util.ArrayList;
 import java.util.Collection;
 import java.util.Collections;
@@ -28,8 +29,6 @@ import java.util.Map;
 import java.util.Map.Entry;
 import java.util.Set;
 import java.util.UUID;
-
-import net.kyori.adventure.platform.bukkit.BukkitAudiences;
 import org.bukkit.Bukkit;
 import org.bukkit.ChatColor;
 import org.bukkit.World;
@@ -51,8 +50,7 @@ import org.bukkit.permissions.Permission;
 import org.bukkit.plugin.PluginDescriptionFile;
 import org.bukkit.plugin.java.JavaPlugin;
 import org.bukkit.plugin.java.JavaPluginLoader;
-import java.io.File;
-
+import org.jetbrains.annotations.NotNull;
 import fr.neatmonster.nocheatplus.actions.ActionFactory;
 import fr.neatmonster.nocheatplus.actions.ActionFactoryFactory;
 import fr.neatmonster.nocheatplus.checks.blockbreak.BlockBreakListener;
@@ -100,6 +98,7 @@ import fr.neatmonster.nocheatplus.components.registry.feature.INeedConfig;
 import fr.neatmonster.nocheatplus.components.registry.feature.INotifyReload;
 import fr.neatmonster.nocheatplus.components.registry.feature.IPostRegisterRunnable;
 import fr.neatmonster.nocheatplus.components.registry.feature.IRegisterAsGenericInstance;
+import fr.neatmonster.nocheatplus.components.registry.feature.IRemoveData;
 import fr.neatmonster.nocheatplus.components.registry.feature.JoinLeaveListener;
 import fr.neatmonster.nocheatplus.components.registry.feature.NCPListener;
 import fr.neatmonster.nocheatplus.components.registry.feature.TickListener;
@@ -111,8 +110,8 @@ import fr.neatmonster.nocheatplus.config.ConfPaths;
 import fr.neatmonster.nocheatplus.config.ConfigFile;
 import fr.neatmonster.nocheatplus.config.ConfigManager;
 import fr.neatmonster.nocheatplus.event.mini.EventRegistryBukkit;
-import fr.neatmonster.nocheatplus.event.mini.IEventRegistry;
 import fr.neatmonster.nocheatplus.event.mini.EventRegistryBukkitView;
+import fr.neatmonster.nocheatplus.event.mini.IEventRegistry;
 import fr.neatmonster.nocheatplus.event.mini.MiniListener;
 import fr.neatmonster.nocheatplus.hooks.ExemptionSettings;
 import fr.neatmonster.nocheatplus.hooks.NCPExemptionManager;
@@ -135,7 +134,6 @@ import fr.neatmonster.nocheatplus.players.DataManager;
 import fr.neatmonster.nocheatplus.players.IPlayerData;
 import fr.neatmonster.nocheatplus.players.IPlayerDataManager;
 import fr.neatmonster.nocheatplus.players.PlayerDataManager;
-import fr.neatmonster.nocheatplus.components.registry.feature.IRemoveData;
 import fr.neatmonster.nocheatplus.players.PlayerMessageSender;
 import fr.neatmonster.nocheatplus.stats.Counters;
 import fr.neatmonster.nocheatplus.utilities.ColorUtil;
@@ -150,7 +148,7 @@ import fr.neatmonster.nocheatplus.utilities.map.BlockProperties;
 import fr.neatmonster.nocheatplus.worlds.IWorldData;
 import fr.neatmonster.nocheatplus.worlds.IWorldDataManager;
 import fr.neatmonster.nocheatplus.worlds.WorldDataManager;
-import org.jetbrains.annotations.NotNull;
+import net.kyori.adventure.platform.bukkit.BukkitAudiences;
 
 /**
  * This is the main class of NoCheatPlus. The commands, events listeners and tasks are registered here.
