@@ -37,7 +37,7 @@ public class InventoryListenerTest {
         long after = System.currentTimeMillis();
 
         assertNull(data.instantEatFood);
-        assertTrue(data.instantEatInteract >= before && data.instantEatInteract <= after);
+        assertEquals("Expected reset timestamp on slow interact", after, data.instantEatInteract, 50L);
     }
 
     @Test

@@ -530,7 +530,7 @@ public class InventoryListener  extends CheckListener implements JoinLeaveListen
         if (data.instantEatInteract <= 0) {
             data.instantEatInteract = now;
             data.instantEatFood = type;
-        } else if (diff < 800) {
+        } else if (diff < 800) { // within threshold for fast food interaction
             data.instantEatInteract = Math.min(now, data.instantEatInteract);
             data.instantEatFood = type;
         } else {
