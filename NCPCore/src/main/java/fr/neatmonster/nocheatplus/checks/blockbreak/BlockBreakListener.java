@@ -234,13 +234,14 @@ public class BlockBreakListener extends CheckListener {
     private void applyFastBreakCheck(final BreakCheckResult result, final Player player,
             final Block block, final GameMode gameMode, final BlockBreakConfig cc,
             final BlockBreakData data, final IPlayerData pData) {
-        if (block == null) {
-            return;
-        }
-        if (!result.cancelled && gameMode != GameMode.CREATIVE
+        if (block != null && !result.cancelled && gameMode != GameMode.CREATIVE
                 && fastBreak.isEnabled(player, pData)
-                && fastBreak.check(new FastBreakContext(player, block, cc, data, pData, isInstaBreak))) {
-            result.cancelled = true;
+                && !FastBreakDecision.shouldSkip(isInstaBreak)) {
+            final FastBreakContext ctx = new FastBreakContext(player, block, cc, data, pData,
+                    isInstaBreak);
+            if (fastBreak.check(ctx)) {
+                result.cancelled = true;
+            }
         }
     }
 
