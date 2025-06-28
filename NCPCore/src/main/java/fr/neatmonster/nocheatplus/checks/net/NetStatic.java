@@ -51,10 +51,7 @@ public class NetStatic {
         int empty = 0;
         boolean firstUsed = false;
         boolean counting = false;
-        final float[] bucketScores = new float[winNum];
-        for (int i = 0; i < winNum; i++) {
-            bucketScores[i] = packetFreq.bucketScore(i);
-        }
+        final float[] bucketScores = snapshotBucketScores(packetFreq);
         for (int i = 1; i < winNum; i++) {
             final float bucket = bucketScores[i];
             if (bucket > 0f) {
@@ -69,6 +66,21 @@ public class NetStatic {
             }
         }
         return new BurnInfo(burnStart, empty);
+    }
+
+    /**
+     * Snapshot all bucket scores from the given frequency instance.
+     *
+     * @param packetFreq the packet frequency source
+     * @return an array of bucket scores
+     */
+    private static float[] snapshotBucketScores(final ActionFrequency packetFreq) {
+        final int winNum = packetFreq.numberOfBuckets();
+        final float[] scores = new float[winNum];
+        for (int i = 0; i < winNum; i++) {
+            scores[i] = packetFreq.bucketScore(i);
+        }
+        return scores;
     }
 
     /**
@@ -106,13 +118,15 @@ public class NetStatic {
         // Consider making this smoothing step configurable and refining the implementation.
         final long tDiff = time - packetFreq.lastAccess();
         if (tDiff >= winDur && tDiff < totalDur) {
-            // There will be some shift, so check if to relax, only if there could be some congestion. 
-            float firstBucketScore = packetFreq.bucketScore(0);
+            // Cache bucket scores to avoid repeated bucketScore() calls.
+            final float[] originalBucketScores = snapshotBucketScores(packetFreq);
+            // There will be some shift, so check if to relax, only if there could be some congestion.
+            float firstBucketScore = originalBucketScores[0];
             if (firstBucketScore > maxPackets) { // Clarify ideal versus maximum packet counts.
                 // Keep in mind potential burst-to-burst exploits.
                 firstBucketScore -= maxPackets; // Count this down.
                 for (int i = 1; i < winNum; i++) {
-                    final float currentBucketScore = packetFreq.bucketScore(i);
+                    final float currentBucketScore = originalBucketScores[i];
                     if (currentBucketScore < maxPackets) {
                         // Smoothen, using following empty spots including one occupied spot at most..
                         float consume = Math.min(firstBucketScore, maxPackets - currentBucketScore);
