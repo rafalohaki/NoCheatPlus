@@ -87,8 +87,10 @@ public class RegistrationOrder {
     }
 
     /**
-     * Compare on base of basePriority. Entries with null priority are sorted to
-     * the front.
+     * Compare on base of basePriority.
+     * <p>
+     * Entries with {@code null} priority are sorted to the front and non-null
+     * priorities are ordered in descending numerical value.
      */
     public static final Comparator<RegistrationOrder> cmpBasePriority = (o1, o2) -> {
         final Integer p1 = o1.getBasePriority();
@@ -101,6 +103,14 @@ public class RegistrationOrder {
             return p2.compareTo(p1); // Higher priority (numerically bigger) first.
         }
     };
+
+    /**
+     * Comparator that sorts by {@link #getBasePriority()} in ascending numerical
+     * order. Entries with {@code null} priority are still sorted to the front.
+     */
+    public static final Comparator<RegistrationOrder> cmpBasePriorityAscending =
+            Comparator.comparing(RegistrationOrder::getBasePriority,
+                    Comparator.nullsFirst(Integer::compareTo));
 
     /**
      * Auxiliary class to contain the basic sorting algorithm, using an abstract
