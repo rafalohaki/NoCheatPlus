@@ -6,8 +6,11 @@ import java.util.ArrayList;
 import java.util.List;
 
 import org.junit.jupiter.api.Test;
+import org.mockito.MockedStatic;
+import static org.mockito.Mockito.mockStatic;
 
 import fr.neatmonster.nocheatplus.utilities.ds.count.ActionFrequency;
+import fr.neatmonster.nocheatplus.utilities.TickTask;
 
 public class TestMorePacketsCheck {
 
@@ -40,5 +43,17 @@ public class TestMorePacketsCheck {
         NetStatic.BurnInfo info = NetStatic.computeBurnInfo(freq);
         assertEquals(3, info.burnStart);
         assertEquals(1, info.empty);
+    }
+
+    @Test
+    public void testAdjustEmptyForLagNeverNegative() throws Exception {
+        java.lang.reflect.Method m = NetStatic.class.getDeclaredMethod(
+                "adjustEmptyForLag", int.class, long.class, int.class);
+        m.setAccessible(true);
+        try (MockedStatic<TickTask> tick = mockStatic(TickTask.class)) {
+            tick.when(() -> TickTask.getLag(5000L, true)).thenReturn(0.5f);
+            int result = (int) m.invoke(null, 2, 5000L, 5);
+            assertTrue(result >= 0);
+        }
     }
 }

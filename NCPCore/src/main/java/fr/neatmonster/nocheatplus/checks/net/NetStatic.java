@@ -159,12 +159,23 @@ public class NetStatic {
         packetFreq.setBucket(0, maxPackets + firstBucketScore);
     }
 
+    /**
+     * Adjust the number of trailing empty windows for server lag.
+     *
+     * <p>The empty count is scaled inversely with the measured lag. With a
+     * lag factor of {@code 2.0} (10 TPS) the count is halved, whereas
+     * with fast tick rates (<code>&lt; 1.0</code>) it increases. The result is
+     * clamped to the range {@code [0, winNum]} to avoid negative or excessive
+     * leniency.</p>
+     *
+     * <p>TODO: Make lag scaling configurable to support stricter policies on
+     * high performance servers.</p>
+     */
     private static int adjustEmptyForLag(int empty, final long totalDur, final int winNum) {
         if (empty > 0) {
             final float lag = TickTask.getLag(totalDur, true);
-            final int lagEmpty = (int) Math.round((lag - 1f) * winNum);
-            empty = lagEmpty > 0 ? Math.min(empty, lagEmpty) : empty;
-            empty = Math.max(0, empty);
+            empty = (int) Math.round(empty * (1f / lag));
+            empty = Math.max(0, Math.min(winNum, empty));
         }
         return empty;
     }
