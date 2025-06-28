@@ -52,14 +52,36 @@ public class BukkitWall implements BukkitShapeModel {
     private final double[] eastwest;
     private final double[] southnorth;
 
+    /**
+     * Construct a wall model with symmetric inset.
+     *
+     * @param inset  distance from the block edge
+     * @param height requested model height (capped at {@code 1.0})
+     */
     public BukkitWall(double inset, double height) {
         this(inset, 1.0 - inset, height, 0.0);
     }
 
+    /**
+     * Construct a wall model with symmetric inset and side inset.
+     *
+     * @param inset     distance from the block edge
+     * @param height    requested model height (capped to {@code 1.0})
+     * @param sideInset inset for side posts
+     */
     public BukkitWall(double inset, double height, double sideInset) {
         this(inset, 1.0 - inset, height, sideInset);
     }
 
+    /**
+     * Construct a wall model with explicit bounds.
+     * Height is clamped to {@code 1.0}.
+     *
+     * @param minXZ    minimum x/z coordinate
+     * @param maxXZ    maximum x/z coordinate
+     * @param height   requested model height
+     * @param sideInset inset for side posts
+     */
     public BukkitWall(double minXZ, double maxXZ, double height, double sideInset) {
         this.minXZ = minXZ;
         this.maxXZ = maxXZ;

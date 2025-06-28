@@ -33,8 +33,12 @@ public class BukkitStatic implements BukkitShapeModel {
 
     /**
      * Create a shape model using full xz-bounds for the given height.
+     * <p>
+     * Any value greater than {@code 1.0} is reduced to {@code 1.0} so the
+     * returned bounding box never exceeds the default block height.
+     * </p>
      *
-     * @param height
+     * @param height requested model height
      * @return New instance.
      */
     public static BukkitStatic ofHeight(double height) {
@@ -46,9 +50,13 @@ public class BukkitStatic implements BukkitShapeModel {
 
     /**
      * Create a shape model with the given xz-inset and height.
+     * <p>
+     * Height values above {@code 1.0} will be capped to ensure the resulting
+     * shape is contained within a single block space.
+     * </p>
      *
-     * @param xzInset
-     * @param height
+     * @param xzInset inset to apply on x and z
+     * @param height requested model height
      * @return New instance.
      */
     public static BukkitStatic ofInsetAndHeight(double xzInset, double height) {

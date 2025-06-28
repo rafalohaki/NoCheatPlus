@@ -29,10 +29,30 @@ public class BukkitFence implements BukkitShapeModel {
     private final double maxXZ;
     private final double height;
 
+    /**
+     * Construct a fence model with symmetric inset.
+     * <p>
+     * Heights above {@code 1.0} are automatically reduced to keep the bounding
+     * box within the block space.
+     * </p>
+     *
+     * @param inset  distance from the block edge on both x and z
+     * @param height requested model height
+     */
     public BukkitFence(double inset, double height) {
         this(inset, 1.0 - inset, height);
     }
 
+    /**
+     * Construct a fence model with explicit bounds.
+     * <p>
+     * The height is capped at {@code 1.0} for safety.
+     * </p>
+     *
+     * @param minXZ minimum x/z coordinate
+     * @param maxXZ maximum x/z coordinate
+     * @param height requested model height
+     */
     public BukkitFence(double minXZ, double maxXZ, double height) {
         this.minXZ = minXZ;
         this.maxXZ = maxXZ;

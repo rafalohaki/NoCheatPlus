@@ -29,10 +29,25 @@ public class BukkitGate implements BukkitShapeModel {
     private final double maxXZ;
     private final double height;
 
+    /**
+     * Construct a gate model with symmetric inset.
+     * Heights above {@code 1.0} are reduced to maintain a valid bounding box.
+     *
+     * @param inset  distance from the block edge on both x and z
+     * @param height requested model height
+     */
     public BukkitGate(double inset, double height) {
         this(inset, 1.0 - inset, height);
     }
 
+    /**
+     * Construct a gate model with explicit bounds.
+     * The height will never exceed {@code 1.0}.
+     *
+     * @param minXZ minimum x/z coordinate
+     * @param maxXZ maximum x/z coordinate
+     * @param height requested model height
+     */
     public BukkitGate(double minXZ, double maxXZ, double height) {
         this.minXZ = minXZ;
         this.maxXZ = maxXZ;

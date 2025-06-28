@@ -24,8 +24,12 @@ import org.bukkit.block.ShulkerBox;
 
 public class BukkitShulkerBox implements BukkitShapeModel {
 
+    /**
+     * Return the shulker box shape. When the box is open the height is capped
+     * to {@code 1.0} to avoid exceeding the block boundaries.
+     */
     @Override
-    public double[] getShape(final BlockCache blockCache, 
+    public double[] getShape(final BlockCache blockCache,
             final World world, final int x, final int y, final int z) {
 
         final Block block = world.getBlockAt(x, y, z);
