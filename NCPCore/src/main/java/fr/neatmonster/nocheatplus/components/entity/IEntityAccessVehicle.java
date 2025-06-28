@@ -27,20 +27,20 @@ import org.bukkit.entity.Entity;
 public interface IEntityAccessVehicle {
 
     /**
-     * Get the current passengers for a vehicle (entity).
-     * 
-     * @param entity
-     * @return
+     * Get the current passengers for the given vehicle entity.
+     *
+     * @param vehicle the entity acting as a vehicle
+     * @return list of passengers, never {@code null}
      */
-    public List<Entity> getEntityPassengers(Entity entity);
+    public List<Entity> getEntityPassengers(Entity vehicle);
 
     /**
-     * Add a new passenger (entity) to the given vehicle.
-     * 
-     * @param entity
-     * @param vehicle
-     * @return
+     * Add a passenger entity to the given vehicle entity.
+     *
+     * @param passenger the entity to add as passenger
+     * @param vehicle the vehicle to add the passenger to
+     * @return {@code true} if the passenger was added successfully
      */
-    public boolean addPassenger(Entity entity, Entity vehicle);
+    public boolean addPassenger(Entity passenger, Entity vehicle);
 
 }
