@@ -204,42 +204,23 @@ public class FightListener extends CheckListener implements JoinLeaveListener{
         final LocationTrace damagedTrace = dmgInfo.trace;
         cancelled = cancelled || dmgInfo.cancelled;
 
-        // Log generic properties of this attack.
-        if (debug) {
-            debug(player, "Attacks " + (damagedPlayer == null ? ("entity " + damaged.getType()) : ("player" + damagedPlayer.getName())) + " damage=" + (finalDamage == originalDamage ? finalDamage : (originalDamage + "/" + finalDamage)));
-        }
+        logAttackInfo(player, damaged, damagedPlayer, originalDamage, finalDamage, debug);
 
         cancelled = cancelled || applyDeadChecks(cc, player, damaged, data);
 
-        if (handleSweepAttack(player, originalDamage, loc, tick, data, debug)) {
-            cleanupLocations();
-            return cancelled;
+        final boolean skipChecks = applySweepAndThorns(player, damaged, originalDamage, loc, tick, data, debug);
+
+        if (!skipChecks) {
+
+            cancelled = cancelled || runCoreCombatChecks(player, damaged, damagedIsFake, loc, damagedLoc, data,
+                    pData, cc, mCc, mData, penaltyList, now, normalizedMove, debug, damagedTrace, tick,
+                    worldChanged, worldName);
+
+            updateAttackState(player, loc, damagedLoc, data, worldName, tick, now, mData, mCc, pData, cancelled,
+                    debug);
+
+            cancelled = cancelled || applyAttackPenalty(player, data, now, debug);
         }
-
-        if (handleThorns(damaged, originalDamage, tick, data)) {
-            cleanupLocations();
-            return cancelled;
-        }
-
-
-
-        cancelled = cancelled || runCombatChecks(player, damaged, damagedIsFake, loc, damagedLoc, data, pData, cc, mCc,
-                mData, penaltyList, now, normalizedMove, debug, damagedTrace, tick);
-
-        cancelled = cancelled || checkAngle(player, loc, damaged, worldChanged, data, cc, pData, worldName, now, debug);
-
-        updateLastAttackData(data, worldName, tick, damagedLoc);
-        // Care for the "lost sprint problem": sprint resets, client moves as if still...
-        // If this is just in-air, model with friction, so this can be removed.
-        // Use stored distance calculation same as reach check?
-        // For pvp: make use of "player was there" heuristic later on.
-        // Confine further with simple pre-conditions.
-        // Evaluate if moving traces can help here.
-        if (!cancelled) {
-            checkLostSprint(player, loc, damagedLoc, now, mData, mCc, pData, debug);
-        }
-
-        cancelled = cancelled || applyAttackPenalty(player, data, now, debug);
 
         cleanupLocations();
         return cancelled;
@@ -685,6 +666,58 @@ public class FightListener extends CheckListener implements JoinLeaveListener{
             return true;
         }
         return false;
+    }
+
+    private void logAttackInfo(final Player attacker, final Entity damaged, final Player damagedPlayer,
+            final double originalDamage, final double finalDamage, final boolean debug) {
+        if (attacker == null || damaged == null || !debug) {
+            return;
+        }
+        debug(attacker,
+                "Attacks "
+                        + (damagedPlayer == null ? ("entity " + damaged.getType())
+                                : ("player" + damagedPlayer.getName()))
+                        + " damage="
+                        + (finalDamage == originalDamage ? finalDamage
+                                : (originalDamage + "/" + finalDamage)));
+    }
+
+    private boolean applySweepAndThorns(final Player player, final Entity damaged, final double originalDamage,
+            final Location loc, final int tick, final FightData data, final boolean debug) {
+        if (player == null || damaged == null || data == null) {
+            return false;
+        }
+        if (handleSweepAttack(player, originalDamage, loc, tick, data, debug)) {
+            return true;
+        }
+        return handleThorns(damaged, originalDamage, tick, data);
+    }
+
+    private boolean runCoreCombatChecks(final Player player, final Entity damaged, final boolean damagedIsFake,
+            final Location loc, final Location damagedLoc, final FightData data, final IPlayerData pData,
+            final FightConfig cc, final MovingConfig mCc, final MovingData mData, final IPenaltyList penaltyList,
+            final long now, final double normalizedMove, final boolean debug, final LocationTrace damagedTrace,
+            final int tick, final boolean worldChanged, final String worldName) {
+
+        if (player == null || damaged == null || pData == null) {
+            return false;
+        }
+        boolean cancelled = runCombatChecks(player, damaged, damagedIsFake, loc, damagedLoc, data, pData, cc, mCc,
+                mData, penaltyList, now, normalizedMove, debug, damagedTrace, tick);
+        cancelled = cancelled || checkAngle(player, loc, damaged, worldChanged, data, cc, pData, worldName, now, debug);
+        return cancelled;
+    }
+
+    private void updateAttackState(final Player player, final Location loc, final Location damagedLoc,
+            final FightData data, final String worldName, final int tick, final long now, final MovingData mData,
+            final MovingConfig mCc, final IPlayerData pData, final boolean cancelled, final boolean debug) {
+        if (player == null || damagedLoc == null || data == null || pData == null) {
+            return;
+        }
+        updateLastAttackData(data, worldName, tick, damagedLoc);
+        if (!cancelled) {
+            checkLostSprint(player, loc, damagedLoc, now, mData, mCc, pData, debug);
+        }
     }
 
     private void cleanupLocations() {
