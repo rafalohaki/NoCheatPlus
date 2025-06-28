@@ -20,6 +20,7 @@ import java.lang.reflect.Method;
 import org.bukkit.entity.Entity;
 
 import fr.neatmonster.nocheatplus.components.entity.IEntityAccessVehicle;
+import fr.neatmonster.nocheatplus.logging.StaticLog;
 import fr.neatmonster.nocheatplus.utilities.ReflectionUtil;
 
 public class EntityAccessVehicleMultiPassenger implements IEntityAccessVehicle {
@@ -34,21 +35,39 @@ public class EntityAccessVehicleMultiPassenger implements IEntityAccessVehicle {
      * @return Instance or {@code null} if not supported.
      */
     public static EntityAccessVehicleMultiPassenger createIfSupported() {
-        // Ensure the getPassengers method exists and addPassenger has a compatible return type.
-        if (ReflectionUtil.getMethodNoArgs(Entity.class, "getPassengers", List.class) == null
-                || !hasAddPassenger()) {
+        // Check getPassengers method.
+        final Method getPassengers = ReflectionUtil.getMethodNoArgs(Entity.class, "getPassengers");
+        if (getPassengers == null) {
+            StaticLog.logDebug("Entity#getPassengers() method not found.");
             return null;
         }
+        if (!List.class.isAssignableFrom(getPassengers.getReturnType())) {
+            StaticLog.logDebug(
+                    "Entity#getPassengers() has unexpected return type: " + getPassengers.getReturnType().getName());
+            return null;
+        }
+
+        // Check addPassenger method and return type.
+        if (!hasAddPassenger()) {
+            return null;
+        }
+
         return new EntityAccessVehicleMultiPassenger();
     }
 
     private static boolean hasAddPassenger() {
         final Method method = ReflectionUtil.getMethod(Entity.class, "addPassenger", Entity.class);
         if (method == null) {
+            StaticLog.logDebug("Entity#addPassenger(Entity) method not found.");
             return false;
         }
         final Class<?> returnType = method.getReturnType();
-        return returnType == boolean.class || returnType == void.class;
+        if (returnType != boolean.class && returnType != void.class) {
+            StaticLog.logDebug("Entity#addPassenger(Entity) has unexpected return type: "
+                    + returnType.getName());
+            return false;
+        }
+        return true;
     }
 
     @Override
