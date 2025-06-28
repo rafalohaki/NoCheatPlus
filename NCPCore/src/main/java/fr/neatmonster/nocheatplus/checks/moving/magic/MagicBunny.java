@@ -282,38 +282,25 @@ public class MagicBunny {
             final MovingData data, final MovingConfig cc, final double minJumpGain,
             final boolean needLowerMultiplier, final Collection<String> tags, final BunnyHopState state) {
 
-        final double minAccelMod = needLowerMultiplier ? 1.0274
-                : (!lastMove.toIsValid || Math.abs(lastMove.hDistance) < EPSILON && Math.abs(lastMove.yDistance) < EPSILON)
-                        ? 1.11 : 1.314;
-        final double maxAccelMod = data.momentumTick > 0 ? (data.momentumTick > 2 ? 1.76 : 1.96) : 2.15;
-        final double maxAccelMod1 = data.momentumTick > 0 ? (data.momentumTick > 2 ? 1.9 : 2.1) : 2.3;
+        if (from == null || to == null || thisMove == null || lastMove == null || pastMove2 == null
+                || pastMove3 == null || pastMove4 == null || data == null || cc == null || tags == null
+                || state == null) {
+            return;
+        }
 
-        if (state.allowHop && hDistance >= baseSpeed
-                && (hDistance > minAccelMod * baseSpeed) && (hDistance < maxAccelMod * baseSpeed)
-                || (yDistance > from.getyOnGround() || hDistance < maxAccelMod1 * baseSpeed) && lastMove.toIsValid
-                && hDistance > minAccelMod * lastMove.hDistance && hDistance < 2.15 * lastMove.hDistance
-                && (!pastMove2.bunnyHop || !pastMove3.bunnyHop && !pastMove4.bunnyHop || !thisMove.headObstructed)) {
+        final double minAccelMod = calcMinAccelMod(needLowerMultiplier, lastMove);
+        final double maxAccelMod = calcMaxAccelMod(data);
+        final double maxAccelMod1 = calcMaxAccelMod1(data);
 
-            if (data.liftOffEnvelope == LiftOffEnvelope.NORMAL
-                    && (!data.sfLowJump || data.sfNoLowJump)
-                    && (yDistance > 0.0 && yDistance > minJumpGain - Magic.GRAVITY_SPAN
-                        || headObstructed
-                        || (cc.sfGroundHop || Math.abs(yDistance) < EPSILON && !lastMove.touchedGroundWorkaround && !lastMove.from.onGround)
-                            && baseSpeed > 0.0 && hDistance / baseSpeed < 1.5 && (hDistance / lastMove.hDistance < 1.35 || hDistance / baseSpeed < 1.35)
-                        || yDistance < 0.0 && (from.getBlockFlags() & BlockFlags.F_BOUNCE25) != 0
-                        || Magic.jumpedUpSlope(data, from, 9) && !lastMove.bunnyHop
-                            && yDistance > Magic.GRAVITY_MIN && yDistance <= minJumpGain - Magic.GRAVITY_SPAN
-                        || Magic.wasOnIceRecently(data) && (hDistance / baseSpeed < 1.32 || hDistance / lastMove.hDistance < 1.27) && !headObstructed
-                            && Magic.jumpedUpSlope(data, from, 14)
-                            && (Math.abs(yDistance) < EPSILON
-                                && (Math.abs(lastMove.yDistance - yDistance) < EPSILON
-                                    || Math.abs(lastMove.yDistance - yDistance) > 0.0 && Math.abs(lastMove.yDistance - yDistance) < Magic.GRAVITY_ODD / 2.0)
-                                || yDistance < 0.0 && yDistance > -Magic.GRAVITY_MAX
-                                    && lastMove.yDistance > yDistance && lastMove.yDistance < -Magic.GRAVITY_ODD / 4.0)
-                    )
-                    && (data.sfJumpPhase == 0 && thisMove.from.onGround
-                        || data.sfJumpPhase <= 1 && (thisMove.touchedGroundWorkaround || lastMove.touchedGround && !lastMove.bunnyHop)
-                        || state.doubleBunny)
+        final boolean attemptHop = state.allowHop && meetsPrimarySpeedCriteria(hDistance, baseSpeed, minAccelMod, maxAccelMod)
+                || meetsSecondarySpeedCriteria(hDistance, baseSpeed, yDistance, from, lastMove, pastMove2,
+                        pastMove3, pastMove4, thisMove, minAccelMod, maxAccelMod1);
+
+        if (attemptHop) {
+            if (isLiftOffAllowed(data)
+                    && isJumpTriggerValid(yDistance, from, baseSpeed, hDistance, minJumpGain, headObstructed,
+                            lastMove, data, cc)
+                    && isJumpPhaseAllowed(data, thisMove, lastMove, state)
                     && (!from.isResetCond() && !to.isResetCond())) {
 
                 data.setBunnyhopDelay(BUNNYHOP_MAX_DELAY);
@@ -324,6 +311,77 @@ public class MagicBunny {
                 tags.add("bunnyenv");
             }
         }
+    }
+
+    private static double calcMinAccelMod(final boolean needLowerMultiplier, final PlayerMoveData lastMove) {
+        if (needLowerMultiplier) {
+            return 1.0274;
+        }
+        return lastMove != null && lastMove.toIsValid
+                && !(Math.abs(lastMove.hDistance) < EPSILON && Math.abs(lastMove.yDistance) < EPSILON)
+                        ? 1.314
+                        : 1.11;
+    }
+
+    private static double calcMaxAccelMod(final MovingData data) {
+        return data.momentumTick > 0 ? (data.momentumTick > 2 ? 1.76 : 1.96) : 2.15;
+    }
+
+    private static double calcMaxAccelMod1(final MovingData data) {
+        return data.momentumTick > 0 ? (data.momentumTick > 2 ? 1.9 : 2.1) : 2.3;
+    }
+
+    private static boolean meetsPrimarySpeedCriteria(final double hDistance, final double baseSpeed,
+            final double minAccelMod, final double maxAccelMod) {
+        return hDistance >= baseSpeed && hDistance > minAccelMod * baseSpeed && hDistance < maxAccelMod * baseSpeed;
+    }
+
+    private static boolean meetsSecondarySpeedCriteria(final double hDistance, final double baseSpeed,
+            final double yDistance, final PlayerLocation from, final PlayerMoveData lastMove,
+            final PlayerMoveData pastMove2, final PlayerMoveData pastMove3, final PlayerMoveData pastMove4,
+            final PlayerMoveData thisMove, final double minAccelMod, final double maxAccelMod1) {
+
+        return (yDistance > from.getyOnGround() || hDistance < maxAccelMod1 * baseSpeed) && lastMove.toIsValid
+                && hDistance > minAccelMod * lastMove.hDistance && hDistance < 2.15 * lastMove.hDistance
+                && (!pastMove2.bunnyHop || !pastMove3.bunnyHop && !pastMove4.bunnyHop || !thisMove.headObstructed);
+    }
+
+    private static boolean isLiftOffAllowed(final MovingData data) {
+        return data.liftOffEnvelope == LiftOffEnvelope.NORMAL && (!data.sfLowJump || data.sfNoLowJump);
+    }
+
+    private static boolean isJumpTriggerValid(final double yDistance, final PlayerLocation from, final double baseSpeed,
+            final double hDistance, final double minJumpGain, final boolean headObstructed,
+            final PlayerMoveData lastMove, final MovingData data, final MovingConfig cc) {
+
+        return (yDistance > 0.0 && yDistance > minJumpGain - Magic.GRAVITY_SPAN)
+                || headObstructed
+                || ((cc.sfGroundHop || Math.abs(yDistance) < EPSILON && !lastMove.touchedGroundWorkaround
+                        && !lastMove.from.onGround)
+                        && baseSpeed > 0.0 && hDistance / baseSpeed < 1.5
+                        && (hDistance / lastMove.hDistance < 1.35 || hDistance / baseSpeed < 1.35))
+                || yDistance < 0.0 && (from.getBlockFlags() & BlockFlags.F_BOUNCE25) != 0
+                || Magic.jumpedUpSlope(data, from, 9) && !lastMove.bunnyHop
+                        && yDistance > Magic.GRAVITY_MIN && yDistance <= minJumpGain - Magic.GRAVITY_SPAN
+                || Magic.wasOnIceRecently(data)
+                        && (hDistance / baseSpeed < 1.32 || hDistance / lastMove.hDistance < 1.27)
+                        && !headObstructed
+                        && Magic.jumpedUpSlope(data, from, 14)
+                        && (Math.abs(yDistance) < EPSILON
+                                && (Math.abs(lastMove.yDistance - yDistance) < EPSILON
+                                        || Math.abs(lastMove.yDistance - yDistance) > 0.0
+                                                && Math.abs(lastMove.yDistance - yDistance) < Magic.GRAVITY_ODD / 2.0)
+                                || yDistance < 0.0 && yDistance > -Magic.GRAVITY_MAX
+                                        && lastMove.yDistance > yDistance
+                                        && lastMove.yDistance < -Magic.GRAVITY_ODD / 4.0);
+    }
+
+    private static boolean isJumpPhaseAllowed(final MovingData data, final PlayerMoveData thisMove,
+            final PlayerMoveData lastMove, final BunnyHopState state) {
+        return data.sfJumpPhase == 0 && thisMove.from.onGround
+                || data.sfJumpPhase <= 1
+                        && (thisMove.touchedGroundWorkaround || lastMove.touchedGround && !lastMove.bunnyHop)
+                || state.doubleBunny;
     }
 
     private static boolean isHeadBangBunny(final double hDistance, final double baseSpeed, final double finalSpeed,
