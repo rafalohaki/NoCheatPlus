@@ -643,22 +643,13 @@ public class MovingUtil {
         // Post-1.9 packet level workaround.
         final MovingConfig cc = pData.getGenericInstance(MovingConfig.class);
         final PlayerSetBackMethod method = cc.playerSetBackMethod;
-        if (!method.shouldNoRisk() 
+        if (!method.shouldNoRisk()
                 && (method.shouldCancel() || method.shouldSetTo()) && method.shouldUpdateFrom()) {
             /*
-             * Another leniency option: Skip, if we have already received an ACK
-             * for this position on packet level - typically the next move would
-             * confirm the set-back, but a redundant teleport would freeze the
-             * player for a slightly longer time. This could happen with the set
-             * back being at the coordinates the player had just been at, but
-             * between set back and on-tick there has been a micro move (not
-             * firing a PlayerMoveEvent) - similarly observed on a local test
-             * server once, HOWEVER there the micro move had been a look-only
-             * packet, not explaining why the position of the player wasn't
-             * reflecting the outgoing position. So here remains the uncertainty
-             * concerning the question if a (silent) Minecraft entity teleport
-             * always follows a cancelled PlayerMoveEvent (!), and a thinkable
-             * potential for abuse.
+             * Leniency: skip teleporting again when the packet queue already
+             * confirmed this position. In testing, a look-only packet sometimes
+             * followed a cancelled move event and left the server position
+             * unmatched.
              */
             // (CANCEL + UPDATE_FROM mean a certain teleport to the set back, still could be repeated tp.)
             final CountableLocation cl = pData.getGenericInstance(NetData.class).teleportQueue.getLastAck();
