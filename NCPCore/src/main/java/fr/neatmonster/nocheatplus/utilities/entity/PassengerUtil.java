@@ -42,6 +42,7 @@ import fr.neatmonster.nocheatplus.players.IPlayerData;
 import fr.neatmonster.nocheatplus.utilities.CheckUtils;
 import fr.neatmonster.nocheatplus.utilities.location.LocUtil;
 import fr.neatmonster.nocheatplus.utilities.location.TrigUtil;
+import java.util.concurrent.CompletableFuture;
 
 /**
  * Vehicle/passenger related static utility. Registered as generic instance for
@@ -384,11 +385,14 @@ public class PassengerUtil {
         boolean scheduleDelay = cc.schedulevehicleSetPassenger;
         if (data.vehicleSetPassengerTaskId == null) {
             if (vehicle.getType() == EntityType.BOAT) {
-                if (!handleVehicle.getHandle().addPassenger(player, vehicle)) {
-                    vehicle.eject();
-                    // Not schedule set passenger for boat due to location async
-                }
-            } else if (scheduleDelay) {
+                addPassengerWithRetry(player, vehicle, 2).thenAccept(success -> {
+                    if (!success) {
+                        vehicle.eject();
+                    }
+                });
+                return;
+            }
+            if (scheduleDelay) {
                 data.vehicleSetPassengerTaskId = Folia.runSyncDelayedTaskForEntity(player, plugin,
                         (arg) -> new VehicleSetPassengerTask(handleVehicle, vehicle, player).run(), null, 2L);
                 if (data.vehicleSetPassengerTaskId == null) {
@@ -415,6 +419,37 @@ public class PassengerUtil {
             CheckUtils.debug(player, CheckType.MOVING_VEHICLE,
                     "Set passenger task already scheduled, skip this time.");
         }
+    }
+
+    private CompletableFuture<Boolean> addPassengerWithRetry(final Entity passenger, final Entity vehicle,
+                                                             final int maxRetries) {
+        final CompletableFuture<Boolean> result = new CompletableFuture<>();
+        if (passenger == null || vehicle == null) {
+            result.complete(false);
+            return result;
+        }
+        if (handleVehicle.getHandle().addPassenger(passenger, vehicle)) {
+            result.complete(true);
+            return result;
+        }
+        if (maxRetries <= 0 || plugin == null) {
+            result.complete(false);
+            return result;
+        }
+        final int[] remaining = { maxRetries };
+        final Object task = Folia.runSyncRepeatingTask(plugin, (arg) -> {
+            if (handleVehicle.getHandle().addPassenger(passenger, vehicle)) {
+                result.complete(true);
+                Folia.cancelTask(arg);
+            } else if (--remaining[0] <= 0) {
+                result.complete(false);
+                Folia.cancelTask(arg);
+            }
+        }, 1L, 1L);
+        if (task == null) {
+            result.complete(false);
+        }
+        return result;
     }
 
     private void ensureSetBackLocation(final Player player, final Location location,
