@@ -11,6 +11,7 @@ import org.bukkit.entity.Entity;
 import org.junit.Test;
 import org.mockito.MockedStatic;
 
+import fr.neatmonster.nocheatplus.support.FeatureSupportRegistry;
 import fr.neatmonster.nocheatplus.utilities.ReflectionUtil;
 
 public class TestEntityAccessVehicleMultiPassenger {
@@ -20,6 +21,7 @@ public class TestEntityAccessVehicleMultiPassenger {
 
     @Test
     public void testMissingGetPassengers() throws Exception {
+        FeatureSupportRegistry.clearCache();
         Method dummyAdd = TestEntityAccessVehicleMultiPassenger.class.getDeclaredMethod("dummyAddPassenger");
         try (MockedStatic<ReflectionUtil> util = mockStatic(ReflectionUtil.class)) {
             util.when(() -> ReflectionUtil.getMethodNoArgs(Entity.class, "getPassengers", List.class))
@@ -33,6 +35,7 @@ public class TestEntityAccessVehicleMultiPassenger {
 
     @Test
     public void testMissingAddPassenger() throws Exception {
+        FeatureSupportRegistry.clearCache();
         Method dummyGet = TestEntityAccessVehicleMultiPassenger.class.getDeclaredMethod("dummyPassengers");
         try (MockedStatic<ReflectionUtil> util = mockStatic(ReflectionUtil.class)) {
             util.when(() -> ReflectionUtil.getMethodNoArgs(Entity.class, "getPassengers", List.class))
