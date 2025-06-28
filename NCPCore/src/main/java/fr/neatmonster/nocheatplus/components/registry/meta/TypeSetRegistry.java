@@ -97,7 +97,7 @@ public class TypeSetRegistry {
      * @param itemType
      * @param groupTypes
      */
-    public <I> void addToGroups(final Class<I> itemType, final Class<? super I>... groupTypes) {
+    public <I> void addToGroups(final Class<I> itemType, final Collection<Class<? super I>> groupTypes) {
         lock.lock();
         try {
             for (final Class<? super I> groupType : groupTypes) {

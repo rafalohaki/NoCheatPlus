@@ -50,6 +50,7 @@ import org.bukkit.inventory.Inventory;
 import org.bukkit.inventory.InventoryView;
 import org.bukkit.inventory.ItemStack;
 import org.bukkit.inventory.PlayerInventory;
+import java.util.List;
 import fr.neatmonster.nocheatplus.NCPAPIProvider;
 import fr.neatmonster.nocheatplus.checks.CheckListener;
 import fr.neatmonster.nocheatplus.checks.CheckType;
@@ -130,7 +131,7 @@ public class InventoryListener  extends CheckListener implements JoinLeaveListen
                 // InventoryData
                 .registerDataPlayer(InventoryData.class)
                 .factory(arg -> new InventoryData())
-                .addToGroups(CheckType.INVENTORY, true, IData.class, ICheckData.class)
+                .addToGroups(CheckType.INVENTORY, true, List.of(IData.class, ICheckData.class))
                 .context() //
                 );
         // Move to BridgeMisc?

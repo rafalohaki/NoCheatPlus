@@ -17,6 +17,7 @@ package fr.neatmonster.nocheatplus.components.registry.setup.config;
 import fr.neatmonster.nocheatplus.NCPAPIProvider;
 import fr.neatmonster.nocheatplus.checks.CheckType;
 import fr.neatmonster.nocheatplus.components.config.IConfig;
+import java.util.Collection;
 import fr.neatmonster.nocheatplus.components.registry.factory.IFactoryOne;
 import fr.neatmonster.nocheatplus.components.registry.setup.RegistrationContext;
 import fr.neatmonster.nocheatplus.components.registry.setup.instance.RegisterInstanceWorld;
@@ -54,7 +55,7 @@ public class RegisterConfigWorld<T extends IConfig> extends RegisterInstanceWorl
     @Override
     public RegisterConfigWorld<T> addToGroups(
             final CheckType checkType, final boolean withDescendantCheckTypes,
-            final Class<? super T>... groupTypes) {
+            final Collection<Class<? super T>> groupTypes) {
         super.addToGroups(checkType, withDescendantCheckTypes, groupTypes);
         return this;
     }

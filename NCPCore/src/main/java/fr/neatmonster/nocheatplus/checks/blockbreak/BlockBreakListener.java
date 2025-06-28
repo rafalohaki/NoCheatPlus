@@ -29,6 +29,7 @@ import org.bukkit.event.player.PlayerAnimationEvent;
 import org.bukkit.event.player.PlayerInteractEvent;
 import org.bukkit.event.player.PlayerItemHeldEvent;
 import org.bukkit.inventory.ItemStack;
+import java.util.List;
 import fr.neatmonster.nocheatplus.NCPAPIProvider;
 import fr.neatmonster.nocheatplus.checks.CheckListener;
 import fr.neatmonster.nocheatplus.checks.CheckType;
@@ -101,7 +102,7 @@ public class BlockBreakListener extends CheckListener {
                 .factory(arg -> new BlockBreakData(
                         arg.playerData.getGenericInstance(BlockBreakConfig.class)))
                 // (Complete data removal for now.)
-                .addToGroups(CheckType.BLOCKBREAK, true, IData.class, ICheckData.class)
+                .addToGroups(CheckType.BLOCKBREAK, true, List.of(IData.class, ICheckData.class))
                 .context() //
                 );
     }

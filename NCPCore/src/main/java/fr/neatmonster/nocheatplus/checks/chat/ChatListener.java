@@ -99,7 +99,7 @@ public class ChatListener extends CheckListener implements INotifyReload, JoinLe
                 .context() //
                 .registerDataPlayer(ChatData.class)
                 .factory(arg -> new ChatData())
-                .addToGroups(CheckType.CHAT, true, IData.class, ICheckData.class)
+                .addToGroups(CheckType.CHAT, true, List.of(IData.class, ICheckData.class))
                 .context() //
                 );
     }

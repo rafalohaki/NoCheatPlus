@@ -17,6 +17,7 @@ package fr.neatmonster.nocheatplus.components.registry.factory;
 import java.util.Collection;
 import java.util.Collections;
 import java.util.LinkedHashSet;
+import java.util.List;
 import java.util.Set;
 import java.util.concurrent.locks.Lock;
 import fr.neatmonster.nocheatplus.checks.CheckType;
@@ -100,7 +101,7 @@ public class RichFactoryRegistry<A> extends RichTypeSetRegistry implements IRich
             factoryRegistry.registerFactory(registerFor, factory);
             for (final Class<?> groupType: autoGroups) {
                 if (groupType.isAssignableFrom(registerFor)) {
-                    addToGroups(registerFor, (Class<? super T>) groupType);
+                    addToGroups(registerFor, List.of((Class<? super T>) groupType));
                 }
             }
         } finally {

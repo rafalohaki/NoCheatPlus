@@ -16,6 +16,7 @@ package fr.neatmonster.nocheatplus.components.registry.setup.data;
 
 import fr.neatmonster.nocheatplus.checks.CheckType;
 import fr.neatmonster.nocheatplus.components.data.IData;
+import java.util.Collection;
 import fr.neatmonster.nocheatplus.components.registry.factory.IFactoryOne;
 import fr.neatmonster.nocheatplus.components.registry.setup.RegistrationContext;
 import fr.neatmonster.nocheatplus.components.registry.setup.instance.RegisterInstancePlayer;
@@ -38,7 +39,7 @@ public class RegisterDataPlayer<T extends IData> extends RegisterInstancePlayer<
     @Override
     public RegisterDataPlayer<T> addToGroups(
             final CheckType checkType, final boolean withDescendantCheckTypes,
-            final Class<? super T>... groupTypes) {
+            final Collection<Class<? super T>> groupTypes) {
         super.addToGroups(checkType, withDescendantCheckTypes, groupTypes);
         return this;
     }

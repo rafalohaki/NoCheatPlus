@@ -32,6 +32,7 @@ import org.bukkit.event.player.PlayerAnimationEvent;
 import org.bukkit.event.player.PlayerInteractEntityEvent;
 import org.bukkit.event.player.PlayerItemHeldEvent;
 import org.bukkit.inventory.ItemStack;
+import java.util.List;
 import fr.neatmonster.nocheatplus.NCPAPIProvider;
 import fr.neatmonster.nocheatplus.checks.CheckListener;
 import fr.neatmonster.nocheatplus.checks.CheckType;
@@ -142,7 +143,7 @@ public class FightListener extends CheckListener implements JoinLeaveListener{
                 // FightData
                 .registerDataPlayer(FightData.class)
                 .factory(arg -> new FightData(arg.playerData.getGenericInstance(FightConfig.class)))
-                .addToGroups(CheckType.FIGHT, false, IData.class, ICheckData.class)
+                .addToGroups(CheckType.FIGHT, false, List.of(IData.class, ICheckData.class))
                 .removeSubCheckData(CheckType.FIGHT, true)
                 .context() //
                 );
