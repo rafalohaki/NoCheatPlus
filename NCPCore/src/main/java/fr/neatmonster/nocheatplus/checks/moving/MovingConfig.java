@@ -104,7 +104,10 @@ public class MovingConfig extends ACheckConfig {
 
     // PassableAccuracy: also use if ray-tracing is not used
     public ActionList passableActions;
-    /** Decay factor for passable violation level. */
+    /**
+     * Fraction of the passable violation level retained per tick. Lower values
+     * cause faster decay.
+     */
     public double     passableVlDecay;
     public double     passableHorizontalMargins;
     public double     passableVerticalMargins;
@@ -139,7 +142,10 @@ public class MovingConfig extends ACheckConfig {
     public boolean    sfSetBackPolicyVoid;
     public boolean    sfSetBackPolicyApplyFallDamage;
     public ActionList survivalFlyActions;
-    /** Decay factor for survival fly violation level. */
+    /**
+     * Fraction of the survival fly violation level retained per tick. Lower
+     * values cause faster decay.
+     */
     public double     survivalFlyVlDecay;
 
     public boolean 	sfHoverCheck; // Placeholder for potential sub check
@@ -193,7 +199,10 @@ public class MovingConfig extends ACheckConfig {
 
     public HashMap<EntityType, Double> vehicleEnvelopeHorizontalSpeedCap = new HashMap<EntityType, Double>();
     public ActionList vehicleEnvelopeActions;
-    /** Decay factor for vehicle envelope violation level. */
+    /**
+     * Fraction of the vehicle envelope violation level retained per tick.
+     * Values below {@code 1.0} make decay faster.
+     */
     public double     vehicleEnvelopeVlDecay;
 
     // Trace
@@ -344,7 +353,7 @@ public class MovingConfig extends ACheckConfig {
     private void loadPassableSettings(final ConfigFile config) {
         passableActions = config.getOptimizedActionList(ConfPaths.MOVING_PASSABLE_ACTIONS,
                 Permissions.MOVING_PASSABLE);
-        passableVlDecay = config.getDouble(ConfPaths.MOVING_PASSABLE_VL_DECAY, 0.99);
+        passableVlDecay = config.getDouble(ConfPaths.MOVING_PASSABLE_VL_DECAY, 0.0, 1.0, 0.99);
         passableHorizontalMargins = config.getDouble(ConfPaths.MOVING_PASSABLE_RT_XZ_FACTOR, 0.1, 1.0, 0.999999);
         passableVerticalMargins = config.getDouble(ConfPaths.MOVING_PASSABLE_RT_Y_FACTOR, 0.1, 1.0, 0.999999);
         passableUntrackedTeleportCheck = config.getBoolean(ConfPaths.MOVING_PASSABLE_UNTRACKED_TELEPORT_ACTIVE);
@@ -389,7 +398,7 @@ public class MovingConfig extends ACheckConfig {
         survivalFlyVLFreezeInAir = config.getBoolean(ConfPaths.MOVING_SURVIVALFLY_LENIENCY_FREEZEINAIR);
         survivalFlyActions = config.getOptimizedActionList(ConfPaths.MOVING_SURVIVALFLY_ACTIONS,
                 Permissions.MOVING_SURVIVALFLY);
-        survivalFlyVlDecay = config.getDouble(ConfPaths.MOVING_SURVIVALFLY_VL_DECAY, 0.95);
+        survivalFlyVlDecay = config.getDouble(ConfPaths.MOVING_SURVIVALFLY_VL_DECAY, 0.0, 1.0, 0.95);
 
         sfHoverCheck = config.getBoolean(ConfPaths.MOVING_SURVIVALFLY_HOVER_CHECK);
         sfHoverTicks = config.getInt(ConfPaths.MOVING_SURVIVALFLY_HOVER_TICKS);
@@ -463,7 +472,7 @@ public class MovingConfig extends ACheckConfig {
                 vehicleEnvelopeHorizontalSpeedCap, 4.0, true);
         vehicleEnvelopeActions = config.getOptimizedActionList(ConfPaths.MOVING_VEHICLE_ENVELOPE_ACTIONS,
                 Permissions.MOVING_VEHICLE_ENVELOPE);
-        vehicleEnvelopeVlDecay = config.getDouble(ConfPaths.MOVING_VEHICLE_ENVELOPE_VL_DECAY, 0.99);
+        vehicleEnvelopeVlDecay = config.getDouble(ConfPaths.MOVING_VEHICLE_ENVELOPE_VL_DECAY, 0.0, 1.0, 0.99);
         List<String> types;
         if (config.get(ConfPaths.MOVING_VEHICLE_IGNOREDVEHICLES) == null) {
             types = Arrays.asList("arrow", "spectral_arrow", "tipped_arrow");

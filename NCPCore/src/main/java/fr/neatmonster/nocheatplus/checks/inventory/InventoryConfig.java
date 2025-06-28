@@ -46,7 +46,10 @@ public class InventoryConfig extends ACheckConfig {
     public final Set<String> inventoryExemptions = new HashSet<String>();
     public final float      fastClickImprobableWeight;
     public final ActionList fastClickActions;
-    /** Decay factor for fast click violation level. */
+    /**
+     * Fraction of the fast click violation level retained per tick. Lower
+     * values cause faster decay.
+     */
     public final double fastClickVlDecay;
 
     public final long		fastConsumeDuration;
@@ -95,7 +98,7 @@ public class InventoryConfig extends ACheckConfig {
         data.readStringlFromList(ConfPaths.INVENTORY_FASTCLICK_EXCLUDE, inventoryExemptions);
         fastClickImprobableWeight = (float) data.getDouble(ConfPaths.INVENTORY_FASTCLICK_IMPROBABLE_WEIGHT);
         fastClickActions = data.getOptimizedActionList(ConfPaths.INVENTORY_FASTCLICK_ACTIONS, Permissions.INVENTORY_FASTCLICK);
-        fastClickVlDecay = data.getDouble(ConfPaths.INVENTORY_FASTCLICK_VL_DECAY, 0.99);
+        fastClickVlDecay = data.getDouble(ConfPaths.INVENTORY_FASTCLICK_VL_DECAY, 0.0, 1.0, 0.99);
 
         if (ServerVersion.compareMinecraftVersion("1.9") >= 0) {
             /** Note: Disable check should use

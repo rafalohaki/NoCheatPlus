@@ -42,7 +42,10 @@ public class CombinedConfig extends ACheckConfig {
     /** Do mind that this flag is not used by all components. */
     public final float          improbableLevel;
     public final ActionList     improbableActions;
-    /** Decay factor for improbable violation level. */
+    /**
+     * Fraction of the improbable violation level retained per tick. Lower
+     * values cause faster decay.
+     */
     public final double     improbableVlDecay;
 
     // Invulnerable management.
@@ -73,7 +76,7 @@ public class CombinedConfig extends ACheckConfig {
 
         improbableLevel = (float) config.getDouble(ConfPaths.COMBINED_IMPROBABLE_LEVEL);
         improbableActions = config.getOptimizedActionList(ConfPaths.COMBINED_IMPROBABLE_ACTIONS, Permissions.COMBINED_IMPROBABLE);
-        improbableVlDecay = config.getDouble(ConfPaths.COMBINED_IMPROBABLE_VL_DECAY, 0.95);
+        improbableVlDecay = config.getDouble(ConfPaths.COMBINED_IMPROBABLE_VL_DECAY, 0.0, 1.0, 0.95);
 
         invulnerableCheck = config.getBoolean(ConfPaths.COMBINED_INVULNERABLE_CHECK);
         invulnerableInitialTicksJoin = config.getInt(ConfPaths.COMBINED_INVULNERABLE_INITIALTICKS_JOIN);

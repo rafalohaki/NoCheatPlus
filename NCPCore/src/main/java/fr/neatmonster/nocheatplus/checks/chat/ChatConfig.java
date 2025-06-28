@@ -54,7 +54,10 @@ public class ChatConfig extends ACheckConfig {
     public final int          commandsShortTermTicks;
     public final double       commandsShortTermLevel;
     public final ActionList   commandsActions;
-    /** Decay factor for command violation level. */
+    /**
+     * Fraction of the command violation level retained per tick. Smaller
+     * values cause faster decay.
+     */
     public final double       commandsVlDecay;
 
     // Potentially add sub check types
@@ -88,7 +91,10 @@ public class ChatConfig extends ACheckConfig {
     public final float        textPlayerWeight;
     public final boolean      textEngineMaximum;
     public final boolean	  textAllowVLReset;
-    /** Decay factor for text violation level. */
+    /**
+     * Fraction of the text violation level retained per tick. Smaller values
+     * cause faster decay.
+     */
     public final double       textVlDecay;
     public final boolean      textDebug;
 
@@ -135,7 +141,7 @@ public class ChatConfig extends ACheckConfig {
         commandsShortTermTicks = config.getInt(ConfPaths.CHAT_COMMANDS_SHORTTERM_TICKS);
         commandsShortTermLevel = config.getDouble(ConfPaths.CHAT_COMMANDS_SHORTTERM_LEVEL);
         commandsActions = config.getOptimizedActionList(ConfPaths.CHAT_COMMANDS_ACTIONS, Permissions.CHAT_COMMANDS);
-        commandsVlDecay = config.getDouble(ConfPaths.CHAT_COMMANDS_VL_DECAY, 0.99);
+        commandsVlDecay = config.getDouble(ConfPaths.CHAT_COMMANDS_VL_DECAY, 0.0, 1.0, 0.99);
 
         textGlobalCheck = config.getBoolean(ConfPaths.CHAT_TEXT_GL_CHECK, true);
         textPlayerCheck = config.getBoolean(ConfPaths.CHAT_TEXT_PP_CHECK, true);
@@ -167,7 +173,7 @@ public class ChatConfig extends ACheckConfig {
         textDebug = config.getBoolean(ConfPaths.CHAT_TEXT_DEBUG, false);
         textFreqNormActions = config.getOptimizedActionList(ConfPaths.CHAT_TEXT_FREQ_NORM_ACTIONS, Permissions.CHAT_TEXT);
         textAllowVLReset = config.getBoolean(ConfPaths.CHAT_TEXT_ALLOWVLRESET);
-        textVlDecay = config.getDouble(ConfPaths.CHAT_TEXT_VL_DECAY, 0.95);
+        textVlDecay = config.getDouble(ConfPaths.CHAT_TEXT_VL_DECAY, 0.0, 1.0, 0.95);
 
         chatWarningCheck = config.getBoolean(ConfPaths.CHAT_WARNING_CHECK);
         chatWarningLevel = (float) config.getDouble(ConfPaths.CHAT_WARNING_LEVEL);
