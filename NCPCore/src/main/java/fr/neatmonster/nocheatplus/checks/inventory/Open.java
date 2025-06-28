@@ -84,7 +84,7 @@ public class Open extends Check implements IDisableListener{
                 || isShulkerBox) {
             return false;
         }
-        final IPlayerData pData = DataManager.getPlayerData(player);
+        final IPlayerData pData = DataManager.getInstance().getPlayerData(player);
         final InventoryConfig cc = pData.getGenericInstance(InventoryConfig.class);
         if (cc.openClose) {
             final UUID id = player.getUniqueId();

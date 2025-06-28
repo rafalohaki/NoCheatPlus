@@ -373,11 +373,11 @@ public class ConfigManager {
 
     /**
      * Set a property for all configurations. Might use with
-     * DataManager.clearConfigs if check-configurations might already be in use.
+     * DataManager.getInstance().clearConfigs if check-configurations might already be in use.
      *
      * @param path
      * @param value
-     * @deprecated For activation flags use the WorldDataManager. This helper will
+     * @deprecated For activation flags use the WorldDataManager.getInstance(). This helper will
      *             be removed in version 2.0.
      *             <p>
      *             Migration: use

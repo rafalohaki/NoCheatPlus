@@ -54,13 +54,13 @@ public class ExemptionsCommand extends BaseCommand {
             return true;
         } 
         String playerName = args[1].trim();
-        Player player = DataManager.getPlayer(playerName);
+        Player player = DataManager.getInstance().getPlayer(playerName);
         UUID id;
         if (player != null) {
             playerName = player.getName();
             id = player.getUniqueId();
         } else {
-            id = DataManager.getUUID(playerName);
+            id = DataManager.getInstance().getUUID(playerName);
         }
         final List<String> entries = new LinkedList<String>();
         if (id == null) {

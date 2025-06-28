@@ -138,7 +138,7 @@ public class BlockInteractListener extends CheckListener {
         if (player == null) {
             return;
         }
-        final IPlayerData pData = DataManager.getPlayerData(player);
+        final IPlayerData pData = DataManager.getInstance().getPlayerData(player);
         if (pData == null || !pData.isCheckActive(CheckType.BLOCKINTERACT, player)) {
             return;
         }
@@ -159,11 +159,11 @@ public class BlockInteractListener extends CheckListener {
         final BlockInteractConfig cc = pData.getGenericInstance(BlockInteractConfig.class);
         final Location loc = player.getLocation(useLoc);
         final FlyingQueueHandle flyingHandle = new FlyingQueueHandle(pData);
-        final CheckResult result = runChecks(player, ctx, pData, data, cc, flyingHandle, loc);
+        final BlockInteractData.CheckResult result = runChecks(player, ctx, pData, data, cc, flyingHandle, loc);
 
-        if (result.cancelled()) {
+        if (result.isCancelled()) {
             onCancelInteract(player, ctx.block(), ctx.face(), event, ctx.previousLastTick(),
-                    result.preventUseItem(), data, cc, pData);
+                    result.isPreventUseItem(), data, cc, pData);
         } else {
             handleFlyingQueue(player, pData, flyingHandle);
         }
@@ -242,9 +242,11 @@ public class BlockInteractListener extends CheckListener {
         return new InteractContext(action, block, face, stack, previousLastTick, blockChecks);
     }
 
-    private CheckResult runChecks(final Player player, final InteractContext ctx, final IPlayerData pData,
+    private BlockInteractData.CheckResult runChecks(final Player player, final InteractContext ctx, final IPlayerData pData,
             final BlockInteractData data, final BlockInteractConfig cc, final FlyingQueueHandle flyingHandle,
             final Location loc) {
+        final BlockInteractData.CheckResult result = data.getCheckResult();
+        result.reset();
         boolean cancelled = false;
         boolean preventUseItem = false;
 
@@ -269,7 +271,8 @@ public class BlockInteractListener extends CheckListener {
                 cancelled = true;
             }
         }
-        return new CheckResult(cancelled, preventUseItem);
+        result.set(cancelled, preventUseItem);
+        return result;
     }
 
     private void handleFlyingQueue(final Player player, final IPlayerData pData, final FlyingQueueHandle flyingHandle) {
@@ -287,8 +290,6 @@ public class BlockInteractListener extends CheckListener {
 
     private record InteractContext(Action action, Block block, BlockFace face, ItemStack stack,
             int previousLastTick, boolean blockChecks) {}
-
-    private record CheckResult(boolean cancelled, boolean preventUseItem) {}
 
     record ActionResult(ItemStack stack, boolean blockChecks) {}
 
@@ -366,7 +367,7 @@ public class BlockInteractListener extends CheckListener {
     public void onPlayerInteractMonitor(final PlayerInteractEvent event) {
         // Set event resolution.
         final Player player = event.getPlayer();
-        final IPlayerData pData = DataManager.getPlayerData(player);
+        final IPlayerData pData = DataManager.getInstance().getPlayerData(player);
         final BlockInteractData data = pData.getGenericInstance(BlockInteractData.class);
         data.setPlayerInteractEventResolution(event);
 

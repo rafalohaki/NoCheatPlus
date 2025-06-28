@@ -72,6 +72,9 @@ public class BlockInteractData extends ACheckData {
      */
     public int rateLimitSkip = 0;
 
+    /** Mutable check result reused across events. */
+    private final CheckResult checkResult = new CheckResult();
+
     /**
      * Checks that have been run and passed for the block last interacted with
      * (rather complete for block-interact checks, to skip subsequent
@@ -83,6 +86,15 @@ public class BlockInteractData extends ACheckData {
      * (not complete, may contain checks from other check groups).
      */
     private final Set<CheckType> consumedChecks = new HashSet<CheckType>();
+
+    /**
+     * Return the reusable {@link CheckResult} instance.
+     *
+     * @return the check result instance
+     */
+    public CheckResult getCheckResult() {
+        return checkResult;
+    }
 
     /**
      * Set last interacted block (coordinates, type, tick). Also resets the
@@ -341,5 +353,33 @@ public class BlockInteractData extends ACheckData {
     public void setLastAllowUseBlock(final boolean allowUseBlock) {
         this.lastAllowUseBlock = allowUseBlock;
     }
+
+    /**
+     * Mutable check result to reuse across events.
+     */
+    public static class CheckResult {
+
+        private boolean cancelled;
+        private boolean preventUseItem;
+
+        public boolean isCancelled() {
+            return cancelled;
+        }
+
+        public boolean isPreventUseItem() {
+            return preventUseItem;
+        }
+
+        public void reset() {
+            cancelled = false;
+            preventUseItem = false;
+        }
+
+        void set(final boolean cancelled, final boolean preventUseItem) {
+            this.cancelled = cancelled;
+            this.preventUseItem = preventUseItem;
+        }
+    }
+
 
 }

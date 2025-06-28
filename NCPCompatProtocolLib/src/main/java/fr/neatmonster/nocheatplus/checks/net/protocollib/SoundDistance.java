@@ -146,7 +146,7 @@ public class SoundDistance extends BaseAdapter {
             if (event.isPlayerTemporary()) return;
         } catch(NoSuchMethodError e) {
             if (event.getPlayer() == null) return;
-            if (DataManager.getPlayerDataSafe(event.getPlayer()) == null) return;
+            if (DataManager.getInstance().getPlayerDataSafe(event.getPlayer()) == null) return;
         }
         final PacketContainer packetContainer = event.getPacket();
 
@@ -156,7 +156,7 @@ public class SoundDistance extends BaseAdapter {
         }
 
         final Player player = event.getPlayer();
-        final IPlayerData pData = DataManager.getPlayerData(player);
+        final IPlayerData pData = DataManager.getInstance().getPlayerData(player);
         if (!pData.isCheckActive(CheckType.NET_SOUNDDISTANCE, player)) {
             return;
         }

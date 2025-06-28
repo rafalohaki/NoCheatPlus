@@ -223,7 +223,7 @@ public class InventoryUtil {
     * @return true, if successful
     */
     public static boolean hasAnyInventoryOpen(final Player player) {
-        final IPlayerData pData = DataManager.getPlayerData(player);
+        final IPlayerData pData = DataManager.getInstance().getPlayerData(player);
         final InventoryData iData = pData.getGenericInstance(InventoryData.class);
         return iData.firstClickTime != 0;
     }
@@ -239,7 +239,7 @@ public class InventoryUtil {
     */
     public static boolean hasOpenedInvRecently(final Player player, final long timeAge) {
         final long now = System.currentTimeMillis();
-        final IPlayerData pData = DataManager.getPlayerData(player);
+        final IPlayerData pData = DataManager.getInstance().getPlayerData(player);
         final InventoryData iData = pData.getGenericInstance(InventoryData.class);
         return iData.firstClickTime != 0 && (now - iData.firstClickTime <= timeAge);     
     }
@@ -253,7 +253,7 @@ public class InventoryUtil {
     * @return true if the time between interaction and inventory click is too recent, false otherwise (beyond age).
     */
     public static boolean hasOpenedContainerRecently(final Player player, final long timeAge) {
-        final IPlayerData pData = DataManager.getPlayerData(player);
+        final IPlayerData pData = DataManager.getInstance().getPlayerData(player);
         final InventoryData iData = pData.getGenericInstance(InventoryData.class);
         return 
                 // This represents an error, will need to investigate why the times get set to 0.

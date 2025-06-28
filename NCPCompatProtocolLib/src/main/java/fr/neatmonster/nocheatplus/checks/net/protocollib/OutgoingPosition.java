@@ -68,7 +68,7 @@ public class OutgoingPosition extends BaseAdapter {
         	counters.add(ProtocolLibComponent.idNullPlayer, 1);
             return;
         }
-        final IPlayerData pData = DataManager.getPlayerDataSafe(player);
+        final IPlayerData pData = DataManager.getInstance().getPlayerDataSafe(player);
         if (pData == null) {
             StaticLog.logWarning("Failed to fetch player data with " + event.getPacketType() + " for: " + player);
             return;

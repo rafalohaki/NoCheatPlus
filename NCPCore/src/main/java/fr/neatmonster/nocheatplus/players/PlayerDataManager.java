@@ -275,7 +275,6 @@ public class PlayerDataManager  implements IPlayerDataManager, ComponentWithName
      * @param permissionRegistry
      */
     public PlayerDataManager(final WorldDataManager worldDataManager, final PermissionRegistry permissionRegistry) {
-        DataManager.instance = this; // NOTE: NoCheatPlus should handle this and return an ILockable.
         if (ServerVersion.isMinecraftVersionUnknown()) {
             // True hacks.
             BukkitVersion.init();
@@ -338,7 +337,7 @@ public class PlayerDataManager  implements IPlayerDataManager, ComponentWithName
 
     private final void legacyPlayerDataExpirationRemovalByName(final UUID playerId, 
             final boolean deleteData) {
-        final String playerName = DataManager.getPlayerName(playerId);
+        final String playerName = DataManager.getInstance().getPlayerName(playerId);
         if (playerName == null) {
             // NOTE: Should warn about missing player name.
             return;
@@ -958,7 +957,7 @@ public class PlayerDataManager  implements IPlayerDataManager, ComponentWithName
 
     @Override
     public PlayerData getPlayerData(final String playerName) {
-        final UUID playerId = DataManager.getUUID(playerName);
+        final UUID playerId = DataManager.getInstance().getUUID(playerName);
         return playerId == null ? null : playerData.get(playerId);
     }
 

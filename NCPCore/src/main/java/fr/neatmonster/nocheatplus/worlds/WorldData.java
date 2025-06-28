@@ -327,7 +327,7 @@ public class WorldData implements IWorldData {
      */
     void addChild(WorldData childData) {
         /*
-         * NOTE: Locking or not. -> if we never call WorldDataManager.something
+         * NOTE: Locking or not. -> if we never call WorldDataManager.getInstance().something
          * from in here, an extra lock is feasible anyway.
          */
         this.children.add(childData);
@@ -339,7 +339,7 @@ public class WorldData implements IWorldData {
      */
     void removeChild(WorldData childData) {
         /*
-         * NOTE: Locking or not. -> if we never call WorldDataManager.something
+         * NOTE: Locking or not. -> if we never call WorldDataManager.getInstance().something
          * from in here, an extra lock is feasible anyway.
          */
         this.children.remove(childData);

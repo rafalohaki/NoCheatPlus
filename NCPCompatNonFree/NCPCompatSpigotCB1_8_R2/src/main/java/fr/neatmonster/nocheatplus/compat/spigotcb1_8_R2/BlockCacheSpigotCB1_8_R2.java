@@ -35,6 +35,14 @@ public class BlockCacheSpigotCB1_8_R2 extends BlockCache {
 
     protected World bukkitWorld;
 
+    private net.minecraft.server.v1_8_R2.Entity toNmsEntity(final Entity entity) {
+        if (!(entity instanceof CraftEntity)) {
+            throw new IllegalArgumentException("Expected CraftEntity, got "
+                    + (entity == null ? "null" : entity.getClass().getName()));
+        }
+        return ((CraftEntity) entity).getHandle();
+    }
+
     public BlockCacheSpigotCB1_8_R2(World world) {
         setAccess(world);
     }
@@ -86,7 +94,7 @@ public class BlockCacheSpigotCB1_8_R2 extends BlockCache {
         try{
             // Potentially simplify this code path.
 
-            final net.minecraft.server.v1_8_R2.Entity mcEntity  = ((CraftEntity) entity).getHandle();
+            final net.minecraft.server.v1_8_R2.Entity mcEntity = toNmsEntity(entity);
 
             final AxisAlignedBB box = new AxisAlignedBB(minX, minY, minZ, maxX, maxY, maxZ);
             @SuppressWarnings("rawtypes")

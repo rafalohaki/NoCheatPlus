@@ -65,4 +65,14 @@ public class TestMinecraftVersion {
         }
     }
 
+    @Test
+    public void testPreReleaseCheck() {
+        String parsed = ServerVersion.parseMinecraftVersion("1.21-pre1");
+        ServerVersion.setMinecraftVersion(parsed);
+        if (ServerVersion.compareMinecraftVersion("1.21.0") >= 0) {
+            fail("Pre-release should not satisfy the release check.");
+        }
+        ServerVersion.setMinecraftVersion(GenericVersion.UNKNOWN_VERSION);
+    }
+
 }
