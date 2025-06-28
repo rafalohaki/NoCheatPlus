@@ -36,32 +36,30 @@ import fr.neatmonster.nocheatplus.worlds.WorldFactoryArgument;
  */
 public class NetStatic {
 
-    static class BurnInfo {
-        final int burnStart;
-        final int empty;
-        BurnInfo(int burnStart, int empty) {
-            this.burnStart = burnStart;
-            this.empty = empty;
-        }
-    }
+    static record BurnInfo(int burnStart, int empty) {}
 
     static BurnInfo computeBurnInfo(final ActionFrequency packetFreq) {
         final int winNum = packetFreq.numberOfBuckets();
         int burnStart = winNum;
         int empty = 0;
         boolean firstUsed = false;
-        boolean counting = false;
         final float[] bucketScores = snapshotBucketScores(packetFreq);
         for (int i = 1; i < winNum; i++) {
             final float bucket = bucketScores[i];
             if (bucket > 0f) {
                 if (!firstUsed) {
                     firstUsed = true;
-                } else if (!counting) {
+                } else {
                     burnStart = i;
-                    counting = true;
+                    break;
                 }
-            } else if (counting) {
+            }
+        }
+        if (burnStart < winNum) {
+            for (int i = burnStart + 1; i < winNum; i++) {
+                if (bucketScores[i] > 0f) {
+                    break;
+                }
                 empty++;
             }
         }

@@ -103,6 +103,32 @@ public class UseEntityAdapter extends BaseAdapter {
             this.player = player;
             this.pData = pData;
         }
+
+        static PlayerContext from(PacketEvent event) {
+            if (event == null) {
+                return null;
+            }
+            if (isTemporary(event)) {
+                return null;
+            }
+            final Player player = event.getPlayer();
+            if (player == null) {
+                return null;
+            }
+            final IPlayerData pData = DataManager.getInstance().getPlayerDataSafe(player);
+            if (pData == null) {
+                return null;
+            }
+            return new PlayerContext(player, pData);
+        }
+
+        private static boolean isTemporary(PacketEvent event) {
+            try {
+                return event.isPlayerTemporary();
+            } catch (NoSuchMethodError e) {
+                return false;
+            }
+        }
     }
 
     private static class UseActionResult {
@@ -142,29 +168,14 @@ public class UseEntityAdapter extends BaseAdapter {
     }
 
     private PlayerContext extractPlayerContext(PacketEvent event) {
-        try {
-            if (event.isPlayerTemporary()) {
-                return null;
-            }
-        } catch (NoSuchMethodError e) {
-            // ignore - older ProtocolLib version
-        }
-        final Player player = event.getPlayer();
-        if (player == null) {
-            return null;
-        }
-        final IPlayerData pData = DataManager.getInstance().getPlayerDataSafe(player);
-        if (pData == null) {
-            return null;
-        }
-        return new PlayerContext(player, pData);
+        return PlayerContext.from(event);
     }
 
     private UseActionResult parseAction(PacketContainer packet) {
         boolean attack = false;
         boolean interpreted = false;
         if (legacySet != null) {
-            final int flags = getAction_legacy(packet);
+            final int flags = getActionLegacy(packet);
             if ((flags & INTERPRETED) != 0) {
                 interpreted = true;
                 if ((flags & ATTACK) != 0) {
@@ -211,7 +222,7 @@ public class UseEntityAdapter extends BaseAdapter {
         }
     }
 
-    private int getAction_legacy(final PacketContainer packetContainer) {
+    private int getActionLegacy(final PacketContainer packetContainer) {
         // (For some reason the object didn't appear work with equality checks, thus compare the short string.)
         final String actionName = legacySet.getActionFromNMSPacket(packetContainer.getHandle());
         return actionName == null ? 0 : (INTERPRETED | ("ATTACK".equals(actionName) ? ATTACK : 0));

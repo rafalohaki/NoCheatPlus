@@ -26,8 +26,12 @@ import fr.neatmonster.nocheatplus.utilities.ColorUtil;
 
 /**
  * NOTE: EARLY REFACTORING STATE, MOST METHODS NEED SYNC OVER DATA !
- * @author mc_dev
+ * <p>
+ * The captcha check must only operate if both the world data and the player
+ * data mark {@link CheckType#CHAT_CAPTCHA} as active.
+ * </p>
  *
+ * @author mc_dev
  */
 public class Captcha extends Check implements ICaptcha{
 

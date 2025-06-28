@@ -599,6 +599,7 @@ public class DefaultConfig extends ConfigFile {
         set(ConfPaths.MOVING_LOADCHUNKS_MOVE, false, 1154);
         set(ConfPaths.MOVING_LOADCHUNKS_TELEPORT, true, 785);
         set(ConfPaths.MOVING_LOADCHUNKS_WORLDCHANGE, true, 785);
+        set(ConfPaths.MOVING_CHUNKLOAD_MAXDISTANCE, 0, 785);
         set(ConfPaths.MOVING_SPRINTINGGRACE, 4.0, 785);
         set(ConfPaths.MOVING_ASSUMESPRINT, true, 785);
         set(ConfPaths.MOVING_SPEEDGRACE, 4.0, 785);

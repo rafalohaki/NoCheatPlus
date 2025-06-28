@@ -387,7 +387,23 @@ public class MovingData extends ACheckData implements IDataOnRemoveSubCheckData,
 
 
     /**
-     * Clear the data of the fly checks (not more-packets).
+     * Clear cached data for fly and more-packets checks.
+     * <p>
+     * This resets a wide range of state including vehicle related
+     * tracking, accounting values and no-fall information. Fields
+     * affected are:
+     * <ul>
+     * <li>playerMoves and vehicleMoves</li>
+     * <li>bunnyhopDelay, sfJumpPhase and jumpAmplifier</li>
+     * <li>setBack and sfZeroVdistRepeat</li>
+     * <li>all accounting and horizontal accounting values</li>
+     * <li>no-fall data</li>
+     * <li>player speed modifiers and lostSprintCount</li>
+     * <li>hover ticks, dirty/low-jump flags and lift-off envelope</li>
+     * <li>inside medium counters and vehicleConsistency</li>
+     * <li>friction values, vertical bounce and block change tracking</li>
+     * <li>momentumTick, liqtick and bubble stream counters</li>
+     * </ul>
      */
     public void clearFlyData() {
         playerMoves.invalidate();
