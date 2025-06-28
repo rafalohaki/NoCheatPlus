@@ -1,11 +1,11 @@
 package fr.neatmonster.nocheatplus.test;
 
-import static org.junit.Assert.*;
+import static org.junit.jupiter.api.Assertions.*;
 
 import java.io.ByteArrayOutputStream;
 import java.io.PrintStream;
 
-import org.junit.Test;
+import org.junit.jupiter.api.Test;
 
 import fr.neatmonster.nocheatplus.logging.StaticLog;
 

@@ -1,6 +1,6 @@
 package fr.neatmonster.nocheatplus.test;
 
-import static org.junit.Assert.assertEquals;
+import static org.junit.jupiter.api.Assertions.assertEquals;
 
 import java.lang.reflect.Field;
 import java.lang.reflect.Method;
@@ -8,8 +8,8 @@ import java.lang.reflect.Proxy;
 
 import org.bukkit.Location;
 import org.bukkit.World;
-import org.junit.Before;
-import org.junit.Test;
+import org.junit.jupiter.api.BeforeEach;
+import org.junit.jupiter.api.Test;
 
 import fr.neatmonster.nocheatplus.checks.fight.FightData;
 import fr.neatmonster.nocheatplus.checks.fight.FightListener;
@@ -38,7 +38,7 @@ public class ComputeTargetMoveInfoTest {
     private Location location;
     private sun.misc.Unsafe unsafe;
 
-    @Before
+    @BeforeEach
     public void setup() throws Exception {
         unsafe = getUnsafe();
         listener = (FightListener) unsafe.allocateInstance(FightListener.class);

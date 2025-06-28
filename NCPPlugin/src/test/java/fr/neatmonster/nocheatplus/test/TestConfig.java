@@ -14,11 +14,11 @@
  */
 package fr.neatmonster.nocheatplus.test;
 
-import static org.junit.Assert.fail;
-import static org.junit.Assert.assertNotNull;
+import static org.junit.jupiter.api.Assertions.fail;
+import static org.junit.jupiter.api.Assertions.assertNotNull;
 
 import org.bukkit.Material;
-import org.junit.Test;
+import org.junit.jupiter.api.Test;
 
 import fr.neatmonster.nocheatplus.compat.BridgeMaterial;
 import fr.neatmonster.nocheatplus.config.ConfPaths;
@@ -68,15 +68,20 @@ public class TestConfig {
         // Simple moved boolean.
         config.set(ConfPaths.LOGGING_FILE, false);
         config = PathUtils.processPaths(config, "test", false);
-        assertNotNull("Expect config to be changed at all.", config);
+
+        // Fix here:
+        assertNotNull(config, "Expect config to be changed at all.");
+
         if (config.contains(ConfPaths.LOGGING_FILE)) {
             fail("Expect path be removed: " + ConfPaths.LOGGING_FILE);
         }
+
         Boolean val = config.getBoolean(ConfPaths.LOGGING_BACKEND_FILE_ACTIVE, true);
         if (val == null || val.booleanValue()) {
             fail("Expect new path to be set to false: " + ConfPaths.LOGGING_BACKEND_FILE_ACTIVE);
         }
     }
+
 
     @Test
     public void testDefaults() {

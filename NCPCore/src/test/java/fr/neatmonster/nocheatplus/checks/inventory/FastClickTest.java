@@ -1,13 +1,13 @@
 package fr.neatmonster.nocheatplus.checks.inventory;
 
-import static org.junit.Assert.*;
+import static org.junit.jupiter.api.Assertions.*;
 
 import java.lang.reflect.Field;
 import java.lang.reflect.Method;
 
 import org.bukkit.entity.Player;
-import org.junit.Before;
-import org.junit.Test;
+import org.junit.jupiter.api.BeforeEach;
+import org.junit.jupiter.api.Test;
 
 import fr.neatmonster.nocheatplus.actions.ActionList;
 import fr.neatmonster.nocheatplus.checks.ViolationData;
@@ -31,7 +31,7 @@ public class FastClickTest {
     private InventoryConfig config;
     private InventoryData data;
 
-    @Before
+    @BeforeEach
     public void setup() throws Exception {
         Object api = java.lang.reflect.Proxy.newProxyInstance(
                 fr.neatmonster.nocheatplus.NCPAPIProvider.class.getClassLoader(),

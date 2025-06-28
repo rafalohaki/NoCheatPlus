@@ -1,12 +1,12 @@
 package fr.neatmonster.nocheatplus.test;
 
-import static org.junit.Assert.assertTrue;
+import static org.junit.jupiter.api.Assertions.assertTrue;
 
 import java.lang.reflect.Proxy;
 
 import org.bukkit.Location;
 import org.bukkit.World;
-import org.junit.Test;
+import org.junit.jupiter.api.Test;
 
 import fr.neatmonster.nocheatplus.compat.BridgeMaterial;
 import fr.neatmonster.nocheatplus.utilities.location.RichBoundsLocation;
@@ -38,7 +38,7 @@ public class TestFarmlandGround {
         RichBoundsLocation loc = new RichBoundsLocation(bc);
         loc.set(new Location(world, 0.5, 1.0, 0.5), 0.6, 1.8, 0.001);
 
-        assertTrue("Expected farmland to count as ground", loc.isOnGround());
+        assertTrue(loc.isOnGround(), "Expected farmland to count as ground");
 
         loc.cleanup();
         bc.cleanup();

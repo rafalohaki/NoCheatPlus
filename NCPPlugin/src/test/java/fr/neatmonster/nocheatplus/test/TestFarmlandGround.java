@@ -19,14 +19,14 @@ import java.lang.reflect.Proxy;
 
 import org.bukkit.Location;
 import org.bukkit.World;
-import org.junit.Test;
+import org.junit.jupiter.api.Test;
 
 import fr.neatmonster.nocheatplus.compat.BridgeMaterial;
 import fr.neatmonster.nocheatplus.logging.StaticLog;
 import fr.neatmonster.nocheatplus.utilities.location.RichBoundsLocation;
 import fr.neatmonster.nocheatplus.utilities.map.FakeBlockCache;
 
-import static org.junit.Assert.*;
+import static org.junit.jupiter.api.Assertions.*;
 
 /**
  * Verify that farmland counts as ground in RichBoundsLocation.
@@ -58,7 +58,8 @@ public class TestFarmlandGround {
         Location loc = new Location(world, 0.5, 1.0, 0.5);
         RichBoundsLocation rloc = new RichBoundsLocation(bc);
         rloc.set(loc, 0.6, 1.8, 0.001);
-        assertTrue("Farmland should count as ground.", rloc.isOnGround());
+        assertTrue(rloc.isOnGround(), "Farmland should count as ground.");
         bc.cleanup();
     }
+
 }

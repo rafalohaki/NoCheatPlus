@@ -1,10 +1,10 @@
 package fr.neatmonster.nocheatplus.utilities.map;
 
-import static org.junit.Assert.assertFalse;
-import static org.junit.Assert.assertTrue;
+import static org.junit.jupiter.api.Assertions.assertFalse;
+import static org.junit.jupiter.api.Assertions.assertTrue;
 
 import org.bukkit.Material;
-import org.junit.Test;
+import org.junit.jupiter.api.Test;
 
 public class BoundingBoxClampTest {
 
@@ -30,8 +30,8 @@ public class BoundingBoxClampTest {
                 node,
                 null,
                 0);
-        assertFalse("Intersection above 1.0 should be ignored", resultAbove);
-        assertTrue("Intersection below 1.0 should be detected", resultBelow);
+        assertFalse(resultAbove, "Intersection above 1.0 should be ignored");
+        assertTrue(resultBelow, "Intersection below 1.0 should be detected");
         cache.cleanup();
     }
 
@@ -60,8 +60,8 @@ public class BoundingBoxClampTest {
                 node,
                 null,
                 0);
-        assertFalse("Sub box above 1.0 should be ignored", resultAbove);
-        assertTrue("Sub box intersection below 1.0 should be detected", resultBelow);
+        assertFalse(resultAbove, "Sub box above 1.0 should be ignored");
+        assertTrue(resultBelow, "Sub box intersection below 1.0 should be detected");
         cache.cleanup();
     }
 }

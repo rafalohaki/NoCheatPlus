@@ -15,7 +15,7 @@
 package fr.neatmonster.nocheatplus.test;
 
 import org.bukkit.Material;
-import org.junit.Test;
+import org.junit.jupiter.api.Test;
 
 import fr.neatmonster.nocheatplus.compat.BridgeMaterial;
 import fr.neatmonster.nocheatplus.logging.StaticLog;

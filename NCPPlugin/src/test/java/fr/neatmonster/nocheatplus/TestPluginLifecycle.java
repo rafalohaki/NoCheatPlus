@@ -7,9 +7,9 @@ import org.bukkit.plugin.PluginManager;
 import org.bukkit.plugin.java.JavaPluginLoader;
 import fr.neatmonster.nocheatplus.logging.BukkitLogManager;
 import org.bukkit.scheduler.BukkitScheduler;
-import org.junit.After;
-import org.junit.Before;
-import org.junit.Test;
+import org.junit.jupiter.api.AfterEach;
+import org.junit.jupiter.api.BeforeEach;
+import org.junit.jupiter.api.Test;
 
 import java.io.File;
 import java.lang.reflect.Field;
@@ -22,14 +22,14 @@ import java.util.Map;
 import java.util.Set;
 import java.util.logging.Logger;
 
-import static org.junit.Assert.*;
+import static org.junit.jupiter.api.Assertions.*;
 
 public class TestPluginLifecycle {
 
     private NoCheatPlus plugin;
     private Server server;
 
-    @Before
+    @BeforeEach
     public void setup() throws Exception {
         PluginTests.setUnitTestNoCheatPlusAPI(true);
         server = createServer();
@@ -45,7 +45,7 @@ public class TestPluginLifecycle {
         fLog.set(plugin, log);
     }
 
-    @After
+    @AfterEach
     public void teardown() {
     }
 @Test

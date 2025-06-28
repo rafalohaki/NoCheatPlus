@@ -1,6 +1,6 @@
 package fr.neatmonster.nocheatplus.test;
 
-import static org.junit.Assert.*;
+import static org.junit.jupiter.api.Assertions.*;
 
 import java.lang.reflect.Field;
 import java.lang.reflect.Method;
@@ -26,8 +26,8 @@ import fr.neatmonster.nocheatplus.compat.MCAccess;
 import fr.neatmonster.nocheatplus.utilities.location.PlayerLocation;
 import fr.neatmonster.nocheatplus.compat.blocks.changetracker.BlockChangeTracker;
 
-import org.junit.Before;
-import org.junit.Test;
+import org.junit.jupiter.api.BeforeEach;
+import org.junit.jupiter.api.Test;
 
 public class TestCreativeFlyHDist {
 
@@ -121,7 +121,7 @@ public class TestCreativeFlyHDist {
         new fr.neatmonster.nocheatplus.players.DataManager(pdm);
     }
 
-    @Before
+    @BeforeEach
     public void init() throws Exception {
         setupAPI();
     }

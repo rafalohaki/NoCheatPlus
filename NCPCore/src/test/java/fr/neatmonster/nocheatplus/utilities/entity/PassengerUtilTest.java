@@ -1,6 +1,6 @@
 package fr.neatmonster.nocheatplus.utilities.entity;
 
-import static org.junit.Assert.*;
+import static org.junit.jupiter.api.Assertions.*;
 import static org.mockito.Mockito.*;
 
 import java.lang.reflect.Field;
@@ -10,8 +10,8 @@ import java.util.Collections;
 import org.bukkit.entity.Entity;
 import org.bukkit.entity.EntityType;
 import org.bukkit.entity.Player;
-import org.junit.Before;
-import org.junit.Test;
+import org.junit.jupiter.api.BeforeEach;
+import org.junit.jupiter.api.Test;
 
 import fr.neatmonster.nocheatplus.components.registry.event.IHandle;
 import fr.neatmonster.nocheatplus.components.entity.IEntityAccessVehicle;
@@ -53,7 +53,7 @@ public class PassengerUtilTest {
 
     private sun.misc.Unsafe unsafe;
 
-    @Before
+    @BeforeEach
     public void setup() throws Exception {
         Field f = sun.misc.Unsafe.class.getDeclaredField("theUnsafe");
         f.setAccessible(true);

@@ -1,6 +1,6 @@
 package fr.neatmonster.nocheatplus.test;
 
-import static org.junit.Assert.*;
+import static org.junit.jupiter.api.Assertions.*;
 import static org.mockito.Mockito.*;
 
 import java.lang.reflect.Field;
@@ -12,9 +12,9 @@ import org.bukkit.command.ConsoleCommandSender;
 import org.bukkit.Server;
 import org.bukkit.Bukkit;
 
-import org.junit.Before;
-import org.junit.Test;
-import org.junit.After;
+import org.junit.jupiter.api.BeforeEach;
+import org.junit.jupiter.api.Test;
+import org.junit.jupiter.api.AfterEach;
 import org.mockito.MockedStatic;
 
 import fr.neatmonster.nocheatplus.actions.ActionList;
@@ -61,7 +61,7 @@ public class TestImprobable {
 
     private MockedStatic<Bukkit> bukkitMock;
 
-    @Before
+    @BeforeEach
     public void setup() throws Exception {
         Field f = NCPAPIProvider.class.getDeclaredField("noCheatPlusAPI");
         f.setAccessible(true);
@@ -105,7 +105,7 @@ public class TestImprobable {
         new Improbable();
     }
 
-    @After
+    @AfterEach
     public void teardown() {
         if (bukkitMock != null) bukkitMock.close();
         if (previousServer != null && Bukkit.getServer() != previousServer) {
