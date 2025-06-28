@@ -27,6 +27,7 @@ import fr.neatmonster.nocheatplus.checks.CheckType;
 import fr.neatmonster.nocheatplus.checks.chat.analysis.MessageLetterCount;
 import fr.neatmonster.nocheatplus.checks.chat.analysis.WordLetterCount;
 import fr.neatmonster.nocheatplus.checks.chat.analysis.engine.LetterEngine;
+import fr.neatmonster.nocheatplus.checks.chat.util.ChatCaptchaUtil;
 import fr.neatmonster.nocheatplus.checks.combined.CombinedData;
 import fr.neatmonster.nocheatplus.components.NoCheatPlusAPI;
 import fr.neatmonster.nocheatplus.components.registry.feature.INotifyReload;
@@ -125,98 +126,111 @@ public class Text extends Check implements INotifyReload {
             final ChatConfig cc, final ChatData data, final IPlayerData pData,
             boolean isMainThread, final boolean alreadyCancelled) {
 
-        synchronized (data) {
-            if (captcha.shouldCheckCaptcha(player, cc, data, pData)) {
-                captcha.checkCaptcha(player, message, cc, data, isMainThread);
-                return true;
+        boolean cancelled = handleCaptchaChallenge(player, message, captcha, cc, data, pData, isMainThread,
+                alreadyCancelled);
+
+        if (!cancelled) {
+            final long time = System.currentTimeMillis();
+            final String lcMessage = message.trim().toLowerCase();
+
+            final String lastMessage;
+            final long lastTime;
+            synchronized (data) {
+                data.chatFrequency.update(time);
+                lastMessage = data.chatLastMessage;
+                lastTime = data.chatLastTime;
             }
-        }
+            final String lastGlMessage;
+            final long lastGlTime;
+            final String lastCancMessage;
+            final long lastCancTime;
+            synchronized (globalLock) {
+                lastGlMessage = lastGlobalMessage;
+                lastGlTime = lastGlobalTime;
+                lastCancMessage = lastCancelledMessage;
+                lastCancTime = lastCancelledTime;
+            }
 
-        final long time = System.currentTimeMillis();
-        final String lcMessage = message.trim().toLowerCase();
+            final boolean debug = pData.isDebugActive(type);
+            final List<String> debugParts = debug ? new LinkedList<String>() : null;
+            if (debug) {
+                debugParts.add("Message (length=" + message.length() + "): ");
+            }
 
-        final String lastMessage;
-        final long lastTime;
-        synchronized (data) {
-            data.chatFrequency.update(time);
-            lastMessage = data.chatLastMessage;
-            lastTime = data.chatLastTime;
-        }
-        final String lastGlMessage;
-        final long lastGlTime;
-        final String lastCancMessage;
-        final long lastCancTime;
-        synchronized (globalLock) {
-            lastGlMessage = lastGlobalMessage;
-            lastGlTime = lastGlobalTime;
-            lastCancMessage = lastCancelledMessage;
-            lastCancTime = lastCancelledTime;
-        }
+            final ScoreResult scoreResult = calculateScore(message, lcMessage, time, cc, pData, debug,
+                    debugParts, lastMessage, lastTime, lastGlMessage, lastGlTime, lastCancMessage,
+                    lastCancTime);
+            float score = scoreResult.score;
+            final MessageLetterCount letterCounts = scoreResult.letterCounts;
 
-        final boolean debug = pData.isDebugActive(type);
-        final List<String> debugParts = debug ? new LinkedList<String>() : null;
-        if (debug) {
-            debugParts.add("Message (length=" + message.length()+"): ");
-        }
+            if (debug && score > 0f) {
+                debugParts.add("Simple score: " + StringUtil.fdec3.format(score));
+            }
 
-        final ScoreResult scoreResult = calculateScore(message, lcMessage, time, cc, pData, debug, debugParts,
-                lastMessage, lastTime, lastGlMessage, lastGlTime, lastCancMessage, lastCancTime);
-        float score = scoreResult.score;
-        final MessageLetterCount letterCounts = scoreResult.letterCounts;
+            EngineResult engineResult = invokeEngine(letterCounts, player, cc, data);
+            float wEngine = engineResult.weight;
+            final Map<String, Float> engMap = engineResult.engMap;
+            score += wEngine;
 
-        if (debug && score > 0f) {
-            debugParts.add("Simple score: " + StringUtil.fdec3.format(score));
-        }
-
-        EngineResult engineResult = invokeEngine(letterCounts, player, cc, data);
-        float wEngine = engineResult.weight;
-        final Map<String, Float> engMap = engineResult.engMap;
-        score += wEngine;
-
-        final EvalResult evalResult;
-        synchronized (data) {
-            evalResult = evaluateFrequencyAndViolations(player, captcha, cc, data, pData, lcMessage, time, score);
-            data.chatLastMessage = lcMessage;
-            data.chatLastTime = time;
-        }
-        synchronized (globalLock) {
-            lastGlobalMessage = lcMessage;
-            lastGlobalTime = time;
-        }
-        boolean cancel = evalResult.cancel;
-        float accumulated = evalResult.accumulated;
-        float shortTermAccumulated = evalResult.shortTermAccumulated;
+            final EvalResult evalResult;
+            synchronized (data) {
+                evalResult = evaluateFrequencyAndViolations(player, captcha, cc, data, pData, lcMessage, time, score);
+                data.chatLastMessage = lcMessage;
+                data.chatLastTime = time;
+            }
+            synchronized (globalLock) {
+                lastGlobalMessage = lcMessage;
+                lastGlobalTime = time;
+            }
+            boolean cancel = evalResult.cancel;
+            float accumulated = evalResult.accumulated;
+            float shortTermAccumulated = evalResult.shortTermAccumulated;
 
         if (debug) {
             final List<String> keys = new LinkedList<String>(engMap.keySet());
             Collections.sort(keys);
             for (String key : keys) {
                 Float s = engMap.get(key);
-                if (s.floatValue() > 0.0f)
+                if (s.floatValue() > 0.0f) {
                     debugParts.add(key + ":" + StringUtil.fdec3.format(s));
+                }
             }
-            if (wEngine > 0.0f)
-                debugParts.add("Engine score (" + (cc.textEngineMaximum?"max":"sum") + "): " + StringUtil.fdec3.format(wEngine));
+            if (wEngine > 0.0f) {
+                debugParts.add("Engine score (" + (cc.textEngineMaximum ? "max" : "sum") + "): "
+                        + StringUtil.fdec3.format(wEngine));
+            }
 
-            debugParts.add("Final score: " +  StringUtil.fdec3.format(score));
-            debugParts.add("Normal: min=" +  StringUtil.fdec3.format(cc.textFreqNormMin) +", weight=" +  StringUtil.fdec3.format(cc.textFreqNormWeight) + " => accumulated=" + StringUtil.fdec3.format(accumulated));
-            debugParts.add("Short-term: min=" +  StringUtil.fdec3.format(cc.textFreqShortTermMin) +", weight=" +  StringUtil.fdec3.format(cc.textFreqShortTermWeight) + " => accumulated=" + StringUtil.fdec3.format(shortTermAccumulated));
+            debugParts.add("Final score: " + StringUtil.fdec3.format(score));
+            debugParts.add(
+                    "Normal: min=" + StringUtil.fdec3.format(cc.textFreqNormMin) + ", weight="
+                            + StringUtil.fdec3.format(cc.textFreqNormWeight) + " => accumulated="
+                            + StringUtil.fdec3.format(accumulated));
+            debugParts.add(
+                    "Short-term: min=" + StringUtil.fdec3.format(cc.textFreqShortTermMin) + ", weight="
+                            + StringUtil.fdec3.format(cc.textFreqShortTermWeight) + " => accumulated="
+                            + StringUtil.fdec3.format(shortTermAccumulated));
             debugParts.add("vl: " + StringUtil.fdec3.format(data.textVL));
             debug(player, StringUtil.join(debugParts, " | "));
             debugParts.clear();
         }
 
-        return cancel;
+        cancelled = cancelled || cancel;
+        }
+        return cancelled;
     }
 
-    private boolean handleCaptcha(final Player player, final String message, final ICaptcha captcha,
+    private boolean handleCaptchaChallenge(final Player player, final String message, final ICaptcha captcha,
             final ChatConfig cc, final ChatData data, final IPlayerData pData,
-            boolean isMainThread, final boolean alreadyCancelled) {
-        if (captcha.shouldCheckCaptcha(player, cc, data, pData)) {
-            captcha.checkCaptcha(player, message, cc, data, isMainThread);
-            return true;
+            final boolean isMainThread, final boolean alreadyCancelled) {
+        boolean cancelled = alreadyCancelled;
+        synchronized (data) {
+            if (ChatCaptchaUtil.isCaptchaEnabled(player, pData)
+                    && captcha.shouldCheckCaptcha(player, cc, data, pData)) {
+                captcha.checkCaptcha(player, message, cc, data, isMainThread);
+                cancelled = true;
+            }
         }
-        return alreadyCancelled;
+        return cancelled;
     }
 
     private static final class ScoreResult {
