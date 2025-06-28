@@ -2,10 +2,8 @@ package fr.neatmonster.nocheatplus.checks.blockbreak;
 
 import org.bukkit.block.Block;
 import org.bukkit.entity.Player;
-
-import fr.neatmonster.nocheatplus.checks.blockbreak.BlockBreakConfig;
-import fr.neatmonster.nocheatplus.players.IPlayerData;
 import fr.neatmonster.nocheatplus.compat.AlmostBoolean;
+import fr.neatmonster.nocheatplus.players.IPlayerData;
 
 /**
  * Container for parameters used by the fast break check.

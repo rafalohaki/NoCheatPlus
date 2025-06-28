@@ -2,14 +2,12 @@ package fr.neatmonster.nocheatplus.checks.moving.helper;
 
 import org.bukkit.entity.Player;
 import org.bukkit.inventory.ItemStack;
-
 import fr.neatmonster.nocheatplus.NCPAPIProvider;
 import fr.neatmonster.nocheatplus.checks.moving.MovingData;
-import fr.neatmonster.nocheatplus.config.ConfigManager;
-import fr.neatmonster.nocheatplus.config.ConfPaths;
-import fr.neatmonster.nocheatplus.logging.Streams;
 import fr.neatmonster.nocheatplus.compat.BridgeMisc;
-import fr.neatmonster.nocheatplus.utilities.TickTask;
+import fr.neatmonster.nocheatplus.config.ConfPaths;
+import fr.neatmonster.nocheatplus.config.ConfigManager;
+import fr.neatmonster.nocheatplus.logging.Streams;
 
 /**
  * Utility class for handling Elytra firework boosts.

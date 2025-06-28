@@ -15,10 +15,8 @@
 package fr.neatmonster.nocheatplus.checks.chat.analysis.engine;
 
 import java.util.Collection;
-
 import fr.neatmonster.nocheatplus.checks.chat.ChatConfig;
 import fr.neatmonster.nocheatplus.checks.chat.analysis.engine.processors.WordProcessor;
-import fr.neatmonster.nocheatplus.checks.chat.analysis.engine.WordProcessorFactory;
 import fr.neatmonster.nocheatplus.utilities.ds.map.ManagedMap;
 
 /**

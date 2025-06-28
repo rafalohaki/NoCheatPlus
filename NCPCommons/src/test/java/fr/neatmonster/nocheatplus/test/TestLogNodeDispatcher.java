@@ -1,16 +1,12 @@
 package fr.neatmonster.nocheatplus.test;
 
 import static org.junit.jupiter.api.Assertions.fail;
-
 import java.util.logging.Level;
-
 import org.junit.jupiter.api.Test;
-
 import fr.neatmonster.nocheatplus.logging.LoggerID;
 import fr.neatmonster.nocheatplus.logging.details.AbstractLogNodeDispatcher;
 import fr.neatmonster.nocheatplus.logging.details.LogNode;
 import fr.neatmonster.nocheatplus.logging.details.LogOptions;
-import fr.neatmonster.nocheatplus.logging.details.ContentLogger;
 
 public class TestLogNodeDispatcher {
 

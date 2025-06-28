@@ -15,15 +15,12 @@
 package fr.neatmonster.nocheatplus.compat.bukkit;
 
 import java.util.Map;
-
 import org.bukkit.Location;
 import org.bukkit.Material;
 import org.bukkit.World;
 import org.bukkit.entity.Entity;
 import org.bukkit.entity.EntityType;
-
 import fr.neatmonster.nocheatplus.compat.bukkit.model.BukkitShapeModel;
-import fr.neatmonster.nocheatplus.utilities.map.BlockCache.BlockCacheNode;
 import fr.neatmonster.nocheatplus.utilities.map.MaterialUtil;
 
 

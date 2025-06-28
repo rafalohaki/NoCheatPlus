@@ -18,9 +18,7 @@ import java.util.ArrayList;
 import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
-
 import org.bukkit.entity.Player;
-
 import fr.neatmonster.nocheatplus.checks.CheckType;
 import fr.neatmonster.nocheatplus.checks.chat.ChatConfig;
 import fr.neatmonster.nocheatplus.checks.chat.ChatData;
@@ -32,8 +30,6 @@ import fr.neatmonster.nocheatplus.checks.chat.analysis.engine.processors.Similar
 import fr.neatmonster.nocheatplus.checks.chat.analysis.engine.processors.WordPrefixes;
 import fr.neatmonster.nocheatplus.checks.chat.analysis.engine.processors.WordPrefixes.WordPrefixesSettings;
 import fr.neatmonster.nocheatplus.checks.chat.analysis.engine.processors.WordProcessor;
-import fr.neatmonster.nocheatplus.checks.chat.analysis.engine.ConfiguredWordProcessorFactory;
-import fr.neatmonster.nocheatplus.checks.chat.analysis.engine.WordProcessorFactory;
 import fr.neatmonster.nocheatplus.components.data.IData;
 import fr.neatmonster.nocheatplus.components.registry.feature.ConsistencyChecker;
 import fr.neatmonster.nocheatplus.components.registry.feature.IHaveCheckType;
