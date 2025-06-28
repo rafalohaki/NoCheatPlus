@@ -71,6 +71,59 @@ public class NetStatic {
         return new BurnInfo(burnStart, empty);
     }
 
+    private static void relaxBursts(final ActionFrequency packetFreq, final float[] bucketScores,
+            final long time, final long winDur, final long totalDur, final float maxPackets) {
+        final long tDiff = time - packetFreq.lastAccess();
+        if (tDiff >= winDur && tDiff < totalDur) {
+            float firstBucketScore = bucketScores[0];
+            if (firstBucketScore > maxPackets) {
+                firstBucketScore -= maxPackets;
+                for (int i = 1; i < bucketScores.length; i++) {
+                    final float currentBucketScore = bucketScores[i];
+                    if (currentBucketScore < maxPackets) {
+                        final float consume = Math.min(firstBucketScore, maxPackets - currentBucketScore);
+                        firstBucketScore -= consume;
+                        bucketScores[i] = currentBucketScore + consume;
+                        packetFreq.setBucket(i, bucketScores[i]);
+                        if (currentBucketScore > 0f) {
+                            break;
+                        }
+                    } else {
+                        break;
+                    }
+                }
+                bucketScores[0] = maxPackets + firstBucketScore;
+                packetFreq.setBucket(0, bucketScores[0]);
+            }
+        }
+    }
+
+    private static double applyBurstViolations(final ActionFrequency packetFreq, final ActionFrequency burstFreq,
+            final float burstPackets, final double burstDirect, final double burstEPM, final long time,
+            final long winDur, final List<String> tags) {
+        double violation = 0.0;
+        float burst = packetFreq.bucketScore(0);
+        if (burst > burstPackets) {
+            burst /= TickTask.getLag(winDur, true);
+            if (burst > burstPackets) {
+                final double vBurstDirect = burst - burstDirect;
+                if (vBurstDirect > 0.0) {
+                    violation = Math.max(violation, vBurstDirect);
+                    tags.add("burstdirect");
+                }
+                burstFreq.add(time, 1f);
+                final double vBurstEPM = (double) burstFreq.score(0f)
+                        - burstEPM
+                        * (double) (burstFreq.bucketDuration() * burstFreq.numberOfBuckets()) / 60000.0;
+                if (vBurstEPM > 0.0) {
+                    violation = Math.max(violation, vBurstEPM);
+                    tags.add("burstepm");
+                }
+            }
+        }
+        return violation;
+    }
+
     /**
      * Packet-cheating check, for catching clients that send more packets than
      * allowed. Intention is to have a more accurate check than just preventing
@@ -105,37 +158,8 @@ public class NetStatic {
         for (int i = 0; i < winNum; i++) {
             bucketScores[i] = packetFreq.bucketScore(i);
         }
+        relaxBursts(packetFreq, bucketScores, time, winDur, totalDur, maxPackets);
 
-        // "Relax" bursts from i = 1 on, i.e. distribute to following intervals (if zero ~ ?or lower).
-        // Consider making this smoothing step configurable and refining the implementation.
-        final long tDiff = time - packetFreq.lastAccess();
-        if (tDiff >= winDur && tDiff < totalDur) {
-            // There will be some shift, so check if to relax, only if there could be some congestion.
-            float firstBucketScore = bucketScores[0];
-            if (firstBucketScore > maxPackets) { // Clarify ideal versus maximum packet counts.
-                // Keep in mind potential burst-to-burst exploits.
-                firstBucketScore -= maxPackets; // Count this down.
-                for (int i = 1; i < winNum; i++) {
-                    final float currentBucketScore = bucketScores[i];
-                    if (currentBucketScore < maxPackets) {
-                        // Smoothen, using following empty spots including one occupied spot at most..
-                        float consume = Math.min(firstBucketScore, maxPackets - currentBucketScore);
-                        firstBucketScore -= consume;
-                        bucketScores[i] = currentBucketScore + consume;
-                        packetFreq.setBucket(i, bucketScores[i]);
-                        if (currentBucketScore > 0f) {
-                            // Only allow relaxing "into" the next occupied spot.
-                            break;
-                        }
-                    } else {
-                        break;
-                    }
-                }
-                // Finally adjust the first bucket score.
-                bucketScores[0] = maxPackets + firstBucketScore;
-                packetFreq.setBucket(0, bucketScores[0]);
-            }
-        }
 
         // Add packet to frequency count.
         packetFreq.add(time, packets);
@@ -175,25 +199,9 @@ public class NetStatic {
             tags.add("epsacc");
         }
 
-        float burst = packetFreq.bucketScore(0); // 500ms
-        if (burst > burstPackets) {
-            // Account for server-side lag "minimally".
-            burst /= TickTask.getLag(winDur, true); // First window lag.
-            if (burst > burstPackets) {
-                final double vBurstDirect = burst - burstDirect;
-                if (vBurstDirect > 0.0) {
-                    violation = Math.max(violation, vBurstDirect);
-                    tags.add("burstdirect");
-                }
-                // Investigate lag adaption for burstFreq with differing window durations.
-                burstFreq.add(time, 1f); // Packet counts are float but only whole packets are expected.
-                final double vBurstEPM = (double) burstFreq.score(0f) - burstEPM * (double) (burstFreq.bucketDuration() * burstFreq.numberOfBuckets()) / 60000.0;
-                if (vBurstEPM > 0.0) {
-                    violation = Math.max(violation, vBurstEPM);
-                    tags.add("burstepm");
-                }
-            }
-        }
+        violation = Math.max(violation,
+                applyBurstViolations(packetFreq, burstFreq, burstPackets, burstDirect, burstEPM, time, winDur, tags));
+
         return Math.max(0.0, violation);
     }
 
