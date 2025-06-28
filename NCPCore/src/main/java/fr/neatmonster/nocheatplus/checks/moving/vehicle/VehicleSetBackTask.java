@@ -59,7 +59,7 @@ public class VehicleSetBackTask implements Runnable{
 
     @Override
     public void run() {
-        final IPlayerData pData = DataManager.getPlayerData(player);
+        final IPlayerData pData = DataManager.getInstance().getPlayerData(player);
         final MovingData data = pData.getGenericInstance(MovingData.class);
         data.vehicleSetBackTaskId = null;
         try{

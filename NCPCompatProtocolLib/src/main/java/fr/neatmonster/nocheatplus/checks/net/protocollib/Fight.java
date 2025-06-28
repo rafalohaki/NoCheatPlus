@@ -94,7 +94,7 @@ public class Fight extends BaseAdapter{
             return;
         }
 
-        final IPlayerData pData = DataManager.getPlayerData(player);
+        final IPlayerData pData = DataManager.getInstance().getPlayerData(player);
         if (!pData.isCheckActive(CheckType.MOVING, player)) return;
         final MovingData data = pData.getGenericInstance(MovingData.class);
         // Process velocity.
@@ -107,7 +107,7 @@ public class Fight extends BaseAdapter{
     //public void handleAnmationPacket(final PacketEvent event) {
         
      //   final Player player = event.getPlayer();
-     //   final FightData data = DataManager.getGenericInstance(player, FightData.class);
+     //   final FightData data = DataManager.getInstance().getGenericInstance(player, FightData.class);
         // Consider counting temporary players as well
      //   if (event.isPlayerTemporary()) return;
      //   if (event.getPacketType() != PacketType.Play.Client.ARM_ANIMATION) {

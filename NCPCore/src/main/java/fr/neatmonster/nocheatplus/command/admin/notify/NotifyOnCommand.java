@@ -43,7 +43,7 @@ public class NotifyOnCommand extends BaseCommand {
             sender.sendMessage(CTAG + "Toggling notifications is only available for online players.");
             return true;
         }
-        DataManager.getPlayerData((Player) sender).setNotifyOff(false);
+        DataManager.getInstance().getPlayerData((Player) sender).setNotifyOff(false);
         sender.sendMessage(TAG + "Notifications are now turned " + ChatColor.YELLOW + "on" + ChatColor.GRAY + ".");
         return true;
     }

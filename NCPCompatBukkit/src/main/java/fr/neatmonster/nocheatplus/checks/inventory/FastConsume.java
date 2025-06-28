@@ -79,7 +79,7 @@ public class FastConsume extends Check implements Listener, INotifyReload {
             counters.addPrimaryThread(idCancelDead, 1);
             return;
         }
-        final IPlayerData pData = DataManager.getPlayerData(player);
+        final IPlayerData pData = DataManager.getInstance().getPlayerData(player);
         if (!pData.isCheckActive(type, player)) {
             return;
         }
@@ -87,7 +87,7 @@ public class FastConsume extends Check implements Listener, INotifyReload {
         final long time = System.currentTimeMillis();
         if (check(player, event.getItem(), time, data, pData)){
             event.setCancelled(true);
-            DataManager.getPlayerData(player).requestUpdateInventory();
+            DataManager.getInstance().getPlayerData(player).requestUpdateInventory();
         }
     }
 

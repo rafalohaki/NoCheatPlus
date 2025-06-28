@@ -144,7 +144,7 @@ public class MovingFlying extends BaseAdapter {
         } 
         catch(NoSuchMethodError e) {
             if (event.getPlayer() == null) return;
-            if (DataManager.getPlayerDataSafe(event.getPlayer()) == null) return;
+            if (DataManager.getInstance().getPlayerDataSafe(event.getPlayer()) == null) return;
         }
         if (event.getPacketType().equals(confirmTeleportType)) {
             if (acceptConfirmTeleportPackets) {
@@ -175,7 +175,7 @@ public class MovingFlying extends BaseAdapter {
             return;
         }
         final Player player = event.getPlayer();
-        final IPlayerData pData = DataManager.getPlayerDataSafe(player);
+        final IPlayerData pData = DataManager.getInstance().getPlayerDataSafe(player);
         final NetData data = pData.getGenericInstance(NetData.class);
         final AlmostBoolean matched = data.teleportQueue.processAck(teleportId);
         if (matched.decideOptimistically()) {
@@ -202,7 +202,7 @@ public class MovingFlying extends BaseAdapter {
             return;
         }
 
-        final IPlayerData pData = DataManager.getPlayerDataSafe(player);
+        final IPlayerData pData = DataManager.getInstance().getPlayerDataSafe(player);
         final NetData data = pData.getGenericInstance(NetData.class);
         data.lastKeepAliveTime = time;
         if (!pData.getCurrentWorldDataSafe().isCheckActive(CheckType.NET_FLYINGFREQUENCY)) {

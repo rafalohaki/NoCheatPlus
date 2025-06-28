@@ -82,7 +82,7 @@ public class Captcha extends Check implements ICaptcha{
 
     @Override
     public void resetCaptcha(Player player){
-        final IPlayerData pData = DataManager.getPlayerData(player);
+        final IPlayerData pData = DataManager.getInstance().getPlayerData(player);
         ChatData data = pData.getGenericInstance(ChatData.class);
         synchronized (data) {
             resetCaptcha(player, pData.getGenericInstance(ChatConfig.class), data, pData);

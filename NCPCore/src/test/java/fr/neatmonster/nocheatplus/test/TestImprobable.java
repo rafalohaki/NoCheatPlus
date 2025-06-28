@@ -75,13 +75,11 @@ public class TestImprobable {
         f.setAccessible(true);
         f.set(null, new TestGodModeHelpers.DummyAPI());
         sun.misc.Unsafe un = getUnsafe();
-        Object pdm = un.allocateInstance(PlayerDataManager.class);
+        PlayerDataManager pdm = (PlayerDataManager) un.allocateInstance(PlayerDataManager.class);
         java.lang.reflect.Field eh = PlayerDataManager.class.getDeclaredField("executionHistories");
         eh.setAccessible(true);
         eh.set(pdm, new java.util.HashMap<>());
-        java.lang.reflect.Field dm = DataManager.class.getDeclaredField("instance");
-        dm.setAccessible(true);
-        dm.set(null, pdm);
+        new DataManager(pdm);
         PluginManager pluginManager = mock(PluginManager.class);
         ConsoleCommandSender console = mock(ConsoleCommandSender.class);
         server = (Server) java.lang.reflect.Proxy.newProxyInstance(getClass().getClassLoader(), new Class[]{Server.class},

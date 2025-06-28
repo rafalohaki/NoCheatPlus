@@ -30,13 +30,11 @@ public class TestAgainstCheck {
         f.setAccessible(true);
         f.set(null, api);
         sun.misc.Unsafe u = getUnsafe();
-        Object pdm = u.allocateInstance(PlayerDataManager.class);
+        PlayerDataManager pdm = (PlayerDataManager) u.allocateInstance(PlayerDataManager.class);
         java.lang.reflect.Field eh = PlayerDataManager.class.getDeclaredField("executionHistories");
         eh.setAccessible(true);
         eh.set(pdm, new java.util.HashMap<>());
-        java.lang.reflect.Field dm = DataManager.class.getDeclaredField("instance");
-        dm.setAccessible(true);
-        dm.set(null, pdm);
+        new DataManager(pdm);
     }
 
     static class DummyAgainst extends Against {

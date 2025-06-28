@@ -59,7 +59,7 @@ public class KickCommand extends BaseCommand {
     }
 
     void kick(CommandSender sender, String name, String reason) {
-        Player player = DataManager.getPlayer(name);
+        Player player = DataManager.getInstance().getPlayer(name);
         if (player == null) return;
         Folia.runSyncTask(plugin, (arg) -> {
             player.kickPlayer(reason);

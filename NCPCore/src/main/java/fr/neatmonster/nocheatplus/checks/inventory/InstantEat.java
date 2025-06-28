@@ -48,7 +48,7 @@ public class InstantEat extends Check {
         // Take time once.
         final long time = System.currentTimeMillis();
 
-        final IPlayerData pData = DataManager.getPlayerData(player);
+        final IPlayerData pData = DataManager.getInstance().getPlayerData(player);
         final InventoryData data = pData.getGenericInstance(InventoryData.class);
 
         boolean cancel = false;

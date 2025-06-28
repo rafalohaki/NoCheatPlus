@@ -88,7 +88,7 @@ public class CombinedListener extends CheckListener {
         // Event priority intentionally lowest for join handling.
 
         final Player player = event.getPlayer();
-        final IPlayerData pData = DataManager.getPlayerData(player);
+        final IPlayerData pData = DataManager.getInstance().getPlayerData(player);
 
         if (!pData.isCheckActive(CheckType.COMBINED, player)) return;
 
@@ -114,7 +114,7 @@ public class CombinedListener extends CheckListener {
     @EventHandler(priority = EventPriority.LOWEST)
     public void onPlayerLeave(final PlayerQuitEvent event) {
         final Player player = event.getPlayer();
-        final IPlayerData pData = DataManager.getPlayerData(player);
+        final IPlayerData pData = DataManager.getInstance().getPlayerData(player);
         if (!pData.isCheckActive(CheckType.COMBINED, player)) return;
         final CombinedData data = pData.getGenericInstance(CombinedData.class);
         // Don't keep Improbable's data
@@ -126,7 +126,7 @@ public class CombinedListener extends CheckListener {
         final Entity entity = event.getEntity();
         if (!(entity instanceof Player)) return;
         final Player  player = (Player) entity;
-        final IPlayerData pData = DataManager.getPlayerData(player);
+        final IPlayerData pData = DataManager.getInstance().getPlayerData(player);
 
         if (!pData.isCheckActive(CheckType.COMBINED, player)) return;
 

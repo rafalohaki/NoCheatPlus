@@ -11,6 +11,7 @@ import org.junit.Test;
 
 import fr.neatmonster.nocheatplus.actions.ActionList;
 import fr.neatmonster.nocheatplus.checks.ViolationData;
+import fr.neatmonster.nocheatplus.players.PlayerDataManager;
 //import fr.neatmonster.nocheatplus.checks.inventory.FastClick;
 //import fr.neatmonster.nocheatplus.checks.inventory.InventoryConfig;
 //import fr.neatmonster.nocheatplus.checks.inventory.InventoryData;
@@ -40,13 +41,11 @@ public class FastClickTest {
         nf.setAccessible(true);
         nf.set(null, api);
         sun.misc.Unsafe u = getUnsafe();
-        Object pdm = u.allocateInstance(fr.neatmonster.nocheatplus.players.PlayerDataManager.class);
+        PlayerDataManager pdm = (PlayerDataManager) u.allocateInstance(fr.neatmonster.nocheatplus.players.PlayerDataManager.class);
         Field eh = fr.neatmonster.nocheatplus.players.PlayerDataManager.class.getDeclaredField("executionHistories");
         eh.setAccessible(true);
         eh.set(pdm, new java.util.HashMap<>());
-        Field dm = fr.neatmonster.nocheatplus.players.DataManager.class.getDeclaredField("instance");
-        dm.setAccessible(true);
-        dm.set(null, pdm);
+        new fr.neatmonster.nocheatplus.players.DataManager(pdm);
         check = new TestableFastClick();
         data = new InventoryData();
         sun.misc.Unsafe unsafe = getUnsafe();

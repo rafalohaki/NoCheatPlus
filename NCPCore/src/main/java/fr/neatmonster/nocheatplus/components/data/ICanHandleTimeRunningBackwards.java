@@ -17,7 +17,7 @@ package fr.neatmonster.nocheatplus.components.data;
 /**
  * Use, if something better can be done instead of removing all data, in case
  * the system time ran backwards, applying with
- * DataManager.handleSystemTimeRanBackwards. <br>
+ * DataManager.getInstance().handleSystemTimeRanBackwards. <br>
  * With implementing ICanHandleTimeRunningBackwards, this takes effect as
  * follows:
  * <ul>
