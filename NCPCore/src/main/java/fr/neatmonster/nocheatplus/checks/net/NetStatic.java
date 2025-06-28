@@ -92,9 +92,14 @@ public class NetStatic {
      * @param burstFreq Counting burst events, should be covering a minute or so.
      * @param burstPackets Packets in the first time window to add to burst count.
      * @param burstEPM Events per minute to trigger a burst violation.
-     * @param tags List to add tags to, for which parts of this check triggered a violation.
-     * @return The violation amount, i.e. "count above limit", 0.0 if no violation.
-     */
+ * @param tags List to add tags to, for which parts of this check triggered a violation.
+ * @return The violation amount, i.e. "count above limit", 0.0 if no violation.
+ *
+ * <p>Lag adjustment is only applied when the server is actually behind
+ * schedule (lag &gt;= 1.0). This keeps the check strict under normal or
+ * fast tick conditions, preventing players from gaining leniency when the
+ * server performs better than expected.</p>
+ */
     public static double morePacketsCheck(final ActionFrequency packetFreq, final long time, final float packets, final float maxPackets, final float idealPackets, final ActionFrequency burstFreq, final float burstPackets, final double burstDirect, final double burstEPM, final List<String> tags) {
         // Note: this logic could be refactored into a dedicated PacketFrequency class.
         // Pull down stuff.
@@ -142,14 +147,22 @@ public class NetStatic {
 
         // Future: burn time windows based on other activity counting, such as matching ActinFrequency with keep-alive packets.
 
-        // Adjust empty based on server side lag, this makes the check more strict.
+        // Adjust empty based on server side lag only if the server is actually
+        // lagging. This avoids granting additional leniency when ticks run
+        // faster than usual, which could otherwise be exploited.
         if (empty > 0) {
-            // Consider adding a configuration flag to skip lag adaption when running in strict mode.
+            // Consider adding a configuration flag to skip lag adaptation when
+            // running in strict mode.
+            // TODO: Make lag scaling behavior configurable to allow strict or
+            // relaxed modes depending on server setup.
             final float lag = TickTask.getLag(totalDur, true); // Full seconds range considered.
-            // Also consider increasing the allowed maximum for extreme server-side lag conditions.
-            int lagEmpty = (int) Math.round((lag - 1f) * winNum);
-            empty = lagEmpty > 0 ? Math.min(empty, lagEmpty) : empty;
-            empty = Math.max(0, empty);
+            if (lag >= 1.0f) {
+                // Scale empty by the inverse of the lag value.
+                empty = (int) Math.round(empty * (1f / lag));
+                // Clamp the result to [0, winNum]; negative values would mean
+                // overshooting already burnt windows and thus are ignored.
+                empty = Math.max(0, Math.min(winNum, empty));
+            }
         }
 
         final double fullCount;
