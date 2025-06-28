@@ -62,8 +62,12 @@ public class BukkitLogNodeDispatcher extends AbstractLogNodeDispatcher {
         synchronized (queueAsynchronous) {
             if (!Folia.isTaskScheduled(taskAsynchronousID)) {
                 // Deadlocking should not be possible.
+                // The asynchronous task only processes queued log records and
+                // must avoid directly invoking Bukkit API methods. Any such
+                // operations must be rescheduled via Folia.runSyncTask.
                 try {
-                    taskAsynchronousID = Folia.runAsyncTask(plugin, (arg) -> taskAsynchronous.run());
+                    taskAsynchronousID =
+                            Folia.runAsyncTask(plugin, (arg) -> taskAsynchronous.run());
                 } catch (IllegalPluginAccessException ex) {
                     // (Should be during onDisable, ignore for now.)
                 }

@@ -87,7 +87,12 @@ public class TopCommand extends BaseCommand{
                 // Start sorting and result processing asynchronously.
                 final CheckType ct = type;
                 final List<VLView> vlviews = views;
-                Folia.runAsyncTask(plugin, (arg) -> new AsynchronousWorker(sender, ct, vlviews, checkTypes, comparator, n, plugin).run());
+                // Offload heavy sorting to a background thread. All Bukkit API
+                // interactions inside AsynchronousWorker must be rescheduled
+                // using Folia.runSyncTask to ensure execution on the main thread.
+                Folia.runAsyncTask(plugin,
+                        (arg) -> new AsynchronousWorker(sender, ct, vlviews, checkTypes,
+                                comparator, n, plugin).run());
             }
         }
         
