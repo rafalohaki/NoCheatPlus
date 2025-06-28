@@ -35,21 +35,20 @@ public class EntityAccessVehicleMultiPassenger implements IEntityAccessVehicle {
      */
     public static EntityAccessVehicleMultiPassenger createIfSupported() {
         // Ensure the getPassengers method exists and addPassenger has a compatible return type.
-        boolean hasGetPassengers =
-                ReflectionUtil.getMethodNoArgs(Entity.class, "getPassengers", List.class) != null;
-        if (!hasGetPassengers || !hasAddPassenger()) {
+        if (ReflectionUtil.getMethodNoArgs(Entity.class, "getPassengers", List.class) == null
+                || !hasAddPassenger()) {
             return null;
         }
         return new EntityAccessVehicleMultiPassenger();
     }
 
     private static boolean hasAddPassenger() {
-        Method method = ReflectionUtil.getMethod(Entity.class, "addPassenger", Entity.class);
+        final Method method = ReflectionUtil.getMethod(Entity.class, "addPassenger", Entity.class);
         if (method == null) {
             return false;
         }
-        Class<?> type = method.getReturnType();
-        return type == boolean.class || type == void.class;
+        final Class<?> returnType = method.getReturnType();
+        return returnType == boolean.class || returnType == void.class;
     }
 
     @Override
