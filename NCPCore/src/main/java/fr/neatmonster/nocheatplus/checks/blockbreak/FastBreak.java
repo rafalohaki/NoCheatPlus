@@ -57,8 +57,10 @@ public class FastBreak extends Check {
      *            indicates that the block was flagged as instantly
      *            breakable. Values other than {@link AlmostBoolean#NO}
      *            cause the check to adjust or skip violation handling.
-     * @param data 
-     * @param cc 
+     * @param cc
+     *            configuration used for the check
+     * @param data
+     *            player specific data for block breaking
      * @return true, if successful
      */
     public boolean check(final Player player, final Block block, final AlmostBoolean isInstaBreak,
