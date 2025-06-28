@@ -168,8 +168,8 @@ public class NetStatic {
      * clamped to the range {@code [0, winNum]} to avoid negative or excessive
      * leniency.</p>
      *
-     * <p>TODO: Make lag scaling configurable to support stricter policies on
-     * high performance servers.</p>
+     * <p>Note: Lag scaling could be made configurable to support stricter
+     * policies on high performance servers.</p>
      */
     private static int adjustEmptyForLag(int empty, final long totalDur, final int winNum) {
         if (empty > 0) {
