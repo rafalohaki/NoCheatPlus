@@ -422,25 +422,34 @@ public class PassengerUtil {
     }
 
     private CompletableFuture<Boolean> addPassengerWithRetry(final Entity passenger, final Entity vehicle,
-                                                             final int remaining) {
+                                                             final int maxRetries) {
         final CompletableFuture<Boolean> result = new CompletableFuture<>();
-        attemptAddPassenger(passenger, vehicle, remaining, result);
-        return result;
-    }
-
-    private void attemptAddPassenger(final Entity passenger, final Entity vehicle, final int remaining,
-                                     final CompletableFuture<Boolean> result) {
-        if (passenger == null || vehicle == null || result.isDone()) {
+        if (passenger == null || vehicle == null) {
             result.complete(false);
-            return;
+            return result;
         }
         if (handleVehicle.getHandle().addPassenger(passenger, vehicle)) {
             result.complete(true);
-        } else if (remaining <= 0 || plugin == null) {
-            result.complete(false);
-        } else {
-            Folia.runSyncDelayedTask(plugin, (arg) -> attemptAddPassenger(passenger, vehicle, remaining - 1, result), 1L);
+            return result;
         }
+        if (maxRetries <= 0 || plugin == null) {
+            result.complete(false);
+            return result;
+        }
+        final int[] remaining = { maxRetries };
+        final Object task = Folia.runSyncRepeatingTask(plugin, (arg) -> {
+            if (handleVehicle.getHandle().addPassenger(passenger, vehicle)) {
+                result.complete(true);
+                Folia.cancelTask(arg);
+            } else if (--remaining[0] <= 0) {
+                result.complete(false);
+                Folia.cancelTask(arg);
+            }
+        }, 1L, 1L);
+        if (task == null) {
+            result.complete(false);
+        }
+        return result;
     }
 
     private void ensureSetBackLocation(final Player player, final Location location,
