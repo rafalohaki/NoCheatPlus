@@ -103,6 +103,32 @@ public class UseEntityAdapter extends BaseAdapter {
             this.player = player;
             this.pData = pData;
         }
+
+        static PlayerContext from(PacketEvent event) {
+            if (event == null) {
+                return null;
+            }
+            if (isTemporary(event)) {
+                return null;
+            }
+            final Player player = event.getPlayer();
+            if (player == null) {
+                return null;
+            }
+            final IPlayerData pData = DataManager.getInstance().getPlayerDataSafe(player);
+            if (pData == null) {
+                return null;
+            }
+            return new PlayerContext(player, pData);
+        }
+
+        private static boolean isTemporary(PacketEvent event) {
+            try {
+                return event.isPlayerTemporary();
+            } catch (NoSuchMethodError e) {
+                return false;
+            }
+        }
     }
 
     private static class UseActionResult {
@@ -142,22 +168,7 @@ public class UseEntityAdapter extends BaseAdapter {
     }
 
     private PlayerContext extractPlayerContext(PacketEvent event) {
-        try {
-            if (event.isPlayerTemporary()) {
-                return null;
-            }
-        } catch (NoSuchMethodError e) {
-            // ignore - older ProtocolLib version
-        }
-        final Player player = event.getPlayer();
-        if (player == null) {
-            return null;
-        }
-        final IPlayerData pData = DataManager.getInstance().getPlayerDataSafe(player);
-        if (pData == null) {
-            return null;
-        }
-        return new PlayerContext(player, pData);
+        return PlayerContext.from(event);
     }
 
     private UseActionResult parseAction(PacketContainer packet) {
