@@ -196,6 +196,8 @@ public class MovingListener extends CheckListener implements TickListener, IRemo
     final Location useLeaveLoc = new Location(null, 0, 0, 0);
     final Location useToggleFlightLoc = new Location(null, 0, 0, 0);
     final Location useTickLoc = new Location(null, 0, 0, 0);
+    /** Location reused in {@link #standsOnEntity(Entity, double)}. */
+    final Location useEntityCheckLoc = new Location(null, 0, 0, 0);
 
     /** Auxiliary functionality. */
     private final AuxMoving aux = NCPAPIProvider.getNoCheatPlusAPI().getGenericInstance(AuxMoving.class);
@@ -414,18 +416,35 @@ public class MovingListener extends CheckListener implements TickListener, IRemo
     }
 
 
-    private boolean standsOnEntity(final Entity entity, final double minY){
-            // Probably check other ids too before doing this ?
-            for (final Entity other : entity.getNearbyEntities(1.5, 1.5, 1.5)){
-                final EntityType type = other.getType();
-                if (!MaterialUtil.isBoat(type)){
-                    continue; 
-                }
-                final Material m = other.getLocation().getBlock().getType();
-                final double locY = other.getLocation().getY();
-                return Math.abs(locY - minY) < 0.7 && BlockProperties.isLiquid(m);
+    /**
+     * Determine if the entity is effectively standing on a boat located on a
+     * liquid block. Assumes only standard boat types recognised by
+     * {@link MaterialUtil#isBoat(EntityType)} and that the boat block checks use
+     * {@link BlockProperties#isLiquid(Material)}.
+     */
+    private boolean standsOnEntity(final Entity entity, final double minY) {
+        if (entity == null) {
+            return false;
+        }
+        boolean onBoat = false;
+        for (final Entity other : entity.getNearbyEntities(1.5, 1.5, 1.5)) {
+            if (other == null) {
+                continue;
             }
-        return false;
+            final EntityType type = other.getType();
+            if (!MaterialUtil.isBoat(type)) {
+                continue;
+            }
+            final Location otherLoc = other.getLocation(useEntityCheckLoc);
+            if (otherLoc != null) {
+                final Material mat = otherLoc.getBlock().getType();
+                if (Math.abs(otherLoc.getY() - minY) < 0.7 && BlockProperties.isLiquid(mat)) {
+                    onBoat = true;
+                }
+                useEntityCheckLoc.setWorld(null);
+            }
+        }
+        return onBoat;
     }
 
     /**
