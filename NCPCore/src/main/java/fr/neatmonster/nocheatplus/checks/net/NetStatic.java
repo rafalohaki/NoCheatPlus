@@ -163,10 +163,9 @@ public class NetStatic {
      * Adjust the number of trailing empty windows for server lag.
      *
      * <p>The empty count is scaled inversely with the measured lag. With a
-     * lag factor of {@code 2.0} (10 TPS) the count is halved, whereas
-     * with fast tick rates (<code>&lt; 1.0</code>) it increases. The result is
-     * clamped to the range {@code [0, winNum]} to avoid negative or excessive
-     * leniency.</p>
+     * lag factor of {@code 2.0} (10 TPS) the count is halved, whereas with
+     * fast tick rates ({@code < 1.0}) it increases. The result is clamped to
+     * the range {@code [0, winNum]} to avoid negative or excessive leniency.</p>
      *
      * <p>Note: Lag scaling could be made configurable to support stricter
      * policies on high performance servers.</p>

@@ -46,14 +46,25 @@ public class TestMorePacketsCheck {
     }
 
     @Test
-    public void testAdjustEmptyForLagNeverNegative() throws Exception {
+    public void testAdjustEmptyForLagVarious() throws Exception {
         java.lang.reflect.Method m = NetStatic.class.getDeclaredMethod(
                 "adjustEmptyForLag", int.class, long.class, int.class);
         m.setAccessible(true);
         try (MockedStatic<TickTask> tick = mockStatic(TickTask.class)) {
+            // High lag should reduce the empty count but stay within bounds.
+            tick.when(() -> TickTask.getLag(5000L, true)).thenReturn(2.0f);
+            int result = (int) m.invoke(null, 4, 5000L, 5);
+            assertTrue(result >= 0 && result <= 5);
+
+            // Low lag increases empty count yet remains clamped to winNum.
             tick.when(() -> TickTask.getLag(5000L, true)).thenReturn(0.5f);
-            int result = (int) m.invoke(null, 2, 5000L, 5);
-            assertTrue(result >= 0);
+            result = (int) m.invoke(null, 2, 5000L, 5);
+            assertTrue(result >= 0 && result <= 5);
+
+            // Normal lag should keep the value unchanged.
+            tick.when(() -> TickTask.getLag(5000L, true)).thenReturn(1.0f);
+            result = (int) m.invoke(null, 3, 5000L, 5);
+            assertEquals(3, result);
         }
     }
 }
