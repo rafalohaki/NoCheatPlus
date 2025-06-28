@@ -15,7 +15,6 @@
 package fr.neatmonster.nocheatplus.checks.moving;
 
 import java.util.ArrayList;
-import java.util.HashMap;
 import java.util.List;
 import java.util.Locale;
 import java.util.Map;
@@ -177,7 +176,7 @@ public class MovingListener extends CheckListener implements TickListener, IRemo
     private final Passable passable = addCheck(new Passable());
     
     /** Store events by player name, in order to invalidate moving processing on higher priority level in case of teleports. */
-    private final Map<String, PlayerMoveEvent> processingEvents = new HashMap<String, PlayerMoveEvent>();
+    private final Map<String, PlayerMoveEvent> processingEvents = new ConcurrentHashMap<String, PlayerMoveEvent>();
 
     /** Player names to check hover for, case insensitive. */
     private final Set<String> hoverTicks = ConcurrentHashMap.newKeySet(30); // Rename
