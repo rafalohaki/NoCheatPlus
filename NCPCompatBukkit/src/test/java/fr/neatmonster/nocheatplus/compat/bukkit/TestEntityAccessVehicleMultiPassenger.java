@@ -1,14 +1,14 @@
 package fr.neatmonster.nocheatplus.compat.bukkit;
 
-import static org.junit.Assert.assertNull;
-import static org.junit.Assert.assertNotNull;
+import static org.junit.jupiter.api.Assertions.assertNull;
+import static org.junit.jupiter.api.Assertions.assertNotNull;
 import static org.mockito.Mockito.mockStatic;
 
 import java.lang.reflect.Method;
 import java.util.List;
 
 import org.bukkit.entity.Entity;
-import org.junit.Test;
+import org.junit.jupiter.api.Test;
 import org.mockito.MockedStatic;
 
 import fr.neatmonster.nocheatplus.support.FeatureSupportRegistry;

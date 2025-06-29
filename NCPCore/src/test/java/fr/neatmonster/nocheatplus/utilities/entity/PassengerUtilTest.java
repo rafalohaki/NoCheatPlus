@@ -12,6 +12,9 @@ import org.bukkit.entity.EntityType;
 import org.bukkit.entity.Player;
 import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.Test;
+import org.mockbukkit.mockbukkit.MockBukkit;
+import org.mockbukkit.mockbukkit.ServerMock;
+import org.mockbukkit.mockbukkit.entity.PlayerMock;
 import fr.neatmonster.nocheatplus.checks.moving.MovingConfig;
 import fr.neatmonster.nocheatplus.checks.moving.MovingData;
 import fr.neatmonster.nocheatplus.components.entity.IEntityAccessVehicle;
@@ -97,13 +100,18 @@ public class PassengerUtilTest {
         Method sched = PassengerUtil.class.getDeclaredMethod("handlePassengerScheduling", Player.class,
                 Entity.class, MovingConfig.class, MovingData.class, boolean.class);
         sched.setAccessible(true);
-        Player player = mock(Player.class);
-        Entity vehicle = mock(Entity.class);
-        when(vehicle.getType()).thenReturn(EntityType.MINECART);
-        MovingConfig cfg = newConfig();
-        MovingData data = newData();
-        sched.invoke(util, player, vehicle, cfg, data, false);
-        assertTrue(access.called);
+        ServerMock server = MockBukkit.mock();
+        try {
+            PlayerMock player = server.addPlayer();
+            Entity vehicle = mock(Entity.class);
+            when(vehicle.getType()).thenReturn(EntityType.MINECART);
+            MovingConfig cfg = newConfig();
+            MovingData data = newData();
+            sched.invoke(util, player, vehicle, cfg, data, false);
+            assertTrue(access.called);
+        } finally {
+            MockBukkit.unmock();
+        }
     }
 
     @Test
@@ -112,11 +120,16 @@ public class PassengerUtilTest {
         PassengerUtil util = newUtil(access);
         Method m = PassengerUtil.class.getDeclaredMethod("addPassengerWithRetry", Entity.class, Entity.class, int.class);
         m.setAccessible(true);
-        Player player = mock(Player.class);
-        Entity vehicle = mock(Entity.class);
-        @SuppressWarnings("unchecked")
-        java.util.concurrent.CompletableFuture<Boolean> res = (java.util.concurrent.CompletableFuture<Boolean>) m.invoke(util, player, vehicle, 1);
-        assertTrue(res.get());
+        ServerMock server = MockBukkit.mock();
+        try {
+            PlayerMock player = server.addPlayer();
+            Entity vehicle = mock(Entity.class);
+            @SuppressWarnings("unchecked")
+            java.util.concurrent.CompletableFuture<Boolean> res = (java.util.concurrent.CompletableFuture<Boolean>) m.invoke(util, player, vehicle, 1);
+            assertTrue(res.get());
+        } finally {
+            MockBukkit.unmock();
+        }
     }
 
     @Test
@@ -125,10 +138,15 @@ public class PassengerUtilTest {
         PassengerUtil util = newUtil(access);
         Method m = PassengerUtil.class.getDeclaredMethod("addPassengerWithRetry", Entity.class, Entity.class, int.class);
         m.setAccessible(true);
-        Player player = mock(Player.class);
-        Entity vehicle = mock(Entity.class);
-        @SuppressWarnings("unchecked")
-        java.util.concurrent.CompletableFuture<Boolean> res = (java.util.concurrent.CompletableFuture<Boolean>) m.invoke(util, player, vehicle, 1);
-        assertFalse(res.get());
+        ServerMock server = MockBukkit.mock();
+        try {
+            PlayerMock player = server.addPlayer();
+            Entity vehicle = mock(Entity.class);
+            @SuppressWarnings("unchecked")
+            java.util.concurrent.CompletableFuture<Boolean> res = (java.util.concurrent.CompletableFuture<Boolean>) m.invoke(util, player, vehicle, 1);
+            assertFalse(res.get());
+        } finally {
+            MockBukkit.unmock();
+        }
     }
 }

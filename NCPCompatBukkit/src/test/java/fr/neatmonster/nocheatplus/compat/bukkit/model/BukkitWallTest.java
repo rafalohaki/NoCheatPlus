@@ -1,6 +1,6 @@
 package fr.neatmonster.nocheatplus.compat.bukkit.model;
 
-import static org.junit.Assert.assertArrayEquals;
+import static org.junit.jupiter.api.Assertions.assertArrayEquals;
 
 import java.util.EnumSet;
 import java.util.Set;
@@ -8,7 +8,7 @@ import java.util.Set;
 import org.bukkit.block.BlockFace;
 import org.bukkit.block.data.MultipleFacing;
 import org.bukkit.block.data.type.Wall;
-import org.junit.Test;
+import org.junit.jupiter.api.Test;
 import static org.mockito.Mockito.*;
 
 public class BukkitWallTest {
