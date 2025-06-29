@@ -1,112 +1,151 @@
-/*
- * This program is free software: you can redistribute it and/or modify
- *   it under the terms of the GNU General Public License as published by
- *   the Free Software Foundation, either version 3 of the License, or
- *   (at your option) any later version.
- *
- *   This program is distributed in the hope that it will be useful,
- *   but WITHOUT ANY WARRANTY; without even the implied warranty of
- *   MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the
- *   GNU General Public License for more details.
- *
- *   You should have received a copy of the GNU General Public License
- *   along with this program.  If not, see <http://www.gnu.org/licenses/>.
- */
 package fr.neatmonster.nocheatplus.test;
-import static org.junit.jupiter.api.Assertions.fail;
 
-import java.util.Arrays;
+import static org.junit.jupiter.api.Assertions.assertFalse;
+import static org.junit.jupiter.api.Assertions.assertTrue;
 import java.util.List;
-
+import java.util.stream.Stream;
+import org.junit.jupiter.api.BeforeEach;
+import org.junit.jupiter.api.DisplayName;
+import org.junit.jupiter.api.Nested;
 import org.junit.jupiter.api.Test;
-
+import org.junit.jupiter.params.ParameterizedTest;
+import org.junit.jupiter.params.provider.MethodSource;
 import fr.neatmonster.nocheatplus.utilities.StringUtil;
 import fr.neatmonster.nocheatplus.utilities.ds.prefixtree.SimpleCharPrefixTree;
 
+/**
+ * A test suite for the {@link SimpleCharPrefixTree} class.
+ * It verifies the core functionalities like prefix matching by word and by character sequence.
+ */
+@DisplayName("SimpleCharPrefixTree Tests")
 public class TestSimpleCharPrefixTree {
-    private List<String> feed = Arrays.asList(
-            "op", "op dummy", "ncp info"
-            );
 
-    private List<String> mustFind = Arrays.asList(
-            "op", "op dummy", "ncp info", "ncp info test"
-            );
+    // --- Test Data Providers ---
 
-    private List<String> mustNotFindWords = Arrays.asList(
-            "opp", "opp dummy", "op dummy2", "ncp", "ncp dummy"
-            );
+    private static final List<String> feedData = List.of("op", "op dummy", "ncp info");
+    private static final List<String> uniqueNumbers = List.of("123456", "2345678", "34567", "456789");
 
-    private List<String> mustNotFindPrefix = Arrays.asList(
-            "ok", "ncp", "ncp dummy", "ncp inf"
-            );
+    static Stream<String> shouldMatchByWordOrPrefix() {
+        return Stream.of("op", "op dummy", "ncp info", "ncp info test");
+    }
 
-    /** Numbers are neither prefix nor suffix of each other. */
-    private List<String> uniqueNumbers = Arrays.asList(
-            "123456", "2345678", "34567", "456789"
-            );
+    static Stream<String> shouldNotMatchByWord() {
+        return Stream.of("opp", "opp dummy", "op dummy2", "ncp", "ncp dummy");
+    }
 
-    @Test
-    public void testPrefixWords(){
-        SimpleCharPrefixTree tree = new SimpleCharPrefixTree();
-        tree.feedAll(feed, false, true);
-        for (String input : mustFind){
-            if (!tree.hasPrefixWords(input)){
-                fail("Expect to be matched: '" + input + "'");
-            }
+    static Stream<String> shouldNotMatchByPrefix() {
+        return Stream.of("ok", "ncp", "ncp dummy", "ncp inf");
+    }
+
+    static Stream<String> provideUniqueNumbers() {
+        return uniqueNumbers.stream();
+    }
+    
+    /**
+     * Tests for the hasPrefixWords() method, which checks if an input starts with
+     * one of the complete phrases stored in the tree.
+     */
+    @Nested
+    @DisplayName("hasPrefixWords() method")
+    class HasPrefixWordsMethod {
+        private SimpleCharPrefixTree tree;
+
+        @BeforeEach
+        void setUp() {
+            tree = new SimpleCharPrefixTree();
+            tree.feedAll(feedData, false, true);
         }
-        for (String input : mustNotFindWords){
-            if (tree.hasPrefixWords(input)){
-                fail("Expect not to be matched: '" + input + "'");
-            }
+
+        @ParameterizedTest
+        @MethodSource("fr.neatmonster.nocheatplus.test.TestSimpleCharPrefixTree#shouldMatchByWordOrPrefix")
+        @DisplayName("should return true for inputs that start with a known phrase")
+        void shouldReturnTrueForMatchingPrefixWords(String input) {
+            assertTrue(tree.hasPrefixWords(input),
+                "Expected input '" + input + "' to be matched as having a prefix word.");
+        }
+
+        @ParameterizedTest
+        @MethodSource("fr.neatmonster.nocheatplus.test.TestSimpleCharPrefixTree#shouldNotMatchByWord")
+        @DisplayName("should return false for inputs that do not start with a known phrase")
+        void shouldReturnFalseForNonMatchingPrefixWords(String input) {
+            assertFalse(tree.hasPrefixWords(input),
+                "Expected input '" + input + "' not to be matched by a prefix word.");
         }
     }
 
-    @Test
-    public void testHasPrefix() {
-        SimpleCharPrefixTree tree = new SimpleCharPrefixTree();
-        tree.feedAll(feed, false, true);
-        // Same tests as with prefix words.
-        for (String input : mustFind){
-            if (!tree.hasPrefix(input)){
-                fail("Expect to be matched: '" + input + "'");
-            }
+    /**
+     * Tests for the hasPrefix() method, which performs a classic character-by-character
+     * prefix check against the tree's contents.
+     */
+    @Nested
+    @DisplayName("hasPrefix() method")
+    class HasPrefixMethod {
+        private SimpleCharPrefixTree tree;
+
+        @BeforeEach
+        void setUp() {
+            tree = new SimpleCharPrefixTree();
+            tree.feedAll(feedData, false, true);
         }
-        for (String input : mustNotFindPrefix){
-            if (tree.hasPrefix(input)){
-                fail("Expect not to be matched: '" + input + "'");
-            }
+
+        @ParameterizedTest
+        @MethodSource("fr.neatmonster.nocheatplus.test.TestSimpleCharPrefixTree#shouldMatchByWordOrPrefix")
+        @DisplayName("should return true for inputs that are prefixed by a stored sequence")
+        void shouldReturnTrueForMatchingPrefixes(String input) {
+            assertTrue(tree.hasPrefix(input),
+                "Expected input '" + input + "' to be matched as having a prefix.");
         }
-        // Extra
-        if (!tree.hasPrefix("ncp infocrabs")) {
-            fail("'ncp info' should be a prefix of 'ncp infocrabs'.");
+
+        @ParameterizedTest
+        @MethodSource("fr.neatmonster.nocheatplus.test.TestSimpleCharPrefixTree#shouldNotMatchByPrefix")
+        @DisplayName("should return false for inputs that are not prefixed by a stored sequence")
+        void shouldReturnFalseForNonMatchingPrefixes(String input) {
+            assertFalse(tree.hasPrefix(input),
+                "Expected input '" + input + "' not to be matched by a prefix.");
+        }
+
+        @Test
+        @DisplayName("should correctly identify a prefix for a longer, unseen word")
+        void shouldIdentifyPrefixOfLongerWord() {
+            assertTrue(tree.hasPrefix("ncp infocrabs"),
+                "'ncp info' should be a prefix of 'ncp infocrabs'.");
         }
     }
 
-    @Test
-    public void testSuffixTree() {
-        SimpleCharPrefixTree prefixTree = new SimpleCharPrefixTree();
-        prefixTree.feedAll(uniqueNumbers, false, true);
-        SimpleCharPrefixTree suffixTree = new SimpleCharPrefixTree();
-        for (String key : uniqueNumbers) {
-            suffixTree.feed(StringUtil.reverse(key));
+    /**
+     * Tests using the prefix tree to effectively perform suffix matching
+     * by reversing the strings before insertion and lookup.
+     */
+    @Nested
+    @DisplayName("when used for suffix matching")
+    class SuffixMatching {
+        private SimpleCharPrefixTree prefixTree;
+        private SimpleCharPrefixTree suffixTree;
+
+        @BeforeEach
+        void setUp() {
+            prefixTree = new SimpleCharPrefixTree();
+            prefixTree.feedAll(uniqueNumbers, false, true);
+
+            suffixTree = new SimpleCharPrefixTree();
+            uniqueNumbers.forEach(s -> suffixTree.feed(StringUtil.reverse(s)));
         }
-        for (String input : uniqueNumbers) {
-            if (!prefixTree.hasPrefix(input)) {
-                fail("Fed data not matching prefix tree: " + input);
-            }
-            if (suffixTree.hasPrefix(input)) {
-                fail("Non-reversed data is matching suffix tree: " + input);
-            }
+
+        @ParameterizedTest
+        @MethodSource("fr.neatmonster.nocheatplus.test.TestSimpleCharPrefixTree#provideUniqueNumbers")
+        @DisplayName("should match original strings in prefix tree but not in suffix tree")
+        void shouldMatchOriginalStringsInPrefixTreeOnly(String original) {
+            assertTrue(prefixTree.hasPrefix(original), "Original string should match the prefix tree.");
+            assertFalse(suffixTree.hasPrefix(original), "Original string should NOT match the suffix tree.");
         }
-        for (String input : uniqueNumbers) {
-            input = StringUtil.reverse(input);
-            if (prefixTree.hasPrefix(input)) {
-                fail("Reversed fed data is matching prefix tree: " + input);
-            }
-            if (!suffixTree.hasPrefix(input)) {
-                fail("Reversed fed data not matching suffix tree: " + input);
-            }
+
+        @ParameterizedTest
+        @MethodSource("fr.neatmonster.nocheatplus.test.TestSimpleCharPrefixTree#provideUniqueNumbers")
+        @DisplayName("should match reversed strings in suffix tree but not in prefix tree")
+        void shouldMatchReversedStringsInSuffixTreeOnly(String original) {
+            String reversed = StringUtil.reverse(original);
+            assertTrue(suffixTree.hasPrefix(reversed), "Reversed string should match the suffix tree.");
+            assertFalse(prefixTree.hasPrefix(reversed), "Reversed string should NOT match the prefix tree.");
         }
     }
-
 }

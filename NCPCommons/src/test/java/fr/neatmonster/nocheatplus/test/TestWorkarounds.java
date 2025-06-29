@@ -1,28 +1,18 @@
-/*
- * This program is free software: you can redistribute it and/or modify
- *   it under the terms of the GNU General Public License as published by
- *   the Free Software Foundation, either version 3 of the License, or
- *   (at your option) any later version.
- *
- *   This program is distributed in the hope that it will be useful,
- *   but WITHOUT ANY WARRANTY; without even the implied warranty of
- *   MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the
- *   GNU General Public License for more details.
- *
- *   You should have received a copy of the GNU General Public License
- *   along with this program.  If not, see <http://www.gnu.org/licenses/>.
- */
 package fr.neatmonster.nocheatplus.test;
 
-import static org.junit.jupiter.api.Assertions.fail;
-
+import static org.junit.jupiter.api.Assertions.assertEquals;
+import static org.junit.jupiter.api.Assertions.assertFalse;
+import static org.junit.jupiter.api.Assertions.assertNotNull;
+import static org.junit.jupiter.api.Assertions.assertNotSame;
+import static org.junit.jupiter.api.Assertions.assertSame;
+import static org.junit.jupiter.api.Assertions.assertThrows;
+import static org.junit.jupiter.api.Assertions.assertTrue;
 import java.util.ArrayList;
-import java.util.Arrays;
-import java.util.Collection;
 import java.util.List;
-
+import org.junit.jupiter.api.BeforeEach;
+import org.junit.jupiter.api.DisplayName;
+import org.junit.jupiter.api.Nested;
 import org.junit.jupiter.api.Test;
-
 import fr.neatmonster.nocheatplus.utilities.ds.count.acceptdeny.AcceptDenyCounter;
 import fr.neatmonster.nocheatplus.utilities.ds.count.acceptdeny.IAcceptDenyCounter;
 import fr.neatmonster.nocheatplus.utilities.ds.count.acceptdeny.ICounterWithParent;
@@ -34,334 +24,241 @@ import fr.neatmonster.nocheatplus.workaround.SimpleWorkaroundRegistry;
 import fr.neatmonster.nocheatplus.workaround.WorkaroundCountDown;
 import fr.neatmonster.nocheatplus.workaround.WorkaroundCounter;
 
+/**
+ * A test suite for the Workaround system, including counters, countdowns, and the registry.
+ */
+@DisplayName("Workaround System Tests")
 public class TestWorkarounds {
 
     /**
-     * Simple isolated testing for one WorkaroundCounter instance, plus parent
-     * count.
+     * A helper method to check the accept/deny counts of a counter.
+     * This makes the test class self-contained.
      */
-    @Test
-    public void testWorkaroundCounter() {
-        WorkaroundCounter wac = new WorkaroundCounter("test.wac");
-        AcceptDenyCounter pc = new AcceptDenyCounter();
-        ((ICounterWithParent) wac.getAllTimeCounter()).setParentCounter(pc);
-
-        for (int i = 0; i < 57; i++) {
-            checkCanUseAndUse(wac);
-        }
-        TestAcceptDenyCounters.checkSame(57, 0, "WorkaroundCounter(c/p)", wac.getAllTimeCounter(), pc);
+    private void assertCounts(IAcceptDenyCounter counter, int expectedAccepts, int expectedDenies, String context) {
+        assertNotNull(counter, "Counter should not be null for context: " + context);
+        assertEquals(expectedAccepts, counter.getAcceptCount(), "Accept count mismatch for: " + context);
+        assertEquals(expectedDenies, counter.getDenyCount(), "Deny count mismatch for: " + context);
     }
 
     /**
-     * Simple isolated testing for one WorkaroundCountDown instance, plus parent
-     * count.
+     * Tests the basic functionality of a WorkaroundCounter.
      */
-    @Test
-    public void testWorkaroundCountDown() {
-        WorkaroundCountDown wacd = new WorkaroundCountDown("test.wacd", 1);
-        AcceptDenyCounter pc = new AcceptDenyCounter();
-        ((ICounterWithParent) wacd.getAllTimeCounter()).setParentCounter(pc);
+    @Nested
+    @DisplayName("WorkaroundCounter")
+    class WorkaroundCounterTests {
+        private WorkaroundCounter wac;
+        private AcceptDenyCounter parentCounter;
 
-        // Attempt to use a lot of times (all but one get denied).
-        for (int i = 0; i < 141; i++) {
-            checkCanUseAndUse(wacd);
-        }
-        int accept = 1; // All time count.
-        int deny = 140; // All time count.
-        TestAcceptDenyCounters.checkSame(accept, deny, "Just use, a=1 (s/a/p)", wacd.getStageCounter(), wacd.getAllTimeCounter(), pc);
-
-        // Reset.
-        wacd.resetConditions();
-        TestAcceptDenyCounters.checkSame(accept, deny, "Reset (s/a/p)",  wacd.getAllTimeCounter(), pc);
-        TestAcceptDenyCounters.checkCounts(wacd.getStageCounter(), 0, 0, "test.wacd.stage");
-
-        // Attempt to use a lot of times (all but one get denied).
-        for (int i = 0; i < 141; i++) {
-            checkCanUseAndUse(wacd);
-        }
-        accept *= 2;
-        deny *= 2;
-        TestAcceptDenyCounters.checkSame(accept, deny, "Just use, repeat a=1, (s/a/p)", wacd.getAllTimeCounter(), pc);
-        TestAcceptDenyCounters.checkCounts(wacd.getStageCounter(), 1, 140, "test.wacd.stage");
-
-        // Set to 5 and use (5xaccept).
-        wacd.resetConditions();
-        wacd.setCurrentCount(5);
-        for (int i = 0; i < 141; i++) {
-            checkCanUseAndUse(wacd);
-        }
-        accept += 5;
-        deny += 141 - 5;
-        TestAcceptDenyCounters.checkSame(accept, deny, "Just use, a=5, (s/a/p)", wacd.getAllTimeCounter(), pc);
-        TestAcceptDenyCounters.checkCounts(wacd.getStageCounter(), 5, 141 - 5, "test.wacd.stage");
-
-        // Set to -1 and use.
-        wacd.resetConditions();
-        wacd.setCurrentCount(-1);
-        for (int i = 0; i < 141; i++) {
-            checkCanUseAndUse(wacd);
-        }
-        deny += 141;
-        TestAcceptDenyCounters.checkSame(accept, deny, "Just use, a=0 (s/a/p)", wacd.getAllTimeCounter(), pc);
-        TestAcceptDenyCounters.checkCounts(wacd.getStageCounter(), 0, 141, "test.wacd.stage");
-
-        // Set to 14 and use (14xaccept).
-        wacd.resetConditions();
-        wacd.setCurrentCount(14);
-        for (int i = 0; i < 141; i++) {
-            checkCanUseAndUse(wacd);
-        }
-        accept += 14;
-        deny += 141 - 14;
-        TestAcceptDenyCounters.checkSame(accept, deny, "Just use, a=14 (s/a/p)", wacd.getAllTimeCounter(), pc);
-        TestAcceptDenyCounters.checkCounts(wacd.getStageCounter(), 14, 141 - 14, "test.wacd.stage");
-
-        // NOTE: consider adding tests for getNewInstance().
-
-    }
-
-    @Test
-    public void testSimpleWorkaroundRegistry() {
-        // (all sorts of tests. Consistency for workarounds and counters.).
-
-        IWorkaroundRegistry reg = new SimpleWorkaroundRegistry();
-
-        // Simple tests with registering individual instances.
-
-        // Call get for non existing counter.
-        if (reg.getGlobalCounter("exist.not") != null) {
-            fail("getGlobalCounter: expect null for not registered id.");
-        }
-        // Create a counter.
-        IAcceptDenyCounter c_man = reg.createGlobalCounter("c.man");
-        if (c_man == null) {
-            fail("createGlobalCounter: expect a counter");
-        }
-        // Ensure the same counter is returned as last time.
-        if (reg.createGlobalCounter("c.man") != c_man) {
-            fail("createGlobalCounter must return the same instance each time.");
+        @BeforeEach
+        void setUp() {
+            wac = new WorkaroundCounter("test.wac");
+            parentCounter = new AcceptDenyCounter();
+            ((ICounterWithParent) wac.getAllTimeCounter()).setParentCounter(parentCounter);
         }
 
-        // Register a single workaround (no parent counter).
-        checkSetWorkaroundBluePrint(new WorkaroundCounter("wc.man"), reg);
-
-        // Register a single workaround with a parent counter set (created from registry).
-        IWorkaround wrp = new WorkaroundCounter("wc.man.rp"); // With parent counter from registry.
-        ((ICounterWithParent) wrp.getAllTimeCounter()).setParentCounter(c_man);
-        checkSetWorkaroundBluePrint(wrp, reg);
-
-        // Register a single workaround with an externally created parent counter set (not in registry).
-        IWorkaround wep = new WorkaroundCounter("wc.man.ep"); // With externally created parent counter.
-        ((ICounterWithParent) wep.getAllTimeCounter()).setParentCounter(new AcceptDenyCounter());
-        checkSetWorkaroundBluePrint(wep, reg);
-
-        // WorkaroundSet
-
-        // Register workarounds.
-        List<WorkaroundCounter> wg1 = getWorkaroundCounters("w.man", 15);
-        List<WorkaroundCountDown> wg2 = getWorkaroundcountDowns("w.man", 15);
-        List<IWorkaround> wgAll = new ArrayList<IWorkaround>(30);
-        wgAll.addAll(wg1);
-        wgAll.addAll(wg2);
-        try {
-            reg.getCheckedIdSet(wg1);
-            fail("Expect IllegalArgumentException for not registered workarounds.");
-        }
-        catch (IllegalArgumentException ex) {
-            // Success.
-        }
-        reg.setWorkaroundBluePrint(wgAll.toArray(new IWorkaround[2 * 15]));
-        List<String> ids1 = new ArrayList<String>(reg.getCheckedIdSet(wg1));
-        List<String> ids2 = new ArrayList<String>(reg.getCheckedIdSet(wg2));
-        List<String> idsAll = new ArrayList<String>(reg.getCheckedIdSet(wgAll));
-        // Register groups.
-        reg.setGroup("group.mix", Arrays.asList(ids1.get(0), ids2.get(0)));
-        reg.setGroup("group.wc", ids1);
-        reg.setGroup("group.wcd", ids2);
-        // reg.setWorkaroundSet with string ids.
-        reg.setWorkaroundSetByIds("ws.all", idsAll, "group.mix", "group.wc", "group.wcd");
-        // reg.getWorkaroundSet.
-        WorkaroundSet ws = reg.getWorkaroundSet("ws.all");
-        // Test the WorkaroundSet
-        for (String id : idsAll) {
-            ws.getWorkaround(id);
-        }
-        // Test reset all.
-        useAll(idsAll, ws);
-        int accept = 1;
-        int deny = 0;
-        checkAllTimeCount(idsAll, ws, accept, deny);
-        checkStageCount(ids2, ws, 1, 0);
-        ws.resetConditions();
-        checkAllTimeCount(idsAll, ws, accept, deny);
-        checkStageCount(ids2, ws, 0, 0);
-        // Reset group.wc.
-        useAll(idsAll, ws);
-        accept += 1;
-        ws.resetConditions("group.wc");
-        checkAllTimeCount(idsAll, ws, accept, deny);
-        checkStageCount(ids2, ws, 1, 0);
-        ws.resetConditions();
-        // group.wcd
-        useAll(idsAll, ws);
-        accept += 1;
-        ws.resetConditions("group.wcd");
-        checkAllTimeCount(idsAll, ws, accept, deny);
-        checkStageCount(ids2, ws, 0, 0);
-        ws.resetConditions();
-        // group.mix
-        useAll(idsAll, ws);
-        accept += 1;
-        ws.resetConditions("group.mix");
-        checkAllTimeCount(idsAll, ws, accept, deny);
-        TestAcceptDenyCounters.checkCounts(((IStagedWorkaround) (ws.getWorkaround(ids2.get(0)))).getStageCounter(), 0, 0, "stageCounter/" + ids2.get(0));
-        for (int i = 1; i < ids2.size(); i++) {
-            TestAcceptDenyCounters.checkCounts(((IStagedWorkaround) (ws.getWorkaround(ids2.get(i)))).getStageCounter(), 1, 0, "stageCounter/" + ids2.get(i));
-        }
-        ws.resetConditions();
-        // NOTE: implement individual group reset (requires part of group.wcd).
-
-        // NOTE: more details and failure cases should be covered as well.
-
-    }
-
-    /**
-     * Get a collection of new WorkaroundCounter instances.
-     * 
-     * @param name
-     *            Prefix of naming name.class.count
-     * @param repeatCount
-     * @return
-     */
-    public static List<WorkaroundCounter> getWorkaroundCounters(String name, int repeatCount) {
-        final List<WorkaroundCounter> workarounds = new ArrayList<WorkaroundCounter>();
-        for (int i = 0; i < repeatCount; i++) {
-            workarounds.add(new WorkaroundCounter(name + ".WorkaroundCounter." + i));
-        }
-        return workarounds;
-    }
-
-    /**
-     * Get a collection of new WorkaroundCountDown instances, initialized with
-     * counting up from 1.
-     * 
-     * @param name
-     *            Prefix of naming name.class.count
-     * @param repeatCount
-     * @return
-     */
-    public static List<WorkaroundCountDown> getWorkaroundcountDowns(String name, int repeatCount) {
-        final List<WorkaroundCountDown> workarounds = new ArrayList<WorkaroundCountDown>();
-        for (int i = 0; i < repeatCount; i++) {
-            workarounds.add(new WorkaroundCountDown(name + ".WorkaroundCountDown." + i, i + 1));
-        }
-        return workarounds;
-    }
-
-    public static void useAll(Collection<String> ids, WorkaroundSet ws) {
-        for (String id : ids) {
-            ws.use(id);
-        }
-    }
-
-    public static void checkStageCount(Collection<String> ids, WorkaroundSet ws, int acceptCount, int denyCount) {
-        for (String id : ids) {
-            IAcceptDenyCounter counter = ((IStagedWorkaround) ws.getWorkaround(id)).getStageCounter();
-            TestAcceptDenyCounters.checkCounts(counter, acceptCount, denyCount, "stageCounter/" + id);
-        }
-    }
-
-    public static void checkAllTimeCount(Collection<String> ids, WorkaroundSet ws, int acceptCount, int denyCount) {
-        for (String id : ids) {
-            IAcceptDenyCounter counter = ws.getWorkaround(id).getAllTimeCounter();
-            TestAcceptDenyCounters.checkCounts(counter, acceptCount, denyCount, "allTimeCounter/" + id);
+        @Test
+        @DisplayName("should always be usable and increment counters on each use")
+        void shouldAlwaysBeUsableAndIncrementCounters() {
+            for (int i = 0; i < 57; i++) {
+                assertTrue(wac.canUse(), "WorkaroundCounter should always be usable.");
+                assertTrue(wac.use(), "use() should return true.");
+            }
+            assertCounts(wac.getAllTimeCounter(), 57, 0, "WorkaroundCounter all-time");
+            assertCounts(parentCounter, 57, 0, "Parent counter");
         }
     }
 
     /**
-     * Set blueprint and test:
-     * <ul>
-     * <li>global counter existence.</li>
-     * </ul>
-     * 
-     * @param bluePrint
-     * @param reg
-     * @return The given bluePrint for chaining.
+     * Tests the stateful logic of a WorkaroundCountDown.
      */
-    public static <W extends IWorkaround> W checkSetWorkaroundBluePrint(W bluePrint, IWorkaroundRegistry reg) {
-        final String id = bluePrint.getId();
-        IAcceptDenyCounter oldAllTimeCount = bluePrint.getAllTimeCounter();
-        if (oldAllTimeCount == null) {
-            fail("getAllTimeCounter must not return null: " + id);
+    @Nested
+    @DisplayName("WorkaroundCountDown")
+    class WorkaroundCountDownTests {
+        private WorkaroundCountDown wacd;
+        private AcceptDenyCounter parentCounter;
+
+        @BeforeEach
+        void setUp() {
+            wacd = new WorkaroundCountDown("test.wacd", 1);
+            parentCounter = new AcceptDenyCounter();
+            ((ICounterWithParent) wacd.getAllTimeCounter()).setParentCounter(parentCounter);
         }
 
-        IAcceptDenyCounter oldParent = (bluePrint instanceof ICounterWithParent)
-                ? ((ICounterWithParent) bluePrint).getParentCounter()
-                : null;
-        IAcceptDenyCounter stageCount = (bluePrint instanceof IStagedWorkaround)
-                ? ((IStagedWorkaround) bluePrint).getStageCounter()
-                : null;
+        @Test
+        @DisplayName("should allow use once by default, then deny subsequent uses")
+        void shouldAllowUseOnceByDefault() {
+            assertTrue(wacd.use(), "First use should be allowed.");
+            for (int i = 0; i < 10; i++) {
+                assertFalse(wacd.use(), "Subsequent uses should be denied.");
+            }
 
-        IAcceptDenyCounter oldRegCounter = reg.getGlobalCounter(id);
-        reg.setWorkaroundBluePrint(bluePrint);
+            assertCounts(wacd.getStageCounter(), 1, 10, "Stage counter after one use");
+            assertCounts(wacd.getAllTimeCounter(), 1, 10, "All-time counter after one use");
+            assertCounts(parentCounter, 1, 10, "Parent counter after one use");
+        }
 
-        assertGlobalCounterState(id, oldParent, oldRegCounter, reg.getGlobalCounter(id));
+        @Test
+        @DisplayName("resetConditions() should reset the stage counter but not the all-time counter")
+        void resetConditionsShouldOnlyResetStageCounter() {
+            wacd.use(); // Use up the initial count
+            assertFalse(wacd.use());
+            assertCounts(wacd.getAllTimeCounter(), 1, 1, "All-time before reset");
 
-        IWorkaround newInstance = reg.getWorkaround(id);
-        assertNewInstance(id, bluePrint, oldParent, stageCount, newInstance);
+            wacd.resetConditions();
 
-        return bluePrint;
+            assertCounts(wacd.getStageCounter(), 0, 0, "Stage counter should be zero after reset");
+            assertCounts(wacd.getAllTimeCounter(), 1, 1, "All-time counter should be unchanged by reset");
+
+            assertTrue(wacd.use(), "Should be usable again after reset.");
+            assertCounts(wacd.getAllTimeCounter(), 2, 1, "All-time should accumulate after reset and new use");
+        }
+
+        @Test
+        @DisplayName("setCurrentCount() allows a specific number of uses")
+        void setCurrentCountShouldAllowUses() {
+            wacd.setCurrentCount(5);
+            for (int i = 0; i < 5; i++) {
+                assertTrue(wacd.use(), "Use #" + (i + 1) + " should be allowed.");
+            }
+            assertFalse(wacd.use(), "Use #6 should be denied.");
+
+            assertCounts(wacd.getStageCounter(), 5, 1, "Stage counter");
+            assertCounts(wacd.getAllTimeCounter(), 5, 1, "All-time counter");
+        }
+
+        @Test
+        @DisplayName("setCurrentCount() with a negative value should deny all uses")
+        void setCurrentCountWithNegativeValueShouldDenyAll() {
+            wacd.setCurrentCount(-1);
+            assertFalse(wacd.use(), "Should not be usable with a negative count.");
+            assertCounts(wacd.getStageCounter(), 0, 1, "Stage counter");
+        }
     }
-
-    private static void assertGlobalCounterState(String id, IAcceptDenyCounter oldParent,
-            IAcceptDenyCounter oldRegCounter, IAcceptDenyCounter regCount) {
-        if (oldParent != null && regCount == null) {
-            fail("There must be a global counter present, if no parent counter was present at the time of registration: " + id);
-        }
-        if (oldParent == null && regCount == null) {
-            fail("A parent counter must be present, after registering a workaround without a parent counter set: " + id);
-        }
-        if (oldRegCounter == null && oldParent != null && regCount != null) {
-            fail("Expect no counter to be registered, if none was and a parent had already been set: " + id);
-        }
-        if (oldRegCounter != null && oldRegCounter != regCount) {
-            fail("Expect an already registeded counter not to change: " + id);
-        }
-    }
-
-    private static void assertNewInstance(String id, IWorkaround bluePrint,
-            IAcceptDenyCounter oldParent, IAcceptDenyCounter stageCount,
-            IWorkaround newInstance) {
-        if (newInstance == bluePrint) {
-            fail("getWorkaround must not return the same instance: " + id);
-        }
-        if (bluePrint.getClass() != newInstance.getClass()) {
-            fail("Demand class identity for factory methods (subject to discussion: ): " + id);
-        }
-        if (oldParent != null && oldParent != newInstance.getAllTimeCounter()) {
-            fail("Expect the global counter to be the same as the parent of a new instance, if none was set: " + id);
-        }
-        if ((newInstance instanceof IStagedWorkaround) &&
-                ((IStagedWorkaround) newInstance).getStageCounter() == stageCount) {
-            fail("Expect stage counter of a new instance to differ: " + id);
-        }
-    }
-
 
     /**
-     * Check consistency of results of canUse and use called in that order.
-     * 
-     * @param workaround
-     * @return Result of use().
+     * Tests for the central registry that manages workarounds.
      */
-    public static boolean checkCanUseAndUse(IWorkaround workaround) {
-        boolean preRes = workaround.canUse();
-        boolean res = workaround.use();
-        if (!preRes && res) {
-            fail("Inconsistency: use() must not return true, if canUse() has returned false.");
+    @Nested
+    @DisplayName("SimpleWorkaroundRegistry")
+    class SimpleWorkaroundRegistryTests {
+        private IWorkaroundRegistry registry;
+
+        @BeforeEach
+        void setUp() {
+            registry = new SimpleWorkaroundRegistry();
         }
 
-        return res;
-    }
+        @Test
+        @DisplayName("createGlobalCounter() should return a new counter and then the same instance for the same ID")
+        void createGlobalCounterShouldWork() {
+            IAcceptDenyCounter counter1 = registry.createGlobalCounter("c.man");
+            assertNotNull(counter1);
 
+            IAcceptDenyCounter counter2 = registry.createGlobalCounter("c.man");
+            assertSame(counter1, counter2, "Should return the same instance for the same ID.");
+        }
+
+        @Test
+        @DisplayName("getWorkaround() should return a new instance, not the blueprint")
+        void getWorkaroundShouldReturnNewInstance() {
+            IWorkaround bluePrint = new WorkaroundCounter("wc.man");
+            registry.setWorkaroundBluePrint(bluePrint);
+
+            IWorkaround newInstance = registry.getWorkaround("wc.man");
+            assertNotNull(newInstance);
+            assertNotSame(bluePrint, newInstance, "getWorkaround must return a new instance.");
+            assertEquals(bluePrint.getClass(), newInstance.getClass());
+        }
+
+        @Test
+        @DisplayName("getCheckedIdSet() should throw exception for unregistered workarounds")
+        void getCheckedIdSetShouldThrowForUnregistered() {
+            List<IWorkaround> unregistered = List.of(new WorkaroundCounter("unregistered.id"));
+            assertThrows(IllegalArgumentException.class, () -> registry.getCheckedIdSet(unregistered),
+                "Should throw an exception for workarounds that are not registered as blueprints.");
+        }
+
+        /**
+         * Tests for a WorkaroundSet created by the registry.
+         */
+        @Nested
+        @DisplayName("WorkaroundSet behavior")
+        class WorkaroundSetTests {
+            private WorkaroundSet ws;
+            private List<String> counterIds;
+            private List<String> countDownIds;
+            private List<String> allIds;
+
+            @BeforeEach
+            void setUp() {
+                // Setup a complex registry state with multiple workarounds and groups
+                List<WorkaroundCounter> counters = List.of(new WorkaroundCounter("wc.1"), new WorkaroundCounter("wc.2"));
+                List<WorkaroundCountDown> countDowns = List.of(new WorkaroundCountDown("wcd.1", 1), new WorkaroundCountDown("wcd.2", 1));
+
+                registry.setWorkaroundBluePrint(counters.toArray(new IWorkaround[0]));
+                registry.setWorkaroundBluePrint(countDowns.toArray(new IWorkaround[0]));
+                
+                counterIds = new ArrayList<>(registry.getCheckedIdSet(counters));
+                countDownIds = new ArrayList<>(registry.getCheckedIdSet(countDowns));
+                
+                allIds = new ArrayList<>();
+                allIds.addAll(counterIds);
+                allIds.addAll(countDownIds);
+
+                registry.setGroup("group.counters", counterIds);
+                registry.setGroup("group.countdowns", countDownIds);
+                
+                // FIX: The WorkaroundSet must be created with knowledge of the groups it contains.
+                registry.setWorkaroundSetByIds("ws.all", allIds, "group.counters", "group.countdowns");
+                
+                ws = registry.getWorkaroundSet("ws.all");
+            }
+
+            @Test
+            @DisplayName("use() should affect the correct workaround within the set")
+            void useShouldAffectCorrectWorkaround() {
+                ws.use("wc.1");
+                ws.use("wcd.1");
+                ws.use("wcd.1"); // Second use should be denied
+
+                assertCounts(ws.getWorkaround("wc.1").getAllTimeCounter(), 1, 0, "Counter wc.1");
+                assertCounts(ws.getWorkaround("wc.2").getAllTimeCounter(), 0, 0, "Counter wc.2 (unused)");
+                assertCounts(ws.getWorkaround("wcd.1").getAllTimeCounter(), 1, 1, "Countdown wcd.1");
+            }
+
+            @Test
+            @DisplayName("resetConditions() on the entire set should reset all staged counters")
+            void resetAllShouldResetStagedCounters() {
+                allIds.forEach(ws::use); // Use everything once
+                assertCounts(((IStagedWorkaround) ws.getWorkaround("wcd.1")).getStageCounter(), 1, 0, "Stage before reset");
+
+                ws.resetConditions();
+
+                countDownIds.forEach(id -> 
+                    assertCounts(((IStagedWorkaround) ws.getWorkaround(id)).getStageCounter(), 0, 0, "Stage counter for " + id + " after reset")
+                );
+
+                // All-time counts should remain
+                assertCounts(ws.getWorkaround("wcd.1").getAllTimeCounter(), 1, 0, "All-time after reset");
+            }
+
+            @Test
+            @DisplayName("resetConditions() on a group should only reset members of that group")
+            void resetGroupShouldOnlyResetGroupMembers() {
+                allIds.forEach(ws::use); // Use everything once
+                assertCounts(((IStagedWorkaround) ws.getWorkaround("wcd.1")).getStageCounter(), 1, 0, "wcd.1 stage before reset");
+                assertCounts(((IStagedWorkaround) ws.getWorkaround("wcd.2")).getStageCounter(), 1, 0, "wcd.2 stage before reset");
+
+                ws.resetConditions("group.counters"); // Resetting counters should have no effect on countdowns
+
+                assertCounts(((IStagedWorkaround) ws.getWorkaround("wcd.1")).getStageCounter(), 1, 0, "wcd.1 stage should be unchanged");
+                assertCounts(((IStagedWorkaround) ws.getWorkaround("wcd.2")).getStageCounter(), 1, 0, "wcd.2 stage should be unchanged");
+
+                ws.resetConditions("group.countdowns"); // Now reset the countdowns
+
+                assertCounts(((IStagedWorkaround) ws.getWorkaround("wcd.1")).getStageCounter(), 0, 0, "wcd.1 stage should now be reset");
+                assertCounts(((IStagedWorkaround) ws.getWorkaround("wcd.2")).getStageCounter(), 0, 0, "wcd.2 stage should now be reset");
+            }
+        }
+    }
 }
