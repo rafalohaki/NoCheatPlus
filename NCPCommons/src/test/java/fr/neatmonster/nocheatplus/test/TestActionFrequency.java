@@ -14,64 +14,113 @@
  */
 package fr.neatmonster.nocheatplus.test;
 
-import static org.junit.jupiter.api.Assertions.*;
-
+import static org.junit.jupiter.api.Assertions.assertDoesNotThrow;
+import static org.junit.jupiter.api.Assertions.assertEquals;
+import org.junit.jupiter.api.BeforeEach;
+import org.junit.jupiter.api.DisplayName;
+import org.junit.jupiter.api.Nested;
 import org.junit.jupiter.api.Test;
-
 import fr.neatmonster.nocheatplus.utilities.ds.count.ActionFrequency;
 
+@DisplayName("ActionFrequency Tests")
 public class TestActionFrequency {
 
-	@Test
-	public void testSum() {
-		ActionFrequency freq = new ActionFrequency(10, 100);
-		for (int i = 0; i < 10; i++){
-			freq.setBucket(i, 1);
-		}
-		if (freq.score(1f) != 10f) fail("10x1=10");
-		freq.clear(0);
-		if (freq.score(1f) != 0f) fail("clear=0");
-		
-	}
-	
-	@Test
-	public void testAddFromZeroTime(){
-		addFromTime(0);
-	}
-	
-	@Test
-	public void testAddFromCurrentTime(){
-		addFromTime(System.currentTimeMillis());
-	}
-	
-	/**
-	 * Test adding 1 such that each bucket gets filled with an equal total amount.
-	 * @param time Point of time from which to start.
-	 */
-	public void addFromTime(long time){
-		ActionFrequency freq = new ActionFrequency(3, 333);
-		freq.update(time);
-		for (int i = 0; i < 999; i++){
-			freq.add(time + i, 1f);
-		}
-		if (freq.score(1f) != 999) fail("Sum should be 999, got instead: " + freq.score(1f));
-		freq.update(time + 999);
-		if (freq.score(1f) != 666f) fail("Sum should be 666, got instead: " + freq.score(1f));
-		freq.update(time + 1332);
-		if (freq.score(1f) != 333f) fail("Sum should be 333, got instead: " + freq.score(1f));
-		freq.update(time + 1665);
-		if (freq.score(1f) != 0f) fail("Sum should be 0, got instead: " + freq.score(1f));
-	}
-	
-	@Test
-	public void testUpdateAlternatingSignumTimes(){
-		// Basically fails if this generates an exception.
-		int sig = 1;
-		ActionFrequency freq = new ActionFrequency(10, 100);
-		for (int i = 0; i < 1000; i++){
-			freq.update(i * sig);
-			sig = sig * -1;
-		}
-	}
+    @Nested
+    @DisplayName("When manipulating buckets directly")
+    class DirectManipulationTest {
 
+        private ActionFrequency freq;
+
+        @BeforeEach
+        void setUp() {
+            freq = new ActionFrequency(10, 100);
+        }
+
+        @Test
+        @DisplayName("score() should sum the values of all buckets")
+        void scoreShouldSumAllBuckets() {
+            for (int i = 0; i < 10; i++) {
+                freq.setBucket(i, 1);
+            }
+            assertEquals(10f, freq.score(1f), "Score should be 10 for 10 buckets with a value of 1.");
+        }
+
+        @Test
+        @DisplayName("clear() should reset the score to zero")
+        void clearShouldResetScore() {
+            for (int i = 0; i < 10; i++) {
+                freq.setBucket(i, 1);
+            }
+            freq.clear(0); // The parameter for clear is unused in the implementation.
+            assertEquals(0f, freq.score(1f), "Score should be 0 after clearing.");
+        }
+    }
+
+    @Nested
+    @DisplayName("When adding actions over time")
+    class TimeBasedDecayTest {
+
+        private static final int BUCKET_COUNT = 3;
+        private static final int BUCKET_DURATION_MS = 333;
+        private static final int TOTAL_DURATION_MS = BUCKET_COUNT * BUCKET_DURATION_MS; // 999ms
+        private static final long START_TIME = 100_000L; // Use a non-zero start time
+
+        private ActionFrequency freq;
+
+        @BeforeEach
+        void setUp() {
+            freq = new ActionFrequency(BUCKET_COUNT, BUCKET_DURATION_MS);
+            freq.update(START_TIME);
+            // Add 999 actions, one per millisecond. Each bucket will receive 333 actions.
+            for (int i = 0; i < TOTAL_DURATION_MS; i++) {
+                freq.add(START_TIME + i, 1f);
+            }
+        }
+
+        @Test
+        @DisplayName("should have a full score immediately after being filled")
+        void shouldHaveFullScoreAfterFilling() {
+            assertEquals(TOTAL_DURATION_MS, freq.score(1f), "Initial score should be the sum of all additions.");
+        }
+
+        @Test
+        @DisplayName("score should decay as one bucket expires")
+        void scoreShouldDecayAsOneBucketExpires() {
+            // Move time forward by exactly the total duration, causing the first bucket to expire.
+            freq.update(START_TIME + TOTAL_DURATION_MS);
+            float expectedScore = TOTAL_DURATION_MS - BUCKET_DURATION_MS; // 666
+            assertEquals(expectedScore, freq.score(1f), "Score should decrease by one bucket's worth.");
+        }
+
+        @Test
+        @DisplayName("score should decay further as a second bucket expires")
+        void scoreShouldDecayAsTwoBucketsExpire() {
+            // Move time forward by total_duration + one_bucket_duration
+            freq.update(START_TIME + TOTAL_DURATION_MS + BUCKET_DURATION_MS);
+            float expectedScore = TOTAL_DURATION_MS - (2 * BUCKET_DURATION_MS); // 333
+            assertEquals(expectedScore, freq.score(1f), "Score should decrease by two buckets' worth.");
+        }
+
+        @Test
+        @DisplayName("score should be zero after all buckets have expired")
+        void scoreShouldBeZeroAfterAllBucketsExpire() {
+            // Move time forward enough for all buckets to expire
+            freq.update(START_TIME + TOTAL_DURATION_MS + (BUCKET_COUNT * BUCKET_DURATION_MS));
+            assertEquals(0f, freq.score(1f), "Score should be zero when all buckets are expired.");
+        }
+    }
+
+    @Test
+    @DisplayName("update() should not throw an exception for alternating positive and negative timestamps")
+    void updateShouldHandleAlternatingSignTimestamps() {
+        // This test verifies robustness against unusual time inputs.
+        assertDoesNotThrow(() -> {
+            ActionFrequency freq = new ActionFrequency(10, 100);
+            long sig = 1;
+            for (int i = 0; i < 1000; i++) {
+                freq.update(i * sig);
+                sig *= -1;
+            }
+        }, "update() should not fail with fluctuating timestamps.");
+    }
 }

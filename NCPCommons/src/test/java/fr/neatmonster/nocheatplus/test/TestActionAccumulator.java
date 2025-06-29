@@ -14,64 +14,123 @@
  */
 package fr.neatmonster.nocheatplus.test;
 
-import static org.junit.jupiter.api.Assertions.*;
-
+import static org.junit.jupiter.api.Assertions.assertAll;
+import static org.junit.jupiter.api.Assertions.assertEquals;
+import org.junit.jupiter.api.BeforeEach;
+import org.junit.jupiter.api.DisplayName;
+import org.junit.jupiter.api.Nested;
 import org.junit.jupiter.api.Test;
-
 import fr.neatmonster.nocheatplus.utilities.ds.count.ActionAccumulator;
 
-
+@DisplayName("ActionAccumulator Tests")
 public class TestActionAccumulator {
-	
-	/**
-	 * Fill the accumulator with numbers from 1 to buckets * capacity.
-	 * @param acc
-	 */
-	private void fill(ActionAccumulator acc) {
-		int buckets = acc.numberOfBuckets();
-		int capacity = acc.bucketCapacity();
-		// Add different amounts to better check consistency.
-		for (int i = 1; i <= buckets * capacity; i ++){
-			acc.add(i);
-		}
-	}
-	
-	/**
-	 * Check if values and counts are as if fill was called on empty acc.
-	 * @param acc
-	 */
-	private void checkIncreasingValues(ActionAccumulator acc) {
-		int buckets = acc.numberOfBuckets();
-		int capacity = acc.bucketCapacity();
-		for (int i = 0; i < buckets; i++){
-			if (acc.bucketCount(i) != capacity) fail("Bad capacity at " + i + ": " + acc.bucketCount(i) + " / " + capacity);
-			int start = (buckets - 1 - i) * capacity + 1;
-			int end = start + capacity - 1;
-			int expect = end * (end + 1) / 2 - (start - 1) * ((start - 1) + 1) / 2;
-			if (acc.bucketScore(i) != (float) expect)  fail("Bad value at bucket " + i + ": " + acc.bucketScore(i) + " / " + expect);
-		}
-		if (acc.count() != buckets * capacity) fail("Total count.");
-		if (acc.score() != buckets * capacity * (buckets * capacity + 1) / 2) fail ("Total score.");
-	}
-	
-	@Test
-	public void testFill(){
-		ActionAccumulator acc = new ActionAccumulator(50, 10);
-		fill(acc);
-		checkIncreasingValues(acc);
-	}
-	
-	@Test
-	public void testClear(){
-		ActionAccumulator acc = new ActionAccumulator(50, 10);
-		fill(acc);
-		acc.clear();
-		if (acc.count() != 0) fail("Expect 0 count after clear, got: " + acc.count());
-		if (acc.score() != 0) fail("Expect 0 score after clear, got: " + acc.score());
-		for (int i = 0; i < acc.numberOfBuckets(); i++){
-			if (acc.bucketCount(i) != 0) fail("Expect 0 count at " + i + " after clear, got: " + acc.bucketCount(i));
-			if (acc.bucketScore(i) != 0) fail("Expect 0 score at " + i + " after clear, got: " + acc.bucketScore(i));
-		}
-	}
-	
+
+    private static final int BUCKETS = 50;
+    private static final int CAPACITY = 10;
+
+    @Nested
+    @DisplayName("When newly created")
+    class WhenNew {
+        private ActionAccumulator acc;
+
+        @BeforeEach
+        void setUp() {
+            acc = new ActionAccumulator(BUCKETS, CAPACITY);
+        }
+
+        @Test
+        @DisplayName("should be empty with zero counts and scores")
+        void shouldBeEmpty() {
+            assertAccumulatorIsEmpty(acc, "A new accumulator");
+        }
+    }
+
+    @Nested
+    @DisplayName("When filled with data")
+    class WhenFilled {
+        private ActionAccumulator acc;
+
+        @BeforeEach
+        void setUp() {
+            acc = new ActionAccumulator(BUCKETS, CAPACITY);
+            fillWithIncreasingValues(acc);
+        }
+
+        @Test
+        @DisplayName("should have correct counts and scores in total and per bucket")
+        void shouldHaveCorrectCountsAndScores() {
+            assertStateAfterFillingWithIncreasingValues(acc);
+        }
+
+        @Test
+        @DisplayName("clear() should reset all counts and scores to zero")
+        void clearShouldResetToZero() {
+            acc.clear();
+            assertAccumulatorIsEmpty(acc, "An accumulator after being cleared");
+        }
+    }
+
+    // --- Helper Methods ---
+
+    /**
+     * Fills the accumulator with numbers from 1 to buckets * capacity.
+     */
+    private void fillWithIncreasingValues(ActionAccumulator acc) {
+        int totalValues = acc.numberOfBuckets() * acc.bucketCapacity();
+        for (int i = 1; i <= totalValues; i++) {
+            acc.add(i);
+        }
+    }
+
+    /**
+     * Asserts that the accumulator's state matches the expected state after being filled
+     * by {@link #fillWithIncreasingValues(ActionAccumulator)}.
+     */
+    private void assertStateAfterFillingWithIncreasingValues(ActionAccumulator acc) {
+        int buckets = acc.numberOfBuckets();
+        int capacity = acc.bucketCapacity();
+        long totalElements = (long) buckets * capacity;
+        long expectedTotalScore = totalElements * (totalElements + 1) / 2; // Sum of 1 to N
+
+        assertAll("Overall counts and scores should be correct",
+                () -> assertEquals(totalElements, acc.count(), "Total count is incorrect."),
+                () -> assertEquals(expectedTotalScore, acc.score(), "Total score is incorrect.")
+        );
+
+        for (int i = 0; i < buckets; i++) {
+            final int bucketIndex = i;
+            // The values are added in increasing order, so the latest values are in bucket 0.
+            int start = (buckets - 1 - bucketIndex) * capacity + 1;
+            int end = start + capacity - 1;
+            // Sum of an arithmetic series: (n/2) * (first + last)
+            long expectedBucketScore = (long) capacity * (start + end) / 2;
+
+            assertAll("Bucket " + bucketIndex + " state should be correct",
+                    () -> assertEquals(capacity, acc.bucketCount(bucketIndex),
+                            "Bucket count at index " + bucketIndex + " is incorrect."),
+                    () -> assertEquals(expectedBucketScore, acc.bucketScore(bucketIndex),
+                            "Bucket score at index " + bucketIndex + " is incorrect.")
+            );
+        }
+    }
+
+    /**
+     * Asserts that the given accumulator is completely empty (all counts and scores are zero).
+     */
+    private void assertAccumulatorIsEmpty(ActionAccumulator acc, String context) {
+        assertAll(context + " should be empty",
+                () -> assertEquals(0, acc.count(), "Total count should be zero."),
+                () -> assertEquals(0, acc.score(), "Total score should be zero.")
+        );
+
+        for (int i = 0; i < acc.numberOfBuckets(); i++) {
+            final int bucketIndex = i;
+            assertAll("Bucket " + bucketIndex + " should be empty",
+                    () -> assertEquals(0, acc.bucketCount(bucketIndex),
+                            "Bucket count at index " + bucketIndex + " should be zero."),
+                    () -> assertEquals(0, acc.bucketScore(bucketIndex),
+                            "Bucket score at index " + bucketIndex + " should be zero.")
+            );
+        }
+    }
 }
