@@ -1,9 +1,9 @@
 package fr.neatmonster.nocheatplus.checks.blockbreak;
 
-import static org.junit.Assert.*;
+import static org.junit.jupiter.api.Assertions.*;
 
-import org.junit.Before;
-import org.junit.Test;
+import org.junit.jupiter.api.BeforeEach;
+import org.junit.jupiter.api.Test;
 
 import fr.neatmonster.nocheatplus.compat.AlmostBoolean;
 
@@ -11,7 +11,7 @@ public class FastBreakDecisionTest {
 
     private long clamp;
 
-    @Before
+    @BeforeEach
     public void setup() {
         clamp = 100;
     }

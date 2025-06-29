@@ -1,8 +1,10 @@
 package fr.neatmonster.nocheatplus.compat.bukkit.model;
 
-import static org.junit.Assert.assertArrayEquals;
-import static org.junit.Assert.assertNotNull;
-import org.junit.Test;
+import static org.junit.jupiter.api.Assertions.assertArrayEquals;
+import static org.junit.jupiter.api.Assertions.assertNotNull;
+import static org.junit.jupiter.api.Assertions.assertThrows;
+
+import org.junit.jupiter.api.Test;
 
 public class BukkitStaticTest {
 
@@ -14,9 +16,9 @@ public class BukkitStaticTest {
         assertArrayEquals(expected, model.getShape(null, null, 0, 0, 0), 0.0);
     }
 
-    @Test(expected = IllegalArgumentException.class)
+    @Test
     public void testOfHeightInvalid() {
-        BukkitStatic.ofHeight(0.0);
+        assertThrows(IllegalArgumentException.class, () -> BukkitStatic.ofHeight(0.0));
     }
 
     @Test
@@ -27,8 +29,9 @@ public class BukkitStaticTest {
         assertArrayEquals(expected, model.getShape(null, null, 0, 0, 0), 0.0);
     }
 
-    @Test(expected = IllegalArgumentException.class)
+    @Test
     public void testOfInsetAndHeightInvalid() {
-        BukkitStatic.ofInsetAndHeight(0.25, -0.1);
+        assertThrows(IllegalArgumentException.class,
+                () -> BukkitStatic.ofInsetAndHeight(0.25, -0.1));
     }
 }
