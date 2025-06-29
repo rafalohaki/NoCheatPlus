@@ -68,8 +68,6 @@ Compiling NoCheatPlus
 ---------
 * We use [Maven](http://maven.apache.org/download.cgi) 3 to handle the dependencies. Tested both with Eclipse and Jenkins is Maven 3.3.9.
 * You can compile with this Maven goal: `mvn clean package`, for a build without any of the "non free" modules, which depened on not publicly downloadable resources, such as the CraftBukkit/Spigot server jar - the reflection based compatibility module is still contained. 
-* To also (re-) build "non free" compatibility modules, use `-P nonfree_build` as well as activating the appropriate module to build via a profile such as `-P cbdev` - see the tables below for reference.
-* For a build with full compatibility modules, You can compile with this goal: `mvn clean package -P nonfree_build -P all`.
 * Static analysis with Checkstyle, PMD and SpotBugs runs automatically during the build; you can also invoke `mvn spotbugs:check` manually.
 * "Non free" jar file dependencies needed for the dedicated compat modules, which your local maven repository might be missing, can be installed manually.
 Example for Eclipse with embedded maven:
@@ -81,11 +79,6 @@ Do set the correct version alongside the file name. On newer version of maven, y
   * **The latest versions of BuildTools.jar will automatically install the created server jars into the local .m2 repository (e.g. on linux) - provided configuration paths are standard. Thus you don't need to do this manually anymore, if you then build NCP with the specific profile, if you have run BuildTools.jar to generate the server jars on that machine/environment.**
 
 Options and profiles related to enabling/disabling including/building "non free" compatibility modules.
-
-| Profile | Parameter | Description |
-| :------------------ | :-------------- | :-------------- |
-| `-P nonfree_build` | _none_ | Enable building "non free" compatibility modules. |
-| _none_ | _none_ | The "non free" modules won't be included. |
 
 Profiles for choice of "non free" compatibility modules to build:
 

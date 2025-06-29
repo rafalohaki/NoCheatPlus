@@ -35,8 +35,8 @@ jobs:
       # Build the project (tries mvnd first, falls back to mvn if not present)
       - name: Build NoCheatPlus
         run: |
-          (command -v mvnd >/dev/null 2>&1 && mvnd -B clean package -P nonfree_build -P all) || \
-          mvn -B clean package -P nonfree_build -P all
+          (command -v mvnd >/dev/null 2>&1 && mvnd -B clean package -P all) || \
+          mvn -B clean package -P all
 
       # Upload the produced JAR(s) as a prerelease asset
       - name: Upload NoCheatPlus
