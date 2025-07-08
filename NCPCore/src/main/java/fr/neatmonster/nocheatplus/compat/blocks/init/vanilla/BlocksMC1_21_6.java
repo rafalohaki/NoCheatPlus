@@ -22,6 +22,7 @@ import fr.neatmonster.nocheatplus.config.ConfigManager;
 import fr.neatmonster.nocheatplus.config.WorldConfigProvider;
 import fr.neatmonster.nocheatplus.logging.StaticLog;
 import fr.neatmonster.nocheatplus.utilities.map.BlockFlags;
+import fr.neatmonster.nocheatplus.utilities.map.BlockProperties;
 
 /**
  * Blocks for Minecraft 1.21.6.
@@ -36,8 +37,9 @@ public class BlocksMC1_21_6 implements BlockPropertiesSetup {
     @Override
     public void setupBlockProperties(WorldConfigProvider<?> worldConfigProvider) {
         // Minecraft 1.21.6 additions
-        BlockFlags.setBlockFlags("DRIED_GHAST", BlockFlags.SOLID_GROUND | BlockFlags.IGN_PASSABLE);
-
+        BlockProperties.setBlockProps("DRIED_GHAST", new fr.neatmonster.nocheatplus.utilities.map.BlockProperties.BlockProps(BlockProperties.noTool, 0.5f));
+        BlockFlags.setBlockFlags("DRIED_GHAST", BlockFlags.SOLID_GROUND | BlockFlags.F_IGN_PASSABLE);
+        
         ConfigFile config = ConfigManager.getConfigFile();
         if (config.getBoolean(ConfPaths.BLOCKBREAK_DEBUG, config.getBoolean(ConfPaths.CHECKS_DEBUG, false)))
         StaticLog.logInfo("Added block-info for Minecraft 1.21.6 blocks.");
