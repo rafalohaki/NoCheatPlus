@@ -128,7 +128,7 @@ public class RegistryHelper {
         T res = null;
         for (String name : classNames) {
             try {
-                res = (T) Class.forName(name).newInstance();
+                res = (T) Class.forName(name).getDeclaredConstructor().newInstance();
                 if (res != null) {
                     return res;
                 }

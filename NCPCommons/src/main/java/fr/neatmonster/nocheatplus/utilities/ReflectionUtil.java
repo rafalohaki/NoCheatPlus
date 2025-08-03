@@ -549,7 +549,7 @@ public class ReflectionUtil {
     }
 
     private static String getSimpleMemberModifierDescription(final Member member) {
-        final boolean accessible = member instanceof AccessibleObject && ((AccessibleObject) member).isAccessible();
+        final boolean accessible = member instanceof AccessibleObject && ((AccessibleObject) member).canAccess(null);
         final int mod = member.getModifiers();
         final String out = Modifier.isPublic(mod) ? "(public" : (accessible ? "(accessible" : "( -");
         return out + (Modifier.isStatic(mod) ? " static) " : ") ");

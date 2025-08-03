@@ -152,7 +152,7 @@ public class MCAccessFactory {
 
         for (String className : classNames) {
             try{
-                return (MCAccess) Class.forName(className).newInstance();
+                return (MCAccess) Class.forName(className).getDeclaredConstructor().newInstance();
             }
             catch(Throwable t) {
                 throwables.add(t);

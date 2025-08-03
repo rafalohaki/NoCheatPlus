@@ -168,7 +168,7 @@ public class NoSlow extends BaseAdapter {
 
             if (InventoryUtil.isConsumable(item)) {
                 // pre1.9 splash potion
-                if (!Bridge1_9.hasElytra() && item.getDurability() > 16384) return;
+                if (!Bridge1_9.hasElytra() && InventoryUtil.getDamage(item) > 16384) return;
                 if (m == Material.POTION || m == Material.MILK_BUCKET || m.toString().endsWith("_APPLE") || m.name().startsWith("HONEY_BOTTLE")) {
                     data.isUsingItem = true;
                     data.offHandUse = Bridge1_9.hasGetItemInOffHand() && e.getHand() == EquipmentSlot.OFF_HAND;

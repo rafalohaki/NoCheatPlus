@@ -19,6 +19,7 @@ import java.io.IOException;
 import java.io.InputStream;
 import java.io.InputStreamReader;
 import java.net.MalformedURLException;
+import java.net.URI;
 import java.net.URL;
 import java.util.Map;
 
@@ -39,7 +40,7 @@ public class ResourceUtil {
 		if (!classPath.startsWith("jar")) return null;
 		String absPath = classPath.substring(0, classPath.lastIndexOf("!") + 1) + "/"+path;
 		try {
-			URL url = new URL(absPath);
+			URL url = URI.create(absPath).toURL();
 			BufferedReader r = null;
 			try {
 				Object obj  = url.getContent();

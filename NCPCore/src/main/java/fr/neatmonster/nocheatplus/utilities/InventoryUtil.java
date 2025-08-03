@@ -135,14 +135,17 @@ public class InventoryUtil {
         if (inventory == null) return 0;
         if (reference == null) return getFreeSlots(inventory);
         final Material mat = reference.getType();
-        final int durability = reference.getDurability();
+        // Use modern ItemMeta API instead of deprecated getDurability()
+        final int durability = (reference.getItemMeta() instanceof org.bukkit.inventory.meta.Damageable) 
+            ? ((org.bukkit.inventory.meta.Damageable) reference.getItemMeta()).getDamage() 
+            : reference.getDurability(); // Fallback for older items
         final ItemStack[] contents = inventory.getContents();
         int count = 0;
         for (final ItemStack stack : contents) {
             if (stack == null) {
                 continue;
             }
-            else if (stack.getType() == mat && stack.getDurability() == durability) {
+            else if (stack.getType() == mat && getDamage(stack) == durability) {
                 count ++;
             }
         }
@@ -336,7 +339,20 @@ public class InventoryUtil {
             return true;
         }
         final Material mat = stack.getType();
-        return stack.getDurability() >= mat.getMaxDurability();
+        return getDamage(stack) >= mat.getMaxDurability();
+    }
+
+    /**
+     * Helper method to get damage/durability from ItemStack using modern API
+     * with fallback to deprecated method for compatibility.
+     */
+    public static int getDamage(final ItemStack stack) {
+        if (stack == null) return 0;
+        if (stack.getItemMeta() instanceof org.bukkit.inventory.meta.Damageable) {
+            return ((org.bukkit.inventory.meta.Damageable) stack.getItemMeta()).getDamage();
+        }
+        // Fallback to deprecated method for compatibility
+        return stack.getDurability();
     }
 
 }

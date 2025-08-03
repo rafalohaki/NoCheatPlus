@@ -180,7 +180,9 @@ public class BlockPlaceListener extends CheckListener {
             placedMat = event.getBlockPlaced().getType();
         }
         else if (Bridge1_9.hasGetItemInOffHand()) {
-            placedMat = BlockProperties.isAir(event.getItemInHand()) ? Material.AIR : event.getItemInHand().getType();
+            // Use modern API via Bridge1_9 to get main hand item
+            final ItemStack itemInHand = Bridge1_9.getItemInMainHand(player);
+            placedMat = BlockProperties.isAir(itemInHand) ? Material.AIR : itemInHand.getType();
         }
         else placedMat = Bridge1_9.getItemInMainHand(player).getType(); // Safety first.
     

@@ -94,3 +94,9 @@ echo "======================================================="
 echo "???? Analiza zako??czona pomy??lnie!"
 echo "???? $(date)"
 echo "======================================================="
+
+echo "??? === JAVA VERSION INFO ==="
+echo "??? Java Runtime: $(java -version 2>&1 | head -1)"
+echo "??? Compiler targets: $(grep -r "maven.compiler.target>\|<target>" . --include="pom.xml" | wc -l) configurations"
+echo "??? Modern Java features available: ??? Records, Switch expressions, var, Text blocks"
+echo

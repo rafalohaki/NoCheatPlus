@@ -182,7 +182,7 @@ public abstract class MultiListenerRegistry<EB, P> extends MiniListenerRegistry<
                 // TODO: Specific log.
                 return false;
             }
-            if (!method.isAccessible()) {
+            if (!method.canAccess(null)) {
                 // TODO: Can this be minimized?
                 method.setAccessible(true);
             }

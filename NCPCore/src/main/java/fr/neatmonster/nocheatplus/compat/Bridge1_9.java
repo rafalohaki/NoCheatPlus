@@ -143,10 +143,9 @@ public class Bridge1_9 {
         return false;
     }
 
-    @SuppressWarnings("deprecation")
     public static ItemStack getItemInMainHand(final Player player) {
         return hasGetItemInMainHand ? player.getInventory().getItemInMainHand() 
-                : player.getItemInHand(); // As long as feasible (see: CraftInventoryPlayer).
+                : player.getInventory().getItemInMainHand(); // Modern API instead of deprecated getItemInHand()
     }
 
     /**
@@ -157,7 +156,7 @@ public class Bridge1_9 {
      */
     public static void setItemInMainHand(final Player player, final ItemStack item) {
         if (hasGetItemInMainHand) player.getInventory().setItemInMainHand(item);
-        else player.setItemInHand(item);
+        else player.getInventory().setItemInMainHand(item);
     }
 
     /**
