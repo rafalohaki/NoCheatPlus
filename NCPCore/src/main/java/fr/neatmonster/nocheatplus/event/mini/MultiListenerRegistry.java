@@ -20,7 +20,6 @@ import java.lang.reflect.Modifier;
 import java.util.ArrayList;
 import java.util.Collection;
 import java.util.logging.Level;
-
 import fr.neatmonster.nocheatplus.NCPAPIProvider;
 import fr.neatmonster.nocheatplus.components.registry.feature.ComponentWithName;
 import fr.neatmonster.nocheatplus.components.registry.order.RegistrationOrder;
@@ -182,7 +181,7 @@ public abstract class MultiListenerRegistry<EB, P> extends MiniListenerRegistry<
                 // TODO: Specific log.
                 return false;
             }
-            if (!method.canAccess(null)) {
+            if (!method.isAccessible()) {
                 // TODO: Can this be minimized?
                 method.setAccessible(true);
             }
