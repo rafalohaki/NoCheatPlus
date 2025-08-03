@@ -48,6 +48,7 @@
                 <module>NCPCompatCB2808</module>
                 <module>NCPCompatCB2882</module>
                 -->
+                <!-- Legacy modules removed - server supports only 1.18+ 
                 <module>NCPCompatCB2922</module>
                 <module>NCPCompatCB3026</module>
                 <module>NCPCompatCB3043</module>
@@ -59,6 +60,7 @@
                 <module>NCPCompatSpigotCB1_9_R2</module>
                 <module>NCPCompatSpigotCB1_10_R1</module>
                 <module>NCPCompatSpigotCB1_11_R1</module>
+                -->
                 <!-- Latest -->
                 <module>NCPCompatCBDev</module>
             </modules>
@@ -78,6 +80,7 @@
             </modules>
         </profile>
 
+        <!-- Legacy version profiles disabled - server supports only 1.18+
         <profile>
             <id>spigot1_11_r1</id>
             <modules>
@@ -119,15 +122,15 @@
                 <module>NCPCompatCB3100</module>
             </modules>
         </profile>
+        -->
 
+        <!-- cblegacy profile disabled - server supports only 1.18+
         <profile>
             <id>cblegacy</id>
             <modules>
-                <!-- Legacy, unsupported
                 <module>NCPCompatCB2512</module>
                 <module>NCPCompatCB2545</module>
                 <module>NCPCompatCB2602</module>
-                -->
                 <module>NCPCompatCB2645</module>
                 <module>NCPCompatCB2691</module>
                 <module>NCPCompatCB2763</module>
@@ -139,6 +142,7 @@
                 <module>NCPCompatCB3043</module>
             </modules>
         </profile>
+        -->
     </profiles>
 
     <repositories>

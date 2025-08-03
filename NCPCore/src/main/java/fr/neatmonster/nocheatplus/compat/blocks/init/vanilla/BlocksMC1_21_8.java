@@ -67,18 +67,16 @@ public class BlocksMC1_21_8 implements BlockPropertiesSetup {
         BlockProperties.setBlockProps("WILDFLOWERS", BlockProperties.instantType);
         BlockFlags.setBlockFlags("WILDFLOWERS", BlockFlags.F_IGN_PASSABLE);
         
-        // Resin blocks - if not already defined in 1.21.4
+        // Resin blocks - if not already defined in 1.21.4 (using predefined types)
         try {
-            BlockProperties.setBlockProps("CHISELED_RESIN_BRICKS", 
-                new BlockProperties.BlockProps(BlockProperties.woodPickaxe, 2.0f, true));
+            BlockProperties.setBlockProps("CHISELED_RESIN_BRICKS", BlockProperties.brickType);
             BlockFlags.setBlockFlags("CHISELED_RESIN_BRICKS", BlockFlags.FULLY_SOLID_BOUNDS);
         } catch (Exception e) {
             // Already defined in BlocksMC1_21_4, skip
         }
         
         try {
-            BlockProperties.setBlockProps("CREAKING_HEART", 
-                new BlockProperties.BlockProps(BlockProperties.woodAxe, 2.0f, true));
+            BlockProperties.setBlockProps("CREAKING_HEART", BlockProperties.woodType);
             BlockFlags.setBlockFlags("CREAKING_HEART", BlockFlags.SOLID_GROUND);
         } catch (Exception e) {
             // Already defined in BlocksMC1_21_4, skip
@@ -87,109 +85,86 @@ public class BlocksMC1_21_8 implements BlockPropertiesSetup {
         BlockProperties.setBlockProps("RESIN_CLUMP", BlockProperties.instantType);
         BlockFlags.setBlockFlags("RESIN_CLUMP", BlockFlags.F_IGN_PASSABLE);
         
-        // Resin brick variants - if not already defined
+        // Resin brick variants - if not already defined (using predefined types)
         try {
-            BlockProperties.setBlockProps("RESIN_BRICK_SLAB", 
-                new BlockProperties.BlockProps(BlockProperties.woodPickaxe, 2.0f, true));
+            BlockProperties.setBlockProps("RESIN_BRICK_SLAB", BlockProperties.brickType);
             BlockFlags.setBlockFlags("RESIN_BRICK_SLAB", BlockFlags.SOLID_GROUND | BlockFlags.F_XZ100);
             
-            BlockProperties.setBlockProps("RESIN_BRICK_STAIRS", 
-                new BlockProperties.BlockProps(BlockProperties.woodPickaxe, 2.0f, true));
+            BlockProperties.setBlockProps("RESIN_BRICK_STAIRS", BlockProperties.brickType);
             BlockFlags.setBlockFlags("RESIN_BRICK_STAIRS", BlockFlags.F_STAIRS | BlockFlags.SOLID_GROUND);
             
-            BlockProperties.setBlockProps("RESIN_BRICK_WALL", 
-                new BlockProperties.BlockProps(BlockProperties.woodPickaxe, 2.0f, true));
+            BlockProperties.setBlockProps("RESIN_BRICK_WALL", BlockProperties.brickType);
             BlockFlags.setBlockFlags("RESIN_BRICK_WALL", BlockFlags.SOLID_GROUND | BlockFlags.F_VARIABLE);
             
-            BlockProperties.setBlockProps("RESIN_BRICKS", 
-                new BlockProperties.BlockProps(BlockProperties.woodPickaxe, 2.0f, true));
+            BlockProperties.setBlockProps("RESIN_BRICKS", BlockProperties.brickType);
             BlockFlags.setBlockFlags("RESIN_BRICKS", BlockFlags.FULLY_SOLID_BOUNDS);
             
-            BlockProperties.setBlockProps("RESIN_BLOCK", 
-                new BlockProperties.BlockProps(BlockProperties.woodPickaxe, 2.0f, true));
+            BlockProperties.setBlockProps("RESIN_BLOCK", BlockProperties.leverType);
             BlockFlags.setBlockFlags("RESIN_BLOCK", BlockFlags.SOLID_GROUND);
         } catch (Exception e) {
             // Already defined in BlocksMC1_21_4, skip
         }
         
-        // Pale Oak wood types
-        BlockProperties.setBlockProps("PALE_OAK_BUTTON", 
-            new BlockProperties.BlockProps(BlockProperties.noTool, 0.5f, true));
+        // Pale Oak wood types - using predefined types to avoid deprecation warnings
+        BlockProperties.setBlockProps("PALE_OAK_BUTTON", BlockProperties.leverType);
         BlockFlags.setBlockFlags("PALE_OAK_BUTTON", BlockFlags.F_IGN_PASSABLE);
         
-        BlockProperties.setBlockProps("PALE_OAK_DOOR", 
-            new BlockProperties.BlockProps(BlockProperties.woodAxe, 3.0f, true));
+        BlockProperties.setBlockProps("PALE_OAK_DOOR", BlockProperties.woodDoorType);
         BlockFlags.setBlockFlags("PALE_OAK_DOOR", BlockFlags.SOLID_GROUND | BlockFlags.F_VARIABLE);
         
-        BlockProperties.setBlockProps("PALE_OAK_FENCE", 
-            new BlockProperties.BlockProps(BlockProperties.woodAxe, 2.0f, true));
+        BlockProperties.setBlockProps("PALE_OAK_FENCE", BlockProperties.woodType);
         BlockFlags.setBlockFlags("PALE_OAK_FENCE", BlockFlags.SOLID_GROUND | BlockFlags.F_IGN_PASSABLE);
         
-        BlockProperties.setBlockProps("PALE_OAK_FENCE_GATE", 
-            new BlockProperties.BlockProps(BlockProperties.woodAxe, 2.0f, true));
+        BlockProperties.setBlockProps("PALE_OAK_FENCE_GATE", BlockProperties.woodType);
         BlockFlags.setBlockFlags("PALE_OAK_FENCE_GATE", BlockFlags.SOLID_GROUND | BlockFlags.F_IGN_PASSABLE | BlockFlags.F_VARIABLE);
         
-        BlockProperties.setBlockProps("PALE_OAK_HANGING_SIGN", 
-            new BlockProperties.BlockProps(BlockProperties.woodAxe, 1.0f, true));
+        BlockProperties.setBlockProps("PALE_OAK_HANGING_SIGN", BlockProperties.leverType);
         BlockFlags.setBlockFlags("PALE_OAK_HANGING_SIGN", BlockFlags.SOLID_GROUND | BlockFlags.F_IGN_PASSABLE);
         
-        BlockProperties.setBlockProps("PALE_OAK_LEAVES", 
-            new BlockProperties.BlockProps(BlockProperties.noTool, 0.2f, true));
+        BlockProperties.setBlockProps("PALE_OAK_LEAVES", BlockProperties.leafType);
         BlockFlags.setBlockFlags("PALE_OAK_LEAVES", BlockFlags.SOLID_GROUND | BlockFlags.F_IGN_PASSABLE | BlockFlags.F_LEAVES);
         
-        BlockProperties.setBlockProps("PALE_OAK_LOG", 
-            new BlockProperties.BlockProps(BlockProperties.woodAxe, 2.0f, true));
+        BlockProperties.setBlockProps("PALE_OAK_LOG", BlockProperties.woodType);
         BlockFlags.setBlockFlags("PALE_OAK_LOG", BlockFlags.SOLID_GROUND);
         
-        BlockProperties.setBlockProps("PALE_OAK_PRESSURE_PLATE", 
-            new BlockProperties.BlockProps(BlockProperties.woodAxe, 0.5f, true));
+        BlockProperties.setBlockProps("PALE_OAK_PRESSURE_PLATE", BlockProperties.leverType);
         BlockFlags.setBlockFlags("PALE_OAK_PRESSURE_PLATE", BlockFlags.F_IGN_PASSABLE);
         
-        BlockProperties.setBlockProps("PALE_OAK_SIGN", 
-            new BlockProperties.BlockProps(BlockProperties.woodAxe, 1.0f, true));
+        BlockProperties.setBlockProps("PALE_OAK_SIGN", BlockProperties.leverType);
         BlockFlags.setBlockFlags("PALE_OAK_SIGN", BlockFlags.SOLID_GROUND | BlockFlags.F_IGN_PASSABLE);
         
-        BlockProperties.setBlockProps("PALE_OAK_SLAB", 
-            new BlockProperties.BlockProps(BlockProperties.woodAxe, 2.0f, true));
+        BlockProperties.setBlockProps("PALE_OAK_SLAB", BlockProperties.woodType);
         BlockFlags.setBlockFlags("PALE_OAK_SLAB", BlockFlags.SOLID_GROUND | BlockFlags.F_XZ100);
         
-        BlockProperties.setBlockProps("PALE_OAK_STAIRS", 
-            new BlockProperties.BlockProps(BlockProperties.woodAxe, 2.0f, true));
+        BlockProperties.setBlockProps("PALE_OAK_STAIRS", BlockProperties.woodType);
         BlockFlags.setBlockFlags("PALE_OAK_STAIRS", BlockFlags.F_STAIRS | BlockFlags.SOLID_GROUND);
         
-        BlockProperties.setBlockProps("PALE_OAK_TRAPDOOR", 
-            new BlockProperties.BlockProps(BlockProperties.woodAxe, 3.0f, true));
+        BlockProperties.setBlockProps("PALE_OAK_TRAPDOOR", BlockProperties.woodDoorType);
         BlockFlags.setBlockFlags("PALE_OAK_TRAPDOOR", BlockFlags.SOLID_GROUND | BlockFlags.F_VARIABLE);
         
-        BlockProperties.setBlockProps("PALE_OAK_WALL_HANGING_SIGN", 
-            new BlockProperties.BlockProps(BlockProperties.woodAxe, 1.0f, true));
+        BlockProperties.setBlockProps("PALE_OAK_WALL_HANGING_SIGN", BlockProperties.leverType);
         BlockFlags.setBlockFlags("PALE_OAK_WALL_HANGING_SIGN", BlockFlags.SOLID_GROUND | BlockFlags.F_IGN_PASSABLE);
         
-        BlockProperties.setBlockProps("PALE_OAK_WALL_SIGN", 
-            new BlockProperties.BlockProps(BlockProperties.woodAxe, 1.0f, true));
+        BlockProperties.setBlockProps("PALE_OAK_WALL_SIGN", BlockProperties.leverType);
         BlockFlags.setBlockFlags("PALE_OAK_WALL_SIGN", BlockFlags.SOLID_GROUND | BlockFlags.F_IGN_PASSABLE);
         
-        BlockProperties.setBlockProps("PALE_OAK_WOOD", 
-            new BlockProperties.BlockProps(BlockProperties.woodAxe, 2.0f, true));
+        BlockProperties.setBlockProps("PALE_OAK_WOOD", BlockProperties.woodType);
         BlockFlags.setBlockFlags("PALE_OAK_WOOD", BlockFlags.SOLID_GROUND);
         
-        // Moss block
-        BlockProperties.setBlockProps("PALE_MOSS_BLOCK", 
-            new BlockProperties.BlockProps(BlockProperties.noTool, 0.1f, true));
+        // Moss block - using leverType for soft, non-tool blocks
+        BlockProperties.setBlockProps("PALE_MOSS_BLOCK", BlockProperties.leverType);
         BlockFlags.setBlockFlags("PALE_MOSS_BLOCK", BlockFlags.SOLID_GROUND);
         
-        // Test blocks (if present)
+        // Test blocks (if present) - using predefined types
         try {
-            BlockProperties.setBlockProps("TEST_BLOCK", 
-                new BlockProperties.BlockProps(BlockProperties.noTool, 1.0f, true));
+            BlockProperties.setBlockProps("TEST_BLOCK", BlockProperties.leverType);
             BlockFlags.setBlockFlags("TEST_BLOCK", BlockFlags.SOLID_GROUND);
         } catch (Exception e) {
             // Test block may not exist in production
         }
         
         try {
-            BlockProperties.setBlockProps("TEST_INSTANCE_BLOCK", 
-                new BlockProperties.BlockProps(BlockProperties.noTool, 1.0f, true));
+            BlockProperties.setBlockProps("TEST_INSTANCE_BLOCK", BlockProperties.leverType);
             BlockFlags.setBlockFlags("TEST_INSTANCE_BLOCK", BlockFlags.SOLID_GROUND);
         } catch (Exception e) {
             // Test block may not exist in production
