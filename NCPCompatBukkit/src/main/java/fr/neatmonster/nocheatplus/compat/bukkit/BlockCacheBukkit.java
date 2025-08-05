@@ -17,9 +17,10 @@ package fr.neatmonster.nocheatplus.compat.bukkit;
 import org.bukkit.Location;
 import org.bukkit.Material;
 import org.bukkit.World;
+import org.bukkit.block.Block;
 import org.bukkit.entity.Entity;
 import org.bukkit.entity.EntityType;
-
+import org.bukkit.util.BoundingBox;
 import fr.neatmonster.nocheatplus.compat.Bridge1_13;
 import fr.neatmonster.nocheatplus.utilities.map.BlockCache;
 import fr.neatmonster.nocheatplus.utilities.map.BlockFlags;
@@ -32,6 +33,12 @@ public class BlockCacheBukkit extends BlockCache {
 
     /** Temporary use. Use LocUtil.clone before passing on. Call setWorld(null) after use. */
     protected final Location useLoc = new Location(null, 0, 0, 0);
+
+    /** Tolerance for entity standing detection */
+    private static final double STANDING_TOLERANCE = 0.7;
+    
+    /** Search radius for nearby entities */
+    private static final double ENTITY_SEARCH_RADIUS = 2.0;
 
     public BlockCacheBukkit(World world) {
         setAccess(world);
@@ -49,62 +56,134 @@ public class BlockCacheBukkit extends BlockCache {
 
     @Override
     public Material fetchTypeId(final int x, final int y, final int z) {
-        // TODO: consider setting type id and data at once.
-        return world.getBlockAt(x, y, z).getType();
+        if (world == null) {
+            return Material.AIR;
+        }
+        try {
+            return world.getBlockAt(x, y, z).getType();
+        } catch (Exception e) {
+            // Return air if block access fails
+            return Material.AIR;
+        }
     }
 
     @SuppressWarnings("deprecation")
     @Override
     public int fetchData(final int x, final int y, final int z) {
-        // TODO: consider setting type id and data at once.
-        return Bridge1_13.hasIsSwimming() ? 0 : world.getBlockAt(x, y, z).getData();
+        if (world == null) {
+            return 0;
+        }
+        
+        // For 1.13+ versions, block data is handled differently
+        if (Bridge1_13.hasIsSwimming()) {
+            return 0;
+        }
+        
+        try {
+            return world.getBlockAt(x, y, z).getData();
+        } catch (Exception e) {
+            return 0;
+        }
     }
 
     @Override
-    public double[] fetchBounds(final int x, final int y, final int z){
+    public double[] fetchBounds(final int x, final int y, final int z) {
+        if (world == null) {
+            return null;
+        }
+        
         Material mat = getType(x, y, z);
         long flags = BlockFlags.getBlockFlags(mat);
+        
         if (flags == BlockFlags.F_IGN_PASSABLE) {
             return null;
         }
-        // minX, minY, minZ, maxX, maxY, maxZ
 
-        // TODO: Want to maintain a list with manual entries or at least half / full blocks ?
-        // Always return full bounds, needs extra adaption to BlockProperties (!).
-        return new double[]{0D, 0D, 0D, 1D, 1D, 1D};
+        try {
+            Block block = world.getBlockAt(x, y, z);
+            
+            // Try to get actual bounding box for newer versions
+            if (hasGetBoundingBox()) {
+                BoundingBox boundingBox = block.getBoundingBox();
+                if (boundingBox != null) {
+                    return new double[]{
+                        boundingBox.getMinX() - x, boundingBox.getMinY() - y, boundingBox.getMinZ() - z,
+                        boundingBox.getMaxX() - x, boundingBox.getMaxY() - y, boundingBox.getMaxZ() - z
+                    };
+                }
+            }
+        } catch (Exception e) {
+            // Fall through to default bounds
+        }
+
+        // Default to full block bounds
+        return new double[]{0.0, 0.0, 0.0, 1.0, 1.0, 1.0};
     }
 
     @Override
-    public boolean standsOnEntity(final Entity entity, final double minX, final double minY, final double minZ, final double maxX, final double maxY, final double maxZ){
-        try{
-            // TODO: Probably check other ids too before doing this ?
-            for (final Entity other : entity.getNearbyEntities(2.0, 2.0, 2.0)){
-                final EntityType type = other.getType();
-                if (!MaterialUtil.isBoat(type) && type != EntityType.SHULKER){ //  && !(other instanceof Minecart)) 
+    public boolean standsOnEntity(final Entity entity, final double minX, final double minY, 
+                                  final double minZ, final double maxX, final double maxY, final double maxZ) {
+        if (entity == null || world == null) {
+            return false;
+        }
+
+        try {
+            // Get nearby entities within search radius
+            for (final Entity other : entity.getNearbyEntities(ENTITY_SEARCH_RADIUS, ENTITY_SEARCH_RADIUS, ENTITY_SEARCH_RADIUS)) {
+                if (other == null) {
                     continue;
                 }
-                final double locY = entity.getLocation(useLoc).getY();
-                useLoc.setWorld(null);
-                if (Math.abs(locY - minY) < 0.7){
-                    // TODO: A "better" estimate is possible, though some more tolerance would be good. 
-                    return true;
+                
+                final EntityType type = other.getType();
+                
+                // Only check for boats and shulkers (entities players can stand on)
+                if (!MaterialUtil.isBoat(type) && type != EntityType.SHULKER) {
+                    continue;
                 }
-                else return false;
+
+                // Get entity location safely
+                final Location entityLoc = entity.getLocation(useLoc);
+                try {
+                    final double entityY = entityLoc.getY();
+                    
+                    // Check if entity is close enough vertically to be standing on the other entity
+                    if (Math.abs(entityY - minY) < STANDING_TOLERANCE) {
+                        return true;
+                    }
+                } finally {
+                    // Always clean up the location reference
+                    useLoc.setWorld(null);
+                }
             }
+        } catch (Throwable t) {
+            // Ignore exceptions (Context: DisguiseCraft and other plugin compatibility)
+            // Log if debugging is enabled
         }
-        catch (Throwable t){
-            // Ignore exceptions (Context: DisguiseCraft).
-        }
+        
         return false;
     }
 
-    /* (non-Javadoc)
-     * @see fr.neatmonster.nocheatplus.utilities.BlockCache#cleanup()
+    /**
+     * Check if the getBoundingBox method is available
+     * @return true if getBoundingBox is available
      */
+    private boolean hasGetBoundingBox() {
+        try {
+            Block.class.getMethod("getBoundingBox");
+            return true;
+        } catch (NoSuchMethodException e) {
+            return false;
+        }
+    }
+
     @Override
     public void cleanup() {
         super.cleanup();
         world = null;
+        // Ensure the reusable location is clean
+        useLoc.setWorld(null);
+        useLoc.setX(0);
+        useLoc.setY(0);
+        useLoc.setZ(0);
     }
-
 }

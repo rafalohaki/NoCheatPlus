@@ -15,7 +15,6 @@
 package fr.neatmonster.nocheatplus.test;
 
 import static org.junit.Assert.fail;
-
 import java.util.Arrays;
 import java.util.HashMap;
 import java.util.HashSet;
@@ -23,15 +22,13 @@ import java.util.Iterator;
 import java.util.Map;
 import java.util.Set;
 import java.util.SplittableRandom;
-
 import org.junit.Test;
-
 import fr.neatmonster.nocheatplus.utilities.build.BuildParameters;
 import fr.neatmonster.nocheatplus.utilities.ds.map.CoordHashMap;
 import fr.neatmonster.nocheatplus.utilities.ds.map.CoordMap;
 import fr.neatmonster.nocheatplus.utilities.ds.map.CoordMap.Entry;
-import fr.neatmonster.nocheatplus.utilities.ds.map.LinkedCoordHashMap.MoveOrder;
 import fr.neatmonster.nocheatplus.utilities.ds.map.LinkedCoordHashMap;
+import fr.neatmonster.nocheatplus.utilities.ds.map.LinkedCoordHashMap.MoveOrder;
 
 public class TestCoordMap {
 

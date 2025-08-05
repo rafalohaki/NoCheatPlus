@@ -94,3 +94,5 @@ nb-configuration.xml
 minecraft_plugin_analyzer.sh
 spotbugs.tgz
 checkstyle.xml
+
+prompt_output.txt

@@ -15,13 +15,11 @@
 package fr.neatmonster.nocheatplus.compat.bukkit;
 
 import java.util.UUID;
-
 import org.bukkit.attribute.Attribute;
 import org.bukkit.attribute.AttributeInstance;
 import org.bukkit.attribute.AttributeModifier;
 import org.bukkit.attribute.AttributeModifier.Operation;
 import org.bukkit.entity.Player;
-
 import fr.neatmonster.nocheatplus.compat.AttribUtil;
 import fr.neatmonster.nocheatplus.components.modifier.IAttributeAccess;
 import fr.neatmonster.nocheatplus.utilities.ReflectionUtil;

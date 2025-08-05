@@ -15,11 +15,8 @@
 package fr.neatmonster.nocheatplus.logging;
 
 import java.io.File;
-import java.util.logging.Level;
-
 import org.bukkit.Bukkit;
 import org.bukkit.plugin.Plugin;
-
 import fr.neatmonster.nocheatplus.NCPAPIProvider;
 import fr.neatmonster.nocheatplus.components.registry.feature.INotifyReload;
 import fr.neatmonster.nocheatplus.components.registry.order.SetupOrder;

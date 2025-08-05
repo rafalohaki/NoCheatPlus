@@ -17,11 +17,9 @@ package fr.neatmonster.nocheatplus.utilities;
 import java.util.Collections;
 import java.util.HashMap;
 import java.util.HashSet;
-import java.util.Iterator;
 import java.util.LinkedHashSet;
 import java.util.Map;
 import java.util.Set;
-
 import fr.neatmonster.nocheatplus.checks.CheckType;
 
 public class CheckTypeUtil {

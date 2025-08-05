@@ -17,10 +17,8 @@ package fr.neatmonster.nocheatplus.compat.bukkit.model;
 import org.bukkit.World;
 import org.bukkit.block.Block;
 import org.bukkit.block.BlockState;
-import org.bukkit.block.Container;
-
-import fr.neatmonster.nocheatplus.utilities.map.BlockCache;
 import org.bukkit.block.ShulkerBox;
+import fr.neatmonster.nocheatplus.utilities.map.BlockCache;
 
 public class BukkitShulkerBox implements BukkitShapeModel {
 

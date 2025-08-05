@@ -15,12 +15,9 @@
 package fr.neatmonster.nocheatplus.compat.bukkit;
 
 import java.util.ArrayList;
-import java.util.Arrays;
 import java.util.Collections;
 import java.util.List;
-
 import org.bukkit.entity.Entity;
-
 import fr.neatmonster.nocheatplus.components.entity.IEntityAccessVehicle;
 
 /**
