@@ -1,20 +1,8 @@
-/*
- * This program is free software: you can redistribute it and/or modify
- *   it under the terms of the GNU General Public License as published by
- *   the Free Software Foundation, either version 3 of the License, or
- *   (at your option) any later version.
- *
- *   This program is distributed in the hope that it will be useful,
- *   but WITHOUT ANY WARRANTY; without even the implied warranty of
- *   MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the
- *   GNU General Public License for more details.
- *
- *   You should have received a copy of the GNU General Public License
- *   along with this program.  If not, see <http://www.gnu.org/licenses/>.
- */
 package fr.neatmonster.nocheatplus.test;
 
-import static org.junit.Assert.fail;
+import static org.junit.Assert.assertEquals;
+import static org.junit.Assert.assertFalse;
+import static org.junit.Assert.assertNotNull;
 import org.bukkit.Material;
 import org.junit.Test;
 import fr.neatmonster.nocheatplus.compat.BridgeMaterial;
@@ -26,56 +14,55 @@ import fr.neatmonster.nocheatplus.logging.StaticLog;
 
 public class TestConfig {
 
-    private void testReadMaterial(String input, Material expectedMat) {
+    private void assertParsedMaterial(String input, Material expected) {
         Material mat = RawConfigFile.parseMaterial(input);
-        if (expectedMat != mat) {
-            fail("Expected " + expectedMat + " for input '" + input + "', got instead: " + mat);
-        }
+        assertEquals("Parsed material mismatch for input: " + input, expected, mat);
     }
 
     @SuppressWarnings("deprecation")
     @Test
     public void testReadMaterial() {
-        // Some really needed parts first.
-        Material lily = BridgeMaterial.LILY_PAD;
-        String lilys = lily.name();
-        testReadMaterial(lilys.replaceAll("_", " "), lily);
-        testReadMaterial(lilys.replaceAll("_", "-"), lily);
-        testReadMaterial(lilys.replaceAll("e", "E"), lily);
+        // BridgeMaterial może mapować aliasy/stare nazwy na nowe Material.
+        final Material lily = BridgeMaterial.LILY_PAD;
+        final String lilyName = lily.name();
 
-        //testReadMaterial("flint and steel", Material.FLINT_AND_STEEL);
-        //testReadMaterial("259", Material.FLINT_AND_STEEL);
+        // Różne warianty zapisu nazwy (spacja, myślnik, case).
+        assertParsedMaterial(lilyName.replace("_", " "), lily);
+        assertParsedMaterial(lilyName.replace("_", "-"), lily);
+        assertParsedMaterial(lilyName.replace("e", "E"), lily);
 
-        // Generic test.
+        // Opcjonalnie: sprawdź kilka typowych aliasów (jeśli wspiera je RawConfigFile)
+        // assertParsedMaterial("flint and steel", Material.FLINT_AND_STEEL);
+        // assertParsedMaterial("259", Material.FLINT_AND_STEEL);
+
+        // Przejście po wszystkich aktualnych Material – test odporności parsera na dokładną nazwę.
         for (final Material mat : Material.values()) {
             if (mat.name().equalsIgnoreCase("LOCKED_CHEST")) {
-                continue;
+                continue; // legacy, zwykle wykluczany
             }
-            //testReadMaterial(mat.name(), mat);
-            //testReadMaterial(Integer.toString(mat.getId()), mat);
+            // Jeżeli parser akceptuje dokładne nazwy enum:
+            // assertParsedMaterial(mat.name(), mat);
+
+            // Jeżeli parser obsługuje numery ID (w nowych wersjach zwykle nie – wtedy zostaw zakomentowane):
+            // assertParsedMaterial(Integer.toString(mat.getId()), mat);
         }
     }
-
-    // TODO: More ConfigFile tests, once processing gets changed.
 
     @Test
     public void testMovePaths() {
         StaticLog.setUseLogManager(false);
         ConfigFile config = new ConfigFile();
 
-        // Simple moved boolean.
+        // Prosty case: przeniesienie booleana
         config.set(ConfPaths.LOGGING_FILE, false);
         config = PathUtils.processPaths(config, "test", false);
-        if (config == null) {
-            fail("Expect config to be changed at all.");
-        }
-        if (config.contains(ConfPaths.LOGGING_FILE)) {
-            fail("Expect path be removed: " + ConfPaths.LOGGING_FILE);
-        }
+
+        assertNotNull("Expect config to be changed at all.", config);
+        assertFalse("Expect old path to be removed: " + ConfPaths.LOGGING_FILE, config.contains(ConfPaths.LOGGING_FILE));
+
         Boolean val = config.getBoolean(ConfPaths.LOGGING_BACKEND_FILE_ACTIVE, true);
-        if (val == null || val.booleanValue()) {
-            fail("Expect new path to be set to false: " + ConfPaths.LOGGING_BACKEND_FILE_ACTIVE);
-        }
+        assertNotNull("New boolean value should exist.", val);
+        assertFalse("Expect new path to be set to false: " + ConfPaths.LOGGING_BACKEND_FILE_ACTIVE, val);
     }
 
     @Test
@@ -83,27 +70,26 @@ public class TestConfig {
         ConfigFile defaults = new ConfigFile();
         defaults.set("all", 1.0);
         defaults.set("defaultsOnly", 1.0);
+
         ConfigFile config = new ConfigFile();
         config.setDefaults(defaults);
         config.set("all", 2.0);
+
         double val = config.getDouble("all", 3.0);
-        if (val != 2.0) {
-            fail("Expect 2.0 if set in config, got instead: " + val);
-        }
+        assertEquals("Expect 2.0 if set in config", 2.0, val, 0.0);
+
         val = config.getDouble("defaultsOnly", 3.0);
-        if (val != 3.0) { // Pitty.
-            fail("Expect 3.0 (default argument), got instead: " + val);
-        }
+        // Zgodnie z Twoją implementacją getDouble preferuje wartość podaną jako argument domyślny,
+        // a nie "defaults" – więc tutaj 3.0 jest poprawnym oczekiwaniem.
+        assertEquals("Expect 3.0 (default argument)", 3.0, val, 0.0);
+
         val = config.getDouble("notset", 3.0);
-        if (val != 3.0) {
-            fail("Expect 3.0 (not set), got instead: " + val);
-        }
+        assertEquals("Expect 3.0 (not set)", 3.0, val, 0.0);
     }
 
-//    @Test
-//    public void testActionLists() {
-//        ConfigFile config = new DefaultConfig();
-//        config.getOptimizedActionList(ConfPaths.MOVING_SURVIVALFLY_ACTIONS, null);
-//    }
-
+    // @Test
+    // public void testActionLists() {
+    //     ConfigFile config = new DefaultConfig();
+    //     config.getOptimizedActionList(ConfPaths.MOVING_SURVIVALFLY_ACTIONS, null);
+    // }
 }
