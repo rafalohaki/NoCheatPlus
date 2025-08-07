@@ -10,7 +10,7 @@
  *   GNU General Public License for more details.
  *
  *   You should have received a copy of the GNU General Public License
- *   along with this program.  If not, see <http://www.gnu.org/licenses/>.
+ *   along with this program.  If not, see .
  */
 package fr.neatmonster.nocheatplus.worlds;
 
@@ -22,19 +22,18 @@ import java.util.LinkedHashMap;
 import java.util.LinkedHashSet;
 import java.util.LinkedList;
 import java.util.List;
+import java.util.Locale;
 import java.util.Map;
 import java.util.Map.Entry;
 import java.util.Set;
 import java.util.concurrent.locks.Lock;
 import java.util.concurrent.locks.ReentrantLock;
-
 import org.bukkit.Bukkit;
 import org.bukkit.World;
 import org.bukkit.entity.Player;
 import org.bukkit.event.EventHandler;
 import org.bukkit.event.EventPriority;
 import org.bukkit.event.world.WorldUnloadEvent;
-
 import fr.neatmonster.nocheatplus.NCPAPIProvider;
 import fr.neatmonster.nocheatplus.checks.CheckType;
 import fr.neatmonster.nocheatplus.compat.AlmostBoolean;
@@ -59,7 +58,6 @@ import fr.neatmonster.nocheatplus.utilities.ds.map.HashMapLOW;
 public class WorldDataManager implements IWorldDataManager, INotifyReload {
 
     static class IWorldDataEntry implements Entry<String, IWorldData> {
-
         private final Entry<String, WorldData> entry;
 
         IWorldDataEntry(Entry<String, WorldData> entry) {
@@ -80,11 +78,9 @@ public class WorldDataManager implements IWorldDataManager, INotifyReload {
         public IWorldData setValue(IWorldData value) {
             throw new UnsupportedOperationException();
         }
-
     }
 
     static class IWorldDataIterator implements Iterator<Entry<String, IWorldData>> {
-
         private final Iterator<Entry<String, WorldData>> iterator;
 
         IWorldDataIterator(Iterator<Entry<String, WorldData>> iterator) {
@@ -115,9 +111,12 @@ public class WorldDataManager implements IWorldDataManager, INotifyReload {
 
     /** Lower case name to WorldData map. */
     // TODO: ID-name pairs / mappings?
-    private final HashMapLOW<String, WorldData> worldDataMap = new HashMapLOW<String, WorldData>(lock, 10);
-    private Map<String, ConfigFile> rawConfigurations = new HashMap<String, ConfigFile>(); // COW
-    private final RichFactoryRegistry<WorldFactoryArgument> factoryRegistry = new RichFactoryRegistry<WorldFactoryArgument>(lock);
+    private final HashMapLOW<String, WorldData> worldDataMap = new HashMapLOW<>(lock, 10);
+
+    /** Copy-On-Write mapa surowych konfiguracji; klucze to nazwy światów (lowercase) lub null dla default. */
+    private Map<String, ConfigFile> rawConfigurations = new HashMap<>();
+
+    private final RichFactoryRegistry<WorldFactoryArgument> factoryRegistry = new RichFactoryRegistry<>(lock);
 
     private final MiniListener<?>[] miniListeners = new MiniListener<?>[] {
         /*
@@ -135,12 +134,11 @@ public class WorldDataManager implements IWorldDataManager, INotifyReload {
         },
     };
 
-
     public WorldDataManager() {
         // TODO: ILockable
         // TODO: Create a default node with some basic settings.
         createDefaultWorldData();
-        // (Call support.) 
+        // (Call support.)
         factoryRegistry.createAutoGroup(IDataOnReload.class);
         factoryRegistry.createAutoGroup(IDataOnWorldUnload.class);
         // Data/config removal.
@@ -157,21 +155,28 @@ public class WorldDataManager implements IWorldDataManager, INotifyReload {
 
     @Override
     public IWorldData getWorldData(final String worldName) {
-        return internalGetWorldData(worldName.toLowerCase());
+        if (worldName == null) return internalGetDefaultWorldData();
+        return internalGetWorldData(worldName.toLowerCase(Locale.ROOT));
     }
 
     @Override
     public IWorldData getWorldData(final World world) {
-        final WorldData worldData = internalGetWorldData(world.getName().toLowerCase());
+        if (world == null) return internalGetDefaultWorldData();
+        final String lcName = safeLower(world.getName());
+        final WorldData worldData = internalGetWorldData(lcName);
         if (worldData.getWorldIdentifier() == null) {
             worldData.updateWorldIdentifier(world);
         }
         return worldData;
     }
 
+    private static String safeLower(String s) {
+        return s == null ? null : s.toLowerCase(Locale.ROOT);
+    }
+
     /**
      * Internal get or create for the lower case world name.
-     * 
+     *
      * @param lowerCaseWorldName
      *            In case of the default WorldData, null is used internally.
      * @return
@@ -193,17 +198,19 @@ public class WorldDataManager implements IWorldDataManager, INotifyReload {
 
     private void createDefaultWorldData() {
         lock.lock();
-        if (worldDataMap.containsKey(null)) {
+        try {
+            if (worldDataMap.containsKey(null)) {
+                return;
+            }
+            ConfigFile config = rawConfigurations.get(null);
+            if (config == null) {
+                config = new DefaultConfig();
+            }
+            worldDataMap.put(null, new WorldData(null, this));
+            updateWorldData(null, config);
+        } finally {
             lock.unlock();
-            return;
         }
-        ConfigFile config = rawConfigurations.get(null);
-        if (config == null) {
-            config = new DefaultConfig();
-        }
-        worldDataMap.put(null, new WorldData(null, this));
-        updateWorldData(null, config);
-        lock.unlock();
     }
 
     /**
@@ -228,28 +235,28 @@ public class WorldDataManager implements IWorldDataManager, INotifyReload {
 
     /**
      * The given ConfigFile instances are stored within WorldData.
-     * 
+     *
      * @param rawWorldConfigs
      */
     public void applyConfiguration(final Map<String, ConfigFile> rawWorldConfigs) {
-        // TODO: ILockable
-        /*
-         * Minimal locking is used, to prevent deadlocks, in case WorldData
-         * instances will hold individual locks.
-         */
+        // Minimal locking to avoid deadlocks if WorldData instances hold individual locks.
         lock.lock();
-        final Map<String, ConfigFile> rawConfigurations = new LinkedHashMap<String, ConfigFile>(rawWorldConfigs.size());
-        for (final Entry<String, ConfigFile> entry : rawWorldConfigs.entrySet()) {
-            final String worldName = entry.getKey();
-            rawConfigurations.put(worldName == null ? null : worldName.toLowerCase(), entry.getValue());
+        final Map<String, ConfigFile> newRawConfigurations = new LinkedHashMap<>(rawWorldConfigs.size());
+        try {
+            for (final Entry<String, ConfigFile> entry : rawWorldConfigs.entrySet()) {
+                final String worldName = entry.getKey();
+                newRawConfigurations.put(worldName == null ? null : worldName.toLowerCase(Locale.ROOT), entry.getValue());
+            }
+            this.rawConfigurations = newRawConfigurations;
+            final ConfigFile defaultConfig = this.rawConfigurations.get(null);
+            final WorldData defaultWorldData = internalGetDefaultWorldData(); // Always the same instance.
+            defaultWorldData.update(defaultConfig);
+        } finally {
+            lock.unlock(); // From here on, new instances have a proper config set.
         }
-        this.rawConfigurations = rawConfigurations;
-        final ConfigFile defaultConfig = this.rawConfigurations.get(null);
-        final WorldData defaultWorldData = internalGetDefaultWorldData(); // Always the same instance.
-        defaultWorldData.update(defaultConfig);
-        lock.unlock(); // From here on, new instances have a proper config set.
+
         // Update all given
-        for (final Entry<String, ConfigFile> entry : rawConfigurations.entrySet()) {
+        for (final Entry<String, ConfigFile> entry : newRawConfigurations.entrySet()) {
             final String worldName = entry.getKey();
             if (worldName != null) {
                 /*
@@ -259,17 +266,21 @@ public class WorldDataManager implements IWorldDataManager, INotifyReload {
                 updateWorldData(worldName, entry.getValue());
             }
         }
+
         // Update all that are not contained and don't point to the default configuration.
         // TODO: Consider deleting world nodes, unless the world is actually loaded.
         for (final Entry<String, WorldData> entry : worldDataMap.iterable()) {
             final String worldName = entry.getKey();
-            if (worldName != null 
-                    && !rawConfigurations.containsKey(worldName)) {
+            if (worldName != null && !newRawConfigurations.containsKey(worldName)) {
                 final WorldData ref = entry.getValue();
                 lock.lock();
-                defaultWorldData.addChild(ref); // Redundant calls are ok.
-                ref.adjustToParent(defaultWorldData); // Inherit specific overrides and more.
-                lock.unlock();
+                try {
+                    final WorldData defaultWorldData = internalGetDefaultWorldData();
+                    defaultWorldData.addChild(ref); // Redundant calls are ok.
+                    ref.adjustToParent(defaultWorldData); // Inherit specific overrides and more.
+                } finally {
+                    lock.unlock();
+                }
             }
         }
     }
@@ -279,19 +290,18 @@ public class WorldDataManager implements IWorldDataManager, INotifyReload {
      * is loaded. Note that calling this may conflict with external plugins
      * preparing settings for just not yet loaded worlds. Intended to be called
      * with rare tasks rather.
-     * <hr/>
+     *
      * Primary thread only.
-     * <hr/>
      */
     public void removeOfflineInheritedWorldData() {
-        final Set<String> worldNames = new HashSet<String>();
+        final Set<String> worldNames = new HashSet<>();
         for (World world : Bukkit.getWorlds()) {
-            worldNames.add(world.getName().toLowerCase());
+            worldNames.add(safeLower(world.getName()));
         }
-        final List<String> remove = new LinkedList<String>();
+        final List<String> remove = new LinkedList<>();
         for (final Entry<String, WorldData> entry : worldDataMap.iterable()) {
             final String lcName = entry.getKey();
-            if (!rawConfigurations.containsKey(lcName) && ! worldNames.contains(lcName)) {
+            if (!rawConfigurations.containsKey(lcName) && !worldNames.contains(lcName)) {
                 remove.add(lcName);
             }
         }
@@ -302,63 +312,71 @@ public class WorldDataManager implements IWorldDataManager, INotifyReload {
     public void updateAllWorldData() {
         // TODO: ILockable / move to an access object ?
         lock.lock();
-        final WorldData defaultWorldData = internalGetDefaultWorldData();
-        defaultWorldData.update();
-        for (final Entry<String, WorldData> entry : worldDataMap.iterable()) {
-            final WorldData ref = entry.getValue();
-            if (ref != defaultWorldData) {
-                ref.update();
+        try {
+            final WorldData defaultWorldData = internalGetDefaultWorldData();
+            defaultWorldData.update();
+            for (final Entry<String, WorldData> entry : worldDataMap.iterable()) {
+                final WorldData ref = entry.getValue();
+                if (ref != defaultWorldData) {
+                    ref.update();
+                }
             }
+        } finally {
+            lock.unlock();
         }
-        lock.unlock();
     }
 
     /**
      * Create if not existent (under lock). In any case simply call
      * WorldData.update (under lock). Updates children and parent relation with
      * the default WorldData instance.
-     * 
+     *
      * @param worldName
      * @param rawConfiguration
      * @return
      */
-    private WorldData updateWorldData(final String worldName, 
-            final ConfigFile rawConfiguration) {
+    private WorldData updateWorldData(final String worldName, final ConfigFile rawConfiguration) {
         final WorldData defaultWorldData = internalGetDefaultWorldData();
         lock.lock(); // TODO: Might lock outside (pro/con).
-        final String lcName = worldName == null ? null : worldName.toLowerCase();
-        WorldData data = worldDataMap.get(lcName);
-        boolean skipUpdate = false;
-        if (data == null) {
-            data = new WorldData(worldName, defaultWorldData, factoryRegistry);
-            worldDataMap.put(data.getWorldNameLowerCase(), data);
-            if (rawConfiguration == defaultWorldData.getRawConfiguration()) {
-                defaultWorldData.addChild(data);
-                skipUpdate = true;
+        try {
+            final String lcName = worldName == null ? null : worldName.toLowerCase(Locale.ROOT);
+            WorldData data = worldDataMap.get(lcName);
+            boolean skipUpdate = false;
+            if (data == null) {
+                data = new WorldData(worldName, defaultWorldData, factoryRegistry);
+                worldDataMap.put(data.getWorldNameLowerCase(), data);
+                if (rawConfiguration == defaultWorldData.getRawConfiguration()) {
+                    defaultWorldData.addChild(data);
+                    skipUpdate = true;
+                }
             }
+            if (!skipUpdate) {
+                data.update(rawConfiguration); // Parent/child state is updated here.
+            }
+            return data;
+        } finally {
+            lock.unlock();
         }
-        if (!skipUpdate) {
-            data.update(rawConfiguration); // Parent/child state is updated  here.
-        }
-        lock.unlock();
-        return data;
     }
 
     @Override
-    public void overrideCheckActivation(final CheckType checkType, final AlmostBoolean active, 
-            final OverrideType overrideType, final boolean overrideChildren) {
+    public void overrideCheckActivation(final CheckType checkType, final AlmostBoolean active,
+                                        final OverrideType overrideType, final boolean overrideChildren) {
         lock.lock();
-        final IWorldData defaultWorldData = getDefaultWorldData();
-        defaultWorldData.overrideCheckActivation(checkType, active, overrideType, overrideChildren);
-        // Override flags.
-        // TODO: If possible, skip derived from default, since default data is done first.
-        for (final Entry<String, WorldData> entry : worldDataMap.iterable()) {
-            final IWorldData worldData = entry.getValue();
-            if (worldData != defaultWorldData) {
-                worldData.overrideCheckActivation(checkType, active, overrideType, overrideChildren);
+        try {
+            final IWorldData defaultWorldData = getDefaultWorldData();
+            defaultWorldData.overrideCheckActivation(checkType, active, overrideType, overrideChildren);
+            // Override flags.
+            // TODO: If possible, skip derived from default, since default data is done first.
+            for (final Entry<String, WorldData> entry : worldDataMap.iterable()) {
+                final IWorldData worldData = entry.getValue();
+                if (worldData != defaultWorldData) {
+                    worldData.overrideCheckActivation(checkType, active, overrideType, overrideChildren);
+                }
             }
+        } finally {
+            lock.unlock();
         }
-        lock.unlock();
     }
 
     @Override
@@ -372,24 +390,26 @@ public class WorldDataManager implements IWorldDataManager, INotifyReload {
     }
 
     public void updateWorldIdentifier(World world) {
-        internalGetWorldData(world.getName().toLowerCase()).updateWorldIdentifier(world);
+        if (world == null) return;
+        final String lc = safeLower(world.getName());
+        internalGetWorldData(lc).updateWorldIdentifier(world);
     }
 
     @Override
     public IWorldData getWorldDataSafe(Player player) {
-        // (Hope the JIT specializes for odd impl.)
+        if (player == null) return getDefaultWorldData();
         try {
-            return getWorldData(player.getWorld());
-        }
-        catch (UnsupportedOperationException e) {
-            // Proxy/Fake/Packet.
+            final World w = player.getWorld();
+            if (w == null) return getDefaultWorldData();
+            return getWorldData(w);
+        } catch (UnsupportedOperationException | IllegalStateException ex) {
+            // Proxy/Fake/Packet or player not fully initialized.
             return getDefaultWorldData();
         }
     }
 
     @Override
-    public <T> void registerFactory(Class<T> registerFor,
-            IFactoryOne<WorldFactoryArgument, T> factory) {
+    public <T> void registerFactory(Class<T> registerFor, IFactoryOne<WorldFactoryArgument, T> factory) {
         factoryRegistry.registerFactory(registerFor, factory);
     }
 
@@ -399,20 +419,18 @@ public class WorldDataManager implements IWorldDataManager, INotifyReload {
     }
 
     @Override
-    public <T> Collection<Class<? extends T>> getGroupedTypes(
-            Class<T> groupType) {
+    public <T> Collection<Class<? extends T>> getGroupedTypes(Class<T> groupType) {
         return factoryRegistry.getGroupedTypes(groupType);
     }
 
     @Override
-    public <T> Collection<Class<? extends T>> getGroupedTypes(
-            Class<T> groupType, CheckType checkType) {
+    public <T> Collection<Class<? extends T>> getGroupedTypes(Class<T> groupType, CheckType checkType) {
         return factoryRegistry.getGroupedTypes(groupType, checkType);
     }
 
     @Override
-    public <I> void addToGroups(Class<I> itemType,
-            Class<? super I>... groupTypes) {
+    @SafeVarargs
+    public final <I> void addToGroups(Class<I> itemType, Class<? super I>... groupTypes) {
         factoryRegistry.addToGroups(itemType, groupTypes);
     }
 
@@ -422,26 +440,23 @@ public class WorldDataManager implements IWorldDataManager, INotifyReload {
     }
 
     @Override
-    public <I> void addToGroups(CheckType checkType, Class<I> itemType,
-            Class<? super I>... groupTypes) {
+    @SafeVarargs
+    public final <I> void addToGroups(CheckType checkType, Class<I> itemType, Class<? super I>... groupTypes) {
         factoryRegistry.addToGroups(checkType, itemType, groupTypes);
     }
 
     @Override
-    public <I> void addToExistingGroups(CheckType checkType,
-            Class<I> itemType) {
+    public <I> void addToExistingGroups(CheckType checkType, Class<I> itemType) {
         factoryRegistry.addToExistingGroups(checkType, itemType);
     }
 
     @Override
-    public <I> void addToGroups(Collection<CheckType> checkTypes,
-            Class<I> itemType, Class<? super I>... groupTypes) {
+    public <I> void addToGroups(Collection<CheckType> checkTypes, Class<I> itemType, Class<? super I>... groupTypes) {
         factoryRegistry.addToGroups(checkTypes, itemType, groupTypes);
     }
 
     @Override
-    public <I> void addToExistingGroups(Collection<CheckType> checkTypes,
-            Class<I> itemType) {
+    public <I> void addToExistingGroups(Collection<CheckType> checkTypes, Class<I> itemType) {
         factoryRegistry.addToExistingGroups(checkTypes, itemType);
     }
 
@@ -451,8 +466,7 @@ public class WorldDataManager implements IWorldDataManager, INotifyReload {
     }
 
     @Override
-    public <T> T getNewInstance(Class<T> registeredFor,
-            WorldFactoryArgument arg) {
+    public <T> T getNewInstance(Class<T> registeredFor, WorldFactoryArgument arg) {
         return factoryRegistry.getNewInstance(registeredFor, arg);
     }
 
@@ -468,11 +482,26 @@ public class WorldDataManager implements IWorldDataManager, INotifyReload {
     }
 
     private void onWorldUnload(WorldUnloadEvent event) {
-        final Collection<Class<? extends IDataOnWorldUnload>> types = factoryRegistry.getGroupedTypes(IDataOnWorldUnload.class);
+        final Collection<Class<? extends IDataOnWorldUnload>> types =
+            factoryRegistry.getGroupedTypes(IDataOnWorldUnload.class);
+
+        if (event == null) return;
         final World world = event.getWorld();
-        final WorldData worldData = worldDataMap.get(world.getName().toLowerCase());
-        worldData.onWorldUnload(event.getWorld(), types);
+        if (world == null) return;
+
+        final String name = world.getName();
+        if (name == null) return;
+
+        final String key = name.toLowerCase(Locale.ROOT);
+        final WorldData worldData = worldDataMap.get(key);
+        if (worldData == null) {
+            // Brak danych dla świata – nic do zwalniania.
+            return;
+        }
+        worldData.onWorldUnload(world, types);
         // TODO: Minimize, clear cache / remove ?
+        // Ewentualnie można rozważyć usuwanie danych dziedziczonych i offline:
+        // considerRemoveWorldDataIfInheritedAndOffline(key);
     }
 
     @Override
@@ -503,13 +532,12 @@ public class WorldDataManager implements IWorldDataManager, INotifyReload {
 
     @Override
     public void removeCachedConfigs() {
-        final Collection<Class<?>> types = new LinkedHashSet<Class<?>>(
-                factoryRegistry.getGroupedTypes(IConfig.class));
+        final Collection<Class<?>> types = new LinkedHashSet<>(
+            factoryRegistry.getGroupedTypes(IConfig.class));
         if (!types.isEmpty()) {
             for (final Entry<String, WorldData> entry : worldDataMap.iterable()) {
                 entry.getValue().removeAllGenericInstances(types);
             }
         }
     }
-
 }
