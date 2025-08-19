@@ -37,31 +37,6 @@
         <profile>
             <id>all</id>
             <modules>
-                <!-- Legacy, unsupported
-                <module>NCPCompatCB2512</module>
-                <module>NCPCompatCB2545</module>
-                <module>NCPCompatCB2602</module>
-                <module>NCPCompatCB2645</module>
-                <module>NCPCompatCB2691</module>
-                <module>NCPCompatCB2763</module>
-                <module>NCPCompatCB2794</module>
-                <module>NCPCompatCB2808</module>
-                <module>NCPCompatCB2882</module>
-                -->
-                <!-- Legacy modules removed - server supports only 1.18+ 
-                <module>NCPCompatCB2922</module>
-                <module>NCPCompatCB3026</module>
-                <module>NCPCompatCB3043</module>
-                <module>NCPCompatCB3100</module>
-                <module>NCPCompatSpigotCB1_8_R1</module>
-                <module>NCPCompatSpigotCB1_8_R2</module>
-                <module>NCPCompatSpigotCB1_8_R3</module>
-                <module>NCPCompatSpigotCB1_9_R1</module>
-                <module>NCPCompatSpigotCB1_9_R2</module>
-                <module>NCPCompatSpigotCB1_10_R1</module>
-                <module>NCPCompatSpigotCB1_11_R1</module>
-                -->
-                <!-- Latest -->
                 <module>NCPCompatCBDev</module>
             </modules>
         </profile>
@@ -79,70 +54,6 @@
                 <module>NCPCompatCBDev</module>
             </modules>
         </profile>
-
-        <!-- Legacy version profiles disabled - server supports only 1.18+
-        <profile>
-            <id>spigot1_11_r1</id>
-            <modules>
-                <module>NCPCompatSpigotCB1_11_R1</module>
-            </modules>
-        </profile>
-
-        <profile>
-            <id>spigot1_10_r1</id>
-            <modules>
-                <module>NCPCompatSpigotCB1_10_R1</module>
-            </modules>
-        </profile>
-
-        <profile>
-            <id>spigot1_9_r2</id>
-            <modules>
-                <module>NCPCompatSpigotCB1_9_R2</module>
-            </modules>
-        </profile>
-
-        <profile>
-            <id>spigot1_9_r1</id>
-            <modules>
-                <module>NCPCompatSpigotCB1_9_R1</module>
-            </modules>
-        </profile>
-
-        <profile>
-            <id>spigot1_8_r3</id>
-            <modules>
-                <module>NCPCompatSpigotCB1_8_R3</module>
-            </modules>
-        </profile>
-
-        <profile>
-            <id>spigot1_7_r4</id>
-            <modules>
-                <module>NCPCompatCB3100</module>
-            </modules>
-        </profile>
-        -->
-
-        <!-- cblegacy profile disabled - server supports only 1.18+
-        <profile>
-            <id>cblegacy</id>
-            <modules>
-                <module>NCPCompatCB2512</module>
-                <module>NCPCompatCB2545</module>
-                <module>NCPCompatCB2602</module>
-                <module>NCPCompatCB2645</module>
-                <module>NCPCompatCB2691</module>
-                <module>NCPCompatCB2763</module>
-                <module>NCPCompatCB2794</module>
-                <module>NCPCompatCB2808</module>
-                <module>NCPCompatCB2882</module>
-                <module>NCPCompatCB2922</module>
-                <module>NCPCompatCB3026</module>
-                <module>NCPCompatCB3043</module>
-            </modules>
-        </profile>
-        -->
     </profiles>
 
     <repositories>
