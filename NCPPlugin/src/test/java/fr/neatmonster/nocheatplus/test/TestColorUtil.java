@@ -19,7 +19,8 @@ import static org.junit.Assert.fail;
 import java.util.LinkedList;
 import java.util.List;
 
-import org.bukkit.ChatColor;
+import net.kyori.adventure.text.format.NamedTextColor;
+import net.kyori.adventure.text.format.TextColor;
 import org.junit.Test;
 
 import fr.neatmonster.nocheatplus.utilities.ColorUtil;
@@ -48,8 +49,11 @@ public class TestColorUtil {
 				{"123&/123", "123123"},
 				
 		};
-		for (ChatColor color : ChatColor.values()){
-			char c = color.getChar();
+		// Test with common color codes used in Minecraft
+		char[] colorCodes = {'0', '1', '2', '3', '4', '5', '6', '7', '8', '9', 
+		                     'a', 'b', 'c', 'd', 'e', 'f', 'k', 'l', 'm', 'n', 'o', 'r',
+		                     'A', 'B', 'C', 'D', 'E', 'F', 'K', 'L', 'M', 'N', 'O', 'R'};
+		for (char c : colorCodes){
 			for (String[] pattern : generic){
 				items.add(new String[]{ pattern[0].replace('/', c), pattern[1]});
 			}

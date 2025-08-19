@@ -18,6 +18,8 @@ import java.util.LinkedList;
 import java.util.List;
 
 import org.bukkit.entity.Player;
+import net.kyori.adventure.text.Component;
+import net.kyori.adventure.text.serializer.legacy.LegacyComponentSerializer;
 
 import fr.neatmonster.nocheatplus.utilities.OnDemandTickListener;
 
@@ -31,9 +33,18 @@ public class PlayerMessageSender extends OnDemandTickListener {
     private final class MessageEntry{
         public final String playerName;
         public final String message;
+        public final Component componentMessage;
+        
         public MessageEntry(final String playerName, final String message){
             this.playerName = playerName;
             this.message = message;
+            this.componentMessage = null;
+        }
+        
+        public MessageEntry(final String playerName, final Component componentMessage){
+            this.playerName = playerName;
+            this.message = null;
+            this.componentMessage = componentMessage;
         }
     }
 
@@ -58,7 +69,13 @@ public class PlayerMessageSender extends OnDemandTickListener {
         for (final MessageEntry entry : entries){
             final Player player = DataManager.getPlayer(entry.playerName);
             if (player != null && player.isOnline()){
-                player.sendMessage(entry.message);
+                if (entry.componentMessage != null) {
+                    // Send Component message using Adventure API
+                    player.sendMessage(entry.componentMessage);
+                } else if (entry.message != null) {
+                    // Send legacy String message
+                    player.sendMessage(entry.message);
+                }
             }
         }
         // Unregister if no further entries are there.
@@ -73,6 +90,15 @@ public class PlayerMessageSender extends OnDemandTickListener {
     }
 
     public void sendMessageThreadSafe(final String playerName, final String message){
+        final MessageEntry entry = new MessageEntry(playerName.toLowerCase(), message);
+        synchronized (this) {
+            messageEntries.add(entry);
+            // Called register asynchronously, potentially.
+            register();
+        }
+    }
+
+    public void sendMessageThreadSafe(final String playerName, final Component message){
         final MessageEntry entry = new MessageEntry(playerName.toLowerCase(), message);
         synchronized (this) {
             messageEntries.add(entry);

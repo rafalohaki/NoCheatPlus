@@ -44,6 +44,7 @@ import fr.neatmonster.nocheatplus.worlds.IWorldData;
 import fr.neatmonster.nocheatplus.worlds.IWorldDataManager;
 import fr.neatmonster.nocheatplus.worlds.WorldDataManager;
 import net.kyori.adventure.platform.bukkit.BukkitAudiences;
+import net.kyori.adventure.text.Component;
 import org.jetbrains.annotations.NotNull;
 
 public class PluginTests {
@@ -148,6 +149,11 @@ public class PluginTests {
         @Override
         public void sendMessageOnTick(String playerName, String message) {
             StaticLog.logInfo("sendMessageOnTick (-> " + playerName + "): " + message);
+        }
+
+        @Override
+        public void sendMessageOnTick(String playerName, Component message) {
+            throw new UnsupportedOperationException();
         }
 
         @Override

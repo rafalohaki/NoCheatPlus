@@ -28,7 +28,6 @@ import java.util.Map;
 import java.util.Map.Entry;
 import java.util.Set;
 import org.bukkit.Bukkit;
-import org.bukkit.ChatColor;
 import org.bukkit.World;
 import org.bukkit.command.CommandSender;
 import org.bukkit.command.PluginCommand;
@@ -128,6 +127,8 @@ import fr.neatmonster.nocheatplus.players.IPlayerDataManager;
 import fr.neatmonster.nocheatplus.players.PlayerDataManager;
 import fr.neatmonster.nocheatplus.players.PlayerMessageSender;
 import fr.neatmonster.nocheatplus.stats.Counters;
+import net.kyori.adventure.text.Component;
+import net.kyori.adventure.text.format.NamedTextColor;
 import fr.neatmonster.nocheatplus.utilities.ColorUtil;
 import fr.neatmonster.nocheatplus.utilities.Misc;
 import fr.neatmonster.nocheatplus.utilities.OnDemandTickListener;
@@ -150,7 +151,10 @@ public class NoCheatPlus extends JavaPlugin implements NoCheatPlusAPI {
     private static final ILockable lockableAPI = new BasicLockable(lockableAPIsecret, 
             true, true, true);
 
-    private static final String MSG_NOTIFY_OFF = ChatColor.RED + "NCP: " + ChatColor.WHITE + "Notifications are turned " + ChatColor.RED + "OFF" + ChatColor.WHITE + ".";
+    private static final Component MSG_NOTIFY_OFF = Component.text("NCP: ", NamedTextColor.RED)
+            .append(Component.text("Notifications are turned ", NamedTextColor.WHITE))
+            .append(Component.text("OFF", NamedTextColor.RED))
+            .append(Component.text(".", NamedTextColor.WHITE));
 
     // Static API
 
@@ -431,6 +435,12 @@ public class NoCheatPlus extends JavaPlugin implements NoCheatPlusAPI {
      */
     @Override
     public void sendMessageOnTick(final String playerName, final String message) {
+        // TODO: Move to PlayerData ?
+        playerMessageSender.sendMessageThreadSafe(playerName, message);
+    }
+
+    @Override
+    public void sendMessageOnTick(final String playerName, final Component message) {
         // TODO: Move to PlayerData ?
         playerMessageSender.sendMessageThreadSafe(playerName, message);
     }
@@ -1348,7 +1358,9 @@ public class NoCheatPlus extends JavaPlugin implements NoCheatPlusAPI {
             // Inconsistent config version.
             if (configProblemsChat != null && ConfigManager.getConfigFile().getBoolean(ConfPaths.CONFIGVERSION_NOTIFY)) {
                 // Could use custom prefix from logging, however ncp should be mentioned then.
-                sendMessageOnTick(playerName, ChatColor.RED + "NCP: " + ChatColor.WHITE + configProblemsChat);
+                Component configMessage = Component.text("NCP: ", NamedTextColor.RED)
+                        .append(Component.text(configProblemsChat, NamedTextColor.WHITE));
+                sendMessageOnTick(playerName, configMessage);
             }
             // Message if notify is turned off.
             if (data.getNotifyOff()) {
